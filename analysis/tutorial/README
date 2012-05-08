@@ -1,0 +1,18 @@
+***************************
+****       Yields tables      ****
+***        YieldsTable.py     ***
+***************************
+
+1. Create workspace with -f option, output workspace file will be called results/<workspacename>_afterFit.root, use this workspace.
+ (In that workspace, will be stored the RooExpandedFitResult of the fit. )
+
+2. In DiscoveryFitTable.py you must set:
+  a) filename = os.environ['SUSYFITTER'] + '/results/discoveryYields_MyOneLeptonKtScaleFitR17_Discovery_combined_NormalMeasurement_model_afterFit.root'   # (see 1.)
+  b) regionsList = ['SR4jT','SR3jT']   # in regionsList give the list of regions you want in the yields tables, all regions must be in this workspace
+  c) signalregionsList =  ['SR3jT','SR4jT']  # only used by ResultsTableTex.py, these regions will be quoted in table with 2 digits after comma, otherwise only 1 digit
+
+3. run the script 
+
+>python YieldsTable.py
+
+

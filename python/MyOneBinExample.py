@@ -48,8 +48,8 @@ configMgr.setLumiUnits("fb-1")
 # Set the files to read from
 bgdFiles = []
 if configMgr.readFromTree:
-    bgdFiles.append("samples/paper/SusyFitterTree_OneSoftEle_BG_v3.root")
-    bgdFiles.append("samples/paper/SusyFitterTree_OneSoftMuo_BG_v3.root")
+    bgdFiles.append("samples/tutorial/SusyFitterTree_OneSoftEle_BG_v3.root")
+    bgdFiles.append("samples/tutorial/SusyFitterTree_OneSoftMuo_BG_v3.root")
 else:
     bgdFiles = [configMgr.histCacheFile]
     pass
@@ -140,7 +140,7 @@ srBin = exclusionFitConfig.addChannel("cuts",["SR"],1,0.5,1.5)
 exclusionFitConfig.setSignalChannels([srBin])
 
 sigSample = Sample("SM_GG_onestepCC_425_385_345",kPink)
-sigSample.setFileList(["samples/SusyFitterTree_p832_GG-One-Step_soft_v1.root"])
+sigSample.setFileList(["samples/tutorial/SusyFitterTree_p832_GG-One-Step_soft_v1.root"])
 sigSample.setNormByTheory()
 sigSample.setNormFactor("mu_SIG",1.,0.,5.)                    
 exclusionFitConfig.addSamples(sigSample)
