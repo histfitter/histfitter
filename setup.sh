@@ -41,6 +41,7 @@ export PYTHONPATH=$ROOTSYS/lib:$PYTHONPATH
 export SVNOFF="svn+ssh://svn.cern.ch/reps/atlasoff"
 export SVNGRP="svn+ssh://svn.cern.ch/reps/atlasgrp"
 export SVNUSR="svn+ssh://svn.cern.ch/reps/atlasusr"
+export SVNTEST="svn+ssh://svn.cern.ch/reps/atlastest"
 export SVNROOT="svn+ssh://svn.cern.ch/reps/atlasoff"
 
 # Hack for mac ?
