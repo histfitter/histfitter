@@ -57,11 +57,11 @@ configMgr.outputFileName = "results/"+configMgr.analysisName+"_Output.root"
 bgdFiles = []
 sigFiles = []
 if configMgr.readFromTree:
-    bgdFiles.append("samples/paper/SusyFitterTree_OneSoftEle_BG_v3.root")
-    bgdFiles.append("samples/paper/SusyFitterTree_OneSoftMuo_BG_v3.root")
+    bgdFiles.append("root://eosatlas//eos/atlas/atlascerngroupdisk/phys-susy/histfitter/stronglepton/SusyFitterTree_OneSoftEle_BG_v3.root")
+    bgdFiles.append("root://eosatlas//eos/atlas/atlascerngroupdisk/phys-susy/histfitter/stronglepton/SusyFitterTree_OneSoftMuo_BG_v3.root")
     if doExclusion:
         # 1-step simplified model
-        sigFiles.append("samples/SusyFitterTree_p832_GG-One-Step_soft_v1.root")
+        sigFiles.append("root://eosatlas//eos/atlas/atlascerngroupdisk/phys-susy/histfitter/stronglepton/SusyFitterTree_p832_GG-One-Step_soft_v1.root")
 else:
     bgdFiles = ["data/"+configMgr.analysisName+".root"]
 
