@@ -1,0 +1,144 @@
+2012-04-26 David Cote <david.cote@cern.ch>
+	* Non backward compatible change to configure input files from Jakub Adamek.
+	Allows to attach input TFiles to systematic->sample->channel->TopLvl->configMgr in the usual logic. 
+	Also see: https://groups.cern.ch/group/atlas-phys-susy-histfitter/Lists/Archive/Flat.aspx?RootFolder=%2Fgroup%2Fatlas-phys-susy-histfitter%2FLists%2FArchive%2Fnon-backward%20compatible%20change%20in%20input%20file%20configuration&FolderCTID=0x0120020041CC9DB0555187419FF9F5C61F43532C
+
+2012-04-25 David Cote <david.cote@cern.ch>
+	* Tagging SusyFitter-00-02-11 in preparation for HistFitter tutorial
+
+2012-01-26 David Cote <david.cote@cern.ch>
+	* Working tag for Rel16 Trees by Carsten for KtScale and KFactors one-lepton fits.
+	* Tagging SusyFitter-00-02-01
+
+2012-01-23 Dan Short <Daniel.Short@cern.ch>
+	* Modified ownership of systematics. Now applied at config level and cloned to channels and topLevs.
+	* Added method options for systematics
+
+2011-12-16 Dan Short <Daniel.Short@cern.ch>
+	* Updated memory management - all ROOT objects should be handled by configMgr ONLY (at interface level). Allows interactive mode functionality
+	
+2011-12-16 Jeanette Loranz <jeanette.miriam.lorenz@cern.ch>
+	* add hypothesis test option in scripts/SusyFitter.py
+
+2011-12-14 David Cote <david.cote@cern.ch>
+	* Last tag before disruptive changes by Dan.
+	* Tagging SusyFitter-00-01-02
+	
+2011-12-13 David Cote <david.cote@cern.ch>
+        * Reversed SusyFitter.py logic to do nothing by default and activate steps with options.
+	* Beta version ready for public use.
+	* Tagging SusyFitter-00-01-01
+
+2011-12-09 David Cote <david.cote@cern.ch>
+        * Completed multi-TopLvlXML loop. Further cosmetic tweaks.
+	* Tagging SusyFitter-00-01-00
+
+2011-12-09 David Cote <david.cote@cern.ch>
+	* Tagging before cleaning-up old obsolete code.
+	* SusyFitter-00-00-05
+	
+2011-12-07 Dan Short <Daniel.Short@cern.ch>
+	* Give configMgr ownership of histograms - stored interactively if run over trees
+	* Bug fix for QCD and memory leak
+	
+2011-12-06 Dan Short <Daniel.Short@cern.ch>
+	* Split execute and initialise
+	* Add -p option to print out histogram names that will be generated
+
+2011-12-06 David Cote <david.cote@cern.ch>
+	* Tagging SusyFitter-00-00-04 before changing the configManager structure
+
+2011-12-05 Dan Short <Daniel.Short@cern.ch>
+	* Added user defined systematic naming
+	* Added systematic from weights (needs testing!)
+	* Naming convention of histograms written to file similar to HistFactory
+
+2011-11-24 Dan Short <Daniel.Short@cern.ch>
+	* Fixed plotting bug in QCD distributions
+	* Changed channel and histo names to have region and variable information
+
+2011-11-19 Dan Short <Daniel.Short@cern.ch>
+	* Working examples for example 4 through 8
+	
+2011-11-18 Dan Short <Daniel.Short@cern.ch>
+	* Added functionality to generate histograms and XML from trees or histograms
+	* Pythonize the histogram generation and XML writing
+	* MajorUpdate python/configWriter.py
+	* Added python/configManager.py
+	* Added python/prepareHistos.py
+	* Added python/writeExample4Prepare.py
+	* Documentation in relevant files
+
+2011-11-06 Dan Short <Daniel.Short@cern.ch>
+	* Updated python/configWriter.py to handle scaling of histograms and toy generation. Also outputs histograms used into new TFile
+	* Added python/generateToys.py to generate toys from a given set of histograms
+	* Added python/writeExample4.py to automate example 4 up to the plot and fit stage from the MapToTH1 stage
+
+2011-11-06 Dan Short <Daniel.Short@cern.ch>
+	* Added python/configWriter.py to provide classes to write and execute HistFactory
+	* Added python/writeHistFactory.py to write and run an example similar to prepareHistFactory
+
+2011-10-31 Dan Short <Daniel.Short@cern.ch>
+	* Updated macros/GenerateToysFromHists.C to remove QCD from toy MC (added after), allow for WTR/full control by --onlyWTR and to get ChanSR and ChanCR from the full distribution
+	* Updated macros/GenerateToysFromHists.C to generate toys for 1 sigma shifts
+
+2011-10-25 Dan Short <Daniel.Short@cern.ch>
+	* Updated example1 to 2 channel fit with separated CR and SR systematics
+	* Added example2 template
+	* Added Toy generation file
+	* Added file to get overall sys values
+	
+2011-10-24 Dan Short <Daniel.Short@cern.ch>
+	* Added files to run Example1 (sample-independent systematics) for Background Forum meeting (see README)
+	* Modified Example1 (sample-independent systematics) to have only 2CR and 1SR
+	* Added python/stripHistos.py to reduce histograms to only necessary bins
+	* Added files to run Example3 (combined systematics with over constrainted fit) for Background Forum meeting (see README)
+	* Added files to run Example4 (combined shape systematics with over constrainted fit) for Background Forum meeting (see README)
+	* Modified files to contain names of placeholders for HistoSys
+	* Added theory uncertainties to all Examples
+	
+2011-10-24 Alex Koutsman <alex.koutsman@cern.ch>
+	* Updated my macros/config-files to the last versions, as shown in today's talk
+        * added pdf component example to PlotExample1.C
+	
+2011-10-21 Dan Short <Daniel.Short@cern.ch>
+	* Updated config_dan/1Ele_3Jet_JEStest_Meff.xml to only do HistoSys for background and only OverallSys for signal
+	* Updated macros_dan/PlotMeffJESShape.C to plot pulls of the normalization factors
+	* Updated data/1Ele_3Jet_JEStest_norm.root to not normalize the systematic shift histograms
+	
+2011-10-20 Dan Short <Daniel.Short@cern.ch>
+	* Updated macros_dan/PlotMeffJESShape.C to get the p-value of the NLL in data compared to the toys
+	* Updated data/1Ele_3Jet_JEStest_norm.root to contain electron and muon energy scale shifts
+	* Updated macros_dan/GenerateToysFromHists.C to generate toys for all variables
+	
+2011-10-19 Dan Short <Daniel.Short@cern.ch>
+	* Removed data/1Ele_3Jet_JEStest.root and data/1Ele_3Jet_JEStest_Fix.root as obsolete
+	* Added macros_dan/GenerateToysFromHists.C to get toys from input histograms
+	* Updated macros_dan/GenerateToysFromHists.C to allow a signal to be implanted
+	* Updated config_dan/1Ele_3Jet_ShapeJES_Meff.xml to exclude signal JES (including it breaks the fit), NormQCD back in
+	* Tagging SusyFitter-00-00-03
+	
+2011-10-18 Dan Short <Daniel.Short@cern.ch>
+	* Removed NormQCD from Meff fit as was causing Migrad to produce negative pdfs
+	* Modifed python normalization file to be more automated
+	
+2011-10-17 Alex Koutsman <alex.koutsman@cern.ch>
+	* Added personal workspace config_alex and macros_alex
+
+2011-10-17 Dan Short <Daniel.Short@cern.ch>
+	* Added personal workspace config_dan and macros_dan
+	
+2011-10-13 Dan Short <Daniel.Short@cern.ch>
+	* Added options to generate toy MCs to validate fits to PlotMeffJESShape.C
+
+2011-10-11 Dan Short <Daniel.Short@cern.ch>
+	* Fixed bugs in plotting macros for meff and nJets
+
+2011-10-10 Dan Short <Daniel.Short@cern.ch>
+	* Added example fit in multiple channels (see README)
+	* Tagging SusyFitter-00-00-02
+	
+2011-10-08 David Cote <david.cote@cern.ch>
+	* First version of (MT,MET) plus signal region (see README)
+	* Tagging SusyFitter-00-00-01
+
