@@ -333,9 +333,14 @@ class TopLevelXML(object):
 
     def setTreeName(self,treeName):
         self.treeName = treeName
+        return
+
+    def propagateTreeName(self,treeName):
+        if self.treeName == '':
+            self.treeName = treeName
         ## propagate down to channels
         for chan in self.channels:
-            chan.setTreeName(treeName)
+            chan.propagateTreeName(self.treeName)
             pass
         return
     
@@ -610,9 +615,14 @@ class ChannelXML(object):
 
     def setTreeName(self,treeName):
         self.treeName = treeName
+        return
+
+    def propagateTreeName(self,treeName):
+        if self.treeName == '':
+            self.treeName = treeName
         ## MAB : Propagate down to samples
         for sam in self.sampleList:
-            sam.setTreeName(treeName)
+            sam.propagateTreeName(self.treeName)
             pass
         return
 
@@ -736,11 +746,16 @@ class Sample(object):
 
     def setTreeName(self,treeName):
         self.treeName = treeName
-        ## MAB: Propagate treeName down to systematics of sample
-        for (systName,systList) in self.systDict.items():
-            for syst in systList:
-                syst.setTreeName(treeName)
-                pass
+        return
+
+    def propagateTreeName(self,treeName):
+        if self.treeName == '':
+            self.treeName = treeName
+        ### MAB: Propagate treeName down to systematics of sample
+        #for (systName,systList) in self.systDict.items():
+        #    for syst in systList:
+        #        syst.propagateTreeName(self.treeName)
+        #        pass
         return
 
     def addHistoSys(self,systName,nomName,highName,lowName,includeOverallSys,normalizeSys,symmetrize=True,oneSide=False,samName="",normString=""):

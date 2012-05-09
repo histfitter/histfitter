@@ -81,6 +81,7 @@ class TreePrepare(PrepareHistosABC):
         for fileName in fileList:
             self.configMgr.chains[self.currentChainName].Add(fileName)
 
+
     def addHisto(self,name,nBins=0,binLow=0.,binHigh=0.,nBinsY=0,binLowY=0.,binHighY=0.,useOverflow=False,useUnderflow=False):
         """
         Use the TTree::Draw method to create the histograms for var from cuts and weights defined in instance
@@ -285,7 +286,7 @@ class HistoPrepare(PrepareHistosABC):
             self.recreate=True
         return
 
-    def read(self,name,fileList):
+    def read(self,name,fileList,channelName='',sampleName='',systName=''):
         print "HistoPrepare " + str(fileList)
         """
         Get the histogram from the file

@@ -82,6 +82,7 @@ class ConfigManager(object):
 
         self.histCacheFile = ""
         self.fileList = [] # File list to be used for tree production
+        self.treeName = ''
         return
 
     def setLumiUnits(self,unit):
@@ -234,6 +235,8 @@ class ConfigManager(object):
         #C++ alter-ego
         self.initializeCppMgr()
         self.propagateFileList() # propagate file lists down the tree
+        ## Assume that all tree names have been set
+        self.propagateTreeName()
         #Summary
         self.Print()
         return
@@ -316,6 +319,9 @@ class ConfigManager(object):
         print "File names: (requires verbose > 1)"
         if verbose > 1:
             configMgr.printFiles()
+        print "Input tree names: (requires verbose > 1)"
+        if verbose > 1:
+            configMgr.printTreeNames()
         print "*-------------------------------------------------*\n"
         return
 
@@ -351,6 +357,25 @@ class ConfigManager(object):
                             print "                                                 " + str(sys.files)
         return
 
+    def printTreeNames(self):
+        print "ConfigManager:"
+        print str(self.treeName)
+        for topLvl in self.topLvls:
+            print "                TopLvlXML: " + topLvl.name
+            print "                " + str(topLvl.treeName)
+            for channel in topLvl.channels:
+                print "                ---------> Channel: " + channel.name
+                print "                           " + str(channel.treeName)
+                for sample in channel.sampleList:
+                    print "                           ---------> Sample: " + sample.name
+                    print "                                      "+str(sample.treeName)
+                    for sysList in sample.systDict:
+                        for sys in sample.systDict[sysList]:
+                            print "                                      ---------> Systematic: " + sys.name
+                            print "                                                 " + str(sys.treeLoName)
+                            print "                                                 " + str(sys.treeHiName)
+        return
+
     def setVerbose(self,lvl):
         self.verbose=lvl
         for tl in self.topLvls:
@@ -381,8 +406,18 @@ class ConfigManager(object):
         # this will result in the propagation of the files belonging
         # to our top level xml)
         for toplvlxml in self.topLvls:
-                toplvlxml.propagateFileList(self.fileList)
+            toplvlxml.propagateFileList(self.fileList)
 
+    def setTreeName(self,treeName):
+        self.treeName = treeName
+        return
+
+    def propagateTreeName(self):
+        for toplvlxml in self.topLvls:
+            toplvlxml.propagateTreeName(self.treeName)
+            pass
+        return
+        
     def executeAll(self):
         for tl in self.topLvls:
             self.execute(tl)
@@ -477,11 +512,15 @@ class ConfigManager(object):
                     if chan.hasB:
                         self.prepare.weights += (" * "+self.weights[-1])
                     if self.readFromTree and not sam.isDiscovery:
-                        self.prepare.read(sam.name+self.nomName, sam.files)
+                        treeName = sam.treeName
+                        if treeName=='': treeName = sam.name+self.nomName
+                        self.prepare.read(treeName, sam.files)
                 else:
                     self.prepare.weights = "1."
                     if self.readFromTree:
-                        self.prepare.read(sam.name, sam.files)
+                        treeName = sam.treeName
+                        if treeName=='': treeName = sam.name
+                        self.prepare.read(treeName, sam.files)
 
                 # Set the cuts
                 if len(sam.cutsDict.keys()) == 0:
@@ -533,7 +572,9 @@ class ConfigManager(object):
                                 if chan.hasB:
                                     self.prepare.weights += (" * "+syst.high[-1])
                                 if self.readFromTree:
-                                    self.prepare.read(sam.name+self.nomName, sam.files)
+                                    treeName = sam.treeName
+                                    if treeName=='': treeName = sam.name+self.nomName
+                                    self.prepare.read(treeName, sam.files)
                             elif syst.type == "tree":
                                 for weight in self.weights[:-1]:
                                     self.prepare.weights += (" * "+weight)
@@ -546,14 +587,22 @@ class ConfigManager(object):
                                     else:
                                         # otherwise - take the sample file list
                                         filelist = sam.files
-                                    self.prepare.read(sam.name+syst.high, filelist)
+                                    if sam.name in syst.treeHiName:
+                                        treeName = syst.treeHiName[sam.name]
+                                    else:
+                                        # otherwise - take the sample file list
+                                        treeName = sam.treeName+syst.high
+                                    if treeName==syst.high: treeName = sam.name+syst.high
+                                    self.prepare.read(treeName, filelist)
                             elif syst.type == "user":
                                 for weight in self.weights[:-1]:
                                     self.prepare.weights += (" * "+weight)
                                 if chan.hasB:
                                     self.prepare.weights += (" * "+self.weights[-1])
                                 if self.readFromTree:
-                                    self.prepare.read(sam.name+self.nomName, sam.files)
+                                    treeName = sam.treeName
+                                    if treeName=='': treeName = sam.name+self.nomName
+                                    self.prepare.read(treeName, sam.files)
                             
                             if not syst.type == "user" or not self.readFromTree: 
                                 if self.verbose>1:
@@ -579,7 +628,9 @@ class ConfigManager(object):
                                 if chan.hasB:
                                     self.prepare.weights += (" * "+syst.low[-1])
                                 if self.readFromTree:
-                                    self.prepare.read(sam.name+self.nomName, sam.files)
+                                    treeName = sam.treeName
+                                    if treeName=='': treeName = sam.name+self.nomName
+                                    self.prepare.read(treeName, sam.files)
                             elif syst.type == "tree":
                                 for weight in self.weights[:-1]:
                                     self.prepare.weights += (" * "+weight)
@@ -592,14 +643,22 @@ class ConfigManager(object):
                                     else:
                                         # otherwise - take the sample file list
                                         filelist = sam.files
-                                    self.prepare.read(sam.name+syst.low, filelist)
+                                    if sam.name in syst.treeLoName:
+                                        treeName = syst.treeLoName[sam.name]
+                                    else:
+                                        # otherwise - take the sample file list
+                                        treeName = sam.treeName+syst.low
+                                    if treeName==syst.low: treeName = sam.name+syst.low
+                                    self.prepare.read(treeName, filelist)
                             elif syst.type == "user":
                                 for weight in self.weights[:-1]:
                                     self.prepare.weights += (" * "+weight)
                                 if chan.hasB:
                                     self.prepare.weights += (" * "+self.weights[-1])
                                 if self.readFromTree:
-                                    self.prepare.read(sam.name+self.nomName, sam.files)
+                                    treeName = sam.treeName
+                                    if treeName=='': treeName = sam.name+self.nomName
+                                    self.prepare.read(treeName, sam.files)
 
                             if not syst.type == "user" or not self.readFromTree:
                                 if self.verbose>1:

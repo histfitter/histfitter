@@ -12,7 +12,8 @@ class Systematic:
         self.merged = False
         self.nFound = 0
         self.files = {}
-        self.treeName = ''
+        self.treeLoName = {}
+        self.treeHiName = {}
 
         if not constraint == "Gaussian" and not method == "shapeSys":
                 raise ValueError("Constraints can only be specified for shapeSys")
@@ -60,6 +61,11 @@ class Systematic:
         """
         self.files[sample] = [file]
 
-    def setTreeName(self,treeName):
-        self.treeName = treeName
+    def setLoTreeName(self,sampleName,treeName):
+        self.treeLoName[sampleName] = treeName
         return
+
+    def setHiTreeName(self,sampleName,treeName):
+        self.treeHiName[sampleName] = treeName
+        return
+
