@@ -715,66 +715,64 @@ if fullSyst:
     
 # single Mu
 
-WpT = bkgOnly.addChannel("Wpt",["WRMu"],WpTBinN,WpTBinLow,WpTBinHigh)
-WpT.hasB = True
-WpT.hasBQCD = True
+nJetZmChannel = bkgOnly.addChannel("nJet",nJetZmRegions,nJetZmNBins,nJetZmBinLow,nJetZmBinHigh)
+nJetZmChannel.hasB = True
+nJetZmChannel.hasBQCD = True
     
-WpT.addSystematic(btagZR)
-WpT.addSystematic(jesLow)
-WpT.addSystematic(jesMedium)
-WpT.addSystematic(jesHigh)
-WpT.addSystematic(lepZR)
+nJetZmChannel.addSystematic(btagZR)
+nJetZmChannel.addSystematic(jesLow)
+nJetZmChannel.addSystematic(jesMedium)
+nJetZmChannel.addSystematic(jesHigh)
+nJetZmChannel.addSystematic(lepZR)
 
 if fullSyst:
-    WpT.addSystematic(metcoZR)
-    WpT.addSystematic(metpuZR)
-    WpT.addSystematic(trigZR)
-    [WpT.getSample(sam).addSystematic(lesZR)    for sam in BGList]
-    [WpT.getSample(sam).addSystematic(lermsZR)  for sam in BGList]
-    [WpT.getSample(sam).addSystematic(leridZR)  for sam in BGList]
+    nJetZmChannel.addSystematic(metcoZR)
+    nJetZmChannel.addSystematic(metpuZR)
+    nJetZmChannel.addSystematic(trigZR)
+    [nJetZmChannel.getSample(sam).addSystematic(lesZR)    for sam in BGList]
+    [nJetZmChannel.getSample(sam).addSystematic(lermsZR)  for sam in BGList]
+    [nJetZmChannel.getSample(sam).addSystematic(leridZR)  for sam in BGList]
         
 
 ####### ZPt for Z  #######
 
 ## ele ele       
 
-ZpTee = bkgOnly.addChannel("Zpt",["ZRee"],ZpTBinN,ZpTBinLow,ZpTBinHigh)
+nJetZeeChannel = bkgOnly.addChannel("nJet",nJetZeeRegions,nJetZeeNBins,nJetZeeBinLow,nJetZeeBinHigh)
 
-ZpTee.addSystematic(jesLow)
-ZpTee.addSystematic(jesMedium)
-ZpTee.addSystematic(jesHigh)
-ZpTee.addSystematic(lepZR)
+nJetZeeChannel.addSystematic(jesLow)
+nJetZeeChannel.addSystematic(jesMedium)
+nJetZeeChannel.addSystematic(jesHigh)
+nJetZeeChannel.addSystematic(lepZR)
 
 if fullSyst:
-    ZpTee.addSystematic(metcoZR)
-    ZpTee.addSystematic(metpuZR)
-    ZpTee.addSystematic(trigZR)
-    [ZpTee.getSample(sam).addSystematic(lesZR)    for sam in BGList]
-    [ZpTee.getSample(sam).addSystematic(lermsZR)  for sam in BGList]
-    [ZpTee.getSample(sam).addSystematic(leridZR)  for sam in BGList]
+    nJetZeeChannel.addSystematic(metcoZR)
+    nJetZeeChannel.addSystematic(metpuZR)
+    nJetZeeChannel.addSystematic(trigZR)
+    [nJetZeeChannel.getSample(sam).addSystematic(lesZR)    for sam in BGList]
+    [nJetZeeChannel.getSample(sam).addSystematic(lermsZR)  for sam in BGList]
+    [nJetZeeChannel.getSample(sam).addSystematic(leridZR)  for sam in BGList]
 
   
 
 ## mu mu      
 
-ZpTmm = bkgOnly.addChannel("Zpt",["ZRmm"],ZpTBinN,ZpTBinLow,ZpTBinHigh)
+nJetZmmChannel = bkgOnly.addChannel("nJet",nJetZmmRegions,nJetZmmNBins,nJetZmmBinLow,nJetZmmBinHigh)
 
-ZpTmm.addSystematic(jesLow)
-ZpTmm.addSystematic(jesMedium)
-ZpTmm.addSystematic(jesHigh)
-ZpTmm.addSystematic(lepZR)
+nJetZmmChannel.addSystematic(jesLow)
+nJetZmmChannel.addSystematic(jesMedium)
+nJetZmmChannel.addSystematic(jesHigh)
+nJetZmmChannel.addSystematic(lepZR)
 
 if fullSyst:
-    ZpTmm.addSystematic(metcoZR)
-    ZpTmm.addSystematic(metpuZR)
-    ZpTmm.addSystematic(trigZR)
-    [ZpTmm.getSample(sam).addSystematic(lesZR)    for sam in BGList]
-    [ZpTmm.getSample(sam).addSystematic(lermsZR)  for sam in BGList]
-    [ZpTmm.getSample(sam).addSystematic(leridZR)  for sam in BGList]
+    nJetZmmChannel.addSystematic(metcoZR)
+    nJetZmmChannel.addSystematic(metpuZR)
+    nJetZmmChannel.addSystematic(trigZR)
+    [nJetZmmChannel.getSample(sam).addSystematic(lesZR)    for sam in BGList]
+    [nJetZmmChannel.getSample(sam).addSystematic(lermsZR)  for sam in BGList]
+    [nJetZmmChannel.getSample(sam).addSystematic(leridZR)  for sam in BGList]
     
-bkgOnly.setBkgConstrainChannels([nJetTopeeChannel,nJetTopeChannel,nJetZeChannel,nJetTopemChannel,nJetTopmmChannel,nJetTopmChannel,WpT,ZpTee,ZpTmm])
-
-
+bkgOnly.setBkgConstrainChannels([nJetTopeeChannel,nJetTopeChannel,nJetTopemChannel,nJetTopmmChannel,nJetTopmChannel,nJetZeChannel,nJetZmChannel,nJetZeeChannel,nJetZmmChannel])
 
 
 #-------------------------------------------------
