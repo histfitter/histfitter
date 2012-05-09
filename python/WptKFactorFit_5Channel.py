@@ -19,7 +19,7 @@ useStat=True
 doValidation=False
 doValidationSR=False
 
-doExclusion_GMSB_combined=False
+doExclusion_GMSB_combined=True
 doExclusion_mSUGRA_dilepton_combined=False
 doExclusion_GG_twostepCC_slepton=False
 
@@ -53,7 +53,7 @@ configMgr.histCacheFile = "data/"+configMgr.analysisName+".root"
 
 # Set the files to read from
 if configMgr.readFromTree:
-    bgdFiles = ["macros/macros_ysasaki/EleEle.root","macros/macros_ysasaki/EleMu.root","macros/macros_ysasaki/MuMu.root","macros/macros_ysasaki/OneEle.root","macros/macros_ysasaki/OneMu.root"]
+    bgdFiles = ["data/EleEle.root","data/EleMu.root","data/MuMu.root","data/OneEle.root","data/OneMu.root"]
     
 if doExclusion_GMSB_combined:
     sigFiles+=["data/SusyFitterTree_EleEle_GMSB.root","data/SusyFitterTree_EleMu_GMSB.root","data/SusyFitterTree_MuMu_GMSB.root"]
@@ -560,7 +560,12 @@ ZpTBinHigh   = 500.1
 #Create TopLevelXML objects
 
 bkgOnly = configMgr.addTopLevelXML("bkgonly")
-bkgOnly.addSamples([qcdSample,bgSample,topSample_Np0,topSample_Np1,topSample_Np2,topSample_Np3,topSample_Np4,topSample_Np5,dataSample,wzSample_Np0_DpT0GeV,wzSample_Np0_DpT50GeV,wzSample_Np0_DpT100GeV,wzSample_Np0_DpT150GeV,wzSample_Np0_DpT200GeV,wzSample_Np0_DpT250GeV,wzSample_Np1_DpT0GeV,wzSample_Np1_DpT50GeV,wzSample_Np1_DpT100GeV,wzSample_Np1_DpT150GeV,wzSample_Np1_DpT200GeV,wzSample_Np1_DpT250GeV,wzSample_Np2_DpT0GeV,wzSample_Np2_DpT50GeV,wzSample_Np2_DpT100GeV,wzSample_Np2_DpT150GeV,wzSample_Np2_DpT200GeV,wzSample_Np2_DpT250GeV,wzSample_Np3_DpT0GeV,wzSample_Np3_DpT50GeV,wzSample_Np3_DpT100GeV,wzSample_Np3_DpT150GeV,wzSample_Np3_DpT200GeV,wzSample_Np3_DpT250GeV,wzSample_Np4_DpT0GeV,wzSample_Np4_DpT50GeV,wzSample_Np4_DpT100GeV,wzSample_Np4_DpT150GeV,wzSample_Np4_DpT200GeV,wzSample_Np4_DpT250GeV,wzSample_Np5_DpT0GeV,wzSample_Np5_DpT50GeV,wzSample_Np5_DpT100GeV,wzSample_Np5_DpT150GeV,wzSample_Np5_DpT200GeV,wzSample_Np5_DpT250GeV])
+bgdsamples=[qcdSample,bgSample,topSample_Np0,topSample_Np1,topSample_Np2,topSample_Np3,topSample_Np4,topSample_Np5,dataSample,wzSample_Np0_DpT0GeV,wzSample_Np0_DpT50GeV,wzSample_Np0_DpT100GeV,wzSample_Np0_DpT150GeV,wzSample_Np0_DpT200GeV,wzSample_Np0_DpT250GeV,wzSample_Np1_DpT0GeV,wzSample_Np1_DpT50GeV,wzSample_Np1_DpT100GeV,wzSample_Np1_DpT150GeV,wzSample_Np1_DpT200GeV,wzSample_Np1_DpT250GeV,wzSample_Np2_DpT0GeV,wzSample_Np2_DpT50GeV,wzSample_Np2_DpT100GeV,wzSample_Np2_DpT150GeV,wzSample_Np2_DpT200GeV,wzSample_Np2_DpT250GeV,wzSample_Np3_DpT0GeV,wzSample_Np3_DpT50GeV,wzSample_Np3_DpT100GeV,wzSample_Np3_DpT150GeV,wzSample_Np3_DpT200GeV,wzSample_Np3_DpT250GeV,wzSample_Np4_DpT0GeV,wzSample_Np4_DpT50GeV,wzSample_Np4_DpT100GeV,wzSample_Np4_DpT150GeV,wzSample_Np4_DpT200GeV,wzSample_Np4_DpT250GeV,wzSample_Np5_DpT0GeV,wzSample_Np5_DpT50GeV,wzSample_Np5_DpT100GeV,wzSample_Np5_DpT150GeV,wzSample_Np5_DpT200GeV,wzSample_Np5_DpT250GeV]
+
+for sam in bgdsamples:
+    sam.setFileList(bgdFiles)
+
+bkgOnly.addSamples(bgdsamples)
 
 if useStat:
     bkgOnly.statErrThreshold=0.05 #0.03??
@@ -1125,11 +1130,7 @@ if doExclusion_GMSB_combined or doExclusion_mSUGRA_dilepton_combined or doExclus
             [S2Channel_mm.getSample(sam).addSystematic(lesS2DL) for sam in BGList]
             [S2Channel_mm.getSample(sam).addSystematic(lermsS2DL) for sam in BGList]
             [S2Channel_mm.getSample(sam).addSystematic(leridS2DL) for sam in BGList]
-
-
-        if doExclusion_GMSB_combined:
-            myTopLvl.setSignalChannels([S2Channel_ee,S2Channel_em,S2Channel_mm])
-            continue
+      
     
         S4Channel_ee = myTopLvl.addChannel("meffInc",["S4ee"],meffNBins,meffBinLow,meffBinHigh)
         S4Channel_ee.useOverflowBin=True
@@ -1179,7 +1180,11 @@ if doExclusion_GMSB_combined or doExclusion_mSUGRA_dilepton_combined or doExclus
             [S4Channel_mm.getSample(sam).addSystematic(lermsS4DL) for sam in BGList]
             [S4Channel_mm.getSample(sam).addSystematic(leridS4DL) for sam in BGList]
 
-        if doExclusion_mSUGRA_dilepton_combined:
+        ## Which SRs for which Scenario?
+
+        if doExclusion_GMSB_combined:
+            myTopLvl.setSignalChannels([S2Channel_ee,S2Channel_em,S2Channel_mm])       
+        elif doExclusion_mSUGRA_dilepton_combined:
             myTopLvl.setSignalChannels([S2Channel_ee,S2Channel_em,S2Channel_mm,S4Channel_ee,S4Channel_em,S4Channel_mm])
         ## Which SRs for SM???
         elif doExclusion_GG_twostepCC_slepton:
