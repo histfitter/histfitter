@@ -514,7 +514,7 @@ class ConfigManager(object):
                     if not "h"+sam.name+"Nom_"+normString+"Norm" in self.hists.keys():
                         if self.readFromTree:
                             self.hists["h"+sam.name+"Nom_"+normString+"Norm"] = TH1F("h"+sam.name+"Nom_"+normString+"Norm","h"+sam.name+"Nom_"+normString+"Norm",1,0.5,1.5)
-                            self.chains[self.prepare.treeName].Project("h"+sam.name+"Nom_"+normString+"Norm",normCuts,self.prepare.weights+" * ("+normCuts+")")
+                            self.chains[self.prepare.currentChainName].Project("h"+sam.name+"Nom_"+normString+"Norm",normCuts,self.prepare.weights+" * ("+normCuts+")")
                         else:
                             self.hists["h"+sam.name+"Nom_"+normString+"Norm"] = None
                             try:
@@ -567,7 +567,7 @@ class ConfigManager(object):
                                 if not "h"+sam.name+syst.name+"High_"+normString+"Norm" in self.hists.keys():
                                     if self.readFromTree:
                                         self.hists["h"+sam.name+syst.name+"High_"+normString+"Norm"] = TH1F("h"+sam.name+syst.name+"High_"+normString+"Norm","h"+sam.name+syst.name+"High_"+normString+"Norm",1,0.5,1.5)
-                                        self.chains[self.prepare.treeName].Project("h"+sam.name+syst.name+"High_"+normString+"Norm",normCuts,self.prepare.weights+" * ("+normCuts+")")
+                                        self.chains[self.prepare.currentChainName].Project("h"+sam.name+syst.name+"High_"+normString+"Norm",normCuts,self.prepare.weights+" * ("+normCuts+")")
                                     else:
                                         self.hists["h"+sam.name+syst.name+"High_"+normString+"Norm"] = None
                                         self.prepare.addHisto("h"+sam.name+syst.name+"High_"+normString+"Norm")
@@ -613,7 +613,7 @@ class ConfigManager(object):
                                 if not "h"+sam.name+syst.name+"Low_"+normString+"Norm" in self.hists.keys():
                                     if self.readFromTree:
                                         self.hists["h"+sam.name+syst.name+"Low_"+normString+"Norm"] = TH1F("h"+sam.name+syst.name+"Low_"+normString+"Norm","h"+sam.name+syst.name+"Low_"+normString+"Norm",1,0.5,1.5)
-                                        self.chains[self.prepare.treeName].Project("h"+sam.name+syst.name+"Low_"+normString+"Norm",normCuts,self.prepare.weights+" * ("+normCuts+")")
+                                        self.chains[self.prepare.currentChainName].Project("h"+sam.name+syst.name+"Low_"+normString+"Norm",normCuts,self.prepare.weights+" * ("+normCuts+")")
                                     else:
                                         self.hists["h"+sam.name+syst.name+"Low_"+normString+"Norm"] = None
                                         self.prepare.addHisto("h"+sam.name+syst.name+"Low_"+normString+"Norm")

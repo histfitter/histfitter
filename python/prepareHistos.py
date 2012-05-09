@@ -23,7 +23,7 @@ class PrepareHistosABC(object):
         self.histList = []
         self.nameList = []
 
-    def read(self,rootName,fileList):
+    def read(self,rootName,fileList,sampleName=''):
         """
         Read in the root object that will make histograms
         """
@@ -72,14 +72,14 @@ class TreePrepare(PrepareHistosABC):
     Supports merging of multiple input files
     """
 
-    def read(self,treeName,fileList):
+    def read(self,chainName,fileList,sampleName=''):
         """
         Set the chain name and add input files
         """
-        self.configMgr.chains[treeName] = TChain(treeName)
-        self.treeName = treeName
+        self.configMgr.chains[chainName] = TChain(chainName)
+        self.currentChainName = chainName
         for fileName in fileList:
-            self.configMgr.chains[self.treeName].Add(fileName)
+            self.configMgr.chains[self.currentChainName].Add(fileName)
 
     def addHisto(self,name,nBins=0,binLow=0.,binHigh=0.,nBinsY=0,binLowY=0.,binHighY=0.,useOverflow=False,useUnderflow=False):
         """
@@ -93,7 +93,7 @@ class TreePrepare(PrepareHistosABC):
                 for (iReg,reg) in enumerate(self.channel.regions):
                     self.cuts = self.configMgr.cutsDict[reg]
                     tempHist = TH1F(name+"temp"+str(iReg),name+"temp"+str(iReg),1,0.5,1.5)
-                    self.configMgr.chains[self.treeName].Project(name+"temp"+str(iReg),self.cuts,self.weights)
+                    self.configMgr.chains[self.currentChainName].Project(name+"temp"+str(iReg),self.cuts,self.weights)
                     error = Double()
                     integral = tempHist.IntegralAndError(1,tempHist.GetNbinsX(),error)
                     self.configMgr.hists[name].SetBinContent(iReg+1,integral)
@@ -116,7 +116,7 @@ class TreePrepare(PrepareHistosABC):
                     #print "!!!!!! VAR",self.var
                     #print "!!!!!! WEIGHTS",self.weights
                     #print "!!!!!! CUTS",self.cuts
-                    nCuts = self.configMgr.chains[self.treeName].Project(name+"temp"+str(iReg),self.var,self.weights+" * ("+self.cuts+")")
+                    nCuts = self.configMgr.chains[self.currentChainName].Project(name+"temp"+str(iReg),self.var,self.weights+" * ("+self.cuts+")")
                     self.configMgr.hists[name].Add(tempHist.Clone())
                     tempHist.Delete()
 
@@ -162,10 +162,10 @@ class TreePrepare(PrepareHistosABC):
             for (iReg,reg) in enumerate(self.channel.regions):
                 if self.configMgr.hists[prefixNom+"_"+str(iReg+1)] == None:
                     qcdHistoSystTemp = TH1F(self.name+"Syst"+str(iReg+1),self.name+"Syst"+str(iReg+1),self.channel.nBins,self.channel.binLow,self.channel.binHigh)
-                    self.configMgr.chains[self.treeName].Project(self.name+"Syst"+str(iReg+1),self.configMgr.cutsDict[reg],self.weights+"Syst")
+                    self.configMgr.chains[self.currentChainName].Project(self.name+"Syst"+str(iReg+1),self.configMgr.cutsDict[reg],self.weights+"Syst")
                     qcdHistoSyst.SetBinContent(iReg+1,qcdHistoSystTemp.GetBinContent(1))
                     qcdHistoStatTemp = TH1F(self.name+"Stat"+str(iReg+1),self.name+"Stat"+str(iReg+1),self.channel.nBins,self.channel.binLow,self.channel.binHigh)
-                    self.configMgr.chains[self.treeName].Project(self.name+"Stat"+str(iReg+1),self.configMgr.cutsDict[reg],self.weights+"Stat")
+                    self.configMgr.chains[self.currentChainName].Project(self.name+"Stat"+str(iReg+1),self.configMgr.cutsDict[reg],self.weights+"Stat")
                     qcdHistoStat.SetBinContent(iReg+1,qcdHistoStatTemp.GetBinContent(1))
         else:
             if self.weights=="1.0":
@@ -176,8 +176,8 @@ class TreePrepare(PrepareHistosABC):
                 sysWeightSyst=self.weights+"Syst"
                 
             if self.configMgr.hists[prefixNom+"_"+str(1)] == None:
-                self.configMgr.chains[self.treeName].Project(self.name+"Syst",self.var,sysWeightSyst+" * ("+self.cuts+")")
-                self.configMgr.chains[self.treeName].Project(self.name+"Stat",self.var,sysWeightStat+" * ("+self.cuts+")")
+                self.configMgr.chains[self.currentChainName].Project(self.name+"Syst",self.var,sysWeightSyst+" * ("+self.cuts+")")
+                self.configMgr.chains[self.currentChainName].Project(self.name+"Stat",self.var,sysWeightStat+" * ("+self.cuts+")")
 
         ## correct nominal bins (not overflow)
         for iBin in xrange(1,self.configMgr.hists[prefixNom].GetNbinsX()+1):

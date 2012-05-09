@@ -31,6 +31,7 @@ class TopLevelXML(object):
         self.bkgConstrainChannels=[]
         self.systDict = {}
         self.files = []
+        self.treeName = ''
 
     def Clone(self,newName=""):
         if newName=="":
@@ -329,6 +330,14 @@ class TopLevelXML(object):
     def removeSystematic(self,name):
         del self.systDict[name]
         return
+
+    def setTreeName(self,treeName):
+        self.treeName = treeName
+        ## propagate down to channels
+        for chan in self.channels:
+            chan.setTreeName(treeName)
+            pass
+        return
     
 class Measurement(object):
     """
@@ -442,6 +451,7 @@ class ChannelXML(object):
             self.statErrorThreshold = statErrorThreshold
             self.statErrorType = "Poisson"
         self.files = []
+        self.treeName = ''
         return
 
     def initialize(self):
@@ -596,6 +606,16 @@ class ChannelXML(object):
         self.xmlFile = open(self.xmlFileName,"w")
         self.xmlFile.write(str(self))
         self.xmlFile.close()
+        return
+
+    def setTreeName(self,treeName):
+        self.treeName = treeName
+        ## MAB : Propagate down to samples
+        for sam in self.sampleList:
+            sam.setTreeName(treeName)
+            pass
+        return
+
 
 class Sample(object):
     """
@@ -627,6 +647,7 @@ class Sample(object):
         self.unit = "GeV"
         self.cutsDict = {}
         self.files = []
+        self.treeName = ''
 
     def buildHisto(self,binValues,region,var):
         """
@@ -711,6 +732,15 @@ class Sample(object):
         Set the name of the nominal histogram for this sample
         """
         self.histoName = histoName
+        return
+
+    def setTreeName(self,treeName):
+        self.treeName = treeName
+        ## MAB: Propagate treeName down to systematics of sample
+        for (systName,systList) in self.systDict.items():
+            for syst in systList:
+                syst.setTreeName(treeName)
+                pass
         return
 
     def addHistoSys(self,systName,nomName,highName,lowName,includeOverallSys,normalizeSys,symmetrize=True,oneSide=False,samName="",normString=""):

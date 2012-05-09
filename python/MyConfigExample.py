@@ -279,3 +279,4 @@ if doExclusion:
             [s.mergeSamples([topSample.name,wzSample.name,bgSample.name,sigSample.name]) for s in mm2J.getSystematic(jes.name)]
             pass
         myTopLvl.setSignalChannels([mm2J])
+
