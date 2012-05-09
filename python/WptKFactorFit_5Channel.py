@@ -17,9 +17,13 @@ doHardLep=True
 doSoftLep=False
 useStat=True
 doValidation=False
-doValidationSR=True
-doValidationSlope=False
-doExclusion=False
+doValidationSR=False
+
+doExclusion_GMSB_combined=False
+doExclusion_mSUGRA_dilepton_combined=False
+doExclusion_GG_twostepCC_slepton=False
+
+
 blindS=False
 fullSyst=True
 useXsecUnc=True             # switch off when calucating excluded cross section (colour code in SM plots)
@@ -42,18 +46,20 @@ configMgr.calculatorType=2
 configMgr.testStaType=3
 configMgr.nPoints=20
 
+bgdFiles = []
+sigFiles = []
+
+configMgr.histCacheFile = "data/"+configMgr.analysisName+".root"
+
 # Set the files to read from
 if configMgr.readFromTree:
-# I've provided trees for ee, emu, mumu using 4.7fb data
-# ln -s /afs/cern.ch/atlas/groups/susy/1lepton/samples2/SusyFitterTree_EleEle.root etc
-    configMgr.inputFileNames = ["macros/macros_ysasaki/EleEle.root","macros/macros_ysasaki/EleMu.root","macros/macros_ysasaki/MuMu.root","macros/macros_ysasaki/OneEle.root","macros/macros_ysasaki/OneMu.root"]
-    if doExclusion:
-        configMgr.inputFileNames+=["data/SusyFitterTree_EleEle_GMSB.root","data/SusyFitterTree_EleMu_GMSB.root","data/SusyFitterTree_MuMu_GMSB.root"]
-##        configMgr.inputFileNames+=["data/SusyFitterTree_EleEle_mSUGRA.root","data/SusyFitterTree_EleMu_mSUGRA.root","data/SusyFitterTree_MuMu_mSUGRA.root"]
-else:
-    configMgr.inputFileNames = ["data/"+configMgr.analysisName+".root"]
-
-
+    bgdFiles = ["macros/macros_ysasaki/EleEle.root","macros/macros_ysasaki/EleMu.root","macros/macros_ysasaki/MuMu.root","macros/macros_ysasaki/OneEle.root","macros/macros_ysasaki/OneMu.root"]
+    
+if doExclusion_GMSB_combined:
+    sigFiles+=["data/SusyFitterTree_EleEle_GMSB.root","data/SusyFitterTree_EleMu_GMSB.root","data/SusyFitterTree_MuMu_GMSB.root"]
+if doExclusion_mSUGRA_dilepton_combined:
+    sigFiles+=["data/SusyFitterTree_EleEle_mSUGRA.root","data/SusyFitterTree_EleMu_mSUGRA.root","data/SusyFitterTree_MuMu_mSUGRA.root"]
+                                
 
 # AnalysisType corresponds to ee,mumu,emu as I want to split these channels up
 
@@ -95,29 +101,14 @@ configMgr.cutsDict = {"TRee":"(mll<80 || mll>100) && met > 30 && met < 80 && jet
                       "VZR4em":"met > 50 && met < 100 & jet4Pt > 50 && nB3Jet == 0 && AnalysisType==5",
                       "VZR4mm":"met > 50 && met < 100 & jet4Pt > 50  && nB3Jet == 0 && AnalysisType==4",
 
-                      "HMTVL1El":"AnalysisType==1 && met>30 && met<250 && mt>80 && jet1Pt>80 && jet3Pt>25 && meffInc>400",
-                      "HMTVL1Mu":"AnalysisType==2 && met>30 && met<250 && mt>80 && jet1Pt>80 && jet3Pt>25 && meffInc>400",
-
                       "WREl":"lep2Pt<10 && met>30 && met<120 && mt>40 && mt<80 && nB3Jet==0 && jet1Pt>80 && jet3Pt>25 && meffInc > 400 && AnalysisType==1",
                       "TREl":"lep2Pt<10 && met>30 && met<120 && mt>40 && mt<80 && nB3Jet>0 && jet1Pt>80 && jet3Pt>25 && meffInc > 400 && AnalysisType==1",
                       "WRMu":"lep2Pt<10 && met>30 && met<120 && mt>40 && mt<80 && nB3Jet==0 && jet1Pt>80 && jet3Pt>25 && meffInc > 400 && AnalysisType==2",
                       "TRMu":"lep2Pt<10 && met>30 && met<120 && mt>40 && mt<80 && nB3Jet>0 && jet1Pt>80 && jet3Pt>25 && meffInc > 400 && AnalysisType==2",
 
                       "TRElVR":"lep2Pt<10 && met>30 && met<120 && mt>40 && mt<80 && nB3Jet>0 && jet1Pt>80 && jet3Pt>25 && AnalysisType==1",
-                      "TRMuVR":"lep2Pt<10 && met>30 && met<120 && mt>40 && mt<80 && nB3Jet>0 && jet1Pt>80 && jet3Pt>25 && AnalysisType==2",
+                      "TRMuVR":"lep2Pt<10 && met>30 && met<120 && mt>40 && mt<80 && nB3Jet>0 && jet1Pt>80 && jet3Pt>25 && AnalysisType==2", 
 
-                      "TRElVR2":"lep2Pt<10 && nB3Jet>0 && jet1Pt>80 && jet3Pt>25 && AnalysisType==1",
-                      "TRMuVR2":"lep2Pt<10 && nB3Jet>0 && jet1Pt>80 && jet3Pt>25 && AnalysisType==2",
-
-                      "WRElVR":"lep2Pt<10 && nB3Jet==0 && jet1Pt>80 && jet3Pt>25 && AnalysisType==1",
-                      "WRMuVR":"lep2Pt<10 && nB3Jet==0 && jet1Pt>80 && jet3Pt>25 && AnalysisType==2",
-
-                      "WRElVR2":"lep2Pt<10 && met>30 && mt>40 && nB3Jet==0 && jet1Pt>80 && jet3Pt>25 && meffInc > 400 && AnalysisType==1",
-                      "WRMuVR2":"lep2Pt<10 && met>30 && mt>40 && nB3Jet==0 && jet1Pt>80 && jet3Pt>25 && meffInc > 400 && AnalysisType==2",
-
-                      "WREl2":"lep2Pt<10 && met>30 && met<120 && mt>40 && mt<80 && nB3Jet==0 && jet1Pt>80 && jet3Pt>25 && meffInc > 400 && AnalysisType==1",
-                      "WRMu2":"lep2Pt<10 && met>30 && met<120 && mt>40 && mt<80 && nB3Jet==0 && jet1Pt>80 && jet3Pt>25 && meffInc > 400 && AnalysisType==2",
-                      
                       "S3El":"AnalysisType==1 && met>250 && mt>100 && met/meff3Jet>0.3 && jet1Pt>100 && jet3Pt>25 && jet4Pt<80",
                       "S4El":"AnalysisType==1 && met>250 && mt>100 && met/meff4Jet>0.2 && jet4Pt>80",
 
@@ -200,7 +191,6 @@ btagS = Systematic("BT",configMgr.weights,bTagHighWeights,bTagLowWeights,"weight
 jesLow = Systematic("JLow","_NoSys","_JESLowup","_JESLowdown","tree","histoSys")
 jesMedium = Systematic("JMedium","_NoSys","_JESMediumup","_JESMediumdown","tree","histoSys")
 jesHigh = Systematic("JHigh","_NoSys","_JESHighup","_JESHighdown","tree","histoSys")
-jesZpt = Systematic("JZpt","_NoSys","_JESup","_JESdown","tree","overallSys")
 
 # LES uncertainty as overallSys - one per channel
 lesZR = Systematic("LES","_NoSys","_LESup","_LESdown","tree","overallSys")
@@ -298,7 +288,7 @@ wzSample_Np0_DpT200GeV.addNormFactor("mu_WZ_Np0",1.,5.,0.)
 wzSample_Np0_DpT200GeV.setStatConfig(useStat)
 
 wzSample_Np0_DpT250GeV = Sample("WZpT250GeV_Np0",kYellow+2)
-wzSample_Np0_DpT250GeV.setNormFactor("mu_WZ_pT200GeV",1.,0.,5.)
+wzSample_Np0_DpT250GeV.setNormFactor("mu_WZ_pT250GeV",1.,0.,5.)
 wzSample_Np0_DpT250GeV.addNormFactor("mu_WZ_Np0",1.,5.,0.)
 wzSample_Np0_DpT250GeV.setStatConfig(useStat)
 
@@ -328,7 +318,7 @@ wzSample_Np1_DpT200GeV.addNormFactor("mu_WZ_Np1",1.,5.,0.)
 wzSample_Np1_DpT200GeV.setStatConfig(useStat)
 
 wzSample_Np1_DpT250GeV = Sample("WZpT250GeV_Np1",kYellow+2)
-wzSample_Np1_DpT250GeV.setNormFactor("mu_WZ_pT200GeV",1.,0.,5.)
+wzSample_Np1_DpT250GeV.setNormFactor("mu_WZ_pT250GeV",1.,0.,5.)
 wzSample_Np1_DpT250GeV.addNormFactor("mu_WZ_Np1",1.,5.,0.)
 wzSample_Np1_DpT250GeV.setStatConfig(useStat)
 
@@ -358,7 +348,7 @@ wzSample_Np2_DpT200GeV.addNormFactor("mu_WZ_Np2",1.,5.,0.)
 wzSample_Np2_DpT200GeV.setStatConfig(useStat)
 
 wzSample_Np2_DpT250GeV = Sample("WZpT250GeV_Np2",kYellow+2)
-wzSample_Np2_DpT250GeV.setNormFactor("mu_WZ_pT200GeV",1.,0.,5.)
+wzSample_Np2_DpT250GeV.setNormFactor("mu_WZ_pT250GeV",1.,0.,5.)
 wzSample_Np2_DpT250GeV.addNormFactor("mu_WZ_Np2",1.,5.,0.)
 wzSample_Np2_DpT250GeV.setStatConfig(useStat)
 
@@ -388,7 +378,7 @@ wzSample_Np3_DpT200GeV.addNormFactor("mu_WZ_Np3",1.,5.,0.)
 wzSample_Np3_DpT200GeV.setStatConfig(useStat)
 
 wzSample_Np3_DpT250GeV = Sample("WZpT250GeV_Np3",kYellow+2)
-wzSample_Np3_DpT250GeV.setNormFactor("mu_WZ_pT200GeV",1.,0.,5.)
+wzSample_Np3_DpT250GeV.setNormFactor("mu_WZ_pT250GeV",1.,0.,5.)
 wzSample_Np3_DpT250GeV.addNormFactor("mu_WZ_Np3",1.,5.,0.)
 wzSample_Np3_DpT250GeV.setStatConfig(useStat)
 
@@ -418,7 +408,7 @@ wzSample_Np4_DpT200GeV.addNormFactor("mu_WZ_Np4",1.,5.,0.)
 wzSample_Np4_DpT200GeV.setStatConfig(useStat)
 
 wzSample_Np4_DpT250GeV = Sample("WZpT250GeV_Np4",kYellow+2)
-wzSample_Np4_DpT250GeV.setNormFactor("mu_WZ_pT200GeV",1.,0.,5.)
+wzSample_Np4_DpT250GeV.setNormFactor("mu_WZ_pT250GeV",1.,0.,5.)
 wzSample_Np4_DpT250GeV.addNormFactor("mu_WZ_Np4",1.,5.,0.)
 wzSample_Np4_DpT250GeV.setStatConfig(useStat)
 
@@ -448,59 +438,9 @@ wzSample_Np5_DpT200GeV.addNormFactor("mu_WZ_Np5",1.,5.,0.)
 wzSample_Np5_DpT200GeV.setStatConfig(useStat)
 
 wzSample_Np5_DpT250GeV = Sample("WZpT250GeV_Np5",kYellow+2)
-wzSample_Np5_DpT250GeV.setNormFactor("mu_WZ_pT200GeV",1.,0.,5.)
+wzSample_Np5_DpT250GeV.setNormFactor("mu_WZ_pT250GeV",1.,0.,5.)
 wzSample_Np5_DpT250GeV.addNormFactor("mu_WZ_Np5",1.,5.,0.)
 wzSample_Np5_DpT250GeV.setStatConfig(useStat)
-
-
-## add external errors on the mu_WZ_TrueZpt
-#err_pT0GeV = Systematic("err_pT0GeV", configMgr.weights,,, "user","userOverallSys")
-#wzSample_Np0_DpT0GeV.addSystematic(err_pT0GeV)
-#wzSample_Np1_DpT0GeV.addSystematic(err_pT0GeV)
-#wzSample_Np2_DpT0GeV.addSystematic(err_pT0GeV)
-#wzSample_Np3_DpT0GeV.addSystematic(err_pT0GeV)
-#wzSample_Np4_DpT0GeV.addSystematic(err_pT0GeV)
-#wzSample_Np5_DpT0GeV.addSystematic(err_pT0GeV)
-
-err_pT50GeV = Systematic("err_pT50GeV", configMgr.weights,1.048 ,0.952, "user","userOverallSys")
-wzSample_Np0_DpT50GeV.addSystematic(err_pT50GeV)
-wzSample_Np1_DpT50GeV.addSystematic(err_pT50GeV)
-wzSample_Np2_DpT50GeV.addSystematic(err_pT50GeV)
-wzSample_Np3_DpT50GeV.addSystematic(err_pT50GeV)
-wzSample_Np4_DpT50GeV.addSystematic(err_pT50GeV)
-wzSample_Np5_DpT50GeV.addSystematic(err_pT50GeV)
-
-err_pT100GeV = Systematic("err_pT100GeV", configMgr.weights,1.064,0.936, "user","userOverallSys")
-wzSample_Np0_DpT100GeV.addSystematic(err_pT100GeV)
-wzSample_Np1_DpT100GeV.addSystematic(err_pT100GeV)
-wzSample_Np2_DpT100GeV.addSystematic(err_pT100GeV)
-wzSample_Np3_DpT100GeV.addSystematic(err_pT100GeV)
-wzSample_Np4_DpT100GeV.addSystematic(err_pT100GeV)
-wzSample_Np5_DpT100GeV.addSystematic(err_pT100GeV)
-
-err_pT150GeV = Systematic("err_pT150GeV", configMgr.weights,1.083 ,0.917, "user","userOverallSys")
-wzSample_Np0_DpT150GeV.addSystematic(err_pT150GeV)
-wzSample_Np1_DpT150GeV.addSystematic(err_pT150GeV)
-wzSample_Np2_DpT150GeV.addSystematic(err_pT150GeV)
-wzSample_Np3_DpT150GeV.addSystematic(err_pT150GeV)
-wzSample_Np4_DpT150GeV.addSystematic(err_pT150GeV)
-wzSample_Np5_DpT150GeV.addSystematic(err_pT150GeV)
-
-err_pT200GeV = Systematic("err_pT200GeV", configMgr.weights,1.102,0.898, "user","userOverallSys")
-wzSample_Np0_DpT200GeV.addSystematic(err_pT200GeV)
-wzSample_Np1_DpT200GeV.addSystematic(err_pT200GeV)
-wzSample_Np2_DpT200GeV.addSystematic(err_pT200GeV)
-wzSample_Np3_DpT200GeV.addSystematic(err_pT200GeV)
-wzSample_Np4_DpT200GeV.addSystematic(err_pT200GeV)
-wzSample_Np5_DpT200GeV.addSystematic(err_pT200GeV)
-
-wzSample_Np0_DpT250GeV.addSystematic(err_pT200GeV)
-wzSample_Np1_DpT250GeV.addSystematic(err_pT200GeV)
-wzSample_Np2_DpT250GeV.addSystematic(err_pT200GeV)
-wzSample_Np3_DpT250GeV.addSystematic(err_pT200GeV)
-wzSample_Np4_DpT250GeV.addSystematic(err_pT200GeV)
-wzSample_Np5_DpT250GeV.addSystematic(err_pT200GeV)
-
 
 
 # TOP
@@ -632,27 +572,11 @@ else:
 meas=bkgOnly.addMeasurement(measName,measLumi,measLumiError)
 meas.addPOI("mu_SIG")
 
-# Fix Background and low WZ parton multiplicities
+# Fix Background 
 meas.addParamSetting("mu_BG","const",1.0)
 meas.addParamSetting("mu_WZ_Np0","const",1.0)
 meas.addParamSetting("mu_WZ_Np1","const",1.0)
 
-
-# Fix Normfacors on mu_WZ_TrueZPt as determined by yuichi
-meas.addParamSetting("mu_WZ_pT0GeV","NOT const",1.00)
-meas.addParamSetting("mu_WZ_pT50GeV","NOT const",0.893)
-meas.addParamSetting("mu_WZ_pT100GeV","NOT const",0.866)
-meas.addParamSetting("mu_WZ_pT150GeV","NOT const",0.737)
-meas.addParamSetting("mu_WZ_pT200GeV","NOT const",0.772)
-
-
-## Fix Uncertainties from the true WZ Pt fit
-
-#meas.addParamSetting("alpha_err_pT0GeV","const",0)
-#meas.addParamSetting("alpha_err_pT50GeV","const",0)
-#meas.addParamSetting("alpha_err_pT100GeV","const",0)
-#meas.addParamSetting("alpha_err_pT150GeV","const",0)
-#meas.addParamSetting("alpha_err_pT200GeV","const",0)
 
 #--------------------------------------------------------------
 # Background fit regions 
@@ -761,7 +685,7 @@ if fullSyst:
     [nJetTopmChannel.getSample(sam).addSystematic(leridTR) for sam in BGList]
     
 
-####### nJet for W #######
+####### nJet for W (One Electron ONLY!) Other channels used for W/ZPt fit  #######
     
 # single ele
 
@@ -781,70 +705,76 @@ if fullSyst:
     [nJetZeChannel.getSample(sam).addSystematic(lermsZR) for sam in BGList]
     [nJetZeChannel.getSample(sam).addSystematic(leridZR) for sam in BGList]    
 
+
+####### WPt for W  #######
     
 # single Mu
 
-nJetZmChannel = bkgOnly.addChannel("nJet",["WRMu"],nJetZeNBins,nJetZeBinLow,nJetZeBinHigh)
-nJetZmChannel.hasB = True
-nJetZmChannel.hasBQCD = True
+WpT = bkgOnly.addChannel("Wpt",["WRMu"],WpTBinN,WpTBinLow,WpTBinHigh)
+WpT.hasB = True
+WpT.hasBQCD = True
     
-nJetZmChannel.addSystematic(btagZR)
-nJetZmChannel.addSystematic(jesLow)
-nJetZmChannel.addSystematic(jesMedium)
-nJetZmChannel.addSystematic(jesHigh)
-nJetZmChannel.addSystematic(lepZR)
+WpT.addSystematic(btagZR)
+WpT.addSystematic(jesLow)
+WpT.addSystematic(jesMedium)
+WpT.addSystematic(jesHigh)
+WpT.addSystematic(lepZR)
 
 if fullSyst:
-    nJetZmChannel.addSystematic(metcoZR)
-    nJetZmChannel.addSystematic(metpuZR)
-    nJetZmChannel.addSystematic(trigZR)
-    [nJetZmChannel.getSample(sam).addSystematic(lesZR)    for sam in BGList]
-    [nJetZmChannel.getSample(sam).addSystematic(lermsZR)  for sam in BGList]
-    [nJetZmChannel.getSample(sam).addSystematic(leridZR)  for sam in BGList]
+    WpT.addSystematic(metcoZR)
+    WpT.addSystematic(metpuZR)
+    WpT.addSystematic(trigZR)
+    [WpT.getSample(sam).addSystematic(lesZR)    for sam in BGList]
+    [WpT.getSample(sam).addSystematic(lermsZR)  for sam in BGList]
+    [WpT.getSample(sam).addSystematic(leridZR)  for sam in BGList]
         
 
-####### nJet for Z  #######
+####### ZPt for Z  #######
 
 ## ele ele       
 
-nJetee = bkgOnly.addChannel("nJet",["ZRee"],nJetTopemNBins,nJetTopemBinLow,nJetTopemBinHigh)
+ZpTee = bkgOnly.addChannel("Zpt",["ZRee"],ZpTBinN,ZpTBinLow,ZpTBinHigh)
 
-nJetee.addSystematic(jesLow)
-nJetee.addSystematic(jesMedium)
-nJetee.addSystematic(jesHigh)
-nJetee.addSystematic(lepZR)
+ZpTee.addSystematic(jesLow)
+ZpTee.addSystematic(jesMedium)
+ZpTee.addSystematic(jesHigh)
+ZpTee.addSystematic(lepZR)
 
 if fullSyst:
-    nJetee.addSystematic(metcoZR)
-    nJetee.addSystematic(metpuZR)
-    nJetee.addSystematic(trigZR)
-    [nJetee.getSample(sam).addSystematic(lesZR)    for sam in BGList]
-    [nJetee.getSample(sam).addSystematic(lermsZR)  for sam in BGList]
-    [nJetee.getSample(sam).addSystematic(leridZR)  for sam in BGList]
+    ZpTee.addSystematic(metcoZR)
+    ZpTee.addSystematic(metpuZR)
+    ZpTee.addSystematic(trigZR)
+    [ZpTee.getSample(sam).addSystematic(lesZR)    for sam in BGList]
+    [ZpTee.getSample(sam).addSystematic(lermsZR)  for sam in BGList]
+    [ZpTee.getSample(sam).addSystematic(leridZR)  for sam in BGList]
 
   
 
 ## mu mu      
 
-nJetmm = bkgOnly.addChannel("nJet",["ZRmm"],nJetTopemNBins,nJetTopemBinLow,nJetTopemBinHigh)
+ZpTmm = bkgOnly.addChannel("Zpt",["ZRmm"],ZpTBinN,ZpTBinLow,ZpTBinHigh)
 
-nJetmm.addSystematic(jesLow)
-nJetmm.addSystematic(jesMedium)
-nJetmm.addSystematic(jesHigh)
-nJetmm.addSystematic(lepZR)
+ZpTmm.addSystematic(jesLow)
+ZpTmm.addSystematic(jesMedium)
+ZpTmm.addSystematic(jesHigh)
+ZpTmm.addSystematic(lepZR)
 
 if fullSyst:
-    nJetmm.addSystematic(metcoZR)
-    nJetmm.addSystematic(metpuZR)
-    nJetmm.addSystematic(trigZR)
-    [nJetmm.getSample(sam).addSystematic(lesZR)    for sam in BGList]
-    [nJetmm.getSample(sam).addSystematic(lermsZR)  for sam in BGList]
-    [nJetmm.getSample(sam).addSystematic(leridZR)  for sam in BGList]
+    ZpTmm.addSystematic(metcoZR)
+    ZpTmm.addSystematic(metpuZR)
+    ZpTmm.addSystematic(trigZR)
+    [ZpTmm.getSample(sam).addSystematic(lesZR)    for sam in BGList]
+    [ZpTmm.getSample(sam).addSystematic(lermsZR)  for sam in BGList]
+    [ZpTmm.getSample(sam).addSystematic(leridZR)  for sam in BGList]
     
-bkgOnly.setBkgConstrainChannels([nJetTopeeChannel,nJetTopeChannel,nJetZeChannel,nJetTopemChannel,nJetTopmmChannel,nJetTopmChannel,nJetZmChannel,nJetee,nJetmm])
+bkgOnly.setBkgConstrainChannels([nJetTopeeChannel,nJetTopeChannel,nJetZeChannel,nJetTopemChannel,nJetTopmmChannel,nJetTopmChannel,WpT,ZpTee,ZpTmm])
 
 
-########## VALIDATION REGIONS #####################
+
+
+#-------------------------------------------------
+# Signal regions - only do this if background only, add as validation regions! 
+#-------------------------------------------------
 
 meffNBins = 1
 #    meffBinLow = 400.
@@ -863,27 +793,10 @@ meffBinLowTR = 0.
 meffBinHighTR = 2000.
 
 
-metNBinsTR = 40
-metBinLowTR = 0.
-#meffBinLow = 0.
-metBinHighTR = 800.
 
+if doValidationSR:
 
-pt1NBinsTR = 40
-pt1BinLowTR = 0.
-#meffBinLow = 0.
-pt1BinHighTR = 800.
-
-
-pt2NBinsTR = 40
-pt2BinLowTR = 0.
-#meffBinLow = 0.
-pt2BinHighTR = 800.
-
-if doValidationSlope:
-
-
-    ## check impact of kfactor fit on several distributions
+    ## check impact of kfactor fit on meff
 
     meffTR_El=bkgOnly.addChannel("meffInc",["TRElVR"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
     meffTR_El.hasB = True
@@ -917,366 +830,7 @@ if doValidationSlope:
         meffTR_Mu.addSystematic(trigTR)
         meffTR_Mu.addSystematic(lesTR)
         meffTR_Mu.addSystematic(lermsTR)
-        meffTR_Mu.addSystematic(leridTR)
-
-        
-
-#    metTR_El=bkgOnly.addChannel("met",["TRElVR2"],metNBinsTR,metBinLowTR,metBinHighTR)
-#    metTR_El.hasB = True
-#    metTR_El.hasBQCD = True
-#    metTR_El.useOverflowBin = True
-#    metTR_El.addSystematic(jesLow)
-#    metTR_El.addSystematic(jesMedium)
-#    metTR_El.addSystematic(jesHigh)
-#    metTR_El.addSystematic(lepTR)
-#    metTR_El.addSystematic(btagTR)
-#    if fullSyst:
-#        metTR_El.addSystematic(metcoTR)
-#        metTR_El.addSystematic(metpuTR)
-#        metTR_El.addSystematic(trigTR)
-#        metTR_El.addSystematic(lesTR)
-#        metTR_El.addSystematic(lermsTR)
-#        metTR_El.addSystematic(leridTR)
-
-
-#    metTR_Mu=bkgOnly.addChannel("met",["TRMuVR2"],metNBinsTR,metBinLowTR,metBinHighTR)
-#    metTR_Mu.hasB = True
-#    metTR_Mu.hasBQCD = True
-#    metTR_Mu.useOverflowBin = True
-#    metTR_Mu.addSystematic(jesLow)
-#    metTR_Mu.addSystematic(jesMedium)
-#    metTR_Mu.addSystematic(jesHigh)
-#    metTR_Mu.addSystematic(lepTR)
-#    metTR_Mu.addSystematic(btagTR)
-#    if fullSyst:
-#        metTR_Mu.addSystematic(metcoTR)
-#        metTR_Mu.addSystematic(metpuTR)
-#        metTR_Mu.addSystematic(trigTR)
-#        metTR_Mu.addSystematic(lesTR)
-#        metTR_Mu.addSystematic(lermsTR)
-#        metTR_Mu.addSystematic(leridTR)
-
-
- #   pt1TR_El=bkgOnly.addChannel("jet1Pt",["TRElVR"],pt1NBinsTR,pt1BinLowTR,pt1BinHighTR)
- #   pt1TR_El.hasB = True
- #   pt1TR_El.hasBQCD = True
- #   pt1TR_El.useOverflowBin = True
- #   pt1TR_El.addSystematic(jesLow)
- #   pt1TR_El.addSystematic(jesMedium)
- #   pt1TR_El.addSystematic(jesHigh)
- #   pt1TR_El.addSystematic(lepTR)
- #   pt1TR_El.addSystematic(btagTR)
- #   if fullSyst:
- #       pt1TR_El.addSystematic(metcoTR)
- #       pt1TR_El.addSystematic(metpuTR)
- #       pt1TR_El.addSystematic(trigTR)
- #       pt1TR_El.addSystematic(lesTR)
- #       pt1TR_El.addSystematic(lermsTR)
- #       pt1TR_El.addSystematic(leridTR)
-
-
- #   pt1TR_Mu=bkgOnly.addChannel("jet1Pt",["TRMuVR"],pt1NBinsTR,pt1BinLowTR,pt1BinHighTR)
- #   pt1TR_Mu.hasB = True
- #   pt1TR_Mu.hasBQCD = True
- #   pt1TR_Mu.useOverflowBin = True
- #   pt1TR_Mu.addSystematic(jesLow)
- #   pt1TR_Mu.addSystematic(jesMedium)
- #   pt1TR_Mu.addSystematic(jesHigh)
- #   pt1TR_Mu.addSystematic(lepTR)
- #   pt1TR_Mu.addSystematic(btagTR)
- #   if fullSyst:
- #       pt1TR_Mu.addSystematic(metcoTR)
- #       pt1TR_Mu.addSystematic(metpuTR)
- #       pt1TR_Mu.addSystematic(trigTR)
- #       pt1TR_Mu.addSystematic(lesTR)
- #       pt1TR_Mu.addSystematic(lermsTR)
- #       pt1TR_Mu.addSystematic(leridTR)
-
-        
-        
- #   pt2TR_El=bkgOnly.addChannel("jet2Pt",["TRElVR"],pt2NBinsTR,pt2BinLowTR,pt2BinHighTR)
- #   pt2TR_El.hasB = True
- #   pt2TR_El.hasBQCD = True
- #   pt2TR_El.useOverflowBin = True
- #   pt2TR_El.addSystematic(jesLow)
- #   pt2TR_El.addSystematic(jesMedium)
- #   pt2TR_El.addSystematic(jesHigh)
- #   pt2TR_El.addSystematic(lepTR)
- #   pt2TR_El.addSystematic(btagTR)
- #   if fullSyst:
- #       pt2TR_El.addSystematic(metcoTR)
- #       pt2TR_El.addSystematic(metpuTR)
- #       pt2TR_El.addSystematic(trigTR)
- #       pt2TR_El.addSystematic(lesTR)
- #       pt2TR_El.addSystematic(lermsTR)
- #       pt2TR_El.addSystematic(leridTR)
-
-
- #   pt2TR_Mu=bkgOnly.addChannel("jet2Pt",["TRMuVR"],pt2NBinsTR,pt2BinLowTR,pt2BinHighTR)
- #   pt2TR_Mu.hasB = True
- #   pt2TR_Mu.hasBQCD = True
- #   pt2TR_Mu.useOverflowBin = True
- #   pt2TR_Mu.addSystematic(jesLow)
- #   pt2TR_Mu.addSystematic(jesMedium)
- #   pt2TR_Mu.addSystematic(jesHigh)
- #   pt2TR_Mu.addSystematic(lepTR)
- #   pt2TR_Mu.addSystematic(btagTR)
- #   if fullSyst:
- #       pt2TR_Mu.addSystematic(metcoTR)
- #       pt2TR_Mu.addSystematic(metpuTR)
- #       pt2TR_Mu.addSystematic(trigTR)
- #       pt2TR_Mu.addSystematic(lesTR)
- #       pt2TR_Mu.addSystematic(lermsTR)
- #       pt2TR_Mu.addSystematic(leridTR)
-
-
-    metWR_El=bkgOnly.addChannel("met",["WRElVR"],metNBinsTR,metBinLowTR,metBinHighTR)
-    metWR_El.useOverflowBin = True
-    metWR_El.addSystematic(jesLow)
-    metWR_El.addSystematic(jesMedium)
-    metWR_El.addSystematic(jesHigh)
-    metWR_El.addSystematic(lepTR)
-    metWR_El.addSystematic(btagTR)
-    if fullSyst:
-        metWR_El.addSystematic(metcoTR)
-        metWR_El.addSystematic(metpuTR)
-        metWR_El.addSystematic(trigTR)
-        metWR_El.addSystematic(lesTR)
-        metWR_El.addSystematic(lermsTR)
-        metWR_El.addSystematic(leridTR)
-
-
-    metWR_Mu=bkgOnly.addChannel("met",["WRMuVR"],metNBinsTR,metBinLowTR,metBinHighTR)
-    metWR_Mu.useOverflowBin = True
-    metWR_Mu.addSystematic(jesLow)
-    metWR_Mu.addSystematic(jesMedium)
-    metWR_Mu.addSystematic(jesHigh)
-    metWR_Mu.addSystematic(lepTR)
-    metWR_Mu.addSystematic(btagTR)
-    if fullSyst:
-        metWR_Mu.addSystematic(metcoTR)
-        metWR_Mu.addSystematic(metpuTR)
-        metWR_Mu.addSystematic(trigTR)
-        metWR_Mu.addSystematic(lesTR)
-        metWR_Mu.addSystematic(lermsTR)
-        metWR_Mu.addSystematic(leridTR)       
-
-
-    wptWR_El=bkgOnly.addChannel("Wpt",["WRElVR"],metNBinsTR,metBinLowTR,metBinHighTR)
-    wptWR_El.useOverflowBin = True
-    wptWR_El.addSystematic(jesLow)
-    wptWR_El.addSystematic(jesMedium)
-    wptWR_El.addSystematic(jesHigh)
-    wptWR_El.addSystematic(lepTR)
-    wptWR_El.addSystematic(btagTR)
-    if fullSyst:
-        wptWR_El.addSystematic(metcoTR)
-        wptWR_El.addSystematic(metpuTR)
-        wptWR_El.addSystematic(trigTR)
-        wptWR_El.addSystematic(lesTR)
-        wptWR_El.addSystematic(lermsTR)
-        wptWR_El.addSystematic(leridTR)
-
-
-    wptWR_Mu=bkgOnly.addChannel("Wpt",["WRMuVR"],metNBinsTR,metBinLowTR,metBinHighTR)
-    wptWR_Mu.useOverflowBin = True
-    wptWR_Mu.addSystematic(jesLow)
-    wptWR_Mu.addSystematic(jesMedium)
-    wptWR_Mu.addSystematic(jesHigh)
-    wptWR_Mu.addSystematic(lepTR)
-    wptWR_Mu.addSystematic(btagTR)
-    if fullSyst:
-        wptWR_Mu.addSystematic(metcoTR)
-        wptWR_Mu.addSystematic(metpuTR)
-        wptWR_Mu.addSystematic(trigTR)
-        wptWR_Mu.addSystematic(lesTR)
-        wptWR_Mu.addSystematic(lermsTR)
-        wptWR_Mu.addSystematic(leridTR)
-
-
- #   lep1ptWR_El=bkgOnly.addChannel("lep1Pt",["WRElVR"],metNBinsTR,metBinLowTR,metBinHighTR)
- #   lep1ptWR_El.useOverflowBin = True
- #   lep1ptWR_El.addSystematic(jesLow)
- #   lep1ptWR_El.addSystematic(jesMedium)
- #   lep1ptWR_El.addSystematic(jesHigh)
- #   lep1ptWR_El.addSystematic(lepTR)
- #   lep1ptWR_El.addSystematic(btagTR)
- #   if fullSyst:
- #       lep1ptWR_El.addSystematic(metcoTR)
- #       lep1ptWR_El.addSystematic(metpuTR)
- #       lep1ptWR_El.addSystematic(trigTR)
- #       lep1ptWR_El.addSystematic(lesTR)
- #       lep1ptWR_El.addSystematic(lermsTR)
- #       lep1ptWR_El.addSystematic(leridTR)
-
-
- #   lep1ptWR_Mu=bkgOnly.addChannel("lep1Pt",["WRMuVR"],metNBinsTR,metBinLowTR,metBinHighTR)
- #   lep1ptWR_Mu.useOverflowBin = True
- #   lep1ptWR_Mu.addSystematic(jesLow)
- #   lep1ptWR_Mu.addSystematic(jesMedium)
- #   lep1ptWR_Mu.addSystematic(jesHigh)
- #   lep1ptWR_Mu.addSystematic(lepTR)
- #   lep1ptWR_Mu.addSystematic(btagTR)
- #   if fullSyst:
- #       lep1ptWR_Mu.addSystematic(metcoTR)
- #       lep1ptWR_Mu.addSystematic(metpuTR)
- #       lep1ptWR_Mu.addSystematic(trigTR)
- #       lep1ptWR_Mu.addSystematic(lesTR)
- #       lep1ptWR_Mu.addSystematic(lermsTR)
- #       lep1ptWR_Mu.addSystematic(leridTR)                    
-
-
- #   metWR2_El=bkgOnly.addChannel("met",["WRElVR2"],metNBinsTR,metBinLowTR,metBinHighTR)
- #   metWR2_El.useOverflowBin = True
- #   metWR2_El.addSystematic(jesLow)
- #   metWR2_El.addSystematic(jesMedium)
- #   metWR2_El.addSystematic(jesHigh)
- #   metWR2_El.addSystematic(lepTR)
- #   metWR2_El.addSystematic(btagTR)
- #   if fullSyst:
- #       metWR2_El.addSystematic(metcoTR)
- #       metWR2_El.addSystematic(metpuTR)
- #       metWR2_El.addSystematic(trigTR)
- #       metWR2_El.addSystematic(lesTR)
- #       metWR2_El.addSystematic(lermsTR)
- #       metWR2_El.addSystematic(leridTR)
-
-
- #   metWR2_Mu=bkgOnly.addChannel("met",["WRMuVR2"],metNBinsTR,metBinLowTR,metBinHighTR)
- #   metWR2_Mu.useOverflowBin = True
-  #  metWR2_Mu.addSystematic(jesLow)
- #   metWR2_Mu.addSystematic(jesMedium)
- #   metWR2_Mu.addSystematic(jesHigh)
- #   metWR2_Mu.addSystematic(lepTR)
- #   metWR2_Mu.addSystematic(btagTR)
- #   if fullSyst:
- #       metWR2_Mu.addSystematic(metcoTR)
- #       metWR2_Mu.addSystematic(metpuTR)
- #       metWR2_Mu.addSystematic(trigTR)
- #       metWR2_Mu.addSystematic(lesTR)
- #       metWR2_Mu.addSystematic(lermsTR)
- #       metWR2_Mu.addSystematic(leridTR)       
-
-
- #   wptWR2_El=bkgOnly.addChannel("Wpt",["WRElVR2"],metNBinsTR,metBinLowTR,metBinHighTR)
- #   wptWR2_El.useOverflowBin = True
- #   wptWR2_El.addSystematic(jesLow)
- #   wptWR2_El.addSystematic(jesMedium)
- #   wptWR2_El.addSystematic(jesHigh)
- #   wptWR2_El.addSystematic(lepTR)
- #   wptWR2_El.addSystematic(btagTR)
- #   if fullSyst:
- #       wptWR2_El.addSystematic(metcoTR)
- #       wptWR2_El.addSystematic(metpuTR)
- #       wptWR2_El.addSystematic(trigTR)
- #       wptWR2_El.addSystematic(lesTR)
- #       wptWR2_El.addSystematic(lermsTR)
- #       wptWR2_El.addSystematic(leridTR)
-
-
-#    wptWR2_Mu=bkgOnly.addChannel("Wpt",["WRMuVR2"],metNBinsTR,metBinLowTR,metBinHighTR)
-#    wptWR2_Mu.useOverflowBin = True
-#    wptWR2_Mu.addSystematic(jesLow)
-#    wptWR2_Mu.addSystematic(jesMedium)
-#    wptWR2_Mu.addSystematic(jesHigh)
-#    wptWR2_Mu.addSystematic(lepTR)
-#    wptWR2_Mu.addSystematic(btagTR)
-#    if fullSyst:
-#        wptWR2_Mu.addSystematic(metcoTR)
-#        wptWR2_Mu.addSystematic(metpuTR)
-#        wptWR2_Mu.addSystematic(trigTR)
- #       wptWR2_Mu.addSystematic(lesTR)
- #       wptWR2_Mu.addSystematic(lermsTR)
-#        wptWR2_Mu.addSystematic(leridTR)
-
-
- #   lep1ptWR2_El=bkgOnly.addChannel("lep1Pt",["WRElVR2"],metNBinsTR,metBinLowTR,metBinHighTR)
- #   lep1ptWR2_El.useOverflowBin = True
- #   lep1ptWR2_El.addSystematic(jesLow)
- #   lep1ptWR2_El.addSystematic(jesMedium)
- #   lep1ptWR2_El.addSystematic(jesHigh)
- #   lep1ptWR2_El.addSystematic(lepTR)
- #   lep1ptWR2_El.addSystematic(btagTR)
-  #  if fullSyst:
-  #      lep1ptWR2_El.addSystematic(metcoTR)
- #       lep1ptWR2_El.addSystematic(metpuTR)
- #       lep1ptWR2_El.addSystematic(trigTR)
- #       lep1ptWR2_El.addSystematic(lesTR)
- #       lep1ptWR2_El.addSystematic(lermsTR)
- #       lep1ptWR2_El.addSystematic(leridTR)
-
-
-  #  lep1ptWR2_Mu=bkgOnly.addChannel("lep1Pt",["WRMuVR2"],metNBinsTR,metBinLowTR,metBinHighTR)
-  #  lep1ptWR2_Mu.useOverflowBin = True
-  #  lep1ptWR2_Mu.addSystematic(jesLow)
-  #  lep1ptWR2_Mu.addSystematic(jesMedium)
-  #  lep1ptWR2_Mu.addSystematic(jesHigh)
-  #  lep1ptWR2_Mu.addSystematic(lepTR)
-  #  lep1ptWR2_Mu.addSystematic(btagTR)
-  #  if fullSyst:
-  #      lep1ptWR2_Mu.addSystematic(metcoTR)
-  #      lep1ptWR2_Mu.addSystematic(metpuTR)
-  #      lep1ptWR2_Mu.addSystematic(trigTR)
-  #      lep1ptWR2_Mu.addSystematic(lesTR)
-  #      lep1ptWR2_Mu.addSystematic(lermsTR)
-  #      lep1ptWR2_Mu.addSystematic(leridTR)
-
-
-  #  njetWR2_Mu=bkgOnly.addChannel("nJet",["WRMu2"],nJetZmNBins,nJetZmBinLow,nJetZmBinHigh)
-  #  njetWR2_Mu.useOverflowBin = True
-  #  njetWR2_Mu.addSystematic(jesLow)
-  #  njetWR2_Mu.addSystematic(jesMedium)
-  #  njetWR2_Mu.addSystematic(jesHigh)
-  #  njetWR2_Mu.addSystematic(lepTR)
-  #  njetWR2_Mu.addSystematic(btagTR)
-  #  if fullSyst:
-  #      njetWR2_Mu.addSystematic(metcoTR)
-  #      njetWR2_Mu.addSystematic(metpuTR)
-  #      njetWR2_Mu.addSystematic(trigTR)
-  #      njetWR2_Mu.addSystematic(lesTR)
-  #      njetWR2_Mu.addSystematic(lermsTR)
-  #      njetWR2_Mu.addSystematic(leridTR)       
-
-
-  #  wptWR2_El=bkgOnly.addChannel("Wpt",["WREl2"],WpTBinN,WpTBinLow,WpTBinHigh)
-  #  wptWR2_El.useOverflowBin = True
-  #  wptWR2_El.addSystematic(jesLow)
-  #  wptWR2_El.addSystematic(jesMedium)
-  #  wptWR2_El.addSystematic(jesHigh)
-  #  wptWR2_El.addSystematic(lepTR)
-  #  wptWR2_El.addSystematic(btagTR)
-  #  if fullSyst:
-  #      wptWR2_El.addSystematic(metcoTR)
-  #      wptWR2_El.addSystematic(metpuTR)
-  #      wptWR2_El.addSystematic(trigTR)
-  #      wptWR2_El.addSystematic(lesTR)
-  #      wptWR2_El.addSystematic(lermsTR)
-  #      wptWR2_El.addSystematic(leridTR)  
-
-
-#-------------------------------------------------
-# Signal regions - only do this if background only, add as validation regions! 
-#-------------------------------------------------
-
-meffNBins = 1
-#    meffBinLow = 400.
-meffBinLow = 0.
-meffBinHigh = 1600.
-
-meffNBinsHL = 6
-meffBinLowHL = 400.
-#meffBinLow = 0.
-meffBinHighHL = 1600.
-
-
-meffNBinsTR = 20
-meffBinLowTR = 0.
-#meffBinLow = 0.
-meffBinHighTR = 2000.
-
-
-
-if doValidationSR:   
+        meffTR_Mu.addSystematic(leridTR)    
 
     # S2 using meff
     meff2ee = bkgOnly.addChannel("meffInc",["S2ee"],meffNBins,meffBinLow,meffBinHigh)
@@ -1496,14 +1050,138 @@ if doValidationSR:
         meffS4T_Mu.addSystematic(leridS4T)
             
         
-if doValidationSR and not doValidationSlope:
-    bkgOnly.setValidationChannels([meff2ee,meff4ee,meff2em,meff4em,meff2mm,meff4mm,meffS3_El,meffS3_Mu,meffS4_El,meffS4_Mu,meffS3T_El,meffS3T_Mu,meffS4T_El,meffS4T_Mu])
+    bkgOnly.setValidationChannels([meff2ee,meff4ee,meff2em,meff4em,meff2mm,meff4mm,meffS3_El,meffS3_Mu,meffS4_El,meffS4_Mu,meffS3T_El,meffS3T_Mu,meffS4T_El,meffS4T_Mu,meffTR_El,meffTR_Mu])
 
-if doValidationSlope and not doValidationSR:
-    bkgOnly.setValidationChannels([meffTR_El,meffTR_Mu,metWR_El,metWR_Mu,wptWR_El,wptWR_Mu])    
+#-------------------------------------------------
+# Exclusion fit
+#-------------------------------------------------
 
-if doValidationSlope and doValidationSR:
-    bkgOnly.setValidationChannels([meffTR_El,meffTR_Mu,metTR_El,metTR_Mu,pt1TR_El,pt1TR_Mu,pt2TR_El,pt2TR_Mu,metWR_El,metWR_Mu,wptWR_El,wptWR_Mu,lep1ptWR_El,lep1ptWR_Mu,metWR2_El,metWR2_Mu,wptWR2_El,wptWR2_Mu,lep1ptWR2_El,lep1ptWR2_Mu,njetWR2_Mu,wptWR2_El,meff2ee,meff4ee,meff2em,meff4em,meff2mm,meff4mm,meffS3_El,meffS3_Mu,meffS4_El,meffS4_Mu,meffS3T_El,meffS3T_Mu,meffS4T_El,meffS4T_Mu])    
+# Need to comment out the following line when running HypoTest.py parallelized
+sigSamples=["GMSB_3_2d_10_250_3_2_1_1"]
+
+if doExclusion_GMSB_combined or doExclusion_mSUGRA_dilepton_combined or doExclusion_GG_twostepCC_slepton:
+       
+    for sig in sigSamples:
+        myTopLvl = bkgOnly
+        myTopLvl.name="dilepton_%s"%sig
+        myTopLvl.prefix=configMgr.analysisName+"_"+"dilepton_%s"%sig
+        
+##        myTopLvl = configMgr.addTopLevelXMLClone(bkgOnly,"dilepton_%s"%sig)
+        sigSample = Sample(sig,kPink)
+        sigSample.setFileList(sigFiles)
+        sigSample.setNormByTheory()
+        sigSample.setNormFactor("mu_SIG",0.,0.,5.)
+        sigSample.setStatConfig(useStat)
+
+        if useXsecUnc:
+            sigSample.addSystematic(xsecSig)
+        myTopLvl.addSamples(sigSample)
+        myTopLvl.setSignalSample(sigSample)
+
+        S2Channel_ee = myTopLvl.addChannel("meffInc",["S2ee"],meffNBins,meffBinLow,meffBinHigh)
+        S2Channel_ee.useOverflowBin=True
+        
+        S2Channel_ee.addSystematic(jesLow)
+        S2Channel_ee.addSystematic(jesMedium)
+        S2Channel_ee.addSystematic(jesHigh)
+        
+        S2Channel_ee.addSystematic(lepS2DL)
+        if fullSyst:
+            S2Channel_ee.addSystematic(metcoS2DL)
+            S2Channel_ee.addSystematic(metpuS2DL)
+            S2Channel_ee.addSystematic(trigS2DL)
+            [S2Channel_ee.getSample(sam).addSystematic(lesS2DL) for sam in BGList]
+            [S2Channel_ee.getSample(sam).addSystematic(lermsS2DL) for sam in BGList]
+            [S2Channel_ee.getSample(sam).addSystematic(leridS2DL) for sam in BGList]
+            
+        S2Channel_em = myTopLvl.addChannel("meffInc",["S2em"],meffNBins,meffBinLow,meffBinHigh)
+        S2Channel_em.useOverflowBin=True
+
+        S2Channel_em.addSystematic(jesLow)
+        S2Channel_em.addSystematic(jesMedium)
+        S2Channel_em.addSystematic(jesHigh)
+        
+        S2Channel_em.addSystematic(lepS2DL)
+        if fullSyst:
+            S2Channel_em.addSystematic(metcoS2DL)
+            S2Channel_em.addSystematic(metpuS2DL)
+            S2Channel_em.addSystematic(trigS2DL)
+            [S2Channel_em.getSample(sam).addSystematic(lesS2DL) for sam in BGList]
+            [S2Channel_em.getSample(sam).addSystematic(lermsS2DL) for sam in BGList]
+            [S2Channel_em.getSample(sam).addSystematic(leridS2DL) for sam in BGList]
+
+        S2Channel_mm = myTopLvl.addChannel("meffInc",["S2mm"],meffNBins,meffBinLow,meffBinHigh)
+        S2Channel_mm.useOverflowBin=True
+
+        S2Channel_mm.addSystematic(jesLow)
+        S2Channel_mm.addSystematic(jesMedium)
+        S2Channel_mm.addSystematic(jesHigh)
+        
+        S2Channel_mm.addSystematic(lepS4DL)
+        if fullSyst:
+            S2Channel_mm.addSystematic(metcoS2DL)
+            S2Channel_mm.addSystematic(metpuS2DL)
+            S2Channel_mm.addSystematic(trigS2DL)
+            [S2Channel_mm.getSample(sam).addSystematic(lesS2DL) for sam in BGList]
+            [S2Channel_mm.getSample(sam).addSystematic(lermsS2DL) for sam in BGList]
+            [S2Channel_mm.getSample(sam).addSystematic(leridS2DL) for sam in BGList]
 
 
+        if doExclusion_GMSB_combined:
+            myTopLvl.setSignalChannels([S2Channel_ee,S2Channel_em,S2Channel_mm])
+            continue
+    
+        S4Channel_ee = myTopLvl.addChannel("meffInc",["S4ee"],meffNBins,meffBinLow,meffBinHigh)
+        S4Channel_ee.useOverflowBin=True
+        
+        S4Channel_ee.addSystematic(jesLow)
+        S4Channel_ee.addSystematic(jesMedium)
+        S4Channel_ee.addSystematic(jesHigh)
+       
+        S4Channel_ee.addSystematic(lepS4DL)
+        if fullSyst:
+            S4Channel_ee.addSystematic(metcoS4DL)
+            S4Channel_ee.addSystematic(metpuS4DL)
+            S4Channel_ee.addSystematic(trigS4DL)
+            [S4Channel_ee.getSample(sam).addSystematic(lesS4DL) for sam in BGList]
+            [S4Channel_ee.getSample(sam).addSystematic(lermsS4DL) for sam in BGList]
+            [S4Channel_ee.getSample(sam).addSystematic(leridS4DL) for sam in BGList]
+            
+        S4Channel_em = myTopLvl.addChannel("meffInc",["S4em"],meffNBins,meffBinLow,meffBinHigh)
+        S4Channel_em.useOverflowBin=True
+
+        S4Channel_em.addSystematic(jesLow)
+        S4Channel_em.addSystematic(jesMedium)
+        S4Channel_em.addSystematic(jesHigh)
+        
+        S4Channel_em.addSystematic(lepS4DL)
+        if fullSyst:
+            S4Channel_em.addSystematic(metcoS4DL)
+            S4Channel_em.addSystematic(metpuS4DL)
+            S4Channel_em.addSystematic(trigS4DL)
+            [S4Channel_em.getSample(sam).addSystematic(lesS4DL) for sam in BGList]
+            [S4Channel_em.getSample(sam).addSystematic(lermsS4DL) for sam in BGList]
+            [S4Channel_em.getSample(sam).addSystematic(leridS4DL) for sam in BGList]
+
+        S4Channel_mm = myTopLvl.addChannel("meffInc",["S4mm"],meffNBins,meffBinLow,meffBinHigh)
+        S4Channel_mm.useOverflowBin=True
+
+        S4Channel_mm.addSystematic(jesLow)
+        S4Channel_mm.addSystematic(jesMedium)
+        S4Channel_mm.addSystematic(jesHigh)
+        
+        S4Channel_mm.addSystematic(lepS4DL)
+        if fullSyst:
+            S4Channel_mm.addSystematic(metcoS4DL)
+            S4Channel_mm.addSystematic(metpuS4DL)
+            S4Channel_mm.addSystematic(trigS4DL)
+            [S4Channel_mm.getSample(sam).addSystematic(lesS4DL) for sam in BGList]
+            [S4Channel_mm.getSample(sam).addSystematic(lermsS4DL) for sam in BGList]
+            [S4Channel_mm.getSample(sam).addSystematic(leridS4DL) for sam in BGList]
+
+        if doExclusion_mSUGRA_dilepton_combined:
+            myTopLvl.setSignalChannels([S2Channel_ee,S2Channel_em,S2Channel_mm,S4Channel_ee,S4Channel_em,S4Channel_mm])
+        ## Which SRs for SM???
+        elif doExclusion_GG_twostepCC_slepton:
+            myTopLvl.setSignalChannels([S4Channel_ee,S4Channel_em,S4Channel_mm])
 
