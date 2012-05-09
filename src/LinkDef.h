@@ -10,7 +10,7 @@
 #pragma link C++ class Heaviside;
 #pragma link C++ class ConfigMgr;
 #pragma link C++ class FitConfig;
-//#pragma link C++ class ExpandedRooFitResult;
+#pragma link C++ class ExpandedRooFitResult;
 #pragma link C++ class RooExpandedFitResult;
 
 #pragma link C++ namespace Util;
