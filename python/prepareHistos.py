@@ -23,7 +23,7 @@ class PrepareHistosABC(object):
         self.histList = []
         self.nameList = []
 
-    def read(self,rootName,fileList,sampleName=''):
+    def read(self,rootName,fileList,channelName='',sampleName=''):
         """
         Read in the root object that will make histograms
         """
@@ -72,7 +72,7 @@ class TreePrepare(PrepareHistosABC):
     Supports merging of multiple input files
     """
 
-    def read(self,chainName,fileList,sampleName=''):
+    def read(self,chainName,fileList,channelName='',sampleName=''):
         """
         Set the chain name and add input files
         """
