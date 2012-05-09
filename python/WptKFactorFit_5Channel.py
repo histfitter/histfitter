@@ -18,6 +18,7 @@ doSoftLep=False
 useStat=True
 doValidation=False
 doValidationSR=False
+doValidationSlope=False
 
 doExclusion_GMSB_combined=False
 doExclusion_mSUGRA_dilepton_combined=False
@@ -107,7 +108,10 @@ configMgr.cutsDict = {"TRee":"(mll<80 || mll>100) && met > 30 && met < 80 && jet
                       "TRMu":"lep2Pt<10 && met>30 && met<120 && mt>40 && mt<80 && nB3Jet>0 && jet1Pt>80 && jet3Pt>25 && meffInc > 400 && AnalysisType==2",
 
                       "TRElVR":"lep2Pt<10 && met>30 && met<120 && mt>40 && mt<80 && nB3Jet>0 && jet1Pt>80 && jet3Pt>25 && AnalysisType==1",
-                      "TRMuVR":"lep2Pt<10 && met>30 && met<120 && mt>40 && mt<80 && nB3Jet>0 && jet1Pt>80 && jet3Pt>25 && AnalysisType==2", 
+                      "TRMuVR":"lep2Pt<10 && met>30 && met<120 && mt>40 && mt<80 && nB3Jet>0 && jet1Pt>80 && jet3Pt>25 && AnalysisType==2",
+
+                      "WRElVR":"lep2Pt<10 && nB3Jet==0 && jet1Pt>80 && jet3Pt>25 && AnalysisType==1",
+                      "WRMuVR":"lep2Pt<10 && nB3Jet==0 && jet1Pt>80 && jet3Pt>25 && AnalysisType==2",
 
                       "S3El":"AnalysisType==1 && met>250 && mt>100 && met/meff3Jet>0.3 && jet1Pt>100 && jet3Pt>25 && jet4Pt<80",
                       "S4El":"AnalysisType==1 && met>250 && mt>100 && met/meff4Jet>0.2 && jet4Pt>80",
@@ -119,7 +123,10 @@ configMgr.cutsDict = {"TRee":"(mll<80 || mll>100) && met > 30 && met < 80 && jet
                       "SR4jTEl":"AnalysisType==1 && met>250 && mt>100 && met/meff4Jet>0.2 && jet4Pt>80 && meffInc>800",
 
                       "SR3jTMu":"AnalysisType==2 && met>250 && mt>100 && met/meff3Jet>0.3 && jet1Pt>100 && jet3Pt>25 && jet4Pt<80 && meffInc>1200",
-                      "SR4jTMu":"AnalysisType==2 && met>250 && mt>100 && met/meff4Jet>0.2 && jet4Pt>80 && meffInc>800"
+                      "SR4jTMu":"AnalysisType==2 && met>250 && mt>100 && met/meff4Jet>0.2 && jet4Pt>80 && meffInc>800",
+
+                      "SR7jTEl":"AnalysisType==1 && met>180 && mt>120 && jet1Pt>80 && jet7Pt>25 && meffInc>750",             
+                      "SR7jTMu":"AnalysisType==2 && met>180 && mt>120 && jet1Pt>80 && jet7Pt>25 && meffInc>750"      
                       
 
 }
@@ -288,7 +295,7 @@ wzSample_Np0_DpT200GeV.addNormFactor("mu_WZ_Np0",1.,5.,0.)
 wzSample_Np0_DpT200GeV.setStatConfig(useStat)
 
 wzSample_Np0_DpT250GeV = Sample("WZpT250GeV_Np0",kYellow+2)
-wzSample_Np0_DpT250GeV.setNormFactor("mu_WZ_pT250GeV",1.,0.,5.)
+wzSample_Np0_DpT250GeV.setNormFactor("mu_WZ_pT200GeV",1.,0.,5.)
 wzSample_Np0_DpT250GeV.addNormFactor("mu_WZ_Np0",1.,5.,0.)
 wzSample_Np0_DpT250GeV.setStatConfig(useStat)
 
@@ -318,7 +325,7 @@ wzSample_Np1_DpT200GeV.addNormFactor("mu_WZ_Np1",1.,5.,0.)
 wzSample_Np1_DpT200GeV.setStatConfig(useStat)
 
 wzSample_Np1_DpT250GeV = Sample("WZpT250GeV_Np1",kYellow+2)
-wzSample_Np1_DpT250GeV.setNormFactor("mu_WZ_pT250GeV",1.,0.,5.)
+wzSample_Np1_DpT250GeV.setNormFactor("mu_WZ_pT200GeV",1.,0.,5.)
 wzSample_Np1_DpT250GeV.addNormFactor("mu_WZ_Np1",1.,5.,0.)
 wzSample_Np1_DpT250GeV.setStatConfig(useStat)
 
@@ -348,7 +355,7 @@ wzSample_Np2_DpT200GeV.addNormFactor("mu_WZ_Np2",1.,5.,0.)
 wzSample_Np2_DpT200GeV.setStatConfig(useStat)
 
 wzSample_Np2_DpT250GeV = Sample("WZpT250GeV_Np2",kYellow+2)
-wzSample_Np2_DpT250GeV.setNormFactor("mu_WZ_pT250GeV",1.,0.,5.)
+wzSample_Np2_DpT250GeV.setNormFactor("mu_WZ_pT200GeV",1.,0.,5.)
 wzSample_Np2_DpT250GeV.addNormFactor("mu_WZ_Np2",1.,5.,0.)
 wzSample_Np2_DpT250GeV.setStatConfig(useStat)
 
@@ -378,7 +385,7 @@ wzSample_Np3_DpT200GeV.addNormFactor("mu_WZ_Np3",1.,5.,0.)
 wzSample_Np3_DpT200GeV.setStatConfig(useStat)
 
 wzSample_Np3_DpT250GeV = Sample("WZpT250GeV_Np3",kYellow+2)
-wzSample_Np3_DpT250GeV.setNormFactor("mu_WZ_pT250GeV",1.,0.,5.)
+wzSample_Np3_DpT250GeV.setNormFactor("mu_WZ_pT200GeV",1.,0.,5.)
 wzSample_Np3_DpT250GeV.addNormFactor("mu_WZ_Np3",1.,5.,0.)
 wzSample_Np3_DpT250GeV.setStatConfig(useStat)
 
@@ -408,7 +415,7 @@ wzSample_Np4_DpT200GeV.addNormFactor("mu_WZ_Np4",1.,5.,0.)
 wzSample_Np4_DpT200GeV.setStatConfig(useStat)
 
 wzSample_Np4_DpT250GeV = Sample("WZpT250GeV_Np4",kYellow+2)
-wzSample_Np4_DpT250GeV.setNormFactor("mu_WZ_pT250GeV",1.,0.,5.)
+wzSample_Np4_DpT250GeV.setNormFactor("mu_WZ_pT200GeV",1.,0.,5.)
 wzSample_Np4_DpT250GeV.addNormFactor("mu_WZ_Np4",1.,5.,0.)
 wzSample_Np4_DpT250GeV.setStatConfig(useStat)
 
@@ -438,9 +445,53 @@ wzSample_Np5_DpT200GeV.addNormFactor("mu_WZ_Np5",1.,5.,0.)
 wzSample_Np5_DpT200GeV.setStatConfig(useStat)
 
 wzSample_Np5_DpT250GeV = Sample("WZpT250GeV_Np5",kYellow+2)
-wzSample_Np5_DpT250GeV.setNormFactor("mu_WZ_pT250GeV",1.,0.,5.)
+wzSample_Np5_DpT250GeV.setNormFactor("mu_WZ_pT200GeV",1.,0.,5.)
 wzSample_Np5_DpT250GeV.addNormFactor("mu_WZ_Np5",1.,5.,0.)
 wzSample_Np5_DpT250GeV.setStatConfig(useStat)
+
+
+### Additional uncertainty coming from the ZPt fit
+
+err_pT50GeV = Systematic("err_pT50GeV", configMgr.weights,1.048 ,0.952, "user","userOverallSys")
+wzSample_Np0_DpT50GeV.addSystematic(err_pT50GeV)
+wzSample_Np1_DpT50GeV.addSystematic(err_pT50GeV)
+wzSample_Np2_DpT50GeV.addSystematic(err_pT50GeV)
+wzSample_Np3_DpT50GeV.addSystematic(err_pT50GeV)
+wzSample_Np4_DpT50GeV.addSystematic(err_pT50GeV)
+wzSample_Np5_DpT50GeV.addSystematic(err_pT50GeV)
+
+err_pT100GeV = Systematic("err_pT100GeV", configMgr.weights,1.064,0.936, "user","userOverallSys")
+wzSample_Np0_DpT100GeV.addSystematic(err_pT100GeV)
+wzSample_Np1_DpT100GeV.addSystematic(err_pT100GeV)
+wzSample_Np2_DpT100GeV.addSystematic(err_pT100GeV)
+wzSample_Np3_DpT100GeV.addSystematic(err_pT100GeV)
+wzSample_Np4_DpT100GeV.addSystematic(err_pT100GeV)
+wzSample_Np5_DpT100GeV.addSystematic(err_pT100GeV)
+
+err_pT150GeV = Systematic("err_pT150GeV", configMgr.weights,1.083 ,0.917, "user","userOverallSys")
+wzSample_Np0_DpT150GeV.addSystematic(err_pT150GeV)
+wzSample_Np1_DpT150GeV.addSystematic(err_pT150GeV)
+wzSample_Np2_DpT150GeV.addSystematic(err_pT150GeV)
+wzSample_Np3_DpT150GeV.addSystematic(err_pT150GeV)
+wzSample_Np4_DpT150GeV.addSystematic(err_pT150GeV)
+wzSample_Np5_DpT150GeV.addSystematic(err_pT150GeV)
+
+err_pT200GeV = Systematic("err_pT200GeV", configMgr.weights,1.102,0.898, "user","userOverallSys")
+wzSample_Np0_DpT200GeV.addSystematic(err_pT200GeV)
+wzSample_Np1_DpT200GeV.addSystematic(err_pT200GeV)
+wzSample_Np2_DpT200GeV.addSystematic(err_pT200GeV)
+wzSample_Np3_DpT200GeV.addSystematic(err_pT200GeV)
+wzSample_Np4_DpT200GeV.addSystematic(err_pT200GeV)
+wzSample_Np5_DpT200GeV.addSystematic(err_pT200GeV)
+
+wzSample_Np0_DpT250GeV.addSystematic(err_pT200GeV)
+wzSample_Np1_DpT250GeV.addSystematic(err_pT200GeV)
+wzSample_Np2_DpT250GeV.addSystematic(err_pT200GeV)
+wzSample_Np3_DpT250GeV.addSystematic(err_pT200GeV)
+wzSample_Np4_DpT250GeV.addSystematic(err_pT200GeV)
+wzSample_Np5_DpT250GeV.addSystematic(err_pT200GeV)
+
+
 
 
 # TOP
@@ -577,10 +628,18 @@ else:
 meas=bkgOnly.addMeasurement(measName,measLumi,measLumiError)
 meas.addPOI("mu_SIG")
 
-# Fix Background 
+# Fix Background and low WZ parton multiplicities
 meas.addParamSetting("mu_BG","const",1.0)
 meas.addParamSetting("mu_WZ_Np0","const",1.0)
 meas.addParamSetting("mu_WZ_Np1","const",1.0)
+
+
+# Fix Normfacors on mu_WZ_TrueZPt as determined by yuichi
+meas.addParamSetting("mu_WZ_pT0GeV","NOT const",1.00)
+meas.addParamSetting("mu_WZ_pT50GeV","NOT const",0.893)
+meas.addParamSetting("mu_WZ_pT100GeV","NOT const",0.866)
+meas.addParamSetting("mu_WZ_pT150GeV","NOT const",0.737)
+meas.addParamSetting("mu_WZ_pT200GeV","NOT const",0.772)
 
 
 #--------------------------------------------------------------
@@ -690,18 +749,19 @@ if fullSyst:
     [nJetTopmChannel.getSample(sam).addSystematic(leridTR) for sam in BGList]
     
 
-####### nJet for W (One Electron ONLY!) Other channels used for W/ZPt fit  #######
+####### nJet  for W #######
     
 # single ele
 
 nJetZeChannel=bkgOnly.addChannel("nJet",nJetZeRegions,nJetZeNBins,nJetZeBinLow,nJetZeBinHigh)
-nJetZeChannel.hasB = False
+nJetZeChannel.hasB = True
 nJetZeChannel.hasBQCD = False
 nJetZeChannel.addSystematic(jesLow)
 nJetZeChannel.addSystematic(jesMedium)
 nJetZeChannel.addSystematic(jesHigh)
-nJetZeChannel.addSystematic(btagZR)
 nJetZeChannel.addSystematic(lepZR)
+nJetZeChannel.addSystematic(btagZR)
+
 if fullSyst:
     nJetZeChannel.addSystematic(metcoZR)
     nJetZeChannel.addSystematic(metpuZR)
@@ -710,20 +770,17 @@ if fullSyst:
     [nJetZeChannel.getSample(sam).addSystematic(lermsZR) for sam in BGList]
     [nJetZeChannel.getSample(sam).addSystematic(leridZR) for sam in BGList]    
 
-
-####### WPt for W  #######
     
 # single Mu
 
 nJetZmChannel = bkgOnly.addChannel("nJet",nJetZmRegions,nJetZmNBins,nJetZmBinLow,nJetZmBinHigh)
 nJetZmChannel.hasB = True
-nJetZmChannel.hasBQCD = True
-    
-nJetZmChannel.addSystematic(btagZR)
+nJetZmChannel.hasBQCD = False
 nJetZmChannel.addSystematic(jesLow)
 nJetZmChannel.addSystematic(jesMedium)
 nJetZmChannel.addSystematic(jesHigh)
 nJetZmChannel.addSystematic(lepZR)
+nJetZmChannel.addSystematic(btagZR)
 
 if fullSyst:
     nJetZmChannel.addSystematic(metcoZR)
@@ -734,7 +791,7 @@ if fullSyst:
     [nJetZmChannel.getSample(sam).addSystematic(leridZR)  for sam in BGList]
         
 
-####### ZPt for Z  #######
+####### Njet for Z  #######
 
 ## ele ele       
 
@@ -798,42 +855,6 @@ meffBinHighTR = 2000.
 
 
 if doValidationSR:
-
-    ## check impact of kfactor fit on meff
-
-    meffTR_El=bkgOnly.addChannel("meffInc",["TRElVR"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
-    meffTR_El.hasB = True
-    meffTR_El.hasBQCD = True
-    meffTR_El.useOverflowBin = True
-    meffTR_El.addSystematic(jesLow)
-    meffTR_El.addSystematic(jesMedium)
-    meffTR_El.addSystematic(jesHigh)
-    meffTR_El.addSystematic(lepTR)
-    meffTR_El.addSystematic(btagTR)
-    if fullSyst:
-        meffTR_El.addSystematic(metcoTR)
-        meffTR_El.addSystematic(metpuTR)
-        meffTR_El.addSystematic(trigTR)
-        meffTR_El.addSystematic(lesTR)
-        meffTR_El.addSystematic(lermsTR)
-        meffTR_El.addSystematic(leridTR)
-
-    meffTR_Mu=bkgOnly.addChannel("meffInc",["TRMuVR"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
-    meffTR_Mu.hasB = True
-    meffTR_Mu.hasBQCD = True
-    meffTR_Mu.useOverflowBin = True
-    meffTR_Mu.addSystematic(jesLow)
-    meffTR_Mu.addSystematic(jesMedium)
-    meffTR_Mu.addSystematic(jesHigh)
-    meffTR_Mu.addSystematic(lepTR)
-    meffTR_Mu.addSystematic(btagTR)
-    if fullSyst:
-        meffTR_Mu.addSystematic(metcoTR)
-        meffTR_Mu.addSystematic(metpuTR)
-        meffTR_Mu.addSystematic(trigTR)
-        meffTR_Mu.addSystematic(lesTR)
-        meffTR_Mu.addSystematic(lermsTR)
-        meffTR_Mu.addSystematic(leridTR)    
 
     # S2 using meff
     meff2ee = bkgOnly.addChannel("meffInc",["S2ee"],meffNBins,meffBinLow,meffBinHigh)
@@ -993,7 +1014,7 @@ if doValidationSR:
         meffS4_Mu.addSystematic(leridS4)
 
 
-    meffS3T_El=bkgOnly.addChannel("meffInc",["SR3jTEl"],1,meffBinLowHL,meffBinHighHL)
+    meffS3T_El=bkgOnly.addChannel("meffInc",["SR3jTEl"],1,1200,meffBinHighHL)
     meffS3T_El.useOverflowBin = True
     meffS3T_El.addSystematic(jesLow)
     meffS3T_El.addSystematic(jesMedium)
@@ -1008,7 +1029,7 @@ if doValidationSR:
         meffS3T_El.addSystematic(leridS3T)
 
 
-    meffS3T_Mu=bkgOnly.addChannel("meffInc",["SR3jTMu"],1,meffBinLowHL,meffBinHighHL)
+    meffS3T_Mu=bkgOnly.addChannel("meffInc",["SR3jTMu"],1,1200,meffBinHighHL)
     meffS3T_Mu.useOverflowBin = True
     meffS3T_Mu.addSystematic(jesLow)
     meffS3T_Mu.addSystematic(jesMedium)
@@ -1023,7 +1044,7 @@ if doValidationSR:
         meffS3T_Mu.addSystematic(leridS3T)   
 
 
-    meffS4T_El=bkgOnly.addChannel("meffInc",["SR4jTEl"],1,meffBinLowHL,meffBinHighHL)
+    meffS4T_El=bkgOnly.addChannel("meffInc",["SR4jTEl"],800,meffBinHighHL)
     meffS4T_El.useOverflowBin = True
     meffS4T_El.addSystematic(jesLow)
     meffS4T_El.addSystematic(jesMedium)
@@ -1038,7 +1059,7 @@ if doValidationSR:
         meffS4T_El.addSystematic(leridS4T)
 
 
-    meffS4T_Mu=bkgOnly.addChannel("meffInc",["SR4jTMu"],1,meffBinLowHL,meffBinHighHL)
+    meffS4T_Mu=bkgOnly.addChannel("meffInc",["SR4jTMu"],1,800,meffBinHighHL)
     meffS4T_Mu.useOverflowBin = True
     meffS4T_Mu.addSystematic(jesLow)
     meffS4T_Mu.addSystematic(jesMedium)
@@ -1051,9 +1072,145 @@ if doValidationSR:
         meffS4T_Mu.addSystematic(lesS4T)
         meffS4T_Mu.addSystematic(lermsS4T)
         meffS4T_Mu.addSystematic(leridS4T)
-            
+
+
+    meffS7T_El=bkgOnly.addChannel("meffInc",["SR7jTEl"],1,750,meffBinHighHL)
+    meffS7T_El.useOverflowBin = True
+    meffS7T_El.addSystematic(jesLow)
+    meffS7T_El.addSystematic(jesMedium)
+    meffS7T_El.addSystematic(jesHigh)
+    meffS7T_El.addSystematic(lepS4T)
+    if fullSyst:
+        meffS7T_El.addSystematic(metcoS4T)
+        meffS7T_El.addSystematic(metpuS4T)
+        meffS7T_El.addSystematic(trigS4T)
+        meffS7T_El.addSystematic(lesS4T)
+        meffS7T_El.addSystematic(lermsS4T)
+        meffS7T_El.addSystematic(leridS4T)
+
+
+    meffS7T_Mu=bkgOnly.addChannel("meffInc",["SR7jTMu"],1,750,meffBinHighHL)
+    meffS7T_Mu.useOverflowBin = True
+    meffS7T_Mu.addSystematic(jesLow)
+    meffS7T_Mu.addSystematic(jesMedium)
+    meffS7T_Mu.addSystematic(jesHigh)
+    meffS7T_Mu.addSystematic(lepS4T)
+    if fullSyst:
+        meffS7T_Mu.addSystematic(metcoS4T)
+        meffS7T_Mu.addSystematic(metpuS4T)
+        meffS7T_Mu.addSystematic(trigS4T)
+        meffS7T_Mu.addSystematic(lesS4T)
+        meffS7T_Mu.addSystematic(lermsS4T)
+        meffS7T_Mu.addSystematic(leridS4T)      
+                
+                     
+meffNBins = 1
+#    meffBinLow = 400.
+meffBinLow = 0.
+meffBinHigh = 1600.
+
+meffNBinsHL = 6
+meffBinLowHL = 400.
+#meffBinLow = 0.
+meffBinHighHL = 1600.
+
+
+meffNBinsTR = 20
+meffBinLowTR = 0.
+#meffBinLow = 0.
+meffBinHighTR = 2000.
+
+metNBinsTR = 40
+metBinLowTR = 0.
+#meffBinLow = 0.
+metBinHighTR = 800.
+
+
+pt1NBinsTR = 40
+pt1BinLowTR = 0.
+#meffBinLow = 0.
+pt1BinHighTR = 800.
+
+
+pt2NBinsTR = 40
+pt2BinLowTR = 0.
+#meffBinLow = 0.
+pt2BinHighTR = 800.
+
+if doValidationSlope:
+
+    metWR_El=bkgOnly.addChannel("met",["WRElVR"],metNBinsTR,metBinLowTR,metBinHighTR)
+    metWR_El.useOverflowBin = True
+    metWR_El.addSystematic(jesLow)
+    metWR_El.addSystematic(jesMedium)
+    metWR_El.addSystematic(jesHigh)
+    metWR_El.addSystematic(lepTR)
+    metWR_El.addSystematic(btagTR)
+    if fullSyst:
+        metWR_El.addSystematic(metcoTR)
+        metWR_El.addSystematic(metpuTR)
+        metWR_El.addSystematic(trigTR)
+        metWR_El.addSystematic(lesTR)
+        metWR_El.addSystematic(lermsTR)
+        metWR_El.addSystematic(leridTR)
+
+
+    metWR_Mu=bkgOnly.addChannel("met",["WRMuVR"],metNBinsTR,metBinLowTR,metBinHighTR)
+    metWR_Mu.useOverflowBin = True
+    metWR_Mu.addSystematic(jesLow)
+    metWR_Mu.addSystematic(jesMedium)
+    metWR_Mu.addSystematic(jesHigh)
+    metWR_Mu.addSystematic(lepTR)
+    metWR_Mu.addSystematic(btagTR)
+    if fullSyst:
+        metWR_Mu.addSystematic(metcoTR)
+        metWR_Mu.addSystematic(metpuTR)
+        metWR_Mu.addSystematic(trigTR)
+        metWR_Mu.addSystematic(lesTR)
+        metWR_Mu.addSystematic(lermsTR)
+        metWR_Mu.addSystematic(leridTR)       
+
+    wptWR_El=bkgOnly.addChannel("Wpt",["WRElVR"],metNBinsTR,metBinLowTR,metBinHighTR)
+    wptWR_El.useOverflowBin = True
+    wptWR_El.addSystematic(jesLow)
+    wptWR_El.addSystematic(jesMedium)
+    wptWR_El.addSystematic(jesHigh)
+    wptWR_El.addSystematic(lepTR)
+    wptWR_El.addSystematic(btagTR)
+    if fullSyst:
+        wptWR_El.addSystematic(metcoTR)
+        wptWR_El.addSystematic(metpuTR)
+        wptWR_El.addSystematic(trigTR)
+        wptWR_El.addSystematic(lesTR)
+        wptWR_El.addSystematic(lermsTR)
+        wptWR_El.addSystematic(leridTR)
+
+
+    wptWR_Mu=bkgOnly.addChannel("Wpt",["WRMuVR"],metNBinsTR,metBinLowTR,metBinHighTR)
+    wptWR_Mu.useOverflowBin = True
+    wptWR_Mu.addSystematic(jesLow)
+    wptWR_Mu.addSystematic(jesMedium)
+    wptWR_Mu.addSystematic(jesHigh)
+    wptWR_Mu.addSystematic(lepTR)
+    wptWR_Mu.addSystematic(btagTR)
+    if fullSyst:
+        wptWR_Mu.addSystematic(metcoTR)
+        wptWR_Mu.addSystematic(metpuTR)
+        wptWR_Mu.addSystematic(trigTR)
+        wptWR_Mu.addSystematic(lesTR)
+        wptWR_Mu.addSystematic(lermsTR)
+        wptWR_Mu.addSystematic(leridTR)
+
+
+if doValidationSR and not doValidationSlope:
+    bkgOnly.setValidationChannels([meff2ee,meff4ee,meff2em,meff4em,meff2mm,meff4mm,meffS3_El,meffS3_Mu,meffS4_El,meffS4_Mu,meffS3T_El,meffS3T_Mu,meffS4T_El,meffS4T_Mu,meffS7T_El,meffS7T_Mu])
+
+if doValidationSlope and not doValidationSR:
+    bkgOnly.setValidationChannels([meffTR_El,meffTR_Mu,metWR_El,metWR_Mu,wptWR_El,wptWR_Mu])    
+
+if doValidationSlope and doValidationSR:
+    bkgOnly.setValidationChannels([meffTR_El,meffTR_Mu,metWR_El,metWR_Mu,wptWR_El,wptWR_Mu,meff2ee,meff4ee,meff2em,meff4em,meff2mm,meff4mm,meffS3_El,meffS3_Mu,meffS4_El,meffS4_Mu,meffS3T_El,meffS3T_Mu,meffS4T_El,meffS4T_Mu,meffS7T_El,meffS7T_Mu])    
         
-    bkgOnly.setValidationChannels([meff2ee,meff4ee,meff2em,meff4em,meff2mm,meff4mm,meffS3_El,meffS3_Mu,meffS4_El,meffS4_Mu,meffS3T_El,meffS3T_Mu,meffS4T_El,meffS4T_Mu,meffTR_El,meffTR_Mu])
 
 #-------------------------------------------------
 # Exclusion fit
