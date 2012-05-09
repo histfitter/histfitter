@@ -19,7 +19,7 @@ useStat=True
 doValidation=False
 doValidationSR=False
 
-doExclusion_GMSB_combined=True
+doExclusion_GMSB_combined=False
 doExclusion_mSUGRA_dilepton_combined=False
 doExclusion_GG_twostepCC_slepton=False
 
