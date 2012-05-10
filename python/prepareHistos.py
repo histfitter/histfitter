@@ -23,7 +23,7 @@ class PrepareHistosABC(object):
         self.histList = []
         self.nameList = []
 
-    def read(self,rootName,fileList,channelName='',sampleName='',systName=''):
+    def read(self,rootName,fileList):
         """
         Read in the root object that will make histograms
         """
@@ -72,15 +72,29 @@ class TreePrepare(PrepareHistosABC):
     Supports merging of multiple input files
     """
 
-    def read(self,chainName,fileList,channelName='',sampleName='',systName=''):
+    def read(self,treeName,fileList):
         """
         Set the chain name and add input files
         """
-        self.configMgr.chains[chainName] = TChain(chainName)
-        self.currentChainName = chainName
+        if treeName=='':
+            raise Exception("Empty tree name provided for reading input root files.")
+
+        #self.configMgr.chains[treeName] = TChain(treeName)
+        #self.currentChainName = treeName
+        #for fileName in fileList:
+        #    self.configMgr.chains[self.currentChainName].Add(fileName)
+
+        chainID = treeName
+        for fileName in fileList: chainID += '_' +fileName
+
+        #print 'GREPME chain ID = ', chainID
+
+        #if not self.configMgr.chains.has_key(chainID):
+        self.configMgr.chains[chainID] = TChain(treeName)
+        self.currentChainName = chainID
         for fileName in fileList:
             self.configMgr.chains[self.currentChainName].Add(fileName)
-
+        return
 
     def addHisto(self,name,nBins=0,binLow=0.,binHigh=0.,nBinsY=0,binLowY=0.,binHighY=0.,useOverflow=False,useUnderflow=False):
         """
@@ -286,7 +300,7 @@ class HistoPrepare(PrepareHistosABC):
             self.recreate=True
         return
 
-    def read(self,name,fileList,channelName='',sampleName='',systName=''):
+    def read(self,name,fileList):
         print "HistoPrepare " + str(fileList)
         """
         Get the histogram from the file
