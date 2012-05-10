@@ -283,6 +283,40 @@ class ConfigManager(object):
                 cppTl.m_validationChannels.push_back(cName)
             for cName in tl.bkgConstrainChannels:
                 cppTl.m_bkgConstrainChannels.push_back(cName)
+           
+            # Plot cosmetics per TopLevelXML (FitConfig in C++)
+            cppTl.m_dataColor = tl.dataColor
+            cppTl.m_totalPdfColor = tl.totalPdfColor
+            cppTl.m_errorLineColor = tl.errorLineColor
+            cppTl.m_errorLineStyle = tl.errorLineStyle
+            cppTl.m_errorFillColor = tl.errorFillColor
+            cppTl.m_errorFillStyle = tl.errorFillStyle
+            if not tl.tLegend == None:
+                cppTl.m_legend = tl.tLegend
+
+            # Plot cosmetics per channel
+            for c in tl.channels:
+                 cppTl.m_channels.push_back(c.channelName)
+                 cppTl.m_channelsNBins.push_back(c.nBins)
+                 if not c.minY == None:
+                     cppTl.m_channelsMinY.push_back(c.minY)
+                 if not c.maxY == None:
+                   cppTl.m_channelsMaxY.push_back(c.maxY)
+                 if not c.titleX == None:
+                     cppTl.m_channelsTitleX.push_back(c.titleX)
+                 if not c.titleY == None:
+                     cppTl.m_channelsTitleY.push_back(c.titleY)
+                 if not c.logY == None:
+                     cppTl.m_channelsLogY.push_back(c.logY)
+                 if not c.ATLASLabelX == None:
+                     cppTl.m_channelsATLASLabelX.push_back(c.ATLASLabelX)
+                 if not c.ATLASLabelY == None:
+                     cppTl.m_channelsATLASLabelY.push_back(c.ATLASLabelY)
+                 if not c.ATLASLabelX == None:
+                     cppTl.m_channelsATLASLabelText.push_back(c.ATLASLabelText)
+                 if not c.showLumi == None:
+                     cppTl.m_channelsShowLumi.push_back(c.showLumi)
+                     
 
         self.cppMgr.checkConsistency()
         self.cppMgr.initialize()

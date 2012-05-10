@@ -10,16 +10,21 @@
 ## For the real complete implementation, see: python/MyOneLeptonKtScaleFit_mergerSoftLep.py
 
 from configManager import configMgr
-from ROOT import kBlack,kWhite,kGray,kRed,kPink,kMagenta,kViolet,kBlue,kAzure,kCyan,kTeal,kGreen,kSpring,kYellow,kOrange
+from ROOT import kBlack,kWhite,kGray,kRed,kPink,kMagenta,kViolet,kBlue,kAzure,kCyan,kTeal,kGreen,kSpring,kYellow,kOrange,kDashed,kSolid,kDotted
 from configWriter import TopLevelXML,Measurement,ChannelXML,Sample
 from systematic import Systematic
 from math import sqrt
 
-from ROOT import gROOT
+from ROOT import gROOT, TLegend, TLegendEntry, TCanvas
 gROOT.LoadMacro("./macros/AtlasStyle.C")
 import ROOT
 ROOT.SetAtlasStyle()
 
+#---------------------------------------------------------------------------------------------
+# Some flags for overridding normal execution and telling ROOT to shut up... use with caution!
+#---------------------------------------------------------------------------------------------
+#gROOT.ProcessLine("gErrorIgnoreLevel=10001;")
+#configMgr.plotHistos = True
 
 #---------------------------------------
 # Flags to control which fit is executed
@@ -101,6 +106,7 @@ wzKtScale = Systematic("KtScaleWZ",configMgr.weights,ktScaleWHighWeights,ktScale
 # JES uncertainty as shapeSys - one systematic per region (combine WR and TR), merge samples
 jes = Systematic("JC","_NoSys","_JESup","_JESdown","tree","shapeSys")
 
+# name of nominal histogram for systematics
 configMgr.nomName = "_NoSys"
 
 # List of samples and their plotting colours
@@ -119,6 +125,8 @@ qcdSample.setStatConfig(useStat)
 dataSample = Sample("Data",kBlack)
 dataSample.setData()
 
+
+# set the file from which the samples should be taken
 for sam in [topSample, wzSample, bgSample, qcdSample, dataSample]:
         sam.setFileList(bgdFiles)
 
@@ -159,7 +167,7 @@ else:
     bkt.statErrThreshold=None
 bkt.addSamples([topSample,wzSample,qcdSample,bgSample,dataSample])
 
-# Systematics to a applied globally within this topLevel
+# Systematics to be applied globally within this topLevel
 bkt.getSample("Top").addSystematic(topKtScale)
 bkt.getSample("WZ").addSystematic(wzKtScale)
 
@@ -189,6 +197,77 @@ nJetTS.addSystematic(jes)
 
 bkt.setBkgConstrainChannels([nJetWS,nJetTS])
 
+
+###################
+#                                               #
+#    Example new cosmetics     #
+#                                               #
+###################
+
+# Set global plotting colors/styles
+bkt.dataColor = dataSample.color
+bkt.totalPdfColor = kBlue
+bkt.errorFillColor = kBlue-5
+bkt.errorFillStyle = 3004
+bkt.errorLineStyle = kDashed
+bkt.errorLineColor = kBlue-5
+
+# Set Channel titleX, titleY, minY, maxY, logY
+nJetWS.minY = 0.5
+nJetWS.maxY = 5000
+nJetWS.titleX = "n jets"
+nJetWS.titleY = "Entries"
+nJetWS.logY = True
+nJetWS.ATLASLabelX = 0.25
+nJetWS.ATLASLabelY = 0.85
+nJetWS.ATLASLabelText = "Work in progress"
+
+
+# Create TLegend (AK: TCanvas is needed for that, but it gets deleted afterwards)
+c = TCanvas()
+compFillStyle = 1001 # see ROOT for Fill styles
+leg = TLegend(0.6,0.475,0.9,0.925,"")
+leg.SetFillStyle(0)
+leg.SetFillColor(0)
+leg.SetBorderSize(0)
+#
+entry = TLegendEntry()
+entry = leg.AddEntry("","Data 2011 (#sqrt{s}=7 TeV)","p") 
+entry.SetMarkerColor(bkt.dataColor)
+entry.SetMarkerStyle(20)
+#
+entry = leg.AddEntry("","Total pdf","lf") 
+entry.SetLineColor(bkt.totalPdfColor)
+entry.SetLineWidth(2)
+entry.SetFillColor(bkt.errorFillColor)
+entry.SetFillStyle(bkt.errorFillStyle)
+#
+entry = leg.AddEntry("","t#bar{t}","lf") 
+entry.SetLineColor(topSample.color)
+entry.SetFillColor(topSample.color)
+entry.SetFillStyle(compFillStyle)
+#
+entry = leg.AddEntry("","WZ","lf") 
+entry.SetLineColor(wzSample.color)
+entry.SetFillColor(wzSample.color)
+entry.SetFillStyle(compFillStyle)
+#
+entry = leg.AddEntry("","multijets (data estimate)","lf") 
+entry.SetLineColor(qcdSample.color)
+entry.SetFillColor(qcdSample.color)
+entry.SetFillStyle(compFillStyle)
+#
+entry = leg.AddEntry("","single top & diboson","lf") 
+entry.SetLineColor(bgSample.color)
+entry.SetFillColor(bgSample.color)
+entry.SetFillStyle(compFillStyle)
+
+# Set legend for TopLevelXML
+bkt.tLegend = leg
+c.Close()
+
+
+
 #--------------------------------------------------------------
 # Validation regions - not necessarily statistically independent
 #--------------------------------------------------------------
@@ -198,37 +277,38 @@ if doValidation:
     srs1l2jTChannel = bkt.addChannel("cuts",["SR1sl2j"],srNBins,srBinLow,srBinHigh)
     srs1l2jTChannel.addSystematic(jes)
     [s.mergeSamples([topSample.name,wzSample.name,bgSample.name]) for s in srs1l2jTChannel.getSystematic(jes.name)]
-
+    
     # additional VRs if using soft lep CRs
     nJetSLVR2 = bkt.addChannel("nJet",["SLVR2"],nJetBinHighTR-nJetBinLowSoft,nJetBinLowSoft,nJetBinHighTR)
     nJetSLVR2.addSystematic(jes)
     [s.mergeSamples([topSample.name,wzSample.name,bgSample.name]) for s in nJetSLVR2.getSystematic(jes.name)]
-
-    nBJetSLVR2 = bkt.addChannel("nBJet",["SLVR2"],nBJetBinHigh-nBJetBinLow,nBJetBinLow,nBJetBinHigh)
-    nBJetSLVR2.addSystematic(jes)
-    [s.mergeSamples([topSample.name,wzSample.name,bgSample.name]) for s in nBJetSLVR2.getSystematic(jes.name)]
-        
-    meffSLVR2 = bkt.addChannel("meffInc",["SLVR2"],meffNBins,meffBinLow,meffBinHigh)
-    meffSLVR2.addSystematic(jes)
-    [s.mergeSamples([topSample.name,wzSample.name,bgSample.name]) for s in meffSLVR2.getSystematic(jes.name)]
-
-    metmeffSLVR2 = bkt.addChannel("met/meff2Jet",["SLVR2"],6,0.1,0.7)
-    metmeffSLVR2.addSystematic(jes)
-    [s.mergeSamples([topSample.name,wzSample.name,bgSample.name]) for s in metmeffSLVR2.getSystematic(jes.name)]
-
-    metSLVR2 = bkt.addChannel("met",["SLVR2"],7,180,250)
-    metSLVR2.addSystematic(jes)
-    [s.mergeSamples([topSample.name,wzSample.name,bgSample.name]) for s in metSLVR2.getSystematic(jes.name)]
-
+    
+##    nBJetSLVR2 = bkt.addChannel("nBJet",["SLVR2"],nBJetBinHigh-nBJetBinLow,nBJetBinLow,nBJetBinHigh)
+##     nBJetSLVR2.addSystematic(jes)
+##     [s.mergeSamples([topSample.name,wzSample.name,bgSample.name]) for s in nBJetSLVR2.getSystematic(jes.name)]
+    
+##     meffSLVR2 = bkt.addChannel("meffInc",["SLVR2"],meffNBins,meffBinLow,meffBinHigh)
+##     meffSLVR2.addSystematic(jes)
+##     [s.mergeSamples([topSample.name,wzSample.name,bgSample.name]) for s in meffSLVR2.getSystematic(jes.name)]
+    
+##    metmeffSLVR2 = bkt.addChannel("met/meff2Jet",["SLVR2"],6,0.1,0.7)
+##     metmeffSLVR2.addSystematic(jes)
+##     [s.mergeSamples([topSample.name,wzSample.name,bgSample.name]) for s in metmeffSLVR2.getSystematic(jes.name)]
+    
+ ##    metSLVR2 = bkt.addChannel("met",["SLVR2"],7,180,250)
+##     metSLVR2.addSystematic(jes)
+##     [s.mergeSamples([topSample.name,wzSample.name,bgSample.name]) for s in metSLVR2.getSystematic(jes.name)]
+    
     #signal region treated as validation region for this case
     mm2J = bkt.addChannel("met/meff2Jet",["SS"],6,0.1,0.7)
     mm2J.useOverflowBin=True
     mm2J.addSystematic(jes)
     [s.mergeSamples([topSample.name,wzSample.name,bgSample.name]) for s in mm2J.getSystematic(jes.name)]
- 
-    bkt.setValidationChannels([nJetSLVR2,metSLVR2,meffSLVR2,nBJetSLVR2,metmeffSLVR2,mm2J,srs1l2jTChannel])
-        
-
+    
+    #    bkt.setValidationChannels([nJetSLVR2,metSLVR2,meffSLVR2,nBJetSLVR2,metmeffSLVR2,mm2J,srs1l2jTChannel])
+    bkt.setValidationChannels([nJetSLVR2,srs1l2jTChannel,mm2J])
+   
+   
 
 
 #**************
@@ -238,7 +318,7 @@ if doValidation:
 if doDiscovery:
     discovery = configMgr.addTopLevelXMLClone(bkt,"Discovery")
     
-    # s1l2jT
+    # s1l2jT = signal region/channel
     ssChannel = discovery.addChannel("cuts",["SS"],srNBins,srBinLow,srBinHigh)
     ssChannel.addSystematic(jes)
     [s.mergeSamples([topSample.name,wzSample.name,bgSample.name]) for s in ssChannel.getSystematic(jes.name)]
@@ -279,4 +359,3 @@ if doExclusion:
             [s.mergeSamples([topSample.name,wzSample.name,bgSample.name,sigSample.name]) for s in mm2J.getSystematic(jes.name)]
             pass
         myTopLvl.setSignalChannels([mm2J])
-

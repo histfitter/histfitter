@@ -1,4 +1,5 @@
 from ROOT import TFile,TMath,RooRandom,TH1,TH1F
+from ROOT import kBlack,kWhite,kGray,kRed,kPink,kMagenta,kViolet,kBlue,kAzure,kCyan,kTeal,kGreen,kSpring,kYellow,kOrange,kDashed,kSolid,kDotted
 from os import system
 from math import fabs
 import generateToys
@@ -32,7 +33,16 @@ class TopLevelXML(object):
         self.systDict = {}
         self.files = []
         self.treeName = ''
-
+        # Plot cosmetics
+        self.dataColor=kBlack
+        self.totalPdfColor=kBlue
+        self.errorLineColor=kBlue-5
+        self.errorLineStyle=kSolid
+        self.errorFillColor=kBlue-5
+        self.errorFillStyle=3004
+        self.setLogy = False
+        self.tLegend = None
+        
     def Clone(self,newName=""):
         if newName=="":
             newName=self.name
@@ -457,6 +467,16 @@ class ChannelXML(object):
             self.statErrorType = "Poisson"
         self.files = []
         self.treeName = ''
+        # Plot cosmetics
+        self.minY = None
+        self.maxY = None
+        self.titleX = None
+        self.titleY = None
+        self.logY = None
+        self.ATLASLabelX = None
+        self.ATLASLabelY = None
+        self.ATLASLabelText = None
+        self.showLumi = None
         return
 
     def initialize(self):
