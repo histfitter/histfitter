@@ -388,7 +388,8 @@ class ConfigManager(object):
                     for sysList in sample.systDict:
                         for sys in sample.systDict[sysList]:
                             print "                                      ---------> Systematic: " + sys.name
-                            print "                                                 " + str(sys.files)
+                            print "                                                 Low : " + str(sys.filesLo)
+                            print "                                                 High: " + str(sys.filesHi)
         return
 
     def printTreeNames(self):
@@ -406,8 +407,8 @@ class ConfigManager(object):
                     for sysList in sample.systDict:
                         for sys in sample.systDict[sysList]:
                             print "                                      ---------> Systematic: " + sys.name
-                            print "                                                 " + str(sys.treeLoName)
-                            print "                                                 " + str(sys.treeHiName)
+                            print "                                                 Low : " + str(sys.treeLoName)
+                            print "                                                 High: " + str(sys.treeHiName)
         return
 
     def setVerbose(self,lvl):
@@ -616,8 +617,8 @@ class ConfigManager(object):
                                     self.prepare.weights += (" * "+self.weights[-1])
                                 if self.readFromTree:
                                     # if the systematic has a dedicated file list - use it
-                                    if sam.name in syst.files:
-                                        filelist = syst.files[sam.name]
+                                    if sam.name in syst.filesHi:
+                                        filelist = syst.filesHi[sam.name]
                                     else:
                                         # otherwise - take the sample file list
                                         filelist = sam.files
@@ -672,8 +673,8 @@ class ConfigManager(object):
                                     self.prepare.weights += (" * "+self.weights[-1])
                                 if self.readFromTree:
                                     # if the systematic has a dedicated file list - use it
-                                    if sam.name in syst.files:
-                                        filelist = syst.files[sam.name]
+                                    if sam.name in syst.filesLo:
+                                        filelist = syst.filesLo[sam.name]
                                     else:
                                         # otherwise - take the sample file list
                                         filelist = sam.files

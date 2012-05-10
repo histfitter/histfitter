@@ -11,7 +11,8 @@ class Systematic:
         self.sampleList = []
         self.merged = False
         self.nFound = 0
-        self.files = {}
+        self.filesHi = {}
+        self.filesLo = {}
         self.treeLoName = {}
         self.treeHiName = {}
 
@@ -53,13 +54,20 @@ class Systematic:
         """
         Set file list for this Systematic directly
         """
-        self.files[sample] = filelist
+        self.filesLo[sample] = filelist
+        self.filesHi[sample] = filelist
 
     def setFile(self,sample,file):
         """
         Set a file for this Systematic directly
         """
-        self.files[sample] = [file]
+        self.filesLo[sample] = [file]
+        self.filesHi[sample] = [file]
+
+    def setTreeName(self,sampleName,treeName):
+        self.treeLoName[sampleName] = treeName
+        self.treeHiName[sampleName] = treeName
+        return
 
     def setLoTreeName(self,sampleName,treeName):
         self.treeLoName[sampleName] = treeName
@@ -69,3 +77,17 @@ class Systematic:
         self.treeHiName[sampleName] = treeName
         return
 
+    def setHiFileList(self,sample,filelist):
+        """
+        Set file list for this Systematic directly
+        """
+        self.filesHi[sample] = filelist
+        return
+
+    def setLoFileList(self,sample,filelist):
+        """
+        Set file list for this Systematic directly
+        """
+        self.filesLo[sample] = filelist
+        return
+    
