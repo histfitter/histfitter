@@ -625,9 +625,9 @@ class ConfigManager(object):
                                     if sam.name in syst.treeHiName:
                                         treeName = syst.treeHiName[sam.name]
                                     else:
-                                        # otherwise - take the sample file list
-                                        treeName = sam.treeName+syst.high
-                                    if treeName==syst.high: treeName = sam.name+syst.high
+                                        # otherwise - take the default tree name for the sample 
+                                        treeName = sam.treeName
+                                    if treeName=='': treeName = sam.name+syst.high
                                     self.prepare.read(treeName, filelist)
                             elif syst.type == "user":
                                 for weight in self.weights[:-1]:
@@ -681,9 +681,9 @@ class ConfigManager(object):
                                     if sam.name in syst.treeLoName:
                                         treeName = syst.treeLoName[sam.name]
                                     else:
-                                        # otherwise - take the sample file list
-                                        treeName = sam.treeName+syst.low
-                                    if treeName==syst.low: treeName = sam.name+syst.low
+                                        # otherwise - take default tree name for the sample
+                                        treeName = sam.treeName
+                                    if treeName=='': treeName = sam.name+syst.low
                                     self.prepare.read(treeName, filelist)
                             elif syst.type == "user":
                                 for weight in self.weights[:-1]:
