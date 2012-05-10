@@ -678,6 +678,7 @@ class Sample(object):
         self.cutsDict = {}
         self.files = []
         self.treeName = ''
+        self.weight = 1.0
 
     def buildHisto(self,binValues,region,var):
         """
@@ -735,7 +736,10 @@ class Sample(object):
         self.isData = isData
         return
 
-
+    def setWeight(self,weight=1.0):
+        self.weight = weight
+        return
+        
     def setQCD(self,isQCD=True,qcdSyst="uncorr"):
         self.isQCD = isQCD
         self.qcdSyst = qcdSyst

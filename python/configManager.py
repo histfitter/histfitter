@@ -541,7 +541,7 @@ class ConfigManager(object):
 
                 # Set the weights
                 if not sam.isData and not sam.isQCD:
-                    self.prepare.weights = str(self.lumiUnits*self.outputLumi/self.inputLumi)
+                    self.prepare.weights = str(self.lumiUnits*self.outputLumi/self.inputLumi) + " * " + str(sam.weight)
                     for weight in self.weights[:-1]:
                         self.prepare.weights += (" * "+weight)
                     if chan.hasB:
@@ -600,7 +600,7 @@ class ConfigManager(object):
                     for (systName,systList) in chan.getSample(sam.name).systDict.items():
                         print "    Systematic: %s"%(systName)
                         for syst in systList:
-                            self.prepare.weights = str(self.lumiUnits*self.outputLumi/self.inputLumi)
+                            self.prepare.weights = str(self.lumiUnits*self.outputLumi/self.inputLumi) + " * " + str(sam.weight)
                             if syst.type == "weight":
                                 for weight in syst.high[:-1]:
                                     self.prepare.weights += (" * "+weight)
@@ -656,7 +656,7 @@ class ConfigManager(object):
                                         self.hists["h"+sam.name+syst.name+"High_"+normString+"Norm"] = None
                                         self.prepare.addHisto("h"+sam.name+syst.name+"High_"+normString+"Norm")
 
-                            self.prepare.weights = str(self.lumiUnits*self.outputLumi/self.inputLumi)
+                            self.prepare.weights = str(self.lumiUnits*self.outputLumi/self.inputLumi) + " * " + str(sam.weight)
                             if syst.type == "weight":
                                 for weight in syst.low[:-1]:
                                     self.prepare.weights += (" * "+weight)
