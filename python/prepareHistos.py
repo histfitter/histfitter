@@ -79,21 +79,18 @@ class TreePrepare(PrepareHistosABC):
         if treeName=='':
             raise Exception("Empty tree name provided for reading input root files.")
 
-        #self.configMgr.chains[treeName] = TChain(treeName)
-        #self.currentChainName = treeName
-        #for fileName in fileList:
-        #    self.configMgr.chains[self.currentChainName].Add(fileName)
-
         chainID = treeName
         for fileName in fileList: chainID += '_' +fileName
-
+        self.currentChainName = chainID
+        
         #print 'GREPME chain ID = ', chainID
 
-        #if not self.configMgr.chains.has_key(chainID):
-        self.configMgr.chains[chainID] = TChain(treeName)
-        self.currentChainName = chainID
-        for fileName in fileList:
-            self.configMgr.chains[self.currentChainName].Add(fileName)
+        ## MB : no need to recreate chain if it already exists
+        if not self.configMgr.chains.has_key(chainID):
+            self.configMgr.chains[chainID] = TChain(treeName)
+            for fileName in fileList:
+                self.configMgr.chains[self.currentChainName].Add(fileName)
+
         return
 
     def addHisto(self,name,nBins=0,binLow=0.,binHigh=0.,nBinsY=0,binLowY=0.,binHighY=0.,useOverflow=False,useUnderflow=False):
