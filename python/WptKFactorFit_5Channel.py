@@ -24,6 +24,7 @@ doExclusion_GMSB_combined=False
 doExclusion_mSUGRA_dilepton_combined=False
 doExclusion_GG_twostepCC_slepton=False
 
+doSignalOnly=False #Remove all bkgs for signal histo creation step
 
 blindS=False
 fullSyst=True
@@ -537,6 +538,8 @@ WZList = ["WZpT0GeV_Np0","WZpT50GeV_Np0","WZpT100GeV_Np0","WZpT150GeV_Np0","WZpT
 BGList = WZList + ["Top_Np0","Top_Np1","Top_Np2","Top_Np3","Top_Np4","Top_Np5","BG"]
 
 
+if doSignalOnly:
+    BGList=[]
 
 ###### REGIONS AND BINNINGS ###########
 
@@ -613,6 +616,9 @@ ZpTBinHigh   = 500.1
 bkgOnly = configMgr.addTopLevelXML("bkgonly")
 bgdsamples=[qcdSample,bgSample,topSample_Np0,topSample_Np1,topSample_Np2,topSample_Np3,topSample_Np4,topSample_Np5,dataSample,wzSample_Np0_DpT0GeV,wzSample_Np0_DpT50GeV,wzSample_Np0_DpT100GeV,wzSample_Np0_DpT150GeV,wzSample_Np0_DpT200GeV,wzSample_Np0_DpT250GeV,wzSample_Np1_DpT0GeV,wzSample_Np1_DpT50GeV,wzSample_Np1_DpT100GeV,wzSample_Np1_DpT150GeV,wzSample_Np1_DpT200GeV,wzSample_Np1_DpT250GeV,wzSample_Np2_DpT0GeV,wzSample_Np2_DpT50GeV,wzSample_Np2_DpT100GeV,wzSample_Np2_DpT150GeV,wzSample_Np2_DpT200GeV,wzSample_Np2_DpT250GeV,wzSample_Np3_DpT0GeV,wzSample_Np3_DpT50GeV,wzSample_Np3_DpT100GeV,wzSample_Np3_DpT150GeV,wzSample_Np3_DpT200GeV,wzSample_Np3_DpT250GeV,wzSample_Np4_DpT0GeV,wzSample_Np4_DpT50GeV,wzSample_Np4_DpT100GeV,wzSample_Np4_DpT150GeV,wzSample_Np4_DpT200GeV,wzSample_Np4_DpT250GeV,wzSample_Np5_DpT0GeV,wzSample_Np5_DpT50GeV,wzSample_Np5_DpT100GeV,wzSample_Np5_DpT150GeV,wzSample_Np5_DpT200GeV,wzSample_Np5_DpT250GeV]
 
+if doSignalOnly:
+    bgdsamples=[]
+    
 for sam in bgdsamples:
     sam.setFileList(bgdFiles)
 
@@ -1237,6 +1243,8 @@ if doExclusion_GMSB_combined or doExclusion_mSUGRA_dilepton_combined or doExclus
             sigSample.addSystematic(xsecSig)
         myTopLvl.addSamples(sigSample)
         myTopLvl.setSignalSample(sigSample)
+
+        BGList+=[sig]
 
         S2Channel_ee = myTopLvl.addChannel("meffInc",["S2ee"],meffNBins,meffBinLow,meffBinHigh)
         S2Channel_ee.useOverflowBin=True
