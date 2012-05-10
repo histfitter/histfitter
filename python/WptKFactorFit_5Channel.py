@@ -1145,7 +1145,45 @@ pt2BinHighTR = 800.
 
 if doValidationSlope:
 
+        ## check impact of kfactor fit on several distributions
+
+    meffTR_El=bkgOnly.addChannel("meffInc",["TRElVR"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
+    meffTR_El.hasB = True
+    meffTR_El.hasBQCD = True
+    meffTR_El.useOverflowBin = True
+    meffTR_El.addSystematic(jesLow)
+    meffTR_El.addSystematic(jesMedium)
+    meffTR_El.addSystematic(jesHigh)
+    meffTR_El.addSystematic(lepTR)
+    meffTR_El.addSystematic(btagTR)
+    if fullSyst:
+        meffTR_El.addSystematic(metcoTR)
+        meffTR_El.addSystematic(metpuTR)
+        meffTR_El.addSystematic(trigTR)
+        meffTR_El.addSystematic(lesTR)
+        meffTR_El.addSystematic(lermsTR)
+        meffTR_El.addSystematic(leridTR)
+
+    meffTR_Mu=bkgOnly.addChannel("meffInc",["TRMuVR"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
+    meffTR_Mu.hasB = True
+    meffTR_Mu.hasBQCD = True
+    meffTR_Mu.useOverflowBin = True
+    meffTR_Mu.addSystematic(jesLow)
+    meffTR_Mu.addSystematic(jesMedium)
+    meffTR_Mu.addSystematic(jesHigh)
+    meffTR_Mu.addSystematic(lepTR)
+    meffTR_Mu.addSystematic(btagTR)
+    if fullSyst:
+        meffTR_Mu.addSystematic(metcoTR)
+        meffTR_Mu.addSystematic(metpuTR)
+        meffTR_Mu.addSystematic(trigTR)
+        meffTR_Mu.addSystematic(lesTR)
+        meffTR_Mu.addSystematic(lermsTR)
+        meffTR_Mu.addSystematic(leridTR)
+
     metWR_El=bkgOnly.addChannel("met",["WRElVR"],metNBinsTR,metBinLowTR,metBinHighTR)
+    metWR_El.hasB = True
+    metWR_El.hasBQCD = False
     metWR_El.useOverflowBin = True
     metWR_El.addSystematic(jesLow)
     metWR_El.addSystematic(jesMedium)
@@ -1162,6 +1200,8 @@ if doValidationSlope:
 
 
     metWR_Mu=bkgOnly.addChannel("met",["WRMuVR"],metNBinsTR,metBinLowTR,metBinHighTR)
+    metWR_Mu.hasB = True
+    metWR_Mu.hasBQCD = False
     metWR_Mu.useOverflowBin = True
     metWR_Mu.addSystematic(jesLow)
     metWR_Mu.addSystematic(jesMedium)
@@ -1177,6 +1217,8 @@ if doValidationSlope:
         metWR_Mu.addSystematic(leridTR)       
 
     wptWR_El=bkgOnly.addChannel("Wpt",["WRElVR"],metNBinsTR,metBinLowTR,metBinHighTR)
+    wptWR_El.hasB = True
+    wptWR_El.hasBQCD = False
     wptWR_El.useOverflowBin = True
     wptWR_El.addSystematic(jesLow)
     wptWR_El.addSystematic(jesMedium)
@@ -1193,6 +1235,8 @@ if doValidationSlope:
 
 
     wptWR_Mu=bkgOnly.addChannel("Wpt",["WRMuVR"],metNBinsTR,metBinLowTR,metBinHighTR)
+    wptWR_Mu.hasB = True
+    wptWR_Mu.hasBQCD = False
     wptWR_Mu.useOverflowBin = True
     wptWR_Mu.addSystematic(jesLow)
     wptWR_Mu.addSystematic(jesMedium)
