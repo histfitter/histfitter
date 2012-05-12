@@ -103,16 +103,16 @@ configMgr.cutsDict = {"TRee":"(mll<80 || mll>100) && met > 30 && met < 80 && jet
                       "VZR4em":"met > 50 && met < 100 & jet4Pt > 50 && nB3Jet == 0 && AnalysisType==5",
                       "VZR4mm":"met > 50 && met < 100 & jet4Pt > 50  && nB3Jet == 0 && AnalysisType==4",
 
-                      "WREl":"lep2Pt<10 && met>30 && met<120 && mt>40 && mt<80 && nB3Jet==0 && jet1Pt>80 && jet3Pt>25 && meffInc > 400 && AnalysisType==1",
-                      "TREl":"lep2Pt<10 && met>30 && met<120 && mt>40 && mt<80 && nB3Jet>0 && jet1Pt>80 && jet3Pt>25 && meffInc > 400 && AnalysisType==1",
-                      "WRMu":"lep2Pt<10 && met>30 && met<120 && mt>40 && mt<80 && nB3Jet==0 && jet1Pt>80 && jet3Pt>25 && meffInc > 400 && AnalysisType==2",
-                      "TRMu":"lep2Pt<10 && met>30 && met<120 && mt>40 && mt<80 && nB3Jet>0 && jet1Pt>80 && jet3Pt>25 && meffInc > 400 && AnalysisType==2",
+                      "WREl":"lep2Pt<10 && met>40 && met<150 && mt>40 && mt<80 && nB3Jet==0 && jet1Pt>80 && jet3Pt>25 && meffInc > 500 && AnalysisType==1",
+                      "TREl":"lep2Pt<10 && met>40 && met<150 && mt>40 && mt<80 && nB3Jet>0 && jet1Pt>80 && jet3Pt>25 && meffInc > 500 && AnalysisType==1",
+                      "WRMu":"lep2Pt<10 && met>40 && met<150 && mt>40 && mt<80 && nB3Jet==0 && jet1Pt>80 && jet3Pt>25 && meffInc > 500 && AnalysisType==2",
+                      "TRMu":"lep2Pt<10 && met>40 && met<150 && mt>40 && mt<80 && nB3Jet>0 && jet1Pt>80 && jet3Pt>25 && meffInc > 500 && AnalysisType==2",
 
-                      "TRElVR":"lep2Pt<10 && met>30 && met<120 && mt>40 && mt<80 && nB3Jet>0 && jet1Pt>80 && jet3Pt>25 && AnalysisType==1",
-                      "TRMuVR":"lep2Pt<10 && met>30 && met<120 && mt>40 && mt<80 && nB3Jet>0 && jet1Pt>80 && jet3Pt>25 && AnalysisType==2",
+                      "TRElVR":"lep2Pt<10 && met>40 && met<150 && mt>40 && mt<80 && nB3Jet>0 && jet1Pt>80 && jet3Pt>25 && AnalysisType==1",
+                      "TRMuVR":"lep2Pt<10 && met>40 && met<150 && mt>40 && mt<80 && nB3Jet>0 && jet1Pt>80 && jet3Pt>25 && AnalysisType==2",
 
-                      "WRElVR":"lep2Pt<10 && nB3Jet==0 && jet1Pt>80 && jet3Pt>25 && AnalysisType==1",
-                      "WRMuVR":"lep2Pt<10 && nB3Jet==0 && jet1Pt>80 && jet3Pt>25 && AnalysisType==2",
+                      "WRElVR":"lep2Pt<10 && met>40 && nB3Jet==0 && jet1Pt>80 && jet3Pt>25 && AnalysisType==1",
+                      "WRMuVR":"lep2Pt<10 && met>40 && nB3Jet==0 && jet1Pt>80 && jet3Pt>25 && AnalysisType==2",
 
                       "S3El":"AnalysisType==1 && met>250 && mt>100 && met/meff3Jet>0.3 && jet1Pt>100 && jet3Pt>25 && jet4Pt<80",
                       "S4El":"AnalysisType==1 && met>250 && mt>100 && met/meff4Jet>0.2 && jet4Pt>80",
@@ -641,11 +641,11 @@ meas.addParamSetting("mu_WZ_Np1","const",1.0)
 
 
 # Fix Normfacors on mu_WZ_TrueZPt as determined by yuichi
-meas.addParamSetting("mu_WZ_pT0GeV","NOT const",1.00)
-meas.addParamSetting("mu_WZ_pT50GeV","NOT const",0.893)
-meas.addParamSetting("mu_WZ_pT100GeV","NOT const",0.866)
-meas.addParamSetting("mu_WZ_pT150GeV","NOT const",0.737)
-meas.addParamSetting("mu_WZ_pT200GeV","NOT const",0.772)
+meas.addParamSetting("mu_WZ_pT0GeV","const",1.00)
+meas.addParamSetting("mu_WZ_pT50GeV","const",0.893)
+meas.addParamSetting("mu_WZ_pT100GeV","const",0.866)
+meas.addParamSetting("mu_WZ_pT150GeV","const",0.737)
+meas.addParamSetting("mu_WZ_pT200GeV","const",0.772)
 
 
 #--------------------------------------------------------------
