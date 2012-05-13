@@ -2354,9 +2354,7 @@ if doExclusion_GMSB_combined or doExclusion_mSUGRA_dilepton_combined or doExclus
         S2Channel_ee = myTopLvl.addChannel("meffInc",["S2ee"],meffNBins,meffBinLow,meffBinHigh)
         S2Channel_ee.useOverflowBin=True
         
-        S2Channel_ee.getSample(sig).addSystematic(jesSignal)
-        
-        S2Channel_ee.addSystematic(lepS2DL)
+        [S2Channel_ee.getSample(sam).addSystematic(lepS2DL) for sam in SigList+BGList]
         [S2Channel_ee.getSample(sam).addSystematic(zpT0GeV) for sam in BGList]
         [S2Channel_ee.getSample(sam).addSystematic(zpT50GeV) for sam in BGList]
         [S2Channel_ee.getSample(sam).addSystematic(zpT100GeV) for sam in BGList]
@@ -2364,9 +2362,9 @@ if doExclusion_GMSB_combined or doExclusion_mSUGRA_dilepton_combined or doExclus
         [S2Channel_ee.getSample(sam).addSystematic(zpT200GeV) for sam in BGList]
 
         if fullSyst:
-            S2Channel_ee.addSystematic(metcoS2DL)
-            S2Channel_ee.addSystematic(metpuS2DL)
-            S2Channel_ee.addSystematic(trigS2DL)
+            [S2Channel_ee.getSample(sam).addSystematic(metcoS2DL) for sam in SigList+BGList]
+            [S2Channel_ee.getSample(sam).addSystematic(metpuS2DL) for sam in SigList+BGList]
+            [S2Channel_ee.getSample(sam).addSystematic(trigS2DL) for sam in SigList+BGList]
             [S2Channel_ee.getSample(sam).addSystematic(lesS2DL) for sam in SigList+BGList]
             [S2Channel_ee.getSample(sam).addSystematic(lermsS2DL) for sam in SigList+BGList]
             [S2Channel_ee.getSample(sam).addSystematic(leridS2DL) for sam in SigList+BGList]
@@ -2377,19 +2375,17 @@ if doExclusion_GMSB_combined or doExclusion_mSUGRA_dilepton_combined or doExclus
         S2Channel_em = myTopLvl.addChannel("meffInc",["S2em"],meffNBins,meffBinLow,meffBinHigh)
         S2Channel_em.useOverflowBin=True
 
-        S2Channel_em.getSample(sig).addSystematic(jesSignal)
-
         [S2Channel_em.getSample(sam).addSystematic(zpT0GeV) for sam in BGList]
         [S2Channel_em.getSample(sam).addSystematic(zpT50GeV) for sam in BGList]
         [S2Channel_em.getSample(sam).addSystematic(zpT100GeV) for sam in BGList]
         [S2Channel_em.getSample(sam).addSystematic(zpT150GeV) for sam in BGList]
         [S2Channel_em.getSample(sam).addSystematic(zpT200GeV) for sam in BGList]
 
-        S2Channel_em.addSystematic(lepS2DL)
+        [S2Channel_em.getSample(sam).addSystematic(lepS2DL) for sam in SigList+BGList]
         if fullSyst:
-            S2Channel_em.addSystematic(metcoS2DL)
-            S2Channel_em.addSystematic(metpuS2DL)
-            S2Channel_em.addSystematic(trigS2DL)
+            [S2Channel_em.getSample(sam).addSystematic(metcoS2DL) for sam in SigList+BGList]
+            [S2Channel_em.getSample(sam).addSystematic(metpuS2DL) for sam in SigList+BGList]
+            [S2Channel_em.getSample(sam).addSystematic(trigS2DL) for sam in SigList+BGList]
             [S2Channel_em.getSample(sam).addSystematic(lesS2DL) for sam in SigList+BGList]
             [S2Channel_em.getSample(sam).addSystematic(lermsS2DL) for sam in SigList+BGList]
             [S2Channel_em.getSample(sam).addSystematic(leridS2DL) for sam in SigList+BGList]
@@ -2400,19 +2396,17 @@ if doExclusion_GMSB_combined or doExclusion_mSUGRA_dilepton_combined or doExclus
         S2Channel_mm = myTopLvl.addChannel("meffInc",["S2mm"],meffNBins,meffBinLow,meffBinHigh)
         S2Channel_mm.useOverflowBin=True
 
-        S2Channel_mm.getSample(sig).addSystematic(jesSignal)
-
         [S2Channel_mm.getSample(sam).addSystematic(zpT0GeV) for sam in BGList]
         [S2Channel_mm.getSample(sam).addSystematic(zpT50GeV) for sam in BGList]
         [S2Channel_mm.getSample(sam).addSystematic(zpT100GeV) for sam in BGList]
         [S2Channel_mm.getSample(sam).addSystematic(zpT150GeV) for sam in BGList]
         [S2Channel_mm.getSample(sam).addSystematic(zpT200GeV) for sam in BGList]
         
-        S2Channel_mm.addSystematic(lepS4DL)
+        [S2Channel_mm.getSample(sam).addSystematic(lepS4DL) for sam in SigList+BGList]
         if fullSyst:
-            S2Channel_mm.addSystematic(metcoS2DL)
-            S2Channel_mm.addSystematic(metpuS2DL)
-            S2Channel_mm.addSystematic(trigS2DL)
+            [S2Channel_mm.getSample(sam).addSystematic(metcoS2DL) for sam in SigList+BGList]
+            [S2Channel_mm.getSample(sam).addSystematic(metpuS2DL) for sam in SigList+BGList]
+            [S2Channel_mm.getSample(sam).addSystematic(trigS2DL) for sam in SigList+BGList]
             [S2Channel_mm.getSample(sam).addSystematic(lesS2DL) for sam in SigList+BGList]
             [S2Channel_mm.getSample(sam).addSystematic(lermsS2DL) for sam in SigList+BGList]
             [S2Channel_mm.getSample(sam).addSystematic(leridS2DL) for sam in SigList+BGList]
@@ -2425,9 +2419,7 @@ if doExclusion_GMSB_combined or doExclusion_mSUGRA_dilepton_combined or doExclus
         S4Channel_ee = myTopLvl.addChannel("meffInc",["S4ee"],meffNBins,meffBinLow,meffBinHigh)
         S4Channel_ee.useOverflowBin=True
         
-        S4Channel_ee.getSample(sig).addSystematic(jesSignal)
-        
-        S4Channel_ee.addSystematic(lepS4DL)
+        [S4Channel_ee.getSample(sam).addSystematic(lepS4DL) for sam in SigList+BGList]
         [S4Channel_ee.getSample(sam).addSystematic(zpT0GeV) for sam in BGList]
         [S4Channel_ee.getSample(sam).addSystematic(zpT50GeV) for sam in BGList]
         [S4Channel_ee.getSample(sam).addSystematic(zpT100GeV) for sam in BGList]
@@ -2435,9 +2427,9 @@ if doExclusion_GMSB_combined or doExclusion_mSUGRA_dilepton_combined or doExclus
         [S4Channel_ee.getSample(sam).addSystematic(zpT200GeV) for sam in BGList]
 
         if fullSyst:
-            S4Channel_ee.addSystematic(metcoS4DL)
-            S4Channel_ee.addSystematic(metpuS4DL)
-            S4Channel_ee.addSystematic(trigS4DL)
+            [S4Channel_ee.getSample(sam).addSystematic(metcoS4DL) for sam in SigList+BGList]
+            [S4Channel_ee.getSample(sam).addSystematic(metpuS4DL) for sam in SigList+BGList]
+            [S4Channel_ee.getSample(sam).addSystematic(trigS4DL) for sam in SigList+BGList]
             [S4Channel_ee.getSample(sam).addSystematic(lesS4DL) for sam in SigList+BGList]
             [S4Channel_ee.getSample(sam).addSystematic(lermsS4DL) for sam in SigList+BGList]
             [S4Channel_ee.getSample(sam).addSystematic(leridS4DL) for sam in SigList+BGList]
@@ -2448,19 +2440,17 @@ if doExclusion_GMSB_combined or doExclusion_mSUGRA_dilepton_combined or doExclus
         S4Channel_em = myTopLvl.addChannel("meffInc",["S4em"],meffNBins,meffBinLow,meffBinHigh)
         S4Channel_em.useOverflowBin=True
 
-        S4Channel_em.getSample(sig).addSystematic(jesSignal)
-
         [S4Channel_em.getSample(sam).addSystematic(zpT0GeV) for sam in BGList]
         [S4Channel_em.getSample(sam).addSystematic(zpT50GeV) for sam in BGList]
         [S4Channel_em.getSample(sam).addSystematic(zpT100GeV) for sam in BGList]
         [S4Channel_em.getSample(sam).addSystematic(zpT150GeV) for sam in BGList]
         [S4Channel_em.getSample(sam).addSystematic(zpT200GeV) for sam in BGList]
 
-        S4Channel_em.addSystematic(lepS4DL)
+        [S4Channel_em.getSample(sam).addSystematic(lepS4DL) for sam in SigList+BGList]
         if fullSyst:
-            S4Channel_em.addSystematic(metcoS4DL)
-            S4Channel_em.addSystematic(metpuS4DL)
-            S4Channel_em.addSystematic(trigS4DL)
+            [S4Channel_em.getSample(sam).addSystematic(metcoS4DL) for sam in SigList+BGList]
+            [S4Channel_em.getSample(sam).addSystematic(metpuS4DL) for sam in SigList+BGList]
+            [S4Channel_em.getSample(sam).addSystematic(trigS4DL) for sam in SigList+BGList]
             [S4Channel_em.getSample(sam).addSystematic(lesS4DL) for sam in SigList+BGList]
             [S4Channel_em.getSample(sam).addSystematic(lermsS4DL) for sam in SigList+BGList]
             [S4Channel_em.getSample(sam).addSystematic(leridS4DL) for sam in SigList+BGList]
@@ -2470,8 +2460,6 @@ if doExclusion_GMSB_combined or doExclusion_mSUGRA_dilepton_combined or doExclus
 
         S4Channel_mm = myTopLvl.addChannel("meffInc",["S4mm"],meffNBins,meffBinLow,meffBinHigh)
         S4Channel_mm.useOverflowBin=True
-
-        [S4Channel_mm.getSample(sam).addSystematic(jesSignal) for sam in SigList]
 
         [S4Channel_mm.getSample(sam).addSystematic(zpT0GeV) for sam in BGList]
         [S4Channel_mm.getSample(sam).addSystematic(zpT50GeV) for sam in BGList]
@@ -2491,6 +2479,9 @@ if doExclusion_GMSB_combined or doExclusion_mSUGRA_dilepton_combined or doExclus
             [S4Channel_mm.getSample(sam).addSystematic(jesMedium) for sam in BGList]
             [S4Channel_mm.getSample(sam).addSystematic(jesHigh) for sam in BGList]
 
+        # Add signal jes systematics for signal to all channels:
+        for channel in myTopLvl.channels:
+            [channel.getSample(sam).addSystematic(jesSignal) for sam in SigList]
 
 
         ## Which SRs for which Scenario?
