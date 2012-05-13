@@ -30,8 +30,6 @@ doExclusion=False
 doExclusion_GMSB_combined=False
 doExclusion_mSUGRA_dilepton_combined=False
 doExclusion_GG_twostepCC_slepton=False
-#doExclusion=True
-blindS=False
 fullSyst=True
 useXsecUnc=True             # switch off when calucating excluded cross section (colour code in SM plots)
 doWptReweighting=False ## currently buggy
@@ -67,7 +65,11 @@ if doExclusion_GMSB_combined:
 if doExclusion_mSUGRA_dilepton_combined:
     sigFiles+=["data/SusyFitterTree_EleEle_mSUGRA.root","data/SusyFitterTree_EleMu_mSUGRA.root","data/SusyFitterTree_MuMu_mSUGRA.root"]
                                 
-
+# Need to comment out the following line when running HypoTest.py parallelized
+sigSamples=[]
+if doExclusion_GMSB_combined:
+    sigSamples=["GMSB_3_2d_40_250_3_10_1_1"]
+SigList=sigSamples
 
 # AnalysisType corresponds to ee,mumu,emu as I want to split these channels up
 
@@ -298,14 +300,14 @@ jesSignal = Systematic("JSig","_NoSys","_JESup","_JESdown","tree","histoSys")
 #jesS4 = Systematic("J4","_NoSys","_JESup","_JESdown","tree","normHistoSys")
 #jesS3T = Systematic("J3T","_NoSys","_JESup","_JESdown","tree","normHistoSys")
 #jesS4T = Systematic("J4T","_NoSys","_JESup","_JESdown","tree","normHistoSys")
-jesVR2 = Systematic("JV2","_NoSys","_JESup","_JESdown","tree","shapeSys")
-jesVR3 = Systematic("JV3","_NoSys","_JESup","_JESdown","tree","shapeSys")
-jesVR4 = Systematic("JV4","_NoSys","_JESup","_JESdown","tree","shapeSys")
-jesVZ2 = Systematic("JZ2","_NoSys","_JESup","_JESdown","tree","shapeSys")
-jesVZ3 = Systematic("JZ3","_NoSys","_JESup","_JESdown","tree","shapeSys")
-jesVZ4 = Systematic("JZ4","_NoSys","_JESup","_JESdown","tree","shapeSys")
-jesS2DL = Systematic("J2DL","_NoSys","_JESup","_JESdown","tree","normHistoSys")
-jesS4DL = Systematic("J4DL","_NoSys","_JESup","_JESdown","tree","normHistoSys")
+#jesVR2 = Systematic("JV2","_NoSys","_JESup","_JESdown","tree","shapeSys")
+#jesVR3 = Systematic("JV3","_NoSys","_JESup","_JESdown","tree","shapeSys")
+#jesVR4 = Systematic("JV4","_NoSys","_JESup","_JESdown","tree","shapeSys")
+#jesVZ2 = Systematic("JZ2","_NoSys","_JESup","_JESdown","tree","shapeSys")
+#jesVZ3 = Systematic("JZ3","_NoSys","_JESup","_JESdown","tree","shapeSys")
+#jesVZ4 = Systematic("JZ4","_NoSys","_JESup","_JESdown","tree","shapeSys")
+#jesS2DL = Systematic("J2DL","_NoSys","_JESup","_JESdown","tree","normHistoSys")
+#jesS4DL = Systematic("J4DL","_NoSys","_JESup","_JESdown","tree","normHistoSys")
 
 # LES uncertainty as overallSys - one per channel
 lesZR = Systematic("LES","_NoSys","_LESup","_LESdown","tree","overallSys")
@@ -528,6 +530,26 @@ meas.addParamSetting("mu_WZ_Np0","const",1.0)
 meas.addParamSetting("mu_WZ_Np1","const",1.0)
 
 
+if doExclusion_GMSB_combined or doExclusion_mSUGRA_dilepton_combined or doExclusion_GG_twostepCC_slepton:
+       
+    for sig in sigSamples:
+        myTopLvl = bkgOnly
+        myTopLvl.name="dilepton_%s"%sig
+        myTopLvl.prefix=configMgr.analysisName+"_"+"dilepton_%s"%sig
+        
+##        myTopLvl = configMgr.addTopLevelXMLClone(bkgOnly,"dilepton_%s"%sig)
+        sigSample = Sample(sig,kPink)
+        sigSample.setFileList(sigFiles)
+        sigSample.setNormByTheory()
+        sigSample.setNormFactor("mu_SIG",0.,0.,5.)
+        sigSample.setStatConfig(useStat)
+
+        if useXsecUnc:
+            sigSample.addSystematic(xsecSig)
+        myTopLvl.addSamples(sigSample)
+        myTopLvl.setSignalSample(sigSample)
+
+
 #--------------------------------------------------------------
 # Background fit regions 
 #--------------------------------------------------------------
@@ -545,20 +567,20 @@ nJetTopeeChannel.useOverflowBin = False
 [nJetTopeeChannel.getSample(sam).addSystematic(jesLow) for sam in BGList]
 [nJetTopeeChannel.getSample(sam).addSystematic(jesMedium) for sam in BGList]
 [nJetTopeeChannel.getSample(sam).addSystematic(jesHigh) for sam in BGList]
-[nJetTopeeChannel.getSample(sam).addSystematic(btagTR) for sam in BGList]
-[nJetTopeeChannel.getSample(sam).addSystematic(lepTR) for sam in BGList]
+[nJetTopeeChannel.getSample(sam).addSystematic(btagTR) for sam in SigList+BGList]
+[nJetTopeeChannel.getSample(sam).addSystematic(lepTR) for sam in SigList+BGList]
 [nJetTopeeChannel.getSample(sam).addSystematic(zpT0GeV) for sam in BGList]
 [nJetTopeeChannel.getSample(sam).addSystematic(zpT50GeV) for sam in BGList]
 [nJetTopeeChannel.getSample(sam).addSystematic(zpT100GeV) for sam in BGList]
 [nJetTopeeChannel.getSample(sam).addSystematic(zpT150GeV) for sam in BGList]
 [nJetTopeeChannel.getSample(sam).addSystematic(zpT200GeV) for sam in BGList]
 if fullSyst:
-    [nJetTopeeChannel.getSample(sam).addSystematic(metcoTR) for sam in BGList]
-    [nJetTopeeChannel.getSample(sam).addSystematic(metpuTR) for sam in BGList]
-    [nJetTopeeChannel.getSample(sam).addSystematic(trigTR) for sam in BGList]
-    [nJetTopeeChannel.getSample(sam).addSystematic(lesTR) for sam in BGList]
-    [nJetTopeeChannel.getSample(sam).addSystematic(lermsTR) for sam in BGList]
-    [nJetTopeeChannel.getSample(sam).addSystematic(leridTR) for sam in BGList]
+    [nJetTopeeChannel.getSample(sam).addSystematic(metcoTR) for sam in SigList+BGList]
+    [nJetTopeeChannel.getSample(sam).addSystematic(metpuTR) for sam in SigList+BGList]
+    [nJetTopeeChannel.getSample(sam).addSystematic(trigTR) for sam in SigList+BGList]
+    [nJetTopeeChannel.getSample(sam).addSystematic(lesTR) for sam in SigList+BGList]
+    [nJetTopeeChannel.getSample(sam).addSystematic(lermsTR) for sam in SigList+BGList]
+    [nJetTopeeChannel.getSample(sam).addSystematic(leridTR) for sam in SigList+BGList]
 
 
 #  single ele
@@ -570,20 +592,20 @@ nJetTopeChannel.useOverflowBin = False
 [nJetTopeChannel.getSample(sam).addSystematic(jesLow) for sam in BGList]
 [nJetTopeChannel.getSample(sam).addSystematic(jesMedium) for sam in BGList]
 [nJetTopeChannel.getSample(sam).addSystematic(jesHigh) for sam in BGList]
-[nJetTopeChannel.getSample(sam).addSystematic(btagTR) for sam in BGList]
-[nJetTopeChannel.getSample(sam).addSystematic(lepTR) for sam in BGList]
+[nJetTopeChannel.getSample(sam).addSystematic(btagTR) for sam in SigList+BGList]
+[nJetTopeChannel.getSample(sam).addSystematic(lepTR) for sam in SigList+BGList]
 [nJetTopeChannel.getSample(sam).addSystematic(zpT0GeV) for sam in BGList]
 [nJetTopeChannel.getSample(sam).addSystematic(zpT50GeV) for sam in BGList]
 [nJetTopeChannel.getSample(sam).addSystematic(zpT100GeV) for sam in BGList]
 [nJetTopeChannel.getSample(sam).addSystematic(zpT150GeV) for sam in BGList]
 [nJetTopeChannel.getSample(sam).addSystematic(zpT200GeV) for sam in BGList]
 if fullSyst:
-    [nJetTopeChannel.getSample(sam).addSystematic(metcoTR) for sam in BGList]
-    [nJetTopeChannel.getSample(sam).addSystematic(metpuTR) for sam in BGList]
-    [nJetTopeChannel.getSample(sam).addSystematic(trigTR) for sam in BGList]
-    [nJetTopeChannel.getSample(sam).addSystematic(lesTR) for sam in BGList]
-    [nJetTopeChannel.getSample(sam).addSystematic(lermsTR) for sam in BGList]
-    [nJetTopeChannel.getSample(sam).addSystematic(leridTR) for sam in BGList]    
+    [nJetTopeChannel.getSample(sam).addSystematic(metcoTR) for sam in SigList+BGList]
+    [nJetTopeChannel.getSample(sam).addSystematic(metpuTR) for sam in SigList+BGList]
+    [nJetTopeChannel.getSample(sam).addSystematic(trigTR) for sam in SigList+BGList]
+    [nJetTopeChannel.getSample(sam).addSystematic(lesTR) for sam in SigList+BGList]
+    [nJetTopeChannel.getSample(sam).addSystematic(lermsTR) for sam in SigList+BGList]
+    [nJetTopeChannel.getSample(sam).addSystematic(leridTR) for sam in SigList+BGList]    
 
 
 #  ele mu
@@ -595,20 +617,20 @@ nJetTopemChannel.useOverflowBin = False
 [nJetTopemChannel.getSample(sam).addSystematic(jesLow) for sam in BGList]
 [nJetTopemChannel.getSample(sam).addSystematic(jesMedium) for sam in BGList]
 [nJetTopemChannel.getSample(sam).addSystematic(jesHigh) for sam in BGList]
-[nJetTopemChannel.getSample(sam).addSystematic(btagTR) for sam in BGList]
-[nJetTopemChannel.getSample(sam).addSystematic(lepTR) for sam in BGList]
+[nJetTopemChannel.getSample(sam).addSystematic(btagTR) for sam in SigList+BGList]
+[nJetTopemChannel.getSample(sam).addSystematic(lepTR) for sam in SigList+BGList]
 [nJetTopemChannel.getSample(sam).addSystematic(zpT0GeV) for sam in BGList]
 [nJetTopemChannel.getSample(sam).addSystematic(zpT50GeV) for sam in BGList]
 [nJetTopemChannel.getSample(sam).addSystematic(zpT100GeV) for sam in BGList]
 [nJetTopemChannel.getSample(sam).addSystematic(zpT150GeV) for sam in BGList]
 [nJetTopemChannel.getSample(sam).addSystematic(zpT200GeV) for sam in BGList]
 if fullSyst:
-    [nJetTopemChannel.getSample(sam).addSystematic(metcoTR) for sam in BGList]
-    [nJetTopemChannel.getSample(sam).addSystematic(metpuTR) for sam in BGList]
-    [nJetTopemChannel.getSample(sam).addSystematic(trigTR) for sam in BGList]
-    [nJetTopemChannel.getSample(sam).addSystematic(lesTR) for sam in BGList]
-    [nJetTopemChannel.getSample(sam).addSystematic(lermsTR) for sam in BGList]
-    [nJetTopemChannel.getSample(sam).addSystematic(leridTR) for sam in BGList]
+    [nJetTopemChannel.getSample(sam).addSystematic(metcoTR) for sam in SigList+BGList]
+    [nJetTopemChannel.getSample(sam).addSystematic(metpuTR) for sam in SigList+BGList]
+    [nJetTopemChannel.getSample(sam).addSystematic(trigTR) for sam in SigList+BGList]
+    [nJetTopemChannel.getSample(sam).addSystematic(lesTR) for sam in SigList+BGList]
+    [nJetTopemChannel.getSample(sam).addSystematic(lermsTR) for sam in SigList+BGList]
+    [nJetTopemChannel.getSample(sam).addSystematic(leridTR) for sam in SigList+BGList]
 
 
 # mu mu
@@ -620,20 +642,20 @@ nJetTopmmChannel.useOverflowBin = False
 [nJetTopmmChannel.getSample(sam).addSystematic(jesLow) for sam in BGList]
 [nJetTopmmChannel.getSample(sam).addSystematic(jesMedium) for sam in BGList]
 [nJetTopmmChannel.getSample(sam).addSystematic(jesHigh) for sam in BGList]
-[nJetTopmmChannel.getSample(sam).addSystematic(btagTR) for sam in BGList]
-[nJetTopmmChannel.getSample(sam).addSystematic(lepTR) for sam in BGList]
+[nJetTopmmChannel.getSample(sam).addSystematic(btagTR) for sam in SigList+BGList]
+[nJetTopmmChannel.getSample(sam).addSystematic(lepTR) for sam in SigList+BGList]
 [nJetTopmmChannel.getSample(sam).addSystematic(zpT0GeV) for sam in BGList]
 [nJetTopmmChannel.getSample(sam).addSystematic(zpT50GeV) for sam in BGList]
 [nJetTopmmChannel.getSample(sam).addSystematic(zpT100GeV) for sam in BGList]
 [nJetTopmmChannel.getSample(sam).addSystematic(zpT150GeV) for sam in BGList]
 [nJetTopmmChannel.getSample(sam).addSystematic(zpT200GeV) for sam in BGList]
 if fullSyst:
-    [nJetTopmmChannel.getSample(sam).addSystematic(metcoTR) for sam in BGList]
-    [nJetTopmmChannel.getSample(sam).addSystematic(metpuTR) for sam in BGList]
-    [nJetTopmmChannel.getSample(sam).addSystematic(trigTR) for sam in BGList]
-    [nJetTopmmChannel.getSample(sam).addSystematic(lesTR) for sam in BGList]
-    [nJetTopmmChannel.getSample(sam).addSystematic(lermsTR) for sam in BGList]
-    [nJetTopmmChannel.getSample(sam).addSystematic(leridTR) for sam in BGList]
+    [nJetTopmmChannel.getSample(sam).addSystematic(metcoTR) for sam in SigList+BGList]
+    [nJetTopmmChannel.getSample(sam).addSystematic(metpuTR) for sam in SigList+BGList]
+    [nJetTopmmChannel.getSample(sam).addSystematic(trigTR) for sam in SigList+BGList]
+    [nJetTopmmChannel.getSample(sam).addSystematic(lesTR) for sam in SigList+BGList]
+    [nJetTopmmChannel.getSample(sam).addSystematic(lermsTR) for sam in SigList+BGList]
+    [nJetTopmmChannel.getSample(sam).addSystematic(leridTR) for sam in SigList+BGList]
 
 
 # single mu
@@ -645,20 +667,20 @@ nJetTopmChannel.useOverflowBin = False
 [nJetTopmChannel.getSample(sam).addSystematic(jesLow) for sam in BGList]
 [nJetTopmChannel.getSample(sam).addSystematic(jesMedium) for sam in BGList]
 [nJetTopmChannel.getSample(sam).addSystematic(jesHigh) for sam in BGList]
-[nJetTopmChannel.getSample(sam).addSystematic(btagTR) for sam in BGList]
-[nJetTopmChannel.getSample(sam).addSystematic(lepTR) for sam in BGList]
+[nJetTopmChannel.getSample(sam).addSystematic(btagTR) for sam in SigList+BGList]
+[nJetTopmChannel.getSample(sam).addSystematic(lepTR) for sam in SigList+BGList]
 [nJetTopmChannel.getSample(sam).addSystematic(zpT0GeV) for sam in BGList]
 [nJetTopmChannel.getSample(sam).addSystematic(zpT50GeV) for sam in BGList]
 [nJetTopmChannel.getSample(sam).addSystematic(zpT100GeV) for sam in BGList]
 [nJetTopmChannel.getSample(sam).addSystematic(zpT150GeV) for sam in BGList]
 [nJetTopmChannel.getSample(sam).addSystematic(zpT200GeV) for sam in BGList]
 if fullSyst:
-    [nJetTopmChannel.getSample(sam).addSystematic(metcoTR) for sam in BGList]
-    [nJetTopmChannel.getSample(sam).addSystematic(metpuTR) for sam in BGList]
-    [nJetTopmChannel.getSample(sam).addSystematic(trigTR) for sam in BGList]
-    [nJetTopmChannel.getSample(sam).addSystematic(lesTR) for sam in BGList]
-    [nJetTopmChannel.getSample(sam).addSystematic(lermsTR) for sam in BGList]
-    [nJetTopmChannel.getSample(sam).addSystematic(leridTR) for sam in BGList]
+    [nJetTopmChannel.getSample(sam).addSystematic(metcoTR) for sam in SigList+BGList]
+    [nJetTopmChannel.getSample(sam).addSystematic(metpuTR) for sam in SigList+BGList]
+    [nJetTopmChannel.getSample(sam).addSystematic(trigTR) for sam in SigList+BGList]
+    [nJetTopmChannel.getSample(sam).addSystematic(lesTR) for sam in SigList+BGList]
+    [nJetTopmChannel.getSample(sam).addSystematic(lermsTR) for sam in SigList+BGList]
+    [nJetTopmChannel.getSample(sam).addSystematic(leridTR) for sam in SigList+BGList]
     
 
 ####### nJet for W/Z  #######
@@ -671,19 +693,19 @@ nJetZeeChannel.hasBQCD = False
 [nJetZeeChannel.getSample(sam).addSystematic(jesLow) for sam in BGList]
 [nJetZeeChannel.getSample(sam).addSystematic(jesMedium) for sam in BGList]
 [nJetZeeChannel.getSample(sam).addSystematic(jesHigh) for sam in BGList]
-[nJetZeeChannel.getSample(sam).addSystematic(lepZR) for sam in BGList]
+[nJetZeeChannel.getSample(sam).addSystematic(lepZR) for sam in SigList+BGList]
 [nJetZeeChannel.getSample(sam).addSystematic(zpT0GeV) for sam in BGList]
 [nJetZeeChannel.getSample(sam).addSystematic(zpT50GeV) for sam in BGList]
 [nJetZeeChannel.getSample(sam).addSystematic(zpT100GeV) for sam in BGList]
 [nJetZeeChannel.getSample(sam).addSystematic(zpT150GeV) for sam in BGList]
 [nJetZeeChannel.getSample(sam).addSystematic(zpT200GeV) for sam in BGList]
 if fullSyst:
-    [nJetZeeChannel.getSample(sam).addSystematic(metcoZR) for sam in BGList]
-    [nJetZeeChannel.getSample(sam).addSystematic(metpuZR) for sam in BGList]
-    [nJetZeeChannel.getSample(sam).addSystematic(trigZR) for sam in BGList]
-    [nJetZeeChannel.getSample(sam).addSystematic(lesZR) for sam in BGList]
-    [nJetZeeChannel.getSample(sam).addSystematic(lermsZR) for sam in BGList]
-    [nJetZeeChannel.getSample(sam).addSystematic(leridZR) for sam in BGList]
+    [nJetZeeChannel.getSample(sam).addSystematic(metcoZR) for sam in SigList+BGList]
+    [nJetZeeChannel.getSample(sam).addSystematic(metpuZR) for sam in SigList+BGList]
+    [nJetZeeChannel.getSample(sam).addSystematic(trigZR) for sam in SigList+BGList]
+    [nJetZeeChannel.getSample(sam).addSystematic(lesZR) for sam in SigList+BGList]
+    [nJetZeeChannel.getSample(sam).addSystematic(lermsZR) for sam in SigList+BGList]
+    [nJetZeeChannel.getSample(sam).addSystematic(leridZR) for sam in SigList+BGList]
 
 
 # single ele
@@ -694,20 +716,20 @@ nJetZeChannel.hasBQCD = False
 [nJetZeChannel.getSample(sam).addSystematic(jesLow) for sam in BGList]
 [nJetZeChannel.getSample(sam).addSystematic(jesMedium) for sam in BGList]
 [nJetZeChannel.getSample(sam).addSystematic(jesHigh) for sam in BGList]
-[nJetZeChannel.getSample(sam).addSystematic(btagZR) for sam in BGList]
-[nJetZeChannel.getSample(sam).addSystematic(lepZR) for sam in BGList]
+[nJetZeChannel.getSample(sam).addSystematic(btagZR) for sam in SigList+BGList]
+[nJetZeChannel.getSample(sam).addSystematic(lepZR) for sam in SigList+BGList]
 [nJetZeChannel.getSample(sam).addSystematic(zpT0GeV) for sam in BGList]
 [nJetZeChannel.getSample(sam).addSystematic(zpT50GeV) for sam in BGList]
 [nJetZeChannel.getSample(sam).addSystematic(zpT100GeV) for sam in BGList]
 [nJetZeChannel.getSample(sam).addSystematic(zpT150GeV) for sam in BGList]
 [nJetZeChannel.getSample(sam).addSystematic(zpT200GeV) for sam in BGList]
 if fullSyst:
-    [nJetZeChannel.getSample(sam).addSystematic(metcoZR) for sam in BGList]
-    [nJetZeChannel.getSample(sam).addSystematic(metpuZR) for sam in BGList]
-    [nJetZeChannel.getSample(sam).addSystematic(trigZR) for sam in BGList]
-    [nJetZeChannel.getSample(sam).addSystematic(lesZR) for sam in BGList]
-    [nJetZeChannel.getSample(sam).addSystematic(lermsZR) for sam in BGList]
-    [nJetZeChannel.getSample(sam).addSystematic(leridZR) for sam in BGList]    
+    [nJetZeChannel.getSample(sam).addSystematic(metcoZR) for sam in SigList+BGList]
+    [nJetZeChannel.getSample(sam).addSystematic(metpuZR) for sam in SigList+BGList]
+    [nJetZeChannel.getSample(sam).addSystematic(trigZR) for sam in SigList+BGList]
+    [nJetZeChannel.getSample(sam).addSystematic(lesZR) for sam in SigList+BGList]
+    [nJetZeChannel.getSample(sam).addSystematic(lermsZR) for sam in SigList+BGList]
+    [nJetZeChannel.getSample(sam).addSystematic(leridZR) for sam in SigList+BGList]    
 
   
 # mu mu
@@ -718,19 +740,19 @@ nJetZmmChannel.hasBQCD = False
 [nJetZmmChannel.getSample(sam).addSystematic(jesLow) for sam in BGList]
 [nJetZmmChannel.getSample(sam).addSystematic(jesMedium) for sam in BGList]
 [nJetZmmChannel.getSample(sam).addSystematic(jesHigh) for sam in BGList]
-[nJetZmmChannel.getSample(sam).addSystematic(lepZR) for sam in BGList]
+[nJetZmmChannel.getSample(sam).addSystematic(lepZR) for sam in SigList+BGList]
 [nJetZmmChannel.getSample(sam).addSystematic(zpT0GeV) for sam in BGList]
 [nJetZmmChannel.getSample(sam).addSystematic(zpT50GeV) for sam in BGList]
 [nJetZmmChannel.getSample(sam).addSystematic(zpT100GeV) for sam in BGList]
 [nJetZmmChannel.getSample(sam).addSystematic(zpT150GeV) for sam in BGList]
 [nJetZmmChannel.getSample(sam).addSystematic(zpT200GeV) for sam in BGList]
 if fullSyst:
-    [nJetZmmChannel.getSample(sam).addSystematic(metcoZR) for sam in BGList]
-    [nJetZmmChannel.getSample(sam).addSystematic(metpuZR) for sam in BGList]
-    [nJetZmmChannel.getSample(sam).addSystematic(trigZR) for sam in BGList]
-    [nJetZmmChannel.getSample(sam).addSystematic(lesZR) for sam in BGList]
-    [nJetZmmChannel.getSample(sam).addSystematic(lermsZR) for sam in BGList]
-    [nJetZmmChannel.getSample(sam).addSystematic(leridZR) for sam in BGList]
+    [nJetZmmChannel.getSample(sam).addSystematic(metcoZR) for sam in SigList+BGList]
+    [nJetZmmChannel.getSample(sam).addSystematic(metpuZR) for sam in SigList+BGList]
+    [nJetZmmChannel.getSample(sam).addSystematic(trigZR) for sam in SigList+BGList]
+    [nJetZmmChannel.getSample(sam).addSystematic(lesZR) for sam in SigList+BGList]
+    [nJetZmmChannel.getSample(sam).addSystematic(lermsZR) for sam in SigList+BGList]
+    [nJetZmmChannel.getSample(sam).addSystematic(leridZR) for sam in SigList+BGList]
 
 
 # single mu
@@ -741,20 +763,20 @@ nJetZmChannel.hasBQCD = False
 [nJetZmChannel.getSample(sam).addSystematic(jesLow) for sam in BGList]
 [nJetZmChannel.getSample(sam).addSystematic(jesMedium) for sam in BGList]
 [nJetZmChannel.getSample(sam).addSystematic(jesHigh) for sam in BGList]
-[nJetZmChannel.getSample(sam).addSystematic(btagZR) for sam in BGList]
-[nJetZmChannel.getSample(sam).addSystematic(lepZR) for sam in BGList]
+[nJetZmChannel.getSample(sam).addSystematic(btagZR) for sam in SigList+BGList]
+[nJetZmChannel.getSample(sam).addSystematic(lepZR) for sam in SigList+BGList]
 [nJetZmChannel.getSample(sam).addSystematic(zpT0GeV) for sam in BGList]
 [nJetZmChannel.getSample(sam).addSystematic(zpT50GeV) for sam in BGList]
 [nJetZmChannel.getSample(sam).addSystematic(zpT100GeV) for sam in BGList]
 [nJetZmChannel.getSample(sam).addSystematic(zpT150GeV) for sam in BGList]
 [nJetZmChannel.getSample(sam).addSystematic(zpT200GeV) for sam in BGList]
 if fullSyst:
-    [nJetZmChannel.getSample(sam).addSystematic(metcoZR) for sam in BGList]
-    [nJetZmChannel.getSample(sam).addSystematic(metpuZR) for sam in BGList]
-    [nJetZmChannel.getSample(sam).addSystematic(trigZR) for sam in BGList]
-    [nJetZmChannel.getSample(sam).addSystematic(lesZR) for sam in BGList]
-    [nJetZmChannel.getSample(sam).addSystematic(lermsZR) for sam in BGList]
-    [nJetZmChannel.getSample(sam).addSystematic(leridZR) for sam in BGList]    
+    [nJetZmChannel.getSample(sam).addSystematic(metcoZR) for sam in SigList+BGList]
+    [nJetZmChannel.getSample(sam).addSystematic(metpuZR) for sam in SigList+BGList]
+    [nJetZmChannel.getSample(sam).addSystematic(trigZR) for sam in SigList+BGList]
+    [nJetZmChannel.getSample(sam).addSystematic(lesZR) for sam in SigList+BGList]
+    [nJetZmChannel.getSample(sam).addSystematic(lermsZR) for sam in SigList+BGList]
+    [nJetZmChannel.getSample(sam).addSystematic(leridZR) for sam in SigList+BGList]    
                                                                             
 
 bkgOnly.setBkgConstrainChannels([nJetTopeeChannel,nJetZeeChannel,nJetTopeChannel,nJetZeChannel,nJetTopemChannel,nJetTopmmChannel,nJetZmmChannel,nJetTopmChannel,nJetZmChannel])
@@ -812,8 +834,8 @@ if doValidationSlope:
     [meffTR_El.getSample(sam).addSystematic(jesLow) for sam in BGList]
     [meffTR_El.getSample(sam).addSystematic(jesMedium) for sam in BGList]
     [meffTR_El.getSample(sam).addSystematic(jesHigh) for sam in BGList]
-    [meffTR_El.getSample(sam).addSystematic(lepTR) for sam in BGList]
-    [meffTR_El.getSample(sam).addSystematic(btagTR) for sam in BGList]
+    [meffTR_El.getSample(sam).addSystematic(lepTR) for sam in SigList+BGList]
+    [meffTR_El.getSample(sam).addSystematic(btagTR) for sam in SigList+BGList]
     [meffTR_El.getSample(sam).addSystematic(zpT0GeV) for sam in BGList]
     [meffTR_El.getSample(sam).addSystematic(zpT50GeV) for sam in BGList]
     [meffTR_El.getSample(sam).addSystematic(zpT100GeV) for sam in BGList]
@@ -821,12 +843,12 @@ if doValidationSlope:
     [meffTR_El.getSample(sam).addSystematic(zpT200GeV) for sam in BGList]
 
     if fullSyst:
-        [meffTR_El.getSample(sam).addSystematic(metcoTR) for sam in BGList]
-        [meffTR_El.getSample(sam).addSystematic(metpuTR) for sam in BGList]
-        [meffTR_El.getSample(sam).addSystematic(trigTR) for sam in BGList]
-        [meffTR_El.getSample(sam).addSystematic(lesTR) for sam in BGList]
-        [meffTR_El.getSample(sam).addSystematic(lermsTR) for sam in BGList]
-        [meffTR_El.getSample(sam).addSystematic(leridTR) for sam in BGList]
+        [meffTR_El.getSample(sam).addSystematic(metcoTR) for sam in SigList+BGList]
+        [meffTR_El.getSample(sam).addSystematic(metpuTR) for sam in SigList+BGList]
+        [meffTR_El.getSample(sam).addSystematic(trigTR) for sam in SigList+BGList]
+        [meffTR_El.getSample(sam).addSystematic(lesTR) for sam in SigList+BGList]
+        [meffTR_El.getSample(sam).addSystematic(lermsTR) for sam in SigList+BGList]
+        [meffTR_El.getSample(sam).addSystematic(leridTR) for sam in SigList+BGList]
 
     meffTR_Mu=bkgOnly.addChannel("meffInc",["TRMuVR"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
     meffTR_Mu.hasB = True
@@ -835,20 +857,20 @@ if doValidationSlope:
     [meffTR_Mu.getSample(sam).addSystematic(jesLow) for sam in BGList]
     [meffTR_Mu.getSample(sam).addSystematic(jesMedium) for sam in BGList]
     [meffTR_Mu.getSample(sam).addSystematic(jesHigh) for sam in BGList]
-    [meffTR_Mu.getSample(sam).addSystematic(lepTR) for sam in BGList]
-    [meffTR_Mu.getSample(sam).addSystematic(btagTR) for sam in BGList]
+    [meffTR_Mu.getSample(sam).addSystematic(lepTR) for sam in SigList+BGList]
+    [meffTR_Mu.getSample(sam).addSystematic(btagTR) for sam in SigList+BGList]
     [meffTR_Mu.getSample(sam).addSystematic(zpT0GeV) for sam in BGList]
     [meffTR_Mu.getSample(sam).addSystematic(zpT50GeV) for sam in BGList]
     [meffTR_Mu.getSample(sam).addSystematic(zpT100GeV) for sam in BGList]
     [meffTR_Mu.getSample(sam).addSystematic(zpT150GeV) for sam in BGList]
     [meffTR_Mu.getSample(sam).addSystematic(zpT200GeV) for sam in BGList]
     if fullSyst:
-        [meffTR_Mu.getSample(sam).addSystematic(metcoTR) for sam in BGList]
-        [meffTR_Mu.getSample(sam).addSystematic(metpuTR) for sam in BGList]
-        [meffTR_Mu.getSample(sam).addSystematic(trigTR) for sam in BGList]
-        [meffTR_Mu.getSample(sam).addSystematic(lesTR) for sam in BGList]
-        [meffTR_Mu.getSample(sam).addSystematic(lermsTR) for sam in BGList]
-        [meffTR_Mu.getSample(sam).addSystematic(leridTR) for sam in BGList]
+        [meffTR_Mu.getSample(sam).addSystematic(metcoTR) for sam in SigList+BGList]
+        [meffTR_Mu.getSample(sam).addSystematic(metpuTR) for sam in SigList+BGList]
+        [meffTR_Mu.getSample(sam).addSystematic(trigTR) for sam in SigList+BGList]
+        [meffTR_Mu.getSample(sam).addSystematic(lesTR) for sam in SigList+BGList]
+        [meffTR_Mu.getSample(sam).addSystematic(lermsTR) for sam in SigList+BGList]
+        [meffTR_Mu.getSample(sam).addSystematic(leridTR) for sam in SigList+BGList]
 
         
 
@@ -859,8 +881,8 @@ if doValidationSlope:
     [metTR_El.getSample(sam).addSystematic(jesLow) for sam in BGList]
     [metTR_El.getSample(sam).addSystematic(jesMedium) for sam in BGList]
     [metTR_El.getSample(sam).addSystematic(jesHigh) for sam in BGList]
-    [metTR_El.getSample(sam).addSystematic(lepTR) for sam in BGList]
-    [metTR_El.getSample(sam).addSystematic(btagTR) for sam in BGList]
+    [metTR_El.getSample(sam).addSystematic(lepTR) for sam in SigList+BGList]
+    [metTR_El.getSample(sam).addSystematic(btagTR) for sam in SigList+BGList]
     [metTR_El.getSample(sam).addSystematic(zpT0GeV) for sam in BGList]
     [metTR_El.getSample(sam).addSystematic(zpT50GeV) for sam in BGList]
     [metTR_El.getSample(sam).addSystematic(zpT100GeV) for sam in BGList]
@@ -868,12 +890,12 @@ if doValidationSlope:
     [metTR_El.getSample(sam).addSystematic(zpT200GeV) for sam in BGList]
 
     if fullSyst:
-        [metTR_El.getSample(sam).addSystematic(metcoTR) for sam in BGList]
-        [metTR_El.getSample(sam).addSystematic(metpuTR) for sam in BGList]
-        [metTR_El.getSample(sam).addSystematic(trigTR) for sam in BGList]
-        [metTR_El.getSample(sam).addSystematic(lesTR) for sam in BGList]
-        [metTR_El.getSample(sam).addSystematic(lermsTR) for sam in BGList]
-        [metTR_El.getSample(sam).addSystematic(leridTR) for sam in BGList]
+        [metTR_El.getSample(sam).addSystematic(metcoTR) for sam in SigList+BGList]
+        [metTR_El.getSample(sam).addSystematic(metpuTR) for sam in SigList+BGList]
+        [metTR_El.getSample(sam).addSystematic(trigTR) for sam in SigList+BGList]
+        [metTR_El.getSample(sam).addSystematic(lesTR) for sam in SigList+BGList]
+        [metTR_El.getSample(sam).addSystematic(lermsTR) for sam in SigList+BGList]
+        [metTR_El.getSample(sam).addSystematic(leridTR) for sam in SigList+BGList]
 
 
     metTR_Mu=bkgOnly.addChannel("met",["TRMuVR2"],metNBinsTR,metBinLowTR,metBinHighTR)
@@ -883,8 +905,8 @@ if doValidationSlope:
     [metTR_Mu.getSample(sam).addSystematic(jesLow) for sam in BGList]
     [metTR_Mu.getSample(sam).addSystematic(jesMedium) for sam in BGList]
     [metTR_Mu.getSample(sam).addSystematic(jesHigh) for sam in BGList]
-    [metTR_Mu.getSample(sam).addSystematic(lepTR) for sam in BGList]
-    [metTR_Mu.getSample(sam).addSystematic(btagTR) for sam in BGList]
+    [metTR_Mu.getSample(sam).addSystematic(lepTR) for sam in SigList+BGList]
+    [metTR_Mu.getSample(sam).addSystematic(btagTR) for sam in SigList+BGList]
     [metTR_Mu.getSample(sam).addSystematic(zpT0GeV) for sam in BGList]
     [metTR_Mu.getSample(sam).addSystematic(zpT50GeV) for sam in BGList]
     [metTR_Mu.getSample(sam).addSystematic(zpT100GeV) for sam in BGList]
@@ -892,12 +914,12 @@ if doValidationSlope:
     [metTR_Mu.getSample(sam).addSystematic(zpT200GeV) for sam in BGList]
 
     if fullSyst:
-        [metTR_Mu.getSample(sam).addSystematic(metcoTR) for sam in BGList]
-        [metTR_Mu.getSample(sam).addSystematic(metpuTR) for sam in BGList]
-        [metTR_Mu.getSample(sam).addSystematic(trigTR) for sam in BGList]
-        [metTR_Mu.getSample(sam).addSystematic(lesTR) for sam in BGList]
-        [metTR_Mu.getSample(sam).addSystematic(lermsTR) for sam in BGList]
-        [metTR_Mu.getSample(sam).addSystematic(leridTR) for sam in BGList]
+        [metTR_Mu.getSample(sam).addSystematic(metcoTR) for sam in SigList+BGList]
+        [metTR_Mu.getSample(sam).addSystematic(metpuTR) for sam in SigList+BGList]
+        [metTR_Mu.getSample(sam).addSystematic(trigTR) for sam in SigList+BGList]
+        [metTR_Mu.getSample(sam).addSystematic(lesTR) for sam in SigList+BGList]
+        [metTR_Mu.getSample(sam).addSystematic(lermsTR) for sam in SigList+BGList]
+        [metTR_Mu.getSample(sam).addSystematic(leridTR) for sam in SigList+BGList]
 
 
     pt1TR_El=bkgOnly.addChannel("jet1Pt",["TRElVR"],pt1NBinsTR,pt1BinLowTR,pt1BinHighTR)
@@ -907,8 +929,8 @@ if doValidationSlope:
     [pt1TR_El.getSample(sam).addSystematic(jesLow) for sam in BGList]
     [pt1TR_El.getSample(sam).addSystematic(jesMedium) for sam in BGList]
     [pt1TR_El.getSample(sam).addSystematic(jesHigh) for sam in BGList]
-    [pt1TR_El.getSample(sam).addSystematic(lepTR) for sam in BGList]
-    [pt1TR_El.getSample(sam).addSystematic(btagTR) for sam in BGList]
+    [pt1TR_El.getSample(sam).addSystematic(lepTR) for sam in SigList+BGList]
+    [pt1TR_El.getSample(sam).addSystematic(btagTR) for sam in SigList+BGList]
     [pt1TR_El.getSample(sam).addSystematic(zpT0GeV) for sam in BGList]
     [pt1TR_El.getSample(sam).addSystematic(zpT50GeV) for sam in BGList]
     [pt1TR_El.getSample(sam).addSystematic(zpT100GeV) for sam in BGList]
@@ -916,12 +938,12 @@ if doValidationSlope:
     [pt1TR_El.getSample(sam).addSystematic(zpT200GeV) for sam in BGList]
 
     if fullSyst:
-        [pt1TR_El.getSample(sam).addSystematic(metcoTR) for sam in BGList]
-        [pt1TR_El.getSample(sam).addSystematic(metpuTR) for sam in BGList]
-        [pt1TR_El.getSample(sam).addSystematic(trigTR) for sam in BGList]
-        [pt1TR_El.getSample(sam).addSystematic(lesTR) for sam in BGList]
-        [pt1TR_El.getSample(sam).addSystematic(lermsTR) for sam in BGList]
-        [pt1TR_El.getSample(sam).addSystematic(leridTR) for sam in BGList]
+        [pt1TR_El.getSample(sam).addSystematic(metcoTR) for sam in SigList+BGList]
+        [pt1TR_El.getSample(sam).addSystematic(metpuTR) for sam in SigList+BGList]
+        [pt1TR_El.getSample(sam).addSystematic(trigTR) for sam in SigList+BGList]
+        [pt1TR_El.getSample(sam).addSystematic(lesTR) for sam in SigList+BGList]
+        [pt1TR_El.getSample(sam).addSystematic(lermsTR) for sam in SigList+BGList]
+        [pt1TR_El.getSample(sam).addSystematic(leridTR) for sam in SigList+BGList]
 
 
     pt1TR_Mu=bkgOnly.addChannel("jet1Pt",["TRMuVR"],pt1NBinsTR,pt1BinLowTR,pt1BinHighTR)
@@ -931,8 +953,8 @@ if doValidationSlope:
     [pt1TR_Mu.getSample(sam).addSystematic(jesLow) for sam in BGList]
     [pt1TR_Mu.getSample(sam).addSystematic(jesMedium) for sam in BGList]
     [pt1TR_Mu.getSample(sam).addSystematic(jesHigh) for sam in BGList]
-    [pt1TR_Mu.getSample(sam).addSystematic(lepTR) for sam in BGList]
-    [pt1TR_Mu.getSample(sam).addSystematic(btagTR) for sam in BGList]
+    [pt1TR_Mu.getSample(sam).addSystematic(lepTR) for sam in SigList+BGList]
+    [pt1TR_Mu.getSample(sam).addSystematic(btagTR) for sam in SigList+BGList]
     [pt1TR_Mu.getSample(sam).addSystematic(zpT0GeV) for sam in BGList]
     [pt1TR_Mu.getSample(sam).addSystematic(zpT50GeV) for sam in BGList]
     [pt1TR_Mu.getSample(sam).addSystematic(zpT100GeV) for sam in BGList]
@@ -940,12 +962,12 @@ if doValidationSlope:
     [pt1TR_Mu.getSample(sam).addSystematic(zpT200GeV) for sam in BGList]
 
     if fullSyst:
-        [pt1TR_Mu.getSample(sam).addSystematic(metcoTR) for sam in BGList]
-        [pt1TR_Mu.getSample(sam).addSystematic(metpuTR) for sam in BGList]
-        [pt1TR_Mu.getSample(sam).addSystematic(trigTR) for sam in BGList]
-        [pt1TR_Mu.getSample(sam).addSystematic(lesTR) for sam in BGList]
-        [pt1TR_Mu.getSample(sam).addSystematic(lermsTR) for sam in BGList]
-        [pt1TR_Mu.getSample(sam).addSystematic(leridTR) for sam in BGList]
+        [pt1TR_Mu.getSample(sam).addSystematic(metcoTR) for sam in SigList+BGList]
+        [pt1TR_Mu.getSample(sam).addSystematic(metpuTR) for sam in SigList+BGList]
+        [pt1TR_Mu.getSample(sam).addSystematic(trigTR) for sam in SigList+BGList]
+        [pt1TR_Mu.getSample(sam).addSystematic(lesTR) for sam in SigList+BGList]
+        [pt1TR_Mu.getSample(sam).addSystematic(lermsTR) for sam in SigList+BGList]
+        [pt1TR_Mu.getSample(sam).addSystematic(leridTR) for sam in SigList+BGList]
 
         
         
@@ -956,8 +978,8 @@ if doValidationSlope:
     [pt2TR_El.getSample(sam).addSystematic(jesLow) for sam in BGList]
     [pt2TR_El.getSample(sam).addSystematic(jesMedium) for sam in BGList]
     [pt2TR_El.getSample(sam).addSystematic(jesHigh) for sam in BGList]
-    [pt2TR_El.getSample(sam).addSystematic(lepTR) for sam in BGList]
-    [pt2TR_El.getSample(sam).addSystematic(btagTR) for sam in BGList]
+    [pt2TR_El.getSample(sam).addSystematic(lepTR) for sam in SigList+BGList]
+    [pt2TR_El.getSample(sam).addSystematic(btagTR) for sam in SigList+BGList]
     [pt2TR_El.getSample(sam).addSystematic(zpT0GeV) for sam in BGList]
     [pt2TR_El.getSample(sam).addSystematic(zpT50GeV) for sam in BGList]
     [pt2TR_El.getSample(sam).addSystematic(zpT100GeV) for sam in BGList]
@@ -965,12 +987,12 @@ if doValidationSlope:
     [pt2TR_El.getSample(sam).addSystematic(zpT200GeV) for sam in BGList]
 
     if fullSyst:
-        [pt2TR_El.getSample(sam).addSystematic(metcoTR) for sam in BGList]
-        [pt2TR_El.getSample(sam).addSystematic(metpuTR) for sam in BGList]
-        [pt2TR_El.getSample(sam).addSystematic(trigTR) for sam in BGList]
-        [pt2TR_El.getSample(sam).addSystematic(lesTR) for sam in BGList]
-        [pt2TR_El.getSample(sam).addSystematic(lermsTR) for sam in BGList]
-        [pt2TR_El.getSample(sam).addSystematic(leridTR) for sam in BGList]
+        [pt2TR_El.getSample(sam).addSystematic(metcoTR) for sam in SigList+BGList]
+        [pt2TR_El.getSample(sam).addSystematic(metpuTR) for sam in SigList+BGList]
+        [pt2TR_El.getSample(sam).addSystematic(trigTR) for sam in SigList+BGList]
+        [pt2TR_El.getSample(sam).addSystematic(lesTR) for sam in SigList+BGList]
+        [pt2TR_El.getSample(sam).addSystematic(lermsTR) for sam in SigList+BGList]
+        [pt2TR_El.getSample(sam).addSystematic(leridTR) for sam in SigList+BGList]
 
 
     pt2TR_Mu=bkgOnly.addChannel("jet2Pt",["TRMuVR"],pt2NBinsTR,pt2BinLowTR,pt2BinHighTR)
@@ -980,8 +1002,8 @@ if doValidationSlope:
     [pt2TR_Mu.getSample(sam).addSystematic(jesLow) for sam in BGList]
     [pt2TR_Mu.getSample(sam).addSystematic(jesMedium) for sam in BGList]
     [pt2TR_Mu.getSample(sam).addSystematic(jesHigh) for sam in BGList]
-    [pt2TR_Mu.getSample(sam).addSystematic(lepTR) for sam in BGList]
-    [pt2TR_Mu.getSample(sam).addSystematic(btagTR) for sam in BGList]
+    [pt2TR_Mu.getSample(sam).addSystematic(lepTR) for sam in SigList+BGList]
+    [pt2TR_Mu.getSample(sam).addSystematic(btagTR) for sam in SigList+BGList]
     [pt2TR_Mu.getSample(sam).addSystematic(zpT0GeV) for sam in BGList]
     [pt2TR_Mu.getSample(sam).addSystematic(zpT50GeV) for sam in BGList]
     [pt2TR_Mu.getSample(sam).addSystematic(zpT100GeV) for sam in BGList]
@@ -989,12 +1011,12 @@ if doValidationSlope:
     [pt2TR_Mu.getSample(sam).addSystematic(zpT200GeV) for sam in BGList]
 
     if fullSyst:
-        [pt2TR_Mu.getSample(sam).addSystematic(metcoTR) for sam in BGList]
-        [pt2TR_Mu.getSample(sam).addSystematic(metpuTR) for sam in BGList]
-        [pt2TR_Mu.getSample(sam).addSystematic(trigTR) for sam in BGList]
-        [pt2TR_Mu.getSample(sam).addSystematic(lesTR) for sam in BGList]
-        [pt2TR_Mu.getSample(sam).addSystematic(lermsTR) for sam in BGList]
-        [pt2TR_Mu.getSample(sam).addSystematic(leridTR) for sam in BGList] 
+        [pt2TR_Mu.getSample(sam).addSystematic(metcoTR) for sam in SigList+BGList]
+        [pt2TR_Mu.getSample(sam).addSystematic(metpuTR) for sam in SigList+BGList]
+        [pt2TR_Mu.getSample(sam).addSystematic(trigTR) for sam in SigList+BGList]
+        [pt2TR_Mu.getSample(sam).addSystematic(lesTR) for sam in SigList+BGList]
+        [pt2TR_Mu.getSample(sam).addSystematic(lermsTR) for sam in SigList+BGList]
+        [pt2TR_Mu.getSample(sam).addSystematic(leridTR) for sam in SigList+BGList] 
 
     wptWR_El=bkgOnly.addChannel("Wpt",["WRElVR"],metNBinsTR,metBinLowTR,metBinHighTR)
     wptWR_El.hasB = True
@@ -1003,8 +1025,8 @@ if doValidationSlope:
     [wptWR_El.getSample(sam).addSystematic(jesLow) for sam in BGList]
     [wptWR_El.getSample(sam).addSystematic(jesMedium) for sam in BGList]
     [wptWR_El.getSample(sam).addSystematic(jesHigh) for sam in BGList]
-    [wptWR_El.getSample(sam).addSystematic(lepTR) for sam in BGList]
-    [wptWR_El.getSample(sam).addSystematic(btagTR) for sam in BGList]
+    [wptWR_El.getSample(sam).addSystematic(lepTR) for sam in SigList+BGList]
+    [wptWR_El.getSample(sam).addSystematic(btagTR) for sam in SigList+BGList]
     [wptWR_El.getSample(sam).addSystematic(zpT0GeV) for sam in BGList]
     [wptWR_El.getSample(sam).addSystematic(zpT50GeV) for sam in BGList]
     [wptWR_El.getSample(sam).addSystematic(zpT100GeV) for sam in BGList]
@@ -1012,12 +1034,12 @@ if doValidationSlope:
     [wptWR_El.getSample(sam).addSystematic(zpT200GeV) for sam in BGList]
 
     if fullSyst:
-        [wptWR_El.getSample(sam).addSystematic(metcoTR) for sam in BGList]
-        [wptWR_El.getSample(sam).addSystematic(metpuTR) for sam in BGList]
-        [wptWR_El.getSample(sam).addSystematic(trigTR) for sam in BGList]
-        [wptWR_El.getSample(sam).addSystematic(lesTR) for sam in BGList]
-        [wptWR_El.getSample(sam).addSystematic(lermsTR) for sam in BGList]
-        [wptWR_El.getSample(sam).addSystematic(leridTR) for sam in BGList]
+        [wptWR_El.getSample(sam).addSystematic(metcoTR) for sam in SigList+BGList]
+        [wptWR_El.getSample(sam).addSystematic(metpuTR) for sam in SigList+BGList]
+        [wptWR_El.getSample(sam).addSystematic(trigTR) for sam in SigList+BGList]
+        [wptWR_El.getSample(sam).addSystematic(lesTR) for sam in SigList+BGList]
+        [wptWR_El.getSample(sam).addSystematic(lermsTR) for sam in SigList+BGList]
+        [wptWR_El.getSample(sam).addSystematic(leridTR) for sam in SigList+BGList]
 
 
     wptWR_Mu=bkgOnly.addChannel("Wpt",["WRMuVR"],metNBinsTR,metBinLowTR,metBinHighTR)
@@ -1027,8 +1049,8 @@ if doValidationSlope:
     [wptWR_Mu.getSample(sam).addSystematic(jesLow) for sam in BGList]
     [wptWR_Mu.getSample(sam).addSystematic(jesMedium) for sam in BGList]
     [wptWR_Mu.getSample(sam).addSystematic(jesHigh) for sam in BGList]
-    [wptWR_Mu.getSample(sam).addSystematic(lepTR) for sam in BGList]
-    [wptWR_Mu.getSample(sam).addSystematic(btagTR) for sam in BGList]
+    [wptWR_Mu.getSample(sam).addSystematic(lepTR) for sam in SigList+BGList]
+    [wptWR_Mu.getSample(sam).addSystematic(btagTR) for sam in SigList+BGList]
     [wptWR_Mu.getSample(sam).addSystematic(zpT0GeV) for sam in BGList]
     [wptWR_Mu.getSample(sam).addSystematic(zpT50GeV) for sam in BGList]
     [wptWR_Mu.getSample(sam).addSystematic(zpT100GeV) for sam in BGList]
@@ -1036,12 +1058,12 @@ if doValidationSlope:
     [wptWR_Mu.getSample(sam).addSystematic(zpT200GeV) for sam in BGList]
 
     if fullSyst:
-        [wptWR_Mu.getSample(sam).addSystematic(metcoTR) for sam in BGList]
-        [wptWR_Mu.getSample(sam).addSystematic(metpuTR) for sam in BGList]
-        [wptWR_Mu.getSample(sam).addSystematic(trigTR) for sam in BGList]
-        [wptWR_Mu.getSample(sam).addSystematic(lesTR) for sam in BGList]
-        [wptWR_Mu.getSample(sam).addSystematic(lermsTR) for sam in BGList]
-        [wptWR_Mu.getSample(sam).addSystematic(leridTR) for sam in BGList]
+        [wptWR_Mu.getSample(sam).addSystematic(metcoTR) for sam in SigList+BGList]
+        [wptWR_Mu.getSample(sam).addSystematic(metpuTR) for sam in SigList+BGList]
+        [wptWR_Mu.getSample(sam).addSystematic(trigTR) for sam in SigList+BGList]
+        [wptWR_Mu.getSample(sam).addSystematic(lesTR) for sam in SigList+BGList]
+        [wptWR_Mu.getSample(sam).addSystematic(lermsTR) for sam in SigList+BGList]
+        [wptWR_Mu.getSample(sam).addSystematic(leridTR) for sam in SigList+BGList]
 
 
     metWR_El=bkgOnly.addChannel("met",["WRElVR"],metNBinsTR,metBinLowTR,metBinHighTR)
@@ -1051,8 +1073,8 @@ if doValidationSlope:
     [metWR_El.getSample(sam).addSystematic(jesLow) for sam in BGList]
     [metWR_El.getSample(sam).addSystematic(jesMedium) for sam in BGList]
     [metWR_El.getSample(sam).addSystematic(jesHigh) for sam in BGList]
-    [metWR_El.getSample(sam).addSystematic(lepTR) for sam in BGList]
-    [metWR_El.getSample(sam).addSystematic(btagTR) for sam in BGList]
+    [metWR_El.getSample(sam).addSystematic(lepTR) for sam in SigList+BGList]
+    [metWR_El.getSample(sam).addSystematic(btagTR) for sam in SigList+BGList]
     [metWR_El.getSample(sam).addSystematic(zpT0GeV) for sam in BGList]
     [metWR_El.getSample(sam).addSystematic(zpT50GeV) for sam in BGList]
     [metWR_El.getSample(sam).addSystematic(zpT100GeV) for sam in BGList]
@@ -1060,12 +1082,12 @@ if doValidationSlope:
     [metWR_El.getSample(sam).addSystematic(zpT200GeV) for sam in BGList]
 
     if fullSyst:
-        [metWR_El.getSample(sam).addSystematic(metcoTR) for sam in BGList]
-        [metWR_El.getSample(sam).addSystematic(metpuTR) for sam in BGList]
-        [metWR_El.getSample(sam).addSystematic(trigTR) for sam in BGList]
-        [metWR_El.getSample(sam).addSystematic(lesTR) for sam in BGList]
-        [metWR_El.getSample(sam).addSystematic(lermsTR) for sam in BGList]
-        [metWR_El.getSample(sam).addSystematic(leridTR) for sam in BGList]
+        [metWR_El.getSample(sam).addSystematic(metcoTR) for sam in SigList+BGList]
+        [metWR_El.getSample(sam).addSystematic(metpuTR) for sam in SigList+BGList]
+        [metWR_El.getSample(sam).addSystematic(trigTR) for sam in SigList+BGList]
+        [metWR_El.getSample(sam).addSystematic(lesTR) for sam in SigList+BGList]
+        [metWR_El.getSample(sam).addSystematic(lermsTR) for sam in SigList+BGList]
+        [metWR_El.getSample(sam).addSystematic(leridTR) for sam in SigList+BGList]
 
 
     metWR_Mu=bkgOnly.addChannel("met",["WRMuVR"],metNBinsTR,metBinLowTR,metBinHighTR)
@@ -1075,8 +1097,8 @@ if doValidationSlope:
     [metWR_Mu.getSample(sam).addSystematic(jesLow) for sam in BGList]
     [metWR_Mu.getSample(sam).addSystematic(jesMedium) for sam in BGList]
     [metWR_Mu.getSample(sam).addSystematic(jesHigh) for sam in BGList]
-    [metWR_Mu.getSample(sam).addSystematic(lepTR) for sam in BGList]
-    [metWR_Mu.getSample(sam).addSystematic(btagTR) for sam in BGList]
+    [metWR_Mu.getSample(sam).addSystematic(lepTR) for sam in SigList+BGList]
+    [metWR_Mu.getSample(sam).addSystematic(btagTR) for sam in SigList+BGList]
     [metWR_Mu.getSample(sam).addSystematic(zpT0GeV) for sam in BGList]
     [metWR_Mu.getSample(sam).addSystematic(zpT50GeV) for sam in BGList]
     [metWR_Mu.getSample(sam).addSystematic(zpT100GeV) for sam in BGList]
@@ -1084,12 +1106,12 @@ if doValidationSlope:
     [metWR_Mu.getSample(sam).addSystematic(zpT200GeV) for sam in BGList]
 
     if fullSyst:
-        [metWR_Mu.getSample(sam).addSystematic(metcoTR) for sam in BGList]
-        [metWR_Mu.getSample(sam).addSystematic(metpuTR) for sam in BGList]
-        [metWR_Mu.getSample(sam).addSystematic(trigTR) for sam in BGList]
-        [metWR_Mu.getSample(sam).addSystematic(lesTR) for sam in BGList]
-        [metWR_Mu.getSample(sam).addSystematic(lermsTR) for sam in BGList]
-        [metWR_Mu.getSample(sam).addSystematic(leridTR) for sam in BGList]       
+        [metWR_Mu.getSample(sam).addSystematic(metcoTR) for sam in SigList+BGList]
+        [metWR_Mu.getSample(sam).addSystematic(metpuTR) for sam in SigList+BGList]
+        [metWR_Mu.getSample(sam).addSystematic(trigTR) for sam in SigList+BGList]
+        [metWR_Mu.getSample(sam).addSystematic(lesTR) for sam in SigList+BGList]
+        [metWR_Mu.getSample(sam).addSystematic(lermsTR) for sam in SigList+BGList]
+        [metWR_Mu.getSample(sam).addSystematic(leridTR) for sam in SigList+BGList]       
 
     ZptZR_ee=bkgOnly.addChannel("Zpt",["ZRee"],metNBinsTR,metBinLowTR,metBinHighTR)
     ZptZR_ee.hasB = False
@@ -1098,7 +1120,7 @@ if doValidationSlope:
     [ZptZR_ee.getSample(sam).addSystematic(jesLow) for sam in BGList]
     [ZptZR_ee.getSample(sam).addSystematic(jesMedium) for sam in BGList]
     [ZptZR_ee.getSample(sam).addSystematic(jesHigh) for sam in BGList]
-    [ZptZR_ee.getSample(sam).addSystematic(lepTR) for sam in BGList]
+    [ZptZR_ee.getSample(sam).addSystematic(lepTR) for sam in SigList+BGList]
     [ZptZR_ee.getSample(sam).addSystematic(zpT0GeV) for sam in BGList]
     [ZptZR_ee.getSample(sam).addSystematic(zpT50GeV) for sam in BGList]
     [ZptZR_ee.getSample(sam).addSystematic(zpT100GeV) for sam in BGList]
@@ -1106,12 +1128,12 @@ if doValidationSlope:
     [ZptZR_ee.getSample(sam).addSystematic(zpT200GeV) for sam in BGList]
 
     if fullSyst:
-        [ZptZR_ee.getSample(sam).addSystematic(metcoTR) for sam in BGList]
-        [ZptZR_ee.getSample(sam).addSystematic(metpuTR) for sam in BGList]
-        [ZptZR_ee.getSample(sam).addSystematic(trigTR) for sam in BGList]
-        [ZptZR_ee.getSample(sam).addSystematic(lesTR) for sam in BGList]
-        [ZptZR_ee.getSample(sam).addSystematic(lermsTR) for sam in BGList]
-        [ZptZR_ee.getSample(sam).addSystematic(leridTR) for sam in BGList]
+        [ZptZR_ee.getSample(sam).addSystematic(metcoTR) for sam in SigList+BGList]
+        [ZptZR_ee.getSample(sam).addSystematic(metpuTR) for sam in SigList+BGList]
+        [ZptZR_ee.getSample(sam).addSystematic(trigTR) for sam in SigList+BGList]
+        [ZptZR_ee.getSample(sam).addSystematic(lesTR) for sam in SigList+BGList]
+        [ZptZR_ee.getSample(sam).addSystematic(lermsTR) for sam in SigList+BGList]
+        [ZptZR_ee.getSample(sam).addSystematic(leridTR) for sam in SigList+BGList]
 
     ZptZRY_ee=bkgOnly.addChannel("Zpt",["ZReeY"],metNBinsTR,metBinLowTR,metBinHighTR)
     ZptZRY_ee.hasB = False
@@ -1120,7 +1142,7 @@ if doValidationSlope:
     [ZptZRY_ee.getSample(sam).addSystematic(jesLow) for sam in BGList]
     [ZptZRY_ee.getSample(sam).addSystematic(jesMedium) for sam in BGList]
     [ZptZRY_ee.getSample(sam).addSystematic(jesHigh) for sam in BGList]
-    [ZptZRY_ee.getSample(sam).addSystematic(lepTR) for sam in BGList]
+    [ZptZRY_ee.getSample(sam).addSystematic(lepTR) for sam in SigList+BGList]
     [ZptZRY_ee.getSample(sam).addSystematic(zpT0GeV) for sam in BGList]
     [ZptZRY_ee.getSample(sam).addSystematic(zpT50GeV) for sam in BGList]
     [ZptZRY_ee.getSample(sam).addSystematic(zpT100GeV) for sam in BGList]
@@ -1128,12 +1150,12 @@ if doValidationSlope:
     [ZptZRY_ee.getSample(sam).addSystematic(zpT200GeV) for sam in BGList]
 
     if fullSyst:
-        [ZptZRY_ee.getSample(sam).addSystematic(metcoTR) for sam in BGList]
-        [ZptZRY_ee.getSample(sam).addSystematic(metpuTR) for sam in BGList]
-        [ZptZRY_ee.getSample(sam).addSystematic(trigTR) for sam in BGList]
-        [ZptZRY_ee.getSample(sam).addSystematic(lesTR) for sam in BGList]
-        [ZptZRY_ee.getSample(sam).addSystematic(lermsTR) for sam in BGList]
-        [ZptZRY_ee.getSample(sam).addSystematic(leridTR) for sam in BGList]    
+        [ZptZRY_ee.getSample(sam).addSystematic(metcoTR) for sam in SigList+BGList]
+        [ZptZRY_ee.getSample(sam).addSystematic(metpuTR) for sam in SigList+BGList]
+        [ZptZRY_ee.getSample(sam).addSystematic(trigTR) for sam in SigList+BGList]
+        [ZptZRY_ee.getSample(sam).addSystematic(lesTR) for sam in SigList+BGList]
+        [ZptZRY_ee.getSample(sam).addSystematic(lermsTR) for sam in SigList+BGList]
+        [ZptZRY_ee.getSample(sam).addSystematic(leridTR) for sam in SigList+BGList]    
 
 
     ZptZR_mm=bkgOnly.addChannel("Zpt",["ZRmm"],metNBinsTR,metBinLowTR,metBinHighTR)
@@ -1143,7 +1165,7 @@ if doValidationSlope:
     [ZptZR_mm.getSample(sam).addSystematic(jesLow) for sam in BGList]
     [ZptZR_mm.getSample(sam).addSystematic(jesMedium) for sam in BGList]
     [ZptZR_mm.getSample(sam).addSystematic(jesHigh) for sam in BGList]
-    [ZptZR_mm.getSample(sam).addSystematic(lepTR) for sam in BGList]
+    [ZptZR_mm.getSample(sam).addSystematic(lepTR) for sam in SigList+BGList]
     [ZptZR_mm.getSample(sam).addSystematic(zpT0GeV) for sam in BGList]
     [ZptZR_mm.getSample(sam).addSystematic(zpT50GeV) for sam in BGList]
     [ZptZR_mm.getSample(sam).addSystematic(zpT100GeV) for sam in BGList]
@@ -1151,12 +1173,12 @@ if doValidationSlope:
     [ZptZR_mm.getSample(sam).addSystematic(zpT200GeV) for sam in BGList]
 
     if fullSyst:
-        [ZptZR_mm.getSample(sam).addSystematic(metcoTR) for sam in BGList]
-        [ZptZR_mm.getSample(sam).addSystematic(metpuTR) for sam in BGList]
-        [ZptZR_mm.getSample(sam).addSystematic(trigTR) for sam in BGList]
-        [ZptZR_mm.getSample(sam).addSystematic(lesTR) for sam in BGList]
-        [ZptZR_mm.getSample(sam).addSystematic(lermsTR) for sam in BGList]
-        [ZptZR_mm.getSample(sam).addSystematic(leridTR) for sam in BGList]
+        [ZptZR_mwm.getSample(sam).addSystematic(metcoTR) for sam in SigList+BGList]
+        [ZptZR_mm.getSample(sam).addSystematic(metpuTR) for sam in SigList+BGList]
+        [ZptZR_mm.getSample(sam).addSystematic(trigTR) for sam in SigList+BGList]
+        [ZptZR_mm.getSample(sam).addSystematic(lesTR) for sam in SigList+BGList]
+        [ZptZR_mm.getSample(sam).addSystematic(lermsTR) for sam in SigList+BGList]
+        [ZptZR_mm.getSample(sam).addSystematic(leridTR) for sam in SigList+BGList]
 
     ZptZRY_mm=bkgOnly.addChannel("Zpt",["ZRmmY"],metNBinsTR,metBinLowTR,metBinHighTR)
     ZptZRY_mm.hasB = False
@@ -1165,7 +1187,7 @@ if doValidationSlope:
     [ZptZRY_mm.getSample(sam).addSystematic(jesLow) for sam in BGList]
     [ZptZRY_mm.getSample(sam).addSystematic(jesMedium) for sam in BGList]
     [ZptZRY_mm.getSample(sam).addSystematic(jesHigh) for sam in BGList]
-    [ZptZRY_mm.getSample(sam).addSystematic(lepTR) for sam in BGList]
+    [ZptZRY_mm.getSample(sam).addSystematic(lepTR) for sam in SigList+BGList]
     [ZptZRY_mm.getSample(sam).addSystematic(zpT0GeV) for sam in BGList]
     [ZptZRY_mm.getSample(sam).addSystematic(zpT50GeV) for sam in BGList]
     [ZptZRY_mm.getSample(sam).addSystematic(zpT100GeV) for sam in BGList]
@@ -1173,12 +1195,12 @@ if doValidationSlope:
     [ZptZRY_mm.getSample(sam).addSystematic(zpT200GeV) for sam in BGList]
 
     if fullSyst:
-        [ZptZRY_mm.getSample(sam).addSystematic(metcoTR) for sam in BGList]
-        [ZptZRY_mm.getSample(sam).addSystematic(metpuTR) for sam in BGList]
-        [ZptZRY_mm.getSample(sam).addSystematic(trigTR) for sam in BGList]
-        [ZptZRY_mm.getSample(sam).addSystematic(lesTR) for sam in BGList]
-        [ZptZRY_mm.getSample(sam).addSystematic(lermsTR) for sam in BGList]
-        [ZptZRY_mm.getSample(sam).addSystematic(leridTR) for sam in BGList]    
+        [ZptZRY_mm.getSample(sam).addSystematic(metcoTR) for sam in SigList+BGList]
+        [ZptZRY_mm.getSample(sam).addSystematic(metpuTR) for sam in SigList+BGList]
+        [ZptZRY_mm.getSample(sam).addSystematic(trigTR) for sam in SigList+BGList]
+        [ZptZRY_mm.getSample(sam).addSystematic(lesTR) for sam in SigList+BGList]
+        [ZptZRY_mm.getSample(sam).addSystematic(lermsTR) for sam in SigList+BGList]
+        [ZptZRY_mm.getSample(sam).addSystematic(leridTR) for sam in SigList+BGList]    
 
 
 if doValidationSR:
@@ -1190,7 +1212,7 @@ if doValidationSR:
     [meff2ee.getSample(sam).addSystematic(jesMedium) for sam in BGList]
     [meff2ee.getSample(sam).addSystematic(jesHigh) for sam in BGList]  
     #[s.mergeSamples([topSample_Np0.name,wzSample_Np0.name,topSample_Np1.name,wzSample_Np1.name,topSample_Np2.name,wzSample_Np2.name,topSample_Np3.name,wzSample_Np3.name,topSample_Np4.name,wzSample_Np4.name,topSample_Np5.name,wzSample_Np5.name,bgSample.name]) for s in meff2ee.getSystematic(jesS2DL.name)]
-    meff2ee.addSystematic(lepS2DL)
+    [meff2ee.getSample(sam).addSystematic(lepS2DL) for sam in SigList+BGList]
     [meff2ee.getSample(sam).addSystematic(zpT0GeV) for sam in BGList]
     [meff2ee.getSample(sam).addSystematic(zpT50GeV) for sam in BGList]
     [meff2ee.getSample(sam).addSystematic(zpT100GeV) for sam in BGList]
@@ -1198,12 +1220,12 @@ if doValidationSR:
     [meff2ee.getSample(sam).addSystematic(zpT200GeV) for sam in BGList]
     
     if fullSyst:
-        meff2ee.addSystematic(metcoS2DL)
-        meff2ee.addSystematic(metpuS2DL)
-        meff2ee.addSystematic(trigS2DL)
-        meff2ee.addSystematic(lesS2DL)
-        meff2ee.addSystematic(lermsS2DL)
-        meff2ee.addSystematic(leridS2DL)
+        [meff2ee.getSample(sam).addSystematic(metcoS2DL) for sam in SigList+BGList]
+        [meff2ee.getSample(sam).addSystematic(metpuS2DL) for sam in SigList+BGList]
+        [meff2ee.getSample(sam).addSystematic(trigS2DL) for sam in SigList+BGList]
+        [meff2ee.getSample(sam).addSystematic(lesS2DL) for sam in SigList+BGList]
+        [meff2ee.getSample(sam).addSystematic(lermsS2DL) for sam in SigList+BGList]
+        [meff2ee.getSample(sam).addSystematic(leridS2DL) for sam in SigList+BGList]
 
     # S4 using meff
     meff4ee = bkgOnly.addChannel("meffInc",["S4ee"],meffNBins,meffBinLow,meffBinHigh)
@@ -1212,7 +1234,7 @@ if doValidationSR:
     [meff4ee.getSample(sam).addSystematic(jesMedium) for sam in BGList]
     [meff4ee.getSample(sam).addSystematic(jesHigh) for sam in BGList]  
     #[s.mergeSamples([topSample_Np0.name,wzSample_Np0.name,topSample_Np1.name,wzSample_Np1.name,topSample_Np2.name,wzSample_Np2.name,topSample_Np3.name,wzSample_Np3.name,topSample_Np4.name,wzSample_Np4.name,topSample_Np5.name,wzSample_Np5.name,bgSample.name]) for s in meff4ee.getSystematic(jesS4DL.name)]
-    meff4ee.addSystematic(lepS4DL)
+    [meff4ee.getSample(sam).addSystematic(lepS4DL) for sam in SigList+BGList]
     [meff4ee.getSample(sam).addSystematic(zpT0GeV) for sam in BGList]
     [meff4ee.getSample(sam).addSystematic(zpT50GeV) for sam in BGList]
     [meff4ee.getSample(sam).addSystematic(zpT100GeV) for sam in BGList]
@@ -1220,12 +1242,12 @@ if doValidationSR:
     [meff4ee.getSample(sam).addSystematic(zpT200GeV) for sam in BGList]
     
     if fullSyst:
-        meff4ee.addSystematic(metcoS4DL)
-        meff4ee.addSystematic(metpuS4DL)
-        meff4ee.addSystematic(trigS4DL)
-        meff4ee.addSystematic(lesS4DL)
-        meff4ee.addSystematic(lermsS4DL)
-        meff4ee.addSystematic(leridS4DL)
+        [meff4ee.getSample(sam).addSystematic(metcoS4DL) for sam in SigList+BGList]
+        [meff4ee.getSample(sam).addSystematic(metpuS4DL) for sam in SigList+BGList]
+        [meff4ee.getSample(sam).addSystematic(trigS4DL) for sam in SigList+BGList]
+        [meff4ee.getSample(sam).addSystematic(lesS4DL) for sam in SigList+BGList]
+        [meff4ee.getSample(sam).addSystematic(lermsS4DL) for sam in SigList+BGList]
+        [meff4ee.getSample(sam).addSystematic(leridS4DL) for sam in SigList+BGList]
 
     # S2 using meff
     meff2em = bkgOnly.addChannel("meffInc",["S2em"],meffNBins,meffBinLow,meffBinHigh)
@@ -1234,7 +1256,7 @@ if doValidationSR:
     [meff2em.getSample(sam).addSystematic(jesMedium) for sam in BGList]
     [meff2em.getSample(sam).addSystematic(jesHigh) for sam in BGList] 
     #[s.mergeSamples([topSample_Np0.name,wzSample_Np0.name,topSample_Np1.name,wzSample_Np1.name,topSample_Np2.name,wzSample_Np2.name,topSample_Np3.name,wzSample_Np3.name,topSample_Np4.name,wzSample_Np4.name,topSample_Np5.name,wzSample_Np5.name,bgSample.name]) for s in meff2em.getSystematic(jesS2DL.name)]
-    meff2em.addSystematic(lepS2DL)
+    [meff2em.getSample(sam).addSystematic(lepS2DL) for sam in SigList+BGList]
     [meff2em.getSample(sam).addSystematic(zpT0GeV) for sam in BGList]
     [meff2em.getSample(sam).addSystematic(zpT50GeV) for sam in BGList]
     [meff2em.getSample(sam).addSystematic(zpT100GeV) for sam in BGList]
@@ -1242,12 +1264,12 @@ if doValidationSR:
     [meff2em.getSample(sam).addSystematic(zpT200GeV) for sam in BGList]
 
     if fullSyst:
-        meff2em.addSystematic(metcoS2DL)
-        meff2em.addSystematic(metpuS2DL)
-        meff2em.addSystematic(trigS2DL)
-        meff2em.addSystematic(lesS2DL)
-        meff2em.addSystematic(lermsS2DL)
-        meff2em.addSystematic(leridS2DL)
+        [meff2em.getSample(sam).addSystematic(metcoS2DL) for sam in SigList+BGList]
+        [meff2em.getSample(sam).addSystematic(metpuS2DL) for sam in SigList+BGList]
+        [meff2em.getSample(sam).addSystematic(trigS2DL) for sam in SigList+BGList]
+        [meff2em.getSample(sam).addSystematic(lesS2DL) for sam in SigList+BGList]
+        [meff2em.getSample(sam).addSystematic(lermsS2DL) for sam in SigList+BGList]
+        [meff2em.getSample(sam).addSystematic(leridS2DL) for sam in SigList+BGList]
 
     # S4 using meff
     meff4em = bkgOnly.addChannel("meffInc",["S4em"],meffNBins,meffBinLow,meffBinHigh)
@@ -1256,7 +1278,7 @@ if doValidationSR:
     [meff4em.getSample(sam).addSystematic(jesMedium) for sam in BGList]
     [meff4em.getSample(sam).addSystematic(jesHigh) for sam in BGList] 
     #[s.mergeSamples([topSample_Np0.name,wzSample_Np0.name,topSample_Np1.name,wzSample_Np1.name,topSample_Np2.name,wzSample_Np2.name,topSample_Np3.name,wzSample_Np3.name,topSample_Np4.name,wzSample_Np4.name,topSample_Np5.name,wzSample_Np5.name,bgSample.name]) for s in meff4em.getSystematic(jesS4DL.name)]
-    meff4em.addSystematic(lepS4DL)
+    [meff4em.getSample(sam).addSystematic(lepS4DL) for sam in SigList+BGList]
     [meff4em.getSample(sam).addSystematic(zpT0GeV) for sam in BGList]
     [meff4em.getSample(sam).addSystematic(zpT50GeV) for sam in BGList]
     [meff4em.getSample(sam).addSystematic(zpT100GeV) for sam in BGList]
@@ -1264,12 +1286,12 @@ if doValidationSR:
     [meff4em.getSample(sam).addSystematic(zpT200GeV) for sam in BGList]
 
     if fullSyst:
-        meff4em.addSystematic(metcoS4DL)
-        meff4em.addSystematic(metpuS4DL)
-        meff4em.addSystematic(trigS4DL)
-        meff4em.addSystematic(lesS4DL)
-        meff4em.addSystematic(lermsS4DL)
-        meff4em.addSystematic(leridS4DL)
+        [meff4em.getSample(sam).addSystematic(metcoS4DL) for sam in SigList+BGList]
+        [meff4em.getSample(sam).addSystematic(metpuS4DL) for sam in SigList+BGList]
+        [meff4em.getSample(sam).addSystematic(trigS4DL) for sam in SigList+BGList]
+        [meff4em.getSample(sam).addSystematic(lesS4DL) for sam in SigList+BGList]
+        [meff4em.getSample(sam).addSystematic(lermsS4DL) for sam in SigList+BGList]
+        [meff4em.getSample(sam).addSystematic(leridS4DL) for sam in SigList+BGList]
 
     # S2 using meff
     meff2mm = bkgOnly.addChannel("meffInc",["S2mm"],meffNBins,meffBinLow,meffBinHigh)
@@ -1278,7 +1300,7 @@ if doValidationSR:
     [meff2mm.getSample(sam).addSystematic(jesMedium) for sam in BGList]
     [meff2mm.getSample(sam).addSystematic(jesHigh) for sam in BGList] 
     #[s.mergeSamples([topSample_Np0.name,wzSample_Np0.name,topSample_Np1.name,wzSample_Np1.name,topSample_Np2.name,wzSample_Np2.name,topSample_Np3.name,wzSample_Np3.name,topSample_Np4.name,wzSample_Np4.name,topSample_Np5.name,wzSample_Np5.name,bgSample.name]) for s in meff2mm.getSystematic(jesS2DL.name)]
-    meff2mm.addSystematic(lepS2DL)
+    [meff2mm.getSample(sam).addSystematic(lepS2DL) for sam in SigList+BGList]
     [meff2em.getSample(sam).addSystematic(zpT0GeV) for sam in BGList]
     [meff2mm.getSample(sam).addSystematic(zpT50GeV) for sam in BGList]
     [meff2mm.getSample(sam).addSystematic(zpT100GeV) for sam in BGList]
@@ -1286,12 +1308,12 @@ if doValidationSR:
     [meff2mm.getSample(sam).addSystematic(zpT200GeV) for sam in BGList]
 
     if fullSyst:
-        meff2mm.addSystematic(metcoS2DL)
-        meff2mm.addSystematic(metpuS2DL)
-        meff2mm.addSystematic(trigS2DL)
-        meff2mm.addSystematic(lesS2DL)
-        meff2mm.addSystematic(lermsS2DL)
-        meff2mm.addSystematic(leridS2DL)
+        [meff2mm.getSample(sam).addSystematic(metcoS2DL) for sam in SigList+BGList]
+        [meff2mm.getSample(sam).addSystematic(metpuS2DL) for sam in SigList+BGList]
+        [meff2mm.getSample(sam).addSystematic(trigS2DL) for sam in SigList+BGList]
+        [meff2mm.getSample(sam).addSystematic(lesS2DL) for sam in SigList+BGList]
+        [meff2mm.getSample(sam).addSystematic(lermsS2DL) for sam in SigList+BGList]
+        [meff2mm.getSample(sam).addSystematic(leridS2DL) for sam in SigList+BGList]
 
     # S4 using meff
     meff4mm = bkgOnly.addChannel("meffInc",["S4mm"],meffNBins,meffBinLow,meffBinHigh)
@@ -1300,7 +1322,7 @@ if doValidationSR:
     [meff4mm.getSample(sam).addSystematic(jesMedium) for sam in BGList]
     [meff4mm.getSample(sam).addSystematic(jesHigh) for sam in BGList]    
     #[s.mergeSamples([topSample_Np0.name,wzSample_Np0.name,topSample_Np1.name,wzSample_Np1.name,topSample_Np2.name,wzSample_Np2.name,topSample_Np3.name,wzSample_Np3.name,topSample_Np4.name,wzSample_Np4.name,topSample_Np5.name,wzSample_Np5.name,bgSample.name]) for s in meff4mm.getSystematic(jesS4DL.name)]
-    meff4mm.addSystematic(lepS4DL)
+    [meff4mm.getSample(sam).addSystematic(lepS4DL) for sam in SigList+BGList]
     [meff4mm.getSample(sam).addSystematic(zpT0GeV) for sam in BGList]
     [meff4mm.getSample(sam).addSystematic(zpT50GeV) for sam in BGList]
     [meff4mm.getSample(sam).addSystematic(zpT100GeV) for sam in BGList]
@@ -1308,12 +1330,12 @@ if doValidationSR:
     [meff4mm.getSample(sam).addSystematic(zpT200GeV) for sam in BGList]
 
     if fullSyst:
-        meff4mm.addSystematic(metcoS4DL)
-        meff4mm.addSystematic(metpuS4DL)
-        meff4mm.addSystematic(trigS4DL)
-        meff4mm.addSystematic(lesS4DL)
-        meff4mm.addSystematic(lermsS4DL)
-        meff4mm.addSystematic(leridS4DL)
+        [meff4mm.getSample(sam).addSystematic(metcoS4DL) for sam in SigList+BGList]
+        [meff4mm.getSample(sam).addSystematic(metpuS4DL) for sam in SigList+BGList]
+        [meff4mm.getSample(sam).addSystematic(trigS4DL) for sam in SigList+BGList]
+        [meff4mm.getSample(sam).addSystematic(lesS4DL) for sam in SigList+BGList]
+        [meff4mm.getSample(sam).addSystematic(lermsS4DL) for sam in SigList+BGList]
+        [meff4mm.getSample(sam).addSystematic(leridS4DL) for sam in SigList+BGList]
 
 # HARD LEPTON SRS
 
@@ -1322,7 +1344,7 @@ if doValidationSR:
     [meffS3_El.getSample(sam).addSystematic(jesLow) for sam in BGList]
     [meffS3_El.getSample(sam).addSystematic(jesMedium) for sam in BGList]
     [meffS3_El.getSample(sam).addSystematic(jesHigh) for sam in BGList]
-    meffS3_El.addSystematic(lepS3)
+    [meffS3_El.getSample(sam).addSystematic(lepS3) for sam in SigList+BGList]
     [meffS3_El.getSample(sam).addSystematic(zpT0GeV) for sam in BGList]
     [meffS3_El.getSample(sam).addSystematic(zpT50GeV) for sam in BGList]
     [meffS3_El.getSample(sam).addSystematic(zpT100GeV) for sam in BGList]
@@ -1330,12 +1352,12 @@ if doValidationSR:
     [meffS3_El.getSample(sam).addSystematic(zpT200GeV) for sam in BGList]
 
     if fullSyst:
-        meffS3_El.addSystematic(metcoS3)
-        meffS3_El.addSystematic(metpuS3)
-        meffS3_El.addSystematic(trigS3)
-        meffS3_El.addSystematic(lesS3)
-        meffS3_El.addSystematic(lermsS3)
-        meffS3_El.addSystematic(leridS3)
+        [meffS3_El.getSample(sam).addSystematic(metcoS3) for sam in SigList+BGList]
+        [meffS3_El.getSample(sam).addSystematic(metpuS3) for sam in SigList+BGList]
+        [meffS3_El.getSample(sam).addSystematic(trigS3) for sam in SigList+BGList]
+        [meffS3_El.getSample(sam).addSystematic(lesS3) for sam in SigList+BGList]
+        [meffS3_El.getSample(sam).addSystematic(lermsS3) for sam in SigList+BGList]
+        [meffS3_El.getSample(sam).addSystematic(leridS3) for sam in SigList+BGList]
 
 
     meffS3_Mu=bkgOnly.addChannel("meffInc",["S3Mu"],meffNBinsHL,meffBinLowHL,meffBinHighHL)
@@ -1343,7 +1365,7 @@ if doValidationSR:
     [meffS3_Mu.getSample(sam).addSystematic(jesLow) for sam in BGList]
     [meffS3_Mu.getSample(sam).addSystematic(jesMedium) for sam in BGList]
     [meffS3_Mu.getSample(sam).addSystematic(jesHigh) for sam in BGList]
-    meffS3_Mu.addSystematic(lepS3)
+    [meffS3_Mu.getSample(sam).addSystematic(lepS3) for sam in SigList+BGList]
     [meffS3_Mu.getSample(sam).addSystematic(zpT0GeV) for sam in BGList]
     [meffS3_Mu.getSample(sam).addSystematic(zpT50GeV) for sam in BGList]
     [meffS3_Mu.getSample(sam).addSystematic(zpT100GeV) for sam in BGList]
@@ -1351,12 +1373,12 @@ if doValidationSR:
     [meffS3_Mu.getSample(sam).addSystematic(zpT200GeV) for sam in BGList]
 
     if fullSyst:
-        meffS3_Mu.addSystematic(metcoS3)
-        meffS3_Mu.addSystematic(metpuS3)
-        meffS3_Mu.addSystematic(trigS3)
-        meffS3_Mu.addSystematic(lesS3)
-        meffS3_Mu.addSystematic(lermsS3)
-        meffS3_Mu.addSystematic(leridS3)   
+        [meffS3_Mu.getSample(sam).addSystematic(metcoS3) for sam in SigList+BGList]
+        [meffS3_Mu.getSample(sam).addSystematic(metpuS3) for sam in SigList+BGList]
+        [meffS3_Mu.getSample(sam).addSystematic(trigS3) for sam in SigList+BGList]
+        [meffS3_Mu.getSample(sam).addSystematic(lesS3) for sam in SigList+BGList]
+        [meffS3_Mu.getSample(sam).addSystematic(lermsS3) for sam in SigList+BGList]
+        [meffS3_Mu.getSample(sam).addSystematic(leridS3) for sam in SigList+BGList]   
 
 
     meffS4_El=bkgOnly.addChannel("meffInc",["S4El"],meffNBinsHL,meffBinLowHL,meffBinHighHL)
@@ -1364,7 +1386,7 @@ if doValidationSR:
     [meffS4_El.getSample(sam).addSystematic(jesLow) for sam in BGList]
     [meffS4_El.getSample(sam).addSystematic(jesMedium) for sam in BGList]
     [meffS4_El.getSample(sam).addSystematic(jesHigh) for sam in BGList] 
-    meffS4_El.addSystematic(lepS4)
+    [meffS4_El.getSample(sam).addSystematic(lepS4) for sam in SigList+BGList]
     [meffS4_El.getSample(sam).addSystematic(zpT0GeV) for sam in BGList]
     [meffS4_El.getSample(sam).addSystematic(zpT50GeV) for sam in BGList]
     [meffS4_El.getSample(sam).addSystematic(zpT100GeV) for sam in BGList]
@@ -1372,12 +1394,12 @@ if doValidationSR:
     [meffS4_El.getSample(sam).addSystematic(zpT200GeV) for sam in BGList]
 
     if fullSyst:
-        meffS4_El.addSystematic(metcoS4)
-        meffS4_El.addSystematic(metpuS4)
-        meffS4_El.addSystematic(trigS4)
-        meffS4_El.addSystematic(lesS4)
-        meffS4_El.addSystematic(lermsS4)
-        meffS4_El.addSystematic(leridS4)
+        [meffS4_El.getSample(sam).addSystematic(metcoS4) for sam in SigList+BGList]
+        [meffS4_El.getSample(sam).addSystematic(metpuS4) for sam in SigList+BGList]
+        [meffS4_El.getSample(sam).addSystematic(trigS4) for sam in SigList+BGList]
+        [meffS4_El.getSample(sam).addSystematic(lesS4) for sam in SigList+BGList]
+        [meffS4_El.getSample(sam).addSystematic(lermsS4) for sam in SigList+BGList]
+        [meffS4_El.getSample(sam).addSystematic(leridS4) for sam in SigList+BGList]
 
 
     meffS4_Mu=bkgOnly.addChannel("meffInc",["S4Mu"],meffNBinsHL,meffBinLowHL,meffBinHighHL)
@@ -1385,7 +1407,7 @@ if doValidationSR:
     [meffS4_Mu.getSample(sam).addSystematic(jesLow) for sam in BGList]
     [meffS4_Mu.getSample(sam).addSystematic(jesMedium) for sam in BGList]
     [meffS4_Mu.getSample(sam).addSystematic(jesHigh) for sam in BGList] 
-    meffS4_Mu.addSystematic(lepS4)
+    [meffS4_Mu.getSample(sam).addSystematic(lepS4) for sam in SigList+BGList]
 
     [meffS4_Mu.getSample(sam).addSystematic(zpT0GeV) for sam in BGList]
     [meffS4_Mu.getSample(sam).addSystematic(zpT50GeV) for sam in BGList]
@@ -1393,12 +1415,12 @@ if doValidationSR:
     [meffS4_Mu.getSample(sam).addSystematic(zpT150GeV) for sam in BGList]
     [meffS4_Mu.getSample(sam).addSystematic(zpT200GeV) for sam in BGList]
     if fullSyst:
-        meffS4_Mu.addSystematic(metcoS4)
-        meffS4_Mu.addSystematic(metpuS4)
-        meffS4_Mu.addSystematic(trigS4)
-        meffS4_Mu.addSystematic(lesS4)
-        meffS4_Mu.addSystematic(lermsS4)
-        meffS4_Mu.addSystematic(leridS4)
+        [meffS4_Mu.getSample(sam).addSystematic(metcoS4) for sam in SigList+BGList]
+        [meffS4_Mu.getSample(sam).addSystematic(metpuS4) for sam in SigList+BGList]
+        [meffS4_Mu.getSample(sam).addSystematic(trigS4) for sam in SigList+BGList]
+        [meffS4_Mu.getSample(sam).addSystematic(lesS4) for sam in SigList+BGList]
+        [meffS4_Mu.getSample(sam).addSystematic(lermsS4) for sam in SigList+BGList]
+        [meffS4_Mu.getSample(sam).addSystematic(leridS4) for sam in SigList+BGList]
 
 
     meffS3T_El=bkgOnly.addChannel("meffInc",["SR3jTEl"],1,1200,meffBinHighHL)
@@ -1406,7 +1428,7 @@ if doValidationSR:
     [meffS3T_El.getSample(sam).addSystematic(jesLow) for sam in BGList]
     [meffS3T_El.getSample(sam).addSystematic(jesMedium) for sam in BGList]
     [meffS3T_El.getSample(sam).addSystematic(jesHigh) for sam in BGList]
-    meffS3T_El.addSystematic(lepS3T)
+    [meffS3T_El.getSample(sam).addSystematic(lepS3T) for sam in SigList+BGList]
     [meffS3T_El.getSample(sam).addSystematic(zpT0GeV) for sam in BGList]
     [meffS3T_El.getSample(sam).addSystematic(zpT50GeV) for sam in BGList]
     [meffS3T_El.getSample(sam).addSystematic(zpT100GeV) for sam in BGList]
@@ -1414,12 +1436,12 @@ if doValidationSR:
     [meffS3T_El.getSample(sam).addSystematic(zpT200GeV) for sam in BGList]
 
     if fullSyst:
-        meffS3T_El.addSystematic(metcoS3T)
-        meffS3T_El.addSystematic(metpuS3T)
-        meffS3T_El.addSystematic(trigS3T)
-        meffS3T_El.addSystematic(lesS3T)
-        meffS3T_El.addSystematic(lermsS3T)
-        meffS3T_El.addSystematic(leridS3T)
+        [meffS3T_El.getSample(sam).addSystematic(metcoS3T) for sam in SigList+BGList]
+        [meffS3T_El.getSample(sam).addSystematic(metpuS3T) for sam in SigList+BGList]
+        [meffS3T_El.getSample(sam).addSystematic(trigS3T) for sam in SigList+BGList]
+        [meffS3T_El.getSample(sam).addSystematic(lesS3T) for sam in SigList+BGList]
+        [meffS3T_El.getSample(sam).addSystematic(lermsS3T) for sam in SigList+BGList]
+        [meffS3T_El.getSample(sam).addSystematic(leridS3T) for sam in SigList+BGList]
 
 
     meffS3T_Mu=bkgOnly.addChannel("meffInc",["SR3jTMu"],1,1200,meffBinHighHL)
@@ -1427,7 +1449,7 @@ if doValidationSR:
     [meffS3T_Mu.getSample(sam).addSystematic(jesLow) for sam in BGList]
     [meffS3T_Mu.getSample(sam).addSystematic(jesMedium) for sam in BGList]
     [meffS3T_Mu.getSample(sam).addSystematic(jesHigh) for sam in BGList]
-    meffS3T_Mu.addSystematic(lepS3T)
+    [meffS3T_Mu.getSample(sam).addSystematic(lepS3T) for sam in SigList+BGList]
     [meffS3T_Mu.getSample(sam).addSystematic(zpT0GeV) for sam in BGList]
     [meffS3T_Mu.getSample(sam).addSystematic(zpT50GeV) for sam in BGList]
     [meffS3T_Mu.getSample(sam).addSystematic(zpT100GeV) for sam in BGList]
@@ -1435,12 +1457,12 @@ if doValidationSR:
     [meffS3T_Mu.getSample(sam).addSystematic(zpT200GeV) for sam in BGList]
 
     if fullSyst:
-        meffS3T_Mu.addSystematic(metcoS3T)
-        meffS3T_Mu.addSystematic(metpuS3T)
-        meffS3T_Mu.addSystematic(trigS3T)
-        meffS3T_Mu.addSystematic(lesS3T)
-        meffS3T_Mu.addSystematic(lermsS3T)
-        meffS3T_Mu.addSystematic(leridS3T)   
+        [meffS3T_Mu.getSample(sam).addSystematic(metcoS3T) for sam in SigList+BGList]
+        [meffS3T_Mu.getSample(sam).addSystematic(metpuS3T) for sam in SigList+BGList]
+        [meffS3T_Mu.getSample(sam).addSystematic(trigS3T) for sam in SigList+BGList]
+        [meffS3T_Mu.getSample(sam).addSystematic(lesS3T) for sam in SigList+BGList]
+        [meffS3T_Mu.getSample(sam).addSystematic(lermsS3T) for sam in SigList+BGList]
+        [meffS3T_Mu.getSample(sam).addSystematic(leridS3T) for sam in SigList+BGList]   
 
 
     meffS4T_El=bkgOnly.addChannel("meffInc",["SR4jTEl"],1,800,meffBinHighHL)
@@ -1448,7 +1470,7 @@ if doValidationSR:
     [meffS4T_El.getSample(sam).addSystematic(jesLow) for sam in BGList]
     [meffS4T_El.getSample(sam).addSystematic(jesMedium) for sam in BGList]
     [meffS4T_El.getSample(sam).addSystematic(jesHigh) for sam in BGList]
-    meffS4T_El.addSystematic(lepS4T)
+    [meffS4T_El.getSample(sam).addSystematic(lepS4T) for sam in SigList+BGList]
     [meffS4T_El.getSample(sam).addSystematic(zpT0GeV) for sam in BGList]
     [meffS4T_El.getSample(sam).addSystematic(zpT50GeV) for sam in BGList]
     [meffS4T_El.getSample(sam).addSystematic(zpT100GeV) for sam in BGList]
@@ -1456,12 +1478,12 @@ if doValidationSR:
     [meffS4T_El.getSample(sam).addSystematic(zpT200GeV) for sam in BGList]
 
     if fullSyst:
-        meffS4T_El.addSystematic(metcoS4T)
-        meffS4T_El.addSystematic(metpuS4T)
-        meffS4T_El.addSystematic(trigS4T)
-        meffS4T_El.addSystematic(lesS4T)
-        meffS4T_El.addSystematic(lermsS4T)
-        meffS4T_El.addSystematic(leridS4T)
+        [meffS4T_El.getSample(sam).addSystematic(metcoS4T) for sam in SigList+BGList]
+        [meffS4T_El.getSample(sam).addSystematic(metpuS4T) for sam in SigList+BGList]
+        [meffS4T_El.getSample(sam).addSystematic(trigS4T) for sam in SigList+BGList]
+        [meffS4T_El.getSample(sam).addSystematic(lesS4T) for sam in SigList+BGList]
+        [meffS4T_El.getSample(sam).addSystematic(lermsS4T) for sam in SigList+BGList]
+        [meffS4T_El.getSample(sam).addSystematic(leridS4T) for sam in SigList+BGList]
 
 
     meffS4T_Mu=bkgOnly.addChannel("meffInc",["SR4jTMu"],1,800,meffBinHighHL)
@@ -1469,7 +1491,7 @@ if doValidationSR:
     [meffS4T_Mu.getSample(sam).addSystematic(jesLow) for sam in BGList]
     [meffS4T_Mu.getSample(sam).addSystematic(jesMedium) for sam in BGList]
     [meffS4T_Mu.getSample(sam).addSystematic(jesHigh) for sam in BGList]
-    meffS4T_Mu.addSystematic(lepS4T)
+    [meffS4T_Mu.getSample(sam).addSystematic(lepS4T) for sam in SigList+BGList]
     [meffS4T_Mu.getSample(sam).addSystematic(zpT0GeV) for sam in BGList]
     [meffS4T_Mu.getSample(sam).addSystematic(zpT50GeV) for sam in BGList]
     [meffS4T_Mu.getSample(sam).addSystematic(zpT100GeV) for sam in BGList]
@@ -1477,19 +1499,19 @@ if doValidationSR:
     [meffS4T_Mu.getSample(sam).addSystematic(zpT200GeV) for sam in BGList]
 
     if fullSyst:
-        meffS4T_Mu.addSystematic(metcoS4T)
-        meffS4T_Mu.addSystematic(metpuS4T)
-        meffS4T_Mu.addSystematic(trigS4T)
-        meffS4T_Mu.addSystematic(lesS4T)
-        meffS4T_Mu.addSystematic(lermsS4T)
-        meffS4T_Mu.addSystematic(leridS4T)
+        [meffS4T_Mu.getSample(sam).addSystematic(metcoS4T) for sam in SigList+BGList]
+        [meffS4T_Mu.getSample(sam).addSystematic(metpuS4T) for sam in SigList+BGList]
+        [meffS4T_Mu.getSample(sam).addSystematic(trigS4T) for sam in SigList+BGList]
+        [meffS4T_Mu.getSample(sam).addSystematic(lesS4T) for sam in SigList+BGList]
+        [meffS4T_Mu.getSample(sam).addSystematic(lermsS4T) for sam in SigList+BGList]
+        [meffS4T_Mu.getSample(sam).addSystematic(leridS4T) for sam in SigList+BGList]
 
     meffS7T_El=bkgOnly.addChannel("meffInc",["SR7jTEl"],1,750,meffBinHighHL)
     meffS7T_El.useOverflowBin = True
     [meffS7T_El.getSample(sam).addSystematic(jesLow) for sam in BGList]
     [meffS7T_El.getSample(sam).addSystematic(jesMedium) for sam in BGList]
     [meffS7T_El.getSample(sam).addSystematic(jesHigh) for sam in BGList]
-    meffS7T_El.addSystematic(lepS4T)
+    [meffS7T_El.getSample(sam).addSystematic(lepS4T) for sam in SigList+BGList]
     [meffS7T_El.getSample(sam).addSystematic(zpT0GeV) for sam in BGList]
     [meffS7T_El.getSample(sam).addSystematic(zpT50GeV) for sam in BGList]
     [meffS7T_El.getSample(sam).addSystematic(zpT100GeV) for sam in BGList]
@@ -1497,12 +1519,12 @@ if doValidationSR:
     [meffS7T_El.getSample(sam).addSystematic(zpT200GeV) for sam in BGList]
 
     if fullSyst:
-        meffS7T_El.addSystematic(metcoS4T)
-        meffS7T_El.addSystematic(metpuS4T)
-        meffS7T_El.addSystematic(trigS4T)
-        meffS7T_El.addSystematic(lesS4T)
-        meffS7T_El.addSystematic(lermsS4T)
-        meffS7T_El.addSystematic(leridS4T)
+        [meffS7T_El.getSample(sam).addSystematic(metcoS4T) for sam in SigList+BGList]
+        [meffS7T_El.getSample(sam).addSystematic(metpuS4T) for sam in SigList+BGList]
+        [meffS7T_El.getSample(sam).addSystematic(trigS4T) for sam in SigList+BGList]
+        [meffS7T_El.getSample(sam).addSystematic(lesS4T) for sam in SigList+BGList]
+        [meffS7T_El.getSample(sam).addSystematic(lermsS4T) for sam in SigList+BGList]
+        [meffS7T_El.getSample(sam).addSystematic(leridS4T) for sam in SigList+BGList]
 
 
     meffS7T_Mu=bkgOnly.addChannel("meffInc",["SR7jTMu"],1,750,meffBinHighHL)
@@ -1510,7 +1532,7 @@ if doValidationSR:
     [meffS7T_Mu.getSample(sam).addSystematic(jesLow) for sam in BGList]
     [meffS7T_Mu.getSample(sam).addSystematic(jesMedium) for sam in BGList]
     [meffS7T_Mu.getSample(sam).addSystematic(jesHigh) for sam in BGList]
-    meffS7T_Mu.addSystematic(lepS4T)
+    [meffS7T_Mu.getSample(sam).addSystematic(lepS4T) for sam in SigList+BGList]
     [meffS7T_Mu.getSample(sam).addSystematic(zpT0GeV) for sam in BGList]
     [meffS7T_Mu.getSample(sam).addSystematic(zpT50GeV) for sam in BGList]
     [meffS7T_Mu.getSample(sam).addSystematic(zpT100GeV) for sam in BGList]
@@ -1518,12 +1540,12 @@ if doValidationSR:
     [meffS7T_Mu.getSample(sam).addSystematic(zpT200GeV) for sam in BGList]
 
     if fullSyst:
-        meffS7T_Mu.addSystematic(metcoS4T)
-        meffS7T_Mu.addSystematic(metpuS4T)
-        meffS7T_Mu.addSystematic(trigS4T)
-        meffS7T_Mu.addSystematic(lesS4T)
-        meffS7T_Mu.addSystematic(lermsS4T)
-        meffS7T_Mu.addSystematic(leridS4T)    
+        [meffS7T_Mu.getSample(sam).addSystematic(metcoS4T) for sam in SigList+BGList]
+        [meffS7T_Mu.getSample(sam).addSystematic(metpuS4T) for sam in SigList+BGList]
+        [meffS7T_Mu.getSample(sam).addSystematic(trigS4T) for sam in SigList+BGList]
+        [meffS7T_Mu.getSample(sam).addSystematic(lesS4T) for sam in SigList+BGList]
+        [meffS7T_Mu.getSample(sam).addSystematic(lermsS4T) for sam in SigList+BGList]
+        [meffS7T_Mu.getSample(sam).addSystematic(leridS4T) for sam in SigList+BGList]    
             
 if doValidationDilep:
 
@@ -1531,13 +1553,11 @@ if doValidationDilep:
     ## check impact of kfactor fit on several distributions
 
     meffVR4_ee=bkgOnly.addChannel("meffInc",["VR4ee"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
-    meffVR4_ee.hasB = True
-    meffVR4_ee.hasBQCD = True
     meffVR4_ee.useOverflowBin = True
     [meffVR4_ee.getSample(sam).addSystematic(jesLow) for sam in BGList]
     [meffVR4_ee.getSample(sam).addSystematic(jesMedium) for sam in BGList]
     [meffVR4_ee.getSample(sam).addSystematic(jesHigh) for sam in BGList]
-    [meffVR4_ee.getSample(sam).addSystematic(lepTR) for sam in BGList]
+    [meffVR4_ee.getSample(sam).addSystematic(lepVR) for sam in BGList]
     [meffVR4_ee.getSample(sam).addSystematic(zpT0GeV) for sam in BGList]
     [meffVR4_ee.getSample(sam).addSystematic(zpT50GeV) for sam in BGList]
     [meffVR4_ee.getSample(sam).addSystematic(zpT100GeV) for sam in BGList]
@@ -1545,21 +1565,19 @@ if doValidationDilep:
     [meffVR4_ee.getSample(sam).addSystematic(zpT200GeV) for sam in BGList]
 
     if fullSyst:
-        [meffVR4_ee.getSample(sam).addSystematic(metcoTR) for sam in BGList]
-        [meffVR4_ee.getSample(sam).addSystematic(metpuTR) for sam in BGList]
-        [meffVR4_ee.getSample(sam).addSystematic(trigTR) for sam in BGList]
-        [meffVR4_ee.getSample(sam).addSystematic(lesTR) for sam in BGList]
-        [meffVR4_ee.getSample(sam).addSystematic(lermsTR) for sam in BGList]
-        [meffVR4_ee.getSample(sam).addSystematic(leridTR) for sam in BGList]
+        [meffVR4_ee.getSample(sam).addSystematic(metcoVR) for sam in BGList]
+        [meffVR4_ee.getSample(sam).addSystematic(metpuVR) for sam in BGList]
+        [meffVR4_ee.getSample(sam).addSystematic(trigVR) for sam in BGList]
+        [meffVR4_ee.getSample(sam).addSystematic(lesVR) for sam in BGList]
+        [meffVR4_ee.getSample(sam).addSystematic(lermsVR) for sam in BGList]
+        [meffVR4_ee.getSample(sam).addSystematic(leridVR) for sam in BGList]
 
     meffVR4_em=bkgOnly.addChannel("meffInc",["VR4em"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
-    meffVR4_em.hasB = True
-    meffVR4_em.hasBQCD = True
     meffVR4_em.useOverflowBin = True
     [meffVR4_em.getSample(sam).addSystematic(jesLow) for sam in BGList]
     [meffVR4_em.getSample(sam).addSystematic(jesMedium) for sam in BGList]
     [meffVR4_em.getSample(sam).addSystematic(jesHigh) for sam in BGList]
-    [meffVR4_em.getSample(sam).addSystematic(lepTR) for sam in BGList]
+    [meffVR4_em.getSample(sam).addSystematic(lepVR) for sam in BGList]
     [meffVR4_em.getSample(sam).addSystematic(zpT0GeV) for sam in BGList]
     [meffVR4_em.getSample(sam).addSystematic(zpT50GeV) for sam in BGList]
     [meffVR4_em.getSample(sam).addSystematic(zpT100GeV) for sam in BGList]
@@ -1567,21 +1585,19 @@ if doValidationDilep:
     [meffVR4_em.getSample(sam).addSystematic(zpT200GeV) for sam in BGList]
 
     if fullSyst:
-        [meffVR4_em.getSample(sam).addSystematic(metcoTR) for sam in BGList]
-        [meffVR4_em.getSample(sam).addSystematic(metpuTR) for sam in BGList]
-        [meffVR4_em.getSample(sam).addSystematic(trigTR) for sam in BGList]
-        [meffVR4_em.getSample(sam).addSystematic(lesTR) for sam in BGList]
-        [meffVR4_em.getSample(sam).addSystematic(lermsTR) for sam in BGList]
-        [meffVR4_em.getSample(sam).addSystematic(leridTR) for sam in BGList]
+        [meffVR4_em.getSample(sam).addSystematic(metcoVR) for sam in BGList]
+        [meffVR4_em.getSample(sam).addSystematic(metpuVR) for sam in BGList]
+        [meffVR4_em.getSample(sam).addSystematic(trigVR) for sam in BGList]
+        [meffVR4_em.getSample(sam).addSystematic(lesVR) for sam in BGList]
+        [meffVR4_em.getSample(sam).addSystematic(lermsVR) for sam in BGList]
+        [meffVR4_em.getSample(sam).addSystematic(leridVR) for sam in BGList]
 
     meffVR4_mm=bkgOnly.addChannel("meffInc",["VR4mm"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
-    meffVR4_mm.hasB = True
-    meffVR4_mm.hasBQCD = True
     meffVR4_mm.useOverflowBin = True
     [meffVR4_mm.getSample(sam).addSystematic(jesLow) for sam in BGList]
     [meffVR4_mm.getSample(sam).addSystematic(jesMedium) for sam in BGList]
     [meffVR4_mm.getSample(sam).addSystematic(jesHigh) for sam in BGList]
-    [meffVR4_mm.getSample(sam).addSystematic(lepTR) for sam in BGList]
+    [meffVR4_mm.getSample(sam).addSystematic(lepVR) for sam in BGList]
     [meffVR4_mm.getSample(sam).addSystematic(zpT0GeV) for sam in BGList]
     [meffVR4_mm.getSample(sam).addSystematic(zpT50GeV) for sam in BGList]
     [meffVR4_mm.getSample(sam).addSystematic(zpT100GeV) for sam in BGList]
@@ -1589,21 +1605,19 @@ if doValidationDilep:
     [meffVR4_mm.getSample(sam).addSystematic(zpT200GeV) for sam in BGList]
 
     if fullSyst:
-        [meffVR4_mm.getSample(sam).addSystematic(metcoTR) for sam in BGList]
-        [meffVR4_mm.getSample(sam).addSystematic(metpuTR) for sam in BGList]
-        [meffVR4_mm.getSample(sam).addSystematic(trigTR) for sam in BGList]
-        [meffVR4_mm.getSample(sam).addSystematic(lesTR) for sam in BGList]
-        [meffVR4_mm.getSample(sam).addSystematic(lermsTR) for sam in BGList]
-        [meffVR4_mm.getSample(sam).addSystematic(leridTR) for sam in BGList]
+        [meffVR4_mm.getSample(sam).addSystematic(metcoVR) for sam in BGList]
+        [meffVR4_mm.getSample(sam).addSystematic(metpuVR) for sam in BGList]
+        [meffVR4_mm.getSample(sam).addSystematic(trigVR) for sam in BGList]
+        [meffVR4_mm.getSample(sam).addSystematic(lesVR) for sam in BGList]
+        [meffVR4_mm.getSample(sam).addSystematic(lermsVR) for sam in BGList]
+        [meffVR4_mm.getSample(sam).addSystematic(leridVR) for sam in BGList]
 
     nJetVR4_ee=bkgOnly.addChannel("nJet",["VR4ee"],nJetZmmNBins,nJetZmmBinLow,nJetZmmBinHigh)
-    nJetVR4_ee.hasB = True
-    nJetVR4_ee.hasBQCD = True
     nJetVR4_ee.useOverflowBin = True
     [nJetVR4_ee.getSample(sam).addSystematic(jesLow) for sam in BGList]
     [nJetVR4_ee.getSample(sam).addSystematic(jesMedium) for sam in BGList]
     [nJetVR4_ee.getSample(sam).addSystematic(jesHigh) for sam in BGList]
-    [nJetVR4_ee.getSample(sam).addSystematic(lepTR) for sam in BGList]
+    [nJetVR4_ee.getSample(sam).addSystematic(lepVR) for sam in BGList]
     [nJetVR4_ee.getSample(sam).addSystematic(zpT0GeV) for sam in BGList]
     [nJetVR4_ee.getSample(sam).addSystematic(zpT50GeV) for sam in BGList]
     [nJetVR4_ee.getSample(sam).addSystematic(zpT100GeV) for sam in BGList]
@@ -1611,21 +1625,19 @@ if doValidationDilep:
     [nJetVR4_ee.getSample(sam).addSystematic(zpT200GeV) for sam in BGList]
 
     if fullSyst:
-        [nJetVR4_ee.getSample(sam).addSystematic(metcoTR) for sam in BGList]
-        [nJetVR4_ee.getSample(sam).addSystematic(metpuTR) for sam in BGList]
-        [nJetVR4_ee.getSample(sam).addSystematic(trigTR) for sam in BGList]
-        [nJetVR4_ee.getSample(sam).addSystematic(lesTR) for sam in BGList]
-        [nJetVR4_ee.getSample(sam).addSystematic(lermsTR) for sam in BGList]
-        [nJetVR4_ee.getSample(sam).addSystematic(leridTR) for sam in BGList]
+        [nJetVR4_ee.getSample(sam).addSystematic(metcoVR) for sam in BGList]
+        [nJetVR4_ee.getSample(sam).addSystematic(metpuVR) for sam in BGList]
+        [nJetVR4_ee.getSample(sam).addSystematic(trigVR) for sam in BGList]
+        [nJetVR4_ee.getSample(sam).addSystematic(lesVR) for sam in BGList]
+        [nJetVR4_ee.getSample(sam).addSystematic(lermsVR) for sam in BGList]
+        [nJetVR4_ee.getSample(sam).addSystematic(leridVR) for sam in BGList]
 
     nJetVR4_em=bkgOnly.addChannel("nJet",["VR4em"],nJetZmmNBins,nJetZmmBinLow,nJetZmmBinHigh)
-    nJetVR4_em.hasB = True
-    nJetVR4_em.hasBQCD = True
     nJetVR4_em.useOverflowBin = True
     [nJetVR4_em.getSample(sam).addSystematic(jesLow) for sam in BGList]
     [nJetVR4_em.getSample(sam).addSystematic(jesMedium) for sam in BGList]
     [nJetVR4_em.getSample(sam).addSystematic(jesHigh) for sam in BGList]
-    [nJetVR4_em.getSample(sam).addSystematic(lepTR) for sam in BGList]
+    [nJetVR4_em.getSample(sam).addSystematic(lepVR) for sam in BGList]
     [nJetVR4_em.getSample(sam).addSystematic(zpT0GeV) for sam in BGList]
     [nJetVR4_em.getSample(sam).addSystematic(zpT50GeV) for sam in BGList]
     [nJetVR4_em.getSample(sam).addSystematic(zpT100GeV) for sam in BGList]
@@ -1633,21 +1645,19 @@ if doValidationDilep:
     [nJetVR4_em.getSample(sam).addSystematic(zpT200GeV) for sam in BGList]
 
     if fullSyst:
-        [nJetVR4_em.getSample(sam).addSystematic(metcoTR) for sam in BGList]
-        [nJetVR4_em.getSample(sam).addSystematic(metpuTR) for sam in BGList]
-        [nJetVR4_em.getSample(sam).addSystematic(trigTR) for sam in BGList]
-        [nJetVR4_em.getSample(sam).addSystematic(lesTR) for sam in BGList]
-        [nJetVR4_em.getSample(sam).addSystematic(lermsTR) for sam in BGList]
-        [nJetVR4_em.getSample(sam).addSystematic(leridTR) for sam in BGList]
+        [nJetVR4_em.getSample(sam).addSystematic(metcoVR) for sam in BGList]
+        [nJetVR4_em.getSample(sam).addSystematic(metpuVR) for sam in BGList]
+        [nJetVR4_em.getSample(sam).addSystematic(trigVR) for sam in BGList]
+        [nJetVR4_em.getSample(sam).addSystematic(lesVR) for sam in BGList]
+        [nJetVR4_em.getSample(sam).addSystematic(lermsVR) for sam in BGList]
+        [nJetVR4_em.getSample(sam).addSystematic(leridVR) for sam in BGList]
 
     nJetVR4_mm=bkgOnly.addChannel("nJet",["VR4mm"],nJetZmmNBins,nJetZmmBinLow,nJetZmmBinHigh)
-    nJetVR4_mm.hasB = True
-    nJetVR4_mm.hasBQCD = True
     nJetVR4_mm.useOverflowBin = True
     [nJetVR4_mm.getSample(sam).addSystematic(jesLow) for sam in BGList]
     [nJetVR4_mm.getSample(sam).addSystematic(jesMedium) for sam in BGList]
     [nJetVR4_mm.getSample(sam).addSystematic(jesHigh) for sam in BGList]
-    [nJetVR4_mm.getSample(sam).addSystematic(lepTR) for sam in BGList]
+    [nJetVR4_mm.getSample(sam).addSystematic(lepVR) for sam in BGList]
     [nJetVR4_mm.getSample(sam).addSystematic(zpT0GeV) for sam in BGList]
     [nJetVR4_mm.getSample(sam).addSystematic(zpT50GeV) for sam in BGList]
     [nJetVR4_mm.getSample(sam).addSystematic(zpT100GeV) for sam in BGList]
@@ -1655,21 +1665,19 @@ if doValidationDilep:
     [nJetVR4_mm.getSample(sam).addSystematic(zpT200GeV) for sam in BGList]
 
     if fullSyst:
-        [nJetVR4_mm.getSample(sam).addSystematic(metcoTR) for sam in BGList]
-        [nJetVR4_mm.getSample(sam).addSystematic(metpuTR) for sam in BGList]
-        [nJetVR4_mm.getSample(sam).addSystematic(trigTR) for sam in BGList]
-        [nJetVR4_mm.getSample(sam).addSystematic(lesTR) for sam in BGList]
-        [nJetVR4_mm.getSample(sam).addSystematic(lermsTR) for sam in BGList]
-        [nJetVR4_mm.getSample(sam).addSystematic(leridTR) for sam in BGList]
+        [nJetVR4_mm.getSample(sam).addSystematic(metcoVR) for sam in BGList]
+        [nJetVR4_mm.getSample(sam).addSystematic(metpuVR) for sam in BGList]
+        [nJetVR4_mm.getSample(sam).addSystematic(trigVR) for sam in BGList]
+        [nJetVR4_mm.getSample(sam).addSystematic(lesVR) for sam in BGList]
+        [nJetVR4_mm.getSample(sam).addSystematic(lermsVR) for sam in BGList]
+        [nJetVR4_mm.getSample(sam).addSystematic(leridVR) for sam in BGList]
 
     meffVR2_ee=bkgOnly.addChannel("meffInc",["VR2ee"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
-    meffVR2_ee.hasB = True
-    meffVR2_ee.hasBQCD = True
     meffVR2_ee.useOverflowBin = True
     [meffVR2_ee.getSample(sam).addSystematic(jesLow) for sam in BGList]
     [meffVR2_ee.getSample(sam).addSystematic(jesMedium) for sam in BGList]
     [meffVR2_ee.getSample(sam).addSystematic(jesHigh) for sam in BGList]
-    [meffVR2_ee.getSample(sam).addSystematic(lepTR) for sam in BGList]
+    [meffVR2_ee.getSample(sam).addSystematic(lepVR) for sam in BGList]
     [meffVR2_ee.getSample(sam).addSystematic(zpT0GeV) for sam in BGList]
     [meffVR2_ee.getSample(sam).addSystematic(zpT50GeV) for sam in BGList]
     [meffVR2_ee.getSample(sam).addSystematic(zpT100GeV) for sam in BGList]
@@ -1677,21 +1685,19 @@ if doValidationDilep:
     [meffVR2_ee.getSample(sam).addSystematic(zpT200GeV) for sam in BGList]
 
     if fullSyst:
-        [meffVR2_ee.getSample(sam).addSystematic(metcoTR) for sam in BGList]
-        [meffVR2_ee.getSample(sam).addSystematic(metpuTR) for sam in BGList]
-        [meffVR2_ee.getSample(sam).addSystematic(trigTR) for sam in BGList]
-        [meffVR2_ee.getSample(sam).addSystematic(lesTR) for sam in BGList]
-        [meffVR2_ee.getSample(sam).addSystematic(lermsTR) for sam in BGList]
-        [meffVR2_ee.getSample(sam).addSystematic(leridTR) for sam in BGList]
+        [meffVR2_ee.getSample(sam).addSystematic(metcoVR) for sam in BGList]
+        [meffVR2_ee.getSample(sam).addSystematic(metpuVR) for sam in BGList]
+        [meffVR2_ee.getSample(sam).addSystematic(trigVR) for sam in BGList]
+        [meffVR2_ee.getSample(sam).addSystematic(lesVR) for sam in BGList]
+        [meffVR2_ee.getSample(sam).addSystematic(lermsVR) for sam in BGList]
+        [meffVR2_ee.getSample(sam).addSystematic(leridVR) for sam in BGList]
 
     meffVR2_em=bkgOnly.addChannel("meffInc",["VR2em"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
-    meffVR2_em.hasB = True
-    meffVR2_em.hasBQCD = True
     meffVR2_em.useOverflowBin = True
     [meffVR2_em.getSample(sam).addSystematic(jesLow) for sam in BGList]
     [meffVR2_em.getSample(sam).addSystematic(jesMedium) for sam in BGList]
     [meffVR2_em.getSample(sam).addSystematic(jesHigh) for sam in BGList]
-    [meffVR2_em.getSample(sam).addSystematic(lepTR) for sam in BGList]
+    [meffVR2_em.getSample(sam).addSystematic(lepVR) for sam in BGList]
     [meffVR2_em.getSample(sam).addSystematic(zpT0GeV) for sam in BGList]
     [meffVR2_em.getSample(sam).addSystematic(zpT50GeV) for sam in BGList]
     [meffVR2_em.getSample(sam).addSystematic(zpT100GeV) for sam in BGList]
@@ -1699,21 +1705,19 @@ if doValidationDilep:
     [meffVR2_em.getSample(sam).addSystematic(zpT200GeV) for sam in BGList]
 
     if fullSyst:
-        [meffVR2_em.getSample(sam).addSystematic(metcoTR) for sam in BGList]
-        [meffVR2_em.getSample(sam).addSystematic(metpuTR) for sam in BGList]
-        [meffVR2_em.getSample(sam).addSystematic(trigTR) for sam in BGList]
-        [meffVR2_em.getSample(sam).addSystematic(lesTR) for sam in BGList]
-        [meffVR2_em.getSample(sam).addSystematic(lermsTR) for sam in BGList]
-        [meffVR2_em.getSample(sam).addSystematic(leridTR) for sam in BGList]
+        [meffVR2_em.getSample(sam).addSystematic(metcoVR) for sam in BGList]
+        [meffVR2_em.getSample(sam).addSystematic(metpuVR) for sam in BGList]
+        [meffVR2_em.getSample(sam).addSystematic(trigVR) for sam in BGList]
+        [meffVR2_em.getSample(sam).addSystematic(lesVR) for sam in BGList]
+        [meffVR2_em.getSample(sam).addSystematic(lermsVR) for sam in BGList]
+        [meffVR2_em.getSample(sam).addSystematic(leridVR) for sam in BGList]
 
     meffVR2_mm=bkgOnly.addChannel("meffInc",["VR2mm"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
-    meffVR2_mm.hasB = True
-    meffVR2_mm.hasBQCD = True
     meffVR2_mm.useOverflowBin = True
     [meffVR2_mm.getSample(sam).addSystematic(jesLow) for sam in BGList]
     [meffVR2_mm.getSample(sam).addSystematic(jesMedium) for sam in BGList]
     [meffVR2_mm.getSample(sam).addSystematic(jesHigh) for sam in BGList]
-    [meffVR2_mm.getSample(sam).addSystematic(lepTR) for sam in BGList]
+    [meffVR2_mm.getSample(sam).addSystematic(lepVR) for sam in BGList]
     [meffVR2_mm.getSample(sam).addSystematic(zpT0GeV) for sam in BGList]
     [meffVR2_mm.getSample(sam).addSystematic(zpT50GeV) for sam in BGList]
     [meffVR2_mm.getSample(sam).addSystematic(zpT100GeV) for sam in BGList]
@@ -1721,21 +1725,19 @@ if doValidationDilep:
     [meffVR2_mm.getSample(sam).addSystematic(zpT200GeV) for sam in BGList]
 
     if fullSyst:
-        [meffVR2_mm.getSample(sam).addSystematic(metcoTR) for sam in BGList]
-        [meffVR2_mm.getSample(sam).addSystematic(metpuTR) for sam in BGList]
-        [meffVR2_mm.getSample(sam).addSystematic(trigTR) for sam in BGList]
-        [meffVR2_mm.getSample(sam).addSystematic(lesTR) for sam in BGList]
-        [meffVR2_mm.getSample(sam).addSystematic(lermsTR) for sam in BGList]
-        [meffVR2_mm.getSample(sam).addSystematic(leridTR) for sam in BGList]
+        [meffVR2_mm.getSample(sam).addSystematic(metcoVR) for sam in BGList]
+        [meffVR2_mm.getSample(sam).addSystematic(metpuVR) for sam in BGList]
+        [meffVR2_mm.getSample(sam).addSystematic(trigVR) for sam in BGList]
+        [meffVR2_mm.getSample(sam).addSystematic(lesVR) for sam in BGList]
+        [meffVR2_mm.getSample(sam).addSystematic(lermsVR) for sam in BGList]
+        [meffVR2_mm.getSample(sam).addSystematic(leridVR) for sam in BGList]
 
     nJetVR2_ee=bkgOnly.addChannel("nJet",["VR2ee"],nJetZmmNBins,nJetZmmBinLow,nJetZmmBinHigh)
-    nJetVR2_ee.hasB = True
-    nJetVR2_ee.hasBQCD = True
     nJetVR2_ee.useOverflowBin = True
     [nJetVR2_ee.getSample(sam).addSystematic(jesLow) for sam in BGList]
     [nJetVR2_ee.getSample(sam).addSystematic(jesMedium) for sam in BGList]
     [nJetVR2_ee.getSample(sam).addSystematic(jesHigh) for sam in BGList]
-    [nJetVR2_ee.getSample(sam).addSystematic(lepTR) for sam in BGList]
+    [nJetVR2_ee.getSample(sam).addSystematic(lepVR) for sam in BGList]
     [nJetVR2_ee.getSample(sam).addSystematic(zpT0GeV) for sam in BGList]
     [nJetVR2_ee.getSample(sam).addSystematic(zpT50GeV) for sam in BGList]
     [nJetVR2_ee.getSample(sam).addSystematic(zpT100GeV) for sam in BGList]
@@ -1743,21 +1745,19 @@ if doValidationDilep:
     [nJetVR2_ee.getSample(sam).addSystematic(zpT200GeV) for sam in BGList]
 
     if fullSyst:
-        [nJetVR2_ee.getSample(sam).addSystematic(metcoTR) for sam in BGList]
-        [nJetVR2_ee.getSample(sam).addSystematic(metpuTR) for sam in BGList]
-        [nJetVR2_ee.getSample(sam).addSystematic(trigTR) for sam in BGList]
-        [nJetVR2_ee.getSample(sam).addSystematic(lesTR) for sam in BGList]
-        [nJetVR2_ee.getSample(sam).addSystematic(lermsTR) for sam in BGList]
-        [nJetVR2_ee.getSample(sam).addSystematic(leridTR) for sam in BGList]
+        [nJetVR2_ee.getSample(sam).addSystematic(metcoVR) for sam in BGList]
+        [nJetVR2_ee.getSample(sam).addSystematic(metpuVR) for sam in BGList]
+        [nJetVR2_ee.getSample(sam).addSystematic(trigVR) for sam in BGList]
+        [nJetVR2_ee.getSample(sam).addSystematic(lesVR) for sam in BGList]
+        [nJetVR2_ee.getSample(sam).addSystematic(lermsVR) for sam in BGList]
+        [nJetVR2_ee.getSample(sam).addSystematic(leridVR) for sam in BGList]
 
     nJetVR2_em=bkgOnly.addChannel("nJet",["VR2em"],nJetZmmNBins,nJetZmmBinLow,nJetZmmBinHigh)
-    nJetVR2_em.hasB = True
-    nJetVR2_em.hasBQCD = True
     nJetVR2_em.useOverflowBin = True
     [nJetVR2_em.getSample(sam).addSystematic(jesLow) for sam in BGList]
     [nJetVR2_em.getSample(sam).addSystematic(jesMedium) for sam in BGList]
     [nJetVR2_em.getSample(sam).addSystematic(jesHigh) for sam in BGList]
-    [nJetVR2_em.getSample(sam).addSystematic(lepTR) for sam in BGList]
+    [nJetVR2_em.getSample(sam).addSystematic(lepVR) for sam in BGList]
     [nJetVR2_em.getSample(sam).addSystematic(zpT0GeV) for sam in BGList]
     [nJetVR2_em.getSample(sam).addSystematic(zpT50GeV) for sam in BGList]
     [nJetVR2_em.getSample(sam).addSystematic(zpT100GeV) for sam in BGList]
@@ -1765,21 +1765,19 @@ if doValidationDilep:
     [nJetVR2_em.getSample(sam).addSystematic(zpT200GeV) for sam in BGList]
 
     if fullSyst:
-        [nJetVR2_em.getSample(sam).addSystematic(metcoTR) for sam in BGList]
-        [nJetVR2_em.getSample(sam).addSystematic(metpuTR) for sam in BGList]
-        [nJetVR2_em.getSample(sam).addSystematic(trigTR) for sam in BGList]
-        [nJetVR2_em.getSample(sam).addSystematic(lesTR) for sam in BGList]
-        [nJetVR2_em.getSample(sam).addSystematic(lermsTR) for sam in BGList]
-        [nJetVR2_em.getSample(sam).addSystematic(leridTR) for sam in BGList]
+        [nJetVR2_em.getSample(sam).addSystematic(metcoVR) for sam in BGList]
+        [nJetVR2_em.getSample(sam).addSystematic(metpuVR) for sam in BGList]
+        [nJetVR2_em.getSample(sam).addSystematic(trigVR) for sam in BGList]
+        [nJetVR2_em.getSample(sam).addSystematic(lesVR) for sam in BGList]
+        [nJetVR2_em.getSample(sam).addSystematic(lermsVR) for sam in BGList]
+        [nJetVR2_em.getSample(sam).addSystematic(leridVR) for sam in BGList]
 
     nJetVR2_mm=bkgOnly.addChannel("nJet",["VR2mm"],nJetZmmNBins,nJetZmmBinLow,nJetZmmBinHigh)
-    nJetVR2_mm.hasB = True
-    nJetVR2_mm.hasBQCD = True
     nJetVR2_mm.useOverflowBin = True
     [nJetVR2_mm.getSample(sam).addSystematic(jesLow) for sam in BGList]
     [nJetVR2_mm.getSample(sam).addSystematic(jesMedium) for sam in BGList]
     [nJetVR2_mm.getSample(sam).addSystematic(jesHigh) for sam in BGList]
-    [nJetVR2_mm.getSample(sam).addSystematic(lepTR) for sam in BGList]
+    [nJetVR2_mm.getSample(sam).addSystematic(lepVR) for sam in BGList]
     [nJetVR2_mm.getSample(sam).addSystematic(zpT0GeV) for sam in BGList]
     [nJetVR2_mm.getSample(sam).addSystematic(zpT50GeV) for sam in BGList]
     [nJetVR2_mm.getSample(sam).addSystematic(zpT100GeV) for sam in BGList]
@@ -1787,21 +1785,19 @@ if doValidationDilep:
     [nJetVR2_mm.getSample(sam).addSystematic(zpT200GeV) for sam in BGList]
 
     if fullSyst:
-        [nJetVR2_mm.getSample(sam).addSystematic(metcoTR) for sam in BGList]
-        [nJetVR2_mm.getSample(sam).addSystematic(metpuTR) for sam in BGList]
-        [nJetVR2_mm.getSample(sam).addSystematic(trigTR) for sam in BGList]
-        [nJetVR2_mm.getSample(sam).addSystematic(lesTR) for sam in BGList]
-        [nJetVR2_mm.getSample(sam).addSystematic(lermsTR) for sam in BGList]
-        [nJetVR2_mm.getSample(sam).addSystematic(leridTR) for sam in BGList]
+        [nJetVR2_mm.getSample(sam).addSystematic(metcoVR) for sam in BGList]
+        [nJetVR2_mm.getSample(sam).addSystematic(metpuVR) for sam in BGList]
+        [nJetVR2_mm.getSample(sam).addSystematic(trigVR) for sam in BGList]
+        [nJetVR2_mm.getSample(sam).addSystematic(lesVR) for sam in BGList]
+        [nJetVR2_mm.getSample(sam).addSystematic(lermsVR) for sam in BGList]
+        [nJetVR2_mm.getSample(sam).addSystematic(leridVR) for sam in BGList]
 
     meffVR3_ee=bkgOnly.addChannel("meffInc",["VR3ee"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
-    meffVR3_ee.hasB = True
-    meffVR3_ee.hasBQCD = True
     meffVR3_ee.useOverflowBin = True
     [meffVR3_ee.getSample(sam).addSystematic(jesLow) for sam in BGList]
     [meffVR3_ee.getSample(sam).addSystematic(jesMedium) for sam in BGList]
     [meffVR3_ee.getSample(sam).addSystematic(jesHigh) for sam in BGList]
-    [meffVR3_ee.getSample(sam).addSystematic(lepTR) for sam in BGList]
+    [meffVR3_ee.getSample(sam).addSystematic(lepVR) for sam in BGList]
     [meffVR3_ee.getSample(sam).addSystematic(zpT0GeV) for sam in BGList]
     [meffVR3_ee.getSample(sam).addSystematic(zpT50GeV) for sam in BGList]
     [meffVR3_ee.getSample(sam).addSystematic(zpT100GeV) for sam in BGList]
@@ -1809,21 +1805,19 @@ if doValidationDilep:
     [meffVR3_ee.getSample(sam).addSystematic(zpT200GeV) for sam in BGList]
 
     if fullSyst:
-        [meffVR3_ee.getSample(sam).addSystematic(metcoTR) for sam in BGList]
-        [meffVR3_ee.getSample(sam).addSystematic(metpuTR) for sam in BGList]
-        [meffVR3_ee.getSample(sam).addSystematic(trigTR) for sam in BGList]
-        [meffVR3_ee.getSample(sam).addSystematic(lesTR) for sam in BGList]
-        [meffVR3_ee.getSample(sam).addSystematic(lermsTR) for sam in BGList]
-        [meffVR3_ee.getSample(sam).addSystematic(leridTR) for sam in BGList]
+        [meffVR3_ee.getSample(sam).addSystematic(metcoVR) for sam in BGList]
+        [meffVR3_ee.getSample(sam).addSystematic(metpuVR) for sam in BGList]
+        [meffVR3_ee.getSample(sam).addSystematic(trigVR) for sam in BGList]
+        [meffVR3_ee.getSample(sam).addSystematic(lesVR) for sam in BGList]
+        [meffVR3_ee.getSample(sam).addSystematic(lermsVR) for sam in BGList]
+        [meffVR3_ee.getSample(sam).addSystematic(leridVR) for sam in BGList]
 
     meffVR3_em=bkgOnly.addChannel("meffInc",["VR3em"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
-    meffVR3_em.hasB = True
-    meffVR3_em.hasBQCD = True
     meffVR3_em.useOverflowBin = True
     [meffVR3_em.getSample(sam).addSystematic(jesLow) for sam in BGList]
     [meffVR3_em.getSample(sam).addSystematic(jesMedium) for sam in BGList]
     [meffVR3_em.getSample(sam).addSystematic(jesHigh) for sam in BGList]
-    [meffVR3_em.getSample(sam).addSystematic(lepTR) for sam in BGList]
+    [meffVR3_em.getSample(sam).addSystematic(lepVR) for sam in BGList]
     [meffVR3_em.getSample(sam).addSystematic(zpT0GeV) for sam in BGList]
     [meffVR3_em.getSample(sam).addSystematic(zpT50GeV) for sam in BGList]
     [meffVR3_em.getSample(sam).addSystematic(zpT100GeV) for sam in BGList]
@@ -1831,21 +1825,19 @@ if doValidationDilep:
     [meffVR3_em.getSample(sam).addSystematic(zpT200GeV) for sam in BGList]
 
     if fullSyst:
-        [meffVR3_em.getSample(sam).addSystematic(metcoTR) for sam in BGList]
-        [meffVR3_em.getSample(sam).addSystematic(metpuTR) for sam in BGList]
-        [meffVR3_em.getSample(sam).addSystematic(trigTR) for sam in BGList]
-        [meffVR3_em.getSample(sam).addSystematic(lesTR) for sam in BGList]
-        [meffVR3_em.getSample(sam).addSystematic(lermsTR) for sam in BGList]
-        [meffVR3_em.getSample(sam).addSystematic(leridTR) for sam in BGList]
+        [meffVR3_em.getSample(sam).addSystematic(metcoVR) for sam in BGList]
+        [meffVR3_em.getSample(sam).addSystematic(metpuVR) for sam in BGList]
+        [meffVR3_em.getSample(sam).addSystematic(trigVR) for sam in BGList]
+        [meffVR3_em.getSample(sam).addSystematic(lesVR) for sam in BGList]
+        [meffVR3_em.getSample(sam).addSystematic(lermsVR) for sam in BGList]
+        [meffVR3_em.getSample(sam).addSystematic(leridVR) for sam in BGList]
 
     meffVR3_mm=bkgOnly.addChannel("meffInc",["VR3mm"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
-    meffVR3_mm.hasB = True
-    meffVR3_mm.hasBQCD = True
     meffVR3_mm.useOverflowBin = True
     [meffVR3_mm.getSample(sam).addSystematic(jesLow) for sam in BGList]
     [meffVR3_mm.getSample(sam).addSystematic(jesMedium) for sam in BGList]
     [meffVR3_mm.getSample(sam).addSystematic(jesHigh) for sam in BGList]
-    [meffVR3_mm.getSample(sam).addSystematic(lepTR) for sam in BGList]
+    [meffVR3_mm.getSample(sam).addSystematic(lepVR) for sam in BGList]
     [meffVR3_mm.getSample(sam).addSystematic(zpT0GeV) for sam in BGList]
     [meffVR3_mm.getSample(sam).addSystematic(zpT50GeV) for sam in BGList]
     [meffVR3_mm.getSample(sam).addSystematic(zpT100GeV) for sam in BGList]
@@ -1853,21 +1845,19 @@ if doValidationDilep:
     [meffVR3_mm.getSample(sam).addSystematic(zpT200GeV) for sam in BGList]
 
     if fullSyst:
-        [meffVR3_mm.getSample(sam).addSystematic(metcoTR) for sam in BGList]
-        [meffVR3_mm.getSample(sam).addSystematic(metpuTR) for sam in BGList]
-        [meffVR3_mm.getSample(sam).addSystematic(trigTR) for sam in BGList]
-        [meffVR3_mm.getSample(sam).addSystematic(lesTR) for sam in BGList]
-        [meffVR3_mm.getSample(sam).addSystematic(lermsTR) for sam in BGList]
-        [meffVR3_mm.getSample(sam).addSystematic(leridTR) for sam in BGList]
+        [meffVR3_mm.getSample(sam).addSystematic(metcoVR) for sam in BGList]
+        [meffVR3_mm.getSample(sam).addSystematic(metpuVR) for sam in BGList]
+        [meffVR3_mm.getSample(sam).addSystematic(trigVR) for sam in BGList]
+        [meffVR3_mm.getSample(sam).addSystematic(lesVR) for sam in BGList]
+        [meffVR3_mm.getSample(sam).addSystematic(lermsVR) for sam in BGList]
+        [meffVR3_mm.getSample(sam).addSystematic(leridVR) for sam in BGList]
 
     nJetVR3_ee=bkgOnly.addChannel("nJet",["VR3ee"],nJetZmmNBins,nJetZmmBinLow,nJetZmmBinHigh)
-    nJetVR3_ee.hasB = True
-    nJetVR3_ee.hasBQCD = True
     nJetVR3_ee.useOverflowBin = True
     [nJetVR3_ee.getSample(sam).addSystematic(jesLow) for sam in BGList]
     [nJetVR3_ee.getSample(sam).addSystematic(jesMedium) for sam in BGList]
     [nJetVR3_ee.getSample(sam).addSystematic(jesHigh) for sam in BGList]
-    [nJetVR3_ee.getSample(sam).addSystematic(lepTR) for sam in BGList]
+    [nJetVR3_ee.getSample(sam).addSystematic(lepVR) for sam in BGList]
     [nJetVR3_ee.getSample(sam).addSystematic(zpT0GeV) for sam in BGList]
     [nJetVR3_ee.getSample(sam).addSystematic(zpT50GeV) for sam in BGList]
     [nJetVR3_ee.getSample(sam).addSystematic(zpT100GeV) for sam in BGList]
@@ -1875,21 +1865,19 @@ if doValidationDilep:
     [nJetVR3_ee.getSample(sam).addSystematic(zpT200GeV) for sam in BGList]
 
     if fullSyst:
-        [nJetVR3_ee.getSample(sam).addSystematic(metcoTR) for sam in BGList]
-        [nJetVR3_ee.getSample(sam).addSystematic(metpuTR) for sam in BGList]
-        [nJetVR3_ee.getSample(sam).addSystematic(trigTR) for sam in BGList]
-        [nJetVR3_ee.getSample(sam).addSystematic(lesTR) for sam in BGList]
-        [nJetVR3_ee.getSample(sam).addSystematic(lermsTR) for sam in BGList]
-        [nJetVR3_ee.getSample(sam).addSystematic(leridTR) for sam in BGList]
+        [nJetVR3_ee.getSample(sam).addSystematic(metcoVR) for sam in BGList]
+        [nJetVR3_ee.getSample(sam).addSystematic(metpuVR) for sam in BGList]
+        [nJetVR3_ee.getSample(sam).addSystematic(trigVR) for sam in BGList]
+        [nJetVR3_ee.getSample(sam).addSystematic(lesVR) for sam in BGList]
+        [nJetVR3_ee.getSample(sam).addSystematic(lermsVR) for sam in BGList]
+        [nJetVR3_ee.getSample(sam).addSystematic(leridVR) for sam in BGList]
 
     nJetVR3_em=bkgOnly.addChannel("nJet",["VR3em"],nJetZmmNBins,nJetZmmBinLow,nJetZmmBinHigh)
-    nJetVR3_em.hasB = True
-    nJetVR3_em.hasBQCD = True
     nJetVR3_em.useOverflowBin = True
     [nJetVR3_em.getSample(sam).addSystematic(jesLow) for sam in BGList]
     [nJetVR3_em.getSample(sam).addSystematic(jesMedium) for sam in BGList]
     [nJetVR3_em.getSample(sam).addSystematic(jesHigh) for sam in BGList]
-    [nJetVR3_em.getSample(sam).addSystematic(lepTR) for sam in BGList]
+    [nJetVR3_em.getSample(sam).addSystematic(lepVR) for sam in BGList]
     [nJetVR3_em.getSample(sam).addSystematic(zpT0GeV) for sam in BGList]
     [nJetVR3_em.getSample(sam).addSystematic(zpT50GeV) for sam in BGList]
     [nJetVR3_em.getSample(sam).addSystematic(zpT100GeV) for sam in BGList]
@@ -1897,21 +1885,19 @@ if doValidationDilep:
     [nJetVR3_em.getSample(sam).addSystematic(zpT200GeV) for sam in BGList]
 
     if fullSyst:
-        [nJetVR3_em.getSample(sam).addSystematic(metcoTR) for sam in BGList]
-        [nJetVR3_em.getSample(sam).addSystematic(metpuTR) for sam in BGList]
-        [nJetVR3_em.getSample(sam).addSystematic(trigTR) for sam in BGList]
-        [nJetVR3_em.getSample(sam).addSystematic(lesTR) for sam in BGList]
-        [nJetVR3_em.getSample(sam).addSystematic(lermsTR) for sam in BGList]
-        [nJetVR3_em.getSample(sam).addSystematic(leridTR) for sam in BGList]
+        [nJetVR3_em.getSample(sam).addSystematic(metcoVR) for sam in BGList]
+        [nJetVR3_em.getSample(sam).addSystematic(metpuVR) for sam in BGList]
+        [nJetVR3_em.getSample(sam).addSystematic(trigVR) for sam in BGList]
+        [nJetVR3_em.getSample(sam).addSystematic(lesVR) for sam in BGList]
+        [nJetVR3_em.getSample(sam).addSystematic(lermsVR) for sam in BGList]
+        [nJetVR3_em.getSample(sam).addSystematic(leridVR) for sam in BGList]
 
     nJetVR3_mm=bkgOnly.addChannel("nJet",["VR3mm"],nJetZmmNBins,nJetZmmBinLow,nJetZmmBinHigh)
-    nJetVR3_mm.hasB = True
-    nJetVR3_mm.hasBQCD = True
     nJetVR3_mm.useOverflowBin = True
     [nJetVR3_mm.getSample(sam).addSystematic(jesLow) for sam in BGList]
     [nJetVR3_mm.getSample(sam).addSystematic(jesMedium) for sam in BGList]
     [nJetVR3_mm.getSample(sam).addSystematic(jesHigh) for sam in BGList]
-    [nJetVR3_mm.getSample(sam).addSystematic(lepTR) for sam in BGList]
+    [nJetVR3_mm.getSample(sam).addSystematic(lepVR) for sam in BGList]
     [nJetVR3_mm.getSample(sam).addSystematic(zpT0GeV) for sam in BGList]
     [nJetVR3_mm.getSample(sam).addSystematic(zpT50GeV) for sam in BGList]
     [nJetVR3_mm.getSample(sam).addSystematic(zpT100GeV) for sam in BGList]
@@ -1919,12 +1905,12 @@ if doValidationDilep:
     [nJetVR3_mm.getSample(sam).addSystematic(zpT200GeV) for sam in BGList]
 
     if fullSyst:
-        [nJetVR3_mm.getSample(sam).addSystematic(metcoTR) for sam in BGList]
-        [nJetVR3_mm.getSample(sam).addSystematic(metpuTR) for sam in BGList]
-        [nJetVR3_mm.getSample(sam).addSystematic(trigTR) for sam in BGList]
-        [nJetVR3_mm.getSample(sam).addSystematic(lesTR) for sam in BGList]
-        [nJetVR3_mm.getSample(sam).addSystematic(lermsTR) for sam in BGList]
-        [nJetVR3_mm.getSample(sam).addSystematic(leridTR) for sam in BGList]
+        [nJetVR3_mm.getSample(sam).addSystematic(metcoVR) for sam in BGList]
+        [nJetVR3_mm.getSample(sam).addSystematic(metpuVR) for sam in BGList]
+        [nJetVR3_mm.getSample(sam).addSystematic(trigVR) for sam in BGList]
+        [nJetVR3_mm.getSample(sam).addSystematic(lesVR) for sam in BGList]
+        [nJetVR3_mm.getSample(sam).addSystematic(lermsVR) for sam in BGList]
+        [nJetVR3_mm.getSample(sam).addSystematic(leridVR) for sam in BGList]
 
 
 if doValidationDilepZ:
@@ -1939,8 +1925,8 @@ if doValidationDilepZ:
     [meffVZR4_ee.getSample(sam).addSystematic(jesLow) for sam in BGList]
     [meffVZR4_ee.getSample(sam).addSystematic(jesMedium) for sam in BGList]
     [meffVZR4_ee.getSample(sam).addSystematic(jesHigh) for sam in BGList]
-    [meffVZR4_ee.getSample(sam).addSystematic(lepTR) for sam in BGList]
-    [meffVZR4_ee.getSample(sam).addSystematic(btagTR) for sam in BGList]
+    [meffVZR4_ee.getSample(sam).addSystematic(lepVR) for sam in BGList]
+    [meffVZR4_ee.getSample(sam).addSystematic(btagVR) for sam in BGList]
     [meffVZR4_ee.getSample(sam).addSystematic(zpT0GeV) for sam in BGList]
     [meffVZR4_ee.getSample(sam).addSystematic(zpT50GeV) for sam in BGList]
     [meffVZR4_ee.getSample(sam).addSystematic(zpT100GeV) for sam in BGList]
@@ -1948,12 +1934,12 @@ if doValidationDilepZ:
     [meffVZR4_ee.getSample(sam).addSystematic(zpT200GeV) for sam in BGList]
 
     if fullSyst:
-        [meffVZR4_ee.getSample(sam).addSystematic(metcoTR) for sam in BGList]
-        [meffVZR4_ee.getSample(sam).addSystematic(metpuTR) for sam in BGList]
-        [meffVZR4_ee.getSample(sam).addSystematic(trigTR) for sam in BGList]
-        [meffVZR4_ee.getSample(sam).addSystematic(lesTR) for sam in BGList]
-        [meffVZR4_ee.getSample(sam).addSystematic(lermsTR) for sam in BGList]
-        [meffVZR4_ee.getSample(sam).addSystematic(leridTR) for sam in BGList]
+        [meffVZR4_ee.getSample(sam).addSystematic(metcoVR) for sam in BGList]
+        [meffVZR4_ee.getSample(sam).addSystematic(metpuVR) for sam in BGList]
+        [meffVZR4_ee.getSample(sam).addSystematic(trigVR) for sam in BGList]
+        [meffVZR4_ee.getSample(sam).addSystematic(lesVR) for sam in BGList]
+        [meffVZR4_ee.getSample(sam).addSystematic(lermsVR) for sam in BGList]
+        [meffVZR4_ee.getSample(sam).addSystematic(leridVR) for sam in BGList]
 
     meffVZR4_em=bkgOnly.addChannel("meffInc",["VZR4em"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
     meffVZR4_em.hasB = True
@@ -1962,8 +1948,8 @@ if doValidationDilepZ:
     [meffVZR4_em.getSample(sam).addSystematic(jesLow) for sam in BGList]
     [meffVZR4_em.getSample(sam).addSystematic(jesMedium) for sam in BGList]
     [meffVZR4_em.getSample(sam).addSystematic(jesHigh) for sam in BGList]
-    [meffVZR4_em.getSample(sam).addSystematic(lepTR) for sam in BGList]
-    [meffVZR4_em.getSample(sam).addSystematic(btagTR) for sam in BGList]
+    [meffVZR4_em.getSample(sam).addSystematic(lepVR) for sam in BGList]
+    [meffVZR4_em.getSample(sam).addSystematic(btagVR) for sam in BGList]
     [meffVZR4_em.getSample(sam).addSystematic(zpT0GeV) for sam in BGList]
     [meffVZR4_em.getSample(sam).addSystematic(zpT50GeV) for sam in BGList]
     [meffVZR4_em.getSample(sam).addSystematic(zpT100GeV) for sam in BGList]
@@ -1971,12 +1957,12 @@ if doValidationDilepZ:
     [meffVZR4_em.getSample(sam).addSystematic(zpT200GeV) for sam in BGList]
 
     if fullSyst:
-        [meffVZR4_em.getSample(sam).addSystematic(metcoTR) for sam in BGList]
-        [meffVZR4_em.getSample(sam).addSystematic(metpuTR) for sam in BGList]
-        [meffVZR4_em.getSample(sam).addSystematic(trigTR) for sam in BGList]
-        [meffVZR4_em.getSample(sam).addSystematic(lesTR) for sam in BGList]
-        [meffVZR4_em.getSample(sam).addSystematic(lermsTR) for sam in BGList]
-        [meffVZR4_em.getSample(sam).addSystematic(leridTR) for sam in BGList]
+        [meffVZR4_em.getSample(sam).addSystematic(metcoVR) for sam in BGList]
+        [meffVZR4_em.getSample(sam).addSystematic(metpuVR) for sam in BGList]
+        [meffVZR4_em.getSample(sam).addSystematic(trigVR) for sam in BGList]
+        [meffVZR4_em.getSample(sam).addSystematic(lesVR) for sam in BGList]
+        [meffVZR4_em.getSample(sam).addSystematic(lermsVR) for sam in BGList]
+        [meffVZR4_em.getSample(sam).addSystematic(leridVR) for sam in BGList]
 
     meffVZR4_mm=bkgOnly.addChannel("meffInc",["VZR4mm"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
     meffVZR4_mm.hasB = True
@@ -1985,8 +1971,8 @@ if doValidationDilepZ:
     [meffVZR4_mm.getSample(sam).addSystematic(jesLow) for sam in BGList]
     [meffVZR4_mm.getSample(sam).addSystematic(jesMedium) for sam in BGList]
     [meffVZR4_mm.getSample(sam).addSystematic(jesHigh) for sam in BGList]
-    [meffVZR4_mm.getSample(sam).addSystematic(lepTR) for sam in BGList]
-    [meffVZR4_mm.getSample(sam).addSystematic(btagTR) for sam in BGList]
+    [meffVZR4_mm.getSample(sam).addSystematic(lepVR) for sam in BGList]
+    [meffVZR4_mm.getSample(sam).addSystematic(btagVR) for sam in BGList]
     [meffVZR4_mm.getSample(sam).addSystematic(zpT0GeV) for sam in BGList]
     [meffVZR4_mm.getSample(sam).addSystematic(zpT50GeV) for sam in BGList]
     [meffVZR4_mm.getSample(sam).addSystematic(zpT100GeV) for sam in BGList]
@@ -1994,12 +1980,12 @@ if doValidationDilepZ:
     [meffVZR4_mm.getSample(sam).addSystematic(zpT200GeV) for sam in BGList]
 
     if fullSyst:
-        [meffVZR4_mm.getSample(sam).addSystematic(metcoTR) for sam in BGList]
-        [meffVZR4_mm.getSample(sam).addSystematic(metpuTR) for sam in BGList]
-        [meffVZR4_mm.getSample(sam).addSystematic(trigTR) for sam in BGList]
-        [meffVZR4_mm.getSample(sam).addSystematic(lesTR) for sam in BGList]
-        [meffVZR4_mm.getSample(sam).addSystematic(lermsTR) for sam in BGList]
-        [meffVZR4_mm.getSample(sam).addSystematic(leridTR) for sam in BGList]
+        [meffVZR4_mm.getSample(sam).addSystematic(metcoVR) for sam in BGList]
+        [meffVZR4_mm.getSample(sam).addSystematic(metpuVR) for sam in BGList]
+        [meffVZR4_mm.getSample(sam).addSystematic(trigVR) for sam in BGList]
+        [meffVZR4_mm.getSample(sam).addSystematic(lesVR) for sam in BGList]
+        [meffVZR4_mm.getSample(sam).addSystematic(lermsVR) for sam in BGList]
+        [meffVZR4_mm.getSample(sam).addSystematic(leridVR) for sam in BGList]
 
     nJetVZR4_ee=bkgOnly.addChannel("nJet",["VZR4ee"],nJetZmmNBins,nJetZmmBinLow,nJetZmmBinHigh)
     nJetVZR4_ee.hasB = True
@@ -2008,8 +1994,8 @@ if doValidationDilepZ:
     [nJetVZR4_ee.getSample(sam).addSystematic(jesLow) for sam in BGList]
     [nJetVZR4_ee.getSample(sam).addSystematic(jesMedium) for sam in BGList]
     [nJetVZR4_ee.getSample(sam).addSystematic(jesHigh) for sam in BGList]
-    [nJetVZR4_ee.getSample(sam).addSystematic(lepTR) for sam in BGList]
-    [nJetVZR4_ee.getSample(sam).addSystematic(btagTR) for sam in BGList]
+    [nJetVZR4_ee.getSample(sam).addSystematic(lepVR) for sam in BGList]
+    [nJetVZR4_ee.getSample(sam).addSystematic(btagVR) for sam in BGList]
     [nJetVZR4_ee.getSample(sam).addSystematic(zpT0GeV) for sam in BGList]
     [nJetVZR4_ee.getSample(sam).addSystematic(zpT50GeV) for sam in BGList]
     [nJetVZR4_ee.getSample(sam).addSystematic(zpT100GeV) for sam in BGList]
@@ -2017,12 +2003,12 @@ if doValidationDilepZ:
     [nJetVZR4_ee.getSample(sam).addSystematic(zpT200GeV) for sam in BGList]
 
     if fullSyst:
-        [nJetVZR4_ee.getSample(sam).addSystematic(metcoTR) for sam in BGList]
-        [nJetVZR4_ee.getSample(sam).addSystematic(metpuTR) for sam in BGList]
-        [nJetVZR4_ee.getSample(sam).addSystematic(trigTR) for sam in BGList]
-        [nJetVZR4_ee.getSample(sam).addSystematic(lesTR) for sam in BGList]
-        [nJetVZR4_ee.getSample(sam).addSystematic(lermsTR) for sam in BGList]
-        [nJetVZR4_ee.getSample(sam).addSystematic(leridTR) for sam in BGList]
+        [nJetVZR4_ee.getSample(sam).addSystematic(metcoVR) for sam in BGList]
+        [nJetVZR4_ee.getSample(sam).addSystematic(metpuVR) for sam in BGList]
+        [nJetVZR4_ee.getSample(sam).addSystematic(trigVR) for sam in BGList]
+        [nJetVZR4_ee.getSample(sam).addSystematic(lesVR) for sam in BGList]
+        [nJetVZR4_ee.getSample(sam).addSystematic(lermsVR) for sam in BGList]
+        [nJetVZR4_ee.getSample(sam).addSystematic(leridVR) for sam in BGList]
 
     nJetVZR4_em=bkgOnly.addChannel("nJet",["VZR4em"],nJetZmmNBins,nJetZmmBinLow,nJetZmmBinHigh)
     nJetVZR4_em.hasB = True
@@ -2031,8 +2017,8 @@ if doValidationDilepZ:
     [nJetVZR4_em.getSample(sam).addSystematic(jesLow) for sam in BGList]
     [nJetVZR4_em.getSample(sam).addSystematic(jesMedium) for sam in BGList]
     [nJetVZR4_em.getSample(sam).addSystematic(jesHigh) for sam in BGList]
-    [nJetVZR4_em.getSample(sam).addSystematic(lepTR) for sam in BGList]
-    [nJetVZR4_em.getSample(sam).addSystematic(btagTR) for sam in BGList]
+    [nJetVZR4_em.getSample(sam).addSystematic(lepVR) for sam in BGList]
+    [nJetVZR4_em.getSample(sam).addSystematic(btagVR) for sam in BGList]
     [nJetVZR4_em.getSample(sam).addSystematic(zpT0GeV) for sam in BGList]
     [nJetVZR4_em.getSample(sam).addSystematic(zpT50GeV) for sam in BGList]
     [nJetVZR4_em.getSample(sam).addSystematic(zpT100GeV) for sam in BGList]
@@ -2040,12 +2026,12 @@ if doValidationDilepZ:
     [nJetVZR4_em.getSample(sam).addSystematic(zpT200GeV) for sam in BGList]
 
     if fullSyst:
-        [nJetVZR4_em.getSample(sam).addSystematic(metcoTR) for sam in BGList]
-        [nJetVZR4_em.getSample(sam).addSystematic(metpuTR) for sam in BGList]
-        [nJetVZR4_em.getSample(sam).addSystematic(trigTR) for sam in BGList]
-        [nJetVZR4_em.getSample(sam).addSystematic(lesTR) for sam in BGList]
-        [nJetVZR4_em.getSample(sam).addSystematic(lermsTR) for sam in BGList]
-        [nJetVZR4_em.getSample(sam).addSystematic(leridTR) for sam in BGList]
+        [nJetVZR4_em.getSample(sam).addSystematic(metcoVR) for sam in BGList]
+        [nJetVZR4_em.getSample(sam).addSystematic(metpuVR) for sam in BGList]
+        [nJetVZR4_em.getSample(sam).addSystematic(trigVR) for sam in BGList]
+        [nJetVZR4_em.getSample(sam).addSystematic(lesVR) for sam in BGList]
+        [nJetVZR4_em.getSample(sam).addSystematic(lermsVR) for sam in BGList]
+        [nJetVZR4_em.getSample(sam).addSystematic(leridVR) for sam in BGList]
 
     nJetVZR4_mm=bkgOnly.addChannel("nJet",["VZR4mm"],nJetZmmNBins,nJetZmmBinLow,nJetZmmBinHigh)
     nJetVZR4_mm.hasB = True
@@ -2054,8 +2040,8 @@ if doValidationDilepZ:
     [nJetVZR4_mm.getSample(sam).addSystematic(jesLow) for sam in BGList]
     [nJetVZR4_mm.getSample(sam).addSystematic(jesMedium) for sam in BGList]
     [nJetVZR4_mm.getSample(sam).addSystematic(jesHigh) for sam in BGList]
-    [nJetVZR4_mm.getSample(sam).addSystematic(lepTR) for sam in BGList]
-    [nJetVZR4_mm.getSample(sam).addSystematic(btagTR) for sam in BGList]
+    [nJetVZR4_mm.getSample(sam).addSystematic(lepVR) for sam in BGList]
+    [nJetVZR4_mm.getSample(sam).addSystematic(btagVR) for sam in BGList]
     [nJetVZR4_mm.getSample(sam).addSystematic(zpT0GeV) for sam in BGList]
     [nJetVZR4_mm.getSample(sam).addSystematic(zpT50GeV) for sam in BGList]
     [nJetVZR4_mm.getSample(sam).addSystematic(zpT100GeV) for sam in BGList]
@@ -2063,12 +2049,12 @@ if doValidationDilepZ:
     [nJetVZR4_mm.getSample(sam).addSystematic(zpT200GeV) for sam in BGList]
 
     if fullSyst:
-        [nJetVZR4_mm.getSample(sam).addSystematic(metcoTR) for sam in BGList]
-        [nJetVZR4_mm.getSample(sam).addSystematic(metpuTR) for sam in BGList]
-        [nJetVZR4_mm.getSample(sam).addSystematic(trigTR) for sam in BGList]
-        [nJetVZR4_mm.getSample(sam).addSystematic(lesTR) for sam in BGList]
-        [nJetVZR4_mm.getSample(sam).addSystematic(lermsTR) for sam in BGList]
-        [nJetVZR4_mm.getSample(sam).addSystematic(leridTR) for sam in BGList]
+        [nJetVZR4_mm.getSample(sam).addSystematic(metcoVR) for sam in BGList]
+        [nJetVZR4_mm.getSample(sam).addSystematic(metpuVR) for sam in BGList]
+        [nJetVZR4_mm.getSample(sam).addSystematic(trigVR) for sam in BGList]
+        [nJetVZR4_mm.getSample(sam).addSystematic(lesVR) for sam in BGList]
+        [nJetVZR4_mm.getSample(sam).addSystematic(lermsVR) for sam in BGList]
+        [nJetVZR4_mm.getSample(sam).addSystematic(leridVR) for sam in BGList]
 
     meffVZR2_ee=bkgOnly.addChannel("meffInc",["VZR2ee"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
     meffVZR2_ee.hasB = True
@@ -2077,8 +2063,8 @@ if doValidationDilepZ:
     [meffVZR2_ee.getSample(sam).addSystematic(jesLow) for sam in BGList]
     [meffVZR2_ee.getSample(sam).addSystematic(jesMedium) for sam in BGList]
     [meffVZR2_ee.getSample(sam).addSystematic(jesHigh) for sam in BGList]
-    [meffVZR2_ee.getSample(sam).addSystematic(lepTR) for sam in BGList]
-    [meffVZR2_ee.getSample(sam).addSystematic(btagTR) for sam in BGList]
+    [meffVZR2_ee.getSample(sam).addSystematic(lepVR) for sam in BGList]
+    [meffVZR2_ee.getSample(sam).addSystematic(btagVR) for sam in BGList]
     [meffVZR2_ee.getSample(sam).addSystematic(zpT0GeV) for sam in BGList]
     [meffVZR2_ee.getSample(sam).addSystematic(zpT50GeV) for sam in BGList]
     [meffVZR2_ee.getSample(sam).addSystematic(zpT100GeV) for sam in BGList]
@@ -2086,12 +2072,12 @@ if doValidationDilepZ:
     [meffVZR2_ee.getSample(sam).addSystematic(zpT200GeV) for sam in BGList]
 
     if fullSyst:
-        [meffVZR2_ee.getSample(sam).addSystematic(metcoTR) for sam in BGList]
-        [meffVZR2_ee.getSample(sam).addSystematic(metpuTR) for sam in BGList]
-        [meffVZR2_ee.getSample(sam).addSystematic(trigTR) for sam in BGList]
-        [meffVZR2_ee.getSample(sam).addSystematic(lesTR) for sam in BGList]
-        [meffVZR2_ee.getSample(sam).addSystematic(lermsTR) for sam in BGList]
-        [meffVZR2_ee.getSample(sam).addSystematic(leridTR) for sam in BGList]
+        [meffVZR2_ee.getSample(sam).addSystematic(metcoVR) for sam in BGList]
+        [meffVZR2_ee.getSample(sam).addSystematic(metpuVR) for sam in BGList]
+        [meffVZR2_ee.getSample(sam).addSystematic(trigVR) for sam in BGList]
+        [meffVZR2_ee.getSample(sam).addSystematic(lesVR) for sam in BGList]
+        [meffVZR2_ee.getSample(sam).addSystematic(lermsVR) for sam in BGList]
+        [meffVZR2_ee.getSample(sam).addSystematic(leridVR) for sam in BGList]
 
     meffVZR2_em=bkgOnly.addChannel("meffInc",["VZR2em"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
     meffVZR2_em.hasB = True
@@ -2100,8 +2086,8 @@ if doValidationDilepZ:
     [meffVZR2_em.getSample(sam).addSystematic(jesLow) for sam in BGList]
     [meffVZR2_em.getSample(sam).addSystematic(jesMedium) for sam in BGList]
     [meffVZR2_em.getSample(sam).addSystematic(jesHigh) for sam in BGList]
-    [meffVZR2_em.getSample(sam).addSystematic(lepTR) for sam in BGList]
-    [meffVZR2_em.getSample(sam).addSystematic(btagTR) for sam in BGList]
+    [meffVZR2_em.getSample(sam).addSystematic(lepVR) for sam in BGList]
+    [meffVZR2_em.getSample(sam).addSystematic(btagVR) for sam in BGList]
     [meffVZR2_em.getSample(sam).addSystematic(zpT0GeV) for sam in BGList]
     [meffVZR2_em.getSample(sam).addSystematic(zpT50GeV) for sam in BGList]
     [meffVZR2_em.getSample(sam).addSystematic(zpT100GeV) for sam in BGList]
@@ -2109,12 +2095,12 @@ if doValidationDilepZ:
     [meffVZR2_em.getSample(sam).addSystematic(zpT200GeV) for sam in BGList]
 
     if fullSyst:
-        [meffVZR2_em.getSample(sam).addSystematic(metcoTR) for sam in BGList]
-        [meffVZR2_em.getSample(sam).addSystematic(metpuTR) for sam in BGList]
-        [meffVZR2_em.getSample(sam).addSystematic(trigTR) for sam in BGList]
-        [meffVZR2_em.getSample(sam).addSystematic(lesTR) for sam in BGList]
-        [meffVZR2_em.getSample(sam).addSystematic(lermsTR) for sam in BGList]
-        [meffVZR2_em.getSample(sam).addSystematic(leridTR) for sam in BGList]
+        [meffVZR2_em.getSample(sam).addSystematic(metcoVR) for sam in BGList]
+        [meffVZR2_em.getSample(sam).addSystematic(metpuVR) for sam in BGList]
+        [meffVZR2_em.getSample(sam).addSystematic(trigVR) for sam in BGList]
+        [meffVZR2_em.getSample(sam).addSystematic(lesVR) for sam in BGList]
+        [meffVZR2_em.getSample(sam).addSystematic(lermsVR) for sam in BGList]
+        [meffVZR2_em.getSample(sam).addSystematic(leridVR) for sam in BGList]
 
     meffVZR2_mm=bkgOnly.addChannel("meffInc",["VZR2mm"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
     meffVZR2_mm.hasB = True
@@ -2123,8 +2109,8 @@ if doValidationDilepZ:
     [meffVZR2_mm.getSample(sam).addSystematic(jesLow) for sam in BGList]
     [meffVZR2_mm.getSample(sam).addSystematic(jesMedium) for sam in BGList]
     [meffVZR2_mm.getSample(sam).addSystematic(jesHigh) for sam in BGList]
-    [meffVZR2_mm.getSample(sam).addSystematic(lepTR) for sam in BGList]
-    [meffVZR2_mm.getSample(sam).addSystematic(btagTR) for sam in BGList]
+    [meffVZR2_mm.getSample(sam).addSystematic(lepVR) for sam in BGList]
+    [meffVZR2_mm.getSample(sam).addSystematic(btagVR) for sam in BGList]
     [meffVZR2_mm.getSample(sam).addSystematic(zpT0GeV) for sam in BGList]
     [meffVZR2_mm.getSample(sam).addSystematic(zpT50GeV) for sam in BGList]
     [meffVZR2_mm.getSample(sam).addSystematic(zpT100GeV) for sam in BGList]
@@ -2132,12 +2118,12 @@ if doValidationDilepZ:
     [meffVZR2_mm.getSample(sam).addSystematic(zpT200GeV) for sam in BGList]
 
     if fullSyst:
-        [meffVZR2_mm.getSample(sam).addSystematic(metcoTR) for sam in BGList]
-        [meffVZR2_mm.getSample(sam).addSystematic(metpuTR) for sam in BGList]
-        [meffVZR2_mm.getSample(sam).addSystematic(trigTR) for sam in BGList]
-        [meffVZR2_mm.getSample(sam).addSystematic(lesTR) for sam in BGList]
-        [meffVZR2_mm.getSample(sam).addSystematic(lermsTR) for sam in BGList]
-        [meffVZR2_mm.getSample(sam).addSystematic(leridTR) for sam in BGList]
+        [meffVZR2_mm.getSample(sam).addSystematic(metcoVR) for sam in BGList]
+        [meffVZR2_mm.getSample(sam).addSystematic(metpuVR) for sam in BGList]
+        [meffVZR2_mm.getSample(sam).addSystematic(trigVR) for sam in BGList]
+        [meffVZR2_mm.getSample(sam).addSystematic(lesVR) for sam in BGList]
+        [meffVZR2_mm.getSample(sam).addSystematic(lermsVR) for sam in BGList]
+        [meffVZR2_mm.getSample(sam).addSystematic(leridVR) for sam in BGList]
 
     nJetVZR2_ee=bkgOnly.addChannel("nJet",["VZR2ee"],nJetZmmNBins,nJetZmmBinLow,nJetZmmBinHigh)
     nJetVZR2_ee.hasB = True
@@ -2146,8 +2132,8 @@ if doValidationDilepZ:
     [nJetVZR2_ee.getSample(sam).addSystematic(jesLow) for sam in BGList]
     [nJetVZR2_ee.getSample(sam).addSystematic(jesMedium) for sam in BGList]
     [nJetVZR2_ee.getSample(sam).addSystematic(jesHigh) for sam in BGList]
-    [nJetVZR2_ee.getSample(sam).addSystematic(lepTR) for sam in BGList]
-    [nJetVZR2_ee.getSample(sam).addSystematic(btagTR) for sam in BGList]
+    [nJetVZR2_ee.getSample(sam).addSystematic(lepVR) for sam in BGList]
+    [nJetVZR2_ee.getSample(sam).addSystematic(btagVR) for sam in BGList]
     [nJetVZR2_ee.getSample(sam).addSystematic(zpT0GeV) for sam in BGList]
     [nJetVZR2_ee.getSample(sam).addSystematic(zpT50GeV) for sam in BGList]
     [nJetVZR2_ee.getSample(sam).addSystematic(zpT100GeV) for sam in BGList]
@@ -2155,12 +2141,12 @@ if doValidationDilepZ:
     [nJetVZR2_ee.getSample(sam).addSystematic(zpT200GeV) for sam in BGList]
 
     if fullSyst:
-        [nJetVZR2_ee.getSample(sam).addSystematic(metcoTR) for sam in BGList]
-        [nJetVZR2_ee.getSample(sam).addSystematic(metpuTR) for sam in BGList]
-        [nJetVZR2_ee.getSample(sam).addSystematic(trigTR) for sam in BGList]
-        [nJetVZR2_ee.getSample(sam).addSystematic(lesTR) for sam in BGList]
-        [nJetVZR2_ee.getSample(sam).addSystematic(lermsTR) for sam in BGList]
-        [nJetVZR2_ee.getSample(sam).addSystematic(leridTR) for sam in BGList]
+        [nJetVZR2_ee.getSample(sam).addSystematic(metcoVR) for sam in BGList]
+        [nJetVZR2_ee.getSample(sam).addSystematic(metpuVR) for sam in BGList]
+        [nJetVZR2_ee.getSample(sam).addSystematic(trigVR) for sam in BGList]
+        [nJetVZR2_ee.getSample(sam).addSystematic(lesVR) for sam in BGList]
+        [nJetVZR2_ee.getSample(sam).addSystematic(lermsVR) for sam in BGList]
+        [nJetVZR2_ee.getSample(sam).addSystematic(leridVR) for sam in BGList]
 
     nJetVZR2_em=bkgOnly.addChannel("nJet",["VZR2em"],nJetZmmNBins,nJetZmmBinLow,nJetZmmBinHigh)
     nJetVZR2_em.hasB = True
@@ -2169,8 +2155,8 @@ if doValidationDilepZ:
     [nJetVZR2_em.getSample(sam).addSystematic(jesLow) for sam in BGList]
     [nJetVZR2_em.getSample(sam).addSystematic(jesMedium) for sam in BGList]
     [nJetVZR2_em.getSample(sam).addSystematic(jesHigh) for sam in BGList]
-    [nJetVZR2_em.getSample(sam).addSystematic(lepTR) for sam in BGList]
-    [nJetVZR2_em.getSample(sam).addSystematic(btagTR) for sam in BGList]
+    [nJetVZR2_em.getSample(sam).addSystematic(lepVR) for sam in BGList]
+    [nJetVZR2_em.getSample(sam).addSystematic(btagVR) for sam in BGList]
     [nJetVZR2_em.getSample(sam).addSystematic(zpT0GeV) for sam in BGList]
     [nJetVZR2_em.getSample(sam).addSystematic(zpT50GeV) for sam in BGList]
     [nJetVZR2_em.getSample(sam).addSystematic(zpT100GeV) for sam in BGList]
@@ -2178,12 +2164,12 @@ if doValidationDilepZ:
     [nJetVZR2_em.getSample(sam).addSystematic(zpT200GeV) for sam in BGList]
 
     if fullSyst:
-        [nJetVZR2_em.getSample(sam).addSystematic(metcoTR) for sam in BGList]
-        [nJetVZR2_em.getSample(sam).addSystematic(metpuTR) for sam in BGList]
-        [nJetVZR2_em.getSample(sam).addSystematic(trigTR) for sam in BGList]
-        [nJetVZR2_em.getSample(sam).addSystematic(lesTR) for sam in BGList]
-        [nJetVZR2_em.getSample(sam).addSystematic(lermsTR) for sam in BGList]
-        [nJetVZR2_em.getSample(sam).addSystematic(leridTR) for sam in BGList]
+        [nJetVZR2_em.getSample(sam).addSystematic(metcoVR) for sam in BGList]
+        [nJetVZR2_em.getSample(sam).addSystematic(metpuVR) for sam in BGList]
+        [nJetVZR2_em.getSample(sam).addSystematic(trigVR) for sam in BGList]
+        [nJetVZR2_em.getSample(sam).addSystematic(lesVR) for sam in BGList]
+        [nJetVZR2_em.getSample(sam).addSystematic(lermsVR) for sam in BGList]
+        [nJetVZR2_em.getSample(sam).addSystematic(leridVR) for sam in BGList]
 
     nJetVZR2_mm=bkgOnly.addChannel("nJet",["VZR2mm"],nJetZmmNBins,nJetZmmBinLow,nJetZmmBinHigh)
     nJetVZR2_mm.hasB = True
@@ -2192,8 +2178,8 @@ if doValidationDilepZ:
     [nJetVZR2_mm.getSample(sam).addSystematic(jesLow) for sam in BGList]
     [nJetVZR2_mm.getSample(sam).addSystematic(jesMedium) for sam in BGList]
     [nJetVZR2_mm.getSample(sam).addSystematic(jesHigh) for sam in BGList]
-    [nJetVZR2_mm.getSample(sam).addSystematic(lepTR) for sam in BGList]
-    [nJetVZR2_mm.getSample(sam).addSystematic(btagTR) for sam in BGList]
+    [nJetVZR2_mm.getSample(sam).addSystematic(lepVR) for sam in BGList]
+    [nJetVZR2_mm.getSample(sam).addSystematic(btagVR) for sam in BGList]
     [nJetVZR2_mm.getSample(sam).addSystematic(zpT0GeV) for sam in BGList]
     [nJetVZR2_mm.getSample(sam).addSystematic(zpT50GeV) for sam in BGList]
     [nJetVZR2_mm.getSample(sam).addSystematic(zpT100GeV) for sam in BGList]
@@ -2201,12 +2187,12 @@ if doValidationDilepZ:
     [nJetVZR2_mm.getSample(sam).addSystematic(zpT200GeV) for sam in BGList]
 
     if fullSyst:
-        [nJetVZR2_mm.getSample(sam).addSystematic(metcoTR) for sam in BGList]
-        [nJetVZR2_mm.getSample(sam).addSystematic(metpuTR) for sam in BGList]
-        [nJetVZR2_mm.getSample(sam).addSystematic(trigTR) for sam in BGList]
-        [nJetVZR2_mm.getSample(sam).addSystematic(lesTR) for sam in BGList]
-        [nJetVZR2_mm.getSample(sam).addSystematic(lermsTR) for sam in BGList]
-        [nJetVZR2_mm.getSample(sam).addSystematic(leridTR) for sam in BGList]
+        [nJetVZR2_mm.getSample(sam).addSystematic(metcoVR) for sam in BGList]
+        [nJetVZR2_mm.getSample(sam).addSystematic(metpuVR) for sam in BGList]
+        [nJetVZR2_mm.getSample(sam).addSystematic(trigVR) for sam in BGList]
+        [nJetVZR2_mm.getSample(sam).addSystematic(lesVR) for sam in BGList]
+        [nJetVZR2_mm.getSample(sam).addSystematic(lermsVR) for sam in BGList]
+        [nJetVZR2_mm.getSample(sam).addSystematic(leridVR) for sam in BGList]
 
     meffVZR3_ee=bkgOnly.addChannel("meffInc",["VZR3ee"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
     meffVZR3_ee.hasB = True
@@ -2215,8 +2201,8 @@ if doValidationDilepZ:
     [meffVZR3_ee.getSample(sam).addSystematic(jesLow) for sam in BGList]
     [meffVZR3_ee.getSample(sam).addSystematic(jesMedium) for sam in BGList]
     [meffVZR3_ee.getSample(sam).addSystematic(jesHigh) for sam in BGList]
-    [meffVZR3_ee.getSample(sam).addSystematic(lepTR) for sam in BGList]
-    [meffVZR3_ee.getSample(sam).addSystematic(btagTR) for sam in BGList]
+    [meffVZR3_ee.getSample(sam).addSystematic(lepVR) for sam in BGList]
+    [meffVZR3_ee.getSample(sam).addSystematic(btagVR) for sam in BGList]
     [meffVZR3_ee.getSample(sam).addSystematic(zpT0GeV) for sam in BGList]
     [meffVZR3_ee.getSample(sam).addSystematic(zpT50GeV) for sam in BGList]
     [meffVZR3_ee.getSample(sam).addSystematic(zpT100GeV) for sam in BGList]
@@ -2224,12 +2210,12 @@ if doValidationDilepZ:
     [meffVZR3_ee.getSample(sam).addSystematic(zpT200GeV) for sam in BGList]
 
     if fullSyst:
-        [meffVZR3_ee.getSample(sam).addSystematic(metcoTR) for sam in BGList]
-        [meffVZR3_ee.getSample(sam).addSystematic(metpuTR) for sam in BGList]
-        [meffVZR3_ee.getSample(sam).addSystematic(trigTR) for sam in BGList]
-        [meffVZR3_ee.getSample(sam).addSystematic(lesTR) for sam in BGList]
-        [meffVZR3_ee.getSample(sam).addSystematic(lermsTR) for sam in BGList]
-        [meffVZR3_ee.getSample(sam).addSystematic(leridTR) for sam in BGList]
+        [meffVZR3_ee.getSample(sam).addSystematic(metcoVR) for sam in BGList]
+        [meffVZR3_ee.getSample(sam).addSystematic(metpuVR) for sam in BGList]
+        [meffVZR3_ee.getSample(sam).addSystematic(trigVR) for sam in BGList]
+        [meffVZR3_ee.getSample(sam).addSystematic(lesVR) for sam in BGList]
+        [meffVZR3_ee.getSample(sam).addSystematic(lermsVR) for sam in BGList]
+        [meffVZR3_ee.getSample(sam).addSystematic(leridVR) for sam in BGList]
 
     meffVZR3_em=bkgOnly.addChannel("meffInc",["VZR3em"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
     meffVZR3_em.hasB = True
@@ -2238,8 +2224,8 @@ if doValidationDilepZ:
     [meffVZR3_em.getSample(sam).addSystematic(jesLow) for sam in BGList]
     [meffVZR3_em.getSample(sam).addSystematic(jesMedium) for sam in BGList]
     [meffVZR3_em.getSample(sam).addSystematic(jesHigh) for sam in BGList]
-    [meffVZR3_em.getSample(sam).addSystematic(lepTR) for sam in BGList]
-    [meffVZR3_em.getSample(sam).addSystematic(btagTR) for sam in BGList]
+    [meffVZR3_em.getSample(sam).addSystematic(lepVR) for sam in BGList]
+    [meffVZR3_em.getSample(sam).addSystematic(btagVR) for sam in BGList]
     [meffVZR3_em.getSample(sam).addSystematic(zpT0GeV) for sam in BGList]
     [meffVZR3_em.getSample(sam).addSystematic(zpT50GeV) for sam in BGList]
     [meffVZR3_em.getSample(sam).addSystematic(zpT100GeV) for sam in BGList]
@@ -2247,12 +2233,12 @@ if doValidationDilepZ:
     [meffVZR3_em.getSample(sam).addSystematic(zpT200GeV) for sam in BGList]
 
     if fullSyst:
-        [meffVZR3_em.getSample(sam).addSystematic(metcoTR) for sam in BGList]
-        [meffVZR3_em.getSample(sam).addSystematic(metpuTR) for sam in BGList]
-        [meffVZR3_em.getSample(sam).addSystematic(trigTR) for sam in BGList]
-        [meffVZR3_em.getSample(sam).addSystematic(lesTR) for sam in BGList]
-        [meffVZR3_em.getSample(sam).addSystematic(lermsTR) for sam in BGList]
-        [meffVZR3_em.getSample(sam).addSystematic(leridTR) for sam in BGList]
+        [meffVZR3_em.getSample(sam).addSystematic(metcoVR) for sam in BGList]
+        [meffVZR3_em.getSample(sam).addSystematic(metpuVR) for sam in BGList]
+        [meffVZR3_em.getSample(sam).addSystematic(trigVR) for sam in BGList]
+        [meffVZR3_em.getSample(sam).addSystematic(lesVR) for sam in BGList]
+        [meffVZR3_em.getSample(sam).addSystematic(lermsVR) for sam in BGList]
+        [meffVZR3_em.getSample(sam).addSystematic(leridVR) for sam in BGList]
 
     meffVZR3_mm=bkgOnly.addChannel("meffInc",["VZR3mm"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
     meffVZR3_mm.hasB = True
@@ -2261,8 +2247,8 @@ if doValidationDilepZ:
     [meffVZR3_mm.getSample(sam).addSystematic(jesLow) for sam in BGList]
     [meffVZR3_mm.getSample(sam).addSystematic(jesMedium) for sam in BGList]
     [meffVZR3_mm.getSample(sam).addSystematic(jesHigh) for sam in BGList]
-    [meffVZR3_mm.getSample(sam).addSystematic(lepTR) for sam in BGList]
-    [meffVZR3_mm.getSample(sam).addSystematic(btagTR) for sam in BGList]
+    [meffVZR3_mm.getSample(sam).addSystematic(lepVR) for sam in BGList]
+    [meffVZR3_mm.getSample(sam).addSystematic(btagVR) for sam in BGList]
     [meffVZR3_mm.getSample(sam).addSystematic(zpT0GeV) for sam in BGList]
     [meffVZR3_mm.getSample(sam).addSystematic(zpT50GeV) for sam in BGList]
     [meffVZR3_mm.getSample(sam).addSystematic(zpT100GeV) for sam in BGList]
@@ -2270,12 +2256,12 @@ if doValidationDilepZ:
     [meffVZR3_mm.getSample(sam).addSystematic(zpT200GeV) for sam in BGList]
 
     if fullSyst:
-        [meffVZR3_mm.getSample(sam).addSystematic(metcoTR) for sam in BGList]
-        [meffVZR3_mm.getSample(sam).addSystematic(metpuTR) for sam in BGList]
-        [meffVZR3_mm.getSample(sam).addSystematic(trigTR) for sam in BGList]
-        [meffVZR3_mm.getSample(sam).addSystematic(lesTR) for sam in BGList]
-        [meffVZR3_mm.getSample(sam).addSystematic(lermsTR) for sam in BGList]
-        [meffVZR3_mm.getSample(sam).addSystematic(leridTR) for sam in BGList]
+        [meffVZR3_mm.getSample(sam).addSystematic(metcoVR) for sam in BGList]
+        [meffVZR3_mm.getSample(sam).addSystematic(metpuVR) for sam in BGList]
+        [meffVZR3_mm.getSample(sam).addSystematic(trigVR) for sam in BGList]
+        [meffVZR3_mm.getSample(sam).addSystematic(lesVR) for sam in BGList]
+        [meffVZR3_mm.getSample(sam).addSystematic(lermsVR) for sam in BGList]
+        [meffVZR3_mm.getSample(sam).addSystematic(leridVR) for sam in BGList]
 
     nJetVZR3_ee=bkgOnly.addChannel("nJet",["VZR3ee"],nJetZmmNBins,nJetZmmBinLow,nJetZmmBinHigh)
     nJetVZR3_ee.hasB = True
@@ -2284,8 +2270,8 @@ if doValidationDilepZ:
     [nJetVZR3_ee.getSample(sam).addSystematic(jesLow) for sam in BGList]
     [nJetVZR3_ee.getSample(sam).addSystematic(jesMedium) for sam in BGList]
     [nJetVZR3_ee.getSample(sam).addSystematic(jesHigh) for sam in BGList]
-    [nJetVZR3_ee.getSample(sam).addSystematic(lepTR) for sam in BGList]
-    [nJetVZR3_ee.getSample(sam).addSystematic(btagTR) for sam in BGList]
+    [nJetVZR3_ee.getSample(sam).addSystematic(lepVR) for sam in BGList]
+    [nJetVZR3_ee.getSample(sam).addSystematic(btagVR) for sam in BGList]
     [nJetVZR3_ee.getSample(sam).addSystematic(zpT0GeV) for sam in BGList]
     [nJetVZR3_ee.getSample(sam).addSystematic(zpT50GeV) for sam in BGList]
     [nJetVZR3_ee.getSample(sam).addSystematic(zpT100GeV) for sam in BGList]
@@ -2293,12 +2279,12 @@ if doValidationDilepZ:
     [nJetVZR3_ee.getSample(sam).addSystematic(zpT200GeV) for sam in BGList]
 
     if fullSyst:
-        [nJetVZR3_ee.getSample(sam).addSystematic(metcoTR) for sam in BGList]
-        [nJetVZR3_ee.getSample(sam).addSystematic(metpuTR) for sam in BGList]
-        [nJetVZR3_ee.getSample(sam).addSystematic(trigTR) for sam in BGList]
-        [nJetVZR3_ee.getSample(sam).addSystematic(lesTR) for sam in BGList]
-        [nJetVZR3_ee.getSample(sam).addSystematic(lermsTR) for sam in BGList]
-        [nJetVZR3_ee.getSample(sam).addSystematic(leridTR) for sam in BGList]
+        [nJetVZR3_ee.getSample(sam).addSystematic(metcoVR) for sam in BGList]
+        [nJetVZR3_ee.getSample(sam).addSystematic(metpuVR) for sam in BGList]
+        [nJetVZR3_ee.getSample(sam).addSystematic(trigVR) for sam in BGList]
+        [nJetVZR3_ee.getSample(sam).addSystematic(lesVR) for sam in BGList]
+        [nJetVZR3_ee.getSample(sam).addSystematic(lermsVR) for sam in BGList]
+        [nJetVZR3_ee.getSample(sam).addSystematic(leridVR) for sam in BGList]
 
     nJetVZR3_em=bkgOnly.addChannel("nJet",["VZR3em"],nJetZmmNBins,nJetZmmBinLow,nJetZmmBinHigh)
     nJetVZR3_em.hasB = True
@@ -2307,8 +2293,8 @@ if doValidationDilepZ:
     [nJetVZR3_em.getSample(sam).addSystematic(jesLow) for sam in BGList]
     [nJetVZR3_em.getSample(sam).addSystematic(jesMedium) for sam in BGList]
     [nJetVZR3_em.getSample(sam).addSystematic(jesHigh) for sam in BGList]
-    [nJetVZR3_em.getSample(sam).addSystematic(lepTR) for sam in BGList]
-    [nJetVZR3_em.getSample(sam).addSystematic(btagTR) for sam in BGList]
+    [nJetVZR3_em.getSample(sam).addSystematic(lepVR) for sam in BGList]
+    [nJetVZR3_em.getSample(sam).addSystematic(btagVR) for sam in BGList]
     [nJetVZR3_em.getSample(sam).addSystematic(zpT0GeV) for sam in BGList]
     [nJetVZR3_em.getSample(sam).addSystematic(zpT50GeV) for sam in BGList]
     [nJetVZR3_em.getSample(sam).addSystematic(zpT100GeV) for sam in BGList]
@@ -2316,12 +2302,12 @@ if doValidationDilepZ:
     [nJetVZR3_em.getSample(sam).addSystematic(zpT200GeV) for sam in BGList]
 
     if fullSyst:
-        [nJetVZR3_em.getSample(sam).addSystematic(metcoTR) for sam in BGList]
-        [nJetVZR3_em.getSample(sam).addSystematic(metpuTR) for sam in BGList]
-        [nJetVZR3_em.getSample(sam).addSystematic(trigTR) for sam in BGList]
-        [nJetVZR3_em.getSample(sam).addSystematic(lesTR) for sam in BGList]
-        [nJetVZR3_em.getSample(sam).addSystematic(lermsTR) for sam in BGList]
-        [nJetVZR3_em.getSample(sam).addSystematic(leridTR) for sam in BGList]
+        [nJetVZR3_em.getSample(sam).addSystematic(metcoVR) for sam in BGList]
+        [nJetVZR3_em.getSample(sam).addSystematic(metpuVR) for sam in BGList]
+        [nJetVZR3_em.getSample(sam).addSystematic(trigVR) for sam in BGList]
+        [nJetVZR3_em.getSample(sam).addSystematic(lesVR) for sam in BGList]
+        [nJetVZR3_em.getSample(sam).addSystematic(lermsVR) for sam in BGList]
+        [nJetVZR3_em.getSample(sam).addSystematic(leridVR) for sam in BGList]
 
     nJetVZR3_mm=bkgOnly.addChannel("nJet",["VZR3mm"],nJetZmmNBins,nJetZmmBinLow,nJetZmmBinHigh)
     nJetVZR3_mm.hasB = True
@@ -2330,8 +2316,8 @@ if doValidationDilepZ:
     [nJetVZR3_mm.getSample(sam).addSystematic(jesLow) for sam in BGList]
     [nJetVZR3_mm.getSample(sam).addSystematic(jesMedium) for sam in BGList]
     [nJetVZR3_mm.getSample(sam).addSystematic(jesHigh) for sam in BGList]
-    [nJetVZR3_mm.getSample(sam).addSystematic(lepTR) for sam in BGList]
-    [nJetVZR3_mm.getSample(sam).addSystematic(btagTR) for sam in BGList]
+    [nJetVZR3_mm.getSample(sam).addSystematic(lepVR) for sam in BGList]
+    [nJetVZR3_mm.getSample(sam).addSystematic(btagVR) for sam in BGList]
     [nJetVZR3_mm.getSample(sam).addSystematic(zpT0GeV) for sam in BGList]
     [nJetVZR3_mm.getSample(sam).addSystematic(zpT50GeV) for sam in BGList]
     [nJetVZR3_mm.getSample(sam).addSystematic(zpT100GeV) for sam in BGList]
@@ -2339,12 +2325,12 @@ if doValidationDilepZ:
     [nJetVZR3_mm.getSample(sam).addSystematic(zpT200GeV) for sam in BGList]
 
     if fullSyst:
-        [nJetVZR3_mm.getSample(sam).addSystematic(metcoTR) for sam in BGList]
-        [nJetVZR3_mm.getSample(sam).addSystematic(metpuTR) for sam in BGList]
-        [nJetVZR3_mm.getSample(sam).addSystematic(trigTR) for sam in BGList]
-        [nJetVZR3_mm.getSample(sam).addSystematic(lesTR) for sam in BGList]
-        [nJetVZR3_mm.getSample(sam).addSystematic(lermsTR) for sam in BGList]
-        [nJetVZR3_mm.getSample(sam).addSystematic(leridTR) for sam in BGList]
+        [nJetVZR3_mm.getSample(sam).addSystematic(metcoVR) for sam in BGList]
+        [nJetVZR3_mm.getSample(sam).addSystematic(metpuVR) for sam in BGList]
+        [nJetVZR3_mm.getSample(sam).addSystematic(trigVR) for sam in BGList]
+        [nJetVZR3_mm.getSample(sam).addSystematic(lesVR) for sam in BGList]
+        [nJetVZR3_mm.getSample(sam).addSystematic(lermsVR) for sam in BGList]
+        [nJetVZR3_mm.getSample(sam).addSystematic(leridVR) for sam in BGList]
 
 
 if doValidationSR:
@@ -2363,29 +2349,7 @@ if doValidationDilepZ:
 # Exclusion fit
 #-------------------------------------------------
 
-# Need to comment out the following line when running HypoTest.py parallelized
-sigSamples=["GMSB_3_2d_40_250_3_10_1_1"]
-
 if doExclusion_GMSB_combined or doExclusion_mSUGRA_dilepton_combined or doExclusion_GG_twostepCC_slepton:
-       
-    for sig in sigSamples:
-        myTopLvl = bkgOnly
-        myTopLvl.name="dilepton_%s"%sig
-        myTopLvl.prefix=configMgr.analysisName+"_"+"dilepton_%s"%sig
-        
-##        myTopLvl = configMgr.addTopLevelXMLClone(bkgOnly,"dilepton_%s"%sig)
-        sigSample = Sample(sig,kPink)
-        sigSample.setFileList(sigFiles)
-        sigSample.setNormByTheory()
-        sigSample.setNormFactor("mu_SIG",0.,0.,5.)
-        sigSample.setStatConfig(useStat)
-
-        if useXsecUnc:
-            sigSample.addSystematic(xsecSig)
-        myTopLvl.addSamples(sigSample)
-        myTopLvl.setSignalSample(sigSample)
-
-        SigList=[sig]
 
         S2Channel_ee = myTopLvl.addChannel("meffInc",["S2ee"],meffNBins,meffBinLow,meffBinHigh)
         S2Channel_ee.useOverflowBin=True
@@ -2539,3 +2503,5 @@ if doExclusion_GMSB_combined or doExclusion_mSUGRA_dilepton_combined or doExclus
         elif doExclusion_GG_twostepCC_slepton:
             myTopLvl.setSignalChannels([S4Channel_ee,S4Channel_em,S4Channel_mm])
 
+
+#  LocalWords:  fullSyst
