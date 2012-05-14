@@ -566,8 +566,8 @@ pt2BinLowTR = 0.
 pt2BinHighTR = 800.
 
 if doValidationSlope:
-
-    ## check impact of kfactor fit on several distributions
+    # check impact of kfactor fit on several distributions
+    #TR
     meffTR_El=bkgOnly.addChannel("meffInc",["TRElVR"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
     metTR_El=bkgOnly.addChannel("met",["TRElVR2"],metNBinsTR,metBinLowTR,metBinHighTR)
     metTR_Mu=bkgOnly.addChannel("met",["TRMuVR2"],metNBinsTR,metBinLowTR,metBinHighTR)
@@ -576,12 +576,58 @@ if doValidationSlope:
     pt2TR_El=bkgOnly.addChannel("jet2Pt",["TRElVR"],pt2NBinsTR,pt2BinLowTR,pt2BinHighTR)
     pt2TR_Mu=bkgOnly.addChannel("jet2Pt",["TRMuVR"],pt2NBinsTR,pt2BinLowTR,pt2BinHighTR)
     
-    validationSlopeTopChannels = [meffTR_El, meffTR_Mu, metTR_El, metTR_Mu, pt1TR_El , pt1TR_Mu , pt2TR_El , pt2TR_Mu]
+    validationSlopeTRChannels = [meffTR_El, meffTR_Mu, metTR_El, metTR_Mu, pt1TR_El , pt1TR_Mu , pt2TR_El , pt2TR_Mu]
     
     # add systematics
-    for chan in validationSlopeTopChannels:
+    for chan in validationSlopeTRChannels:
         chan.hasB = True
         chan.hasBQCD = True
+        chan.useOverflowBin = True
+        for syst in commonChanSyst + commonSamSyst + btagChanSyst:
+            chan.addSystematic(syst)
+            if debugSyst:
+                print " channel = ", chan.name, " adding systematic = ", syst.name
+        # only additional Full Systematics
+        if fullSyst:
+            for syst in fullChanSyst + fullSamSyst:
+                chan.addSystematic(syst)
+                if debugSyst:
+                    print " channel = ", chan.name, " adding Full systematic = ", syst.name             
+                    
+    # WR
+    wptWR_El=bkgOnly.addChannel("Wpt",["WRElVR"],metNBinsTR,metBinLowTR,metBinHighTR)
+    wptWR_Mu=bkgOnly.addChannel("Wpt",["WRMuVR"],metNBinsTR,metBinLowTR,metBinHighTR)
+    metWR_El=bkgOnly.addChannel("met",["WRElVR"],metNBinsTR,metBinLowTR,metBinHighTR)
+    metWR_Mu=bkgOnly.addChannel("met",["WRMuVR"],metNBinsTR,metBinLowTR,metBinHighTR)
+    
+    validationSlopeWRChannels = [wptWR_El, wptWR_Mu, metWR_El, metWR_Mu]
+    
+    # add systematics
+    for chan in validationSlopeWRChannels:
+        chan.hasB = True
+        chan.hasBQCD = False
+        chan.useOverflowBin = True
+        for syst in commonChanSyst + commonSamSyst + btagChanSyst:
+            chan.addSystematic(syst)
+            if debugSyst:
+                print " channel = ", chan.name, " adding systematic = ", syst.name
+        # only additional Full Systematics
+        if fullSyst:
+            for syst in fullChanSyst + fullSamSyst:
+                chan.addSystematic(syst)
+                if debugSyst:
+                    print " channel = ", chan.name, " adding Full systematic = ", syst.name             
+
+    #ZR
+    ZptZR_ee=bkgOnly.addChannel("Zpt",["ZRee"],metNBinsTR,metBinLowTR,metBinHighTR)
+    ZptZR_mm=bkgOnly.addChannel("Zpt",["ZRmm"],metNBinsTR,metBinLowTR,metBinHighTR)
+    
+    validationSlopeWRChannels = [ZptZR_ee, ZptZR_mm]
+    
+    # add systematics
+    for chan in validationSlopeZRChannels:
+        chan.hasB = False
+        chan.hasBQCD = False
         chan.useOverflowBin = True
         for syst in commonChanSyst + commonSamSyst:
             chan.addSystematic(syst)
@@ -593,341 +639,63 @@ if doValidationSlope:
                 chan.addSystematic(syst)
                 if debugSyst:
                     print " channel = ", chan.name, " adding Full systematic = ", syst.name             
-                    
-    # AK FINISHED TILL HERE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1                
-
-    wptWR_El=bkgOnly.addChannel("Wpt",["WRElVR"],metNBinsTR,metBinLowTR,metBinHighTR)
-##     wptWR_El.hasB = True
-##     wptWR_El.hasBQCD = False
-##     wptWR_El.useOverflowBin = True
-##     wptWR_El.addSystematic(jesLow)
-##     wptWR_El.addSystematic(jesMedium)
-##     wptWR_El.addSystematic(jesHigh)
-##     wptWR_El.addSystematic(lepTR)
-##     wptWR_El.addSystematic(btagTR)
-##     if fullSyst:
-##         wptWR_El.addSystematic(metcoTR)
-##         wptWR_El.addSystematic(metpuTR)
-##         wptWR_El.addSystematic(trigTR)
-##         wptWR_El.addSystematic(lesTR)
-##         wptWR_El.addSystematic(lermsTR)
-##         wptWR_El.addSystematic(leridTR)
-
-
-    wptWR_Mu=bkgOnly.addChannel("Wpt",["WRMuVR"],metNBinsTR,metBinLowTR,metBinHighTR)
-    wptWR_Mu.hasB = True
-    wptWR_Mu.hasBQCD = False
-    wptWR_Mu.useOverflowBin = True
-    wptWR_Mu.addSystematic(jesLow)
-    wptWR_Mu.addSystematic(jesMedium)
-    wptWR_Mu.addSystematic(jesHigh)
-    wptWR_Mu.addSystematic(lepTR)
-    wptWR_Mu.addSystematic(btagTR)
-    if fullSyst:
-        wptWR_Mu.addSystematic(metcoTR)
-        wptWR_Mu.addSystematic(metpuTR)
-        wptWR_Mu.addSystematic(trigTR)
-        wptWR_Mu.addSystematic(lesTR)
-        wptWR_Mu.addSystematic(lermsTR)
-        wptWR_Mu.addSystematic(leridTR)
-
-
-    metWR_El=bkgOnly.addChannel("met",["WRElVR"],metNBinsTR,metBinLowTR,metBinHighTR)
-    metWR_El.hasB = True
-    metWR_El.hasBQCD = False
-    metWR_El.useOverflowBin = True
-    metWR_El.addSystematic(jesLow)
-    metWR_El.addSystematic(jesMedium)
-    metWR_El.addSystematic(jesHigh)
-    metWR_El.addSystematic(lepTR)
-    metWR_El.addSystematic(btagTR)
-    if fullSyst:
-        metWR_El.addSystematic(metcoTR)
-        metWR_El.addSystematic(metpuTR)
-        metWR_El.addSystematic(trigTR)
-        metWR_El.addSystematic(lesTR)
-        metWR_El.addSystematic(lermsTR)
-        metWR_El.addSystematic(leridTR)
-
-
-    metWR_Mu=bkgOnly.addChannel("met",["WRMuVR"],metNBinsTR,metBinLowTR,metBinHighTR)
-    metWR_Mu.hasB = True
-    metWR_Mu.hasBQCD = False
-    metWR_Mu.useOverflowBin = True
-    metWR_Mu.addSystematic(jesLow)
-    metWR_Mu.addSystematic(jesMedium)
-    metWR_Mu.addSystematic(jesHigh)
-    metWR_Mu.addSystematic(lepTR)
-    metWR_Mu.addSystematic(btagTR)
-    if fullSyst:
-        metWR_Mu.addSystematic(metcoTR)
-        metWR_Mu.addSystematic(metpuTR)
-        metWR_Mu.addSystematic(trigTR)
-        metWR_Mu.addSystematic(lesTR)
-        metWR_Mu.addSystematic(lermsTR)
-        metWR_Mu.addSystematic(leridTR)       
-
-    ZptZR_ee=bkgOnly.addChannel("Zpt",["ZRee"],metNBinsTR,metBinLowTR,metBinHighTR)
-    ZptZR_ee.hasB = False
-    ZptZR_ee.hasBQCD = False
-    ZptZR_ee.useOverflowBin = True
-    ZptZR_ee.addSystematic(jesLow)
-    ZptZR_ee.addSystematic(jesMedium)
-    ZptZR_ee.addSystematic(jesHigh)
-    ZptZR_ee.addSystematic(lepTR)
-    ZptZR_ee.addSystematic(btagTR)
-    if fullSyst:
-        ZptZR_ee.addSystematic(metcoTR)
-        ZptZR_ee.addSystematic(metpuTR)
-        ZptZR_ee.addSystematic(trigTR)
-        ZptZR_ee.addSystematic(lesTR)
-        ZptZR_ee.addSystematic(lermsTR)
-        ZptZR_ee.addSystematic(leridTR)
-
-
-    ZptZR_mm=bkgOnly.addChannel("Zpt",["ZRmm"],metNBinsTR,metBinLowTR,metBinHighTR)
-    ZptZR_mm.hasB = False
-    ZptZR_mm.hasBQCD = False
-    ZptZR_mm.useOverflowBin = True
-    ZptZR_mm.addSystematic(jesLow)
-    ZptZR_mm.addSystematic(jesMedium)
-    ZptZR_mm.addSystematic(jesHigh)
-    ZptZR_mm.addSystematic(lepTR)
-    ZptZR_mm.addSystematic(btagTR)
-    if fullSyst:
-        ZptZR_mm.addSystematic(metcoTR)
-        ZptZR_mm.addSystematic(metpuTR)
-        ZptZR_mm.addSystematic(trigTR)
-        ZptZR_mm.addSystematic(lesTR)
-        ZptZR_mm.addSystematic(lermsTR)
-        ZptZR_mm.addSystematic(leridTR)
-
 
 if doValidationSR:
 
     # S2 using meff
     meff2ee = bkgOnly.addChannel("meffInc",["S2ee"],meffNBinsS2,meffBinLowS2,meffBinHighS2)
-    meff2ee.useOverflowBin=True
-    meff2ee.addSystematic(jesLow)
-    meff2ee.addSystematic(jesMedium)
-    meff2ee.addSystematic(jesHigh)  
-    #[s.mergeSamples([topSample_Np0.name,wzSample_Np0.name,topSample_Np1.name,wzSample_Np1.name,topSample_Np2.name,wzSample_Np2.name,topSample_Np3.name,wzSample_Np3.name,topSample_Np4.name,wzSample_Np4.name,topSample_Np5.name,wzSample_Np5.name,bgSample.name]) for s in meff2ee.getSystematic(jesS2DL.name)]
-    meff2ee.addSystematic(lepS2DL)
-    
-    if fullSyst:
-        meff2ee.addSystematic(metcoS2DL)
-        meff2ee.addSystematic(metpuS2DL)
-        meff2ee.addSystematic(trigS2DL)
-        meff2ee.addSystematic(lesS2DL)
-        meff2ee.addSystematic(lermsS2DL)
-        meff2ee.addSystematic(leridS2DL)
+   ##  meff2ee.useOverflowBin=True
+##     meff2ee.addSystematic(jesLow)
+##     meff2ee.addSystematic(jesMedium)
+##     meff2ee.addSystematic(jesHigh)  
+##     meff2ee.addSystematic(lepS2DL)
+##     if fullSyst:
+##         meff2ee.addSystematic(metcoS2DL)
+##         meff2ee.addSystematic(metpuS2DL)
+##         meff2ee.addSystematic(trigS2DL)
+##         meff2ee.addSystematic(lesS2DL)
+##         meff2ee.addSystematic(lermsS2DL)
+##         meff2ee.addSystematic(leridS2DL)
 
     # S4 using meff
     meff4ee = bkgOnly.addChannel("meffInc",["S4ee"],meffNBinsS4,meffBinLowS4,meffBinHighS4)
-    meff4ee.useOverflowBin=True
-    meff4ee.addSystematic(jesLow)
-    meff4ee.addSystematic(jesMedium)
-    meff4ee.addSystematic(jesHigh)  
-    #[s.mergeSamples([topSample_Np0.name,wzSample_Np0.name,topSample_Np1.name,wzSample_Np1.name,topSample_Np2.name,wzSample_Np2.name,topSample_Np3.name,wzSample_Np3.name,topSample_Np4.name,wzSample_Np4.name,topSample_Np5.name,wzSample_Np5.name,bgSample.name]) for s in meff4ee.getSystematic(jesS4DL.name)]
-    meff4ee.addSystematic(lepS4DL)
-    
-    if fullSyst:
-        meff4ee.addSystematic(metcoS4DL)
-        meff4ee.addSystematic(metpuS4DL)
-        meff4ee.addSystematic(trigS4DL)
-        meff4ee.addSystematic(lesS4DL)
-        meff4ee.addSystematic(lermsS4DL)
-        meff4ee.addSystematic(leridS4DL)
-
     # S2 using meff
     meff2em = bkgOnly.addChannel("meffInc",["S2em"],meffNBinsS2,meffBinLowS2,meffBinHighS2)
-    meff2em.useOverflowBin=True
-    meff2em.addSystematic(jesLow)
-    meff2em.addSystematic(jesMedium)
-    meff2em.addSystematic(jesHigh) 
-    #[s.mergeSamples([topSample_Np0.name,wzSample_Np0.name,topSample_Np1.name,wzSample_Np1.name,topSample_Np2.name,wzSample_Np2.name,topSample_Np3.name,wzSample_Np3.name,topSample_Np4.name,wzSample_Np4.name,topSample_Np5.name,wzSample_Np5.name,bgSample.name]) for s in meff2em.getSystematic(jesS2DL.name)]
-    meff2em.addSystematic(lepS2DL)
-    
-    if fullSyst:
-        meff2em.addSystematic(metcoS2DL)
-        meff2em.addSystematic(metpuS2DL)
-        meff2em.addSystematic(trigS2DL)
-        meff2em.addSystematic(lesS2DL)
-        meff2em.addSystematic(lermsS2DL)
-        meff2em.addSystematic(leridS2DL)
-
     # S4 using meff
     meff4em = bkgOnly.addChannel("meffInc",["S4em"],meffNBinsS4,meffBinLowS4,meffBinHighS4)
-    meff4em.useOverflowBin=True
-    meff4em.addSystematic(jesLow)
-    meff4em.addSystematic(jesMedium)
-    meff4em.addSystematic(jesHigh) 
-    #[s.mergeSamples([topSample_Np0.name,wzSample_Np0.name,topSample_Np1.name,wzSample_Np1.name,topSample_Np2.name,wzSample_Np2.name,topSample_Np3.name,wzSample_Np3.name,topSample_Np4.name,wzSample_Np4.name,topSample_Np5.name,wzSample_Np5.name,bgSample.name]) for s in meff4em.getSystematic(jesS4DL.name)]
-    meff4em.addSystematic(lepS4DL)
-    
-    if fullSyst:
-        meff4em.addSystematic(metcoS4DL)
-        meff4em.addSystematic(metpuS4DL)
-        meff4em.addSystematic(trigS4DL)
-        meff4em.addSystematic(lesS4DL)
-        meff4em.addSystematic(lermsS4DL)
-        meff4em.addSystematic(leridS4DL)
-
     # S2 using meff
     meff2mm = bkgOnly.addChannel("meffInc",["S2mm"],meffNBinsS2,meffBinLowS2,meffBinHighS2)
-    meff2mm.useOverflowBin=True
-    meff2mm.addSystematic(jesLow)
-    meff2mm.addSystematic(jesMedium)
-    meff2mm.addSystematic(jesHigh) 
-    #[s.mergeSamples([topSample_Np0.name,wzSample_Np0.name,topSample_Np1.name,wzSample_Np1.name,topSample_Np2.name,wzSample_Np2.name,topSample_Np3.name,wzSample_Np3.name,topSample_Np4.name,wzSample_Np4.name,topSample_Np5.name,wzSample_Np5.name,bgSample.name]) for s in meff2mm.getSystematic(jesS2DL.name)]
-    meff2mm.addSystematic(lepS2DL)
-    
-    if fullSyst:
-        meff2mm.addSystematic(metcoS2DL)
-        meff2mm.addSystematic(metpuS2DL)
-        meff2mm.addSystematic(trigS2DL)
-        meff2mm.addSystematic(lesS2DL)
-        meff2mm.addSystematic(lermsS2DL)
-        meff2mm.addSystematic(leridS2DL)
-
     # S4 using meff
     meff4mm = bkgOnly.addChannel("meffInc",["S4mm"],meffNBinsS4,meffBinLowS4,meffBinHighS4)
-    meff4mm.useOverflowBin=True
-    meff4mm.addSystematic(jesLow)
-    meff4mm.addSystematic(jesMedium)
-    meff4mm.addSystematic(jesHigh)    
-    #[s.mergeSamples([topSample_Np0.name,wzSample_Np0.name,topSample_Np1.name,wzSample_Np1.name,topSample_Np2.name,wzSample_Np2.name,topSample_Np3.name,wzSample_Np3.name,topSample_Np4.name,wzSample_Np4.name,topSample_Np5.name,wzSample_Np5.name,bgSample.name]) for s in meff4mm.getSystematic(jesS4DL.name)]
-    meff4mm.addSystematic(lepS4DL)
-    
-    if fullSyst:
-        meff4mm.addSystematic(metcoS4DL)
-        meff4mm.addSystematic(metpuS4DL)
-        meff4mm.addSystematic(trigS4DL)
-        meff4mm.addSystematic(lesS4DL)
-        meff4mm.addSystematic(lermsS4DL)
-        meff4mm.addSystematic(leridS4DL)
-
-# HARD LEPTON SRS
-
+    # HARD LEPTON SRS
     meffS3_El=bkgOnly.addChannel("meffInc",["S3El"],meffNBinsHL,meffBinLowHL,meffBinHighHL)
-    meffS3_El.useOverflowBin = True
-    meffS3_El.addSystematic(jesLow)
-    meffS3_El.addSystematic(jesMedium)
-    meffS3_El.addSystematic(jesHigh)
-    meffS3_El.addSystematic(lepS3)
-    if fullSyst:
-        meffS3_El.addSystematic(metcoS3)
-        meffS3_El.addSystematic(metpuS3)
-        meffS3_El.addSystematic(trigS3)
-        meffS3_El.addSystematic(lesS3)
-        meffS3_El.addSystematic(lermsS3)
-        meffS3_El.addSystematic(leridS3)
-
-
     meffS3_Mu=bkgOnly.addChannel("meffInc",["S3Mu"],meffNBinsHL,meffBinLowHL,meffBinHighHL)
-    meffS3_Mu.useOverflowBin = True
-    meffS3_Mu.addSystematic(jesLow)
-    meffS3_Mu.addSystematic(jesMedium)
-    meffS3_Mu.addSystematic(jesHigh)
-    meffS3_Mu.addSystematic(lepS3)
-    if fullSyst:
-        meffS3_Mu.addSystematic(metcoS3)
-        meffS3_Mu.addSystematic(metpuS3)
-        meffS3_Mu.addSystematic(trigS3)
-        meffS3_Mu.addSystematic(lesS3)
-        meffS3_Mu.addSystematic(lermsS3)
-        meffS3_Mu.addSystematic(leridS3)   
-
-
     meffS4_El=bkgOnly.addChannel("meffInc",["S4El"],meffNBinsHL,meffBinLowHL,meffBinHighHL)
-    meffS4_El.useOverflowBin = True
-    meffS4_El.addSystematic(jesLow)
-    meffS4_El.addSystematic(jesMedium)
-    meffS4_El.addSystematic(jesHigh) 
-    meffS4_El.addSystematic(lepS4)
-    if fullSyst:
-        meffS4_El.addSystematic(metcoS4)
-        meffS4_El.addSystematic(metpuS4)
-        meffS4_El.addSystematic(trigS4)
-        meffS4_El.addSystematic(lesS4)
-        meffS4_El.addSystematic(lermsS4)
-        meffS4_El.addSystematic(leridS4)
-
-
     meffS4_Mu=bkgOnly.addChannel("meffInc",["S4Mu"],meffNBinsHL,meffBinLowHL,meffBinHighHL)
-    meffS4_Mu.useOverflowBin = True
-    meffS4_Mu.addSystematic(jesLow)
-    meffS4_Mu.addSystematic(jesMedium)
-    meffS4_Mu.addSystematic(jesHigh) 
-    meffS4_Mu.addSystematic(lepS4)
-    if fullSyst:
-        meffS4_Mu.addSystematic(metcoS4)
-        meffS4_Mu.addSystematic(metpuS4)
-        meffS4_Mu.addSystematic(trigS4)
-        meffS4_Mu.addSystematic(lesS4)
-        meffS4_Mu.addSystematic(lermsS4)
-        meffS4_Mu.addSystematic(leridS4)
-
-
     meffS3T_El=bkgOnly.addChannel("meffInc",["SR3jTEl"],1,1200,meffBinHighHL)
-    meffS3T_El.useOverflowBin = True
-    meffS3T_El.addSystematic(jesLow)
-    meffS3T_El.addSystematic(jesMedium)
-    meffS3T_El.addSystematic(jesHigh)
-    meffS3T_El.addSystematic(lepS3T)
-    if fullSyst:
-        meffS3T_El.addSystematic(metcoS3T)
-        meffS3T_El.addSystematic(metpuS3T)
-        meffS3T_El.addSystematic(trigS3T)
-        meffS3T_El.addSystematic(lesS3T)
-        meffS3T_El.addSystematic(lermsS3T)
-        meffS3T_El.addSystematic(leridS3T)
-
-
     meffS3T_Mu=bkgOnly.addChannel("meffInc",["SR3jTMu"],1,1200,meffBinHighHL)
-    meffS3T_Mu.useOverflowBin = True
-    meffS3T_Mu.addSystematic(jesLow)
-    meffS3T_Mu.addSystematic(jesMedium)
-    meffS3T_Mu.addSystematic(jesHigh)
-    meffS3T_Mu.addSystematic(lepS3T)
-    if fullSyst:
-        meffS3T_Mu.addSystematic(metcoS3T)
-        meffS3T_Mu.addSystematic(metpuS3T)
-        meffS3T_Mu.addSystematic(trigS3T)
-        meffS3T_Mu.addSystematic(lesS3T)
-        meffS3T_Mu.addSystematic(lermsS3T)
-        meffS3T_Mu.addSystematic(leridS3T)   
-
-
     meffS4T_El=bkgOnly.addChannel("meffInc",["SR4jTEl"],1,800,meffBinHighHL)
-    meffS4T_El.useOverflowBin = True
-    meffS4T_El.addSystematic(jesLow)
-    meffS4T_El.addSystematic(jesMedium)
-    meffS4T_El.addSystematic(jesHigh)
-    meffS4T_El.addSystematic(lepS4T)
-    if fullSyst:
-        meffS4T_El.addSystematic(metcoS4T)
-        meffS4T_El.addSystematic(metpuS4T)
-        meffS4T_El.addSystematic(trigS4T)
-        meffS4T_El.addSystematic(lesS4T)
-        meffS4T_El.addSystematic(lermsS4T)
-        meffS4T_El.addSystematic(leridS4T)
-
-
     meffS4T_Mu=bkgOnly.addChannel("meffInc",["SR4jTMu"],1,800,meffBinHighHL)
-    meffS4T_Mu.useOverflowBin = True
-    meffS4T_Mu.addSystematic(jesLow)
-    meffS4T_Mu.addSystematic(jesMedium)
-    meffS4T_Mu.addSystematic(jesHigh)
-    meffS4T_Mu.addSystematic(lepS4T)
-    if fullSyst:
-        meffS4T_Mu.addSystematic(metcoS4T)
-        meffS4T_Mu.addSystematic(metpuS4T)
-        meffS4T_Mu.addSystematic(trigS4T)
-        meffS4T_Mu.addSystematic(lesS4T)
-        meffS4T_Mu.addSystematic(lermsS4T)
-        meffS4T_Mu.addSystematic(leridS4T)
-            
+
+     validationSRChannels = [meff2ee, meff4ee, meff2em, meff4em, meff2mm, meff4mm, meffS3_El, meffS3_Mu, meffS4_El, meffS4_Mu, meffS3T_El, meffS3T_Mu, meffS4T_El, meffS4T_Mu]
+    
+    # add systematics
+    for chan in validationSRChannels:
+        chan.hasB = False
+        chan.hasBQCD = False
+        chan.useOverflowBin = True
+        for syst in commonChanSyst + commonSamSyst:
+            chan.addSystematic(syst)
+            if debugSyst:
+                print " channel = ", chan.name, " adding systematic = ", syst.name
+        # only additional Full Systematics
+        if fullSyst:
+            for syst in fullChanSyst + fullSamSyst:
+                chan.addSystematic(syst)
+                if debugSyst:
+                    print " channel = ", chan.name, " adding Full systematic = ", syst.name             
+
+          
 if doValidationDilep:
 
 
