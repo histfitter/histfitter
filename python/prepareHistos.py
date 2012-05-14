@@ -112,6 +112,13 @@ class TreePrepare(PrepareHistosABC):
                     self.configMgr.hists[name].SetBinError(iReg+1,error)
                     self.configMgr.hists[name].GetXaxis().SetBinLabel(iReg+1,reg)
                     tempHist.Delete()
+
+                    for iBin in xrange(1,self.configMgr.hists[name].GetNbinsX()+1):
+                        binVal = self.configMgr.hists[name].GetBinContent(iBin)
+                        binErr = self.configMgr.hists[name].GetBinError(iBin)
+                        if binVal<0.:
+                            self.configMgr.hists[name].SetBinContent(iBin,0.)
+
         else:
             if self.configMgr.hists[name] == None:
                 if self.var.find(":") == -1:
