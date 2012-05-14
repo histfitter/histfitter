@@ -135,8 +135,8 @@ class TreePrepare(PrepareHistosABC):
                     for iBin in xrange(1,self.configMgr.hists[name].GetNbinsX()+1):
                         binVal = self.configMgr.hists[name].GetBinContent(iBin)
                         binErr = self.configMgr.hists[name].GetBinError(iBin)
-                        #if binVal==0.:
-                        #    self.configMgr.hists[name].SetBinContent(iBin,1E-8)
+                        if binVal<0.:
+                            self.configMgr.hists[name].SetBinContent(iBin,0.)
                         #if binErr==0:
                         #    self.configMgr.hists[name].SetBinError(iBin,1E-8)
 
@@ -201,17 +201,22 @@ class TreePrepare(PrepareHistosABC):
                     self.configMgr.hists[prefixNom+"_"+str(iBin)] = TH1F(prefixNom+"_"+str(iBin),prefixNom+"_"+str(iBin),self.channel.nBins,self.channel.binLow,self.channel.binHigh)
 
                 binVal = self.configMgr.hists[prefixNom].GetBinContent(iBin)
+                #binError = sqrt(qcdHistoSyst.GetBinContent(iBin)**2+qcdHistoStat.GetBinContent(iBin)**2)
+                #binStatError = qcdHistoStat.GetBinContent(iBin)
                 binError = sqrt(qcdHistoSyst.GetBinContent(iBin)**2+qcdHistoStat.GetBinContent(iBin))
                 binStatError = sqrt(qcdHistoStat.GetBinContent(iBin))
                 binSystError = qcdHistoSyst.GetBinContent(iBin)
+                ##self.configMgr.hists[prefixNom+"_"+str(iBin)].SetBinContent(iBin,self.configMgr.hists[prefixNom].GetBinContent(iBin))
+                #
                 #print "GREPME %s bin %g content %.2g stat error %.2g syst error %.2g total error %.2g" % (prefixNom,iBin,self.configMgr.hists[prefixNom].GetBinContent(iBin),binStatError,binSystError,binError)
-                #if binVal > 0.: # self.configMgr.hists[prefixNom].GetBinContent(iBin) > 0.:
-                self.configMgr.hists[prefixNom+"_"+str(iBin)].SetBinContent(iBin,self.configMgr.hists[prefixNom].GetBinContent(iBin))
-                #else:
-                #    self.configMgr.hists[prefixNom+"_"+str(iBin)].SetBinContent(iBin,0.)
-                #    self.configMgr.hists[prefixNom+"_"+str(iBin)].SetBinError(iBin,binStatError)
-                #    self.configMgr.hists[prefixNom].SetBinContent(iBin,0.)
-                #    self.configMgr.hists[prefixNom].SetBinError(iBin,binStatError)
+                if binVal > 0.:
+                    #self.configMgr.hists[prefixNom].SetBinContent(iBin,binVal) 
+                    self.configMgr.hists[prefixNom+"_"+str(iBin)].SetBinContent(iBin,self.configMgr.hists[prefixNom].GetBinContent(iBin))
+                else:
+                    self.configMgr.hists[prefixNom+"_"+str(iBin)].SetBinContent(iBin,0.)
+                    self.configMgr.hists[prefixNom+"_"+str(iBin)].SetBinError(iBin,binError)
+                    self.configMgr.hists[prefixNom].SetBinContent(iBin,0.)
+                    self.configMgr.hists[prefixNom].SetBinError(iBin,binError)
             #
             if self.configMgr.hists[prefixHigh+"_"+str(iBin)] == None:
                 if self.channel.variableName == "cuts":
@@ -219,14 +224,17 @@ class TreePrepare(PrepareHistosABC):
                 else:
                     self.configMgr.hists[prefixHigh+"_"+str(iBin)] = TH1F(prefixHigh+"_"+str(iBin),prefixHigh+"_"+str(iBin),self.channel.nBins,self.channel.binLow,self.channel.binHigh)
                 #
-                #if binVal+binError > 0.: # self.configMgr.hists[prefixNom].GetBinContent(iBin) > 0.:
-                self.configMgr.hists[prefixHigh+"_"+str(iBin)].SetBinContent(iBin,binVal+binError) #self.configMgr.hists[prefixNom].GetBinContent(iBin)+binError)
-                self.configMgr.hists[prefixHigh].SetBinContent(iBin,binVal+binError) #self.configMgr.hists[prefixNom].GetBinContent(iBin)+binError)
-                #else:
-                #    self.configMgr.hists[prefixHigh+"_"+str(iBin)].SetBinContent(iBin,0.)
-                #    self.configMgr.hists[prefixHigh+"_"+str(iBin)].SetBinError(iBin,binStatError)
-                #    self.configMgr.hists[prefixHigh].SetBinContent(iBin,0.)
-                #    self.configMgr.hists[prefixHigh].SetBinError(iBin,binStatError)
+                ##self.configMgr.hists[prefixHigh+"_"+str(iBin)].SetBinContent(iBin,binVal+binError) #self.configMgr.hists[prefixNom].GetBinContent(iBin)+binError)
+                ##self.configMgr.hists[prefixHigh].SetBinContent(iBin,binVal+binError) #self.configMgr.hists[prefixNom].GetBinContent(iBin)+binError)
+                #
+                if binVal+binError > 0.: # self.configMgr.hists[prefixNom].GetBinContent(iBin) > 0.:
+                    self.configMgr.hists[prefixHigh+"_"+str(iBin)].SetBinContent(iBin,binVal+binError) #self.configMgr.hists[prefixNom].GetBinContent(iBin)+binError)
+                    self.configMgr.hists[prefixHigh].SetBinContent(iBin,binVal+binError) #self.configMgr.hists[prefixNom].GetBinContent(iBin)+binError)
+                else:
+                    self.configMgr.hists[prefixHigh+"_"+str(iBin)].SetBinContent(iBin,0.)
+                    self.configMgr.hists[prefixHigh+"_"+str(iBin)].SetBinError(iBin,binError)
+                    self.configMgr.hists[prefixHigh].SetBinContent(iBin,0.)
+                    self.configMgr.hists[prefixHigh].SetBinError(iBin,binError)
             #
             if self.configMgr.hists[prefixLow+"_"+str(iBin)] == None:
                 if self.channel.variableName == "cuts":
@@ -234,14 +242,17 @@ class TreePrepare(PrepareHistosABC):
                 else:
                     self.configMgr.hists[prefixLow+"_"+str(iBin)] = TH1F(prefixLow+"_"+str(iBin),prefixLow+"_"+str(iBin),self.channel.nBins,self.channel.binLow,self.channel.binHigh)
                 #
-                #if (binVal-binError)>0. : # ( self.configMgr.hists[prefixNom].GetBinContent(iBin) - binError ) > 0.:
-                self.configMgr.hists[prefixLow+"_"+str(iBin)].SetBinContent(iBin,binVal-binError) # self.configMgr.hists[prefixNom].GetBinContent(iBin)-binError)
-                self.configMgr.hists[prefixLow].SetBinContent(iBin,binVal-binError) # self.configMgr.hists[prefixNom].GetBinContent(iBin)-binError)
-                #else:
-                #    self.configMgr.hists[prefixLow+"_"+str(iBin)].SetBinContent(iBin,0.)
-                #    self.configMgr.hists[prefixLow+"_"+str(iBin)].SetBinError(iBin,binStatError)
-                #    self.configMgr.hists[prefixLow].SetBinContent(iBin,0.)
-                #    self.configMgr.hists[prefixLow].SetBinError(iBin,binStatError)
+                ##self.configMgr.hists[prefixLow+"_"+str(iBin)].SetBinContent(iBin,binVal-binError) # self.configMgr.hists[prefixNom].GetBinContent(iBin)-binError)
+                ##self.configMgr.hists[prefixLow].SetBinContent(iBin,binVal-binError) # self.configMgr.hists[prefixNom].GetBinContent(iBin)-binError)
+                #
+                if (binVal-binError)>0. : # ( self.configMgr.hists[prefixNom].GetBinContent(iBin) - binError ) > 0.:
+                    self.configMgr.hists[prefixLow+"_"+str(iBin)].SetBinContent(iBin,binVal-binError) # self.configMgr.hists[prefixNom].GetBinContent(iBin)-binError)
+                    self.configMgr.hists[prefixLow].SetBinContent(iBin,binVal-binError) # self.configMgr.hists[prefixNom].GetBinContent(iBin)-binError)
+                else:
+                    self.configMgr.hists[prefixLow+"_"+str(iBin)].SetBinContent(iBin,0.)
+                    self.configMgr.hists[prefixLow+"_"+str(iBin)].SetBinError(iBin,binError)
+                    self.configMgr.hists[prefixLow].SetBinContent(iBin,0.)
+                    self.configMgr.hists[prefixLow].SetBinError(iBin,binError)
 
         ## MB : also correct the overflow bin!
         for iBin in xrange(self.configMgr.hists[prefixNom].GetNbinsX()+1,self.configMgr.hists[prefixNom].GetNbinsX()+2):
@@ -249,6 +260,8 @@ class TreePrepare(PrepareHistosABC):
             binVal = self.configMgr.hists[prefixNom].GetBinContent(iBin)
             binError = sqrt(qcdHistoSyst.GetBinContent(iBin)**2+qcdHistoStat.GetBinContent(iBin))
             binStatError = sqrt(qcdHistoStat.GetBinContent(iBin))
+            ##binError = sqrt(qcdHistoSyst.GetBinContent(iBin)**2+qcdHistoStat.GetBinContent(iBin)**2)
+            ##binStatError = qcdHistoStat.GetBinContent(iBin)
             binSystError = qcdHistoSyst.GetBinContent(iBin)
             #print "GREPME %s bin %g content %.2g stat error %.2g syst error %.2g total error %.2g" % (prefixNom,iBin,self.configMgr.hists[prefixNom].GetBinContent(iBin),binStatError,binSystError,binError)
             if binVal > 0.: # self.configMgr.hists[prefixNom].GetBinContent(iBin) > 0.:
