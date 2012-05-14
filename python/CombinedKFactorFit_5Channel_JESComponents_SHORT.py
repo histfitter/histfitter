@@ -641,22 +641,8 @@ if doValidationSlope:
                     print " channel = ", chan.name, " adding Full systematic = ", syst.name             
 
 if doValidationSR:
-
     # S2 using meff
     meff2ee = bkgOnly.addChannel("meffInc",["S2ee"],meffNBinsS2,meffBinLowS2,meffBinHighS2)
-   ##  meff2ee.useOverflowBin=True
-##     meff2ee.addSystematic(jesLow)
-##     meff2ee.addSystematic(jesMedium)
-##     meff2ee.addSystematic(jesHigh)  
-##     meff2ee.addSystematic(lepS2DL)
-##     if fullSyst:
-##         meff2ee.addSystematic(metcoS2DL)
-##         meff2ee.addSystematic(metpuS2DL)
-##         meff2ee.addSystematic(trigS2DL)
-##         meff2ee.addSystematic(lesS2DL)
-##         meff2ee.addSystematic(lermsS2DL)
-##         meff2ee.addSystematic(leridS2DL)
-
     # S4 using meff
     meff4ee = bkgOnly.addChannel("meffInc",["S4ee"],meffNBinsS4,meffBinLowS4,meffBinHighS4)
     # S2 using meff
@@ -677,12 +663,10 @@ if doValidationSR:
     meffS4T_El=bkgOnly.addChannel("meffInc",["SR4jTEl"],1,800,meffBinHighHL)
     meffS4T_Mu=bkgOnly.addChannel("meffInc",["SR4jTMu"],1,800,meffBinHighHL)
 
-     validationSRChannels = [meff2ee, meff4ee, meff2em, meff4em, meff2mm, meff4mm, meffS3_El, meffS3_Mu, meffS4_El, meffS4_Mu, meffS3T_El, meffS3T_Mu, meffS4T_El, meffS4T_Mu]
+    validationSRChannels = [meff2ee, meff4ee, meff2em, meff4em, meff2mm, meff4mm, meffS3_El, meffS3_Mu, meffS4_El, meffS4_Mu, meffS3T_El, meffS3T_Mu, meffS4T_El, meffS4T_Mu]
     
     # add systematics
     for chan in validationSRChannels:
-        chan.hasB = False
-        chan.hasBQCD = False
         chan.useOverflowBin = True
         for syst in commonChanSyst + commonSamSyst:
             chan.addSystematic(syst)
@@ -697,630 +681,84 @@ if doValidationSR:
 
           
 if doValidationDilep:
-
-
-    ## check impact of kfactor fit on several distributions
-
-    meffVR_ee=bkgOnly.addChannel("meffInc",["VRee"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
-    meffVR_ee.hasB = True
-    meffVR_ee.hasBQCD = True
-    meffVR_ee.useOverflowBin = True
-    meffVR_ee.addSystematic(jesLow)
-    meffVR_ee.addSystematic(jesMedium)
-    meffVR_ee.addSystematic(jesHigh)
-    meffVR_ee.addSystematic(lepTR)
-    meffVR_ee.addSystematic(btagTR)
-    if fullSyst:
-        meffVR_ee.addSystematic(metcoTR)
-        meffVR_ee.addSystematic(metpuTR)
-        meffVR_ee.addSystematic(trigTR)
-        meffVR_ee.addSystematic(lesTR)
-        meffVR_ee.addSystematic(lermsTR)
-        meffVR_ee.addSystematic(leridTR)
-
-    meffVR_em=bkgOnly.addChannel("meffInc",["VRem"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
-    meffVR_em.hasB = True
-    meffVR_em.hasBQCD = True
-    meffVR_em.useOverflowBin = True
-    meffVR_em.addSystematic(jesLow)
-    meffVR_em.addSystematic(jesMedium)
-    meffVR_em.addSystematic(jesHigh)
-    meffVR_em.addSystematic(lepTR)
-    meffVR_em.addSystematic(btagTR)
-    if fullSyst:
-        meffVR_em.addSystematic(metcoTR)
-        meffVR_em.addSystematic(metpuTR)
-        meffVR_em.addSystematic(trigTR)
-        meffVR_em.addSystematic(lesTR)
-        meffVR_em.addSystematic(lermsTR)
-        meffVR_em.addSystematic(leridTR)
-
-    meffVR_mm=bkgOnly.addChannel("meffInc",["VRmm"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
-    meffVR_mm.hasB = True
-    meffVR_mm.hasBQCD = True
-    meffVR_mm.useOverflowBin = True
-    meffVR_mm.addSystematic(jesLow)
-    meffVR_mm.addSystematic(jesMedium)
-    meffVR_mm.addSystematic(jesHigh)
-    meffVR_mm.addSystematic(lepTR)
-    meffVR_mm.addSystematic(btagTR)
-    if fullSyst:
-        meffVR_mm.addSystematic(metcoTR)
-        meffVR_mm.addSystematic(metpuTR)
-        meffVR_mm.addSystematic(trigTR)
-        meffVR_mm.addSystematic(lesTR)
-        meffVR_mm.addSystematic(lermsTR)
-        meffVR_mm.addSystematic(leridTR)
-
-    nJetVR_ee=bkgOnly.addChannel("nJet",["VRee"],nJetZmRegions,nJetZmNBins,nJetZmBinLow,nJetZmBinHigh)
-    nJetVR_ee.hasB = True
-    nJetVR_ee.hasBQCD = True
-    nJetVR_ee.useOverflowBin = True
-    nJetVR_ee.addSystematic(jesLow)
-    nJetVR_ee.addSystematic(jesMedium)
-    nJetVR_ee.addSystematic(jesHigh)
-    nJetVR_ee.addSystematic(lepTR)
-    nJetVR_ee.addSystematic(btagTR)
-    if fullSyst:
-        nJetVR_ee.addSystematic(metcoTR)
-        nJetVR_ee.addSystematic(metpuTR)
-        nJetVR_ee.addSystematic(trigTR)
-        nJetVR_ee.addSystematic(lesTR)
-        nJetVR_ee.addSystematic(lermsTR)
-        nJetVR_ee.addSystematic(leridTR)
-
-    nJetVR_em=bkgOnly.addChannel("nJet",["VRem"],nJetZmRegions,nJetZmNBins,nJetZmBinLow,nJetZmBinHigh)
-    nJetVR_em.hasB = True
-    nJetVR_em.hasBQCD = True
-    nJetVR_em.useOverflowBin = True
-    nJetVR_em.addSystematic(jesLow)
-    nJetVR_em.addSystematic(jesMedium)
-    nJetVR_em.addSystematic(jesHigh)
-    nJetVR_em.addSystematic(lepTR)
-    nJetVR_em.addSystematic(btagTR)
-    if fullSyst:
-        nJetVR_em.addSystematic(metcoTR)
-        nJetVR_em.addSystematic(metpuTR)
-        nJetVR_em.addSystematic(trigTR)
-        nJetVR_em.addSystematic(lesTR)
-        nJetVR_em.addSystematic(lermsTR)
-        nJetVR_em.addSystematic(leridTR)
-
-    nJetVR_mm=bkgOnly.addChannel("nJet",["VRmm"],nJetZmRegions,nJetZmNBins,nJetZmBinLow,nJetZmBinHigh)
-    nJetVR_mm.hasB = True
-    nJetVR_mm.hasBQCD = True
-    nJetVR_mm.useOverflowBin = True
-    nJetVR_mm.addSystematic(jesLow)
-    nJetVR_mm.addSystematic(jesMedium)
-    nJetVR_mm.addSystematic(jesHigh)
-    nJetVR_mm.addSystematic(lepTR)
-    nJetVR_mm.addSystematic(btagTR)
-    if fullSyst:
-        nJetVR_mm.addSystematic(metcoTR)
-        nJetVR_mm.addSystematic(metpuTR)
-        nJetVR_mm.addSystematic(trigTR)
-        nJetVR_mm.addSystematic(lesTR)
-        nJetVR_mm.addSystematic(lermsTR)
-        nJetVR_mm.addSystematic(leridTR)
-
+    meffVR4_ee=bkgOnly.addChannel("meffInc",["VR4ee"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
+    meffVR4_em=bkgOnly.addChannel("meffInc",["VR4em"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
+    meffVR4_mm=bkgOnly.addChannel("meffInc",["VR4mm"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
+    nJetVR4_ee=bkgOnly.addChannel("nJet",["VR4ee"],nJetZmRegions,nJetZmNBins,nJetZmBinLow,nJetZmBinHigh)
+    nJetVR4_em=bkgOnly.addChannel("nJet",["VR4em"],nJetZmRegions,nJetZmNBins,nJetZmBinLow,nJetZmBinHigh)
+    nJetVR4_mm=bkgOnly.addChannel("nJet",["VR4mm"],nJetZmRegions,nJetZmNBins,nJetZmBinLow,nJetZmBinHigh)
     meffVR2_ee=bkgOnly.addChannel("meffInc",["VR2ee"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
-    meffVR2_ee.hasB = True
-    meffVR2_ee.hasBQCD = True
-    meffVR2_ee.useOverflowBin = True
-    meffVR2_ee.addSystematic(jesLow)
-    meffVR2_ee.addSystematic(jesMedium)
-    meffVR2_ee.addSystematic(jesHigh)
-    meffVR2_ee.addSystematic(lepTR)
-    meffVR2_ee.addSystematic(btagTR)
-    if fullSyst:
-        meffVR2_ee.addSystematic(metcoTR)
-        meffVR2_ee.addSystematic(metpuTR)
-        meffVR2_ee.addSystematic(trigTR)
-        meffVR2_ee.addSystematic(lesTR)
-        meffVR2_ee.addSystematic(lermsTR)
-        meffVR2_ee.addSystematic(leridTR)
-
     meffVR2_em=bkgOnly.addChannel("meffInc",["VR2em"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
-    meffVR2_em.hasB = True
-    meffVR2_em.hasBQCD = True
-    meffVR2_em.useOverflowBin = True
-    meffVR2_em.addSystematic(jesLow)
-    meffVR2_em.addSystematic(jesMedium)
-    meffVR2_em.addSystematic(jesHigh)
-    meffVR2_em.addSystematic(lepTR)
-    meffVR2_em.addSystematic(btagTR)
-    if fullSyst:
-        meffVR2_em.addSystematic(metcoTR)
-        meffVR2_em.addSystematic(metpuTR)
-        meffVR2_em.addSystematic(trigTR)
-        meffVR2_em.addSystematic(lesTR)
-        meffVR2_em.addSystematic(lermsTR)
-        meffVR2_em.addSystematic(leridTR)
-
     meffVR2_mm=bkgOnly.addChannel("meffInc",["VR2mm"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
-    meffVR2_mm.hasB = True
-    meffVR2_mm.hasBQCD = True
-    meffVR2_mm.useOverflowBin = True
-    meffVR2_mm.addSystematic(jesLow)
-    meffVR2_mm.addSystematic(jesMedium)
-    meffVR2_mm.addSystematic(jesHigh)
-    meffVR2_mm.addSystematic(lepTR)
-    meffVR2_mm.addSystematic(btagTR)
-    if fullSyst:
-        meffVR2_mm.addSystematic(metcoTR)
-        meffVR2_mm.addSystematic(metpuTR)
-        meffVR2_mm.addSystematic(trigTR)
-        meffVR2_mm.addSystematic(lesTR)
-        meffVR2_mm.addSystematic(lermsTR)
-        meffVR2_mm.addSystematic(leridTR)
-
     nJetVR2_ee=bkgOnly.addChannel("nJet",["VR2ee"],nJetZmRegions,nJetZmNBins,nJetZmBinLow,nJetZmBinHigh)
-    nJetVR2_ee.hasB = True
-    nJetVR2_ee.hasBQCD = True
-    nJetVR2_ee.useOverflowBin = True
-    nJetVR2_ee.addSystematic(jesLow)
-    nJetVR2_ee.addSystematic(jesMedium)
-    nJetVR2_ee.addSystematic(jesHigh)
-    nJetVR2_ee.addSystematic(lepTR)
-    nJetVR2_ee.addSystematic(btagTR)
-    if fullSyst:
-        nJetVR2_ee.addSystematic(metcoTR)
-        nJetVR2_ee.addSystematic(metpuTR)
-        nJetVR2_ee.addSystematic(trigTR)
-        nJetVR2_ee.addSystematic(lesTR)
-        nJetVR2_ee.addSystematic(lermsTR)
-        nJetVR2_ee.addSystematic(leridTR)
-
     nJetVR2_em=bkgOnly.addChannel("nJet",["VR2em"],nJetZmRegions,nJetZmNBins,nJetZmBinLow,nJetZmBinHigh)
-    nJetVR2_em.hasB = True
-    nJetVR2_em.hasBQCD = True
-    nJetVR2_em.useOverflowBin = True
-    nJetVR2_em.addSystematic(jesLow)
-    nJetVR2_em.addSystematic(jesMedium)
-    nJetVR2_em.addSystematic(jesHigh)
-    nJetVR2_em.addSystematic(lepTR)
-    nJetVR2_em.addSystematic(btagTR)
-    if fullSyst:
-        nJetVR2_em.addSystematic(metcoTR)
-        nJetVR2_em.addSystematic(metpuTR)
-        nJetVR2_em.addSystematic(trigTR)
-        nJetVR2_em.addSystematic(lesTR)
-        nJetVR2_em.addSystematic(lermsTR)
-        nJetVR2_em.addSystematic(leridTR)
-
     nJetVR2_mm=bkgOnly.addChannel("nJet",["VR2mm"],nJetZmRegions,nJetZmNBins,nJetZmBinLow,nJetZmBinHigh)
-    nJetVR2_mm.hasB = True
-    nJetVR2_mm.hasBQCD = True
-    nJetVR2_mm.useOverflowBin = True
-    nJetVR2_mm.addSystematic(jesLow)
-    nJetVR2_mm.addSystematic(jesMedium)
-    nJetVR2_mm.addSystematic(jesHigh)
-    nJetVR2_mm.addSystematic(lepTR)
-    nJetVR2_mm.addSystematic(btagTR)
-    if fullSyst:
-        nJetVR2_mm.addSystematic(metcoTR)
-        nJetVR2_mm.addSystematic(metpuTR)
-        nJetVR2_mm.addSystematic(trigTR)
-        nJetVR2_mm.addSystematic(lesTR)
-        nJetVR2_mm.addSystematic(lermsTR)
-        nJetVR2_mm.addSystematic(leridTR)
-
     meffVR3_ee=bkgOnly.addChannel("meffInc",["VR3ee"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
-    meffVR3_ee.hasB = True
-    meffVR3_ee.hasBQCD = True
-    meffVR3_ee.useOverflowBin = True
-    meffVR3_ee.addSystematic(jesLow)
-    meffVR3_ee.addSystematic(jesMedium)
-    meffVR3_ee.addSystematic(jesHigh)
-    meffVR3_ee.addSystematic(lepTR)
-    meffVR3_ee.addSystematic(btagTR)
-    if fullSyst:
-        meffVR3_ee.addSystematic(metcoTR)
-        meffVR3_ee.addSystematic(metpuTR)
-        meffVR3_ee.addSystematic(trigTR)
-        meffVR3_ee.addSystematic(lesTR)
-        meffVR3_ee.addSystematic(lermsTR)
-        meffVR3_ee.addSystematic(leridTR)
-
     meffVR3_em=bkgOnly.addChannel("meffInc",["VR3em"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
-    meffVR3_em.hasB = True
-    meffVR3_em.hasBQCD = True
-    meffVR3_em.useOverflowBin = True
-    meffVR3_em.addSystematic(jesLow)
-    meffVR3_em.addSystematic(jesMedium)
-    meffVR3_em.addSystematic(jesHigh)
-    meffVR3_em.addSystematic(lepTR)
-    meffVR3_em.addSystematic(btagTR)
-    if fullSyst:
-        meffVR3_em.addSystematic(metcoTR)
-        meffVR3_em.addSystematic(metpuTR)
-        meffVR3_em.addSystematic(trigTR)
-        meffVR3_em.addSystematic(lesTR)
-        meffVR3_em.addSystematic(lermsTR)
-        meffVR3_em.addSystematic(leridTR)
-
     meffVR3_mm=bkgOnly.addChannel("meffInc",["VR3mm"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
-    meffVR3_mm.hasB = True
-    meffVR3_mm.hasBQCD = True
-    meffVR3_mm.useOverflowBin = True
-    meffVR3_mm.addSystematic(jesLow)
-    meffVR3_mm.addSystematic(jesMedium)
-    meffVR3_mm.addSystematic(jesHigh)
-    meffVR3_mm.addSystematic(lepTR)
-    meffVR3_mm.addSystematic(btagTR)
-    if fullSyst:
-        meffVR3_mm.addSystematic(metcoTR)
-        meffVR3_mm.addSystematic(metpuTR)
-        meffVR3_mm.addSystematic(trigTR)
-        meffVR3_mm.addSystematic(lesTR)
-        meffVR3_mm.addSystematic(lermsTR)
-        meffVR3_mm.addSystematic(leridTR)
-
     nJetVR3_ee=bkgOnly.addChannel("nJet",["VR3ee"],nJetZmRegions,nJetZmNBins,nJetZmBinLow,nJetZmBinHigh)
-    nJetVR3_ee.hasB = True
-    nJetVR3_ee.hasBQCD = True
-    nJetVR3_ee.useOverflowBin = True
-    nJetVR3_ee.addSystematic(jesLow)
-    nJetVR3_ee.addSystematic(jesMedium)
-    nJetVR3_ee.addSystematic(jesHigh)
-    nJetVR3_ee.addSystematic(lepTR)
-    nJetVR3_ee.addSystematic(btagTR)
-    if fullSyst:
-        nJetVR3_ee.addSystematic(metcoTR)
-        nJetVR3_ee.addSystematic(metpuTR)
-        nJetVR3_ee.addSystematic(trigTR)
-        nJetVR3_ee.addSystematic(lesTR)
-        nJetVR3_ee.addSystematic(lermsTR)
-        nJetVR3_ee.addSystematic(leridTR)
-
     nJetVR3_em=bkgOnly.addChannel("nJet",["VR3em"],nJetZmRegions,nJetZmNBins,nJetZmBinLow,nJetZmBinHigh)
-    nJetVR3_em.hasB = True
-    nJetVR3_em.hasBQCD = True
-    nJetVR3_em.useOverflowBin = True
-    nJetVR3_em.addSystematic(jesLow)
-    nJetVR3_em.addSystematic(jesMedium)
-    nJetVR3_em.addSystematic(jesHigh)
-    nJetVR3_em.addSystematic(lepTR)
-    nJetVR3_em.addSystematic(btagTR)
-    if fullSyst:
-        nJetVR3_em.addSystematic(metcoTR)
-        nJetVR3_em.addSystematic(metpuTR)
-        nJetVR3_em.addSystematic(trigTR)
-        nJetVR3_em.addSystematic(lesTR)
-        nJetVR3_em.addSystematic(lermsTR)
-        nJetVR3_em.addSystematic(leridTR)
-
     nJetVR3_mm=bkgOnly.addChannel("nJet",["VR3mm"],nJetZmRegions,nJetZmNBins,nJetZmBinLow,nJetZmBinHigh)
-    nJetVR3_mm.hasB = True
-    nJetVR3_mm.hasBQCD = True
-    nJetVR3_mm.useOverflowBin = True
-    nJetVR3_mm.addSystematic(jesLow)
-    nJetVR3_mm.addSystematic(jesMedium)
-    nJetVR3_mm.addSystematic(jesHigh)
-    nJetVR3_mm.addSystematic(lepTR)
-    nJetVR3_mm.addSystematic(btagTR)
-    if fullSyst:
-        nJetVR3_mm.addSystematic(metcoTR)
-        nJetVR3_mm.addSystematic(metpuTR)
-        nJetVR3_mm.addSystematic(trigTR)
-        nJetVR3_mm.addSystematic(lesTR)
-        nJetVR3_mm.addSystematic(lermsTR)
-        nJetVR3_mm.addSystematic(leridTR)
 
+    validation2LepChannels = [meffVR2_ee, meffVR2_em, meffVR2_mm, nJetVR2_ee, nJetVR2_em, nJetVR2_mm,
+                              meffVR3_ee, meffVR3_em, meffVR3_mm, nJetVR3_ee, nJetVR3_em, nJetVR3_mm,
+                              meffVR4_ee, meffVR4_em, meffVR4_mm, nJetVR4_ee, nJetVR4_em, nJetVR4_mm]
+    
+    # add systematics
+    for chan in validation2LepChannels:
+        chan.useOverflowBin = True
+        for syst in commonChanSyst + commonSamSyst:
+            chan.addSystematic(syst)
+            if debugSyst:
+                print " channel = ", chan.name, " adding systematic = ", syst.name
+        # only additional Full Systematics
+        if fullSyst:
+            for syst in fullChanSyst + fullSamSyst:
+                chan.addSystematic(syst)
+                if debugSyst:
+                    print " channel = ", chan.name, " adding Full systematic = ", syst.name             
 
+    
 if doValidationDilepZ:
-
-
-    ## check impact of kfactor fit on several distributions
-
-    meffZVR_ee=bkgOnly.addChannel("meffInc",["ZVRee"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
-    meffZVR_ee.hasB = True
-    meffZVR_ee.hasBQCD = True
-    meffZVR_ee.useOverflowBin = True
-    meffZVR_ee.addSystematic(jesLow)
-    meffZVR_ee.addSystematic(jesMedium)
-    meffZVR_ee.addSystematic(jesHigh)
-    meffZVR_ee.addSystematic(lepTR)
-    meffZVR_ee.addSystematic(btagTR)
-    if fullSyst:
-        meffZVR_ee.addSystematic(metcoTR)
-        meffZVR_ee.addSystematic(metpuTR)
-        meffZVR_ee.addSystematic(trigTR)
-        meffZVR_ee.addSystematic(lesTR)
-        meffZVR_ee.addSystematic(lermsTR)
-        meffZVR_ee.addSystematic(leridTR)
-
-    meffZVR_em=bkgOnly.addChannel("meffInc",["ZVRem"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
-    meffZVR_em.hasB = True
-    meffZVR_em.hasBQCD = True
-    meffZVR_em.useOverflowBin = True
-    meffZVR_em.addSystematic(jesLow)
-    meffZVR_em.addSystematic(jesMedium)
-    meffZVR_em.addSystematic(jesHigh)
-    meffZVR_em.addSystematic(lepTR)
-    meffZVR_em.addSystematic(btagTR)
-    if fullSyst:
-        meffZVR_em.addSystematic(metcoTR)
-        meffZVR_em.addSystematic(metpuTR)
-        meffZVR_em.addSystematic(trigTR)
-        meffZVR_em.addSystematic(lesTR)
-        meffZVR_em.addSystematic(lermsTR)
-        meffZVR_em.addSystematic(leridTR)
-
-    meffZVR_mm=bkgOnly.addChannel("meffInc",["ZVRmm"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
-    meffZVR_mm.hasB = True
-    meffZVR_mm.hasBQCD = True
-    meffZVR_mm.useOverflowBin = True
-    meffZVR_mm.addSystematic(jesLow)
-    meffZVR_mm.addSystematic(jesMedium)
-    meffZVR_mm.addSystematic(jesHigh)
-    meffZVR_mm.addSystematic(lepTR)
-    meffZVR_mm.addSystematic(btagTR)
-    if fullSyst:
-        meffZVR_mm.addSystematic(metcoTR)
-        meffZVR_mm.addSystematic(metpuTR)
-        meffZVR_mm.addSystematic(trigTR)
-        meffZVR_mm.addSystematic(lesTR)
-        meffZVR_mm.addSystematic(lermsTR)
-        meffZVR_mm.addSystematic(leridTR)
-
-    nJetZVR_ee=bkgOnly.addChannel("nJet",["ZVRee"],nJetZmRegions,nJetZmNBins,nJetZmBinLow,nJetZmBinHigh)
-    nJetZVR_ee.hasB = True
-    nJetZVR_ee.hasBQCD = True
-    nJetZVR_ee.useOverflowBin = True
-    nJetZVR_ee.addSystematic(jesLow)
-    nJetZVR_ee.addSystematic(jesMedium)
-    nJetZVR_ee.addSystematic(jesHigh)
-    nJetZVR_ee.addSystematic(lepTR)
-    nJetZVR_ee.addSystematic(btagTR)
-    if fullSyst:
-        nJetZVR_ee.addSystematic(metcoTR)
-        nJetZVR_ee.addSystematic(metpuTR)
-        nJetZVR_ee.addSystematic(trigTR)
-        nJetZVR_ee.addSystematic(lesTR)
-        nJetZVR_ee.addSystematic(lermsTR)
-        nJetZVR_ee.addSystematic(leridTR)
-
-    nJetZVR_em=bkgOnly.addChannel("nJet",["ZVRem"],nJetZmRegions,nJetZmNBins,nJetZmBinLow,nJetZmBinHigh)
-    nJetZVR_em.hasB = True
-    nJetZVR_em.hasBQCD = True
-    nJetZVR_em.useOverflowBin = True
-    nJetZVR_em.addSystematic(jesLow)
-    nJetZVR_em.addSystematic(jesMedium)
-    nJetZVR_em.addSystematic(jesHigh)
-    nJetZVR_em.addSystematic(lepTR)
-    nJetZVR_em.addSystematic(btagTR)
-    if fullSyst:
-        nJetZVR_em.addSystematic(metcoTR)
-        nJetZVR_em.addSystematic(metpuTR)
-        nJetZVR_em.addSystematic(trigTR)
-        nJetZVR_em.addSystematic(lesTR)
-        nJetZVR_em.addSystematic(lermsTR)
-        nJetZVR_em.addSystematic(leridTR)
-
-    nJetZVR_mm=bkgOnly.addChannel("nJet",["ZVRmm"],nJetZmRegions,nJetZmNBins,nJetZmBinLow,nJetZmBinHigh)
-    nJetZVR_mm.hasB = True
-    nJetZVR_mm.hasBQCD = True
-    nJetZVR_mm.useOverflowBin = True
-    nJetZVR_mm.addSystematic(jesLow)
-    nJetZVR_mm.addSystematic(jesMedium)
-    nJetZVR_mm.addSystematic(jesHigh)
-    nJetZVR_mm.addSystematic(lepTR)
-    nJetZVR_mm.addSystematic(btagTR)
-    if fullSyst:
-        nJetZVR_mm.addSystematic(metcoTR)
-        nJetZVR_mm.addSystematic(metpuTR)
-        nJetZVR_mm.addSystematic(trigTR)
-        nJetZVR_mm.addSystematic(lesTR)
-        nJetZVR_mm.addSystematic(lermsTR)
-        nJetZVR_mm.addSystematic(leridTR)
-
+    meffZVR4_ee=bkgOnly.addChannel("meffInc",["ZVR4ee"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
+    meffZVR4_em=bkgOnly.addChannel("meffInc",["ZVR4em"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
+    meffZVR4_mm=bkgOnly.addChannel("meffInc",["ZVR4mm"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
+    nJetZVR4_ee=bkgOnly.addChannel("nJet",["ZVR4ee"],nJetZmRegions,nJetZmNBins,nJetZmBinLow,nJetZmBinHigh)
+    nJetZVR4_em=bkgOnly.addChannel("nJet",["ZVR4em"],nJetZmRegions,nJetZmNBins,nJetZmBinLow,nJetZmBinHigh)
+    nJetZVR4_mm=bkgOnly.addChannel("nJet",["ZVR4mm"],nJetZmRegions,nJetZmNBins,nJetZmBinLow,nJetZmBinHigh)
     meffZVR2_ee=bkgOnly.addChannel("meffInc",["ZVR2ee"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
-    meffZVR2_ee.hasB = True
-    meffZVR2_ee.hasBQCD = True
-    meffZVR2_ee.useOverflowBin = True
-    meffZVR2_ee.addSystematic(jesLow)
-    meffZVR2_ee.addSystematic(jesMedium)
-    meffZVR2_ee.addSystematic(jesHigh)
-    meffZVR2_ee.addSystematic(lepTR)
-    meffZVR2_ee.addSystematic(btagTR)
-    if fullSyst:
-        meffZVR2_ee.addSystematic(metcoTR)
-        meffZVR2_ee.addSystematic(metpuTR)
-        meffZVR2_ee.addSystematic(trigTR)
-        meffZVR2_ee.addSystematic(lesTR)
-        meffZVR2_ee.addSystematic(lermsTR)
-        meffZVR2_ee.addSystematic(leridTR)
-
     meffZVR2_em=bkgOnly.addChannel("meffInc",["ZVR2em"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
-    meffZVR2_em.hasB = True
-    meffZVR2_em.hasBQCD = True
-    meffZVR2_em.useOverflowBin = True
-    meffZVR2_em.addSystematic(jesLow)
-    meffZVR2_em.addSystematic(jesMedium)
-    meffZVR2_em.addSystematic(jesHigh)
-    meffZVR2_em.addSystematic(lepTR)
-    meffZVR2_em.addSystematic(btagTR)
-    if fullSyst:
-        meffZVR2_em.addSystematic(metcoTR)
-        meffZVR2_em.addSystematic(metpuTR)
-        meffZVR2_em.addSystematic(trigTR)
-        meffZVR2_em.addSystematic(lesTR)
-        meffZVR2_em.addSystematic(lermsTR)
-        meffZVR2_em.addSystematic(leridTR)
-
     meffZVR2_mm=bkgOnly.addChannel("meffInc",["ZVR2mm"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
-    meffZVR2_mm.hasB = True
-    meffZVR2_mm.hasBQCD = True
-    meffZVR2_mm.useOverflowBin = True
-    meffZVR2_mm.addSystematic(jesLow)
-    meffZVR2_mm.addSystematic(jesMedium)
-    meffZVR2_mm.addSystematic(jesHigh)
-    meffZVR2_mm.addSystematic(lepTR)
-    meffZVR2_mm.addSystematic(btagTR)
-    if fullSyst:
-        meffZVR2_mm.addSystematic(metcoTR)
-        meffZVR2_mm.addSystematic(metpuTR)
-        meffZVR2_mm.addSystematic(trigTR)
-        meffZVR2_mm.addSystematic(lesTR)
-        meffZVR2_mm.addSystematic(lermsTR)
-        meffZVR2_mm.addSystematic(leridTR)
-
     nJetZVR2_ee=bkgOnly.addChannel("nJet",["ZVR2ee"],nJetZmRegions,nJetZmNBins,nJetZmBinLow,nJetZmBinHigh)
-    nJetZVR2_ee.hasB = True
-    nJetZVR2_ee.hasBQCD = True
-    nJetZVR2_ee.useOverflowBin = True
-    nJetZVR2_ee.addSystematic(jesLow)
-    nJetZVR2_ee.addSystematic(jesMedium)
-    nJetZVR2_ee.addSystematic(jesHigh)
-    nJetZVR2_ee.addSystematic(lepTR)
-    nJetZVR2_ee.addSystematic(btagTR)
-    if fullSyst:
-        nJetZVR2_ee.addSystematic(metcoTR)
-        nJetZVR2_ee.addSystematic(metpuTR)
-        nJetZVR2_ee.addSystematic(trigTR)
-        nJetZVR2_ee.addSystematic(lesTR)
-        nJetZVR2_ee.addSystematic(lermsTR)
-        nJetZVR2_ee.addSystematic(leridTR)
-
     nJetZVR2_em=bkgOnly.addChannel("nJet",["ZVR2em"],nJetZmRegions,nJetZmNBins,nJetZmBinLow,nJetZmBinHigh)
-    nJetZVR2_em.hasB = True
-    nJetZVR2_em.hasBQCD = True
-    nJetZVR2_em.useOverflowBin = True
-    nJetZVR2_em.addSystematic(jesLow)
-    nJetZVR2_em.addSystematic(jesMedium)
-    nJetZVR2_em.addSystematic(jesHigh)
-    nJetZVR2_em.addSystematic(lepTR)
-    nJetZVR2_em.addSystematic(btagTR)
-    if fullSyst:
-        nJetZVR2_em.addSystematic(metcoTR)
-        nJetZVR2_em.addSystematic(metpuTR)
-        nJetZVR2_em.addSystematic(trigTR)
-        nJetZVR2_em.addSystematic(lesTR)
-        nJetZVR2_em.addSystematic(lermsTR)
-        nJetZVR2_em.addSystematic(leridTR)
-
     nJetZVR2_mm=bkgOnly.addChannel("nJet",["ZVR2mm"],nJetZmRegions,nJetZmNBins,nJetZmBinLow,nJetZmBinHigh)
-    nJetZVR2_mm.hasB = True
-    nJetZVR2_mm.hasBQCD = True
-    nJetZVR2_mm.useOverflowBin = True
-    nJetZVR2_mm.addSystematic(jesLow)
-    nJetZVR2_mm.addSystematic(jesMedium)
-    nJetZVR2_mm.addSystematic(jesHigh)
-    nJetZVR2_mm.addSystematic(lepTR)
-    nJetZVR2_mm.addSystematic(btagTR)
-    if fullSyst:
-        nJetZVR2_mm.addSystematic(metcoTR)
-        nJetZVR2_mm.addSystematic(metpuTR)
-        nJetZVR2_mm.addSystematic(trigTR)
-        nJetZVR2_mm.addSystematic(lesTR)
-        nJetZVR2_mm.addSystematic(lermsTR)
-        nJetZVR2_mm.addSystematic(leridTR)
-
     meffZVR3_ee=bkgOnly.addChannel("meffInc",["ZVR3ee"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
-    meffZVR3_ee.hasB = True
-    meffZVR3_ee.hasBQCD = True
-    meffZVR3_ee.useOverflowBin = True
-    meffZVR3_ee.addSystematic(jesLow)
-    meffZVR3_ee.addSystematic(jesMedium)
-    meffZVR3_ee.addSystematic(jesHigh)
-    meffZVR3_ee.addSystematic(lepTR)
-    meffZVR3_ee.addSystematic(btagTR)
-    if fullSyst:
-        meffZVR3_ee.addSystematic(metcoTR)
-        meffZVR3_ee.addSystematic(metpuTR)
-        meffZVR3_ee.addSystematic(trigTR)
-        meffZVR3_ee.addSystematic(lesTR)
-        meffZVR3_ee.addSystematic(lermsTR)
-        meffZVR3_ee.addSystematic(leridTR)
-
     meffZVR3_em=bkgOnly.addChannel("meffInc",["ZVR3em"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
-    meffZVR3_em.hasB = True
-    meffZVR3_em.hasBQCD = True
-    meffZVR3_em.useOverflowBin = True
-    meffZVR3_em.addSystematic(jesLow)
-    meffZVR3_em.addSystematic(jesMedium)
-    meffZVR3_em.addSystematic(jesHigh)
-    meffZVR3_em.addSystematic(lepTR)
-    meffZVR3_em.addSystematic(btagTR)
-    if fullSyst:
-        meffZVR3_em.addSystematic(metcoTR)
-        meffZVR3_em.addSystematic(metpuTR)
-        meffZVR3_em.addSystematic(trigTR)
-        meffZVR3_em.addSystematic(lesTR)
-        meffZVR3_em.addSystematic(lermsTR)
-        meffZVR3_em.addSystematic(leridTR)
-
     meffZVR3_mm=bkgOnly.addChannel("meffInc",["ZVR3mm"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
-    meffZVR3_mm.hasB = True
-    meffZVR3_mm.hasBQCD = True
-    meffZVR3_mm.useOverflowBin = True
-    meffZVR3_mm.addSystematic(jesLow)
-    meffZVR3_mm.addSystematic(jesMedium)
-    meffZVR3_mm.addSystematic(jesHigh)
-    meffZVR3_mm.addSystematic(lepTR)
-    meffZVR3_mm.addSystematic(btagTR)
-    if fullSyst:
-        meffZVR3_mm.addSystematic(metcoTR)
-        meffZVR3_mm.addSystematic(metpuTR)
-        meffZVR3_mm.addSystematic(trigTR)
-        meffZVR3_mm.addSystematic(lesTR)
-        meffZVR3_mm.addSystematic(lermsTR)
-        meffZVR3_mm.addSystematic(leridTR)
-
     nJetZVR3_ee=bkgOnly.addChannel("nJet",["ZVR3ee"],nJetZmRegions,nJetZmNBins,nJetZmBinLow,nJetZmBinHigh)
-    nJetZVR3_ee.hasB = True
-    nJetZVR3_ee.hasBQCD = True
-    nJetZVR3_ee.useOverflowBin = True
-    nJetZVR3_ee.addSystematic(jesLow)
-    nJetZVR3_ee.addSystematic(jesMedium)
-    nJetZVR3_ee.addSystematic(jesHigh)
-    nJetZVR3_ee.addSystematic(lepTR)
-    nJetZVR3_ee.addSystematic(btagTR)
-    if fullSyst:
-        nJetZVR3_ee.addSystematic(metcoTR)
-        nJetZVR3_ee.addSystematic(metpuTR)
-        nJetZVR3_ee.addSystematic(trigTR)
-        nJetZVR3_ee.addSystematic(lesTR)
-        nJetZVR3_ee.addSystematic(lermsTR)
-        nJetZVR3_ee.addSystematic(leridTR)
-
     nJetZVR3_em=bkgOnly.addChannel("nJet",["ZVR3em"],nJetZmRegions,nJetZmNBins,nJetZmBinLow,nJetZmBinHigh)
-    nJetZVR3_em.hasB = True
-    nJetZVR3_em.hasBQCD = True
-    nJetZVR3_em.useOverflowBin = True
-    nJetZVR3_em.addSystematic(jesLow)
-    nJetZVR3_em.addSystematic(jesMedium)
-    nJetZVR3_em.addSystematic(jesHigh)
-    nJetZVR3_em.addSystematic(lepTR)
-    nJetZVR3_em.addSystematic(btagTR)
-    if fullSyst:
-        nJetZVR3_em.addSystematic(metcoTR)
-        nJetZVR3_em.addSystematic(metpuTR)
-        nJetZVR3_em.addSystematic(trigTR)
-        nJetZVR3_em.addSystematic(lesTR)
-        nJetZVR3_em.addSystematic(lermsTR)
-        nJetZVR3_em.addSystematic(leridTR)
-
     nJetZVR3_mm=bkgOnly.addChannel("nJet",["ZVR3mm"],nJetZmRegions,nJetZmNBins,nJetZmBinLow,nJetZmBinHigh)
-    nJetZVR3_mm.hasB = True
-    nJetZVR3_mm.hasBQCD = True
-    nJetZVR3_mm.useOverflowBin = True
-    nJetZVR3_mm.addSystematic(jesLow)
-    nJetZVR3_mm.addSystematic(jesMedium)
-    nJetZVR3_mm.addSystematic(jesHigh)
-    nJetZVR3_mm.addSystematic(lepTR)
-    nJetZVR3_mm.addSystematic(btagTR)
-    if fullSyst:
-        nJetZVR3_mm.addSystematic(metcoTR)
-        nJetZVR3_mm.addSystematic(metpuTR)
-        nJetZVR3_mm.addSystematic(trigTR)
-        nJetZVR3_mm.addSystematic(lesTR)
-        nJetZVR3_mm.addSystematic(lermsTR)
-        nJetZVR3_mm.addSystematic(leridTR)
-
-
-        
+    
+    validation2LepZChannels = [meffZVR2_ee, meffZVR2_em, meffZVR2_mm, nJetZVR2_ee, nJetZVR2_em, nJetZVR2_mm,
+                              meffZVR3_ee, meffZVR3_em, meffZVR3_mm, nJetZVR3_ee, nJetZVR3_em, nJetZVR3_mm,
+                              meffZVR4_ee, meffZVR4_em, meffZVR4_mm, nJetZVR4_ee, nJetZVR4_em, nJetZVR4_mm]
+    
+    # add systematics
+    for chan in validation2LepChannels:
+        chan.hasB = True
+        chan.hasBQCD = True
+        chan.useOverflowBin = True
+        for syst in commonChanSyst + commonSamSyst + btagChanSyst:
+            chan.addSystematic(syst)
+            if debugSyst:
+                print " channel = ", chan.name, " adding systematic = ", syst.name
+        # only additional Full Systematics
+        if fullSyst:
+            for syst in fullChanSyst + fullSamSyst:
+                chan.addSystematic(syst)
+                if debugSyst:
+                    print " channel = ", chan.name, " adding Full systematic = ", syst.name             
+    
 
 if doValidationSR:
     bkgOnly.setValidationChannels([meff2ee,meff4ee,meff2em,meff4em,meff2mm,meff4mm,meffS3_El,meffS3_Mu,meffS4_El,meffS4_Mu,meffS3T_El,meffS3T_Mu,meffS4T_El,meffS4T_Mu])
@@ -1329,10 +767,12 @@ if doValidationSlope:
     bkgOnly.setValidationChannels([meffTR_El,meffTR_Mu,metTR_El,metTR_Mu,pt1TR_El,pt1TR_Mu,pt2TR_El,pt2TR_Mu,wptWR_El,wptWR_Mu,metWR_El,metWR_Mu,ZptZR_ee,ZptZR_mm])
 
 if doValidationDilep:
-    bkgOnly.setValidationChannels([meffVR_ee,meffVR_em,meffVR_mm,nJetVR_ee,nJetVR_em,nJetVR_mm,meffVR2_ee,meffVR2_em,meffVR2_mm,nJetVR2_ee,nJetVR2_em,nJetVR2_mm,meffVR3_ee,meffVR3_em,meffVR3_mm,nJetVR3_ee,nJetVR3_em,nJetVR3_mm])
+    bkgOnly.setValidationChannels([meffVR4_ee,meffVR4_em,meffVR4_mm,nJetVR4_ee,nJetVR4_em,nJetVR4_mm,meffVR2_ee,meffVR2_em,meffVR2_mm,nJetVR2_ee,nJetVR2_em,nJetVR2_mm,meffVR3_ee,meffVR3_em,meffVR3_mm,nJetVR3_ee,nJetVR3_em,nJetVR3_mm])
 
 if doValidationDilepZ:
-    bkgOnly.setValidationChannels([meffZVR_ee,meffZVR_em,meffZVR_mm,nJetZVR_ee,nJetZVR_em,nJetZVR_mm,meffZVR2_ee,meffZVR2_em,meffZVR2_mm,nJetZVR2_ee,nJetZVR2_em,nJetZVR2_mm,meffZVR3_ee,meffZVR3_em,meffZVR3_mm,nJetZVR3_ee,nJetZVR3_em,nJetZVR3_mm])
+    bkgOnly.setValidationChannels([meffZVR4_ee,meffZVR4_em,meffZVR4_mm,nJetZVR4_ee,nJetZVR4_em,nJetZVR4_mm,meffZVR2_ee,meffZVR2_em,meffZVR2_mm,nJetZVR2_ee,nJetZVR2_em,nJetZVR2_mm,meffZVR3_ee,meffZVR3_em,meffZVR3_mm,nJetZVR3_ee,nJetZVR3_em,nJetZVR3_mm])
+
+
 
 #-------------------------------------------------
 # Exclusion fit
