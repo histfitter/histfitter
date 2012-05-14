@@ -23,6 +23,7 @@ doValidationSR=False
 doValidationSlope=False
 doValidationDilep=False
 doValidationDilepZ=False
+doValidationSoftLep=False
 doDiscoveryS2=False
 doDiscoveryS4=False
 doDiscovery=False
@@ -680,9 +681,13 @@ if doValidationSR:
     meffS3T_Mu=bkgOnly.addChannel("meffInc",["SR3jTMu"],1,1200,meffBinHighHL)
     meffS4T_El=bkgOnly.addChannel("meffInc",["SR4jTEl"],1,800,meffBinHighHL)
     meffS4T_Mu=bkgOnly.addChannel("meffInc",["SR4jTMu"],1,800,meffBinHighHL)
+    # SOFT LEPTON SRS
+    mmSSEl = bkt.addChannel("met/meff2Jet",["SSEl"],6,0.1,0.7)
+    mmSSMu = bkt.addChannel("met/meff2Jet",["SSMu"],6,0.1,0.7)
+    mmSSElT = bkt.addChannel("met/meff2Jet",["SSElT"],4,0.3,0.7)
+    mmSSMuT = bkt.addChannel("met/meff2Jet",["SSMuT"],4,0.3,0.7)
 
-    validationSRChannels = [meff2ee, meff4ee, meff2em, meff4em, meff2mm, meff4mm, meffS3_El, meffS3_Mu, meffS4_El, meffS4_Mu, meffS3T_El, meffS3T_Mu, meffS4T_El, meffS4T_Mu]
-    
+    validationSRChannels = [meff2ee, meff4ee, meff2em, meff4em, meff2mm, meff4mm, meffS3_El, meffS3_Mu, meffS4_El, meffS4_Mu, meffS3T_El, meffS3T_Mu, meffS4T_El, meffS4T_Mu, mmSSEl, mmSSMu, mmSSElT, mmSSMuT]                                                    
     # add systematics
     for chan in validationSRChannels:
         chan.useOverflowBin = True
@@ -696,6 +701,14 @@ if doValidationSR:
                 chan.addSystematic(syst)
                 if debugSyst:
                     print " channel = ", chan.name, " adding Full systematic = ", syst.name             
+
+
+
+
+
+
+
+
 
           
 if doValidationDilep:
@@ -778,33 +791,17 @@ if doValidationDilepZ:
                     print " channel = ", chan.name, " adding Full systematic = ", syst.name             
     
 
-if doValidationSR:
-    bkgOnly.setValidationChannels([meff2ee,meff4ee,meff2em,meff4em,meff2mm,meff4mm,meffS3_El,meffS3_Mu,meffS4_El,meffS4_Mu,meffS3T_El,meffS3T_Mu,meffS4T_El,meffS4T_Mu])
-
-if doValidationSlope:
-    bkgOnly.setValidationChannels([meffTR_El,meffTR_Mu,metTR_El,metTR_Mu,pt1TR_El,pt1TR_Mu,pt2TR_El,pt2TR_Mu,wptWR_El,wptWR_Mu,metWR_El,metWR_Mu,ZptZR_ee,ZptZR_mm])
-
-if doValidationDilep:
-    bkgOnly.setValidationChannels([meffVR4_ee,meffVR4_em,meffVR4_mm,nJetVR4_ee,nJetVR4_em,nJetVR4_mm,meffVR2_ee,meffVR2_em,meffVR2_mm,nJetVR2_ee,nJetVR2_em,nJetVR2_mm,meffVR3_ee,meffVR3_em,meffVR3_mm,nJetVR3_ee,nJetVR3_em,nJetVR3_mm])
-
-if doValidationDilepZ:
-    bkgOnly.setValidationChannels([meffZVR4_ee,meffZVR4_em,meffZVR4_mm,nJetZVR4_ee,nJetZVR4_em,nJetZVR4_mm,meffZVR2_ee,meffZVR2_em,meffZVR2_mm,nJetZVR2_ee,nJetZVR2_em,nJetZVR2_mm,meffZVR3_ee,meffZVR3_em,meffZVR3_mm,nJetZVR3_ee,nJetZVR3_em,nJetZVR3_mm])
-    pass
-
-if doSoftLep:
+if doValidationSoftLep:
     mmSVEl = bkt.addChannel("met/meff2Jet",["SVEl"],6,0.1,0.7)
     mmSVMu = bkt.addChannel("met/meff2Jet",["SVMu"],6,0.1,0.7)
     mmSVWEl = bkt.addChannel("met/meff2Jet",["SVWEl"],6,0.1,0.7)
     mmSVWMu = bkt.addChannel("met/meff2Jet",["SVWMu"],6,0.1,0.7)
     mmSVTEl = bkt.addChannel("met/meff2Jet",["SVTEl"],6,0.1,0.7)
     mmSVTMu = bkt.addChannel("met/meff2Jet",["SVTMu"],6,0.1,0.7)
-    mmSSEl = bkt.addChannel("met/meff2Jet",["SSEl"],6,0.1,0.7)
-    mmSSMu = bkt.addChannel("met/meff2Jet",["SSMu"],6,0.1,0.7)
-    mmSSElT = bkt.addChannel("met/meff2Jet",["SSElT"],4,0.3,0.7)
-    mmSSMuT = bkt.addChannel("met/meff2Jet",["SSMuT"],4,0.3,0.7)
-    bkgOnly.setValidationChannels([mmSVEl, mmSVMu,  mmSSEl, mmSSMu, mmSSElT, mmSSMuT, mmSVTEl, mmSVTMu, mmSVWEl, mmSVWMu])
 
-    validationSoftLepChannels = [mmSVEl, mmSVMu,  mmSSEl, mmSSMu, mmSSElT, mmSSMuT]
+    bkgOnly.setValidationChannels([mmSVEl, mmSVMu, mmSVTEl, mmSVTMu, mmSVWEl, mmSVWMu])
+
+    validationSoftLepChannels = [mmSVEl, mmSVMu]
     validationSoftLepBtagChannels =  [mmSVTEl, mmSVTMu]
     validationSoftLepBvetoChannels =  [mmSVWEl, mmSVWMu]
    
@@ -858,6 +855,24 @@ if doSoftLep:
             pass
         pass
     pass
+
+
+if doValidationSR:
+    bkgOnly.setValidationChannels(validationSRChannels)
+
+if doValidationSlope:
+    bkgOnly.setValidationChannels([meffTR_El,meffTR_Mu,metTR_El,metTR_Mu,pt1TR_El,pt1TR_Mu,pt2TR_El,pt2TR_Mu,wptWR_El,wptWR_Mu,metWR_El,metWR_Mu,ZptZR_ee,ZptZR_mm])
+
+if doValidationDilep:
+    bkgOnly.setValidationChannels([meffVR4_ee,meffVR4_em,meffVR4_mm,nJetVR4_ee,nJetVR4_em,nJetVR4_mm,meffVR2_ee,meffVR2_em,meffVR2_mm,nJetVR2_ee,nJetVR2_em,nJetVR2_mm,meffVR3_ee,meffVR3_em,meffVR3_mm,nJetVR3_ee,nJetVR3_em,nJetVR3_mm])
+
+if doValidationDilepZ:
+    bkgOnly.setValidationChannels([meffZVR4_ee,meffZVR4_em,meffZVR4_mm,nJetZVR4_ee,nJetZVR4_em,nJetZVR4_mm,meffZVR2_ee,meffZVR2_em,meffZVR2_mm,nJetZVR2_ee,nJetZVR2_em,nJetZVR2_mm,meffZVR3_ee,meffZVR3_em,meffZVR3_mm,nJetZVR3_ee,nJetZVR3_em,nJetZVR3_mm])
+    pass
+
+if doValidationSoftLep:
+    bkgOnly.setValidationChannels(validationSoftLepChannels + validationSoftLepBtagChannels + validationSoftLepBvetoChannels )
+
 
 #-------------------------------------------------
 # Exclusion fit
