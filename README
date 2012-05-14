@@ -101,4 +101,3 @@ svn co $SVNGRP/Physics/SUSY/Analyses/SusyFitter/trunk SusyFitter
 3. Tagging:
 svn cp . $SVNGRP/Physics/SUSY/Analyses/SusyFitter/tags/SusyFitter-00-00-01 -m "tagging message"
 
-
