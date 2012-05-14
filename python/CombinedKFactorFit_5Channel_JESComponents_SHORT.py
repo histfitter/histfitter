@@ -576,13 +576,13 @@ if doValidationSlope:
         chan.hasB = True
         chan.hasBQCD = True
         chan.useOverflowBin = True
-        for syst in commonChanSyst + commonSamSyst + btagChanSyst:
+        for syst in basicChanSyst + btagChanSyst:
             chan.addSystematic(syst)
             if debugSyst:
                 print " channel = ", chan.name, " adding systematic = ", syst.name
         # only additional Full Systematics
         if fullSyst:
-            for syst in fullChanSyst + fullSamSyst:
+            for syst in fullChanSyst:
                 chan.addSystematic(syst)
                 if debugSyst:
                     print " channel = ", chan.name, " adding Full systematic = ", syst.name             
@@ -600,13 +600,13 @@ if doValidationSlope:
         chan.hasB = True
         chan.hasBQCD = False
         chan.useOverflowBin = True
-        for syst in commonChanSyst + commonSamSyst + btagChanSyst:
+        for syst in basicChanSyst + btagChanSyst:
             chan.addSystematic(syst)
             if debugSyst:
                 print " channel = ", chan.name, " adding systematic = ", syst.name
         # only additional Full Systematics
         if fullSyst:
-            for syst in fullChanSyst + fullSamSyst:
+            for syst in fullChanSyst:
                 chan.addSystematic(syst)
                 if debugSyst:
                     print " channel = ", chan.name, " adding Full systematic = ", syst.name             
@@ -622,13 +622,13 @@ if doValidationSlope:
         chan.hasB = False
         chan.hasBQCD = False
         chan.useOverflowBin = True
-        for syst in commonChanSyst + commonSamSyst:
+        for syst in basicChanSyst:
             chan.addSystematic(syst)
             if debugSyst:
                 print " channel = ", chan.name, " adding systematic = ", syst.name
         # only additional Full Systematics
         if fullSyst:
-            for syst in fullChanSyst + fullSamSyst:
+            for syst in fullChanSyst:
                 chan.addSystematic(syst)
                 if debugSyst:
                     print " channel = ", chan.name, " adding Full systematic = ", syst.name             
@@ -656,35 +656,27 @@ if doValidationSR:
     meffS4T_El=bkgOnly.addChannel("meffInc",["SR4jTEl"],1,800,meffBinHighHL)
     meffS4T_Mu=bkgOnly.addChannel("meffInc",["SR4jTMu"],1,800,meffBinHighHL)
     # SOFT LEPTON SRS
-    mmSSEl = bkt.addChannel("met/meff2Jet",["SSEl"],6,0.1,0.7)
-    mmSSMu = bkt.addChannel("met/meff2Jet",["SSMu"],6,0.1,0.7)
-    mmSSElT = bkt.addChannel("met/meff2Jet",["SSElT"],4,0.3,0.7)
-    mmSSMuT = bkt.addChannel("met/meff2Jet",["SSMuT"],4,0.3,0.7)
+    mmSSEl = bkgOnly.addChannel("met/meff2Jet",["SSEl"],6,0.1,0.7)
+    mmSSMu = bkgOnly.addChannel("met/meff2Jet",["SSMu"],6,0.1,0.7)
+    mmSSElT = bkgOnly.addChannel("met/meff2Jet",["SSElT"],4,0.3,0.7)
+    mmSSMuT = bkgOnly.addChannel("met/meff2Jet",["SSMuT"],4,0.3,0.7)
 
     validationSRChannels = [meff2ee, meff4ee, meff2em, meff4em, meff2mm, meff4mm, meffS3_El, meffS3_Mu, meffS4_El, meffS4_Mu, meffS3T_El, meffS3T_Mu, meffS4T_El, meffS4T_Mu, mmSSEl, mmSSMu, mmSSElT, mmSSMuT]                                                    
     # add systematics
     for chan in validationSRChannels:
         chan.useOverflowBin = True
-        for syst in commonChanSyst + commonSamSyst:
+        for syst in basicChanSyst:
             chan.addSystematic(syst)
             if debugSyst:
                 print " channel = ", chan.name, " adding systematic = ", syst.name
         # only additional Full Systematics
         if fullSyst:
-            for syst in fullChanSyst + fullSamSyst:
+            for syst in fullChanSyst:
                 chan.addSystematic(syst)
                 if debugSyst:
                     print " channel = ", chan.name, " adding Full systematic = ", syst.name             
 
 
-
-
-
-
-
-
-
-          
 if doValidationDilep:
     meffVR4_ee=bkgOnly.addChannel("meffInc",["VR4ee"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
     meffVR4_em=bkgOnly.addChannel("meffInc",["VR4em"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
@@ -712,13 +704,13 @@ if doValidationDilep:
     # add systematics
     for chan in validation2LepChannels:
         chan.useOverflowBin = True
-        for syst in commonChanSyst + commonSamSyst:
+        for syst in basicChanSyst:
             chan.addSystematic(syst)
             if debugSyst:
                 print " channel = ", chan.name, " adding systematic = ", syst.name
         # only additional Full Systematics
         if fullSyst:
-            for syst in fullChanSyst + fullSamSyst:
+            for syst in fullChanSyst:
                 chan.addSystematic(syst)
                 if debugSyst:
                     print " channel = ", chan.name, " adding Full systematic = ", syst.name             
@@ -753,25 +745,25 @@ if doValidationDilepZ:
         chan.hasB = True
         chan.hasBQCD = True
         chan.useOverflowBin = True
-        for syst in commonChanSyst + commonSamSyst + btagChanSyst:
+        for syst in basicChanSyst + btagChanSyst:
             chan.addSystematic(syst)
             if debugSyst:
                 print " channel = ", chan.name, " adding systematic = ", syst.name
         # only additional Full Systematics
         if fullSyst:
-            for syst in fullChanSyst + fullSamSyst:
+            for syst in fullChanSyst:
                 chan.addSystematic(syst)
                 if debugSyst:
                     print " channel = ", chan.name, " adding Full systematic = ", syst.name             
     
 
 if doValidationSoftLep:
-    mmSVEl = bkt.addChannel("met/meff2Jet",["SVEl"],6,0.1,0.7)
-    mmSVMu = bkt.addChannel("met/meff2Jet",["SVMu"],6,0.1,0.7)
-    mmSVWEl = bkt.addChannel("met/meff2Jet",["SVWEl"],6,0.1,0.7)
-    mmSVWMu = bkt.addChannel("met/meff2Jet",["SVWMu"],6,0.1,0.7)
-    mmSVTEl = bkt.addChannel("met/meff2Jet",["SVTEl"],6,0.1,0.7)
-    mmSVTMu = bkt.addChannel("met/meff2Jet",["SVTMu"],6,0.1,0.7)
+    mmSVEl = bkgOnly.addChannel("met/meff2Jet",["SVEl"],6,0.1,0.7)
+    mmSVMu = bkgOnly.addChannel("met/meff2Jet",["SVMu"],6,0.1,0.7)
+    mmSVWEl = bkgOnly.addChannel("met/meff2Jet",["SVWEl"],6,0.1,0.7)
+    mmSVWMu = bkgOnly.addChannel("met/meff2Jet",["SVWMu"],6,0.1,0.7)
+    mmSVTEl = bkgOnly.addChannel("met/meff2Jet",["SVTEl"],6,0.1,0.7)
+    mmSVTMu = bkgOnly.addChannel("met/meff2Jet",["SVTMu"],6,0.1,0.7)
 
     bkgOnly.setValidationChannels([mmSVEl, mmSVMu, mmSVTEl, mmSVTMu, mmSVWEl, mmSVWMu])
 
@@ -782,13 +774,13 @@ if doValidationSoftLep:
     # add systematics
     for chan in validationSoftLepChannels:
         chan.useOverflowBin = True
-        for syst in commonChanSyst + commonSamSyst:
+        for syst in basicChanSyst:
             chan.addSystematic(syst)
             if debugSyst:
                 print " channel = ", chan.name, " adding systematic = ", syst.name
         # only additional Full Systematics
         if fullSyst:
-            for syst in fullChanSyst + fullSamSyst:
+            for syst in fullChanSyst:
                 chan.addSystematic(syst)
                 if debugSyst:
                     print " channel = ", chan.name, " adding Full systematic = ", syst.name             
@@ -798,13 +790,13 @@ if doValidationSoftLep:
         chan.hasB = True
         chan.hasBQCD = True
         chan.useOverflowBin = True
-        for syst in commonChanSyst + commonSamSyst + btagChanSyst:
+        for syst in basicChanSyst + btagChanSyst:
             chan.addSystematic(syst)
             if debugSyst:
                 print " channel = ", chan.name, " adding systematic = ", syst.name
         # only additional Full Systematics
         if fullSyst:
-            for syst in fullChanSyst + fullSamSyst:
+            for syst in fullChanSyst:
                 chan.addSystematic(syst)
                 if debugSyst:
                     print " channel = ", chan.name, " adding Full systematic = ", syst.name             
@@ -814,13 +806,13 @@ if doValidationSoftLep:
         chan.hasB = True
         chan.hasBQCD = False
         chan.useOverflowBin = True
-        for syst in commonChanSyst + commonSamSyst + btagChanSyst:
+        for syst in basicChanSyst + btagChanSyst:
             chan.addSystematic(syst)
             if debugSyst:
                 print " channel = ", chan.name, " adding systematic = ", syst.name
         # only additional Full Systematics
         if fullSyst:
-            for syst in fullChanSyst + fullSamSyst:
+            for syst in fullChanSyst:
                 chan.addSystematic(syst)
                 if debugSyst:
                     print " channel = ", chan.name, " adding Full systematic = ", syst.name
@@ -886,35 +878,6 @@ if doExclusion_GMSB_combined or doExclusion_mSUGRA_dilepton_combined or doExclus
         for chan in SRChannels:
             chan.useOverflowBin = True
             chan.getSample(sig).addSystematic(jesSignal)
-            for syst in sigCommonChanSyst:
-                chan.addSystematic(syst)
-                if debugSyst:
-                    print " channel = ", chan.name, " adding systematic = ", syst.name
-            # only BGList sample systematics     
-            for syst in sigCommonBGSamSyst:
-                for sam in BGList:
-                    chan.getSample(sam).addSystematic(syst)
-                    if debugSyst:
-                        print " channel = ", chan.name, " sample = ", chan.getSample(sam).name, " adding systematic = ", syst.name
-            # only additional Full Systematics
-            if fullSyst:
-                for syst in sigFullChanSyst:
-                    chan.addSystematic(syst)
-                    if debugSyst:
-                        print " channel = ", chan.name, " adding Full systematic = ", syst.name
-            # only BGList sample additional Full systematics     
-            for syst in sigFullBGSamSyst:
-                for sam in BGList:
-                    chan.getSample(sam).addSystematic(syst)
-                    if debugSyst:
-                        print " channel = ", chan.name, " sample = ", chan.getSample(sam).name, " adding Full systematic = ", syst.name
-            # only BGList+SigList sample additional Full systematics     
-            for syst in sigFullSamSyst:
-                for sam in BGList+SigList:
-                    chan.getSample(sam).addSystematic(syst)
-                    if debugSyst:
-                        print " channel = ", chan.name, " sample = ", chan.getSample(sam).name, " adding Full systematic = ", syst.name
-             
 
         ## Which SRs for which Scenario?
 
