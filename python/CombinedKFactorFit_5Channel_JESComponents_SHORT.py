@@ -158,9 +158,9 @@ configMgr.cutsDict = {"TRee":"(mll<80 || mll>100) && met > 30 && met < 80 && jet
                       "SR4jTEl":"AnalysisType==1 && met>250 && mt>100 && met/meff4Jet>0.2 && jet4Pt>80 && meffInc>800",
 
                       "SR3jTMu":"AnalysisType==2 && met>250 && mt>100 && met/meff3Jet>0.3 && jet1Pt>100 && jet3Pt>25 && jet4Pt<80 && meffInc>1200",
-                      "SR4jTMu":"AnalysisType==2 && met>250 && mt>100 && met/meff4Jet>0.2 && jet4Pt>80 && meffInc>800"
-                      
-
+                      "SR4jTMu":"AnalysisType==2 && met>250 && mt>100 && met/meff4Jet>0.2 && jet4Pt>80 && meffInc>800",
+                      "SR7jTEl":"AnalysisType==1 && met>180 && mt>120 && jet1Pt>80 && jet7Pt>25 && meffInc>750",
+                      "SR7jTMu":"AnalysisType==2 && met>180 && mt>120 && jet1Pt>80 && jet7Pt>25 && meffInc>750" 
 }
 
 
@@ -224,7 +224,7 @@ hfLowWeights = ("genWeight","eventWeight","leptonWeight","triggerWeight",truthWp
 #--------------------
 
 #  HF uncertainty on V+Jets
-hf = Systematic("HF",configMgr.weights,hfHighWeights,hfLowWeights,"weight","overallSys")
+hf = Systematic("HF",configMgr.weights,hfHighWeights,hfLowWeights,"weight","histoSys")
 
 # Signal XSec uncertainty as overallSys (pure yeild affect)
 xsecSig = Systematic("XSS",configMgr.weights,xsecSigHighWeights,xsecSigLowWeights,"weight","overallSys")
@@ -333,11 +333,8 @@ wzSample_Np5.setStatConfig(useStat)
 
 ### Additional scale uncertainty on WZ Np0 and WZ Np1
 
-err_WZ_Np0 = Systematic("err_WZ_Np0", configMgr.weights,1.06 ,0.96, "user","userOverallSys")
-err_WZ_Np1 = Systematic("err_WZ_Np1", configMgr.weights,1.06 ,0.83, "user","userOverallSys")
-
-wzSample_Np0.addSystematic(err_WZ_Np0)
-wzSample_Np1.addSystematic(err_WZ_Np1)
+wzSample_Np0.addSystematic(Systematic("err_WZ_Np0", configMgr.weights,1.06 ,0.96, "user","userOverallSys"))
+wzSample_Np1.addSystematic(Systematic("err_WZ_Np1", configMgr.weights,1.06 ,0.83, "user","userOverallSys"))
 
 ### Additional uncertainty on the V+HF samples
 
@@ -349,13 +346,9 @@ wzSample_Np4.addSystematic(hf)
 
 
 bgSample = Sample("BG",kGreen)
-bgSample.setNormFactor("mu_BG",1.,0.,5.)
 bgSample.setStatConfig(useStat)
-
-### Additional uncertainty on mu_BG
-
-err_BG = Systematic("err_BG", configMgr.weights,1.2 ,0.8, "user","userOverallSys")
-bgSample.addSystematic(err_BG)
+### Additional uncertainty on BG
+bgSample.addSystematic(Systematic("err_BG", configMgr.weights,1.2 ,0.8, "user","userOverallSys"))
 
 qcdSample = Sample("QCD",kGray+1)
 qcdSample.setQCD(True,"histoSys")
@@ -411,7 +404,7 @@ for sam in bgdsamples:
 bkgOnly.addSamples(bgdsamples)
 
 if useStat:
-    bkgOnly.statErrThreshold=0.05 #0.03??
+    bkgOnly.statErrThreshold=0.05 
 else:
     bkgOnly.statErrThreshold=None
 
