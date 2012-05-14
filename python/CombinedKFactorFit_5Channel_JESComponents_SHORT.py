@@ -36,7 +36,11 @@ doExclusion_GG_twostepCC_slepton=False
 doSignalOnly=False #Remove all bkgs for signal histo creation step
 #doSignalOnly=True #Remove all bkgs for signal histo creation step
 # Need to comment out the following line when running HypoTest.py parallelized
-sigSamples=["GMSB_3_2d_50_250_3_10_1_1"]
+
+if not 'sigSamples' in dir(): 
+    sigSamples=["SU_580_240_0_10_P"]
+# sigSamples=["GMSB_3_2d_50_250_3_10_1_1"]
+
 #sigSamples=[]
 
 
@@ -160,9 +164,25 @@ configMgr.cutsDict = {"TRee":"(mll<80 || mll>100) && met > 30 && met < 80 && jet
                       "SR3jTMu":"AnalysisType==2 && met>250 && mt>100 && met/meff3Jet>0.3 && jet1Pt>100 && jet3Pt>25 && jet4Pt<80 && meffInc>1200",
                       "SR4jTMu":"AnalysisType==2 && met>250 && mt>100 && met/meff4Jet>0.2 && jet4Pt>80 && meffInc>800",
                       "SR7jTEl":"AnalysisType==1 && met>180 && mt>120 && jet1Pt>80 && jet7Pt>25 && meffInc>750",
-                      "SR7jTMu":"AnalysisType==2 && met>180 && mt>120 && jet1Pt>80 && jet7Pt>25 && meffInc>750" 
+                      "SR7jTMu":"AnalysisType==2 && met>180 && mt>120 && jet1Pt>80 && jet7Pt>25 && meffInc>750",
+
+                     # soft lepton
+                      "SVEl":"(lep1Pt < 25 && lep2Pt<10 && met>180 && met<250 && mt>80 && mt<100 && jet1Pt>130 && jet2Pt>25 && AnalysisType==6)",
+                      "SVMu":"(lep1Pt < 20 && lep2Pt<10 && met>180 && met<250 && mt>80 && mt<100 && jet1Pt>130 && jet2Pt>25 && AnalysisType==7)",
+
+                      "SVWEl":"lep1Pt < 25 && lep2Pt<10 && met>180 && met<250 && mt>40 && mt<80 && nB2Jet==0 && jet1Pt>130 && jet2Pt>25  && AnalysisType==6",
+                      "SVTEl":"lep1Pt < 25 && lep2Pt<10 && met>180 && met<250 && mt>40 && mt<80 && nB2Jet>0 && jet1Pt>130 && jet2Pt>25 && AnalysisType==6",
+                      "SVWMu":"lep1Pt < 20 && lep2Pt<10 && met>180 && met<250 && mt>40 && mt<80 && nB2Jet==0 && jet1Pt>130 && jet2Pt>25  && AnalysisType==7",
+                      "SVTMu":"lep1Pt < 20 && lep2Pt<10 && met>180 && met<250 && mt>40 && mt<80 && nB2Jet>0 && jet1Pt>130 && jet2Pt>25 && AnalysisType==7",
+
+                      "SSEl":"lep1Pt < 25 && lep2Pt<10 && met>250 && mt>100 && jet1Pt>130 && jet2Pt>25 && AnalysisType==6 ",
+                      "SSMu":"lep1Pt < 20 && lep2Pt<10 && met>250 && mt>100 && jet1Pt>130 && jet2Pt>25 && AnalysisType==7 ",                                            
+
 }
 
+d=configMgr.cutsDict
+configMgr.cutsDict["SS2jElT"] = d["SSEl"]+"&& met/meff2Jet>0.3"
+configMgr.cutsDict["SS2jMuT"] = d["SSMu"]+"&& met/meff2Jet>0.3"
 
 
 ## # Tuples of weights 
@@ -778,6 +798,13 @@ if doValidationDilepZ:
 # Exclusion fit
 #-------------------------------------------------
 
+sigCommonChanSyst = [ Systematic("LE",configMgr.weights,lepHighWeights,lepLowWeights,"weight","overallSys")] # Lepton weight uncertainty as overallSys
+
+sigCommonBGSyst =  [ Systematic("JLow","_NoSys","_JESLowup","_JESLowdown","tree","histoSys"), # JES uncertainty as histoSys - for low pt jets
+                     Systematic("JMedium","_NoSys","_JESMediumup","_JESMediumdown","tree","histoSys"), # JES uncertainty as histoSys - for medium pt jets
+                     Systematic("JHigh","_NoSys","_JESHighup","_JESHighdown","tree","histoSys") # JES uncertainty as histoSys - for high pt jets
+                     ]
+
 
 if doExclusion_GMSB_combined or doExclusion_mSUGRA_dilepton_combined or doExclusion_GG_twostepCC_slepton:
        
@@ -801,137 +828,62 @@ if doExclusion_GMSB_combined or doExclusion_mSUGRA_dilepton_combined or doExclus
         SigList=[sig]
 
         S2Channel_ee = myTopLvl.addChannel("meffInc",["S2ee"],meffNBinsS2,meffBinLowS2,meffBinHighS2)
-        S2Channel_ee.useOverflowBin=True
+       ##  S2Channel_ee.useOverflowBin=True
         
-        S2Channel_ee.getSample(sig).addSystematic(jesSignal)
+##         S2Channel_ee.getSample(sig).addSystematic(jesSignal)
 
-        [S2Channel_ee.getSample(sam).addSystematic(zpT50GeV) for sam in BGList]
-        [S2Channel_ee.getSample(sam).addSystematic(zpT100GeV) for sam in BGList]
-        [S2Channel_ee.getSample(sam).addSystematic(zpT150GeV) for sam in BGList]
-        [S2Channel_ee.getSample(sam).addSystematic(zpT200GeV) for sam in BGList]
+##         [S2Channel_ee.getSample(sam).addSystematic(zpT50GeV) for sam in BGList]
+##         [S2Channel_ee.getSample(sam).addSystematic(zpT100GeV) for sam in BGList]
+##         [S2Channel_ee.getSample(sam).addSystematic(zpT150GeV) for sam in BGList]
+##         [S2Channel_ee.getSample(sam).addSystematic(zpT200GeV) for sam in BGList]
        
-        S2Channel_ee.addSystematic(lepS2DL)
-        if fullSyst:
-            S2Channel_ee.addSystematic(metcoS2DL)
-            S2Channel_ee.addSystematic(metpuS2DL)
-            S2Channel_ee.addSystematic(trigS2DL)
-            [S2Channel_ee.getSample(sam).addSystematic(lesS2DL) for sam in SigList+BGList]
-            [S2Channel_ee.getSample(sam).addSystematic(lermsS2DL) for sam in SigList+BGList]
-            [S2Channel_ee.getSample(sam).addSystematic(leridS2DL) for sam in SigList+BGList]
-            [S2Channel_ee.getSample(sam).addSystematic(jesLow) for sam in BGList]
-            [S2Channel_ee.getSample(sam).addSystematic(jesMedium) for sam in BGList]
-            [S2Channel_ee.getSample(sam).addSystematic(jesHigh) for sam in BGList]
+##         S2Channel_ee.addSystematic(lepS2DL)
+##         if fullSyst:
+##             S2Channel_ee.addSystematic(metcoS2DL)
+##             S2Channel_ee.addSystematic(metpuS2DL)
+##             S2Channel_ee.addSystematic(trigS2DL)
+##             [S2Channel_ee.getSample(sam).addSystematic(lesS2DL) for sam in SigList+BGList]
+##             [S2Channel_ee.getSample(sam).addSystematic(lermsS2DL) for sam in SigList+BGList]
+##             [S2Channel_ee.getSample(sam).addSystematic(leridS2DL) for sam in SigList+BGList]
+##             [S2Channel_ee.getSample(sam).addSystematic(jesLow) for sam in BGList]
+##             [S2Channel_ee.getSample(sam).addSystematic(jesMedium) for sam in BGList]
+##             [S2Channel_ee.getSample(sam).addSystematic(jesHigh) for sam in BGList]
             
         S2Channel_em = myTopLvl.addChannel("meffInc",["S2em"],meffNBinsS2,meffBinLowS2,meffBinHighS2)
-        S2Channel_em.useOverflowBin=True
-
-        S2Channel_em.getSample(sig).addSystematic(jesSignal)
-        [S2Channel_em.getSample(sam).addSystematic(zpT50GeV) for sam in BGList]
-        [S2Channel_em.getSample(sam).addSystematic(zpT100GeV) for sam in BGList]
-        [S2Channel_em.getSample(sam).addSystematic(zpT150GeV) for sam in BGList]
-        [S2Channel_em.getSample(sam).addSystematic(zpT200GeV) for sam in BGList]      
-       
-        S2Channel_em.addSystematic(lepS2DL)
-        if fullSyst:
-            S2Channel_em.addSystematic(metcoS2DL)
-            S2Channel_em.addSystematic(metpuS2DL)
-            S2Channel_em.addSystematic(trigS2DL)
-            [S2Channel_em.getSample(sam).addSystematic(lesS2DL) for sam in SigList+BGList]
-            [S2Channel_em.getSample(sam).addSystematic(lermsS2DL) for sam in SigList+BGList]
-            [S2Channel_em.getSample(sam).addSystematic(leridS2DL) for sam in SigList+BGList]
-            [S2Channel_em.getSample(sam).addSystematic(jesLow) for sam in BGList]
-            [S2Channel_em.getSample(sam).addSystematic(jesMedium) for sam in BGList]
-            [S2Channel_em.getSample(sam).addSystematic(jesHigh) for sam in BGList]
-
         S2Channel_mm = myTopLvl.addChannel("meffInc",["S2mm"],meffNBinsS2,meffBinLowS2,meffBinHighS2)
-        S2Channel_mm.useOverflowBin=True
-
-        S2Channel_mm.getSample(sig).addSystematic(jesSignal)
-        [S2Channel_mm.getSample(sam).addSystematic(zpT50GeV) for sam in BGList]
-        [S2Channel_mm.getSample(sam).addSystematic(zpT100GeV) for sam in BGList]
-        [S2Channel_mm.getSample(sam).addSystematic(zpT150GeV) for sam in BGList]
-        [S2Channel_mm.getSample(sam).addSystematic(zpT200GeV) for sam in BGList]
-    
-       
-        S2Channel_mm.addSystematic(lepS4DL)
-        if fullSyst:
-            S2Channel_mm.addSystematic(metcoS2DL)
-            S2Channel_mm.addSystematic(metpuS2DL)
-            S2Channel_mm.addSystematic(trigS2DL)
-            [S2Channel_mm.getSample(sam).addSystematic(lesS2DL) for sam in SigList+BGList]
-            [S2Channel_mm.getSample(sam).addSystematic(lermsS2DL) for sam in SigList+BGList]
-            [S2Channel_mm.getSample(sam).addSystematic(leridS2DL) for sam in SigList+BGList]
-            [S2Channel_mm.getSample(sam).addSystematic(jesLow) for sam in BGList]
-            [S2Channel_mm.getSample(sam).addSystematic(jesMedium) for sam in BGList]
-            [S2Channel_mm.getSample(sam).addSystematic(jesHigh) for sam in BGList]
-
-    
         S4Channel_ee = myTopLvl.addChannel("meffInc",["S4ee"],meffNBinsS4,meffBinLowS4,meffBinHighS4)
-        S4Channel_ee.useOverflowBin=True
-        
-        S4Channel_ee.getSample(sig).addSystematic(jesSignal)
-       
-        [S4Channel_ee.getSample(sam).addSystematic(zpT50GeV) for sam in BGList]
-        [S4Channel_ee.getSample(sam).addSystematic(zpT100GeV) for sam in BGList]
-        [S4Channel_ee.getSample(sam).addSystematic(zpT150GeV) for sam in BGList]
-        [S4Channel_ee.getSample(sam).addSystematic(zpT200GeV) for sam in BGList]
-
-        S4Channel_ee.addSystematic(lepS4DL)
-        if fullSyst:
-            S4Channel_ee.addSystematic(metcoS4DL)
-            S4Channel_ee.addSystematic(metpuS4DL)
-            S4Channel_ee.addSystematic(trigS4DL)
-            [S4Channel_ee.getSample(sam).addSystematic(lesS4DL) for sam in SigList+BGList]
-            [S4Channel_ee.getSample(sam).addSystematic(lermsS4DL) for sam in SigList+BGList]
-            [S4Channel_ee.getSample(sam).addSystematic(leridS4DL) for sam in SigList+BGList]
-            [S4Channel_ee.getSample(sam).addSystematic(jesLow) for sam in BGList]
-            [S4Channel_ee.getSample(sam).addSystematic(jesMedium) for sam in BGList]
-            [S4Channel_ee.getSample(sam).addSystematic(jesHigh) for sam in BGList]
-    
         S4Channel_em = myTopLvl.addChannel("meffInc",["S4em"],meffNBinsS4,meffBinLowS4,meffBinHighS4)
-        S4Channel_em.useOverflowBin=True
-
-        S4Channel_em.getSample(sig).addSystematic(jesSignal)
-
-        [S4Channel_em.getSample(sam).addSystematic(zpT50GeV) for sam in BGList]
-        [S4Channel_em.getSample(sam).addSystematic(zpT100GeV) for sam in BGList]
-        [S4Channel_em.getSample(sam).addSystematic(zpT150GeV) for sam in BGList]
-        [S4Channel_em.getSample(sam).addSystematic(zpT200GeV) for sam in BGList]
-        
-        S4Channel_em.addSystematic(lepS4DL)
-        if fullSyst:
-            S4Channel_em.addSystematic(metcoS4DL)
-            S4Channel_em.addSystematic(metpuS4DL)
-            S4Channel_em.addSystematic(trigS4DL)
-            [S4Channel_em.getSample(sam).addSystematic(lesS4DL) for sam in SigList+BGList]
-            [S4Channel_em.getSample(sam).addSystematic(lermsS4DL) for sam in SigList+BGList]
-            [S4Channel_em.getSample(sam).addSystematic(leridS4DL) for sam in SigList+BGList]
-            [S4Channel_em.getSample(sam).addSystematic(jesLow) for sam in BGList]
-            [S4Channel_em.getSample(sam).addSystematic(jesMedium) for sam in BGList]
-            [S4Channel_em.getSample(sam).addSystematic(jesHigh) for sam in BGList]
-
         S4Channel_mm = myTopLvl.addChannel("meffInc",["S4mm"],meffNBinsS4,meffBinLowS4,meffBinHighS4)
-        S4Channel_mm.useOverflowBin=True
 
-        S4Channel_mm.getSample(sig).addSystematic(jesSignal)
-
-        [S4Channel_mm.getSample(sam).addSystematic(zpT50GeV) for sam in BGList]
-        [S4Channel_mm.getSample(sam).addSystematic(zpT100GeV) for sam in BGList]
-        [S4Channel_mm.getSample(sam).addSystematic(zpT150GeV) for sam in BGList]
-        [S4Channel_mm.getSample(sam).addSystematic(zpT200GeV) for sam in BGList]
+        SRChannels = [nJetZeeChannel, nJetZeChannel, nJetZmmChannel, nJetZmChannel]
         
-        S4Channel_mm.addSystematic(lepS4DL)
-        if fullSyst:
-            S4Channel_mm.addSystematic(metcoS4DL)
-            S4Channel_mm.addSystematic(metpuS4DL)
-            S4Channel_mm.addSystematic(trigS4DL)
-            [S4Channel_mm.getSample(sam).addSystematic(lesS4DL) for sam in SigList+BGList]
-            [S4Channel_mm.getSample(sam).addSystematic(lermsS4DL) for sam in SigList+BGList]
-            [S4Channel_mm.getSample(sam).addSystematic(leridS4DL) for sam in SigList+BGList]
-            [S4Channel_mm.getSample(sam).addSystematic(jesLow) for sam in BGList]
-            [S4Channel_mm.getSample(sam).addSystematic(jesMedium) for sam in BGList]
-            [S4Channel_mm.getSample(sam).addSystematic(jesHigh) for sam in BGList]
-
+        # add systematics
+        for chan in SRChannels:
+            chan.useOverflowBin = True
+            chan.getSample(sig).addSystematic(jesSignal)
+            for syst in commonChanSyst:
+                chan.addSystematic(syst)
+                if debugSyst:
+                    print " channel = ", chan.name, " adding systematic = ", syst.name
+            # only BGList sample systematics     
+            for syst in commonSamSyst:
+                for sam in BGList:
+                    chan.getSample(sam).addSystematic(syst)
+                    if debugSyst:
+                        print " channel = ", chan.name, " sample = ", chan.getSample(sam).name, " adding systematic = ", syst.name
+            # only additional Full Systematics
+            if fullSyst:
+                for syst in fullChanSyst:
+                    chan.addSystematic(syst)
+                    if debugSyst:
+                        print " channel = ", chan.name, " adding Full systematic = ", syst.name
+            # only BGList sample additional Full systematics     
+            for syst in fullSamSyst:
+                for sam in BGList:
+                    chan.getSample(sam).addSystematic(syst)
+                    if debugSyst:
+                        print " channel = ", chan.name, " sample = ", chan.getSample(sam).name, " adding Full systematic = ", syst.name
+             
 
         ## Which SRs for which Scenario?
 
@@ -945,3 +897,35 @@ if doExclusion_GMSB_combined or doExclusion_mSUGRA_dilepton_combined or doExclus
 
 
 #  LocalWords:  jesSignal
+
+## # Signal XSec uncertainty as overallSys (pure yeild affect)
+## xsecSig = Systematic("XSS",configMgr.weights,xsecSigHighWeights,xsecSigLowWeights,"weight","overallSys")
+
+## # JES uncertainty as shapeSys - one systematic per region (combine WR and TR), merge samples
+## jesSignal = Systematic("JSig","_NoSys","_JESup","_JESdown","tree","histoSys")
+
+## commonChanSyst = [ Systematic("LE",configMgr.weights,lepHighWeights,lepLowWeights,"weight","overallSys"), # Lepton weight uncertainty as overallSys
+##                Systematic("JLow","_NoSys","_JESLowup","_JESLowdown","tree","histoSys"), # JES uncertainty as histoSys - for low pt jets
+##                Systematic("JMedium","_NoSys","_JESMediumup","_JESMediumdown","tree","histoSys"), # JES uncertainty as histoSys - for medium pt jets
+##                Systematic("JHigh","_NoSys","_JESHighup","_JESHighdown","tree","histoSys") # JES uncertainty as histoSys - for high pt jets
+##                    ]
+
+## fullChanSyst = [ Systematic("MC","_NoSys","_METCOup","_METCOdown","tree","overallSys"), # MET cell-out uncertainty as overallSys - one per channel
+##                  Systematic("MP","_NoSys","_METPUup","_METPUdown","tree","histoSys"), # MET pileup uncertainty as overallSys - one per channel # CHANGED TO HISTOSYS TO BE CONSISTENT WITH 1LEP
+##                  Systematic("TE",configMgr.weights,trigHighWeights,trigLowWeights,"weight","overallSys") # Trigger weight uncertainty as overallSys
+##                  ]
+
+## btagChanSyst = [Systematic("BT",configMgr.weights,bTagHighWeights,bTagLowWeights,"weight","overallSys")]
+
+## commonSamSyst = [ #Systematic("Zpt0GeV",configMgr.weights,pT0GeVHighWeights,pT0GeVLowWeights,"weight","overallSys"),
+##                   Systematic("Zpt50GeV",configMgr.weights,pT50GeVHighWeights,pT50GeVLowWeights,"weight","overallSys"),
+##                   Systematic("Zpt100GeV",configMgr.weights,pT100GeVHighWeights,pT100GeVLowWeights,"weight","overallSys"),
+##                   Systematic("Zpt150GeV",configMgr.weights,pT150GeVHighWeights,pT150GeVLowWeights,"weight","overallSys"),
+##                   Systematic("Zpt200GeV",configMgr.weights,pT200GeVHighWeights,pT200GeVLowWeights,"weight","overallSys")
+##                   ]
+
+## fullSamSyst = [    Systematic("LES","_NoSys","_LESup","_LESdown","tree","overallSys"), # LES uncertainty as overallSys - one per channel
+##                    Systematic("LRM","_NoSys","_LERMSup","_LERMSdown","tree","overallSys"), # LER with muon system as overallSys - one per channel
+##                    Systematic("LRI","_NoSys","_LERIDup","_LERIDdown","tree","overallSys") # LER with inner detector as overallSys - one per channel
+##                    ]
+
