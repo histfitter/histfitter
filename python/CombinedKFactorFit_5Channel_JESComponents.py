@@ -13,12 +13,12 @@ from systematic import Systematic
 #import ROOT
 #ROOT.SetAtlasStyle()
 
-onLxplus=True
+onLxplus=False
 doHardLep=True
 doSoftLep=False
 useStat=True
 doValidation=False
-doValidationSR=False
+doValidationSR=True
 doValidationSlope=False
 doValidationDilep=False
 doValidationDilepZ=False
@@ -1090,7 +1090,7 @@ if doValidationSlope:
 if doValidationSR:
 
     # S2 using meff
-    meff2ee = bkgOnly.addChannel("meffInc",["S2ee"],meffNBins,meffBinLow,meffBinHigh)
+    meff2ee = bkgOnly.addChannel("meffInc",["S2ee"],meffNBinsS2,meffBinLowS2,meffBinHighS2)
     meff2ee.useOverflowBin=True
     meff2ee.addSystematic(jesLow)
     meff2ee.addSystematic(jesMedium)
@@ -1107,7 +1107,7 @@ if doValidationSR:
         meff2ee.addSystematic(leridS2DL)
 
     # S4 using meff
-    meff4ee = bkgOnly.addChannel("meffInc",["S4ee"],meffNBins,meffBinLow,meffBinHigh)
+    meff4ee = bkgOnly.addChannel("meffInc",["S4ee"],meffNBinsS4,meffBinLowS4,meffBinHighS4)
     meff4ee.useOverflowBin=True
     meff4ee.addSystematic(jesLow)
     meff4ee.addSystematic(jesMedium)
@@ -1124,7 +1124,7 @@ if doValidationSR:
         meff4ee.addSystematic(leridS4DL)
 
     # S2 using meff
-    meff2em = bkgOnly.addChannel("meffInc",["S2em"],meffNBins,meffBinLow,meffBinHigh)
+    meff2em = bkgOnly.addChannel("meffInc",["S2em"],meffNBinsS2,meffBinLowS2,meffBinHighS2)
     meff2em.useOverflowBin=True
     meff2em.addSystematic(jesLow)
     meff2em.addSystematic(jesMedium)
@@ -1141,7 +1141,7 @@ if doValidationSR:
         meff2em.addSystematic(leridS2DL)
 
     # S4 using meff
-    meff4em = bkgOnly.addChannel("meffInc",["S4em"],meffNBins,meffBinLow,meffBinHigh)
+    meff4em = bkgOnly.addChannel("meffInc",["S4em"],meffNBinsS4,meffBinLowS4,meffBinHighS4)
     meff4em.useOverflowBin=True
     meff4em.addSystematic(jesLow)
     meff4em.addSystematic(jesMedium)
@@ -1158,7 +1158,7 @@ if doValidationSR:
         meff4em.addSystematic(leridS4DL)
 
     # S2 using meff
-    meff2mm = bkgOnly.addChannel("meffInc",["S2mm"],meffNBins,meffBinLow,meffBinHigh)
+    meff2mm = bkgOnly.addChannel("meffInc",["S2mm"],meffNBinsS2,meffBinLowS2,meffBinHighS2)
     meff2mm.useOverflowBin=True
     meff2mm.addSystematic(jesLow)
     meff2mm.addSystematic(jesMedium)
@@ -1175,7 +1175,7 @@ if doValidationSR:
         meff2mm.addSystematic(leridS2DL)
 
     # S4 using meff
-    meff4mm = bkgOnly.addChannel("meffInc",["S4mm"],meffNBins,meffBinLow,meffBinHigh)
+    meff4mm = bkgOnly.addChannel("meffInc",["S4mm"],meffNBinsS4,meffBinLowS4,meffBinHighS4)
     meff4mm.useOverflowBin=True
     meff4mm.addSystematic(jesLow)
     meff4mm.addSystematic(jesMedium)
