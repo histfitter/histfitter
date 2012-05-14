@@ -45,7 +45,7 @@ pwd
 if [ ! -e "results/" ]
 then
         mkdir -v results
-	cp /afs/cern.ch/atlas/project/cern/susy/users/jlorenz/MyOneLeptonKtScaleFitR17_Sig_${ARGS}_combined_NormalMeasurement_model.root results/.
+	cp /afs/cern.ch/atlas/project/cern/susy/users/HistFitter/*_${ARGS}_combined_NormalMeasurement_model.root results/.
 fi
 
 if [ ! -e "data/" ]
@@ -80,7 +80,8 @@ if [ $DRYRUN -ne 1 ]; then
 fi
 
 #echo '_file0->ls(); gSystem->Exit(0);' | root -b data/MyOneLeptonKtScaleFitR17.root
-cp results/*_Output_hypotest.root /afs/cern.ch/atlas/project/cern/susy/users/jlorenz/${ARGS}_hypotestresult/.
+mkdir -p /afs/cern.ch/atlas/project/cern/susy/users/HistFitter/${ARGS}_hypotestresult
+cp results/*_Output_hypotest.root /afs/cern.ch/atlas/project/cern/susy/users/HistFitter/${ARGS}_hypotestresult/.
 
 echo
 echo ">> Finished command:"

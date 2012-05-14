@@ -63,7 +63,7 @@ echo "directory contains:"
 #mkdir -p -v /afs/cern.ch/user/j/jlorenz/scratch0/susyresults/$ARGS_hypotestresult 2>&1
 
 
-RUNCMD="python $SUSYDIR/scripts/HistFitter.py -t -w -g ${ARGS} $SUSYDIR/python/MyOneLeptonKtScaleFit_onepoint.py"
+RUNCMD="python $SUSYDIR/scripts/HistFitter.py -t -w -g ${ARGS} $SUSYDIR/python/CombinedKFactorFit_5Channel_JESComponents_SHORT.py"
 
 echo
 echo ">> Now running command:"
@@ -77,7 +77,7 @@ if [ $DRYRUN -ne 1 ]; then
   #gzip $LOGFILE
 fi
 
-cp results/*_combined_NormalMeasurement_model.root /afs/cern.ch/atlas/project/cern/susy/users/jlorenz/. 
+cp results/*_combined_NormalMeasurement_model.root /afs/cern.ch/atlas/project/cern/susy/users/HistFitter/. 
 #echo '_file0->ls(); gSystem->Exit(0);' | root -b data/MyOneLeptonKtScaleFitR17.root
 
 echo
