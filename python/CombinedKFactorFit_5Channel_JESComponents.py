@@ -13,6 +13,7 @@ from systematic import Systematic
 #import ROOT
 #ROOT.SetAtlasStyle()
 
+onLxplus=True
 doHardLep=True
 doSoftLep=False
 useStat=True
@@ -65,11 +66,15 @@ bgdFiles = []
 sigFiles = []
 
 configMgr.histCacheFile = "data/"+configMgr.analysisName+".root"
+inputDir="root://eosatlas//eos/atlas/atlascerngroupdisk/phys-susy/histfitter/stronglepton/Paper_v1/"
 
 # Set the files to read from
 if configMgr.readFromTree:
-    bgdFiles = ["data/SusyFitterTree_EleEle.root","data/SusyFitterTree_EleMu.root","data/SusyFitterTree_MuMu.root","data/SusyFitterTree_OneEle.root","data/SusyFitterTree_OneMu.root"]
-    
+    if not onLxplus:
+        bgdFiles = ["data/SusyFitterTree_EleEle.root","data/SusyFitterTree_EleMu.root","data/SusyFitterTree_MuMu.root","data/SusyFitterTree_OneEle.root","data/SusyFitterTree_OneMu.root"]
+    else:
+        bgdFiles = [inputDir+"/SusyFitterTree_EleEle.root",inputDir+"/SusyFitterTree_EleMu.root",inputDir+"/SusyFitterTree_MuMu.root",inputDir+"/SusyFitterTree_OneEle.root",inputDir+"/SusyFitterTree_OneMu.root"]
+
 if doExclusion_GMSB_combined:
     sigFiles+=["data/SusyFitterTree_EleEle_GMSB.root","data/SusyFitterTree_EleMu_GMSB.root","data/SusyFitterTree_MuMu_GMSB.root"]
 if doExclusion_mSUGRA_dilepton_combined:
