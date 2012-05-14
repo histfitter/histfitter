@@ -414,7 +414,6 @@ meas=bkgOnly.addMeasurement(measName,measLumi,measLumiError)
 meas.addPOI("mu_SIG")
 
 # Fix Background 
-meas.addParamSetting("mu_BG","const",1.0)
 meas.addParamSetting("mu_WZ_Np0","const",1.0)
 meas.addParamSetting("mu_WZ_Np1","const",1.0)
 
