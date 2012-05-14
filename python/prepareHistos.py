@@ -116,8 +116,8 @@ class TreePrepare(PrepareHistosABC):
                     for iBin in xrange(1,self.configMgr.hists[name].GetNbinsX()+1):
                         binVal = self.configMgr.hists[name].GetBinContent(iBin)
                         binErr = self.configMgr.hists[name].GetBinError(iBin)
-                        if binVal<0.:
-                            self.configMgr.hists[name].SetBinContent(iBin,0.)
+                        if binVal<=0.:
+                            self.configMgr.hists[name].SetBinContent(iBin,1E-8) #0.)
 
         else:
             if self.configMgr.hists[name] == None:
@@ -142,8 +142,8 @@ class TreePrepare(PrepareHistosABC):
                     for iBin in xrange(1,self.configMgr.hists[name].GetNbinsX()+1):
                         binVal = self.configMgr.hists[name].GetBinContent(iBin)
                         binErr = self.configMgr.hists[name].GetBinError(iBin)
-                        if binVal<0.:
-                            self.configMgr.hists[name].SetBinContent(iBin,0.)
+                        if binVal<=0.:
+                            self.configMgr.hists[name].SetBinContent(iBin,1E-8) #0.)
                         #if binErr==0:
                         #    self.configMgr.hists[name].SetBinError(iBin,1E-8)
 
@@ -220,9 +220,9 @@ class TreePrepare(PrepareHistosABC):
                     #self.configMgr.hists[prefixNom].SetBinContent(iBin,binVal) 
                     self.configMgr.hists[prefixNom+"_"+str(iBin)].SetBinContent(iBin,self.configMgr.hists[prefixNom].GetBinContent(iBin))
                 else:
-                    self.configMgr.hists[prefixNom+"_"+str(iBin)].SetBinContent(iBin,0.)
+                    self.configMgr.hists[prefixNom+"_"+str(iBin)].SetBinContent(iBin,1E-8) #0.)
                     self.configMgr.hists[prefixNom+"_"+str(iBin)].SetBinError(iBin,binError)
-                    self.configMgr.hists[prefixNom].SetBinContent(iBin,0.)
+                    self.configMgr.hists[prefixNom].SetBinContent(iBin,1E-8) #0.)
                     self.configMgr.hists[prefixNom].SetBinError(iBin,binError)
             #
             if self.configMgr.hists[prefixHigh+"_"+str(iBin)] == None:
@@ -238,9 +238,9 @@ class TreePrepare(PrepareHistosABC):
                     self.configMgr.hists[prefixHigh+"_"+str(iBin)].SetBinContent(iBin,binVal+binError) #self.configMgr.hists[prefixNom].GetBinContent(iBin)+binError)
                     self.configMgr.hists[prefixHigh].SetBinContent(iBin,binVal+binError) #self.configMgr.hists[prefixNom].GetBinContent(iBin)+binError)
                 else:
-                    self.configMgr.hists[prefixHigh+"_"+str(iBin)].SetBinContent(iBin,0.)
+                    self.configMgr.hists[prefixHigh+"_"+str(iBin)].SetBinContent(iBin,1E-8) #0.)
                     self.configMgr.hists[prefixHigh+"_"+str(iBin)].SetBinError(iBin,binError)
-                    self.configMgr.hists[prefixHigh].SetBinContent(iBin,0.)
+                    self.configMgr.hists[prefixHigh].SetBinContent(iBin,1E-8) #0.)
                     self.configMgr.hists[prefixHigh].SetBinError(iBin,binError)
             #
             if self.configMgr.hists[prefixLow+"_"+str(iBin)] == None:
@@ -256,9 +256,9 @@ class TreePrepare(PrepareHistosABC):
                     self.configMgr.hists[prefixLow+"_"+str(iBin)].SetBinContent(iBin,binVal-binError) # self.configMgr.hists[prefixNom].GetBinContent(iBin)-binError)
                     self.configMgr.hists[prefixLow].SetBinContent(iBin,binVal-binError) # self.configMgr.hists[prefixNom].GetBinContent(iBin)-binError)
                 else:
-                    self.configMgr.hists[prefixLow+"_"+str(iBin)].SetBinContent(iBin,0.)
+                    self.configMgr.hists[prefixLow+"_"+str(iBin)].SetBinContent(iBin,1E-8) #0.)
                     self.configMgr.hists[prefixLow+"_"+str(iBin)].SetBinError(iBin,binError)
-                    self.configMgr.hists[prefixLow].SetBinContent(iBin,0.)
+                    self.configMgr.hists[prefixLow].SetBinContent(iBin,1E-8) #0.)
                     self.configMgr.hists[prefixLow].SetBinError(iBin,binError)
 
         ## MB : also correct the overflow bin!
@@ -274,18 +274,18 @@ class TreePrepare(PrepareHistosABC):
             if binVal > 0.: # self.configMgr.hists[prefixNom].GetBinContent(iBin) > 0.:
                 pass
             else:
-                self.configMgr.hists[prefixNom].SetBinContent(iBin,0.)
+                self.configMgr.hists[prefixNom].SetBinContent(iBin,1E-8) #0.)
             #
             if binVal+binError > 0.: # self.configMgr.hists[prefixNom].GetBinContent(iBin) > 0.:
                 self.configMgr.hists[prefixHigh].SetBinContent(iBin,binVal+binError) #self.configMgr.hists[prefixNom].GetBinContent(iBin)+binError)
             else:
-                self.configMgr.hists[prefixHigh].SetBinContent(iBin,0.)
+                self.configMgr.hists[prefixHigh].SetBinContent(iBin,1E-8) #0.)
                 self.configMgr.hists[prefixHigh].SetBinError(iBin,binStatError)
             #
             if (binVal-binError)>0. : # ( self.configMgr.hists[prefixNom].GetBinContent(iBin) - binError ) > 0.:
                 self.configMgr.hists[prefixLow].SetBinContent(iBin,binVal-binError) # self.configMgr.hists[prefixNom].GetBinContent(iBin)-binError)
             else:
-                self.configMgr.hists[prefixLow].SetBinContent(iBin,0.)
+                self.configMgr.hists[prefixLow].SetBinContent(iBin,1E-8) #0.)
                 self.configMgr.hists[prefixLow].SetBinError(iBin,binStatError)
 
         #Over/Underflow bins
