@@ -67,6 +67,7 @@ sigFiles = []
 
 configMgr.histCacheFile = "data/"+configMgr.analysisName+".root"
 inputDir="root://eosatlas//eos/atlas/atlascerngroupdisk/phys-susy/histfitter/stronglepton/Paper_v1/"
+inputDirSig="root://eosatlas//eos/atlas/atlascerngroupdisk/phys-susy/histfitter/stronglepton/"
 
 # Set the files to read from
 if configMgr.readFromTree:
@@ -76,10 +77,17 @@ if configMgr.readFromTree:
         bgdFiles = [inputDir+"/SusyFitterTree_EleEle.root",inputDir+"/SusyFitterTree_EleMu.root",inputDir+"/SusyFitterTree_MuMu.root",inputDir+"/SusyFitterTree_OneEle.root",inputDir+"/SusyFitterTree_OneMu.root"]
 
 if doExclusion_GMSB_combined:
-    sigFiles+=["data/SusyFitterTree_EleEle_GMSB.root","data/SusyFitterTree_EleMu_GMSB.root","data/SusyFitterTree_MuMu_GMSB.root"]
+    if not onLxplus:
+        sigFiles+=["data/SusyFitterTree_EleEle_GMSB.root","data/SusyFitterTree_EleMu_GMSB.root","data/SusyFitterTree_MuMu_GMSB.root"]
+    else:
+        sigFiles+=[inputDirSig+"/SusyFitterTree_EleEle_GMSB.root",inputDirSig+"/SusyFitterTree_EleMu_GMSB.root",inputDirSig+"/SusyFitterTree_MuMu_GMSB.root"]
+
 if doExclusion_mSUGRA_dilepton_combined:
-    sigFiles+=["data/SusyFitterTree_EleEle_mSUGRA.root","data/SusyFitterTree_EleMu_mSUGRA.root","data/SusyFitterTree_MuMu_mSUGRA.root"]
-                                
+    if not onLxplus:
+        sigFiles+=["data/SusyFitterTree_EleEle_mSUGRA.root","data/SusyFitterTree_EleMu_mSUGRA.root","data/SusyFitterTree_MuMu_mSUGRA.root"]
+    else:
+        sigFiles+=[inputDirSig+"/SusyFitterTree_EleEle_mSUGRA.root",inputDirSig+"/SusyFitterTree_EleMu_mSUGRA.root",inputDirSig+"/SusyFitterTree_MuMu_mSUGRA.root"]
+
 
 
 # AnalysisType corresponds to ee,mumu,emu as I want to split these channels up
