@@ -230,11 +230,19 @@ if __name__ == "__main__":
         pass
         
     if printLimits:
+        for tl in configMgr.topLvls:
+            if len(tl.validationChannels)>0:
+                raise(Exception,"Validation regions should be turned off for setting an upper limit!")
+            pass
         configMgr.cppMgr.doUpperLimitAll()
         #GetLimits()
         pass
 
     if doHypoTests:
+        for tl in configMgr.topLvls:
+            if len(tl.validationChannels)>0:
+                raise(Exception,"Validation regions should be turned off for doing hypothesis test!")
+            pass
         configMgr.cppMgr.doHypoTestAll()
         pass
 
