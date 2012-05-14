@@ -272,65 +272,51 @@ fullChanSyst.append(Systematic("LRI","_NoSys","_LERIDup","_LERIDdown","tree","ov
 btagChanSyst = [Systematic("BT",configMgr.weights,bTagHighWeights,bTagLowWeights,"weight","overallSys")]
 
 
-# nJet Binning for Top Control region
-
-nJetTopeeNBins = 8
-nJetTopeeBinLow = 2
-nJetTopeeBinHigh = 10
-
-nJetTopeNBins = 8
-nJetTopeBinLow = 3
-nJetTopeBinHigh = 10
-
-nJetTopemNBins = 8
-nJetTopemBinLow = 2
-nJetTopemBinHigh = 10
-
-nJetTopmmNBins = 8
-nJetTopmmBinLow = 2
-nJetTopmmBinHigh = 10
-
-nJetTopmNBins = 8
-nJetTopmBinLow = 3
-nJetTopmBinHigh = 10
-
 # List of samples and their plotting colours
+AlpGenSamples=[]
 topSample_Np0 = Sample("Top_Np0",100)
 topSample_Np0.setNormFactor("mu_Top_Np0",1.,0.,5.)
-topSample_Np0.setStatConfig(useStat)
+AlpGenSamples.append(topSample_Np0)
 wzSample_Np0 = Sample("WZ_Np0",55)
 wzSample_Np0.setNormFactor("mu_WZ_Np0",1.,0.,5.)
-wzSample_Np0.setStatConfig(useStat)
+AlpGenSamples.append(wzSample_Np0)
 topSample_Np1 = Sample("Top_Np1",97)
 topSample_Np1.setNormFactor("mu_Top_Np1",1.,0.,5.)
-topSample_Np1.setStatConfig(useStat)
+AlpGenSamples.append(topSample_Np1)
 wzSample_Np1 = Sample("WZ_Np1",58)
 wzSample_Np1.setNormFactor("mu_WZ_Np1",1.,0.,5.)
-wzSample_Np1.setStatConfig(useStat)
+AlpGenSamples.append(wzSample_Np1)
 topSample_Np2 = Sample("Top_Np2",94)
 topSample_Np2.setNormFactor("mu_Top_Np2",1.,0.,5.)
-topSample_Np2.setStatConfig(useStat)
+AlpGenSamples.append(topSample_Np2)
 wzSample_Np2 = Sample("WZ_Np2",61)
 wzSample_Np2.setNormFactor("mu_WZ_Np2",1.,0.,5.)
-wzSample_Np2.setStatConfig(useStat)
+AlpGenSamples.append(wzSample_Np2)
 topSample_Np3 = Sample("Top_Np3",91)
 topSample_Np3.setNormFactor("mu_Top_Np3",1.,0.,5.)
-topSample_Np3.setStatConfig(useStat)
+AlpGenSamples.append(topSample_Np3)
 wzSample_Np3 = Sample("WZ_Np3",64)
 wzSample_Np3.setNormFactor("mu_WZ_Np3",1.,0.,5.)
-wzSample_Np3.setStatConfig(useStat)
+AlpGenSamples.append(wzSample_Np3)
 topSample_Np4 = Sample("Top_Np4",91)
 topSample_Np4.setNormFactor("mu_Top_Np3",1.,0.,5.)
-topSample_Np4.setStatConfig(useStat)
+AlpGenSamples.append(topSample_Np4)
 wzSample_Np4 = Sample("WZ_Np4",67)
 wzSample_Np4.setNormFactor("mu_WZ_Np4",1.,0.,5.)
-wzSample_Np4.setStatConfig(useStat)
+AlpGenSamples.append(wzSample_Np4)
 topSample_Np5 = Sample("Top_Np5",91)
 topSample_Np5.setNormFactor("mu_Top_Np3",1.,0.,5.)
-topSample_Np5.setStatConfig(useStat) 
+AlpGenSamples.append(topSample_Np5) 
 wzSample_Np5 = Sample("WZ_Np5",70)
 wzSample_Np5.setNormFactor("mu_WZ_Np5",1.,0.,5.)
-wzSample_Np5.setStatConfig(useStat)
+AlpGenSamples.append(wzSample_Np5)
+
+for sam in AlpGenSamples:
+    sam.setStatConfig(useStat)
+    sam.addSystematic(Systematic("Zpt50GeV",configMgr.weights,pT50GeVHighWeights,pT50GeVLowWeights,"weight","overallSys"))
+    sam.addSystematic(Systematic("Zpt100GeV",configMgr.weights,pT100GeVHighWeights,pT100GeVLowWeights,"weight","overallSys"))
+    sam.addSystematic(Systematic("Zpt150GeV",configMgr.weights,pT150GeVHighWeights,pT150GeVLowWeights,"weight","overallSys"))
+    sam.addSystematic(Systematic("Zpt200GeV",configMgr.weights,pT200GeVHighWeights,pT200GeVLowWeights,"weight","overallSys"))
 
 ### Additional scale uncertainty on WZ Np0 and WZ Np1
 wzSample_Np0.addSystematic(Systematic("err_WZ_Np0", configMgr.weights,1.06 ,0.96, "user","userOverallSys"))
@@ -356,6 +342,28 @@ qcdSample.setStatConfig(useStat)
 dataSample = Sample("Data",kBlack)
 dataSample.setData()
 
+# nJet Binning for Top Control region
+nJetTopeeNBins = 8
+nJetTopeeBinLow = 2
+nJetTopeeBinHigh = 10
+
+nJetTopeNBins = 8
+nJetTopeBinLow = 3
+nJetTopeBinHigh = 10
+
+nJetTopemNBins = 8
+nJetTopemBinLow = 2
+nJetTopemBinHigh = 10
+
+nJetTopmmNBins = 8
+nJetTopmmBinLow = 2
+nJetTopmmBinHigh = 10
+
+nJetTopmNBins = 8
+nJetTopmBinLow = 3
+nJetTopmBinHigh = 10
+
+# nJet Binning for W Control region
 nJetZmmRegions = ["ZRmm"]
 nJetZmmNBins = 8
 nJetZmmBinLow = 2
@@ -391,9 +399,9 @@ srBinLow = 0.5
 srBinHigh = 1.5
 
                 
-#Create TopLevelXML objects
-bkgOnly = configMgr.addTopLevelXML("bkgonly")
-bgdsamples=[qcdSample,bgSample,topSample_Np0,topSample_Np1,topSample_Np2,topSample_Np3,topSample_Np4,topSample_Np5,wzSample_Np0,wzSample_Np1,wzSample_Np2,wzSample_Np3,wzSample_Np4,wzSample_Np5,dataSample]
+bgdsamples=[qcdSample,bgSample,dataSample]
+for sam in AlpGenSamples:
+    bgdsamples.append(sam)
 
 if doSignalOnly:
     bgdsamples=[]
@@ -401,8 +409,10 @@ if doSignalOnly:
 for sam in bgdsamples:
     sam.setFileList(bgdFiles)
 
-bkgOnly.addSamples(bgdsamples)
 
+#Create TopLevelXML objects
+bkgOnly = configMgr.addTopLevelXML("bkgonly")
+bkgOnly.addSamples(bgdsamples)
 if useStat:
     bkgOnly.statErrThreshold=0.05 
 else:
