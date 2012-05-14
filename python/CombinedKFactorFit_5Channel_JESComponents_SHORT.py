@@ -223,9 +223,6 @@ hfLowWeights = ("genWeight","eventWeight","leptonWeight","triggerWeight",truthWp
 # List of systematics
 #--------------------
 
-#  HF uncertainty on V+Jets
-hf = Systematic("HF",configMgr.weights,hfHighWeights,hfLowWeights,"weight","histoSys")
-
 # Signal XSec uncertainty as overallSys (pure yeild affect)
 xsecSig = Systematic("XSS",configMgr.weights,xsecSigHighWeights,xsecSigLowWeights,"weight","overallSys")
 
@@ -268,27 +265,22 @@ measLumiError = 0.037
 
 # nJet Binning for Top Control region
 
-nJetTopeeRegions = ["TRee"]
 nJetTopeeNBins = 8
 nJetTopeeBinLow = 2
 nJetTopeeBinHigh = 10
 
-nJetTopeRegions = ["TREl"]
 nJetTopeNBins = 8
 nJetTopeBinLow = 3
 nJetTopeBinHigh = 10
 
-nJetTopemRegions = ["TRem"]
 nJetTopemNBins = 8
 nJetTopemBinLow = 2
 nJetTopemBinHigh = 10
 
-nJetTopmmRegions = ["TRmm"]
 nJetTopmmNBins = 8
 nJetTopmmBinLow = 2
 nJetTopmmBinHigh = 10
 
-nJetTopmRegions = ["TRMu"]
 nJetTopmNBins = 8
 nJetTopmBinLow = 3
 nJetTopmBinHigh = 10
@@ -338,6 +330,7 @@ wzSample_Np1.addSystematic(Systematic("err_WZ_Np1", configMgr.weights,1.06 ,0.83
 
 ### Additional uncertainty on the V+HF samples
 
+hf = Systematic("HF",configMgr.weights,hfHighWeights,hfLowWeights,"weight","histoSys")
 wzSample_Np0.addSystematic(hf)
 wzSample_Np1.addSystematic(hf)
 wzSample_Np2.addSystematic(hf)
@@ -431,15 +424,15 @@ if doSignalOnly:
 ##### nJet for Top ####
 
 # ele ele
-nJetTopeeChannel=bkgOnly.addChannel("nJet",nJetTopeeRegions,nJetTopeeNBins,nJetTopeeBinLow,nJetTopeeBinHigh)
+nJetTopeeChannel=bkgOnly.addChannel("nJet",["TRee"],nJetTopeeNBins,nJetTopeeBinLow,nJetTopeeBinHigh)
 #  single ele
-nJetTopeChannel=bkgOnly.addChannel("nJet",nJetTopeRegions,nJetTopeNBins,nJetTopeBinLow,nJetTopeBinHigh)
+nJetTopeChannel=bkgOnly.addChannel("nJet",["TREl"],nJetTopeNBins,nJetTopeBinLow,nJetTopeBinHigh)
 #  ele mu
-nJetTopemChannel=bkgOnly.addChannel("nJet",nJetTopemRegions,nJetTopemNBins,nJetTopemBinLow,nJetTopemBinHigh)
+nJetTopemChannel=bkgOnly.addChannel("nJet",["TRem"],nJetTopemNBins,nJetTopemBinLow,nJetTopemBinHigh)
 # mu mu
-nJetTopmmChannel=bkgOnly.addChannel("nJet",nJetTopmmRegions,nJetTopmmNBins,nJetTopmmBinLow,nJetTopmmBinHigh)
+nJetTopmmChannel=bkgOnly.addChannel("nJet",["TRmm"],nJetTopmmNBins,nJetTopmmBinLow,nJetTopmmBinHigh)
 # single mu
-nJetTopmChannel=bkgOnly.addChannel("nJet",nJetTopmRegions,nJetTopmNBins,nJetTopmBinLow,nJetTopmBinHigh)
+nJetTopmChannel=bkgOnly.addChannel("nJet",["TRMu"],nJetTopmNBins,nJetTopmBinLow,nJetTopmBinHigh)
 
 topChannels = [nJetTopeeChannel, nJetTopeChannel, nJetTopemChannel,nJetTopmmChannel,nJetTopmChannel]
 
