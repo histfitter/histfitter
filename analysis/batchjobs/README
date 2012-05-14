@@ -1,0 +1,87 @@
+scripts for submission of batch jobs 
+
+-------------------------------------
+
+IN GENERAL: 
+
+-you need to modify the paths in the following scripts:
+  *submit_susy.sh
+  *submit_susy_main_tree.sh
+  *submit_susy_tree.sh
+  *runSusyLimitBatch2.sh
+  *runSusyLimitBatch3.sh
+  
+  
+-you need to move the following files to your submit directory (usually SusyFitter):
+  * analysis/OneLepton/batchjobs/submit_susy_main.sh
+  * analysis/OneLepton/batchjobs/submit_susy_main_tree.sh  
+  * analysis/OneLepton/batchjobs/submit_susy.sh
+  * analysis/OneLepton/batchjobs/submit_susy_tree.sh   
+  * analysis/OneLepton/batchjobs/susy_points4.txt
+  * analysis/OneLepton/batchjobs/susy_points3.txt  
+  * analysis/OneLepton/batchjobs/runSusyLimitBatch2.sh
+  * analysis/OneLepton/batchjobs/runSusyLimitBatch3.sh  
+  
+- you need to move the following files to your output directory:
+  * macros/macros_jlorenz/check_results.py
+  * macros/macros_jlorenz/hadd_script.py  
+
+-------------------------------------
+
+Submission of batch jobs:
+
+1. Prepare the workspace:
+   (-> This corresponds to HistFitter.py -t -w config_file.py)
+   
+   sh submit_susy_main_tree.sh
+   
+   This will submit 12 jobs with in total 863 MSUGRA grid points. It will load susy_points4.txt.
+   For each list of input points it will call submit_susy_tree.sh.
+   submit_susy_tree.sh will submit the batch job.
+   It will call runSusyLimitBatch2.sh.
+   runSusyLimitBatch2.sh will create some directories on the batch node and copy the some input files to it.
+   It will also copy the output to the output directory.
+   It will execute python scripts/HistFitter.py -t -w python/MyOneLeptonKtScale_onepoint.py 
+   ###scripts/HistFitter_onepoint.py is similar to scripts/HistFitter.py but contains the option <-g grid_point> 
+   with which it is possible to specify the signal grid point in the input.
+   python/MyOneLeptonKtScale_onepoint.py is similar to python/MyOneLeptonKtScale.py, but no signal samples are specified and the ATLAS macro is turned off.
+   
+2. Perform the hypothesis fit:
+   (-> this corresponds to HistFitter.py -p config_file.py)
+   
+   sh submit_susy_main.sh
+   
+   This will submit one batch job for any of the signal points. 
+   The points are defined in susy_points3.txt.
+   submit_susy_main.sh will call for every point submit_susy.sh which will submit the batch job.
+   The batch job will execute runSusyLimitBatch3.sh.
+   This will create some directories on the batch node, copy the root file with the workspace to the batch node, 
+   perform the hypothesis test and cp the result back to the output directory.
+   runSusyLimitBatch3.sh will call scripts/HypoTest.py.
+   This script is a modified clone from doHypoTestAll() which takes the root file with the workspace as input.
+   The hypothesis test result will be stored in the output directory as <grid_point>_hypotestresult/MyOneLeptonKtScaleFitR17_Output_hypotest.root
+   
+3. Combine the output files:
+
+   sh hadd_script.sh
+   
+   will hadd all <grid_point>_hypotestresult/MyOneLeptonKtScaleFitR17_Output_hypotest.root to MyOneLeptonKtScaleFitR17_Output_hypotest.root   
+   check if all points are there with:
+   
+   python check_results.py
+   
+------------------------------------------------------
+
+Contour plots:
+
+Consult README in macros/contourplot
+
+In principle:
+
+root -b -q makelistfiles.C
+root -b -q makecontourhists.C
+root -b -q makecontourplots.C
+
+Make sure that you've modified the paths in these files to point to your input files.
+makecontourplots.C will call contourmacros/SUSY_m0_vs_m12_all_withBand_cls.C, the main plotting macro.
+
