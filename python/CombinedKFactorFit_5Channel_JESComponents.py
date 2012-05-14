@@ -13,7 +13,7 @@ from systematic import Systematic
 #import ROOT
 #ROOT.SetAtlasStyle()
 
-onLxplus=False
+onLxplus=True
 doHardLep=True
 doSoftLep=False
 useStat=True
@@ -75,7 +75,7 @@ if configMgr.readFromTree:
     if not onLxplus:
         bgdFiles = ["data/SusyFitterTree_OneSoftMuo_BG_v4.root","data/SusyFitterTree_OneSoftEle_BG_v4.root","data/SusyFitterTree_EleEle.root","data/SusyFitterTree_EleMu.root","data/SusyFitterTree_MuMu.root","data/SusyFitterTree_OneEle.root","data/SusyFitterTree_OneMu.root"]
     else:
-        bgdFiles = [inputDir+"../SusyFitterTree_OneSoftMuo_BG_v4.root",inputDir+"../SusyFitterTree_OneSoftEle_BG_v4.root",inputDir+"/SusyFitterTree_EleEle.root",inputDir+"/SusyFitterTree_EleMu.root",inputDir+"/SusyFitterTree_MuMu.root",inputDir+"/SusyFitterTree_OneEle.root",inputDir+"/SusyFitterTree_OneMu.root",inputDir+""]
+        bgdFiles = [inputDirSig+"SusyFitterTree_OneSoftMuo_BG_v4.root",inputDirSig+"SusyFitterTree_OneSoftEle_BG_v4.root",inputDir+"/SusyFitterTree_EleEle.root",inputDir+"/SusyFitterTree_EleMu.root",inputDir+"/SusyFitterTree_MuMu.root",inputDir+"/SusyFitterTree_OneEle.root",inputDir+"/SusyFitterTree_OneMu.root",inputDir+""]
 
 if doExclusion_GMSB_combined:
     if not onLxplus:
