@@ -19,11 +19,11 @@ doHardLep=True
 doSoftLep=False
 useStat=True
 doValidation=False
-doValidationSR=False
+doValidationSR=True
 doValidationSlope=False
 doValidationDilep=False
 doValidationDilepZ=False
-doValidationSoftLep=False
+doValidationSoftLep=True
 doDiscoveryS2=False
 doDiscoveryS4=False
 doDiscovery=False
@@ -32,6 +32,7 @@ discoverychannel="ee" # ee, emu, mumu
 doExclusion=False
 doExclusion_GMSB_combined=False
 doExclusion_mSUGRA_dilepton_combined=False
+doExclusion_GG_onestepCC_combined=False
 doExclusion_GG_twostepCC_slepton=False
 
 doSignalOnly=False #Remove all bkgs for signal histo creation step
@@ -78,9 +79,9 @@ inputDirSig="root://eosatlas//eos/atlas/atlascerngroupdisk/phys-susy/histfitter/
 # Set the files to read from
 if configMgr.readFromTree:
     if not onLxplus:
-        bgdFiles = ["data/SusyFitterTree_EleEle.root","data/SusyFitterTree_EleMu.root","data/SusyFitterTree_MuMu.root","data/SusyFitterTree_OneEle.root","data/SusyFitterTree_OneMu.root"]
+        bgdFiles = ["data/SusyFitterTree_OneSoftMuo_BG_v4.root","data/SusyFitterTree_OneSoftEle_BG_v4.root","data/SusyFitterTree_EleEle.root","data/SusyFitterTree_EleMu.root","data/SusyFitterTree_MuMu.root","data/SusyFitterTree_OneEle.root","data/SusyFitterTree_OneMu.root"]
     else:
-        bgdFiles = [inputDir+"/SusyFitterTree_EleEle.root",inputDir+"/SusyFitterTree_EleMu.root",inputDir+"/SusyFitterTree_MuMu.root",inputDir+"/SusyFitterTree_OneEle.root",inputDir+"/SusyFitterTree_OneMu.root"]
+        bgdFiles = [inputDirSig+"SusyFitterTree_OneSoftMuo_BG_v4.root",inputDirSig+"SusyFitterTree_OneSoftEle_BG_v4.root",inputDir+"/SusyFitterTree_EleEle.root",inputDir+"/SusyFitterTree_EleMu.root",inputDir+"/SusyFitterTree_MuMu.root",inputDir+"/SusyFitterTree_OneEle.root",inputDir+"/SusyFitterTree_OneMu.root"]
 
 if doExclusion_GMSB_combined:
     if not onLxplus:
@@ -94,7 +95,11 @@ if doExclusion_mSUGRA_dilepton_combined:
     else:
         sigFiles+=[inputDirSig+"/SusyFitterTree_EleEle_mSUGRA.root",inputDirSig+"/SusyFitterTree_EleMu_mSUGRA.root",inputDirSig+"/SusyFitterTree_MuMu_mSUGRA.root"]
 
-
+if doExclusion_GG_onestepCC_combined:
+    if not onLxplus:
+        sigFiles+=["data/SusyFitterTree_OneSoftMuo_SM_GG_onestepCC_v3.root","data/SusyFitterTree_OneSoftEle_SM_GG_onestepCC_v3.root"]
+    else:
+        sigFiles+=[inputDirSig+"/SusyFitterTree_OneSoftMuo_SM_GG_onestepCC_v3.root",inputDirSig+"/SusyFitterTree_OneSoftMuo_SM_GG_onestepCC_v3.root"]
 
 # AnalysisType corresponds to ee,mumu,emu as I want to split these channels up
 
