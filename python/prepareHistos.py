@@ -185,7 +185,7 @@ class TreePrepare(PrepareHistosABC):
                 sysWeightSyst="0.25" #rough average of Dan's results
             else:
                 sysWeightStat=self.weights+"Stat"
-                sysWeightSyst=self.weights+"Syst"
+                sysWeightSyst=self.weights+"Syst" 
                 
             if self.configMgr.hists[prefixNom+"_"+str(1)] == None:
                 self.configMgr.chains[self.currentChainName].Project(self.name+"Syst",self.var,sysWeightSyst+" * ("+self.cuts+")")
