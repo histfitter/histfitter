@@ -37,8 +37,8 @@ doSignalOnly=False #Remove all bkgs for signal histo creation step
 #doSignalOnly=True #Remove all bkgs for signal histo creation step
 # Need to comment out the following line when running HypoTest.py parallelized
 
-if not 'sigSamples' in dir(): 
-    sigSamples=["SU_580_240_0_10_P"]
+if not 'sigSamples' in dir():
+    sigSamples=["SU_580_240_0_10_P"]
 # sigSamples=["GMSB_3_2d_50_250_3_10_1_1"]
 
 #sigSamples=[]
@@ -98,87 +98,85 @@ if doExclusion_mSUGRA_dilepton_combined:
 # AnalysisType corresponds to ee,mumu,emu as I want to split these channels up
 
 # Map regions to cut strings
-configMgr.cutsDict = {"TRee":"(mll<80 || mll>100) && met > 30 && met < 80 && jet2Pt > 50 && nB3Jet > 0 && AnalysisType==3",
-                      "TRmm":"(mll<80 || mll>100) && met > 30 && met < 80 && jet2Pt > 50 && nB3Jet > 0 && AnalysisType==4",
-                      "TRem":"(mll<80 || mll>100) && met > 30 && met < 80 && jet2Pt > 50 && nB3Jet > 0 && AnalysisType==5",
-                      "ZRee":"mll>80 && mll<100  && met < 50 && jet2Pt > 50 && AnalysisType==3",
-                      "ZRmm":"mll>80 && mll<100  && met < 50 && jet2Pt > 50 && AnalysisType==4",
+configMgr.cutsDict = {}
+configMgr.cutsDict["TRee"]="(mll<80 || mll>100) && met > 30 && met < 80 && jet2Pt > 50 && nB3Jet > 0 && AnalysisType==3"
+configMgr.cutsDict["TRmm"]="(mll<80 || mll>100) && met > 30 && met < 80 && jet2Pt > 50 && nB3Jet > 0 && AnalysisType==4"
+configMgr.cutsDict["TRem"]="(mll<80 || mll>100) && met > 30 && met < 80 && jet2Pt > 50 && nB3Jet > 0 && AnalysisType==5"
+configMgr.cutsDict["ZRee"]="mll>80 && mll<100  && met < 50 && jet2Pt > 50 && AnalysisType==3"
+configMgr.cutsDict["ZRmm"]="mll>80 && mll<100  && met < 50 && jet2Pt > 50 && AnalysisType==4"
 
-                      "S2ee":"met > 300 && nJet>=2 && jet2Pt > 200 && jet4Pt < 50 && AnalysisType==3",
-                      "S2mm":"met > 300 && nJet>=2 && jet2Pt > 200 && jet4Pt < 50 && AnalysisType==4",
-                      "S2em":"met > 300 && nJet>=2 && jet2Pt > 200 && jet4Pt < 50 && AnalysisType==5",
-                      "S4ee":"met > 100 && nJet>=4 && jet4Pt > 50 && met/meff4Jet > 0.2 && meffInc > 650 && AnalysisType==3",
-                      "S4mm":"met > 100 && nJet>=4 && jet4Pt > 50 && met/meff4Jet > 0.2 && meffInc > 650 && AnalysisType==4",
-                      "S4em":"met > 100 && nJet>=4 && jet4Pt > 50 && met/meff4Jet > 0.2 && meffInc > 650 && AnalysisType==5",
+configMgr.cutsDict["S2ee"]="met > 300 && nJet>=2 && jet2Pt > 200 && jet4Pt < 50 && AnalysisType==3"
+configMgr.cutsDict["S2mm"]="met > 300 && nJet>=2 && jet2Pt > 200 && jet4Pt < 50 && AnalysisType==4"
+configMgr.cutsDict["S2em"]="met > 300 && nJet>=2 && jet2Pt > 200 && jet4Pt < 50 && AnalysisType==5"
+configMgr.cutsDict["S4ee"]="met > 100 && nJet>=4 && jet4Pt > 50 && met/meff4Jet > 0.2 && meffInc > 650 && AnalysisType==3"
+configMgr.cutsDict["S4mm"]="met > 100 && nJet>=4 && jet4Pt > 50 && met/meff4Jet > 0.2 && meffInc > 650 && AnalysisType==4"
+configMgr.cutsDict["S4em"]="met > 100 && nJet>=4 && jet4Pt > 50 && met/meff4Jet > 0.2 && meffInc > 650 && AnalysisType==5"
 
-                      "VR2ee":"met > 100 && met < 300 && jet4Pt < 50 && jet2Pt > 50 && AnalysisType==3",
-                      "VR2em":"met > 100 && met < 300 && jet4Pt < 50 && jet2Pt > 50 && AnalysisType==5",
-                      "VR2mm":"met > 100 && met < 300 && jet4Pt < 50 && jet2Pt > 50 && AnalysisType==4",
+configMgr.cutsDict["VR2ee"]="met > 100 && met < 300 && jet4Pt < 50 && jet2Pt > 50 && AnalysisType==3"
+configMgr.cutsDict["VR2em"]="met > 100 && met < 300 && jet4Pt < 50 && jet2Pt > 50 && AnalysisType==5"
+configMgr.cutsDict["VR2mm"]="met > 100 && met < 300 && jet4Pt < 50 && jet2Pt > 50 && AnalysisType==4"
 
-                      "VR3ee":"met > 100 && met < 300 && jet4Pt < 50 && jet3Pt > 50 && AnalysisType==3",
-                      "VR3em":"met > 100 && met < 300 && jet4Pt < 50 && jet3Pt > 50 && AnalysisType==5",
-                      "VR3mm":"met > 100 && met < 300 && jet4Pt < 50 && jet3Pt > 50 && AnalysisType==4",
+configMgr.cutsDict["VR3ee"]="met > 100 && met < 300 && jet4Pt < 50 && jet3Pt > 50 && AnalysisType==3"
+configMgr.cutsDict["VR3em"]="met > 100 && met < 300 && jet4Pt < 50 && jet3Pt > 50 && AnalysisType==5"
+configMgr.cutsDict["VR3mm"]="met > 100 && met < 300 && jet4Pt < 50 && jet3Pt > 50 && AnalysisType==4"
 
-                      "VR4ee":"met < 100 && jet4Pt > 50 && AnalysisType==3",
-                      "VR4em":"met < 100 && jet4Pt > 50  && AnalysisType==5",
-                      "VR4mm":"met < 100  && jet4Pt > 50 && AnalysisType==4",
+configMgr.cutsDict["VR4ee"]="met < 100 && jet4Pt > 50 && AnalysisType==3"
+configMgr.cutsDict["VR4em"]="met < 100 && jet4Pt > 50  && AnalysisType==5"
+configMgr.cutsDict["VR4mm"]="met < 100  && jet4Pt > 50 && AnalysisType==4"
 
-                      "VZR2ee":"met > 50 && met < 100 && jet2Pt > 50 && nB3Jet == 0 && AnalysisType==3",
-                      "VZR2em":"met > 50 && met < 100 && jet2Pt > 50 && nB3Jet == 0 && AnalysisType==5",                    
-                      "VZR2mm":"met > 50 && met < 100 && jet2Pt > 50 && nB3Jet == 0 && AnalysisType==4",
+configMgr.cutsDict["VZR2ee"]="met > 50 && met < 100 && jet2Pt > 50 && nB3Jet == 0 && AnalysisType==3"
+configMgr.cutsDict["VZR2em"]="met > 50 && met < 100 && jet2Pt > 50 && nB3Jet == 0 && AnalysisType==5"                    
+configMgr.cutsDict["VZR2mm"]="met > 50 && met < 100 && jet2Pt > 50 && nB3Jet == 0 && AnalysisType==4"
 
-                      "VZR3ee":"met > 50 && met < 100  && jet3Pt > 50 && nB3Jet == 0 && AnalysisType==3",
-                      "VZR3em":"met > 50 && met < 100 && jet3Pt > 50 && nB3Jet == 0 && AnalysisType==5",
-                      "VZR3mm":"met > 50 && met < 100 && jet3Pt > 50 && nB3Jet == 0 && AnalysisType==4",
+configMgr.cutsDict["VZR3ee"]="met > 50 && met < 100  && jet3Pt > 50 && nB3Jet == 0 && AnalysisType==3"
+configMgr.cutsDict["VZR3em"]="met > 50 && met < 100 && jet3Pt > 50 && nB3Jet == 0 && AnalysisType==5"
+configMgr.cutsDict["VZR3mm"]="met > 50 && met < 100 && jet3Pt > 50 && nB3Jet == 0 && AnalysisType==4"
 
-                      "VZR4ee":"met > 50 && met < 100 & jet4Pt > 50  && nB3Jet == 0 && AnalysisType==3",
-                      "VZR4em":"met > 50 && met < 100 & jet4Pt > 50 && nB3Jet == 0 && AnalysisType==5",
-                      "VZR4mm":"met > 50 && met < 100 & jet4Pt > 50  && nB3Jet == 0 && AnalysisType==4",
+configMgr.cutsDict["VZR4ee"]="met > 50 && met < 100 & jet4Pt > 50  && nB3Jet == 0 && AnalysisType==3"
+configMgr.cutsDict["VZR4em"]="met > 50 && met < 100 & jet4Pt > 50 && nB3Jet == 0 && AnalysisType==5"
+configMgr.cutsDict["VZR4mm"]="met > 50 && met < 100 & jet4Pt > 50  && nB3Jet == 0 && AnalysisType==4"
 
-                      "HMTVL1El":"AnalysisType==1 && met>30 && met<250 && mt>80 && jet1Pt>80 && jet3Pt>25 && meffInc>400",
-                      "HMTVL1Mu":"AnalysisType==2 && met>30 && met<250 && mt>80 && jet1Pt>80 && jet3Pt>25 && meffInc>400",
+configMgr.cutsDict["HMTVL1El"]="AnalysisType==1 && met>30 && met<250 && mt>80 && jet1Pt>80 && jet3Pt>25 && meffInc>400"
+configMgr.cutsDict["HMTVL1Mu"]="AnalysisType==2 && met>30 && met<250 && mt>80 && jet1Pt>80 && jet3Pt>25 && meffInc>400"
                       
-                      "WREl":"lep2Pt<10 && met>40 && met<150 && mt>40 && mt<80 && nB3Jet==0 && jet1Pt>80 && jet3Pt>25 && meffInc > 500 && AnalysisType==1",
-                      "TREl":"lep2Pt<10 && met>40 && met<150 && mt>40 && mt<80 && nB3Jet>0 && jet1Pt>80 && jet3Pt>25 && meffInc > 500 && AnalysisType==1",
-                      "WRMu":"lep2Pt<10 && met>40 && met<150 && mt>40 && mt<80 && nB3Jet==0 && jet1Pt>80 && jet3Pt>25 && meffInc > 500 && AnalysisType==2",
-                      "TRMu":"lep2Pt<10 && met>40 && met<150 && mt>40 && mt<80 && nB3Jet>0 && jet1Pt>80 && jet3Pt>25 && meffInc > 500 && AnalysisType==2",
+configMgr.cutsDict["WREl"]="lep2Pt<10 && met>40 && met<150 && mt>40 && mt<80 && nB3Jet==0 && jet1Pt>80 && jet3Pt>25 && meffInc > 500 && AnalysisType==1"
+configMgr.cutsDict["TREl"]="lep2Pt<10 && met>40 && met<150 && mt>40 && mt<80 && nB3Jet>0 && jet1Pt>80 && jet3Pt>25 && meffInc > 500 && AnalysisType==1"
+configMgr.cutsDict["WRMu"]="lep2Pt<10 && met>40 && met<150 && mt>40 && mt<80 && nB3Jet==0 && jet1Pt>80 && jet3Pt>25 && meffInc > 500 && AnalysisType==2"
+configMgr.cutsDict["TRMu"]="lep2Pt<10 && met>40 && met<150 && mt>40 && mt<80 && nB3Jet>0 && jet1Pt>80 && jet3Pt>25 && meffInc > 500 && AnalysisType==2"
 
-                      "TRElVR":"lep2Pt<10 && met>40 && met<150 && mt>40 && mt<80 && nB3Jet>0 && jet1Pt>80 && jet3Pt>25 && AnalysisType==1",
-                      "TRMuVR":"lep2Pt<10 && met>40 && met<150 && mt>40 && mt<80 && nB3Jet>0 && jet1Pt>80 && jet3Pt>25 && AnalysisType==2",
+configMgr.cutsDict["TRElVR"]="lep2Pt<10 && met>40 && met<150 && mt>40 && mt<80 && nB3Jet>0 && jet1Pt>80 && jet3Pt>25 && AnalysisType==1"
+configMgr.cutsDict["TRMuVR"]="lep2Pt<10 && met>40 && met<150 && mt>40 && mt<80 && nB3Jet>0 && jet1Pt>80 && jet3Pt>25 && AnalysisType==2"
 
-                      "TRElVR2":"lep2Pt<10 && nB3Jet>0 && jet1Pt>80 && jet3Pt>25 && AnalysisType==1",
-                      "TRMuVR2":"lep2Pt<10 && nB3Jet>0 && jet1Pt>80 && jet3Pt>25 && AnalysisType==2", 
+configMgr.cutsDict["TRElVR2"]="lep2Pt<10 && nB3Jet>0 && jet1Pt>80 && jet3Pt>25 && AnalysisType==1"
+configMgr.cutsDict["TRMuVR2"]="lep2Pt<10 && nB3Jet>0 && jet1Pt>80 && jet3Pt>25 && AnalysisType==2" 
 
-                      "WRElVR":"lep2Pt<10 && met>50 && nB3Jet==0 && jet1Pt>80 && jet3Pt>25 && AnalysisType==1",
-                      "WRMuVR":"lep2Pt<10 && met>50 && nB3Jet==0 && jet1Pt>80 && jet3Pt>25 && AnalysisType==2",
+configMgr.cutsDict["WRElVR"]="lep2Pt<10 && met>50 && nB3Jet==0 && jet1Pt>80 && jet3Pt>25 && AnalysisType==1"
+configMgr.cutsDict["WRMuVR"]="lep2Pt<10 && met>50 && nB3Jet==0 && jet1Pt>80 && jet3Pt>25 && AnalysisType==2"
 
-                      "S3El":"AnalysisType==1 && met>250 && mt>100 && met/meff3Jet>0.3 && jet1Pt>100 && jet3Pt>25 && jet4Pt<80",
-                      "S4El":"AnalysisType==1 && met>250 && mt>100 && met/meff4Jet>0.2 && jet4Pt>80",
+configMgr.cutsDict["S3El"]="AnalysisType==1 && met>250 && mt>100 && met/meff3Jet>0.3 && jet1Pt>100 && jet3Pt>25 && jet4Pt<80"
+configMgr.cutsDict["S4El"]="AnalysisType==1 && met>250 && mt>100 && met/meff4Jet>0.2 && jet4Pt>80"
 
-                      "S3Mu":"AnalysisType==2 && met>250 && mt>100 && met/meff3Jet>0.3 && jet1Pt>100 && jet3Pt>25 && jet4Pt<80",
-                      "S4Mu":"AnalysisType==2 && met>250 && mt>100 && met/meff4Jet>0.2 && jet4Pt>80",
+configMgr.cutsDict["S3Mu"]="AnalysisType==2 && met>250 && mt>100 && met/meff3Jet>0.3 && jet1Pt>100 && jet3Pt>25 && jet4Pt<80"
+configMgr.cutsDict["S4Mu"]="AnalysisType==2 && met>250 && mt>100 && met/meff4Jet>0.2 && jet4Pt>80"
 
-                      "SR3jTEl":"AnalysisType==1 && met>250 && mt>100 && met/meff3Jet>0.3 && jet1Pt>100 && jet3Pt>25 && jet4Pt<80 && meffInc>1200",
-                      "SR4jTEl":"AnalysisType==1 && met>250 && mt>100 && met/meff4Jet>0.2 && jet4Pt>80 && meffInc>800",
+configMgr.cutsDict["SR3jTEl"]="AnalysisType==1 && met>250 && mt>100 && met/meff3Jet>0.3 && jet1Pt>100 && jet3Pt>25 && jet4Pt<80 && meffInc>1200"
+configMgr.cutsDict["SR4jTEl"]="AnalysisType==1 && met>250 && mt>100 && met/meff4Jet>0.2 && jet4Pt>80 && meffInc>800"
 
-                      "SR3jTMu":"AnalysisType==2 && met>250 && mt>100 && met/meff3Jet>0.3 && jet1Pt>100 && jet3Pt>25 && jet4Pt<80 && meffInc>1200",
-                      "SR4jTMu":"AnalysisType==2 && met>250 && mt>100 && met/meff4Jet>0.2 && jet4Pt>80 && meffInc>800",
-                      "SR7jTEl":"AnalysisType==1 && met>180 && mt>120 && jet1Pt>80 && jet7Pt>25 && meffInc>750",
-                      "SR7jTMu":"AnalysisType==2 && met>180 && mt>120 && jet1Pt>80 && jet7Pt>25 && meffInc>750",
+configMgr.cutsDict["SR3jTMu"]="AnalysisType==2 && met>250 && mt>100 && met/meff3Jet>0.3 && jet1Pt>100 && jet3Pt>25 && jet4Pt<80 && meffInc>1200"
+configMgr.cutsDict["SR4jTMu"]="AnalysisType==2 && met>250 && mt>100 && met/meff4Jet>0.2 && jet4Pt>80 && meffInc>800"
+configMgr.cutsDict["SR7jTEl"]="AnalysisType==1 && met>180 && mt>120 && jet1Pt>80 && jet7Pt>25 && meffInc>750"
+configMgr.cutsDict["SR7jTMu"]="AnalysisType==2 && met>180 && mt>120 && jet1Pt>80 && jet7Pt>25 && meffInc>750"
 
-                     # soft lepton
-                      "SVEl":"(lep1Pt < 25 && lep2Pt<10 && met>180 && met<250 && mt>80 && mt<100 && jet1Pt>130 && jet2Pt>25 && AnalysisType==6)",
-                      "SVMu":"(lep1Pt < 20 && lep2Pt<10 && met>180 && met<250 && mt>80 && mt<100 && jet1Pt>130 && jet2Pt>25 && AnalysisType==7)",
+configMgr.cutsDict["SVEl"]="(lep1Pt < 25 && lep2Pt<10 && met>180 && met<250 && mt>80 && mt<100 && jet1Pt>130 && jet2Pt>25 && AnalysisType==6)"
+configMgr.cutsDict["SVMu"]="(lep1Pt < 20 && lep2Pt<10 && met>180 && met<250 && mt>80 && mt<100 && jet1Pt>130 && jet2Pt>25 && AnalysisType==7)"
 
-                      "SVWEl":"lep1Pt < 25 && lep2Pt<10 && met>180 && met<250 && mt>40 && mt<80 && nB2Jet==0 && jet1Pt>130 && jet2Pt>25  && AnalysisType==6",
-                      "SVTEl":"lep1Pt < 25 && lep2Pt<10 && met>180 && met<250 && mt>40 && mt<80 && nB2Jet>0 && jet1Pt>130 && jet2Pt>25 && AnalysisType==6",
-                      "SVWMu":"lep1Pt < 20 && lep2Pt<10 && met>180 && met<250 && mt>40 && mt<80 && nB2Jet==0 && jet1Pt>130 && jet2Pt>25  && AnalysisType==7",
-                      "SVTMu":"lep1Pt < 20 && lep2Pt<10 && met>180 && met<250 && mt>40 && mt<80 && nB2Jet>0 && jet1Pt>130 && jet2Pt>25 && AnalysisType==7",
+configMgr.cutsDict["SVWEl"]="lep1Pt < 25 && lep2Pt<10 && met>180 && met<250 && mt>40 && mt<80 && nB2Jet==0 && jet1Pt>130 && jet2Pt>25  && AnalysisType==6"
+configMgr.cutsDict["SVTEl"]="lep1Pt < 25 && lep2Pt<10 && met>180 && met<250 && mt>40 && mt<80 && nB2Jet>0 && jet1Pt>130 && jet2Pt>25 && AnalysisType==6"
+configMgr.cutsDict["SVWMu"]="lep1Pt < 20 && lep2Pt<10 && met>180 && met<250 && mt>40 && mt<80 && nB2Jet==0 && jet1Pt>130 && jet2Pt>25  && AnalysisType==7"
+configMgr.cutsDict["SVTMu"]="lep1Pt < 20 && lep2Pt<10 && met>180 && met<250 && mt>40 && mt<80 && nB2Jet>0 && jet1Pt>130 && jet2Pt>25 && AnalysisType==7"
 
-                      "SSEl":"lep1Pt < 25 && lep2Pt<10 && met>250 && mt>100 && jet1Pt>130 && jet2Pt>25 && AnalysisType==6 ",
-                      "SSMu":"lep1Pt < 20 && lep2Pt<10 && met>250 && mt>100 && jet1Pt>130 && jet2Pt>25 && AnalysisType==7 ",                                            
-
-}
+configMgr.cutsDict["SSEl"]="lep1Pt < 25 && lep2Pt<10 && met>250 && mt>100 && jet1Pt>130 && jet2Pt>25 && AnalysisType==6"
+configMgr.cutsDict["SSMu"]="lep1Pt < 20 && lep2Pt<10 && met>250 && mt>100 && jet1Pt>130 && jet2Pt>25 && AnalysisType==7"
 
 d=configMgr.cutsDict
 configMgr.cutsDict["SS2jElT"] = d["SSEl"]+"&& met/meff2Jet>0.3"
@@ -256,7 +254,7 @@ commonChanSyst = [ Systematic("LE",configMgr.weights,lepHighWeights,lepLowWeight
                    ]
 
 fullChanSyst = [ Systematic("MC","_NoSys","_METCOup","_METCOdown","tree","overallSys"), # MET cell-out uncertainty as overallSys - one per channel
-                 Systematic("MP","_NoSys","_METPUup","_METPUdown","tree","histoSys"), # MET pileup uncertainty as overallSys - one per channel # CHANGED TO HISTOSYS TO BE CONSISTENT WITH 1LEP
+                 Systematic("MP","_NoSys","_METPUup","_METPUdown","tree","histoSys"), # MET pileup uncertainty as overallSys - one per channel
                  Systematic("TE",configMgr.weights,trigHighWeights,trigLowWeights,"weight","overallSys") # Trigger weight uncertainty as overallSys
                  ]
 
@@ -791,23 +789,82 @@ if doValidationDilep:
 
 if doValidationDilepZ:
     bkgOnly.setValidationChannels([meffZVR4_ee,meffZVR4_em,meffZVR4_mm,nJetZVR4_ee,nJetZVR4_em,nJetZVR4_mm,meffZVR2_ee,meffZVR2_em,meffZVR2_mm,nJetZVR2_ee,nJetZVR2_em,nJetZVR2_mm,meffZVR3_ee,meffZVR3_em,meffZVR3_mm,nJetZVR3_ee,nJetZVR3_em,nJetZVR3_mm])
+    pass
 
+if doSoftLep:
+    mmSVEl = bkt.addChannel("met/meff2Jet",["SVEl"],6,0.1,0.7)
+    mmSVMu = bkt.addChannel("met/meff2Jet",["SVMu"],6,0.1,0.7)
+    mmSVWEl = bkt.addChannel("met/meff2Jet",["SVWEl"],6,0.1,0.7)
+    mmSVWMu = bkt.addChannel("met/meff2Jet",["SVWMu"],6,0.1,0.7)
+    mmSVTEl = bkt.addChannel("met/meff2Jet",["SVTEl"],6,0.1,0.7)
+    mmSVTMu = bkt.addChannel("met/meff2Jet",["SVTMu"],6,0.1,0.7)
+    mmSSEl = bkt.addChannel("met/meff2Jet",["SSEl"],6,0.1,0.7)
+    mmSSMu = bkt.addChannel("met/meff2Jet",["SSMu"],6,0.1,0.7)
+    mmSSElT = bkt.addChannel("met/meff2Jet",["SSElT"],4,0.3,0.7)
+    mmSSMuT = bkt.addChannel("met/meff2Jet",["SSMuT"],4,0.3,0.7)
+    bkgOnly.setValidationChannels([mmSVEl, mmSVMu,  mmSSEl, mmSSMu, mmSSElT, mmSSMuT, mmSVTEl, mmSVTMu, mmSVWEl, mmSVWMu])
 
+    validationSoftLepChannels = [mmSVEl, mmSVMu,  mmSSEl, mmSSMu, mmSSElT, mmSSMuT]
+    validationSoftLepBtagChannels =  [mmSVTEl, mmSVTMu]
+    validationSoftLepBvetoChannels =  [mmSVWEl, mmSVWMu]
+   
+    # add systematics
+    for chan in validationSoftLepChannels:
+        chan.useOverflowBin = True
+        for syst in commonChanSyst + commonSamSyst:
+            chan.addSystematic(syst)
+            if debugSyst:
+                print " channel = ", chan.name, " adding systematic = ", syst.name
+        # only additional Full Systematics
+        if fullSyst:
+            for syst in fullChanSyst + fullSamSyst:
+                chan.addSystematic(syst)
+                if debugSyst:
+                    print " channel = ", chan.name, " adding Full systematic = ", syst.name             
+
+    # add systematics
+    for chan in validationSoftLepBtagChannels:
+        chan.hasB = True
+        chan.hasBQCD = True
+        chan.useOverflowBin = True
+        for syst in commonChanSyst + commonSamSyst + btagChanSyst:
+            chan.addSystematic(syst)
+            if debugSyst:
+                print " channel = ", chan.name, " adding systematic = ", syst.name
+        # only additional Full Systematics
+        if fullSyst:
+            for syst in fullChanSyst + fullSamSyst:
+                chan.addSystematic(syst)
+                if debugSyst:
+                    print " channel = ", chan.name, " adding Full systematic = ", syst.name             
+
+    # add systematics
+    for chan in validationSoftLepBvetoChannels:
+        chan.hasB = True
+        chan.hasBQCD = False
+        chan.useOverflowBin = True
+        for syst in commonChanSyst + commonSamSyst + btagChanSyst:
+            chan.addSystematic(syst)
+            if debugSyst:
+                print " channel = ", chan.name, " adding systematic = ", syst.name
+        # only additional Full Systematics
+        if fullSyst:
+            for syst in fullChanSyst + fullSamSyst:
+                chan.addSystematic(syst)
+                if debugSyst:
+                    print " channel = ", chan.name, " adding Full systematic = ", syst.name
+                    pass
+                pass
+            pass
+        pass
+    pass
 
 #-------------------------------------------------
 # Exclusion fit
 #-------------------------------------------------
 
-sigCommonChanSyst = [ Systematic("LE",configMgr.weights,lepHighWeights,lepLowWeights,"weight","overallSys")] # Lepton weight uncertainty as overallSys
-
-sigCommonBGSyst =  [ Systematic("JLow","_NoSys","_JESLowup","_JESLowdown","tree","histoSys"), # JES uncertainty as histoSys - for low pt jets
-                     Systematic("JMedium","_NoSys","_JESMediumup","_JESMediumdown","tree","histoSys"), # JES uncertainty as histoSys - for medium pt jets
-                     Systematic("JHigh","_NoSys","_JESHighup","_JESHighdown","tree","histoSys") # JES uncertainty as histoSys - for high pt jets
-                     ]
-
-
 if doExclusion_GMSB_combined or doExclusion_mSUGRA_dilepton_combined or doExclusion_GG_twostepCC_slepton:
-       
+
     for sig in sigSamples:
         myTopLvl = bkgOnly
         myTopLvl.name="dilepton_%s"%sig
@@ -828,27 +885,6 @@ if doExclusion_GMSB_combined or doExclusion_mSUGRA_dilepton_combined or doExclus
         SigList=[sig]
 
         S2Channel_ee = myTopLvl.addChannel("meffInc",["S2ee"],meffNBinsS2,meffBinLowS2,meffBinHighS2)
-       ##  S2Channel_ee.useOverflowBin=True
-        
-##         S2Channel_ee.getSample(sig).addSystematic(jesSignal)
-
-##         [S2Channel_ee.getSample(sam).addSystematic(zpT50GeV) for sam in BGList]
-##         [S2Channel_ee.getSample(sam).addSystematic(zpT100GeV) for sam in BGList]
-##         [S2Channel_ee.getSample(sam).addSystematic(zpT150GeV) for sam in BGList]
-##         [S2Channel_ee.getSample(sam).addSystematic(zpT200GeV) for sam in BGList]
-       
-##         S2Channel_ee.addSystematic(lepS2DL)
-##         if fullSyst:
-##             S2Channel_ee.addSystematic(metcoS2DL)
-##             S2Channel_ee.addSystematic(metpuS2DL)
-##             S2Channel_ee.addSystematic(trigS2DL)
-##             [S2Channel_ee.getSample(sam).addSystematic(lesS2DL) for sam in SigList+BGList]
-##             [S2Channel_ee.getSample(sam).addSystematic(lermsS2DL) for sam in SigList+BGList]
-##             [S2Channel_ee.getSample(sam).addSystematic(leridS2DL) for sam in SigList+BGList]
-##             [S2Channel_ee.getSample(sam).addSystematic(jesLow) for sam in BGList]
-##             [S2Channel_ee.getSample(sam).addSystematic(jesMedium) for sam in BGList]
-##             [S2Channel_ee.getSample(sam).addSystematic(jesHigh) for sam in BGList]
-            
         S2Channel_em = myTopLvl.addChannel("meffInc",["S2em"],meffNBinsS2,meffBinLowS2,meffBinHighS2)
         S2Channel_mm = myTopLvl.addChannel("meffInc",["S2mm"],meffNBinsS2,meffBinLowS2,meffBinHighS2)
         S4Channel_ee = myTopLvl.addChannel("meffInc",["S4ee"],meffNBinsS4,meffBinLowS4,meffBinHighS4)
@@ -861,25 +897,31 @@ if doExclusion_GMSB_combined or doExclusion_mSUGRA_dilepton_combined or doExclus
         for chan in SRChannels:
             chan.useOverflowBin = True
             chan.getSample(sig).addSystematic(jesSignal)
-            for syst in commonChanSyst:
+            for syst in sigCommonChanSyst:
                 chan.addSystematic(syst)
                 if debugSyst:
                     print " channel = ", chan.name, " adding systematic = ", syst.name
             # only BGList sample systematics     
-            for syst in commonSamSyst:
+            for syst in sigCommonBGSamSyst:
                 for sam in BGList:
                     chan.getSample(sam).addSystematic(syst)
                     if debugSyst:
                         print " channel = ", chan.name, " sample = ", chan.getSample(sam).name, " adding systematic = ", syst.name
             # only additional Full Systematics
             if fullSyst:
-                for syst in fullChanSyst:
+                for syst in sigFullChanSyst:
                     chan.addSystematic(syst)
                     if debugSyst:
                         print " channel = ", chan.name, " adding Full systematic = ", syst.name
             # only BGList sample additional Full systematics     
-            for syst in fullSamSyst:
+            for syst in sigFullBGSamSyst:
                 for sam in BGList:
+                    chan.getSample(sam).addSystematic(syst)
+                    if debugSyst:
+                        print " channel = ", chan.name, " sample = ", chan.getSample(sam).name, " adding Full systematic = ", syst.name
+            # only BGList+SigList sample additional Full systematics     
+            for syst in sigFullSamSyst:
+                for sam in BGList+SigList:
                     chan.getSample(sam).addSystematic(syst)
                     if debugSyst:
                         print " channel = ", chan.name, " sample = ", chan.getSample(sam).name, " adding Full systematic = ", syst.name
@@ -897,35 +939,4 @@ if doExclusion_GMSB_combined or doExclusion_mSUGRA_dilepton_combined or doExclus
 
 
 #  LocalWords:  jesSignal
-
-## # Signal XSec uncertainty as overallSys (pure yeild affect)
-## xsecSig = Systematic("XSS",configMgr.weights,xsecSigHighWeights,xsecSigLowWeights,"weight","overallSys")
-
-## # JES uncertainty as shapeSys - one systematic per region (combine WR and TR), merge samples
-## jesSignal = Systematic("JSig","_NoSys","_JESup","_JESdown","tree","histoSys")
-
-## commonChanSyst = [ Systematic("LE",configMgr.weights,lepHighWeights,lepLowWeights,"weight","overallSys"), # Lepton weight uncertainty as overallSys
-##                Systematic("JLow","_NoSys","_JESLowup","_JESLowdown","tree","histoSys"), # JES uncertainty as histoSys - for low pt jets
-##                Systematic("JMedium","_NoSys","_JESMediumup","_JESMediumdown","tree","histoSys"), # JES uncertainty as histoSys - for medium pt jets
-##                Systematic("JHigh","_NoSys","_JESHighup","_JESHighdown","tree","histoSys") # JES uncertainty as histoSys - for high pt jets
-##                    ]
-
-## fullChanSyst = [ Systematic("MC","_NoSys","_METCOup","_METCOdown","tree","overallSys"), # MET cell-out uncertainty as overallSys - one per channel
-##                  Systematic("MP","_NoSys","_METPUup","_METPUdown","tree","histoSys"), # MET pileup uncertainty as overallSys - one per channel # CHANGED TO HISTOSYS TO BE CONSISTENT WITH 1LEP
-##                  Systematic("TE",configMgr.weights,trigHighWeights,trigLowWeights,"weight","overallSys") # Trigger weight uncertainty as overallSys
-##                  ]
-
-## btagChanSyst = [Systematic("BT",configMgr.weights,bTagHighWeights,bTagLowWeights,"weight","overallSys")]
-
-## commonSamSyst = [ #Systematic("Zpt0GeV",configMgr.weights,pT0GeVHighWeights,pT0GeVLowWeights,"weight","overallSys"),
-##                   Systematic("Zpt50GeV",configMgr.weights,pT50GeVHighWeights,pT50GeVLowWeights,"weight","overallSys"),
-##                   Systematic("Zpt100GeV",configMgr.weights,pT100GeVHighWeights,pT100GeVLowWeights,"weight","overallSys"),
-##                   Systematic("Zpt150GeV",configMgr.weights,pT150GeVHighWeights,pT150GeVLowWeights,"weight","overallSys"),
-##                   Systematic("Zpt200GeV",configMgr.weights,pT200GeVHighWeights,pT200GeVLowWeights,"weight","overallSys")
-##                   ]
-
-## fullSamSyst = [    Systematic("LES","_NoSys","_LESup","_LESdown","tree","overallSys"), # LES uncertainty as overallSys - one per channel
-##                    Systematic("LRM","_NoSys","_LERMSup","_LERMSdown","tree","overallSys"), # LER with muon system as overallSys - one per channel
-##                    Systematic("LRI","_NoSys","_LERIDup","_LERIDdown","tree","overallSys") # LER with inner detector as overallSys - one per channel
-##                    ]
 
