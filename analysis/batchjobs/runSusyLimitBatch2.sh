@@ -77,7 +77,7 @@ if [ $DRYRUN -ne 1 ]; then
   #gzip $LOGFILE
 fi
 
-cp results/MyOneLeptonKtScaleFitR17_Sig_SU_*_combined_NormalMeasurement_model.root /afs/cern.ch/atlas/project/cern/susy/users/jlorenz/. 
+cp results/*_combined_NormalMeasurement_model.root /afs/cern.ch/atlas/project/cern/susy/users/jlorenz/. 
 #echo '_file0->ls(); gSystem->Exit(0);' | root -b data/MyOneLeptonKtScaleFitR17.root
 
 echo

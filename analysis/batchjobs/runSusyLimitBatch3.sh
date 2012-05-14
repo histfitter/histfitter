@@ -80,7 +80,7 @@ if [ $DRYRUN -ne 1 ]; then
 fi
 
 #echo '_file0->ls(); gSystem->Exit(0);' | root -b data/MyOneLeptonKtScaleFitR17.root
-cp results/MyOneLeptonKtScaleFitR17_Output_hypotest.root /afs/cern.ch/atlas/project/cern/susy/users/jlorenz/${ARGS}_hypotestresult/.
+cp results/*_Output_hypotest.root /afs/cern.ch/atlas/project/cern/susy/users/jlorenz/${ARGS}_hypotestresult/.
 
 echo
 echo ">> Finished command:"

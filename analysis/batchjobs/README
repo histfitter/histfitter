@@ -13,14 +13,14 @@ IN GENERAL:
   
   
 -you need to move the following files to your submit directory (usually SusyFitter):
-  * analysis/OneLepton/batchjobs/submit_susy_main.sh
-  * analysis/OneLepton/batchjobs/submit_susy_main_tree.sh  
-  * analysis/OneLepton/batchjobs/submit_susy.sh
-  * analysis/OneLepton/batchjobs/submit_susy_tree.sh   
-  * analysis/OneLepton/batchjobs/susy_points4.txt
-  * analysis/OneLepton/batchjobs/susy_points3.txt  
-  * analysis/OneLepton/batchjobs/runSusyLimitBatch2.sh
-  * analysis/OneLepton/batchjobs/runSusyLimitBatch3.sh  
+  * analysis/batchjobs/submit_susy_main.sh
+  * analysis/batchjobs/submit_susy_main_tree.sh  
+  * analysis/batchjobs/submit_susy.sh
+  * analysis/batchjobs/submit_susy_tree.sh   
+  * analysis/batchjobs/susy_points4.txt
+  * analysis/batchjobs/susy_points3.txt  
+  * analysis/batchjobs/runSusyLimitBatch2.sh
+  * analysis/batchjobs/runSusyLimitBatch3.sh  
   
 - you need to move the following files to your output directory:
   * macros/macros_jlorenz/check_results.py
@@ -42,8 +42,6 @@ Submission of batch jobs:
    runSusyLimitBatch2.sh will create some directories on the batch node and copy the some input files to it.
    It will also copy the output to the output directory.
    It will execute python scripts/HistFitter.py -t -w python/MyOneLeptonKtScale_onepoint.py 
-   ###scripts/HistFitter_onepoint.py is similar to scripts/HistFitter.py but contains the option <-g grid_point> 
-   with which it is possible to specify the signal grid point in the input.
    python/MyOneLeptonKtScale_onepoint.py is similar to python/MyOneLeptonKtScale.py, but no signal samples are specified and the ATLAS macro is turned off.
    
 2. Perform the hypothesis fit:
