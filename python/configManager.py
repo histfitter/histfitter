@@ -162,13 +162,16 @@ class ConfigManager(object):
                     if not sam.isData and not sam.isQCD and not sam.isDiscovery:
                         for (name,systList) in self.systDict.items():
                             for syst in systList:
-                                chan.getSample(sam.name).addSystematic(syst)
+                                if not name in chan.getSample(sam.name).systDict.keys():
+                                    chan.getSample(sam.name).addSystematic(syst)
                         for (name,systList) in tl.systDict.items():
                             for syst in systList:
-                                chan.getSample(sam.name).addSystematic(syst)                    
+                                if not name in chan.getSample(sam.name).systDict.keys():
+                                    chan.getSample(sam.name).addSystematic(syst)
                         for (name,systList) in chan.systDict.items():
                             for syst in systList:
-                                chan.getSample(sam.name).addSystematic(syst)
+                                if not name in chan.getSample(sam.name).systDict.keys():
+                                    chan.getSample(sam.name).addSystematic(syst)
                     elif sam.isQCD or sam.isData:
                         chan.getSample(sam.name).setWrite(False)
 
