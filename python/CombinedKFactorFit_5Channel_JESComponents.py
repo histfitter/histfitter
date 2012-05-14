@@ -712,7 +712,7 @@ if fullSyst:
 # single ele
 
 nJetZeChannel=bkgOnly.addChannel("nJet",nJetZeRegions,nJetZeNBins,nJetZeBinLow,nJetZeBinHigh)
-nJetZeChannel.hasB = True
+nJetZeChannel.hasB = False
 nJetZeChannel.hasBQCD = False
 nJetZeChannel.addSystematic(jesLow)
 nJetZeChannel.addSystematic(jesMedium)
@@ -1052,7 +1052,7 @@ if doValidationSlope:
         metWR_Mu.addSystematic(leridTR)       
 
     ZptZR_ee=bkgOnly.addChannel("Zpt",["ZRee"],metNBinsTR,metBinLowTR,metBinHighTR)
-    ZptZR_ee.hasB = True
+    ZptZR_ee.hasB = False
     ZptZR_ee.hasBQCD = False
     ZptZR_ee.useOverflowBin = True
     ZptZR_ee.addSystematic(jesLow)
@@ -1070,7 +1070,7 @@ if doValidationSlope:
 
 
     ZptZR_mm=bkgOnly.addChannel("Zpt",["ZRmm"],metNBinsTR,metBinLowTR,metBinHighTR)
-    ZptZR_mm.hasB = True
+    ZptZR_mm.hasB = False
     ZptZR_mm.hasBQCD = False
     ZptZR_mm.useOverflowBin = True
     ZptZR_mm.addSystematic(jesLow)
