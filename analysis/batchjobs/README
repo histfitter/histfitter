@@ -40,11 +40,13 @@ Submission of batch jobs:
    submit_susy_tree.sh will submit the batch job.
    It will call runSusyLimitBatch2.sh.
    runSusyLimitBatch2.sh will create some directories on the batch node and copy the some input files to it.
-   It will also copy the output to the output directory.
-   It will execute python scripts/HistFitter.py -t -w python/MyOneLeptonKtScale_onepoint.py 
+   It will also copy the output to the output directory. *** MAKE SURE YOU UPDATE THE OUTPUT DIR IN runSusyLimitBatch2.sh ***
+   It will execute python scripts/HistFitter.py -t -w python/MyOneLeptonKtScale_onepoint.py  # *** MAKE SURE YOU UPDATE THE CONFIG FILE ***
    python/MyOneLeptonKtScale_onepoint.py is similar to python/MyOneLeptonKtScale.py, but no signal samples are specified and the ATLAS macro is turned off.
    
 2. Perform the hypothesis fit:
+   *** MAKE SURE YOU UPDATE THE OUTPUT DIR IN runSusyLimitBatch3.sh ***
+
    (-> this corresponds to HistFitter.py -p config_file.py)
    
    sh submit_susy_main.sh
