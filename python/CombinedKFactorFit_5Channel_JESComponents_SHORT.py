@@ -14,7 +14,7 @@ from systematic import Systematic
 #ROOT.SetAtlasStyle()
 
 onLxplus=True
-debugSyst=True
+debugSyst=False
 doHardLep=True
 doSoftLep=False
 useStat=True
@@ -168,13 +168,13 @@ configMgr.cutsDict["SR4jTMu"]="AnalysisType==2 && met>250 && mt>100 && met/meff4
 configMgr.cutsDict["SR7jTEl"]="AnalysisType==1 && met>180 && mt>120 && jet1Pt>80 && jet7Pt>25 && meffInc>750"
 configMgr.cutsDict["SR7jTMu"]="AnalysisType==2 && met>180 && mt>120 && jet1Pt>80 && jet7Pt>25 && meffInc>750"
 
-configMgr.cutsDict["SVEl"]="(lep1Pt < 25 && lep2Pt<10 && met>180 && met<250 && mt>80 && mt<100 && jet1Pt>130 && jet2Pt>25 && AnalysisType==6)"
-configMgr.cutsDict["SVMu"]="(lep1Pt < 20 && lep2Pt<10 && met>180 && met<250 && mt>80 && mt<100 && jet1Pt>130 && jet2Pt>25 && AnalysisType==7)"
+configMgr.cutsDict["SVEl"]="(lep1Pt<25 && lep2Pt<10 && met>180 && met<250 && mt>80 && mt<100 && jet1Pt>130 && jet2Pt>25 && AnalysisType==6)"
+configMgr.cutsDict["SVMu"]="(lep1Pt<20 && lep2Pt<10 && met>180 && met<250 && mt>80 && mt<100 && jet1Pt>130 && jet2Pt>25 && AnalysisType==7)"
 
-configMgr.cutsDict["SVWEl"]="lep1Pt < 25 && lep2Pt<10 && met>180 && met<250 && mt>40 && mt<80 && nB2Jet==0 && jet1Pt>130 && jet2Pt>25  && AnalysisType==6"
-configMgr.cutsDict["SVTEl"]="lep1Pt < 25 && lep2Pt<10 && met>180 && met<250 && mt>40 && mt<80 && nB2Jet>0 && jet1Pt>130 && jet2Pt>25 && AnalysisType==6"
-configMgr.cutsDict["SVWMu"]="lep1Pt < 20 && lep2Pt<10 && met>180 && met<250 && mt>40 && mt<80 && nB2Jet==0 && jet1Pt>130 && jet2Pt>25  && AnalysisType==7"
-configMgr.cutsDict["SVTMu"]="lep1Pt < 20 && lep2Pt<10 && met>180 && met<250 && mt>40 && mt<80 && nB2Jet>0 && jet1Pt>130 && jet2Pt>25 && AnalysisType==7"
+configMgr.cutsDict["SVWEl"]="lep1Pt<25 && lep2Pt<10 && met>180 && met<250 && mt>40 && mt<80 && nB2Jet==0 && jet1Pt>130 && jet2Pt>25 && AnalysisType==6"
+configMgr.cutsDict["SVTEl"]="lep1Pt<25 && lep2Pt<10 && met>180 && met<250 && mt>40 && mt<80 && nB2Jet>0 && jet1Pt>130 && jet2Pt>25 && AnalysisType==6"
+configMgr.cutsDict["SVWMu"]="lep1Pt<20 && lep2Pt<10 && met>180 && met<250 && mt>40 && mt<80 && nB2Jet==0 && jet1Pt>130 && jet2Pt>25 && AnalysisType==7"
+configMgr.cutsDict["SVTMu"]="lep1Pt<20 && lep2Pt<10 && met>180 && met<250 && mt>40 && mt<80 && nB2Jet>0 && jet1Pt>130 && jet2Pt>25 && AnalysisType==7"
 
 configMgr.cutsDict["SSEl"]="lep1Pt < 25 && lep2Pt<10 && met>250 && mt>100 && jet1Pt>130 && jet2Pt>25 && AnalysisType==6"
 configMgr.cutsDict["SSMu"]="lep1Pt < 20 && lep2Pt<10 && met>250 && mt>100 && jet1Pt>130 && jet2Pt>25 && AnalysisType==7"
@@ -241,6 +241,7 @@ hfLowWeights = ("genWeight","eventWeight","leptonWeight","triggerWeight",truthWp
 #--------------------
 # List of systematics
 #--------------------
+configMgr.nomName = "_NoSys"
 
 # Signal XSec uncertainty as overallSys (pure yeild affect)
 xsecSig = Systematic("XSS",configMgr.weights,xsecSigHighWeights,xsecSigLowWeights,"weight","overallSys")
@@ -248,39 +249,23 @@ xsecSig = Systematic("XSS",configMgr.weights,xsecSigHighWeights,xsecSigLowWeight
 # JES uncertainty as shapeSys - one systematic per region (combine WR and TR), merge samples
 jesSignal = Systematic("JSig","_NoSys","_JESup","_JESdown","tree","histoSys")
 
-commonChanSyst = [ Systematic("LE",configMgr.weights,lepHighWeights,lepLowWeights,"weight","overallSys"), # Lepton weight uncertainty as overallSys
-               Systematic("JLow","_NoSys","_JESLowup","_JESLowdown","tree","histoSys"), # JES uncertainty as histoSys - for low pt jets
-               Systematic("JMedium","_NoSys","_JESMediumup","_JESMediumdown","tree","histoSys"), # JES uncertainty as histoSys - for medium pt jets
-               Systematic("JHigh","_NoSys","_JESHighup","_JESHighdown","tree","histoSys") # JES uncertainty as histoSys - for high pt jets
-                   ]
+basicChanSyst = []
+basicChanSyst.append(Systematic("JLow","_NoSys","_JESLowup","_JESLowdown","tree","histoSys")) # JES uncertainty - for low pt jets
+basicChanSyst.append(Systematic("JMedium","_NoSys","_JESMediumup","_JESMediumdown","tree","histoSys")) # JES uncertainty - for medium pt jets
+basicChanSyst.append(Systematic("JHigh","_NoSys","_JESHighup","_JESHighdown","tree","histoSys")) # JES uncertainty - for high pt jets
+basicChanSyst.append(Systematic("MC","_NoSys","_METCOup","_METCOdown","tree","overallSys")) # MET cell-out uncertainty - one per channel
+             
 
-fullChanSyst = [ Systematic("MC","_NoSys","_METCOup","_METCOdown","tree","overallSys"), # MET cell-out uncertainty as overallSys - one per channel
-                 Systematic("MP","_NoSys","_METPUup","_METPUdown","tree","histoSys"), # MET pileup uncertainty as overallSys - one per channel
-                 Systematic("TE",configMgr.weights,trigHighWeights,trigLowWeights,"weight","overallSys") # Trigger weight uncertainty as overallSys
-                 ]
+fullChanSyst = []
+fullChanSyst.append(Systematic("LE",configMgr.weights,lepHighWeights,lepLowWeights,"weight","overallSys")) # Lepton weight uncertainty
+fullChanSyst.append(Systematic("MP","_NoSys","_METPUup","_METPUdown","tree","histoSys")) # MET pileup uncertainty - one per channel
+fullChanSyst.append(Systematic("TE",configMgr.weights,trigHighWeights,trigLowWeights,"weight","overallSys")) # Trigger weight uncertainty
+fullChanSyst.append(Systematic("LES","_NoSys","_LESup","_LESdown","tree","overallSys")) # LES uncertainty - one per channel
+fullChanSyst.append(Systematic("LRM","_NoSys","_LERMSup","_LERMSdown","tree","overallSys")) # LER with muon system - one per channel
+fullChanSyst.append(Systematic("LRI","_NoSys","_LERIDup","_LERIDdown","tree","overallSys")) # LER with inner detector - one per channel
 
 btagChanSyst = [Systematic("BT",configMgr.weights,bTagHighWeights,bTagLowWeights,"weight","overallSys")]
 
-commonSamSyst = [ #Systematic("Zpt0GeV",configMgr.weights,pT0GeVHighWeights,pT0GeVLowWeights,"weight","overallSys"),
-                  Systematic("Zpt50GeV",configMgr.weights,pT50GeVHighWeights,pT50GeVLowWeights,"weight","overallSys"),
-                  Systematic("Zpt100GeV",configMgr.weights,pT100GeVHighWeights,pT100GeVLowWeights,"weight","overallSys"),
-                  Systematic("Zpt150GeV",configMgr.weights,pT150GeVHighWeights,pT150GeVLowWeights,"weight","overallSys"),
-                  Systematic("Zpt200GeV",configMgr.weights,pT200GeVHighWeights,pT200GeVLowWeights,"weight","overallSys")
-                  ]
-
-fullSamSyst = [    Systematic("LES","_NoSys","_LESup","_LESdown","tree","overallSys"), # LES uncertainty as overallSys - one per channel
-                   Systematic("LRM","_NoSys","_LERMSup","_LERMSdown","tree","overallSys"), # LER with muon system as overallSys - one per channel
-                   Systematic("LRI","_NoSys","_LERIDup","_LERIDdown","tree","overallSys") # LER with inner detector as overallSys - one per channel
-                   ]
-
-
-# List of systematics
-configMgr.nomName = "_NoSys"
-
-#Parameters of the Measurement
-measName = "BasicMeasurement"
-measLumi = 1.
-measLumiError = 0.037
 
 # nJet Binning for Top Control region
 
@@ -343,12 +328,10 @@ wzSample_Np5.setNormFactor("mu_WZ_Np5",1.,0.,5.)
 wzSample_Np5.setStatConfig(useStat)
 
 ### Additional scale uncertainty on WZ Np0 and WZ Np1
-
 wzSample_Np0.addSystematic(Systematic("err_WZ_Np0", configMgr.weights,1.06 ,0.96, "user","userOverallSys"))
 wzSample_Np1.addSystematic(Systematic("err_WZ_Np1", configMgr.weights,1.06 ,0.83, "user","userOverallSys"))
 
 ### Additional uncertainty on the V+HF samples
-
 hf = Systematic("HF",configMgr.weights,hfHighWeights,hfLowWeights,"weight","histoSys")
 wzSample_Np0.addSystematic(hf)
 wzSample_Np1.addSystematic(hf)
@@ -422,7 +405,7 @@ else:
 
 
 #Add Measurement
-meas=bkgOnly.addMeasurement(measName,measLumi,measLumiError)
+meas=bkgOnly.addMeasurement("BasicMeasurement",lumi=1.0,lumiErr=0.037)
 meas.addPOI("mu_SIG")
 
 # Fix Background 
@@ -460,28 +443,16 @@ for chan in topChannels:
     chan.hasB = True
     chan.hasBQCD = True
     chan.useOverflowBin = False
-    for syst in commonChanSyst + btagChanSyst:
+    for syst in basicChanSyst + btagChanSyst:
         chan.addSystematic(syst)
         if debugSyst:
             print " channel = ", chan.name, " adding systematic = ", syst.name
-    # only BGList sample systematics     
-    for syst in commonSamSyst:
-        for sam in BGList:
-            chan.getSample(sam).addSystematic(syst)
-            if debugSyst:
-                print " channel = ", chan.name, " sample = ", chan.getSample(sam).name, " adding systematic = ", syst.name
     # only additional Full Systematics
     if fullSyst:
         for syst in fullChanSyst:
             chan.addSystematic(syst)
             if debugSyst:
                 print " channel = ", chan.name, " adding Full systematic = ", syst.name
-        # only BGList sample additional Full systematics     
-        for syst in fullSamSyst:
-            for sam in BGList:
-                chan.getSample(sam).addSystematic(syst)
-                if debugSyst:
-                    print " channel = ", chan.name, " sample = ", chan.getSample(sam).name, " adding Full systematic = ", syst.name
                 
         
 ####### nJet for W/Z  #######
@@ -510,28 +481,16 @@ WZChannels = [nJetZeeChannel, nJetZeChannel, nJetZmmChannel, nJetZmChannel]
 # add systematics
 for chan in WZChannels:
     chan.useOverflowBin = False
-    for syst in commonChanSyst:
+    for syst in basicChanSyst:
         chan.addSystematic(syst)
         if debugSyst:
             print " channel = ", chan.name, " adding systematic = ", syst.name
-    # only BGList sample systematics     
-    for syst in commonSamSyst:
-        for sam in BGList:
-            chan.getSample(sam).addSystematic(syst)
-            if debugSyst:
-                print " channel = ", chan.name, " sample = ", chan.getSample(sam).name, " adding systematic = ", syst.name
     # only additional Full Systematics
     if fullSyst:
         for syst in fullChanSyst:
             chan.addSystematic(syst)
             if debugSyst:
                 print " channel = ", chan.name, " adding Full systematic = ", syst.name
-        # only BGList sample additional Full systematics     
-        for syst in fullSamSyst:
-            for sam in BGList:
-                chan.getSample(sam).addSystematic(syst)
-                if debugSyst:
-                    print " channel = ", chan.name, " sample = ", chan.getSample(sam).name, " adding Full systematic = ", syst.name
                 
         
 bkgOnly.setBkgConstrainChannels([nJetTopeeChannel,nJetZeeChannel,nJetTopeChannel,nJetZeChannel,nJetTopemChannel,nJetTopmmChannel,nJetZmmChannel,nJetTopmChannel,nJetZmChannel])
