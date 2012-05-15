@@ -185,8 +185,8 @@ configMgr.cutsDict["SSEl"]="lep1Pt < 25 && lep2Pt<10 && met>250 && mt>100 && jet
 configMgr.cutsDict["SSMu"]="lep1Pt < 20 && lep2Pt<10 && met>250 && mt>100 && jet1Pt>130 && jet2Pt>25 && AnalysisType==7"
 
 d=configMgr.cutsDict
-configMgr.cutsDict["SS2jElT"] = d["SSEl"]+"&& met/meff2Jet>0.3"
-configMgr.cutsDict["SS2jMuT"] = d["SSMu"]+"&& met/meff2Jet>0.3"
+configMgr.cutsDict["SSElT"] = d["SSEl"]+"&& met/meff2Jet>0.3"
+configMgr.cutsDict["SSMuT"] = d["SSMu"]+"&& met/meff2Jet>0.3"
 
 
 ## # Tuples of weights 
