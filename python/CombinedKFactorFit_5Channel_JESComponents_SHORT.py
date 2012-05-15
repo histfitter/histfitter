@@ -410,7 +410,9 @@ for sam in bgdsamples:
     sam.setFileList(bgdFiles)
 
 
-#Create TopLevelXML objects
+#--------------------------------------------------------------
+# Background-only fit 
+#--------------------------------------------------------------
 bkgOnly = configMgr.addTopLevelXML("bkgonly")
 bkgOnly.addSamples(bgdsamples)
 if useStat:
@@ -418,22 +420,14 @@ if useStat:
 else:
     bkgOnly.statErrThreshold=None
 
-
 #Add Measurement
 meas=bkgOnly.addMeasurement("BasicMeasurement",lumi=1.0,lumiErr=0.037)
 meas.addPOI("mu_SIG")
-
 # Fix Background 
 meas.addParamSetting("mu_WZ_Np0","const",1.0)
 meas.addParamSetting("mu_WZ_Np1","const",1.0)
 
-
-#--------------------------------------------------------------
-# Background fit regions 
-#--------------------------------------------------------------
-
 BGList=["Top_Np0","WZ_Np0","Top_Np1","WZ_Np1","Top_Np2","WZ_Np2","Top_Np3","WZ_Np3","Top_Np4","WZ_Np4","Top_Np5","WZ_Np5","BG"]
-
 if doSignalOnly:
     BGList=[]
 
@@ -462,13 +456,11 @@ for chan in topChannels:
         chan.addSystematic(syst)
         if debugSyst:
             print " channel = ", chan.name, " adding systematic = ", syst.name
-    # only additional Full Systematics
     if fullSyst:
         for syst in fullChanSyst:
             chan.addSystematic(syst)
             if debugSyst:
                 print " channel = ", chan.name, " adding Full systematic = ", syst.name
-                
         
 ####### nJet for W/Z  #######
     
@@ -561,15 +553,13 @@ pt2BinHighTR = 800.
 if doValidationSlope:
     # check impact of kfactor fit on several distributions
     #TR
-    meffTR_El=bkgOnly.addChannel("meffInc",["TRElVR"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
-    metTR_El=bkgOnly.addChannel("met",["TRElVR2"],metNBinsTR,metBinLowTR,metBinHighTR)
-    metTR_Mu=bkgOnly.addChannel("met",["TRMuVR2"],metNBinsTR,metBinLowTR,metBinHighTR)
-    pt1TR_El=bkgOnly.addChannel("jet1Pt",["TRElVR"],pt1NBinsTR,pt1BinLowTR,pt1BinHighTR)
-    pt1TR_Mu=bkgOnly.addChannel("jet1Pt",["TRMuVR"],pt1NBinsTR,pt1BinLowTR,pt1BinHighTR)
-    pt2TR_El=bkgOnly.addChannel("jet2Pt",["TRElVR"],pt2NBinsTR,pt2BinLowTR,pt2BinHighTR)
-    pt2TR_Mu=bkgOnly.addChannel("jet2Pt",["TRMuVR"],pt2NBinsTR,pt2BinLowTR,pt2BinHighTR)
-    
-    validationSlopeTRChannels = [meffTR_El, meffTR_Mu, metTR_El, metTR_Mu, pt1TR_El , pt1TR_Mu , pt2TR_El , pt2TR_Mu]
+    meffTR_El=bkgOnly.addValidationChannel("meffInc",["TRElVR"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
+    metTR_El=bkgOnly.addValidationChannel("met",["TRElVR2"],metNBinsTR,metBinLowTR,metBinHighTR)
+    metTR_Mu=bkgOnly.addValidationChannel("met",["TRMuVR2"],metNBinsTR,metBinLowTR,metBinHighTR)
+    pt1TR_El=bkgOnly.addValidationChannel("jet1Pt",["TRElVR"],pt1NBinsTR,pt1BinLowTR,pt1BinHighTR)
+    pt1TR_Mu=bkgOnly.addValidationChannel("jet1Pt",["TRMuVR"],pt1NBinsTR,pt1BinLowTR,pt1BinHighTR)
+    pt2TR_El=bkgOnly.addValidationChannel("jet2Pt",["TRElVR"],pt2NBinsTR,pt2BinLowTR,pt2BinHighTR)
+    pt2TR_Mu=bkgOnly.addValidationChannel("jet2Pt",["TRMuVR"],pt2NBinsTR,pt2BinLowTR,pt2BinHighTR)
     
     # add systematics
     for chan in validationSlopeTRChannels:
@@ -635,33 +625,35 @@ if doValidationSlope:
 
 if doValidationSR:
     # S2 using meff
-    meff2ee = bkgOnly.addChannel("meffInc",["S2ee"],meffNBinsS2,meffBinLowS2,meffBinHighS2)
+    meff2ee = bkgOnly.addValidationChannel("meffInc",["S2ee"],meffNBinsS2,meffBinLowS2,meffBinHighS2)
     # S4 using meff
-    meff4ee = bkgOnly.addChannel("meffInc",["S4ee"],meffNBinsS4,meffBinLowS4,meffBinHighS4)
+    meff4ee = bkgOnly.addValidationChannel("meffInc",["S4ee"],meffNBinsS4,meffBinLowS4,meffBinHighS4)
     # S2 using meff
-    meff2em = bkgOnly.addChannel("meffInc",["S2em"],meffNBinsS2,meffBinLowS2,meffBinHighS2)
+    meff2em = bkgOnly.addValidationChannel("meffInc",["S2em"],meffNBinsS2,meffBinLowS2,meffBinHighS2)
     # S4 using meff
-    meff4em = bkgOnly.addChannel("meffInc",["S4em"],meffNBinsS4,meffBinLowS4,meffBinHighS4)
+    meff4em = bkgOnly.addValidationChannel("meffInc",["S4em"],meffNBinsS4,meffBinLowS4,meffBinHighS4)
     # S2 using meff
-    meff2mm = bkgOnly.addChannel("meffInc",["S2mm"],meffNBinsS2,meffBinLowS2,meffBinHighS2)
+    meff2mm = bkgOnly.addValidationChannel("meffInc",["S2mm"],meffNBinsS2,meffBinLowS2,meffBinHighS2)
     # S4 using meff
-    meff4mm = bkgOnly.addChannel("meffInc",["S4mm"],meffNBinsS4,meffBinLowS4,meffBinHighS4)
+    meff4mm = bkgOnly.addValidationChannel("meffInc",["S4mm"],meffNBinsS4,meffBinLowS4,meffBinHighS4)
     # HARD LEPTON SRS
-    meffS3_El=bkgOnly.addChannel("meffInc",["S3El"],meffNBinsHL,meffBinLowHL,meffBinHighHL)
-    meffS3_Mu=bkgOnly.addChannel("meffInc",["S3Mu"],meffNBinsHL,meffBinLowHL,meffBinHighHL)
-    meffS4_El=bkgOnly.addChannel("meffInc",["S4El"],meffNBinsHL,meffBinLowHL,meffBinHighHL)
-    meffS4_Mu=bkgOnly.addChannel("meffInc",["S4Mu"],meffNBinsHL,meffBinLowHL,meffBinHighHL)
-    meffS3T_El=bkgOnly.addChannel("meffInc",["SR3jTEl"],1,1200,meffBinHighHL)
-    meffS3T_Mu=bkgOnly.addChannel("meffInc",["SR3jTMu"],1,1200,meffBinHighHL)
-    meffS4T_El=bkgOnly.addChannel("meffInc",["SR4jTEl"],1,800,meffBinHighHL)
-    meffS4T_Mu=bkgOnly.addChannel("meffInc",["SR4jTMu"],1,800,meffBinHighHL)
+    meffS3_El=bkgOnly.addValidationChannel("meffInc",["S3El"],meffNBinsHL,meffBinLowHL,meffBinHighHL)
+    meffS3_Mu=bkgOnly.addValidationChannel("meffInc",["S3Mu"],meffNBinsHL,meffBinLowHL,meffBinHighHL)
+    meffS4_El=bkgOnly.addValidationChannel("meffInc",["S4El"],meffNBinsHL,meffBinLowHL,meffBinHighHL)
+    meffS4_Mu=bkgOnly.addValidationChannel("meffInc",["S4Mu"],meffNBinsHL,meffBinLowHL,meffBinHighHL)
+    meffS3T_El=bkgOnly.addValidationChannel("meffInc",["SR3jTEl"],1,1200,meffBinHighHL)
+    meffS3T_Mu=bkgOnly.addValidationChannel("meffInc",["SR3jTMu"],1,1200,meffBinHighHL)
+    meffS4T_El=bkgOnly.addValidationChannel("meffInc",["SR4jTEl"],1,800,meffBinHighHL)
+    meffS4T_Mu=bkgOnly.addValidationChannel("meffInc",["SR4jTMu"],1,800,meffBinHighHL)
+    meffS7T_El=bkgOnly.addValidationChannel("meffInc",["SR7jTEl"],1,750,meffBinHighHL)
+    meffS7T_Mu=bkgOnly.addValidationChannel("meffInc",["SR7jTMu"],1,750,meffBinHighHL)
     # SOFT LEPTON SRS
-    mmSSEl = bkgOnly.addChannel("met/meff2Jet",["SSEl"],6,0.1,0.7)
-    mmSSMu = bkgOnly.addChannel("met/meff2Jet",["SSMu"],6,0.1,0.7)
-    mmSSElT = bkgOnly.addChannel("met/meff2Jet",["SSElT"],4,0.3,0.7)
-    mmSSMuT = bkgOnly.addChannel("met/meff2Jet",["SSMuT"],4,0.3,0.7)
+    mmSSEl = bkgOnly.addValidationChannel("met/meff2Jet",["SSEl"],6,0.1,0.7)
+    mmSSMu = bkgOnly.addValidationChannel("met/meff2Jet",["SSMu"],6,0.1,0.7)
+    mmSSElT = bkgOnly.addValidationChannel("met/meff2Jet",["SSElT"],4,0.3,0.7)
+    mmSSMuT = bkgOnly.addValidationChannel("met/meff2Jet",["SSMuT"],4,0.3,0.7)
 
-    validationSRChannels = [meff2ee, meff4ee, meff2em, meff4em, meff2mm, meff4mm, meffS3_El, meffS3_Mu, meffS4_El, meffS4_Mu, meffS3T_El, meffS3T_Mu, meffS4T_El, meffS4T_Mu, mmSSEl, mmSSMu, mmSSElT, mmSSMuT]                                                    
+    validationSRChannels = [meff2ee, meff4ee, meff2em, meff4em, meff2mm, meff4mm, meffS3_El, meffS3_Mu, meffS4_El, meffS4_Mu, meffS3T_El, meffS3T_Mu, meffS4T_El, meffS4T_Mu, mmSSEl, mmSSMu, mmSSElT, mmSSMuT,meffS7T_El,meffS7T_Mu]                                                    
     # add systematics
     for chan in validationSRChannels:
         chan.useOverflowBin = True
@@ -823,8 +815,6 @@ if doValidationSoftLep:
     pass
 
 
-if doValidationSR:
-    bkgOnly.setValidationChannels(validationSRChannels)
 
 if doValidationSlope:
     bkgOnly.setValidationChannels([meffTR_El,meffTR_Mu,metTR_El,metTR_Mu,pt1TR_El,pt1TR_Mu,pt2TR_El,pt2TR_Mu,wptWR_El,wptWR_Mu,metWR_El,metWR_Mu,ZptZR_ee,ZptZR_mm])

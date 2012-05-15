@@ -207,6 +207,11 @@ class TopLevelXML(object):
         self.channels.append(chanObj)
         return self.channels[len(self.channels)-1]
 
+    def addValidationChannel(self,variableName,regions,nBins,binLow,binHigh):
+        ch = self.addChannel(variableName,regions,nBins,binLow,binHigh)
+        self.setValidationChannels(ch)
+        return ch
+
     def getChannel(self,variableName,regions):
         for chan in self.channels:
             if chan.variableName == variableName and chan.regions == regions:
