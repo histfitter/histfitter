@@ -144,7 +144,6 @@ if __name__ == "__main__":
     runFit = False
     printLimits = False
     doHypoTests = False
-    sigSamples = []
  
     print "\n * * * Welcome to HistFitter * * *\n"
 
@@ -163,7 +162,7 @@ if __name__ == "__main__":
         print "-v verbose level (1: minimal, 2: print histogram names, 3: print XML files, default: %i)"%configMgr.verbose
         print "-l make limit plot of workspace (default %s)" % printLimits
         print "-p run hypothesis test on workspace (default %s)" % doHypoTests
-        print "-g <grid points to be processed> - give as comma separated list (default: %s)" % str(sigSamples)
+        print "-g <grid points to be processed> - give as comma separated list"
         print "\nAlso see the README file.\n"
         print "Command examples:"
         print "HistFitter.py -i python/MySusyFitterConfig.py           #only runs initialization in interactive mode (try e.g.: configMgr.<tab>)"
