@@ -312,6 +312,7 @@ wzSample_Np5.setNormFactor("mu_WZ_Np5",1.,0.,5.)
 AlpGenSamples.append(wzSample_Np5)
 
 for sam in AlpGenSamples:
+    sam.setFileList(bgdFiles)
     sam.setStatConfig(useStat)
     sam.addSystematic(Systematic("Zpt50GeV",configMgr.weights,pT50GeVHighWeights,pT50GeVLowWeights,"weight","overallSys"))
     sam.addSystematic(Systematic("Zpt100GeV",configMgr.weights,pT100GeVHighWeights,pT100GeVLowWeights,"weight","overallSys"))
@@ -332,14 +333,24 @@ wzSample_Np4.addSystematic(hf)
 
 
 bgSample = Sample("BG",kGreen)
+bgSample.setFileList(bgdFiles)
 bgSample.setStatConfig(useStat)
 ### Additional uncertainty on BG
 bgSample.addSystematic(Systematic("err_BG", configMgr.weights,1.2 ,0.8, "user","userOverallSys"))
 
+#List of bkg samples
+bgdsamples=[bgSample]
+for sam in AlpGenSamples:
+    bgdsamples.append(sam)
+
+#QCD and data samples
 qcdSample = Sample("QCD",kGray+1)
+qcdSample.setFileList(bgdFiles)
 qcdSample.setQCD(True,"histoSys")
 qcdSample.setStatConfig(useStat)
+
 dataSample = Sample("Data",kBlack)
+dataSample.setFileList(bgdFiles)
 dataSample.setData()
 
 # nJet Binning for Top Control region
@@ -398,23 +409,14 @@ srNBins = 1
 srBinLow = 0.5
 srBinHigh = 1.5
 
-                
-bgdsamples=[qcdSample,bgSample,dataSample]
-for sam in AlpGenSamples:
-    bgdsamples.append(sam)
-
-if doSignalOnly:
-    bgdsamples=[]
-
-for sam in bgdsamples:
-    sam.setFileList(bgdFiles)
-
 
 #--------------------------------------------------------------
 # Background-only fit 
 #--------------------------------------------------------------
 bkgOnly = configMgr.addTopLevelXML("bkgonly")
-bkgOnly.addSamples(bgdsamples)
+if not doSignalOnly:
+    bkgOnly.addSamples(bgdsamples)
+    bkgOnly.addSamples([qcdSample,dataSample])
 if useStat:
     bkgOnly.statErrThreshold=0.05 
 else:
@@ -427,9 +429,12 @@ meas.addPOI("mu_SIG")
 meas.addParamSetting("mu_WZ_Np0","const",1.0)
 meas.addParamSetting("mu_WZ_Np1","const",1.0)
 
-BGList=["Top_Np0","WZ_Np0","Top_Np1","WZ_Np1","Top_Np2","WZ_Np2","Top_Np3","WZ_Np3","Top_Np4","WZ_Np4","Top_Np5","WZ_Np5","BG"]
-if doSignalOnly:
-    BGList=[]
+#Add common systematics
+for syst in basicChanSyst:
+    bkgOnly.addSystematic(syst)
+    if fullSyst:
+        for syst in fullChanSyst:
+            bkgOnly.addSystematic(syst)
 
 
 ##### nJet for Top ####
@@ -452,15 +457,9 @@ for chan in topChannels:
     chan.hasB = True
     chan.hasBQCD = True
     chan.useOverflowBin = False
-    for syst in basicChanSyst + btagChanSyst:
+    for syst in btagChanSyst:
         chan.addSystematic(syst)
-        if debugSyst:
-            print " channel = ", chan.name, " adding systematic = ", syst.name
-    if fullSyst:
-        for syst in fullChanSyst:
-            chan.addSystematic(syst)
-            if debugSyst:
-                print " channel = ", chan.name, " adding Full systematic = ", syst.name
+
         
 ####### nJet for W/Z  #######
     
@@ -488,17 +487,6 @@ WZChannels = [nJetZeeChannel, nJetZeChannel, nJetZmmChannel, nJetZmChannel]
 # add systematics
 for chan in WZChannels:
     chan.useOverflowBin = False
-    for syst in basicChanSyst:
-        chan.addSystematic(syst)
-        if debugSyst:
-            print " channel = ", chan.name, " adding systematic = ", syst.name
-    # only additional Full Systematics
-    if fullSyst:
-        for syst in fullChanSyst:
-            chan.addSystematic(syst)
-            if debugSyst:
-                print " channel = ", chan.name, " adding Full systematic = ", syst.name
-                
         
 bkgOnly.setBkgConstrainChannels([nJetTopeeChannel,nJetZeeChannel,nJetTopeChannel,nJetZeChannel,nJetTopemChannel,nJetTopmmChannel,nJetZmmChannel,nJetTopmChannel,nJetZmChannel])
 
@@ -566,22 +554,14 @@ if doValidationSlope:
         chan.hasB = True
         chan.hasBQCD = True
         chan.useOverflowBin = True
-        for syst in basicChanSyst + btagChanSyst:
+        for syst in btagChanSyst:
             chan.addSystematic(syst)
-            if debugSyst:
-                print " channel = ", chan.name, " adding systematic = ", syst.name
-        # only additional Full Systematics
-        if fullSyst:
-            for syst in fullChanSyst:
-                chan.addSystematic(syst)
-                if debugSyst:
-                    print " channel = ", chan.name, " adding Full systematic = ", syst.name             
                     
     # WR
-    wptWR_El=bkgOnly.addChannel("Wpt",["WRElVR"],metNBinsTR,metBinLowTR,metBinHighTR)
-    wptWR_Mu=bkgOnly.addChannel("Wpt",["WRMuVR"],metNBinsTR,metBinLowTR,metBinHighTR)
-    metWR_El=bkgOnly.addChannel("met",["WRElVR"],metNBinsTR,metBinLowTR,metBinHighTR)
-    metWR_Mu=bkgOnly.addChannel("met",["WRMuVR"],metNBinsTR,metBinLowTR,metBinHighTR)
+    wptWR_El=bkgOnly.addValidationChannel("Wpt",["WRElVR"],metNBinsTR,metBinLowTR,metBinHighTR)
+    wptWR_Mu=bkgOnly.addValidationChannel("Wpt",["WRMuVR"],metNBinsTR,metBinLowTR,metBinHighTR)
+    metWR_El=bkgOnly.addValidationChannel("met",["WRElVR"],metNBinsTR,metBinLowTR,metBinHighTR)
+    metWR_Mu=bkgOnly.addValidationChannel("met",["WRMuVR"],metNBinsTR,metBinLowTR,metBinHighTR)
     
     validationSlopeWRChannels = [wptWR_El, wptWR_Mu, metWR_El, metWR_Mu]
     
@@ -590,20 +570,12 @@ if doValidationSlope:
         chan.hasB = True
         chan.hasBQCD = False
         chan.useOverflowBin = True
-        for syst in basicChanSyst + btagChanSyst:
+        for syst in btagChanSyst:
             chan.addSystematic(syst)
-            if debugSyst:
-                print " channel = ", chan.name, " adding systematic = ", syst.name
-        # only additional Full Systematics
-        if fullSyst:
-            for syst in fullChanSyst:
-                chan.addSystematic(syst)
-                if debugSyst:
-                    print " channel = ", chan.name, " adding Full systematic = ", syst.name             
 
     #ZR
-    ZptZR_ee=bkgOnly.addChannel("Zpt",["ZRee"],metNBinsTR,metBinLowTR,metBinHighTR)
-    ZptZR_mm=bkgOnly.addChannel("Zpt",["ZRmm"],metNBinsTR,metBinLowTR,metBinHighTR)
+    ZptZR_ee=bkgOnly.addValidationChannel("Zpt",["ZRee"],metNBinsTR,metBinLowTR,metBinHighTR)
+    ZptZR_mm=bkgOnly.addValidationChannel("Zpt",["ZRmm"],metNBinsTR,metBinLowTR,metBinHighTR)
     
     validationSlopeWRChannels = [ZptZR_ee, ZptZR_mm]
     
@@ -612,16 +584,6 @@ if doValidationSlope:
         chan.hasB = False
         chan.hasBQCD = False
         chan.useOverflowBin = True
-        for syst in basicChanSyst:
-            chan.addSystematic(syst)
-            if debugSyst:
-                print " channel = ", chan.name, " adding systematic = ", syst.name
-        # only additional Full Systematics
-        if fullSyst:
-            for syst in fullChanSyst:
-                chan.addSystematic(syst)
-                if debugSyst:
-                    print " channel = ", chan.name, " adding Full systematic = ", syst.name             
 
 if doValidationSR:
     # S2 using meff
@@ -657,37 +619,27 @@ if doValidationSR:
     # add systematics
     for chan in validationSRChannels:
         chan.useOverflowBin = True
-        for syst in basicChanSyst:
-            chan.addSystematic(syst)
-            if debugSyst:
-                print " channel = ", chan.name, " adding systematic = ", syst.name
-        # only additional Full Systematics
-        if fullSyst:
-            for syst in fullChanSyst:
-                chan.addSystematic(syst)
-                if debugSyst:
-                    print " channel = ", chan.name, " adding Full systematic = ", syst.name             
 
 
 if doValidationDilep:
-    meffVR4_ee=bkgOnly.addChannel("meffInc",["VR4ee"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
-    meffVR4_em=bkgOnly.addChannel("meffInc",["VR4em"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
-    meffVR4_mm=bkgOnly.addChannel("meffInc",["VR4mm"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
-    nJetVR4_ee=bkgOnly.addChannel("nJet",["VR4ee"],nJetZmRegions,nJetZmNBins,nJetZmBinLow,nJetZmBinHigh)
-    nJetVR4_em=bkgOnly.addChannel("nJet",["VR4em"],nJetZmRegions,nJetZmNBins,nJetZmBinLow,nJetZmBinHigh)
-    nJetVR4_mm=bkgOnly.addChannel("nJet",["VR4mm"],nJetZmRegions,nJetZmNBins,nJetZmBinLow,nJetZmBinHigh)
-    meffVR2_ee=bkgOnly.addChannel("meffInc",["VR2ee"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
-    meffVR2_em=bkgOnly.addChannel("meffInc",["VR2em"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
-    meffVR2_mm=bkgOnly.addChannel("meffInc",["VR2mm"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
-    nJetVR2_ee=bkgOnly.addChannel("nJet",["VR2ee"],nJetZmRegions,nJetZmNBins,nJetZmBinLow,nJetZmBinHigh)
-    nJetVR2_em=bkgOnly.addChannel("nJet",["VR2em"],nJetZmRegions,nJetZmNBins,nJetZmBinLow,nJetZmBinHigh)
-    nJetVR2_mm=bkgOnly.addChannel("nJet",["VR2mm"],nJetZmRegions,nJetZmNBins,nJetZmBinLow,nJetZmBinHigh)
-    meffVR3_ee=bkgOnly.addChannel("meffInc",["VR3ee"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
-    meffVR3_em=bkgOnly.addChannel("meffInc",["VR3em"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
-    meffVR3_mm=bkgOnly.addChannel("meffInc",["VR3mm"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
-    nJetVR3_ee=bkgOnly.addChannel("nJet",["VR3ee"],nJetZmRegions,nJetZmNBins,nJetZmBinLow,nJetZmBinHigh)
-    nJetVR3_em=bkgOnly.addChannel("nJet",["VR3em"],nJetZmRegions,nJetZmNBins,nJetZmBinLow,nJetZmBinHigh)
-    nJetVR3_mm=bkgOnly.addChannel("nJet",["VR3mm"],nJetZmRegions,nJetZmNBins,nJetZmBinLow,nJetZmBinHigh)
+    meffVR4_ee=bkgOnly.addValidationChannel("meffInc",["VR4ee"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
+    meffVR4_em=bkgOnly.addValidationChannel("meffInc",["VR4em"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
+    meffVR4_mm=bkgOnly.addValidationChannel("meffInc",["VR4mm"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
+    nJetVR4_ee=bkgOnly.addValidationChannel("nJet",["VR4ee"],nJetZmRegions,nJetZmNBins,nJetZmBinLow,nJetZmBinHigh)
+    nJetVR4_em=bkgOnly.addValidationChannel("nJet",["VR4em"],nJetZmRegions,nJetZmNBins,nJetZmBinLow,nJetZmBinHigh)
+    nJetVR4_mm=bkgOnly.addValidationChannel("nJet",["VR4mm"],nJetZmRegions,nJetZmNBins,nJetZmBinLow,nJetZmBinHigh)
+    meffVR2_ee=bkgOnly.addValidationChannel("meffInc",["VR2ee"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
+    meffVR2_em=bkgOnly.addValidationChannel("meffInc",["VR2em"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
+    meffVR2_mm=bkgOnly.addValidationChannel("meffInc",["VR2mm"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
+    nJetVR2_ee=bkgOnly.addValidationChannel("nJet",["VR2ee"],nJetZmRegions,nJetZmNBins,nJetZmBinLow,nJetZmBinHigh)
+    nJetVR2_em=bkgOnly.addValidationChannel("nJet",["VR2em"],nJetZmRegions,nJetZmNBins,nJetZmBinLow,nJetZmBinHigh)
+    nJetVR2_mm=bkgOnly.addValidationChannel("nJet",["VR2mm"],nJetZmRegions,nJetZmNBins,nJetZmBinLow,nJetZmBinHigh)
+    meffVR3_ee=bkgOnly.addValidationChannel("meffInc",["VR3ee"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
+    meffVR3_em=bkgOnly.addValidationChannel("meffInc",["VR3em"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
+    meffVR3_mm=bkgOnly.addValidationChannel("meffInc",["VR3mm"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
+    nJetVR3_ee=bkgOnly.addValidationChannel("nJet",["VR3ee"],nJetZmRegions,nJetZmNBins,nJetZmBinLow,nJetZmBinHigh)
+    nJetVR3_em=bkgOnly.addValidationChannel("nJet",["VR3em"],nJetZmRegions,nJetZmNBins,nJetZmBinLow,nJetZmBinHigh)
+    nJetVR3_mm=bkgOnly.addValidationChannel("nJet",["VR3mm"],nJetZmRegions,nJetZmNBins,nJetZmBinLow,nJetZmBinHigh)
 
     validation2LepChannels = [meffVR2_ee, meffVR2_em, meffVR2_mm, nJetVR2_ee, nJetVR2_em, nJetVR2_mm,
                               meffVR3_ee, meffVR3_em, meffVR3_mm, nJetVR3_ee, nJetVR3_em, nJetVR3_mm,
@@ -696,37 +648,27 @@ if doValidationDilep:
     # add systematics
     for chan in validation2LepChannels:
         chan.useOverflowBin = True
-        for syst in basicChanSyst:
-            chan.addSystematic(syst)
-            if debugSyst:
-                print " channel = ", chan.name, " adding systematic = ", syst.name
-        # only additional Full Systematics
-        if fullSyst:
-            for syst in fullChanSyst:
-                chan.addSystematic(syst)
-                if debugSyst:
-                    print " channel = ", chan.name, " adding Full systematic = ", syst.name             
 
     
 if doValidationDilepZ:
-    meffZVR4_ee=bkgOnly.addChannel("meffInc",["ZVR4ee"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
-    meffZVR4_em=bkgOnly.addChannel("meffInc",["ZVR4em"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
-    meffZVR4_mm=bkgOnly.addChannel("meffInc",["ZVR4mm"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
-    nJetZVR4_ee=bkgOnly.addChannel("nJet",["ZVR4ee"],nJetZmRegions,nJetZmNBins,nJetZmBinLow,nJetZmBinHigh)
-    nJetZVR4_em=bkgOnly.addChannel("nJet",["ZVR4em"],nJetZmRegions,nJetZmNBins,nJetZmBinLow,nJetZmBinHigh)
-    nJetZVR4_mm=bkgOnly.addChannel("nJet",["ZVR4mm"],nJetZmRegions,nJetZmNBins,nJetZmBinLow,nJetZmBinHigh)
-    meffZVR2_ee=bkgOnly.addChannel("meffInc",["ZVR2ee"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
-    meffZVR2_em=bkgOnly.addChannel("meffInc",["ZVR2em"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
-    meffZVR2_mm=bkgOnly.addChannel("meffInc",["ZVR2mm"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
-    nJetZVR2_ee=bkgOnly.addChannel("nJet",["ZVR2ee"],nJetZmRegions,nJetZmNBins,nJetZmBinLow,nJetZmBinHigh)
-    nJetZVR2_em=bkgOnly.addChannel("nJet",["ZVR2em"],nJetZmRegions,nJetZmNBins,nJetZmBinLow,nJetZmBinHigh)
-    nJetZVR2_mm=bkgOnly.addChannel("nJet",["ZVR2mm"],nJetZmRegions,nJetZmNBins,nJetZmBinLow,nJetZmBinHigh)
-    meffZVR3_ee=bkgOnly.addChannel("meffInc",["ZVR3ee"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
-    meffZVR3_em=bkgOnly.addChannel("meffInc",["ZVR3em"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
-    meffZVR3_mm=bkgOnly.addChannel("meffInc",["ZVR3mm"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
-    nJetZVR3_ee=bkgOnly.addChannel("nJet",["ZVR3ee"],nJetZmRegions,nJetZmNBins,nJetZmBinLow,nJetZmBinHigh)
-    nJetZVR3_em=bkgOnly.addChannel("nJet",["ZVR3em"],nJetZmRegions,nJetZmNBins,nJetZmBinLow,nJetZmBinHigh)
-    nJetZVR3_mm=bkgOnly.addChannel("nJet",["ZVR3mm"],nJetZmRegions,nJetZmNBins,nJetZmBinLow,nJetZmBinHigh)
+    meffZVR4_ee=bkgOnly.addValidationChannel("meffInc",["VZR4ee"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
+    meffZVR4_em=bkgOnly.addValidationChannel("meffInc",["VZR4em"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
+    meffZVR4_mm=bkgOnly.addValidationChannel("meffInc",["VZR4mm"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
+    nJetZVR4_ee=bkgOnly.addValidationChannel("nJet",["VZR4ee"],nJetZmRegions,nJetZmNBins,nJetZmBinLow,nJetZmBinHigh)
+    nJetZVR4_em=bkgOnly.addValidationChannel("nJet",["VZR4em"],nJetZmRegions,nJetZmNBins,nJetZmBinLow,nJetZmBinHigh)
+    nJetZVR4_mm=bkgOnly.addValidationChannel("nJet",["VZR4mm"],nJetZmRegions,nJetZmNBins,nJetZmBinLow,nJetZmBinHigh)
+    meffZVR2_ee=bkgOnly.addValidationChannel("meffInc",["VZR2ee"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
+    meffZVR2_em=bkgOnly.addValidationChannel("meffInc",["VZR2em"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
+    meffZVR2_mm=bkgOnly.addValidationChannel("meffInc",["VZR2mm"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
+    nJetZVR2_ee=bkgOnly.addValidationChannel("nJet",["VZR2ee"],nJetZmRegions,nJetZmNBins,nJetZmBinLow,nJetZmBinHigh)
+    nJetZVR2_em=bkgOnly.addValidationChannel("nJet",["VZR2em"],nJetZmRegions,nJetZmNBins,nJetZmBinLow,nJetZmBinHigh)
+    nJetZVR2_mm=bkgOnly.addValidationChannel("nJet",["VZR2mm"],nJetZmRegions,nJetZmNBins,nJetZmBinLow,nJetZmBinHigh)
+    meffZVR3_ee=bkgOnly.addValidationChannel("meffInc",["VZR3ee"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
+    meffZVR3_em=bkgOnly.addValidationChannel("meffInc",["VZR3em"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
+    meffZVR3_mm=bkgOnly.addValidationChannel("meffInc",["VZR3mm"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
+    nJetZVR3_ee=bkgOnly.addValidationChannel("nJet",["VZR3ee"],nJetZmRegions,nJetZmNBins,nJetZmBinLow,nJetZmBinHigh)
+    nJetZVR3_em=bkgOnly.addValidationChannel("nJet",["VZR3em"],nJetZmRegions,nJetZmNBins,nJetZmBinLow,nJetZmBinHigh)
+    nJetZVR3_mm=bkgOnly.addValidationChannel("nJet",["VZR3mm"],nJetZmRegions,nJetZmNBins,nJetZmBinLow,nJetZmBinHigh)
     
     validation2LepZChannels = [meffZVR2_ee, meffZVR2_em, meffZVR2_mm, nJetZVR2_ee, nJetZVR2_em, nJetZVR2_mm,
                               meffZVR3_ee, meffZVR3_em, meffZVR3_mm, nJetZVR3_ee, nJetZVR3_em, nJetZVR3_mm,
@@ -737,25 +679,15 @@ if doValidationDilepZ:
         chan.hasB = True
         chan.hasBQCD = True
         chan.useOverflowBin = True
-        for syst in basicChanSyst + btagChanSyst:
-            chan.addSystematic(syst)
-            if debugSyst:
-                print " channel = ", chan.name, " adding systematic = ", syst.name
-        # only additional Full Systematics
-        if fullSyst:
-            for syst in fullChanSyst:
-                chan.addSystematic(syst)
-                if debugSyst:
-                    print " channel = ", chan.name, " adding Full systematic = ", syst.name             
     
 
 if doValidationSoftLep:
-    mmSVEl = bkgOnly.addChannel("met/meff2Jet",["SVEl"],6,0.1,0.7)
-    mmSVMu = bkgOnly.addChannel("met/meff2Jet",["SVMu"],6,0.1,0.7)
-    mmSVWEl = bkgOnly.addChannel("met/meff2Jet",["SVWEl"],6,0.1,0.7)
-    mmSVWMu = bkgOnly.addChannel("met/meff2Jet",["SVWMu"],6,0.1,0.7)
-    mmSVTEl = bkgOnly.addChannel("met/meff2Jet",["SVTEl"],6,0.1,0.7)
-    mmSVTMu = bkgOnly.addChannel("met/meff2Jet",["SVTMu"],6,0.1,0.7)
+    mmSVEl = bkgOnly.addValidationChannel("met/meff2Jet",["SVEl"],6,0.1,0.7)
+    mmSVMu = bkgOnly.addValidationChannel("met/meff2Jet",["SVMu"],6,0.1,0.7)
+    mmSVWEl = bkgOnly.addValidationChannel("met/meff2Jet",["SVWEl"],6,0.1,0.7)
+    mmSVWMu = bkgOnly.addValidationChannel("met/meff2Jet",["SVWMu"],6,0.1,0.7)
+    mmSVTEl = bkgOnly.addValidationChannel("met/meff2Jet",["SVTEl"],6,0.1,0.7)
+    mmSVTMu = bkgOnly.addValidationChannel("met/meff2Jet",["SVTMu"],6,0.1,0.7)
 
     bkgOnly.setValidationChannels([mmSVEl, mmSVMu, mmSVTEl, mmSVTMu, mmSVWEl, mmSVWMu])
 
@@ -766,68 +698,22 @@ if doValidationSoftLep:
     # add systematics
     for chan in validationSoftLepChannels:
         chan.useOverflowBin = True
-        for syst in basicChanSyst:
-            chan.addSystematic(syst)
-            if debugSyst:
-                print " channel = ", chan.name, " adding systematic = ", syst.name
-        # only additional Full Systematics
-        if fullSyst:
-            for syst in fullChanSyst:
-                chan.addSystematic(syst)
-                if debugSyst:
-                    print " channel = ", chan.name, " adding Full systematic = ", syst.name             
 
     # add systematics
     for chan in validationSoftLepBtagChannels:
         chan.hasB = True
         chan.hasBQCD = True
         chan.useOverflowBin = True
-        for syst in basicChanSyst + btagChanSyst:
+        for syst in btagChanSyst:
             chan.addSystematic(syst)
-            if debugSyst:
-                print " channel = ", chan.name, " adding systematic = ", syst.name
-        # only additional Full Systematics
-        if fullSyst:
-            for syst in fullChanSyst:
-                chan.addSystematic(syst)
-                if debugSyst:
-                    print " channel = ", chan.name, " adding Full systematic = ", syst.name             
 
     # add systematics
     for chan in validationSoftLepBvetoChannels:
         chan.hasB = True
         chan.hasBQCD = False
         chan.useOverflowBin = True
-        for syst in basicChanSyst + btagChanSyst:
+        for syst in btagChanSyst:
             chan.addSystematic(syst)
-            if debugSyst:
-                print " channel = ", chan.name, " adding systematic = ", syst.name
-        # only additional Full Systematics
-        if fullSyst:
-            for syst in fullChanSyst:
-                chan.addSystematic(syst)
-                if debugSyst:
-                    print " channel = ", chan.name, " adding Full systematic = ", syst.name
-                    pass
-                pass
-            pass
-        pass
-    pass
-
-
-
-if doValidationSlope:
-    bkgOnly.setValidationChannels([meffTR_El,meffTR_Mu,metTR_El,metTR_Mu,pt1TR_El,pt1TR_Mu,pt2TR_El,pt2TR_Mu,wptWR_El,wptWR_Mu,metWR_El,metWR_Mu,ZptZR_ee,ZptZR_mm])
-
-if doValidationDilep:
-    bkgOnly.setValidationChannels([meffVR4_ee,meffVR4_em,meffVR4_mm,nJetVR4_ee,nJetVR4_em,nJetVR4_mm,meffVR2_ee,meffVR2_em,meffVR2_mm,nJetVR2_ee,nJetVR2_em,nJetVR2_mm,meffVR3_ee,meffVR3_em,meffVR3_mm,nJetVR3_ee,nJetVR3_em,nJetVR3_mm])
-
-if doValidationDilepZ:
-    bkgOnly.setValidationChannels([meffZVR4_ee,meffZVR4_em,meffZVR4_mm,nJetZVR4_ee,nJetZVR4_em,nJetZVR4_mm,meffZVR2_ee,meffZVR2_em,meffZVR2_mm,nJetZVR2_ee,nJetZVR2_em,nJetZVR2_mm,meffZVR3_ee,meffZVR3_em,meffZVR3_mm,nJetZVR3_ee,nJetZVR3_em,nJetZVR3_mm])
-    pass
-
-if doValidationSoftLep:
-    bkgOnly.setValidationChannels(validationSoftLepChannels + validationSoftLepBtagChannels + validationSoftLepBvetoChannels )
 
 
 #-------------------------------------------------
