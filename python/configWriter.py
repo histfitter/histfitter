@@ -486,12 +486,13 @@ class ChannelXML(object):
 
     def initialize(self):
         for sample in self.sampleList:
-            for syst in self.systDict.keys():
-                try:
-                    sample.getSystematic(syst)
-                except:
-                    for s in self.systDict[syst]:
-                        sample.addSystematic(s)
+            if not sample.isData and not sample.isQCD and not sample.isDiscovery:
+                for syst in self.systDict.keys():
+                    try:
+                        sample.getSystematic(syst)
+                    except:
+                        for s in self.systDict[syst]:
+                            sample.addSystematic(s)
 
     def Clone(self,prefix=""):
         if prefix=="":
