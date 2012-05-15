@@ -26,23 +26,14 @@ doValidationDilep=False
 doValidationDilepZ=False
 doValidationSoftLep=False
 
-doDiscoveryS2=False
-doDiscoveryS4=False
-doDiscovery=False
-doDiscoveryTight=False
-discoverychannel="ee" # ee, emu, mumu
-
 doExclusion_GMSB_combined=False
-doExclusion_mSUGRA_dilepton_combined=False
+doExclusion_mSUGRA_dilepton_combined=True
 doExclusion_GG_onestepCC_combined=False
 doExclusion_GG_twostepCC_slepton=False
 blindS=False
 useXsecUnc=True             # switch off when calucating excluded cross section (colour code in SM plots)
-doWptReweighting=False ## currently buggy
+doWptReweighting=False ## deprecated
 doSignalOnly=False #Remove all bkgs for signal histo creation step
-#doSignalOnly=True #Remove all bkgs for signal histo creation step
-# Need to comment out the following line when running HypoTest.py parallelized
-
 
 if not 'sigSamples' in dir():
     sigSamples=["SU_580_240_0_10_P"]
@@ -65,7 +56,15 @@ configMgr.calculatorType=2
 configMgr.testStaType=3
 configMgr.nPoints=20
 
-bgdFiles = []
+#Split bdgFiles per channel
+bgdFiles_ee = []
+bgdFiles_em = []
+bgdFiles_mm = []
+bgdFiles_e = []
+bgdFiles_m = []
+bgdFiles_se = []
+bgdFiles_sm = []
+
 sigFiles = []
 
 configMgr.histCacheFile = "data/"+configMgr.analysisName+".root"
@@ -75,9 +74,21 @@ inputDirSig="root://eosatlas//eos/atlas/atlascerngroupdisk/phys-susy/histfitter/
 # Set the files to read from
 if configMgr.readFromTree:
     if not onLxplus:
-        bgdFiles = ["data/SusyFitterTree_OneSoftMuo_BG_v4.root","data/SusyFitterTree_OneSoftEle_BG_v4.root","data/SusyFitterTree_EleEle.root","data/SusyFitterTree_EleMu.root","data/SusyFitterTree_MuMu.root","data/SusyFitterTree_OneEle.root","data/SusyFitterTree_OneMu.root"]
+        bgdFiles_ee = ["data/SusyFitterTree_EleEle.root"]
+        bgdFiles_em = ["data/SusyFitterTree_EleMu.root"]
+        bgdFiles_mm = ["data/SusyFitterTree_MuMu.root"]
+        bgdFiles_e = ["data/SusyFitterTree_OneEle.root"]
+        bgdFiles_m = ["data/SusyFitterTree_OneMu.root"]
+        bgdFiles_se = ["data/SusyFitterTree_OneSoftEle_BG_v4.root"]
+        bgdFiles_sm = ["data/SusyFitterTree_OneSoftMuo_BG_v4.root"]
     else:
-        bgdFiles = ["/afs/cern.ch/work/h/hyamaguc/public/samples/SusyFitterTree_OneSoftMuo_BG_v3.root","/afs/cern.ch/work/h/hyamaguc/public/samples/SusyFitterTree_OneSoftEle_BG_v3.root",inputDir+"/SusyFitterTree_EleEle.root",inputDir+"/SusyFitterTree_EleMu.root",inputDir+"/SusyFitterTree_MuMu.root",inputDir+"/SusyFitterTree_OneEle.root",inputDir+"/SusyFitterTree_OneMu.root"]
+        bgdFiles_ee = [inputDir+"/SusyFitterTree_EleEle.root"]
+        bgdFiles_em = [inputDir+"/SusyFitterTree_EleMu.root"]
+        bgdFiles_mm = [inputDir+"/SusyFitterTree_MuMu.root"]
+        bgdFiles_e = [inputDir+"/SusyFitterTree_OneEle.root"]
+        bgdFiles_m = [inputDir+"/SusyFitterTree_OneMu.root"]
+        bgdFiles_se = ["/afs/cern.ch/work/h/hyamaguc/public/samples/SusyFitterTree_OneSoftEle_BG_v3.root"]
+        bgdFiles_sm = ["/afs/cern.ch/work/h/hyamaguc/public/samples/SusyFitterTree_OneSoftMuo_BG_v3.root"]
 
 if doExclusion_GMSB_combined:
     if not onLxplus:
@@ -307,7 +318,6 @@ wzSample_Np5.setNormFactor("mu_WZ_Np5",1.,0.,5.)
 AlpGenSamples.append(wzSample_Np5)
 
 for sam in AlpGenSamples:
-    sam.setFileList(bgdFiles)
     sam.setStatConfig(useStat)
     sam.addSystematic(Systematic("Zpt50GeV",configMgr.weights,pT50GeVHighWeights,pT50GeVLowWeights,"weight","overallSys"))
     sam.addSystematic(Systematic("Zpt100GeV",configMgr.weights,pT100GeVHighWeights,pT100GeVLowWeights,"weight","overallSys"))
@@ -328,7 +338,6 @@ wzSample_Np4.addSystematic(hf)
 
 
 bgSample = Sample("BG",kGreen)
-bgSample.setFileList(bgdFiles)
 bgSample.setStatConfig(useStat)
 ### Additional uncertainty on BG
 bgSample.addSystematic(Systematic("err_BG", configMgr.weights,1.2 ,0.8, "user","userOverallSys"))
@@ -340,12 +349,10 @@ for sam in AlpGenSamples:
 
 #QCD and data samples
 qcdSample = Sample("QCD",kGray+1)
-qcdSample.setFileList(bgdFiles)
 qcdSample.setQCD(True,"histoSys")
 qcdSample.setStatConfig(useStat)
 
 dataSample = Sample("Data",kBlack)
-dataSample.setFileList(bgdFiles)
 dataSample.setData()
 
 # nJet Binning for Top Control region
@@ -436,14 +443,19 @@ for syst in basicChanSyst:
 
 # ele ele
 nJetTopeeChannel=bkgOnly.addChannel("nJet",["TRee"],nJetTopeeNBins,nJetTopeeBinLow,nJetTopeeBinHigh)
+nJetTopeeChannel.setFileList(bgdFiles_ee)
 #  single ele
 nJetTopeChannel=bkgOnly.addChannel("nJet",["TREl"],nJetTopeNBins,nJetTopeBinLow,nJetTopeBinHigh)
+nJetTopeChannel.setFileList(bgdFiles_e)
 #  ele mu
 nJetTopemChannel=bkgOnly.addChannel("nJet",["TRem"],nJetTopemNBins,nJetTopemBinLow,nJetTopemBinHigh)
+nJetTopemChannel.setFileList(bgdFiles_em)
 # mu mu
 nJetTopmmChannel=bkgOnly.addChannel("nJet",["TRmm"],nJetTopmmNBins,nJetTopmmBinLow,nJetTopmmBinHigh)
+nJetTopmmChannel.setFileList(bgdFiles_mm)
 # single mu
 nJetTopmChannel=bkgOnly.addChannel("nJet",["TRMu"],nJetTopmNBins,nJetTopmBinLow,nJetTopmBinHigh)
+nJetTopmChannel.setFileList(bgdFiles_m)
 
 topChannels = [nJetTopeeChannel, nJetTopeChannel, nJetTopemChannel,nJetTopmmChannel,nJetTopmChannel]
 
@@ -460,19 +472,23 @@ for chan in topChannels:
     
 # ele ele    
 nJetZeeChannel=bkgOnly.addChannel("nJet",nJetZeeRegions,nJetZeeNBins,nJetZeeBinLow,nJetZeeBinHigh)
+nJetZeeChannel.setFileList(bgdFiles_ee)
 nJetZeeChannel.hasB = False
 nJetZeeChannel.hasBQCD = False
 # single ele
 nJetZeChannel=bkgOnly.addChannel("nJet",nJetZeRegions,nJetZeNBins,nJetZeBinLow,nJetZeBinHigh)
+nJetZeChannel.setFileList(bgdFiles_e)
 nJetZeChannel.hasB = True
 nJetZeChannel.hasBQCD = False
 [nJetZeChannel.addSystematic(syst) for syst in btagChanSyst]
 # mu mu
 nJetZmmChannel=bkgOnly.addChannel("nJet",nJetZmmRegions,nJetZmmNBins,nJetZmmBinLow,nJetZmmBinHigh)
+nJetZmmChannel.setFileList(bgdFiles_mm)
 nJetZmmChannel.hasB = False
 nJetZmmChannel.hasBQCD = False
 # single mu
 nJetZmChannel=bkgOnly.addChannel("nJet",nJetZmRegions,nJetZmNBins,nJetZmBinLow,nJetZmBinHigh)
+nJetZmChannel.setFileList(bgdFiles_m)
 nJetZmChannel.hasB = True
 nJetZmChannel.hasBQCD = False
 [nJetZmChannel.addSystematic(syst) for syst in btagChanSyst]
@@ -547,15 +563,22 @@ if doValidationSlope:
     # check impact of kfactor fit on several distributions
     #TR
     meffTR_El=bkgOnly.addValidationChannel("meffInc",["TRElVR"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
+    meffTR_Mu=bkgOnly.addValidationChannel("meffInc",["TRMuVR"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
     metTR_El=bkgOnly.addValidationChannel("met",["TRElVR2"],metNBinsTR,metBinLowTR,metBinHighTR)
     metTR_Mu=bkgOnly.addValidationChannel("met",["TRMuVR2"],metNBinsTR,metBinLowTR,metBinHighTR)
     pt1TR_El=bkgOnly.addValidationChannel("jet1Pt",["TRElVR"],pt1NBinsTR,pt1BinLowTR,pt1BinHighTR)
     pt1TR_Mu=bkgOnly.addValidationChannel("jet1Pt",["TRMuVR"],pt1NBinsTR,pt1BinLowTR,pt1BinHighTR)
     pt2TR_El=bkgOnly.addValidationChannel("jet2Pt",["TRElVR"],pt2NBinsTR,pt2BinLowTR,pt2BinHighTR)
     pt2TR_Mu=bkgOnly.addValidationChannel("jet2Pt",["TRMuVR"],pt2NBinsTR,pt2BinLowTR,pt2BinHighTR)
+
+    validationSlopeTRChannels = [meffTR_El,meffTR_Mu,metTR_El,metTR_Mu,pt1TR_El,pt1TR_Mu,pt2TR_El,pt2TR_Mu]
     
     # add systematics
     for chan in validationSlopeTRChannels:
+        if chan.name.find("_El")>-1:
+            chan.setFileList(bgdFiles_e)
+        else:
+            chan.setFileList(bgdFiles_m)
         chan.hasB = True
         chan.hasBQCD = True
         chan.useOverflowBin = True
@@ -572,6 +595,10 @@ if doValidationSlope:
     
     # add systematics
     for chan in validationSlopeWRChannels:
+        if chan.name.find("_El")>-1:
+            chan.setFileList(bgdFiles_e)
+        else:
+            chan.setFileList(bgdFiles_m)
         chan.hasB = True
         chan.hasBQCD = False
         chan.useOverflowBin = True
@@ -585,7 +612,11 @@ if doValidationSlope:
     validationSlopeWRChannels = [ZptZR_ee, ZptZR_mm]
     
     # add systematics
-    for chan in validationSlopeZRChannels:
+    for chan in validationSlopeWRChannels:
+        if chan.name.find("_ee")>-1:
+            chan.setFileList(bgdFiles_ee)
+        else:
+            chan.setFileList(bgdFiles_mm)
         chan.hasB = False
         chan.hasBQCD = False
         chan.useOverflowBin = True
@@ -593,19 +624,31 @@ if doValidationSlope:
 if doValidationSRLoose:
     #DILEPTONS
     meff2ee = bkgOnly.addValidationChannel("meffInc",["S2ee"],meffNBinsS2,meffBinLowS2,meffBinHighS2)
+    meff2ee.setFileList(bgdFiles_ee)
     meff4ee = bkgOnly.addValidationChannel("meffInc",["S4ee"],meffNBinsS4,meffBinLowS4,meffBinHighS4)
+    meff4ee.setFileList(bgdFiles_ee)
     meff2em = bkgOnly.addValidationChannel("meffInc",["S2em"],meffNBinsS2,meffBinLowS2,meffBinHighS2)
+    meff2em.setFileList(bgdFiles_em)
     meff4em = bkgOnly.addValidationChannel("meffInc",["S4em"],meffNBinsS4,meffBinLowS4,meffBinHighS4)
+    meff4em.setFileList(bgdFiles_em)
     meff2mm = bkgOnly.addValidationChannel("meffInc",["S2mm"],meffNBinsS2,meffBinLowS2,meffBinHighS2)
+    meff2mm.setFileList(bgdFiles_mm)
     meff4mm = bkgOnly.addValidationChannel("meffInc",["S4mm"],meffNBinsS4,meffBinLowS4,meffBinHighS4)
+    meff4mm.setFileList(bgdFiles_mm)
     # HARD LEPTON SRS
     meffS3_El=bkgOnly.addValidationChannel("meffInc",["S3El"],meffNBinsHL,meffBinLowHL,meffBinHighHL)
+    meffS3_El.setFileList(bgdFiles_e)
     meffS3_Mu=bkgOnly.addValidationChannel("meffInc",["S3Mu"],meffNBinsHL,meffBinLowHL,meffBinHighHL)
+    meffS3_Mu.setFileList(bgdFiles_m)
     meffS4_El=bkgOnly.addValidationChannel("meffInc",["S4El"],meffNBinsHL,meffBinLowHL,meffBinHighHL)
+    meffS4_El.setFileList(bgdFiles_e)
     meffS4_Mu=bkgOnly.addValidationChannel("meffInc",["S4Mu"],meffNBinsHL,meffBinLowHL,meffBinHighHL)
+    meffS4_Mu.setFileList(bgdFiles_m)
     # SOFT LEPTON SRS
     mmSSEl = bkgOnly.addValidationChannel("met/meff2Jet",["SSEl"],6,0.1,0.7)
+    mmSSEl.setFileList(bgdFiles_se)
     mmSSMu = bkgOnly.addValidationChannel("met/meff2Jet",["SSMu"],6,0.1,0.7)
+    mmSSMu.setFileList(bgdFiles_sm)
 
     validationSRChannels = [meff2ee, meff4ee, meff2em, meff4em, meff2mm, meff4mm, meffS3_El, meffS3_Mu, meffS4_El, meffS4_Mu, mmSSEl, mmSSMu]
     for chan in validationSRChannels:
@@ -615,22 +658,36 @@ if doValidationSRTight:
     #DILEPTONS
     if not doValidationSRLoose:
         meff2ee = bkgOnly.addValidationChannel("meffInc",["S2ee"],1,meffBinLowS2,meffBinHighS2)
+        meff2ee.setFileList(bgdFiles_ee)
         meff4ee = bkgOnly.addValidationChannel("meffInc",["S4ee"],1,meffBinLowS4,meffBinHighS4)
+        meff4ee.setFileList(bgdFiles_ee)
         meff2em = bkgOnly.addValidationChannel("meffInc",["S2em"],1,meffBinLowS2,meffBinHighS2)
+        meff2em.setFileList(bgdFiles_em)
         meff4em = bkgOnly.addValidationChannel("meffInc",["S4em"],1,meffBinLowS4,meffBinHighS4)
+        meff4em.setFileList(bgdFiles_em)
         meff2mm = bkgOnly.addValidationChannel("meffInc",["S2mm"],1,meffBinLowS2,meffBinHighS2)
+        meff2mm.setFileList(bgdFiles_mm)
         meff4mm = bkgOnly.addValidationChannel("meffInc",["S4mm"],1,meffBinLowS4,meffBinHighS4)
+        meff4mm.setFileList(bgdFiles_mm)
         pass
     # HARD LEPTON SRS
     meffS3T_El=bkgOnly.addValidationChannel("meffInc",["SR3jTEl"],1,1200,meffBinHighHL)
+    meffS3T_El.setFileList(bgdFiles_e)
     meffS3T_Mu=bkgOnly.addValidationChannel("meffInc",["SR3jTMu"],1,1200,meffBinHighHL)
+    meffS3T_Mu.setFileList(bgdFiles_m)
     meffS4T_El=bkgOnly.addValidationChannel("meffInc",["SR4jTEl"],1,800,meffBinHighHL)
+    meffS4T_El.setFileList(bgdFiles_e)
     meffS4T_Mu=bkgOnly.addValidationChannel("meffInc",["SR4jTMu"],1,800,meffBinHighHL)
+    meffS4T_Mu.setFileList(bgdFiles_m)
     meffS7T_El=bkgOnly.addValidationChannel("meffInc",["SR7jTEl"],1,750,meffBinHighHL)
+    meffS7T_El.setFileList(bgdFiles_e)
     meffS7T_Mu=bkgOnly.addValidationChannel("meffInc",["SR7jTMu"],1,750,meffBinHighHL)
+    meffS7T_El.setFileList(bgdFiles_m)
     # SOFT LEPTON SRS
     mmSSElT = bkgOnly.addValidationChannel("met/meff2Jet",["SSElT"],4,0.3,0.7)
+    mmSSElT.setFileList(bgdFiles_e)
     mmSSMuT = bkgOnly.addValidationChannel("met/meff2Jet",["SSMuT"],4,0.3,0.7)
+    mmSSMuT.setFileList(bgdFiles_m)
 
     validationSRChannels = [meff2ee, meff4ee, meff2em, meff4em, meff2mm, meff4mm, meffS3T_El, meffS3T_Mu, meffS4T_El, meffS4T_Mu, mmSSElT, mmSSMuT,meffS7T_El,meffS7T_Mu]                                                    
     for chan in validationSRChannels:
@@ -641,21 +698,21 @@ if doValidationDilep:
     meffVR4_ee=bkgOnly.addValidationChannel("meffInc",["VR4ee"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
     meffVR4_em=bkgOnly.addValidationChannel("meffInc",["VR4em"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
     meffVR4_mm=bkgOnly.addValidationChannel("meffInc",["VR4mm"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
-    nJetVR4_ee=bkgOnly.addValidationChannel("nJet",["VR4ee"],nJetZmRegions,nJetZmNBins,nJetZmBinLow,nJetZmBinHigh)
-    nJetVR4_em=bkgOnly.addValidationChannel("nJet",["VR4em"],nJetZmRegions,nJetZmNBins,nJetZmBinLow,nJetZmBinHigh)
-    nJetVR4_mm=bkgOnly.addValidationChannel("nJet",["VR4mm"],nJetZmRegions,nJetZmNBins,nJetZmBinLow,nJetZmBinHigh)
+    nJetVR4_ee=bkgOnly.addValidationChannel("nJet",["VR4ee"],nJetZmNBins,nJetZmBinLow,nJetZmBinHigh)
+    nJetVR4_em=bkgOnly.addValidationChannel("nJet",["VR4em"],nJetZmNBins,nJetZmBinLow,nJetZmBinHigh)
+    nJetVR4_mm=bkgOnly.addValidationChannel("nJet",["VR4mm"],nJetZmNBins,nJetZmBinLow,nJetZmBinHigh)
     meffVR2_ee=bkgOnly.addValidationChannel("meffInc",["VR2ee"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
     meffVR2_em=bkgOnly.addValidationChannel("meffInc",["VR2em"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
     meffVR2_mm=bkgOnly.addValidationChannel("meffInc",["VR2mm"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
-    nJetVR2_ee=bkgOnly.addValidationChannel("nJet",["VR2ee"],nJetZmRegions,nJetZmNBins,nJetZmBinLow,nJetZmBinHigh)
-    nJetVR2_em=bkgOnly.addValidationChannel("nJet",["VR2em"],nJetZmRegions,nJetZmNBins,nJetZmBinLow,nJetZmBinHigh)
-    nJetVR2_mm=bkgOnly.addValidationChannel("nJet",["VR2mm"],nJetZmRegions,nJetZmNBins,nJetZmBinLow,nJetZmBinHigh)
+    nJetVR2_ee=bkgOnly.addValidationChannel("nJet",["VR2ee"],nJetZmNBins,nJetZmBinLow,nJetZmBinHigh)
+    nJetVR2_em=bkgOnly.addValidationChannel("nJet",["VR2em"],nJetZmNBins,nJetZmBinLow,nJetZmBinHigh)
+    nJetVR2_mm=bkgOnly.addValidationChannel("nJet",["VR2mm"],nJetZmNBins,nJetZmBinLow,nJetZmBinHigh)
     meffVR3_ee=bkgOnly.addValidationChannel("meffInc",["VR3ee"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
     meffVR3_em=bkgOnly.addValidationChannel("meffInc",["VR3em"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
     meffVR3_mm=bkgOnly.addValidationChannel("meffInc",["VR3mm"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
-    nJetVR3_ee=bkgOnly.addValidationChannel("nJet",["VR3ee"],nJetZmRegions,nJetZmNBins,nJetZmBinLow,nJetZmBinHigh)
-    nJetVR3_em=bkgOnly.addValidationChannel("nJet",["VR3em"],nJetZmRegions,nJetZmNBins,nJetZmBinLow,nJetZmBinHigh)
-    nJetVR3_mm=bkgOnly.addValidationChannel("nJet",["VR3mm"],nJetZmRegions,nJetZmNBins,nJetZmBinLow,nJetZmBinHigh)
+    nJetVR3_ee=bkgOnly.addValidationChannel("nJet",["VR3ee"],nJetZmNBins,nJetZmBinLow,nJetZmBinHigh)
+    nJetVR3_em=bkgOnly.addValidationChannel("nJet",["VR3em"],nJetZmNBins,nJetZmBinLow,nJetZmBinHigh)
+    nJetVR3_mm=bkgOnly.addValidationChannel("nJet",["VR3mm"],nJetZmNBins,nJetZmBinLow,nJetZmBinHigh)
 
     validation2LepChannels = [meffVR2_ee, meffVR2_em, meffVR2_mm, nJetVR2_ee, nJetVR2_em, nJetVR2_mm,
                               meffVR3_ee, meffVR3_em, meffVR3_mm, nJetVR3_ee, nJetVR3_em, nJetVR3_mm,
@@ -664,27 +721,33 @@ if doValidationDilep:
     # add systematics
     for chan in validation2LepChannels:
         chan.useOverflowBin = True
+        if chan.name.find("_ee")>-1:
+            chan.setFileList(bgdFiles_ee)
+        elif chan.name.find("_em")>-1:
+            chan.setFileList(bgdFiles_em)
+        else:
+            chan.setFileList(bgdFiles_mm)
 
     
 if doValidationDilepZ:
     meffZVR4_ee=bkgOnly.addValidationChannel("meffInc",["VZR4ee"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
     meffZVR4_em=bkgOnly.addValidationChannel("meffInc",["VZR4em"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
     meffZVR4_mm=bkgOnly.addValidationChannel("meffInc",["VZR4mm"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
-    nJetZVR4_ee=bkgOnly.addValidationChannel("nJet",["VZR4ee"],nJetZmRegions,nJetZmNBins,nJetZmBinLow,nJetZmBinHigh)
-    nJetZVR4_em=bkgOnly.addValidationChannel("nJet",["VZR4em"],nJetZmRegions,nJetZmNBins,nJetZmBinLow,nJetZmBinHigh)
-    nJetZVR4_mm=bkgOnly.addValidationChannel("nJet",["VZR4mm"],nJetZmRegions,nJetZmNBins,nJetZmBinLow,nJetZmBinHigh)
+    nJetZVR4_ee=bkgOnly.addValidationChannel("nJet",["VZR4ee"],nJetZmNBins,nJetZmBinLow,nJetZmBinHigh)
+    nJetZVR4_em=bkgOnly.addValidationChannel("nJet",["VZR4em"],nJetZmNBins,nJetZmBinLow,nJetZmBinHigh)
+    nJetZVR4_mm=bkgOnly.addValidationChannel("nJet",["VZR4mm"],nJetZmNBins,nJetZmBinLow,nJetZmBinHigh)
     meffZVR2_ee=bkgOnly.addValidationChannel("meffInc",["VZR2ee"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
     meffZVR2_em=bkgOnly.addValidationChannel("meffInc",["VZR2em"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
     meffZVR2_mm=bkgOnly.addValidationChannel("meffInc",["VZR2mm"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
-    nJetZVR2_ee=bkgOnly.addValidationChannel("nJet",["VZR2ee"],nJetZmRegions,nJetZmNBins,nJetZmBinLow,nJetZmBinHigh)
-    nJetZVR2_em=bkgOnly.addValidationChannel("nJet",["VZR2em"],nJetZmRegions,nJetZmNBins,nJetZmBinLow,nJetZmBinHigh)
-    nJetZVR2_mm=bkgOnly.addValidationChannel("nJet",["VZR2mm"],nJetZmRegions,nJetZmNBins,nJetZmBinLow,nJetZmBinHigh)
+    nJetZVR2_ee=bkgOnly.addValidationChannel("nJet",["VZR2ee"],nJetZmNBins,nJetZmBinLow,nJetZmBinHigh)
+    nJetZVR2_em=bkgOnly.addValidationChannel("nJet",["VZR2em"],nJetZmNBins,nJetZmBinLow,nJetZmBinHigh)
+    nJetZVR2_mm=bkgOnly.addValidationChannel("nJet",["VZR2mm"],nJetZmNBins,nJetZmBinLow,nJetZmBinHigh)
     meffZVR3_ee=bkgOnly.addValidationChannel("meffInc",["VZR3ee"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
     meffZVR3_em=bkgOnly.addValidationChannel("meffInc",["VZR3em"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
     meffZVR3_mm=bkgOnly.addValidationChannel("meffInc",["VZR3mm"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
-    nJetZVR3_ee=bkgOnly.addValidationChannel("nJet",["VZR3ee"],nJetZmRegions,nJetZmNBins,nJetZmBinLow,nJetZmBinHigh)
-    nJetZVR3_em=bkgOnly.addValidationChannel("nJet",["VZR3em"],nJetZmRegions,nJetZmNBins,nJetZmBinLow,nJetZmBinHigh)
-    nJetZVR3_mm=bkgOnly.addValidationChannel("nJet",["VZR3mm"],nJetZmRegions,nJetZmNBins,nJetZmBinLow,nJetZmBinHigh)
+    nJetZVR3_ee=bkgOnly.addValidationChannel("nJet",["VZR3ee"],nJetZmNBins,nJetZmBinLow,nJetZmBinHigh)
+    nJetZVR3_em=bkgOnly.addValidationChannel("nJet",["VZR3em"],nJetZmNBins,nJetZmBinLow,nJetZmBinHigh)
+    nJetZVR3_mm=bkgOnly.addValidationChannel("nJet",["VZR3mm"],nJetZmNBins,nJetZmBinLow,nJetZmBinHigh)
     
     validation2LepZChannels = [meffZVR2_ee, meffZVR2_em, meffZVR2_mm, nJetZVR2_ee, nJetZVR2_em, nJetZVR2_mm,
                               meffZVR3_ee, meffZVR3_em, meffZVR3_mm, nJetZVR3_ee, nJetZVR3_em, nJetZVR3_mm,
@@ -695,6 +758,12 @@ if doValidationDilepZ:
         chan.hasB = True
         chan.hasBQCD = True
         chan.useOverflowBin = True
+        if chan.name.find("_ee")>-1:
+            chan.setFileList(bgdFiles_ee)
+        elif chan.name.find("_em")>-1:
+            chan.setFileList(bgdFiles_em)
+        else:
+            chan.setFileList(bgdFiles_mm)
     
 
 if doValidationSoftLep:
@@ -731,6 +800,12 @@ if doValidationSoftLep:
         for syst in btagChanSyst:
             chan.addSystematic(syst)
 
+    for chan in validationSoftLepChannels+validationSoftLepBtagChannels+validationSoftLepBvetoChannels:
+        if chan.name.find("El")>-1:
+            chan.setFileList(bgdFiles_se)
+        else:
+            chan.setFileList(bgdFiles_sm)
+
 
 #-------------------------------------------------
 # Exclusion fit
@@ -763,7 +838,7 @@ if doExclusion_GMSB_combined or doExclusion_mSUGRA_dilepton_combined or doExclus
         elif doExclusion_GG_twostepCC_slepton:
             SRs=["S4ee","S4em","S4mm"]
 
-        if doValidationSR:
+        if doValidationSRLoose or doValidationSRTight:
             for sr in SRs:
                 #don't re-create already existing channel, but unset as Validation and set as Signal channel
                 ch = myTopLvl.getChannel("meffInc",[sr])
@@ -777,12 +852,25 @@ if doExclusion_GMSB_combined or doExclusion_mSUGRA_dilepton_combined or doExclus
                 elif sr=="S4El" or sr=="S4Mu":
                     ch = myTopLvl.addChannel("meffInc",[sr],meffNBins1lS4,meffBinLow1lS4,meffBinHigh1lS4)
                 elif sr=="S2ee" or sr=="S2em" or sr=="S2mm":
-                    ch = myTopLvl.addChannel("meffInc",["S2em"],meffNBinsS2,meffBinLowS2,meffBinHighS2)
+                    ch = myTopLvl.addChannel("meffInc",[sr],meffNBinsS2,meffBinLowS2,meffBinHighS2)
                 elif sr=="S4ee" or sr=="S4em" or sr=="S4mm":
                     ch = myTopLvl.addChannel("meffInc",[sr],meffNBinsS4,meffBinLowS4,meffBinHighS4)
                 else:
                     raise RuntimeError("Unexpected signal region %s"%sr)
                 ch.useOverflowBin=True
+
+                if ch.name.find("El"):
+                    ch.setFileList(bgdFiles_e)
+                elif ch.name.find("Mu"):
+                    ch.setFileList(bgdFiles_m)
+                elif ch.name.find("ee"):
+                    ch.setFileList(bgdFiles_ee)
+                elif ch.name.find("em"):
+                    ch.setFileList(bgdFiles_em)
+                elif ch.name.find("mm"):
+                    ch.setFileList(bgdFiles_mm)
+                    
+                
                 myTopLvl.setSignalChannels(ch)        
 
 
