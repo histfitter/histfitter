@@ -13,18 +13,18 @@ from systematic import Systematic
 #import ROOT
 #ROOT.SetAtlasStyle()
 
-onLxplus=True
+onLxplus=False
 doHardLep=True
-doSoftLep=True
+doSoftLep=False
 useStat=True
 fullSyst=True
 
 doValidationSRLoose=False
-doValidationSRTight=True
+doValidationSRTight=False
 doValidationSlope=False
 doValidationDilep=False
 doValidationDilepZ=False
-doValidationSoftLep=True
+doValidationSoftLep=False
 
 doDiscoveryS2=False
 doDiscoveryS4=False
@@ -46,10 +46,7 @@ doSignalOnly=False #Remove all bkgs for signal histo creation step
 
 if not 'sigSamples' in dir():
     sigSamples=["SU_580_240_0_10_P"]
-# sigSamples=["GMSB_3_2d_50_250_3_10_1_1"]
-#sigSamples=[]
-
-
+#    sigSamples=["GMSB_3_2d_50_250_3_10_1_1"]
 
 # First define HistFactory attributes
 configMgr.analysisName = "Combined_KFactorFit_5Channel" # Name to give the analysis
@@ -499,6 +496,16 @@ bkgOnly.setBkgConstrainChannels([nJetTopeeChannel,nJetZeeChannel,nJetTopeChannel
 # meffBinLow = 0.
 # meffBinHigh = 1600.
 
+#Hard 1 lepton SR binning
+meffNBins1lS3 = 6
+meffBinLow1lS3 = 400.
+meffBinHigh1lS3 = 1600.
+
+meffNBins1lS4 = 4
+meffBinLow1lS4 = 800.
+meffBinHigh1lS4 = 1600.
+
+#Dilepton SR binning
 meffNBinsS2 = 5
 meffBinLowS2 = 700.
 meffBinHighS2 = 1700.
@@ -765,8 +772,10 @@ if doExclusion_GMSB_combined or doExclusion_mSUGRA_dilepton_combined or doExclus
                 myTopLvl.setSignalChannels(ch)
         else:
             for sr in SRs:
-                if sr=="S3El" or sr=="S3Mu" or sr=="S4El" or sr=="S4Mu":
-                    ch = myTopLvl.addChannel("meffInc",[sr],meffNBins,meffBinLow,meffBinHigh)
+                if sr=="S3El" or sr=="S3Mu":
+                    ch = myTopLvl.addChannel("meffInc",[sr],meffNBins1lS3,meffBinLow1lS3,meffBinHigh1lS3)
+                elif sr=="S4El" or sr=="S4Mu":
+                    ch = myTopLvl.addChannel("meffInc",[sr],meffNBins1lS4,meffBinLow1lS4,meffBinHigh1lS4)
                 elif sr=="S2ee" or sr=="S2em" or sr=="S2mm":
                     ch = myTopLvl.addChannel("meffInc",["S2em"],meffNBinsS2,meffBinLowS2,meffBinHighS2)
                 elif sr=="S4ee" or sr=="S4em" or sr=="S4mm":
@@ -778,5 +787,4 @@ if doExclusion_GMSB_combined or doExclusion_mSUGRA_dilepton_combined or doExclus
 
 
 
-#  LocalWords:  jesSignal
 
