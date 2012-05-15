@@ -17,23 +17,26 @@ onLxplus=True
 doHardLep=True
 doSoftLep=True
 useStat=True
+fullSyst=True
+
 doValidationSRLoose=False
 doValidationSRTight=True
 doValidationSlope=False
 doValidationDilep=False
 doValidationDilepZ=False
 doValidationSoftLep=True
+
 doDiscoveryS2=False
 doDiscoveryS4=False
 doDiscovery=False
 doDiscoveryTight=False
 discoverychannel="ee" # ee, emu, mumu
+
 doExclusion_GMSB_combined=False
-doExclusion_mSUGRA_dilepton_combined=True
+doExclusion_mSUGRA_dilepton_combined=False
 doExclusion_GG_onestepCC_combined=False
 doExclusion_GG_twostepCC_slepton=False
 blindS=False
-fullSyst=True
 useXsecUnc=True             # switch off when calucating excluded cross section (colour code in SM plots)
 doWptReweighting=False ## currently buggy
 doSignalOnly=False #Remove all bkgs for signal histo creation step
