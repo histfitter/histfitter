@@ -14,11 +14,9 @@ from systematic import Systematic
 #ROOT.SetAtlasStyle()
 
 onLxplus=True
-debugSyst=False
 doHardLep=True
 doSoftLep=False
 useStat=True
-doValidation=False
 doValidationSR=True
 doValidationSlope=False
 doValidationDilep=False
@@ -29,32 +27,29 @@ doDiscoveryS4=False
 doDiscovery=False
 doDiscoveryTight=False
 discoverychannel="ee" # ee, emu, mumu
-doExclusion=False
 doExclusion_GMSB_combined=False
-doExclusion_mSUGRA_dilepton_combined=False
+doExclusion_mSUGRA_dilepton_combined=True
 doExclusion_GG_onestepCC_combined=False
 doExclusion_GG_twostepCC_slepton=False
-
-doSignalOnly=False #Remove all bkgs for signal histo creation step
-#doSignalOnly=True #Remove all bkgs for signal histo creation step
-# Need to comment out the following line when running HypoTest.py parallelized
-
-if not 'sigSamples' in dir():
-    sigSamples=["SU_580_240_0_10_P"]
-# sigSamples=["GMSB_3_2d_50_250_3_10_1_1"]
-
-#sigSamples=[]
-
-
-#doExclusion=True
 blindS=False
 fullSyst=True
 useXsecUnc=True             # switch off when calucating excluded cross section (colour code in SM plots)
 doWptReweighting=False ## currently buggy
+doSignalOnly=False #Remove all bkgs for signal histo creation step
+#doSignalOnly=True #Remove all bkgs for signal histo creation step
+# Need to comment out the following line when running HypoTest.py parallelized
+
+
+if not 'sigSamples' in dir():
+    sigSamples=["SU_580_240_0_10_P"]
+# sigSamples=["GMSB_3_2d_50_250_3_10_1_1"]
+#sigSamples=[]
+
+
 
 # First define HistFactory attributes
-configMgr.analysisName = "Combined_KFactorFit_5Channel_SHORT" # Name to give the analysis
-configMgr.outputFileName = "results/Combined_KFactorFit_5Channel_SHORT.root"
+configMgr.analysisName = "Combined_KFactorFit_5Channel" # Name to give the analysis
+configMgr.outputFileName = "results/Combined_KFactorFit_5Channel.root"
 
 # Scaling calculated by outputLumi / inputLumi
 configMgr.inputLumi = 0.001
@@ -259,11 +254,10 @@ basicChanSyst.append(Systematic("JLow","_NoSys","_JESLowup","_JESLowdown","tree"
 basicChanSyst.append(Systematic("JMedium","_NoSys","_JESMediumup","_JESMediumdown","tree","histoSys")) # JES uncertainty - for medium pt jets
 basicChanSyst.append(Systematic("JHigh","_NoSys","_JESHighup","_JESHighdown","tree","histoSys")) # JES uncertainty - for high pt jets
 basicChanSyst.append(Systematic("MC","_NoSys","_METCOup","_METCOdown","tree","overallSys")) # MET cell-out uncertainty - one per channel
+basicChanSyst.append(Systematic("MP","_NoSys","_METPUup","_METPUdown","tree","histoSys")) # MET pileup uncertainty - one per channel
              
-
 fullChanSyst = []
 fullChanSyst.append(Systematic("LE",configMgr.weights,lepHighWeights,lepLowWeights,"weight","overallSys")) # Lepton weight uncertainty
-fullChanSyst.append(Systematic("MP","_NoSys","_METPUup","_METPUdown","tree","histoSys")) # MET pileup uncertainty - one per channel
 fullChanSyst.append(Systematic("TE",configMgr.weights,trigHighWeights,trigLowWeights,"weight","overallSys")) # Trigger weight uncertainty
 fullChanSyst.append(Systematic("LES","_NoSys","_LESup","_LESdown","tree","overallSys")) # LES uncertainty - one per channel
 fullChanSyst.append(Systematic("LRM","_NoSys","_LERMSup","_LERMSdown","tree","overallSys")) # LER with muon system - one per channel
@@ -723,11 +717,8 @@ if doValidationSoftLep:
 if doExclusion_GMSB_combined or doExclusion_mSUGRA_dilepton_combined or doExclusion_GG_twostepCC_slepton:
 
     for sig in sigSamples:
-        myTopLvl = bkgOnly
-        myTopLvl.name="dilepton_%s"%sig
-        myTopLvl.prefix=configMgr.analysisName+"_"+"dilepton_%s"%sig
-        
-##        myTopLvl = configMgr.addTopLevelXMLClone(bkgOnly,"dilepton_%s"%sig)
+        myTopLvl = configMgr.addTopLevelXMLClone(bkgOnly,"Sig_%s"%sig)
+
         sigSample = Sample(sig,kPink)
         sigSample.setFileList(sigFiles)
         sigSample.setNormByTheory()
@@ -736,34 +727,40 @@ if doExclusion_GMSB_combined or doExclusion_mSUGRA_dilepton_combined or doExclus
 
         if useXsecUnc:
             sigSample.addSystematic(xsecSig)
+        #ADD ISR UNCERTAINTY!!
+        sigSample.addSystematic(jesSignal)
         myTopLvl.addSamples(sigSample)
         myTopLvl.setSignalSample(sigSample)
 
-        SigList=[sig]
 
-        S2Channel_ee = myTopLvl.addChannel("meffInc",["S2ee"],meffNBinsS2,meffBinLowS2,meffBinHighS2)
-        S2Channel_em = myTopLvl.addChannel("meffInc",["S2em"],meffNBinsS2,meffBinLowS2,meffBinHighS2)
-        S2Channel_mm = myTopLvl.addChannel("meffInc",["S2mm"],meffNBinsS2,meffBinLowS2,meffBinHighS2)
-        S4Channel_ee = myTopLvl.addChannel("meffInc",["S4ee"],meffNBinsS4,meffBinLowS4,meffBinHighS4)
-        S4Channel_em = myTopLvl.addChannel("meffInc",["S4em"],meffNBinsS4,meffBinLowS4,meffBinHighS4)
-        S4Channel_mm = myTopLvl.addChannel("meffInc",["S4mm"],meffNBinsS4,meffBinLowS4,meffBinHighS4)
-
-        SRChannels = [nJetZeeChannel, nJetZeChannel, nJetZmmChannel, nJetZmChannel]
-        
-        # add systematics
-        for chan in SRChannels:
-            chan.useOverflowBin = True
-            chan.getSample(sig).addSystematic(jesSignal)
-
-        ## Which SRs for which Scenario?
-
+        SRs=["S3El","S3Mu","S4El","S4Mu","S2ee","S2em","S2mm","S4ee","S4em","S4mm"]
         if doExclusion_GMSB_combined:
-            myTopLvl.setSignalChannels([S2Channel_ee,S2Channel_em,S2Channel_mm])       
+            SRs=["S2ee","S2em","S2mm"]
         elif doExclusion_mSUGRA_dilepton_combined:
-            myTopLvl.setSignalChannels([S2Channel_ee,S2Channel_em,S2Channel_mm,S4Channel_ee,S4Channel_em,S4Channel_mm])
-        ## Which SRs for SM???
+            SRs=["S3El","S3Mu","S4El","S4Mu","S2ee","S2em","S2mm","S4ee","S4em","S4mm"]
         elif doExclusion_GG_twostepCC_slepton:
-            myTopLvl.setSignalChannels([S4Channel_ee,S4Channel_em,S4Channel_mm])
+            SRs=["S4ee","S4em","S4mm"]
+
+        if doValidationSR:
+            for sr in SRs:
+                #don't re-create already existing channel, but unset as Validation and set as Signal channel
+                ch = myTopLvl.getChannel("meffInc",[sr])
+                iPop=myTopLvl.validationChannels.index(sr+"_meffInc")
+                myTopLvl.validationChannels.pop(iPop)
+                myTopLvl.setSignalChannels(ch)
+        else:
+            for sr in SRs:
+                if sr=="S3El" or sr=="S3Mu" or sr=="S4El" or sr=="S4Mu":
+                    ch = myTopLvl.addChannel("meffInc",[sr],meffNBins,meffBinLow,meffBinHigh)
+                elif sr=="S2ee" or sr=="S2em" or sr=="S2mm":
+                    ch = myTopLvl.addChannel("meffInc",["S2em"],meffNBinsS2,meffBinLowS2,meffBinHighS2)
+                elif sr=="S4ee" or sr=="S4em" or sr=="S4mm":
+                    ch = myTopLvl.addChannel("meffInc",[sr],meffNBinsS4,meffBinLowS4,meffBinHighS4)
+                else:
+                    raise RuntimeError("Unexpected signal region %s"%sr)
+                ch.useOverflowBin=True
+                myTopLvl.setSignalChannels(ch)        
+
 
 
 #  LocalWords:  jesSignal
