@@ -15,9 +15,10 @@ from systematic import Systematic
 
 onLxplus=True
 doHardLep=True
-doSoftLep=False
+doSoftLep=True
 useStat=True
-doValidationSR=True
+doValidationSRLoose=False
+doValidationSRTight=True
 doValidationSlope=False
 doValidationDilep=False
 doValidationDilepZ=False
@@ -579,24 +580,38 @@ if doValidationSlope:
         chan.hasBQCD = False
         chan.useOverflowBin = True
 
-if doValidationSR:
-    # S2 using meff
+if doValidationSRLoose:
+    #DILEPTONS
     meff2ee = bkgOnly.addValidationChannel("meffInc",["S2ee"],meffNBinsS2,meffBinLowS2,meffBinHighS2)
-    # S4 using meff
     meff4ee = bkgOnly.addValidationChannel("meffInc",["S4ee"],meffNBinsS4,meffBinLowS4,meffBinHighS4)
-    # S2 using meff
     meff2em = bkgOnly.addValidationChannel("meffInc",["S2em"],meffNBinsS2,meffBinLowS2,meffBinHighS2)
-    # S4 using meff
     meff4em = bkgOnly.addValidationChannel("meffInc",["S4em"],meffNBinsS4,meffBinLowS4,meffBinHighS4)
-    # S2 using meff
     meff2mm = bkgOnly.addValidationChannel("meffInc",["S2mm"],meffNBinsS2,meffBinLowS2,meffBinHighS2)
-    # S4 using meff
     meff4mm = bkgOnly.addValidationChannel("meffInc",["S4mm"],meffNBinsS4,meffBinLowS4,meffBinHighS4)
     # HARD LEPTON SRS
     meffS3_El=bkgOnly.addValidationChannel("meffInc",["S3El"],meffNBinsHL,meffBinLowHL,meffBinHighHL)
     meffS3_Mu=bkgOnly.addValidationChannel("meffInc",["S3Mu"],meffNBinsHL,meffBinLowHL,meffBinHighHL)
     meffS4_El=bkgOnly.addValidationChannel("meffInc",["S4El"],meffNBinsHL,meffBinLowHL,meffBinHighHL)
     meffS4_Mu=bkgOnly.addValidationChannel("meffInc",["S4Mu"],meffNBinsHL,meffBinLowHL,meffBinHighHL)
+    # SOFT LEPTON SRS
+    mmSSEl = bkgOnly.addValidationChannel("met/meff2Jet",["SSEl"],6,0.1,0.7)
+    mmSSMu = bkgOnly.addValidationChannel("met/meff2Jet",["SSMu"],6,0.1,0.7)
+
+    validationSRChannels = [meff2ee, meff4ee, meff2em, meff4em, meff2mm, meff4mm, meffS3_El, meffS3_Mu, meffS4_El, meffS4_Mu, mmSSEl, mmSSMu]
+    for chan in validationSRChannels:
+        chan.useOverflowBin = True
+
+if doValidationSRTight:
+    #DILEPTONS
+    if not doValidationSRLoose:
+        meff2ee = bkgOnly.addValidationChannel("meffInc",["S2ee"],1,meffBinLowS2,meffBinHighS2)
+        meff4ee = bkgOnly.addValidationChannel("meffInc",["S4ee"],1,meffBinLowS4,meffBinHighS4)
+        meff2em = bkgOnly.addValidationChannel("meffInc",["S2em"],1,meffBinLowS2,meffBinHighS2)
+        meff4em = bkgOnly.addValidationChannel("meffInc",["S4em"],1,meffBinLowS4,meffBinHighS4)
+        meff2mm = bkgOnly.addValidationChannel("meffInc",["S2mm"],1,meffBinLowS2,meffBinHighS2)
+        meff4mm = bkgOnly.addValidationChannel("meffInc",["S4mm"],1,meffBinLowS4,meffBinHighS4)
+        pass
+    # HARD LEPTON SRS
     meffS3T_El=bkgOnly.addValidationChannel("meffInc",["SR3jTEl"],1,1200,meffBinHighHL)
     meffS3T_Mu=bkgOnly.addValidationChannel("meffInc",["SR3jTMu"],1,1200,meffBinHighHL)
     meffS4T_El=bkgOnly.addValidationChannel("meffInc",["SR4jTEl"],1,800,meffBinHighHL)
@@ -604,13 +619,10 @@ if doValidationSR:
     meffS7T_El=bkgOnly.addValidationChannel("meffInc",["SR7jTEl"],1,750,meffBinHighHL)
     meffS7T_Mu=bkgOnly.addValidationChannel("meffInc",["SR7jTMu"],1,750,meffBinHighHL)
     # SOFT LEPTON SRS
-    mmSSEl = bkgOnly.addValidationChannel("met/meff2Jet",["SSEl"],6,0.1,0.7)
-    mmSSMu = bkgOnly.addValidationChannel("met/meff2Jet",["SSMu"],6,0.1,0.7)
     mmSSElT = bkgOnly.addValidationChannel("met/meff2Jet",["SSElT"],4,0.3,0.7)
     mmSSMuT = bkgOnly.addValidationChannel("met/meff2Jet",["SSMuT"],4,0.3,0.7)
 
-    validationSRChannels = [meff2ee, meff4ee, meff2em, meff4em, meff2mm, meff4mm, meffS3_El, meffS3_Mu, meffS4_El, meffS4_Mu, meffS3T_El, meffS3T_Mu, meffS4T_El, meffS4T_Mu, mmSSEl, mmSSMu, mmSSElT, mmSSMuT,meffS7T_El,meffS7T_Mu]                                                    
-    # add systematics
+    validationSRChannels = [meff2ee, meff4ee, meff2em, meff4em, meff2mm, meff4mm, meffS3T_El, meffS3T_Mu, meffS4T_El, meffS4T_Mu, mmSSElT, mmSSMuT,meffS7T_El,meffS7T_Mu]                                                    
     for chan in validationSRChannels:
         chan.useOverflowBin = True
 
