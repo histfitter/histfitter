@@ -79,16 +79,16 @@ if configMgr.readFromTree:
         bgdFiles_mm = ["data/SusyFitterTree_MuMu.root"]
         bgdFiles_e = ["data/SusyFitterTree_OneEle.root"]
         bgdFiles_m = ["data/SusyFitterTree_OneMu.root"]
-        bgdFiles_se = ["data/SusyFitterTree_OneSoftEle_BG_v4.root"]
-        bgdFiles_sm = ["data/SusyFitterTree_OneSoftMuo_BG_v4.root"]
+        bgdFiles_se = ["data/SusyFitterTree_OneSoftEle_BG_v5.root"]
+        bgdFiles_sm = ["data/SusyFitterTree_OneSoftMuo_BG_v5.root"]
     else:
         bgdFiles_ee = [inputDir+"/SusyFitterTree_EleEle.root"]
         bgdFiles_em = [inputDir+"/SusyFitterTree_EleMu.root"]
         bgdFiles_mm = [inputDir+"/SusyFitterTree_MuMu.root"]
         bgdFiles_e = [inputDir+"/SusyFitterTree_OneEle.root"]
         bgdFiles_m = [inputDir+"/SusyFitterTree_OneMu.root"]
-        bgdFiles_se = ["/afs/cern.ch/work/h/hyamaguc/public/samples/SusyFitterTree_OneSoftEle_BG_v3.root"]
-        bgdFiles_sm = ["/afs/cern.ch/work/h/hyamaguc/public/samples/SusyFitterTree_OneSoftMuo_BG_v3.root"]
+        bgdFiles_se = ["/afs/cern.ch/work/h/hyamaguc/public/samples/SusyFitterTree_OneSoftEle_BG_v5.root"]
+        bgdFiles_sm = ["/afs/cern.ch/work/h/hyamaguc/public/samples/SusyFitterTree_OneSoftMuo_BG_v5.root"]
 
 if doExclusion_GMSB_combined:
     if not onLxplus:
