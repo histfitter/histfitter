@@ -28,14 +28,14 @@ def removeWeight(oldList,oldWeight):
     newList.remove(oldWeight)
     return newList
 
-onLxplus=False
+onLxplus=True
 doHardLep=True
 doSoftLep=False
 useStat=True
-fullSyst=True
+fullSyst=False
 
-doValidationSRLoose=True
-doValidationSRTight=True
+doValidationSRLoose=False
+doValidationSRTight=False
 doValidationSlope=False
 doValidationDilep=False
 doValidationDilepZ=False

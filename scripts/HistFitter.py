@@ -83,7 +83,7 @@ def GenerateFitAndPlot(tl):
     Util.ImportInWorkspace(w,expResultBefore,"RooExpandedFitResult_beforeFit")
     # plot before fit
     #Util.PlotPdfWithComponents(w,tl.name,plotChannels,"beforeFit_ORIGINAL",None,toyMC)
-    Util.PlotPdfWithComponents(w,tl.name,plotChannels,"beforeFit",expResultBefore,toyMC,plotRatio)
+    #Util.PlotPdfWithComponents(w,tl.name,plotChannels,"beforeFit",expResultBefore,toyMC,plotRatio)
     #return
 
     # fit of CRs only
@@ -97,11 +97,11 @@ def GenerateFitAndPlot(tl):
     Util.ImportInWorkspace(w,expResultAfter,"RooExpandedFitResult_afterFit")
     # plot after fit
     #Util.PlotPdfWithComponents(w,tl.name,plotChannels,"afterFit_ORIGINAL",result,toyMC)
-    Util.PlotPdfWithComponents(w,tl.name,plotChannels,"afterFit",expResultAfter,toyMC,plotRatio)
+    #Util.PlotPdfWithComponents(w,tl.name,plotChannels,"afterFit",expResultAfter,toyMC,plotRatio)
     # plot each component of each region separately with propagated error after fit  (interesting for debugging)
     #    Util.PlotSeparateComponents(tl.name,plotChannels,"afterFit",result,toyMC)
     # plot correlation matrix for result
-    Util.PlotCorrelationMatrix(result)
+    #Util.PlotCorrelationMatrix(result)
     # Util.GetCorrelations(result, 0.85)
     #     plotPLL = False
     #     Util.PlotNLL(w, result, plotPLL, "", toyMC)
