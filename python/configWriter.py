@@ -32,6 +32,7 @@ class TopLevelXML(object):
         self.bkgConstrainChannels=[]
         self.systDict = {}
         self.files = []
+        self.weights = []
         self.treeName = ''
         # Plot cosmetics
         self.dataColor=kBlack
@@ -118,17 +119,17 @@ class TopLevelXML(object):
                 print "WARNING TopLvlXML: %s, Channel: %s --> SR/CR/VR undefined"%(self.name,chanName)
             if nFound>1:
                 print "WARNING TopLvlXML: %s, Channel: %s --> SR=%s CR=%s VR=%s is ambiguous"%(self.name,chanName,isSR,isCR,isVR)
-            for sample in self.sampleList:
-                try:
-                    chan.getSample(sample.name)
-                except:
-                    chan.addSample(sample)
-                for syst in sample.systDict.keys():
-                    try:
-                        chan.getSample(sample.name).getSystematic(syst)
-                    except:
-                        for s in sample.getSystematic(syst):
-                            chan.getSample(sample.name).addSystematic(s)
+            #for sample in self.sampleList:
+            #    try:
+            #        chan.getSample(sample.name)
+            #    except:
+            #        chan.addSample(sample)
+            #    for (systName,syst) in sample.systDict.items():
+            #        try:
+            #            chan.getSample(sample.name).getSystematic(systName)
+            #        except:
+            #            for s in sample.getSystematic(systName):
+            #                chan.getSample(sample.name).addSystematic(s)
         return
     
     def close(self):
@@ -189,74 +190,225 @@ class TopLevelXML(object):
         return self.measurements[len(self.measurements)-1]
 
     def getMeasurement(self,name):
+        """
+        Find the measurement object with given name
+        """
         for m in self.measurements:
             if m.name == name:
                 return m
+
         raise RuntimeError("Measurement %s does not exist in %s"%(name,self.name))    
                 
     def addChannel(self,variableName,regions,nBins,binLow,binHigh):
+        """
+        Build a channel object from this TopLevel
+        """
         chanObj = ChannelXML(variableName,regions,self.prefix,nBins,binLow,binHigh,self.statErrThreshold)
-        #verify that this name is not already used
+
+        # Verify that this name is not already used
         for chan in self.channels:
             if chan.name == chanObj.name:
                 raise RuntimeError("Channel %s already exists in TopLevelXML %s. Please use a different name."%(chanObj.name,self.name))
-            pass
+
+        # Channel doesn't have weights so add them
+        chanObj.setWeights(self.weights)
+
+        # Propagate systematics into channel
+        for (systName,syst) in self.systDict.items():
+            chanObj.addSystematic(syst)
+
+        # Put samples owned by this TopLevel into the channel
         for s in self.sampleList:
-            chanObj.addSample(s)
-        #add channel to the list
+            chanObj.addSample(s.Clone())
+
+        # Add channel to the list
         self.channels.append(chanObj)
+
         return self.channels[len(self.channels)-1]
 
-    def addValidationChannel(self,variableName,regions,nBins,binLow,binHigh):
-        ch = self.addChannel(variableName,regions,nBins,binLow,binHigh)
-        self.setValidationChannels(ch)
-        return ch
-
-    def getChannel(self,variableName,regions):
-        for chan in self.channels:
-            if chan.variableName == variableName and chan.regions == regions:
-                return chan
-        raise ValueError("No channel with variable name %s and regions %s found" % (variableName,regions))
-
     def addChannelObj(self,obj):
+        """
+        Add channel as a pre-built object
+        """
         if not isinstance(obj,ChannelXML):
             raise RuntimeError("addChannel does not support input of type '%s'."%(type(obj)))
-        #verify that this name is not already used
+
+        # Verify that this name is not already used
         for chan in self.channels:
             if chan.name == obj.name:
                 raise RuntimeError("Channel %s already exists in TopLevelXML %s. Please use a different name."%(chanObj.name,self.name))
-            pass
+
+        # Create a copy
+        newObj = deepcopy(obj)
+
+        # If the channel doesn't have any weights then add them
+        if len(newObj.weights) == 0:
+            newObj.weights.setWeights(self.weights)
+            
+        # Propagate systematics into channel
+        for (systName,syst) in self.systDict.items():
+            if not systName in newObj.systDict.keys():
+                newObj.addSystematic(syst)
+
+        # Put samples owned by this TopLevel into the channel
         for s in self.sampleList:
-            obj.addSample(s)
-        #add channel clone to the list
-        self.channels.append(deepcopy(obj))
+            if not s.name in [sam.name for sam in newObj.sampleList]:
+                newObj.addSample(s)
+
+        # Add channel clone to the list
+        self.channels.append(newObj)
         return self.channels[len(self.channels)-1]
 
+    def addValidationChannel(self,variableName,regions,nBins,binLow,binHigh):
+        """
+        Create a channel and give it a validation flag
+        """
+        ch = self.addChannel(variableName,regions,nBins,binLow,binHigh)
+
+        self.setValidationChannels(ch)
+
+        return ch
+
+    def getChannel(self,variableName,regions):
+        """
+        Find the channel with the given variable and regions
+        """
+        for chan in self.channels:
+            if chan.variableName == variableName and chan.regions == regions:
+                return chan
+
+        raise RuntimeError("No channel with variable name %s and regions %s found" % (variableName,regions))
+
     def addSamples(self,input):
+        """
+        Add list (or single object) of pre-built samples to this TopLevel
+        """
         if isinstance(input,list):
             sampleList=input
         else:
             sampleList=[input]
             pass
+
         for s in sampleList:
-            if not self.sampleList.__contains__(s):
+            # If the sample doesn't exist in TopLevel already then add it, else something has gone wrong
+            if not s.name in [sam.name for sam in self.sampleList]:
+
+                # Append copy of the sample
                 self.sampleList.append(s.Clone())
+
+                # Only apply weights and systematics to MC-derived samples
+                if not s.isData and not s.isDiscovery and not s.isQCD:
+                    # If the sample doesn't have weights then add them
+                    if len(self.sampleList[-1].weights) == 0:                        
+                        self.sampleList[-1].setWeights(self.weights)
+                        
+                    # Propagate systematics into sample
+                    for (systName,syst) in self.systDict.items():
+                        if not systName in self.sampleList[-1].systDict.keys():
+                            self.sampleList[-1].addSystematic(syst)
+
+            else:
+                raise RuntimeError("Sample %s already defined in TopLevel %s" % (s.name,self.name))
+
+            # Propagate to channels that are already owned as well
             for c in self.channels:
                 hasSample = False
-                for cSam in c.sampleList:
-                    if s.name == cSam.name:
-                        hasSample = True
-                if not hasSample:
+                if not s.name in [sam.name for sam in c.sampleList]:
                     c.addSample(self.getSample(s.name))
         return
 
     def getSample(self,name):
+        """
+        Find the sample with the given name
+        """
         for s in self.sampleList:
             if s.name == name:
                 return s
         raise Exception("Sample with name %s not found in TopLevel %s"%(name,self.name))
 
+    def setWeights(self,weights):
+        """
+        Set the weights
+        
+        This overrides all previously defined weights
+        """
+        self.weights = deepcopy(weights)
+
+        # Propagate to owned channels that do not already have weights
+        for c in self.channels:
+            if len(c.weights) == 0:
+                c.setWeights(weights)
+
+        # Propagate to owned samples that do not already have weights
+        for s in self.sampleList:
+            if not s.isData and not s.isDiscovery and not s.isQCD:
+                if len(s.weights) == 0:
+                    s.setWeights(weights)
+
+        return
+
+    def addWeight(self,weight):
+        """
+        Add a single weight
+        """
+        if not weight in self.weights:
+            self.weights.append(weight)
+        else:
+            raise RuntimeError("Weight %s already defined in TopLevel" % (weight,self.name))
+
+        # Propagate to owned channels that do not already have this weight
+        for c in self.channels:
+            if not weight in c.weights:
+                c.addWeight(weight)
+
+        # Propagate to owned samples that do not already have this weight
+        for s in self.sampleList:
+            if not s.isData and not s.isDiscovery and not s.isQCD:
+                if not weight in s.weights:
+                    s.addWeight(weight)
+
+        # Propagate to owned weight-type systematics that do not already have this weight
+        for syst in self.systDict.values():
+            if syst.type == "weight": 
+                if not weight in syst.high:
+                    syst.high.append(weight)
+                if not weight in syst.low:
+                    syst.low.append(weight)
+        return
+
+    def removeWeight(self,weight):
+        """
+        Remove a single weight
+        """
+        if weight in self.weights:
+            self.weights.remove(weight)
+        else:
+            raise RuntimeError("Weight %s does not exist in TopLevel %s" % (weight,self.name))
+
+        # Propagate to owned channels
+        for c in self.channels:
+            if weight in c.weights:
+                c.removeWeight(weight)
+
+        # Propagate to owned samples
+        for s in self.sampleList:
+            if not s.isData and not s.isDiscovery and not s.isQCD:
+                if weight in s.weights:
+                    s.removeWeight(weight)
+
+        # Propagate to owned weight-type systematics
+        for syst in self.systDict.values():
+            if syst.type == "weight": 
+                if weight in syst.high:
+                    syst.high.remove(weight)
+                if weight in syst.low:
+                    syst.low.remove(weight)    
+        return
+
     def setSignalSample(self,sig):
+        """
+        Flag the signal sample
+        """
         if isinstance(sig,Sample):
             self.signalSample=sig.name
         elif isinstance(sig,str):
@@ -285,14 +437,23 @@ class TopLevelXML(object):
         return
 
     def setSignalChannels(self,chans):
+        """
+        Set the channels to be treated as signal (SRs)
+        """
         self.appendStrChanOrListToList(chans,self.signalChannels)
         return
 
     def setBkgConstrainChannels(self,chans):
+        """
+        Set the channels to be treated as constraining regions (CRs)
+        """
         self.appendStrChanOrListToList(chans,self.bkgConstrainChannels)
         return
 
     def setValidationChannels(self,chans): #should be renamed appendValidationChannels !
+        """
+        Set the channels to be treated as validation regions (VRs)
+        """
         self.appendStrChanOrListToList(chans,self.validationChannels)
         return
 
@@ -303,6 +464,7 @@ class TopLevelXML(object):
         their own file list.
         """
         self.files = filelist
+        return
 
     def setFile(self,file):
         """
@@ -311,6 +473,7 @@ class TopLevelXML(object):
         their own file list.
         """
         self.files = [file]
+        return
 
     def propagateFileList(self, fileList):
         """
@@ -318,39 +481,61 @@ class TopLevelXML(object):
         """
         # if we don't have our own file list, use the one given to us
         if self.files == []:
-                self.files = fileList
+            self.files = fileList
         # propagate our file list downwards
         for ch in self.channels:
-                ch.propagateFileList(self.files)
+            ch.propagateFileList(self.files)
+        return
 
     def addSystematic(self,syst):
         """
         Add a systematic to this object. This will be propagated to all owned samples
         """
-        if not syst.name in self.systDict.keys():
-            self.systDict[syst.name] = []
-        self.systDict[syst.name].append(syst.Clone())
-        return
+        if syst.name in self.systDict.keys():
+            raise RuntimeError("Attempt to overwrite systematic %s in TopLevel %s" % (syst.name,self.name))
+        else:
+            self.systDict[syst.name] = syst.Clone()
+            for chan in self.channels:
+                chan.addSystematic(syst)
+            for sam in self.sampleList:
+                if not sam.isData and not sam.isDiscovery and not sam.isQCD:
+                    sam.addSystematic(syst)
+            return
 
     def getSystematic(self,systName):
+        """
+        Find the systematic with given name
+        """
         try:
             return self.systDict[systName]
         except KeyError:
             raise KeyError("Could not find systematic %s in topLevel %s" % (systName,self.name))
 
     def clearSystematics(self):
+        """
+        Remove all systematics from this TopLevel
+        """
         self.systDict.clear()
         return
 
     def removeSystematic(self,name):
+        """
+        Remove a single systematic from this TopLevel
+        """
         del self.systDict[name]
         return
 
     def setTreeName(self,treeName):
+        """
+        Set the tree name
+        """
         self.treeName = treeName
         return
 
     def propagateTreeName(self,treeName):
+        """
+        Propagate the tree name
+        """
         if self.treeName == '':
             self.treeName = treeName
         ## propagate down to channels
@@ -458,9 +643,9 @@ class ChannelXML(object):
         self.binLow = binLow
         self.sampleList = []
         self.dataList = []
+        self.weights = []
         self.systDict = {}
         self.infoDict = {}
-        self.hasB = hasB
         self.hasBQCD = False
         self.useOverflowBin=False
         self.useUnderflowBin=False
@@ -486,13 +671,13 @@ class ChannelXML(object):
 
     def initialize(self):
         for sample in self.sampleList:
-            if not sample.isData and not sample.isQCD and not sample.isDiscovery:
-                for syst in self.systDict.keys():
-                    try:
-                        sample.getSystematic(syst)
-                    except:
-                        for s in self.systDict[syst]:
-                            sample.addSystematic(s)
+            pass
+            #if not sample.isData and not sample.isQCD and not sample.isDiscovery:
+            #    for (systName,syst) in self.systDict.items():
+            #        try:
+            #            sample.getSystematic(systName)
+            #        except:
+            #            sample.addSystematic(syst)
 
     def Clone(self,prefix=""):
         if prefix=="":
@@ -512,7 +697,17 @@ class ChannelXML(object):
         Add Sample object to this channel
         """
         self.sampleList.append(sample.Clone())
+        if sample.isData or sample.isDiscovery or sample.isQCD:
+            return
 
+        if len(self.sampleList[-1].weights) == 0:
+            self.sampleList[-1].weights = deepcopy(self.weights)
+
+        for (systName,syst) in self.systDict.items():
+            if not systName in self.sampleList[-1].systDict.keys():
+                self.sampleList[-1].addSystematic(syst)
+        return
+            
     def getSample(self,name):
         """
         Get Sample object for this channel
@@ -548,6 +743,62 @@ class ChannelXML(object):
         # propagate our file list downwards
         for sam in self.sampleList:
                 sam.propagateFileList(self.files)
+
+    def setWeights(self,weights):
+        """
+        Set the weights for this channel - overrides previous weights
+
+        Propagate to owned samples
+        """
+        self.weights = deepcopy(weights)
+
+        for s in self.sampleList:
+            if not sample.isData and not sample.isQCD and not sample.isDiscovery:
+                s.setWeights(weights)
+
+        return
+
+    def addWeight(self,weight):
+        """
+        Add a single weight and propagate
+        """
+        if not weight in self.weights:
+            self.weights.append(weight)
+        else:
+            raise RuntimeError("Weight %s already defined in channel %s" % (weight,self.name))
+
+        for s in self.sampleList:
+            if not sample.isData and not sample.isQCD and not sample.isDiscovery:
+                if not weight in s.weights:
+                    s.addWeight(weight)
+
+        for syst in self.systDict.values():
+            if syst.type == "weight":
+                if not weight in syst.high:
+                    syst.high.append(weight)
+                if not weight in syst.low:
+                    syst.low.append(weight) 
+        return
+
+    def removeWeight(self,weight):
+        """
+        Remove a single weight and propagate
+        """
+        if weight in self.weights:
+            self.weights.remove(weight)
+            
+        for s in self.sampleList:
+            if not s.isData and not s.isQCD and not s.isDiscovery:
+                if weight in s.weights:
+                    s.removeWeight(weight)
+                    
+        for syst in self.systDict.values():
+            if syst.type == "weight":
+                if weight in syst.high:
+                    syst.high.remove(weight)
+                if weight in syst.low:
+                    syst.low.remove(weight)     
+        return
 
     def addDiscoverySamples(self,srList,startValList,minValList,maxValList,colorList):
         """
@@ -599,12 +850,18 @@ class ChannelXML(object):
         """
         Add a systematic to this channel. This will be propagated to all owned samples
         """
-        if not syst.name in self.systDict.keys():
-            self.systDict[syst.name] = []
-        self.systDict[syst.name].append(syst.Clone())
-        return
+        if syst.name in self.systDict.keys():
+            raise Exception("Attempt to overwrite systematic %s in Channel %s" % (syst.name,self.name))
+        else:
+            self.systDict[syst.name] = syst.Clone()
+            for sam in self.sampleList:
+                sam.addSystematic(syst)
+            return
 
     def getSystematic(self,systName):
+        """
+        Find the systematic with the given name
+        """
         try:
             return self.systDict[systName]
         except KeyError:
@@ -677,6 +934,7 @@ class Sample(object):
         self.overallSystList = []
         self.shapeFactorList = []
         self.systList = []
+        self.weights = []
         self.systDict = {}
         self.normFactor = []
         self.qcdSyst = None
@@ -684,7 +942,9 @@ class Sample(object):
         self.cutsDict = {}
         self.files = []
         self.treeName = ''
-        self.weight = 1.0
+        self.xsecWeight = None
+        self.xsecUp = None
+        self.xsecDown = None
 
     def buildHisto(self,binValues,region,var):
         """
@@ -726,8 +986,8 @@ class Sample(object):
 
     def Clone(self):
         newInst = deepcopy(self)
-        for (key,val) in self.systDict.items():
-            newInst.systDict[key] = val
+        #for (key,val) in self.systDict.items():
+        #    newInst.systDict[key] = val
         return newInst
 
     def setUnit(self,unit):
@@ -742,8 +1002,38 @@ class Sample(object):
         self.isData = isData
         return
 
-    def setWeight(self,weight=1.0):
-        self.weight = weight
+    def setWeights(self,weights):
+        """
+        Set the weights for this sample - overrides
+        """
+        self.weights = deepcopy(weights)
+        return
+
+    def addWeight(self,weight):
+        """
+        Add a weight to this sample and propagate
+        """
+        if not weight in self.weights:
+            self.weights.append(weight)
+        else:
+            raise RuntimeError("Weight %s already defined in sample %s" % (weight,self.name))
+        for syst in self.systDict.values():
+            if syst.type == "weight":
+                if not weight in syst.high:
+                    syst.high.append(weight)
+                if not weight in syst.low:
+                    syst.low.append(weight)
+        return
+
+    def removeWeight(self,weight):
+        if weight in self.weights:
+            self.weights.remove(weight)
+        for syst in self.systDict.values():
+            if syst.type == "weight":
+                if weight in syst.high:
+                    syst.high.remove(weight)
+                if weight in syst.low:    
+                    syst.low.remove(weight)
         return
         
     def setQCD(self,isQCD=True,qcdSyst="uncorr"):
@@ -1042,10 +1332,11 @@ class Sample(object):
         """
         Add a systematic to this Sample directly
         """
-        if not syst.name in self.systDict.keys():
-            self.systDict[syst.name] = []
-        self.systDict[syst.name].append(syst)
-        return
+        if syst.name in self.systDict.keys():
+            raise Exception("Attempt to overwrite systematic %s in Sample %s" % (syst.name,self.name))
+        else:
+            self.systDict[syst.name] = syst.Clone()
+            return
 
     def getSystematic(self,systName):
         try:

@@ -2,6 +2,7 @@ from ROOT import THStack,TLegend,TCanvas,TFile,std,TH1F
 from ROOT import ConfigMgr,FitConfig #this module comes from gSystem.Load("libSusyFitter.so")
 from prepareHistos import TreePrepare,HistoPrepare
 from copy import deepcopy
+from systematic import Systematic
 import os
 
 from ROOT import gROOT
@@ -57,17 +58,15 @@ class ConfigManager(object):
         self.stackList = [] # List of stacks for plotting
         self.canvasList = [] # List of canvases for plotting
         self.qcdList = [] 
+        self.weights = [] # List of weights
+        self.weightsQCD = [] # List of QCD weights
+        self.weightsQCDWithB = [] # List of QCD weights if there is a b-jet selection
 
         self.systDict = {} # Dictionary mapping systematic name to tuple of isTree and high/low
         self.cutsDict = {} # Dictionary mapping region names to cut strings
         self.histoDict = {} # Dictionary mapping histogram names to histograms
         self.hists = {} # Instances of all histograms in memory 
         self.chains = {} # Instances of all trees in memory
-
-        self.weights = () # Tuple of weights
-        self.weightsWithB = () # Tuple of weights if there is a b-jet selection
-        self.weightsQCD = () # Tuple of QCD weights
-        self.weightsQCDWithB = () # Tuple of QCD weights if there is a b-jet selection
         
         self.verbose=1
         self.includeOverallSys = True # Boolean to chose if HistoSys should also have OverallSys
@@ -119,12 +118,12 @@ class ConfigManager(object):
             newTLX = TopLevelXML(newName)
             pass
         newTLX.verbose=self.verbose
+        newTLX.setWeights(self.weights)
         self.topLvls.append(newTLX)
         return self.topLvls[len(self.topLvls)-1]
 
     def addTopLevelXMLClone(self,obj,name): 
         return self.addTopLevelXML(obj,name)
-
 
     def removeTopLevelXML(self,name):
         for i in xrange(0,len(self.topLvls)):
@@ -160,18 +159,10 @@ class ConfigManager(object):
                 chan.initialize()
                 for sam in chan.sampleList:
                     if not sam.isData and not sam.isQCD and not sam.isDiscovery:
-                        for (name,systList) in self.systDict.items():
-                            for syst in systList:
-                                if not name in chan.getSample(sam.name).systDict.keys():
-                                    chan.getSample(sam.name).addSystematic(syst)
-                        for (name,systList) in tl.systDict.items():
-                            for syst in systList:
-                                if not name in chan.getSample(sam.name).systDict.keys():
-                                    chan.getSample(sam.name).addSystematic(syst)
-                        for (name,systList) in chan.systDict.items():
-                            for syst in systList:
-                                if not name in chan.getSample(sam.name).systDict.keys():
-                                    chan.getSample(sam.name).addSystematic(syst)
+                        pass
+                        for (name,syst) in self.systDict.items():
+                            if not name in chan.getSample(sam.name).systDict.keys():
+                                chan.getSample(sam.name).addSystematic(syst)
                     elif sam.isQCD or sam.isData:
                         chan.getSample(sam.name).setWrite(False)
 
@@ -212,22 +203,21 @@ class ConfigManager(object):
                     elif not sam.isDiscovery:
                         if not "h"+sam.name+"Nom_"+regString+"_obs_"+replaceSymbols(chan.variableName) in self.hists.keys():
                             self.hists["h"+sam.name+"Nom_"+regString+"_obs_"+replaceSymbols(chan.variableName)] = None
-                        for (name,systList) in chan.getSample(sam.name).systDict.items():
-                            for syst in systList:
-                                if not "h"+sam.name+syst.name+"High_"+regString+"_obs_"+replaceSymbols(chan.variableName) in self.hists.keys():
-                                    self.hists["h"+sam.name+syst.name+"High_"+regString+"_obs_"+replaceSymbols(chan.variableName)] = None
-                                if not "h"+sam.name+syst.name+"Low_"+regString+"_obs_"+replaceSymbols(chan.variableName) in self.hists.keys():
-                                    self.hists["h"+sam.name+syst.name+"Low_"+regString+"_obs_"+replaceSymbols(chan.variableName)] = None
-                                if syst.merged:
-                                    mergedName = ""
-                                    for s in syst.sampleList:
-                                        mergedName += s
-                                    if not "h"+mergedName+"Nom_"+regString+"_obs_"+replaceSymbols(chan.variableName) in self.hists.keys():    
-                                        self.hists["h"+mergedName+"Nom_"+regString+"_obs_"+replaceSymbols(chan.variableName)] = None
-                                    if not "h"+mergedName+syst.name+"High_"+regString+"_obs_"+replaceSymbols(chan.variableName) in self.hists.keys():
-                                        self.hists["h"+mergedName+syst.name+"High_"+regString+"_obs_"+replaceSymbols(chan.variableName)] = None
-                                    if not "h"+mergedName+syst.name+"Low_"+regString+"_obs_"+replaceSymbols(chan.variableName) in self.hists.keys(): 
-                                        self.hists["h"+mergedName+syst.name+"Low_"+regString+"_obs_"+replaceSymbols(chan.variableName)] = None
+                        for (name,syst) in chan.getSample(sam.name).systDict.items():
+                            if not "h"+sam.name+syst.name+"High_"+regString+"_obs_"+replaceSymbols(chan.variableName) in self.hists.keys():
+                                self.hists["h"+sam.name+syst.name+"High_"+regString+"_obs_"+replaceSymbols(chan.variableName)] = None
+                            if not "h"+sam.name+syst.name+"Low_"+regString+"_obs_"+replaceSymbols(chan.variableName) in self.hists.keys():
+                                self.hists["h"+sam.name+syst.name+"Low_"+regString+"_obs_"+replaceSymbols(chan.variableName)] = None
+                            if syst.merged:
+                                mergedName = ""
+                                for s in syst.sampleList:
+                                    mergedName += s
+                                if not "h"+mergedName+"Nom_"+regString+"_obs_"+replaceSymbols(chan.variableName) in self.hists.keys():    
+                                    self.hists["h"+mergedName+"Nom_"+regString+"_obs_"+replaceSymbols(chan.variableName)] = None
+                                if not "h"+mergedName+syst.name+"High_"+regString+"_obs_"+replaceSymbols(chan.variableName) in self.hists.keys():
+                                    self.hists["h"+mergedName+syst.name+"High_"+regString+"_obs_"+replaceSymbols(chan.variableName)] = None
+                                if not "h"+mergedName+syst.name+"Low_"+regString+"_obs_"+replaceSymbols(chan.variableName) in self.hists.keys(): 
+                                    self.hists["h"+mergedName+syst.name+"Low_"+regString+"_obs_"+replaceSymbols(chan.variableName)] = None
         if self.readFromTree:
             self.prepare = TreePrepare()
             if self.plotHistos==None:    #set plotHistos if not already set by user
@@ -388,11 +378,10 @@ class ConfigManager(object):
                 for sample in channel.sampleList:
                     print "                           ---------> Sample: " + sample.name
                     print "                                      "+str(sample.files)
-                    for sysList in sample.systDict:
-                        for sys in sample.systDict[sysList]:
-                            print "                                      ---------> Systematic: " + sys.name
-                            print "                                                 Low : " + str(sys.filesLo)
-                            print "                                                 High: " + str(sys.filesHi)
+                    for (systName,syst) in sample.systDict.items():
+                        print "                                      ---------> Systematic: " + syst.name
+                        print "                                                 Low : " + str(syst.filesLo)
+                        print "                                                 High: " + str(syst.filesHi)
         return
 
     def printTreeNames(self):
@@ -407,11 +396,10 @@ class ConfigManager(object):
                 for sample in channel.sampleList:
                     print "                           ---------> Sample: " + sample.name
                     print "                                      "+str(sample.treeName)
-                    for sysList in sample.systDict:
-                        for sys in sample.systDict[sysList]:
-                            print "                                      ---------> Systematic: " + sys.name
-                            print "                                                 Low : " + str(sys.treeLoName)
-                            print "                                                 High: " + str(sys.treeHiName)
+                    for (systName,syst) in sample.systDict.items():
+                        print "                                      ---------> Systematic: " + syst.name
+                        print "                                                 Low : " + str(syst.treeLoName)
+                        print "                                                 High: " + str(syst.treeHiName)
         return
 
     def setVerbose(self,lvl):
@@ -477,7 +465,7 @@ class ConfigManager(object):
         systDict = {}
 
         for (name,syst) in self.systDict.items():
-            systDict[name] = systList
+            systDict[name] = syst
 
         for (name,syst) in topLvl.systDict.items():
             if not name in systDict.keys():
@@ -501,29 +489,27 @@ class ConfigManager(object):
 
         for (iChan,chan) in enumerate(topLvl.channels):
             for (iSam,sam) in enumerate(chan.sampleList):
-                chan.infoDict[sam.name] = [("Nom",self.nomName,self.weights,"")]
+                chan.infoDict[sam.name] = [("Nom",self.nomName,sam.weights,"")]
                 if not sam.isData and not sam.isQCD:
-                    for (systName,systList) in chan.getSample(sam.name).systDict.items():
-                        for syst in systList:
-                            if self.verbose > 1:
-                                print "!!!!!!!!!!!!!!"
-                                print "CHAN",chan.name
-                                print "SAM",sam.name
-                                print "SYST",systName
-                                print "TYPE",syst.type
-                                print "METHOD",syst.method
-                                print "LOW",syst.low
-                                print "HIGH",syst.high
-                                pass
-                            if syst.type == "tree":
-                                chan.infoDict[sam.name].append((systName+"High",syst.high,self.weights,syst.method))
-                                chan.infoDict[sam.name].append((systName+"Low",syst.low,self.weights,syst.method))
-                            else:
-                                if not syst.type == "user":
-                                    chan.infoDict[sam.name].append((systName+"High",self.nomName,syst.high,syst.method))
-                                    chan.infoDict[sam.name].append((systName+"Low",self.nomName,syst.low,syst.method))
-                                else:
-                                    chan.infoDict[sam.name].append((systName,syst.high,syst.low,syst.method))
+                    for (systName,syst) in sam.systDict.items():
+                        if self.verbose > 1:
+                            print "!!!!!!!!!!!!!!"
+                            print "CHAN",chan.name
+                            print "SAM",sam.name
+                            print "SYST",systName
+                            print "TYPE",syst.type
+                            print "METHOD",syst.method
+                            print "LOW",syst.low
+                            print "HIGH",syst.high
+                            pass
+                        if syst.type == "tree":
+                            chan.infoDict[sam.name].append((systName+"High",syst.high,sam.weights,syst.method))
+                            chan.infoDict[sam.name].append((systName+"Low",syst.low,sam.weights,syst.method))
+                        elif syst.type == "weight":
+                            chan.infoDict[sam.name].append((systName+"High",self.nomName,syst.high,syst.method))
+                            chan.infoDict[sam.name].append((systName+"Low",self.nomName,syst.low,syst.method))
+                        else:
+                            chan.infoDict[sam.name].append((systName,syst.high,syst.low,syst.method))
                     
         
         for (iChan,chan) in enumerate(topLvl.channels):
@@ -544,11 +530,8 @@ class ConfigManager(object):
 
                 # Set the weights
                 if not sam.isData and not sam.isQCD:
-                    self.prepare.weights = str(self.lumiUnits*self.outputLumi/self.inputLumi) + " * " + str(sam.weight)
-                    for weight in self.weights[:-1]:
-                        self.prepare.weights += (" * "+weight)
-                    if chan.hasB:
-                        self.prepare.weights += (" * "+self.weights[-1])
+                    self.prepare.weights = str(self.lumiUnits*self.outputLumi/self.inputLumi)
+                    self.prepare.weights += " * " + " * ".join(sam.weights)
                     if self.readFromTree and not sam.isDiscovery:
                         treeName = sam.treeName
                         if treeName=='': treeName = sam.name+self.nomName
@@ -600,87 +583,71 @@ class ConfigManager(object):
                                 # assume that if no histogram is made, then it is not needed  
                                 pass
 
-                    for (systName,systList) in chan.getSample(sam.name).systDict.items():
+                    for (systName,syst) in chan.getSample(sam.name).systDict.items():
                         print "    Systematic: %s"%(systName)
-                        for syst in systList:
-                            self.prepare.weights = str(self.lumiUnits*self.outputLumi/self.inputLumi) + " * " + str(sam.weight)
-                            if syst.type == "weight":
-                                for weight in syst.high[:-1]:
-                                    self.prepare.weights += (" * "+weight)
-                                if chan.hasB:
-                                    self.prepare.weights += (" * "+syst.high[-1])
-                                if self.readFromTree:
+                        self.prepare.weights = str(self.lumiUnits*self.outputLumi/self.inputLumi)
+                        if syst.type == "weight":
+                            self.prepare.weights += " * " + " * ".join(syst.high)
+                            if self.readFromTree:
+                                treeName = sam.treeName
+                                if treeName=='': treeName = sam.name+self.nomName
+                                self.prepare.read(treeName, sam.files)
+                        elif syst.type == "tree":
+                            self.prepare.weights += " * " + " * ".join(sam.weights)
+                            if self.readFromTree:
+                                # if the systematic has a dedicated file list - use it
+                                if sam.name in syst.filesHi:
+                                    filelist = syst.filesHi[sam.name]
+                                else:
+                                    # otherwise - take the sample file list
+                                    filelist = sam.files
+                                if sam.name in syst.treeHiName:
+                                    treeName = syst.treeHiName[sam.name]
+                                else:
+                                    # otherwise - take the default tree name for the sample 
                                     treeName = sam.treeName
-                                    if treeName=='': treeName = sam.name+self.nomName
-                                    self.prepare.read(treeName, sam.files)
-                            elif syst.type == "tree":
-                                for weight in self.weights[:-1]:
-                                    self.prepare.weights += (" * "+weight)
-                                if chan.hasB:
-                                    self.prepare.weights += (" * "+self.weights[-1])
-                                if self.readFromTree:
-                                    # if the systematic has a dedicated file list - use it
-                                    if sam.name in syst.filesHi:
-                                        filelist = syst.filesHi[sam.name]
-                                    else:
-                                        # otherwise - take the sample file list
-                                        filelist = sam.files
-                                    if sam.name in syst.treeHiName:
-                                        treeName = syst.treeHiName[sam.name]
-                                    else:
-                                        # otherwise - take the default tree name for the sample 
-                                        treeName = sam.treeName
-                                    if treeName=='': treeName = sam.name+syst.high
-                                    self.prepare.read(treeName, filelist)
-                            elif syst.type == "user":
-                                for weight in self.weights[:-1]:
-                                    self.prepare.weights += (" * "+weight)
-                                if chan.hasB:
-                                    self.prepare.weights += (" * "+self.weights[-1])
-                                if self.readFromTree:
-                                    treeName = sam.treeName
-                                    if treeName=='': treeName = sam.name+self.nomName
-                                    self.prepare.read(treeName, sam.files)
+                                if treeName=='': treeName = sam.name+syst.high
+                                self.prepare.read(treeName, filelist)
+                        elif syst.type == "user":
+                            self.prepare.weights += " * " + " * ".join(sam.weights)
+                            if self.readFromTree:
+                                treeName = sam.treeName
+                                if treeName=='': treeName = sam.name+self.nomName
+                                self.prepare.read(treeName, sam.files)
                             
-                            if not syst.type == "user" or not self.readFromTree: 
-                                if self.verbose>1:
-                                    print "!!!!!! adding histo","h"+sam.name+syst.name+"High_"+regionString+"_obs_"+replaceSymbols(chan.variableName)
-                                try:    
-                                    self.prepare.addHisto("h"+sam.name+syst.name+"High_"+regionString+"_obs_"+replaceSymbols(chan.variableName),useOverflow=chan.useOverflowBin,useUnderflow=chan.useUnderflowBin)
-                                except:
-                                    pass
+                        if not syst.type == "user" or not self.readFromTree: 
+                            if self.verbose>1:
+                                print "!!!!!! adding histo","h"+sam.name+syst.name+"High_"+regionString+"_obs_"+replaceSymbols(chan.variableName)
+                            try:    
+                                self.prepare.addHisto("h"+sam.name+syst.name+"High_"+regionString+"_obs_"+replaceSymbols(chan.variableName),useOverflow=chan.useOverflowBin,useUnderflow=chan.useUnderflowBin)
+                            except:
+                                pass
                                 
-                            if syst.method == "userNormHistoSys" or syst.method == "normHistoSys":
-                                if not "h"+sam.name+syst.name+"High_"+normString+"Norm" in self.hists.keys():
-                                    if self.readFromTree:
-                                        self.hists["h"+sam.name+syst.name+"High_"+normString+"Norm"] = TH1F("h"+sam.name+syst.name+"High_"+normString+"Norm","h"+sam.name+syst.name+"High_"+normString+"Norm",1,0.5,1.5)
-                                        self.chains[self.prepare.currentChainName].Project("h"+sam.name+syst.name+"High_"+normString+"Norm",normCuts,self.prepare.weights+" * ("+normCuts+")")
-                                    else:
-                                        self.hists["h"+sam.name+syst.name+"High_"+normString+"Norm"] = None
-                                        self.prepare.addHisto("h"+sam.name+syst.name+"High_"+normString+"Norm")
+                        if syst.method == "userNormHistoSys" or syst.method == "normHistoSys":
+                            if not "h"+sam.name+syst.name+"High_"+normString+"Norm" in self.hists.keys():
+                                if self.readFromTree:
+                                    self.hists["h"+sam.name+syst.name+"High_"+normString+"Norm"] = TH1F("h"+sam.name+syst.name+"High_"+normString+"Norm","h"+sam.name+syst.name+"High_"+normString+"Norm",1,0.5,1.5)
+                                    self.chains[self.prepare.currentChainName].Project("h"+sam.name+syst.name+"High_"+normString+"Norm",normCuts,self.prepare.weights+" * ("+normCuts+")")
+                                else:
+                                    self.hists["h"+sam.name+syst.name+"High_"+normString+"Norm"] = None
+                                    self.prepare.addHisto("h"+sam.name+syst.name+"High_"+normString+"Norm")
 
-                            self.prepare.weights = str(self.lumiUnits*self.outputLumi/self.inputLumi) + " * " + str(sam.weight)
-                            if syst.type == "weight":
-                                for weight in syst.low[:-1]:
-                                    self.prepare.weights += (" * "+weight)
-                                if chan.hasB:
-                                    self.prepare.weights += (" * "+syst.low[-1])
-                                if self.readFromTree:
-                                    treeName = sam.treeName
-                                    if treeName=='': treeName = sam.name+self.nomName
-                                    self.prepare.read(treeName, sam.files)
-                            elif syst.type == "tree":
-                                for weight in self.weights[:-1]:
-                                    self.prepare.weights += (" * "+weight)
-                                if chan.hasB:
-                                    self.prepare.weights += (" * "+self.weights[-1])
-                                if self.readFromTree:
-                                    # if the systematic has a dedicated file list - use it
-                                    if sam.name in syst.filesLo:
-                                        filelist = syst.filesLo[sam.name]
-                                    else:
-                                        # otherwise - take the sample file list
-                                        filelist = sam.files
+                        self.prepare.weights = str(self.lumiUnits*self.outputLumi/self.inputLumi)
+                        if syst.type == "weight":
+                            self.prepare.weights += " * " + " * ".join(syst.low)
+                            if self.readFromTree:
+                                treeName = sam.treeName
+                                if treeName=='': treeName = sam.name+self.nomName
+                                self.prepare.read(treeName, sam.files)
+                        elif syst.type == "tree":
+                            self.prepare.weights += " * " + " * ".join(sam.weights)
+                            if self.readFromTree:
+                                # if the systematic has a dedicated file list - use it
+                                if sam.name in syst.filesLo:
+                                    filelist = syst.filesLo[sam.name]
+                                else:
+                                    # otherwise - take the sample file list
+                                    filelist = sam.files
                                     if sam.name in syst.treeLoName:
                                         treeName = syst.treeLoName[sam.name]
                                     else:
@@ -688,124 +655,119 @@ class ConfigManager(object):
                                         treeName = sam.treeName
                                     if treeName=='': treeName = sam.name+syst.low
                                     self.prepare.read(treeName, filelist)
-                            elif syst.type == "user":
-                                for weight in self.weights[:-1]:
-                                    self.prepare.weights += (" * "+weight)
-                                if chan.hasB:
-                                    self.prepare.weights += (" * "+self.weights[-1])
-                                if self.readFromTree:
-                                    treeName = sam.treeName
-                                    if treeName=='': treeName = sam.name+self.nomName
-                                    self.prepare.read(treeName, sam.files)
+                        elif syst.type == "user":
+                            self.prepare.weights += " * " + " * ".join(sam.weights)
+                            if self.readFromTree:
+                                treeName = sam.treeName
+                                if treeName=='': treeName = sam.name+self.nomName
+                                self.prepare.read(treeName, sam.files)
 
-                            if not syst.type == "user" or not self.readFromTree:
-                                if self.verbose>1:
-                                    print "!!!!!! adding histo","h"+sam.name+syst.name+"Low_"+regionString+"_obs_"+replaceSymbols(chan.variableName)
-                                try:    
-                                    self.prepare.addHisto("h"+sam.name+syst.name+"Low_"+regionString+"_obs_"+replaceSymbols(chan.variableName),useOverflow=chan.useOverflowBin,useUnderflow=chan.useUnderflowBin)
-                                except:
-                                    pass
+                        if not syst.type == "user" or not self.readFromTree:
+                            if self.verbose>1:
+                                print "!!!!!! adding histo","h"+sam.name+syst.name+"Low_"+regionString+"_obs_"+replaceSymbols(chan.variableName)
+                            try:    
+                                self.prepare.addHisto("h"+sam.name+syst.name+"Low_"+regionString+"_obs_"+replaceSymbols(chan.variableName),useOverflow=chan.useOverflowBin,useUnderflow=chan.useUnderflowBin)
+                            except:
+                                pass
                                 
-                            if syst.method == "userNormHistoSys" or syst.method == "normHistoSys":
-                                if not "h"+sam.name+syst.name+"Low_"+normString+"Norm" in self.hists.keys():
-                                    if self.readFromTree:
-                                        self.hists["h"+sam.name+syst.name+"Low_"+normString+"Norm"] = TH1F("h"+sam.name+syst.name+"Low_"+normString+"Norm","h"+sam.name+syst.name+"Low_"+normString+"Norm",1,0.5,1.5)
-                                        self.chains[self.prepare.currentChainName].Project("h"+sam.name+syst.name+"Low_"+normString+"Norm",normCuts,self.prepare.weights+" * ("+normCuts+")")
-                                    else:
-                                        self.hists["h"+sam.name+syst.name+"Low_"+normString+"Norm"] = None
-                                        self.prepare.addHisto("h"+sam.name+syst.name+"Low_"+normString+"Norm")
+                        if syst.method == "userNormHistoSys" or syst.method == "normHistoSys":
+                            if not "h"+sam.name+syst.name+"Low_"+normString+"Norm" in self.hists.keys():
+                                if self.readFromTree:
+                                    self.hists["h"+sam.name+syst.name+"Low_"+normString+"Norm"] = TH1F("h"+sam.name+syst.name+"Low_"+normString+"Norm","h"+sam.name+syst.name+"Low_"+normString+"Norm",1,0.5,1.5)
+                                    self.chains[self.prepare.currentChainName].Project("h"+sam.name+syst.name+"Low_"+normString+"Norm",normCuts,self.prepare.weights+" * ("+normCuts+")")
+                                else:
+                                    self.hists["h"+sam.name+syst.name+"Low_"+normString+"Norm"] = None
+                                    self.prepare.addHisto("h"+sam.name+syst.name+"Low_"+normString+"Norm")
 
-                            nomName = "h"+sam.name+"Nom_"+regionString+"_obs_"+replaceSymbols(chan.variableName)
-                            highName = "h"+sam.name+syst.name+"High_"+regionString+"_obs_"+replaceSymbols(chan.variableName)
-                            lowName = "h"+sam.name+syst.name+"Low_"+regionString+"_obs_"+replaceSymbols(chan.variableName)
+                        nomName = "h"+sam.name+"Nom_"+regionString+"_obs_"+replaceSymbols(chan.variableName)
+                        highName = "h"+sam.name+syst.name+"High_"+regionString+"_obs_"+replaceSymbols(chan.variableName)
+                        lowName = "h"+sam.name+syst.name+"Low_"+regionString+"_obs_"+replaceSymbols(chan.variableName)
                         
-                            if syst.method == "histoSys":
-                                chan.getSample(sam.name).addHistoSys(syst.name,nomName,highName,lowName,False,False)
-                            elif syst.method == "histoSysOneSide":
-                                chan.getSample(sam.name).addHistoSys(syst.name,nomName,highName,lowName,False,False,False,True)
-                            elif syst.method == "overallSys":
-                                highIntegral = configMgr.hists[highName].Integral()
-                                lowIntegral = configMgr.hists[lowName].Integral()
-                                nomIntegral = configMgr.hists[nomName].Integral()
-                                try:
-                                    overallSystHigh = highIntegral / nomIntegral
-                                except ZeroDivisionError:
-                                    print "Error generating High HistoSys for %s syst=%s nom=%g high=%g low=%g" % (nomName,syst.name,nomIntegral,highIntegral,lowIntegral)
-                                    overallSystHigh = 1.0 
-                                try:
-                                    overallSystLow = lowIntegral / nomIntegral
-
-                                except ZeroDivisionError:
-                                    print "Error generating Low HistoSys for %s syst=%s nom=%g high=%g low=%g" % (nomName,syst.name,nomIntegral,highIntegral,lowIntegral)
-                                    overallSystLow = 1.0
-                                chan.getSample(sam.name).addOverallSys(syst.name,overallSystHigh,overallSystLow)
-                            elif syst.method == "userOverallSys":
-                                chan.getSample(sam.name).addOverallSys(syst.name,syst.high,syst.low)
-                            elif syst.method == "overallHistoSys":
-                                chan.getSample(sam.name).addHistoSys(syst.name,nomName,highName,lowName,True,False)
-                            elif syst.method == "normHistoSys":
-                                chan.getSample(sam.name).addHistoSys(syst.name,nomName,highName,lowName,False,True,False,False,sam.name,normString)
-                            elif syst.method == "normHistoSysOneSide":
-                                chan.getSample(sam.name).addHistoSys(syst.name,nomName,highName,lowName,False,True,False,True)
-                            elif syst.method == "userHistoSys":
-                                if not len(syst.high) == configMgr.hists[nomName].GetNbinsX() or not len(syst.low) == configMgr.hists[nomName].GetNbinsX():
-                                    raise ValueError("High and low must both be the same as the binning in nominal for userHistoSys")
-                                if configMgr.hists[highName] == None:
-                                    configMgr.hists[highName] = TH1F(highName,highName,configMgr.hists[nomName].GetNbinsX(),configMgr.hists[nomName].GetXaxis().GetXmin(),configMgr.hists[nomName].GetXaxis().GetXmax())
-                                    for iBin in xrange(configMgr.hists[nomName].GetNbinsX()):
-                                        configMgr.hists[highName].SetBinContent(iBin+1,configMgr.hists[nomName].GetBinContent(iBin+1)*syst.high[iBin])
-                                if configMgr.hists[lowName] == None:
-                                    configMgr.hists[lowName] = TH1F(lowName,lowName,configMgr.hists[nomName].GetNbinsX(),configMgr.hists[nomName].GetXaxis().GetXmin(),configMgr.hists[nomName].GetXaxis().GetXmax())
-                                    for iBin in xrange(configMgr.hists[nomName].GetNbinsX()):
-                                        configMgr.hists[lowName].SetBinContent(iBin+1,configMgr.hists[nomName].GetBinContent(iBin+1)*syst.low[iBin])
-                                chan.getSample(sam.name).addHistoSys(syst.name,nomName,highName,lowName,False,False)
-                            elif syst.method == "userNormHistoSys":
-                                if not len(syst.high) == configMgr.hists[nomName].GetNbinsX() or not len(syst.low) == configMgr.hists[nomName].GetNbinsX():
-                                    raise ValueError("High and low must both be the same as the binning in nominal for userHistoSys")
-                                if configMgr.hists[highName] == None:
-                                    configMgr.hists[highName] = TH1F(highName,highName,configMgr.hists[nomName].GetNbinsX(),configMgr.hists[nomName].GetXaxis().GetXmin(),configMgr.hists[nomName].GetXaxis().GetXmax())
-                                    for iBin in xrange(configMgr.hists[nomName].GetNbinsX()):
-                                        configMgr.hists[highName].SetBinContent(iBin+1,configMgr.hists[nomName].GetBinContent(iBin+1)*syst.high[iBin])
-                                if configMgr.hists[lowName] == None:
-                                    configMgr.hists[lowName] = TH1F(lowName,lowName,configMgr.hists[nomName].GetNbinsX(),configMgr.hists[nomName].GetXaxis().GetXmin(),configMgr.hists[nomName].GetXaxis().GetXmax())
-                                    for iBin in xrange(configMgr.hists[nomName].GetNbinsX()):
-                                        configMgr.hists[lowName].SetBinContent(iBin+1,configMgr.hists[nomName].GetBinContent(iBin+1)*syst.low[iBin])
-
-                                if not (syst.name,sam.name) in userNormDict.keys():
-                                    userNormDict[(syst.name,sam.name)] = []
-                                    userNormDict[(syst.name,sam.name)].append((regionString,highName,lowName,nomName))
-                                else:
-                                    userNormDict[(syst.name,sam.name)].append((regionString,highName,lowName,nomName))
-                                chan.getSample(sam.name).addHistoSys(syst.name,nomName,highName,lowName,False,True,False,False,sam.name,normString)
-                            elif syst.method == "shapeSys":
-                                if syst.merged:
-                                    mergedName = ""
-                                    for s in syst.sampleList:
-                                        mergedName += s
-                                    nomMergedName = "h"+mergedName+"Nom_"+regionString+"_obs_"+replaceSymbols(chan.variableName)
-                                    highMergedName = "h"+mergedName+syst.name+"High_"+regionString+"_obs_"+replaceSymbols(chan.variableName)
-                                    lowMergedName = "h"+mergedName+syst.name+"Low_"+regionString+"_obs_"+replaceSymbols(chan.variableName)
-                                    if sam.name in syst.sampleList:
-                                        syst.foundSample()
-                                        if self.hists[nomMergedName] == None:
-                                            self.hists[nomMergedName] = self.hists[nomName].Clone(nomMergedName)
-                                        else:
-                                            self.hists[nomMergedName].Add(self.hists[nomName])
-                                        if self.hists[highMergedName] == None:
-                                            self.hists[highMergedName] = self.hists[highName].Clone(highMergedName)
-                                        else:
-                                            self.hists[highMergedName].Add(self.hists[highName])
-                                        if self.hists[lowMergedName] == None:
-                                            self.hists[lowMergedName] = self.hists[lowName].Clone(lowMergedName)
-                                        else:
-                                            self.hists[lowMergedName].Add(self.hists[lowName])
-                                        if syst.isMerged():
-                                            chan.getSample(sam.name).addShapeSys(syst.name,nomMergedName,highMergedName,lowMergedName,syst.constraint)
-                                            syst.Reset()
-                                        chan.getSample(sam.name).shapeSystList.append((systName,nomMergedName+"Norm",syst.constraint,"","","",""))
-                                else:
-                                    chan.getSample(sam.name).addShapeSys(syst.name,nomName,highName,lowName)
-                                    chan.getSample(sam.name).shapeSystList.append((systName,nomName+"Norm",configMgr.histCacheFile,"","","",""))
+                        if syst.method == "histoSys":
+                            chan.getSample(sam.name).addHistoSys(syst.name,nomName,highName,lowName,False,False)
+                        elif syst.method == "histoSysOneSide":
+                            chan.getSample(sam.name).addHistoSys(syst.name,nomName,highName,lowName,False,False,False,True)
+                        elif syst.method == "overallSys":
+                            highIntegral = configMgr.hists[highName].Integral()
+                            lowIntegral = configMgr.hists[lowName].Integral()
+                            nomIntegral = configMgr.hists[nomName].Integral()
+                            try:
+                                overallSystHigh = highIntegral / nomIntegral
+                            except ZeroDivisionError:
+                                print "Error generating High HistoSys for %s syst=%s nom=%g high=%g low=%g" % (nomName,syst.name,nomIntegral,highIntegral,lowIntegral)
+                                overallSystHigh = 1.0 
+                            try:
+                                overallSystLow = lowIntegral / nomIntegral
+                            except ZeroDivisionError:
+                                print "Error generating Low HistoSys for %s syst=%s nom=%g high=%g low=%g" % (nomName,syst.name,nomIntegral,highIntegral,lowIntegral)
+                                overallSystLow = 1.0
+                            chan.getSample(sam.name).addOverallSys(syst.name,overallSystHigh,overallSystLow)
+                        elif syst.method == "userOverallSys":
+                            chan.getSample(sam.name).addOverallSys(syst.name,syst.high,syst.low)
+                        elif syst.method == "overallHistoSys":
+                            chan.getSample(sam.name).addHistoSys(syst.name,nomName,highName,lowName,True,False)
+                        elif syst.method == "normHistoSys":
+                            chan.getSample(sam.name).addHistoSys(syst.name,nomName,highName,lowName,False,True,False,False,sam.name,normString)
+                        elif syst.method == "normHistoSysOneSide":
+                            chan.getSample(sam.name).addHistoSys(syst.name,nomName,highName,lowName,False,True,False,True)
+                        elif syst.method == "userHistoSys":
+                            if not len(syst.high) == configMgr.hists[nomName].GetNbinsX() or not len(syst.low) == configMgr.hists[nomName].GetNbinsX():
+                                raise ValueError("High and low must both be the same as the binning in nominal for userHistoSys")
+                            if configMgr.hists[highName] == None:
+                                configMgr.hists[highName] = TH1F(highName,highName,configMgr.hists[nomName].GetNbinsX(),configMgr.hists[nomName].GetXaxis().GetXmin(),configMgr.hists[nomName].GetXaxis().GetXmax())
+                                for iBin in xrange(configMgr.hists[nomName].GetNbinsX()):
+                                    configMgr.hists[highName].SetBinContent(iBin+1,configMgr.hists[nomName].GetBinContent(iBin+1)*syst.high[iBin])
+                            if configMgr.hists[lowName] == None:
+                                configMgr.hists[lowName] = TH1F(lowName,lowName,configMgr.hists[nomName].GetNbinsX(),configMgr.hists[nomName].GetXaxis().GetXmin(),configMgr.hists[nomName].GetXaxis().GetXmax())
+                                for iBin in xrange(configMgr.hists[nomName].GetNbinsX()):
+                                    configMgr.hists[lowName].SetBinContent(iBin+1,configMgr.hists[nomName].GetBinContent(iBin+1)*syst.low[iBin])
+                            chan.getSample(sam.name).addHistoSys(syst.name,nomName,highName,lowName,False,False)
+                        elif syst.method == "userNormHistoSys":
+                            if not len(syst.high) == configMgr.hists[nomName].GetNbinsX() or not len(syst.low) == configMgr.hists[nomName].GetNbinsX():
+                                raise ValueError("High and low must both be the same as the binning in nominal for userHistoSys")
+                            if configMgr.hists[highName] == None:
+                                configMgr.hists[highName] = TH1F(highName,highName,configMgr.hists[nomName].GetNbinsX(),configMgr.hists[nomName].GetXaxis().GetXmin(),configMgr.hists[nomName].GetXaxis().GetXmax())
+                                for iBin in xrange(configMgr.hists[nomName].GetNbinsX()):
+                                    configMgr.hists[highName].SetBinContent(iBin+1,configMgr.hists[nomName].GetBinContent(iBin+1)*syst.high[iBin])
+                            if configMgr.hists[lowName] == None:
+                                configMgr.hists[lowName] = TH1F(lowName,lowName,configMgr.hists[nomName].GetNbinsX(),configMgr.hists[nomName].GetXaxis().GetXmin(),configMgr.hists[nomName].GetXaxis().GetXmax())
+                                for iBin in xrange(configMgr.hists[nomName].GetNbinsX()):
+                                    configMgr.hists[lowName].SetBinContent(iBin+1,configMgr.hists[nomName].GetBinContent(iBin+1)*syst.low[iBin])
+                            if not (syst.name,sam.name) in userNormDict.keys():
+                                userNormDict[(syst.name,sam.name)] = []
+                                userNormDict[(syst.name,sam.name)].append((regionString,highName,lowName,nomName))
+                            else:
+                                userNormDict[(syst.name,sam.name)].append((regionString,highName,lowName,nomName))
+                            chan.getSample(sam.name).addHistoSys(syst.name,nomName,highName,lowName,False,True,False,False,sam.name,normString)
+                        elif syst.method == "shapeSys":
+                            if syst.merged:
+                                mergedName = ""
+                                for s in syst.sampleList:
+                                    mergedName += s
+                                nomMergedName = "h"+mergedName+"Nom_"+regionString+"_obs_"+replaceSymbols(chan.variableName)
+                                highMergedName = "h"+mergedName+syst.name+"High_"+regionString+"_obs_"+replaceSymbols(chan.variableName)
+                                lowMergedName = "h"+mergedName+syst.name+"Low_"+regionString+"_obs_"+replaceSymbols(chan.variableName)
+                                if sam.name in syst.sampleList:
+                                    syst.foundSample()
+                                    if self.hists[nomMergedName] == None:
+                                        self.hists[nomMergedName] = self.hists[nomName].Clone(nomMergedName)
+                                    else:
+                                        self.hists[nomMergedName].Add(self.hists[nomName])
+                                    if self.hists[highMergedName] == None:
+                                        self.hists[highMergedName] = self.hists[highName].Clone(highMergedName)
+                                    else:
+                                        self.hists[highMergedName].Add(self.hists[highName])
+                                    if self.hists[lowMergedName] == None:
+                                        self.hists[lowMergedName] = self.hists[lowName].Clone(lowMergedName)
+                                    else:
+                                        self.hists[lowMergedName].Add(self.hists[lowName])
+                                    if syst.isMerged():
+                                        chan.getSample(sam.name).addShapeSys(syst.name,nomMergedName,highMergedName,lowMergedName,syst.constraint)
+                                        syst.Reset()
+                                    chan.getSample(sam.name).shapeSystList.append((systName,nomMergedName+"Norm",syst.constraint,"","","",""))
+                            else:
+                                chan.getSample(sam.name).addShapeSys(syst.name,nomName,highName,lowName)
+                                chan.getSample(sam.name).shapeSystList.append((systName,nomName+"Norm",configMgr.histCacheFile,"","","",""))
                 elif sam.isQCD:
                     self.prepare.addQCDHistos(sam,chan.useOverflowBin,chan.useUnderflowBin)
                     if chan.variableName == "cuts":

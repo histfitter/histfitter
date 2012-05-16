@@ -1,4 +1,3 @@
-
 ################################################################
 ## In principle all you have to setup is defined in this file ##
 ################################################################
@@ -7,13 +6,29 @@ from configManager import configMgr
 from ROOT import kBlack,kRed,kBlue,kGreen,kYellow,kWhite,kPink,kGray,kMagenta
 from configWriter import TopLevelXML,Measurement,ChannelXML,Sample
 from systematic import Systematic
+from copy import deepcopy
 
 #from ROOT import gROOT
 #gROOT.LoadMacro("./macros/AtlasStyle.C")
 #import ROOT
 #ROOT.SetAtlasStyle()
 
-onLxplus=False
+def replaceWeight(oldList,oldWeight,newWeight):
+    newList = deepcopy(oldList)
+    newList[oldList.index(oldWeight)] = newWeight
+    return newList
+
+def addWeight(oldList,newWeight):
+    newList = deepcopy(oldList)
+    newList.append(newWeight)
+    return newList
+
+def removeWeight(oldList,oldWeight):
+    newList = deepcopy(oldList)
+    newList.remove(oldWeight)
+    return newList
+
+onLxplus=True
 doHardLep=True
 doSoftLep=False
 useStat=True
@@ -196,59 +211,59 @@ configMgr.cutsDict["SSElT"] = d["SSEl"]+"&& met/meff2Jet>0.3"
 configMgr.cutsDict["SSMuT"] = d["SSMu"]+"&& met/meff2Jet>0.3"
 
 
-## # Tuples of weights 
+## Lists of weights 
 if doWptReweighting:
     truthWptWeight="truthWptWeight"
 else:
     truthWptWeight="1"
-configMgr.weights = ("genWeight","eventWeight","leptonWeight","triggerWeight",truthWptWeight,"truthZpt0GeVWeight","truthZpt50GeVWeight","truthZpt100GeVWeight","truthZpt150GeVWeight","truthZpt200GeVWeight","bTagWeight3Jet")
+
+weights = ["genWeight","eventWeight","leptonWeight","triggerWeight",truthWptWeight, \
+           "truthZpt0GeVWeight", "truthZpt50GeVWeight","truthZpt100GeVWeight","truthZpt150GeVWeight", \
+           "truthZpt200GeVWeight","bTagWeight3Jet"]
+
+configMgr.weights = weights
 configMgr.weightsQCD = "qcdWeight"
 configMgr.weightsQCDWithB = "qcdBWeight"
 
-xsecSigHighWeights = ("genWeightUp","eventWeight","leptonWeight","triggerWeight","truthZpt0GeVWeight","truthZpt50GeVWeight","truthZpt100GeVWeight","truthZpt150GeVWeight","truthZpt200GeVWeight",truthWptWeight,"bTagWeight3Jet")
-xsecSigLowWeights = ("genWeightDown","eventWeight","leptonWeight","triggerWeight","truthZpt0GeVWeight","truthZpt50GeVWeight","truthZpt100GeVWeight","truthZpt150GeVWeight","truthZpt200GeVWeight",truthWptWeight,"bTagWeight3Jet")
+xsecSigHighWeights = replaceWeight(weights,"genWeight","genWeightUp")
+xsecSigLowWeights = replaceWeight(weights,"genWeight","genWeightDown")
 
-#ktScaleWHighWeights = ("genWeight","eventWeight","leptonWeight","triggerWeight",truthWptWeight,"ktfacUpWeightW","bTagWeight3Jet")
-#ktScaleWLowWeights = ("genWeight","eventWeight","leptonWeight","triggerWeight",truthWptWeight,"ktfacDownWeightW","bTagWeight3Jet")
+#ktScaleWHighWeights = addWeight(weights,"ktfacUpWeightW")
+#ktScaleWHighWeights = addWeight(weights,"ktfacDownWeightW")
+
+#ktScaleWHighWeights = addWeight(weights,"ktfacUpWeightTop")
+#ktScaleWHighWeights = addWeight(weights,"ktfacDownWeightTop")
                     
-#ktScaleTopHighWeights = ("genWeight","eventWeight","leptonWeight","triggerWeight",truthWptWeight,"ktfacUpWeightTop","bTagWeight3Jet")
-#ktScaleTopLowWeights = ("genWeight","eventWeight","leptonWeight","triggerWeight",truthWptWeight,"ktfacDownWeightTop","bTagWeight3Jet")
+bTagHighWeights = replaceWeight(weights,"bTagWeight3Jet","bTagWeight3JetUp")
+bTagLowWeights = replaceWeight(weights,"bTagWeight3Jet","bTagWeight3JetDown")
 
-#noWPtWeights = ("genWeight","eventWeight","leptonWeight","triggerWeight","bTagWeight3Jet")
-#noWPtWeightsHigh = ("genWeight","eventWeight","leptonWeight","triggerWeight","(1+(truthWptWeight-1)/2)","bTagWeight3Jet")
-#noWPtWeightsLow = ("genWeight","eventWeight","leptonWeight","triggerWeight","(1+(truthWptWeight-1)*1.5)","bTagWeight3Jet")
+trigHighWeights = replaceWeight(weights,"triggerWeight","triggerWeightUp")
+trigLowWeights = replaceWeight(weights,"triggerWeight","triggerWeightDown")
 
-bTagHighWeights = ("genWeight","eventWeight","leptonWeight","triggerWeight","truthZpt0GeVWeight","truthZpt50GeVWeight","truthZpt100GeVWeight","truthZpt150GeVWeight","truthZpt200GeVWeight",truthWptWeight,"bTagWeight3JetUp")
-bTagLowWeights = ("genWeight","eventWeight","leptonWeight","triggerWeight","truthZpt0GeVWeight","truthZpt50GeVWeight","truthZpt100GeVWeight","truthZpt150GeVWeight","truthZpt200GeVWeight",truthWptWeight,"bTagWeight3JetDown")
-
-trigHighWeights = ("genWeight","eventWeight","leptonWeight","triggerWeightUp","truthZpt0GeVWeight","truthZpt50GeVWeight","truthZpt100GeVWeight","truthZpt150GeVWeight","truthZpt200GeVWeight",truthWptWeight,"bTagWeight3Jet")
-trigLowWeights = ("genWeight","eventWeight","leptonWeight","triggerWeightDown","truthZpt0GeVWeight","truthZpt50GeVWeight","truthZpt100GeVWeight","truthZpt150GeVWeight","truthZpt200GeVWeight",truthWptWeight,"bTagWeight3Jet")
-
-lepHighWeights = ("genWeight","eventWeight","leptonWeightUp","triggerWeight","truthZpt0GeVWeight","truthZpt50GeVWeight","truthZpt100GeVWeight","truthZpt150GeVWeight","truthZpt200GeVWeight",truthWptWeight,"bTagWeight3Jet")
-lepLowWeights = ("genWeight","eventWeight","leptonWeightDown","triggerWeight","truthZpt0GeVWeight","truthZpt50GeVWeight","truthZpt100GeVWeight","truthZpt150GeVWeight","truthZpt200GeVWeight",truthWptWeight,"bTagWeight3Jet")
+lepHighWeights = replaceWeight(weights,"leptonWeight","leptonWeightUp")
+lepLowWeights = replaceWeight(weights,"leptonWeight","leptonWeightDown")
 
 ## True Zpt reweighting
 
-pT0GeVHighWeights = ("genWeight","eventWeight","leptonWeight","triggerWeight",truthWptWeight,"truthZpt50GeVWeight","truthZpt100GeVWeight","truthZpt150GeVWeight","truthZpt200GeVWeight","truthZpt0GeVWeightUp","bTagWeight3Jet")
-pT0GeVLowWeights = ("genWeight","eventWeight","leptonWeight","triggerWeight",truthWptWeight,"truthZpt50GeVWeight","truthZpt100GeVWeight","truthZpt150GeVWeight","truthZpt200GeVWeight","truthZpt0GeVWeightDown","bTagWeight3Jet")
+pT0GeVHighWeights = replaceWeight(weights,"truthZpt0GeVWeight","truthZpt0GeVWeightUp")
+pT0GeVLowWeights = replaceWeight(weights,"truthZpt0GeVWeight","truthZpt0GeVWeightDown")
 
-pT50GeVHighWeights = ("genWeight","eventWeight","leptonWeight","triggerWeight",truthWptWeight,"truthZpt0GeVWeight","truthZpt100GeVWeight","truthZpt150GeVWeight","truthZpt200GeVWeight","truthZpt50GeVWeightUp","bTagWeight3Jet")
-pT50GeVLowWeights = ("genWeight","eventWeight","leptonWeight","triggerWeight",truthWptWeight,"truthZpt0GeVWeight","truthZpt100GeVWeight","truthZpt150GeVWeight","truthZpt200GeVWeight","truthZpt50GeVWeightDown","bTagWeight3Jet")
+pT50GeVHighWeights = replaceWeight(weights,"truthZpt50GeVWeight","truthZpt50GeVWeightUp")
+pT50GeVLowWeights = replaceWeight(weights,"truthZpt50GeVWeight","truthZpt50GeVWeightDown")
 
-pT100GeVHighWeights = ("genWeight","eventWeight","leptonWeight","triggerWeight",truthWptWeight,"truthZpt0GeVWeight","truthZpt50GeVWeight","truthZpt150GeVWeight","truthZpt200GeVWeight","truthZpt100GeVWeightUp","bTagWeight3Jet")
-pT100GeVLowWeights = ("genWeight","eventWeight","leptonWeight","triggerWeight",truthWptWeight,"truthZpt0GeVWeight","truthZpt50GeVWeight","truthZpt150GeVWeight","truthZpt200GeVWeight","truthZpt100GeVWeightDown","bTagWeight3Jet")
+pT100GeVHighWeights = replaceWeight(weights,"truthZpt100GeVWeight","truthZpt100GeVWeightUp")
+pT100GeVLowWeights = replaceWeight(weights,"truthZpt100GeVWeight","truthZpt100GeVWeightDown")
 
-pT150GeVHighWeights = ("genWeight","eventWeight","leptonWeight","triggerWeight",truthWptWeight,"truthZpt0GeVWeight","truthZpt50GeVWeight","truthZpt100GeVWeight","truthZpt200GeVWeight","truthZpt150GeVWeightUp","bTagWeight3Jet")
-pT150GeVLowWeights = ("genWeight","eventWeight","leptonWeight","triggerWeight",truthWptWeight,"truthZpt0GeVWeight","truthZpt50GeVWeight","truthZpt100GeVWeight","truthZpt200GeVWeight","truthZpt150GeVWeightDown","bTagWeight3Jet")
+pT150GeVHighWeights = replaceWeight(weights,"truthZpt150GeVWeight","truthZpt150GeVWeightUp")
+pT150GeVLowWeights = replaceWeight(weights,"truthZpt150GeVWeight","truthZpt150GeVWeightDown")
 
-pT200GeVHighWeights = ("genWeight","eventWeight","leptonWeight","triggerWeight",truthWptWeight,"truthZpt0GeVWeight","truthZpt50GeVWeight","truthZpt100GeVWeight","truthZpt150GeVWeight","truthZpt200GeVWeightUp","bTagWeight3Jet")
-pT200GeVLowWeights = ("genWeight","eventWeight","leptonWeight","triggerWeight",truthWptWeight,"truthZpt0GeVWeight","truthZpt50GeVWeight","truthZpt100GeVWeight","truthZpt150GeVWeight","truthZpt200GeVWeightDown","bTagWeight3Jet")
-
+pT200GeVHighWeights = replaceWeight(weights,"truthZpt200GeVWeight","truthZpt200GeVWeightUp")
+pT200GeVLowWeights = replaceWeight(weights,"truthZpt200GeVWeight","truthZpt200GeVWeightDown")
 
 ## HF uncertainty on V+Jets
 
-hfHighWeights = ("genWeight","eventWeight","leptonWeight","triggerWeight",truthWptWeight,"truthZpt0GeVWeight","truthZpt50GeVWeight","truthZpt100GeVWeight","truthZpt150GeVWeight","truthZpt200GeVWeight","hfWeightUp","bTagWeight3Jet")
-hfLowWeights = ("genWeight","eventWeight","leptonWeight","triggerWeight",truthWptWeight,"truthZpt0GeVWeight","truthZpt50GeVWeight","truthZpt100GeVWeight","truthZpt150GeVWeight","truthZpt200GeVWeight","hfWeightDown","bTagWeight3Jet")
+hfHighWeights = addWeight(weights,"hfWeightUp")
+hfLowWeights = addWeight(weights,"hfWeightDown")
                                                                                         
 #--------------------
 # List of systematics
@@ -280,39 +295,51 @@ btagChanSyst = [Systematic("BT",configMgr.weights,bTagHighWeights,bTagLowWeights
 
 # List of samples and their plotting colours
 AlpGenSamples=[]
+
 topSample_Np0 = Sample("Top_Np0",100)
 topSample_Np0.setNormFactor("mu_Top_Np0",1.,0.,5.)
 AlpGenSamples.append(topSample_Np0)
+
 wzSample_Np0 = Sample("WZ_Np0",55)
 wzSample_Np0.setNormFactor("mu_WZ_Np0",1.,0.,5.)
 AlpGenSamples.append(wzSample_Np0)
+
 topSample_Np1 = Sample("Top_Np1",97)
 topSample_Np1.setNormFactor("mu_Top_Np1",1.,0.,5.)
 AlpGenSamples.append(topSample_Np1)
+
 wzSample_Np1 = Sample("WZ_Np1",58)
 wzSample_Np1.setNormFactor("mu_WZ_Np1",1.,0.,5.)
 AlpGenSamples.append(wzSample_Np1)
+
 topSample_Np2 = Sample("Top_Np2",94)
 topSample_Np2.setNormFactor("mu_Top_Np2",1.,0.,5.)
 AlpGenSamples.append(topSample_Np2)
+
 wzSample_Np2 = Sample("WZ_Np2",61)
 wzSample_Np2.setNormFactor("mu_WZ_Np2",1.,0.,5.)
 AlpGenSamples.append(wzSample_Np2)
+
 topSample_Np3 = Sample("Top_Np3",91)
 topSample_Np3.setNormFactor("mu_Top_Np3",1.,0.,5.)
 AlpGenSamples.append(topSample_Np3)
+
 wzSample_Np3 = Sample("WZ_Np3",64)
 wzSample_Np3.setNormFactor("mu_WZ_Np3",1.,0.,5.)
 AlpGenSamples.append(wzSample_Np3)
+
 topSample_Np4 = Sample("Top_Np4",91)
 topSample_Np4.setNormFactor("mu_Top_Np3",1.,0.,5.)
 AlpGenSamples.append(topSample_Np4)
+
 wzSample_Np4 = Sample("WZ_Np4",67)
 wzSample_Np4.setNormFactor("mu_WZ_Np4",1.,0.,5.)
 AlpGenSamples.append(wzSample_Np4)
+
 topSample_Np5 = Sample("Top_Np5",91)
 topSample_Np5.setNormFactor("mu_Top_Np3",1.,0.,5.)
 AlpGenSamples.append(topSample_Np5) 
+
 wzSample_Np5 = Sample("WZ_Np5",70)
 wzSample_Np5.setNormFactor("mu_WZ_Np5",1.,0.,5.)
 AlpGenSamples.append(wzSample_Np5)
@@ -335,7 +362,6 @@ wzSample_Np1.addSystematic(hf)
 wzSample_Np2.addSystematic(hf)
 wzSample_Np3.addSystematic(hf)
 wzSample_Np4.addSystematic(hf)
-
 
 bgSample = Sample("BG",kGreen)
 bgSample.setStatConfig(useStat)
@@ -433,10 +459,12 @@ meas.addParamSetting("mu_WZ_Np1","const",1.0)
 
 #Add common systematics
 for syst in basicChanSyst:
+    print syst.name
     bkgOnly.addSystematic(syst)
-    if fullSyst:
-        for syst in fullChanSyst:
-            bkgOnly.addSystematic(syst)
+if fullSyst:
+    for syst in fullChanSyst:
+        print syst.name
+        bkgOnly.addSystematic(syst)
 
 
 ##### nJet for Top ####
@@ -461,7 +489,6 @@ topChannels = [nJetTopeeChannel, nJetTopeChannel, nJetTopemChannel,nJetTopmmChan
 
 # add systematics
 for chan in topChannels:
-    chan.hasB = True
     chan.hasBQCD = True
     chan.useOverflowBin = False
     for syst in btagChanSyst:
@@ -473,35 +500,32 @@ for chan in topChannels:
 # ele ele    
 nJetZeeChannel=bkgOnly.addChannel("nJet",nJetZeeRegions,nJetZeeNBins,nJetZeeBinLow,nJetZeeBinHigh)
 nJetZeeChannel.setFileList(bgdFiles_ee)
-nJetZeeChannel.hasB = False
 nJetZeeChannel.hasBQCD = False
+nJetZeeChannel.removeWeight("bTagWeight3Jet")
 # single ele
 nJetZeChannel=bkgOnly.addChannel("nJet",nJetZeRegions,nJetZeNBins,nJetZeBinLow,nJetZeBinHigh)
 nJetZeChannel.setFileList(bgdFiles_e)
-nJetZeChannel.hasB = True
 nJetZeChannel.hasBQCD = False
 [nJetZeChannel.addSystematic(syst) for syst in btagChanSyst]
 # mu mu
 nJetZmmChannel=bkgOnly.addChannel("nJet",nJetZmmRegions,nJetZmmNBins,nJetZmmBinLow,nJetZmmBinHigh)
 nJetZmmChannel.setFileList(bgdFiles_mm)
-nJetZmmChannel.hasB = False
 nJetZmmChannel.hasBQCD = False
+nJetZmmChannel.removeWeight("bTagWeight3Jet")
 # single mu
 nJetZmChannel=bkgOnly.addChannel("nJet",nJetZmRegions,nJetZmNBins,nJetZmBinLow,nJetZmBinHigh)
 nJetZmChannel.setFileList(bgdFiles_m)
-nJetZmChannel.hasB = True
 nJetZmChannel.hasBQCD = False
 [nJetZmChannel.addSystematic(syst) for syst in btagChanSyst]
                                                                
 WZChannels = [nJetZeeChannel, nJetZeChannel, nJetZmmChannel, nJetZmChannel]
 
-# add systematics
+# Additional settings
 for chan in WZChannels:
+    chan.hasBQCD = False    
     chan.useOverflowBin = False
         
 bkgOnly.setBkgConstrainChannels([nJetTopeeChannel,nJetZeeChannel,nJetTopeChannel,nJetZeChannel,nJetTopemChannel,nJetTopmmChannel,nJetZmmChannel,nJetTopmChannel,nJetZmChannel])
-
-
 
 #-------------------------------------------------
 # Signal regions - only do this if background only, add as validation regions! 
@@ -579,7 +603,6 @@ if doValidationSlope:
             chan.setFileList(bgdFiles_e)
         else:
             chan.setFileList(bgdFiles_m)
-        chan.hasB = True
         chan.hasBQCD = True
         chan.useOverflowBin = True
         for syst in btagChanSyst:
@@ -599,7 +622,6 @@ if doValidationSlope:
             chan.setFileList(bgdFiles_e)
         else:
             chan.setFileList(bgdFiles_m)
-        chan.hasB = True
         chan.hasBQCD = False
         chan.useOverflowBin = True
         for syst in btagChanSyst:
@@ -617,7 +639,7 @@ if doValidationSlope:
             chan.setFileList(bgdFiles_ee)
         else:
             chan.setFileList(bgdFiles_mm)
-        chan.hasB = False
+        chan.removeWeight("bTagWeight3Jet")
         chan.hasBQCD = False
         chan.useOverflowBin = True
 
@@ -653,6 +675,7 @@ if doValidationSRLoose:
     validationSRChannels = [meff2ee, meff4ee, meff2em, meff4em, meff2mm, meff4mm, meffS3_El, meffS3_Mu, meffS4_El, meffS4_Mu, mmSSEl, mmSSMu]
     for chan in validationSRChannels:
         chan.useOverflowBin = True
+        chan.removeWeight("bTagWeight3Jet")
 
 if doValidationSRTight:
     #DILEPTONS
@@ -692,6 +715,7 @@ if doValidationSRTight:
     validationSRChannels = [meff2ee, meff4ee, meff2em, meff4em, meff2mm, meff4mm, meffS3T_El, meffS3T_Mu, meffS4T_El, meffS4T_Mu, mmSSElT, mmSSMuT,meffS7T_El,meffS7T_Mu]                                                    
     for chan in validationSRChannels:
         chan.useOverflowBin = True
+        chan.removeWeight("bTagWeight3Jet")
 
 
 if doValidationDilep:
@@ -721,6 +745,7 @@ if doValidationDilep:
     # add systematics
     for chan in validation2LepChannels:
         chan.useOverflowBin = True
+        chan.removeWeight("bTagWeight3Jet")
         if chan.name.find("_ee")>-1:
             chan.setFileList(bgdFiles_ee)
         elif chan.name.find("_em")>-1:
@@ -755,7 +780,6 @@ if doValidationDilepZ:
     
     # add systematics
     for chan in validation2LepChannels:
-        chan.hasB = True
         chan.hasBQCD = True
         chan.useOverflowBin = True
         if chan.name.find("_ee")>-1:
@@ -783,10 +807,10 @@ if doValidationSoftLep:
     # add systematics
     for chan in validationSoftLepChannels:
         chan.useOverflowBin = True
+        chan.removeWeight("bTagWeight3Jet")
 
     # add systematics
     for chan in validationSoftLepBtagChannels:
-        chan.hasB = True
         chan.hasBQCD = True
         chan.useOverflowBin = True
         for syst in btagChanSyst:
@@ -794,7 +818,6 @@ if doValidationSoftLep:
 
     # add systematics
     for chan in validationSoftLepBvetoChannels:
-        chan.hasB = True
         chan.hasBQCD = False
         chan.useOverflowBin = True
         for syst in btagChanSyst:
@@ -834,7 +857,8 @@ if doExclusion_GMSB_combined or doExclusion_mSUGRA_dilepton_combined or doExclus
         if doExclusion_GMSB_combined:
             SRs=["S2ee","S2em","S2mm"]
         elif doExclusion_mSUGRA_dilepton_combined:
-            SRs=["S3El","S3Mu","S4El","S4Mu","S2ee","S2em","S2mm","S4ee","S4em","S4mm"]
+            #SRs=["S3El","S3Mu","S4El","S4Mu","S2ee","S2em","S2mm","S4ee","S4em","S4mm"]
+            SRs=["S3El"]
         elif doExclusion_GG_twostepCC_slepton:
             SRs=["S4ee","S4em","S4mm"]
 
@@ -858,6 +882,7 @@ if doExclusion_GMSB_combined or doExclusion_mSUGRA_dilepton_combined or doExclus
                 else:
                     raise RuntimeError("Unexpected signal region %s"%sr)
                 ch.useOverflowBin=True
+                ch.removeWeight("bTagWeight3Jet")
 
                 if ch.name.find("El"):
                     ch.setFileList(bgdFiles_e)
