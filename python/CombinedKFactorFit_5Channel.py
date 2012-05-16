@@ -81,6 +81,7 @@ bgdFiles_se = []
 bgdFiles_sm = []
 
 sigFiles = []
+sigFiles_l = []
 
 configMgr.histCacheFile = "data/"+configMgr.analysisName+".root"
 inputDir="root://eosatlas//eos/atlas/atlascerngroupdisk/phys-susy/histfitter/stronglepton/Paper_v1/"
@@ -114,8 +115,11 @@ if doExclusion_GMSB_combined:
 if doExclusion_mSUGRA_dilepton_combined:
     if not onLxplus:
         sigFiles+=["data/SusyFitterTree_EleEle_mSUGRA.root","data/SusyFitterTree_EleMu_mSUGRA.root","data/SusyFitterTree_MuMu_mSUGRA.root"]
+        sigFiles_l+=["data/SusyFitterTree_p832_mSUGRA_paper_v1.root"]
     else:
         sigFiles+=[inputDirSig+"/SusyFitterTree_EleEle_mSUGRA.root",inputDirSig+"/SusyFitterTree_EleMu_mSUGRA.root",inputDirSig+"/SusyFitterTree_MuMu_mSUGRA.root"]
+        sigFiles_l+=[inputDirSig+"/SusyFitterTree_p832_mSUGRA_paper_v1.root"]
+
 
 if doExclusion_GG_onestepCC_combined:
     if not onLxplus:
@@ -850,7 +854,6 @@ if doExclusion_GMSB_combined or doExclusion_mSUGRA_dilepton_combined or doExclus
         sigSample.setNormFactor("mu_SIG",0.,0.,5.)
         sigSample.setStatConfig(useStat)
         myTopLvl.addSamples(sigSample)
-        myTopLvl.setSignalSample(sigSample)
 
         #signal-specific uncertainties
         sigSample.addSystematic(jesSignal)
@@ -865,8 +868,8 @@ if doExclusion_GMSB_combined or doExclusion_mSUGRA_dilepton_combined or doExclus
         if doExclusion_GMSB_combined:
             SRs=["S2ee","S2em","S2mm"]
         elif doExclusion_mSUGRA_dilepton_combined:
-            #SRs=["S3El","S3Mu","S4El","S4Mu","S2ee","S2em","S2mm","S4ee","S4em","S4mm"]
-            SRs=["S3El"]
+            SRs=["S3El","S3Mu","S4El","S4Mu","S2ee","S2em","S2mm","S4ee","S4em","S4mm"]
+            #SRs=["S3El"]
         elif doExclusion_GG_twostepCC_slepton:
             SRs=["S4ee","S4em","S4mm"]
 
@@ -892,20 +895,27 @@ if doExclusion_GMSB_combined or doExclusion_mSUGRA_dilepton_combined or doExclus
                 ch.useOverflowBin=True
                 ch.removeWeight("bTagWeight3Jet")
 
-                if ch.name.find("El"):
+                if ch.name.find("El")>-1:
                     ch.setFileList(bgdFiles_e)
-                elif ch.name.find("Mu"):
+                elif ch.name.find("Mu")>-1:
                     ch.setFileList(bgdFiles_m)
-                elif ch.name.find("ee"):
+                elif ch.name.find("ee")>-1:
                     ch.setFileList(bgdFiles_ee)
-                elif ch.name.find("em"):
+                elif ch.name.find("em")>-1:
                     ch.setFileList(bgdFiles_em)
-                elif ch.name.find("mm"):
+                elif ch.name.find("mm")>-1:
                     ch.setFileList(bgdFiles_mm)
-                    
-                
+                                    
                 myTopLvl.setSignalChannels(ch)        
 
-
-
-
+        for (iChan,chan) in enumerate(myTopLvl.channels):
+            if chan.name.find("El")>-1:
+                chan.getSample(sig).setFileList(sigFiles_l)
+            elif chan.name.find("Mu")>-1:
+                chan.getSample(sig).setFileList(sigFiles_l)
+            elif chan.name.find("ee")>-1:
+                chan.getSample(sig).setFileList(sigFiles)
+            elif chan.name.find("em")>-1:
+                chan.getSample(sig).setFileList(sigFiles)
+            elif chan.name.find("mm")>-1:
+                chan.getSample(sig).setFileList(sigFiles)
