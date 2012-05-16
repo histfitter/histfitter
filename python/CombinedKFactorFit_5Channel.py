@@ -34,8 +34,8 @@ doSoftLep=False
 useStat=True
 fullSyst=True
 
-doValidationSRLoose=False
-doValidationSRTight=False
+doValidationSRLoose=True
+doValidationSRTight=True
 doValidationSlope=False
 doValidationDilep=False
 doValidationDilepZ=False
@@ -209,7 +209,13 @@ configMgr.cutsDict["SSMu"]="lep1Pt < 20 && lep2Pt<10 && met>250 && mt>100 && jet
 d=configMgr.cutsDict
 configMgr.cutsDict["SSElT"] = d["SSEl"]+"&& met/meff2Jet>0.3"
 configMgr.cutsDict["SSMuT"] = d["SSMu"]+"&& met/meff2Jet>0.3"
-
+#To allow 1-bin and multi-bins channels based on same cuts
+configMgr.cutsDict["S2eeT"] = d["S2ee"] 
+configMgr.cutsDict["S2emT"] = d["S2em"] 
+configMgr.cutsDict["S2mmT"] = d["S2mm"] 
+configMgr.cutsDict["S4eeT"] = d["S4ee"] 
+configMgr.cutsDict["S4emT"] = d["S4em"] 
+configMgr.cutsDict["S4mmT"] = d["S4mm"] 
 
 ## Lists of weights 
 if doWptReweighting:
@@ -284,7 +290,7 @@ basicChanSyst.append(Systematic("MC","_NoSys","_METCOup","_METCOdown","tree","ov
 basicChanSyst.append(Systematic("MP","_NoSys","_METPUup","_METPUdown","tree","histoSys")) # MET pileup uncertainty - one per channel
              
 fullChanSyst = []
-fullChanSyst.append(Systematic("LE",configMgr.weights,lepHighWeights,lepLowWeights,"weight","overallSys")) # Lepton weight uncertainty
+#fullChanSyst.append(Systematic("LE",configMgr.weights,lepHighWeights,lepLowWeights,"weight","overallSys")) # Lepton weight uncertainty
 fullChanSyst.append(Systematic("TE",configMgr.weights,trigHighWeights,trigLowWeights,"weight","overallSys")) # Trigger weight uncertainty
 fullChanSyst.append(Systematic("LES","_NoSys","_LESup","_LESdown","tree","overallSys")) # LES uncertainty - one per channel
 fullChanSyst.append(Systematic("LRM","_NoSys","_LERMSup","_LERMSdown","tree","overallSys")) # LER with muon system - one per channel
@@ -679,20 +685,19 @@ if doValidationSRLoose:
 
 if doValidationSRTight:
     #DILEPTONS
-    if not doValidationSRLoose:
-        meff2ee = bkgOnly.addValidationChannel("meffInc",["S2ee"],1,meffBinLowS2,meffBinHighS2)
-        meff2ee.setFileList(bgdFiles_ee)
-        meff4ee = bkgOnly.addValidationChannel("meffInc",["S4ee"],1,meffBinLowS4,meffBinHighS4)
-        meff4ee.setFileList(bgdFiles_ee)
-        meff2em = bkgOnly.addValidationChannel("meffInc",["S2em"],1,meffBinLowS2,meffBinHighS2)
-        meff2em.setFileList(bgdFiles_em)
-        meff4em = bkgOnly.addValidationChannel("meffInc",["S4em"],1,meffBinLowS4,meffBinHighS4)
-        meff4em.setFileList(bgdFiles_em)
-        meff2mm = bkgOnly.addValidationChannel("meffInc",["S2mm"],1,meffBinLowS2,meffBinHighS2)
-        meff2mm.setFileList(bgdFiles_mm)
-        meff4mm = bkgOnly.addValidationChannel("meffInc",["S4mm"],1,meffBinLowS4,meffBinHighS4)
-        meff4mm.setFileList(bgdFiles_mm)
-        pass
+    meff2ee = bkgOnly.addValidationChannel("meffInc",["S2eeT"],1,meffBinLowS2,meffBinHighS2)
+    meff2ee.setFileList(bgdFiles_ee)
+    meff4ee = bkgOnly.addValidationChannel("meffInc",["S4eeT"],1,meffBinLowS4,meffBinHighS4)
+    meff4ee.setFileList(bgdFiles_ee)
+    meff2em = bkgOnly.addValidationChannel("meffInc",["S2emT"],1,meffBinLowS2,meffBinHighS2)
+    meff2em.setFileList(bgdFiles_em)
+    meff4em = bkgOnly.addValidationChannel("meffInc",["S4emT"],1,meffBinLowS4,meffBinHighS4)
+    meff4em.setFileList(bgdFiles_em)
+    meff2mm = bkgOnly.addValidationChannel("meffInc",["S2mmT"],1,meffBinLowS2,meffBinHighS2)
+    meff2mm.setFileList(bgdFiles_mm)
+    meff4mm = bkgOnly.addValidationChannel("meffInc",["S4mmT"],1,meffBinLowS4,meffBinHighS4)
+    meff4mm.setFileList(bgdFiles_mm)
+    
     # HARD LEPTON SRS
     meffS3T_El=bkgOnly.addValidationChannel("meffInc",["SR3jTEl"],1,1200,meffBinHighHL)
     meffS3T_El.setFileList(bgdFiles_e)
@@ -844,15 +849,18 @@ if doExclusion_GMSB_combined or doExclusion_mSUGRA_dilepton_combined or doExclus
         sigSample.setNormByTheory()
         sigSample.setNormFactor("mu_SIG",0.,0.,5.)
         sigSample.setStatConfig(useStat)
-
-        if useXsecUnc:
-            sigSample.addSystematic(xsecSig)
-        #ADD ISR UNCERTAINTY!!
-        sigSample.addSystematic(jesSignal)
         myTopLvl.addSamples(sigSample)
         myTopLvl.setSignalSample(sigSample)
 
-
+        #signal-specific uncertainties
+        sigSample.addSystematic(jesSignal)
+        if useXsecUnc:
+            sigSample.addSystematic(xsecSig)
+        if sig.startswith("SM"):
+            from SystematicsUtils import getISRSyst
+            isrSyst = getISRSyst(sig)
+            sigSample.addSystematic(isrSyst)
+        
         SRs=["S3El","S3Mu","S4El","S4Mu","S2ee","S2em","S2mm","S4ee","S4em","S4mm"]
         if doExclusion_GMSB_combined:
             SRs=["S2ee","S2em","S2mm"]
@@ -862,7 +870,7 @@ if doExclusion_GMSB_combined or doExclusion_mSUGRA_dilepton_combined or doExclus
         elif doExclusion_GG_twostepCC_slepton:
             SRs=["S4ee","S4em","S4mm"]
 
-        if doValidationSRLoose or doValidationSRTight:
+        if doValidationSRLoose:
             for sr in SRs:
                 #don't re-create already existing channel, but unset as Validation and set as Signal channel
                 ch = myTopLvl.getChannel("meffInc",[sr])
