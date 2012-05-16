@@ -609,7 +609,7 @@ if doValidationSlope:
     
     # add systematics
     for chan in validationSlopeTRChannels:
-        if chan.name.find("_El")>-1:
+        if chan.name.find("El")>-1:
             chan.setFileList(bgdFiles_e)
         else:
             chan.setFileList(bgdFiles_m)
@@ -628,7 +628,7 @@ if doValidationSlope:
     
     # add systematics
     for chan in validationSlopeWRChannels:
-        if chan.name.find("_El")>-1:
+        if chan.name.find("El")>-1:
             chan.setFileList(bgdFiles_e)
         else:
             chan.setFileList(bgdFiles_m)
@@ -641,11 +641,11 @@ if doValidationSlope:
     ZptZR_ee=bkgOnly.addValidationChannel("Zpt",["ZRee"],metNBinsTR,metBinLowTR,metBinHighTR)
     ZptZR_mm=bkgOnly.addValidationChannel("Zpt",["ZRmm"],metNBinsTR,metBinLowTR,metBinHighTR)
     
-    validationSlopeWRChannels = [ZptZR_ee, ZptZR_mm]
+    validationSlopeZRChannels = [ZptZR_ee, ZptZR_mm]
     
     # add systematics
-    for chan in validationSlopeWRChannels:
-        if chan.name.find("_ee")>-1:
+    for chan in validationSlopeZRChannels:
+        if chan.name.find("ee")>-1:
             chan.setFileList(bgdFiles_ee)
         else:
             chan.setFileList(bgdFiles_mm)
