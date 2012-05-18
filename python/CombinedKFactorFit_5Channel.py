@@ -44,15 +44,16 @@ doValidationSoftLep=False
 
 doExclusion_GMSB_combined=False
 doExclusion_mSUGRA_dilepton_combined=False
-doExclusion_GG_onestepCC_x12=True
-doExclusion_GG_onestepCC_GridX=False
+doExclusion_GG_onestepCC_combined=False
 doExclusion_GG_twostepCC_slepton=True
 blindS=False
 useXsecUnc=True             # switch off when calucating excluded cross section (colour code in SM plots)
 doWptReweighting=False ## deprecated
 #doSignalOnly=False #Remove all bkgs for signal histo creation step
 doSignalOnly=True #Remove all bkgs for signal histo creation step
-
+if configMgr.executeHistFactory:
+    doSignalOnly=False
+    
 if not 'sigSamples' in dir():
 #    sigSamples=["SU_580_240_0_10_P"]
     sigSamples=["SM_GG_onestepCC_445_245_45"]
@@ -125,18 +126,12 @@ if doExclusion_mSUGRA_dilepton_combined:
         sigFiles_l+=[inputDirSig+"/SusyFitterTree_p832_mSUGRA_paper_v1.root"]
 
 
-if doExclusion_GG_onestepCC_x12:
+if doExclusion_GG_onestepCC_combined:
     if not onLxplus:
         sigFiles_l+=["data/SusyFitterTree_OneSoftMuo_SM_GG_onestepCC_v3.root","data/SusyFitterTree_OneSoftEle_SM_GG_onestepCC_v3.root"]
     else:
         sigFiles_l+=[inputDirSig+"/SusyFitterTree_OneSoftMuo_SM_GG_onestepCC_v3.root",inputDirSig+"/SusyFitterTree_OneSoftEle_SM_GG_onestepCC_v3.root",inputDirSig+"/SusyFitterTree_p832_GGonestep_paper_v1.root"]
 
-if doExclusion_GG_onestepCC_GridX:
-    if not onLxplus:
-        sigFiles_l+=["data/SusyFitterTree_OneSoftMuo_SM_SS_onestepCC_varyx_v3.root","data/SusyFitterTree_OneSoftEle_SM_SS_onestepCC_varyx_v3.root","data/SusyFitterTree_p832_GGonestepLSP60_paper_v1.root"]
-    else:
-        sigFiles_l+=[inputDirSig+"/SusyFitterTree_OneSoftMuo_SM_SS_onestepCC_varyx_v3.root",inputDirSig+"/SusyFitterTree_OneSoftEle_SM_SS_onestepCC_varyx_v3.root",inputDirSig+"/SusyFitterTree_p832_GGonestepLSP60_paper_v1.root"]
-        
 if doExclusion_GG_twostepCC_slepton:
     if not onLxplus:
         sigFiles+=["data/SusyFitterTree_EleEle_SM_GG_twostepCC_slepton.root","data/SusyFitterTree_EleMu_SM_GG_twostepCC_slepton.root","data/SusyFitterTree_MuMu_SM_GG_twostepCC_slepton.root"]
@@ -924,7 +919,8 @@ if doValidationSoftLep:
 # Exclusion fit
 #-------------------------------------------------
 
-if doExclusion_GMSB_combined or doExclusion_mSUGRA_dilepton_combined or doExclusion_GG_twostepCC_slepton or doExclusion_GG_onestepCC_x12 or doExclusion_GG_onestepCC_GridX:
+if doExclusion_GMSB_combined or doExclusion_mSUGRA_dilepton_combined or doExclusion_GG_twostepCC_slepton or doExclusion_GG_onestepCC_combined:
+
 
     for sig in sigSamples:
         myTopLvl = configMgr.addTopLevelXMLClone(bkgOnly,"Sig_%s"%sig)
@@ -933,8 +929,6 @@ if doExclusion_GMSB_combined or doExclusion_mSUGRA_dilepton_combined or doExclus
         sigSample.setFileList(sigFiles)
         sigSample.setNormByTheory()
         sigSample.setNormFactor("mu_SIG",0.,0.,5.)
-
-        #signal-specific uncertainties
         sigSample.setStatConfig(useStat)
         sigSample.addSystematic(jesSignal)
         if useXsecUnc:
@@ -946,6 +940,7 @@ if doExclusion_GMSB_combined or doExclusion_mSUGRA_dilepton_combined or doExclus
 
         myTopLvl.addSamples(sigSample)
 
+        #signal-specific uncertainties
         
         SRs=["S3El","S3Mu","S4El","S4Mu","S2ee","S2em","S2mm","S4ee","S4em","S4mm"]
         if doExclusion_GMSB_combined:
@@ -953,11 +948,10 @@ if doExclusion_GMSB_combined or doExclusion_mSUGRA_dilepton_combined or doExclus
         elif doExclusion_mSUGRA_dilepton_combined:
 ##            SRs=["S3El","S3Mu","S4El","S4Mu","S2ee","S2em","S2mm","S4ee","S4em","S4mm"]
             SRs=["S2ee","S2em","S2mm","S4ee","S4em","S4mm"]
+            #SRs=["S3El"]
         elif doExclusion_GG_twostepCC_slepton:
             SRs=["S4ee","S4em","S4mm"]
-        elif doExclusion_GG_onestepCC_x12:
-            SRs=["S3El","S3Mu","S4El","S4Mu"] # only hard lepton so far
-        elif doExclusion_GG_onestepCC_GridX:
+        elif doExclusion_GG_onestepCC_combined:
             SRs=["S3El","S3Mu","S4El","S4Mu"] # only hard lepton so far
 
         if doValidationSRLoose:
