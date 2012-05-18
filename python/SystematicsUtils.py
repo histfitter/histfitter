@@ -4,8 +4,12 @@ from ROOT import TMath
 
 def getISRSyst(sig):
     errisr = 0.
-    mgl = int(sig.split('_')[3])
-    mlsp = int(sig.split('_')[4])
+    if sig.find("slepton"):
+        mgl = int(sig.split('_')[4])
+        mlsp = int(sig.split('_')[7])
+    else:
+        mgl = int(sig.split('_')[3])
+        mlsp = int(sig.split('_')[4])
     mdiff = mgl - mlsp
 
     norm = TMath.sqrt(0.25**2 + 0.10**2) # these are the max. showering parameter variations we found (variations recommended for pythia 2011 tunes)
