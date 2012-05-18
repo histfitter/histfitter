@@ -1,5 +1,6 @@
 from systematic import Systematic
 from configManager import configMgr
+from ROOT import TMath
 
 def getISRSyst(sig):
     errisr = 0.
@@ -7,7 +8,7 @@ def getISRSyst(sig):
     mlsp = int(sig.split('_')[4])
     mdiff = mgl - mlsp
 
-    norm = sqrt(0.25**2 + 0.10**2) # these are the max. showering parameter variations we found (variations recommended for pythia 2011 tunes)
+    norm = TMath.sqrt(0.25**2 + 0.10**2) # these are the max. showering parameter variations we found (variations recommended for pythia 2011 tunes)
             
     if mgl<300: norm += (1.-(mgl-200)/100.)*0.25
     if mdiff<300: errisr = (1.-(mdiff/300.))*norm # the uncertainty grows towards the mass diagonal, and when mgl gets smaller.
