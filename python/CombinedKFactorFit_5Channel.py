@@ -7,6 +7,7 @@ from ROOT import kBlack,kRed,kBlue,kGreen,kYellow,kWhite,kPink,kGray,kMagenta
 from configWriter import TopLevelXML,Measurement,ChannelXML,Sample
 from systematic import Systematic
 from copy import deepcopy
+import commands
 
 #from ROOT import gROOT
 #gROOT.LoadMacro("./macros/AtlasStyle.C")
@@ -28,7 +29,7 @@ def removeWeight(oldList,oldWeight):
     newList.remove(oldWeight)
     return newList
 
-onLxplus=False
+onLxplus='lxplus' in commands.getstatusoutput("hostname")[1]
 useHardLepCR=True
 useSoftLepCR=False
 useDiLepCR=True
@@ -42,10 +43,12 @@ doValidationDilep=False
 doValidationDilepZ=False
 doValidationSoftLep=False
 
+
+
 doExclusion_GMSB_combined=False
 doExclusion_mSUGRA_dilepton_combined=False
-doExclusion_GG_onestepCC_combined=False
-doExclusion_GG_twostepCC_slepton=True
+doExclusion_GG_onestepCC_combined=True
+doExclusion_GG_twostepCC_slepton=False
 blindS=False
 useXsecUnc=True             # switch off when calucating excluded cross section (colour code in SM plots)
 doWptReweighting=False ## deprecated
@@ -91,6 +94,11 @@ sigFiles_l = []
 configMgr.histCacheFile = "data/"+configMgr.analysisName+".root"
 inputDir="root://eosatlas//eos/atlas/atlascerngroupdisk/phys-susy/histfitter/stronglepton/Paper_v1/"
 inputDirSig="root://eosatlas//eos/atlas/atlascerngroupdisk/phys-susy/histfitter/stronglepton/"
+
+if not onLxplus:
+    print "INFO : Mainz bleibt Mainz..."
+else:
+    print "INFO : Running on lxplus..."
 
 # Set the files to read from
 if configMgr.readFromTree:
