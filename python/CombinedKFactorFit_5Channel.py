@@ -29,7 +29,7 @@ def removeWeight(oldList,oldWeight):
     newList.remove(oldWeight)
     return newList
 
-onLxplus='lxplus' in commands.getstatusoutput("hostname")[1]
+onLxplus='lx' in commands.getstatusoutput("hostname")[1]
 useHardLepCR=True
 useSoftLepCR=False
 useDiLepCR=True
@@ -954,6 +954,7 @@ if doExclusion_GMSB_combined or doExclusion_mSUGRA_dilepton_combined or doExclus
             sigSample.addSystematic(isrSyst)
 
         myTopLvl.addSamples(sigSample)
+        myTopLvl.setSignalSample(sigSample)
 
         
         SRs=["S3El","S3Mu","S4El","S4Mu","S2ee","S2em","S2mm","S4ee","S4em","S4mm"]
