@@ -4,7 +4,7 @@ from ROOT import TMath
 
 def getISRSyst(sig):
     errisr = 0.
-    if sig.find("slepton"):
+    if "slepton" in sig:
         mgl = int(sig.split('_')[4])
         mlsp = int(sig.split('_')[7])
     else:
