@@ -34,7 +34,7 @@ useHardLepCR=True
 useSoftLepCR=False
 useDiLepCR=True
 useStat=True
-fullSyst=True
+fullSyst=False
 
 doValidationSRLoose=False
 doValidationSRTight=False
@@ -43,11 +43,10 @@ doValidationDilep=False
 doValidationDilepZ=False
 doValidationSoftLep=False
 
-
-
 doExclusion_GMSB_combined=False
 doExclusion_mSUGRA_dilepton_combined=False
-doExclusion_GG_onestepCC_combined=True
+doExclusion_GG_onestepCC_x12=True
+doExclusion_GG_onestepCC_gridX=False
 doExclusion_GG_twostepCC_slepton=False
 blindS=False
 useXsecUnc=True             # switch off when calucating excluded cross section (colour code in SM plots)
@@ -96,9 +95,9 @@ inputDir="root://eosatlas//eos/atlas/atlascerngroupdisk/phys-susy/histfitter/str
 inputDirSig="root://eosatlas//eos/atlas/atlascerngroupdisk/phys-susy/histfitter/stronglepton/"
 
 if not onLxplus:
-    print "INFO : Mainz bleibt Mainz..."
+    print "INFO : Mainz bleibt Mainz...\n"
 else:
-    print "INFO : Running on lxplus..."
+    print "INFO : Running on lxplus... \n"
 
 # Set the files to read from
 if configMgr.readFromTree:
@@ -134,11 +133,17 @@ if doExclusion_mSUGRA_dilepton_combined:
         sigFiles_l+=[inputDirSig+"/SusyFitterTree_p832_mSUGRA_paper_v1.root"]
 
 
-if doExclusion_GG_onestepCC_combined:
+if doExclusion_GG_onestepCC_x12:
     if not onLxplus:
         sigFiles_l+=["data/SusyFitterTree_OneSoftMuo_SM_GG_onestepCC_v3.root","data/SusyFitterTree_OneSoftEle_SM_GG_onestepCC_v3.root"]
     else:
         sigFiles_l+=[inputDirSig+"/SusyFitterTree_OneSoftMuo_SM_GG_onestepCC_v3.root",inputDirSig+"/SusyFitterTree_OneSoftEle_SM_GG_onestepCC_v3.root",inputDirSig+"/SusyFitterTree_p832_GGonestep_paper_v1.root"]
+
+if doExclusion_GG_onestepCC_gridX:
+    if not onLxplus:
+        sigFiles_l+=["data/SusyFitterTree_OneSoftMuo_SM_GG_onestepCC_varyx_v3.root","data/SusyFitterTree_OneSoftEle_SM_GG_onestepCC_varyx_v3.root","data/SusyFitterTree_p832_GGonestepLSP60_paper_v1.root"]
+    else:
+        sigFiles_l+=[inputDirSig+"/SusyFitterTree_OneSoftMuo_SM_GG_onestepCC_varyx_v3.root",inputDirSig+"/SusyFitterTree_OneSoftEle_SM_GG_onestepCC_varyx_v3.root",inputDirSig+"/SusyFitterTree_p832_GGonestepLSP60_paper_v1.root"]
 
 if doExclusion_GG_twostepCC_slepton:
     if not onLxplus:
@@ -927,7 +932,7 @@ if doValidationSoftLep:
 # Exclusion fit
 #-------------------------------------------------
 
-if doExclusion_GMSB_combined or doExclusion_mSUGRA_dilepton_combined or doExclusion_GG_twostepCC_slepton or doExclusion_GG_onestepCC_combined:
+if doExclusion_GMSB_combined or doExclusion_mSUGRA_dilepton_combined or doExclusion_GG_twostepCC_slepton or doExclusion_GG_onestepCC_x12 or doExclusion_GG_onestepCC_gridX:
 
 
     for sig in sigSamples:
@@ -937,6 +942,8 @@ if doExclusion_GMSB_combined or doExclusion_mSUGRA_dilepton_combined or doExclus
         sigSample.setFileList(sigFiles)
         sigSample.setNormByTheory()
         sigSample.setNormFactor("mu_SIG",0.,0.,5.)
+
+        #signal-specific uncertainties
         sigSample.setStatConfig(useStat)
         sigSample.addSystematic(jesSignal)
         if useXsecUnc:
@@ -948,20 +955,20 @@ if doExclusion_GMSB_combined or doExclusion_mSUGRA_dilepton_combined or doExclus
 
         myTopLvl.addSamples(sigSample)
 
-        #signal-specific uncertainties
         
         SRs=["S3El","S3Mu","S4El","S4Mu","S2ee","S2em","S2mm","S4ee","S4em","S4mm"]
         if doExclusion_GMSB_combined:
             SRs=["S2ee","S2em","S2mm"]
         elif doExclusion_mSUGRA_dilepton_combined:
-##            SRs=["S3El","S3Mu","S4El","S4Mu","S2ee","S2em","S2mm","S4ee","S4em","S4mm"]
+            #  SRs=["S3El","S3Mu","S4El","S4Mu","S2ee","S2em","S2mm","S4ee","S4em","S4mm"]
             SRs=["S2ee","S2em","S2mm","S4ee","S4em","S4mm"]
-            #SRs=["S3El"]
         elif doExclusion_GG_twostepCC_slepton:
             SRs=["S4ee","S4em","S4mm"]
-        elif doExclusion_GG_onestepCC_combined:
+        elif doExclusion_GG_onestepCC_x12:
             SRs=["S3El","S3Mu","S4El","S4Mu"] # only hard lepton so far
-
+        elif doExclusion_GG_onestepCC_gridX:
+            SRs=["S3El","S3Mu","S4El","S4Mu"] # only hard lepton so far
+            
         if doValidationSRLoose:
             for sr in SRs:
                 #don't re-create already existing channel, but unset as Validation and set as Signal channel
