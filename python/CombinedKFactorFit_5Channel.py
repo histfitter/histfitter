@@ -1,4 +1,4 @@
- ################################################################
+################################################################
 ## In principle all you have to setup is defined in this file ##
 ################################################################
 
@@ -29,12 +29,13 @@ def removeWeight(oldList,oldWeight):
     return newList
 
 onLxplus=True
-doHardLep=True
-doSoftLep=False
+useHardLepCR=True
+useSoftLepCR=True
+useDiLepCR=True
 useStat=True
 fullSyst=True
 
-doValidationSRLoose=False
+doValidationSRLoose=True
 doValidationSRTight=False
 doValidationSlope=False
 doValidationDilep=False
@@ -44,7 +45,7 @@ doValidationSoftLep=False
 doExclusion_GMSB_combined=False
 doExclusion_mSUGRA_dilepton_combined=False
 doExclusion_GG_onestepCC_combined=False
-doExclusion_GG_twostepCC_slepton=True
+doExclusion_GG_twostepCC_slepton=False
 blindS=False
 useXsecUnc=True             # switch off when calucating excluded cross section (colour code in SM plots)
 doWptReweighting=False ## deprecated
@@ -106,7 +107,7 @@ if configMgr.readFromTree:
         bgdFiles_m = [inputDir+"/SusyFitterTree_OneMu.root"]
         bgdFiles_se = ["/afs/cern.ch/work/h/hyamaguc/public/samples/SusyFitterTree_OneSoftEle_BG_v5.root"]
         bgdFiles_sm = ["/afs/cern.ch/work/h/hyamaguc/public/samples/SusyFitterTree_OneSoftMuo_BG_v5.root"]
-
+  
 if doExclusion_GMSB_combined:
     if not onLxplus:
         sigFiles+=["data/SusyFitterTree_EleEle_GMSB.root","data/SusyFitterTree_EleMu_GMSB.root","data/SusyFitterTree_MuMu_GMSB.root"]
@@ -203,10 +204,10 @@ configMgr.cutsDict["SR7jTMu"]="AnalysisType==2 && met>180 && mt>120 && jet1Pt>80
 configMgr.cutsDict["SVEl"]="(lep1Pt<25 && lep2Pt<10 && met>180 && met<250 && mt>80 && mt<100 && jet1Pt>130 && jet2Pt>25 && AnalysisType==6)"
 configMgr.cutsDict["SVMu"]="(lep1Pt<20 && lep2Pt<10 && met>180 && met<250 && mt>80 && mt<100 && jet1Pt>130 && jet2Pt>25 && AnalysisType==7)"
 
-configMgr.cutsDict["SVWEl"]="lep1Pt<25 && lep2Pt<10 && met>180 && met<250 && mt>40 && mt<80 && nB2Jet==0 && jet1Pt>130 && jet2Pt>25 && AnalysisType==6"
-configMgr.cutsDict["SVTEl"]="lep1Pt<25 && lep2Pt<10 && met>180 && met<250 && mt>40 && mt<80 && nB2Jet>0 && jet1Pt>130 && jet2Pt>25 && AnalysisType==6"
-configMgr.cutsDict["SVWMu"]="lep1Pt<20 && lep2Pt<10 && met>180 && met<250 && mt>40 && mt<80 && nB2Jet==0 && jet1Pt>130 && jet2Pt>25 && AnalysisType==7"
-configMgr.cutsDict["SVTMu"]="lep1Pt<20 && lep2Pt<10 && met>180 && met<250 && mt>40 && mt<80 && nB2Jet>0 && jet1Pt>130 && jet2Pt>25 && AnalysisType==7"
+configMgr.cutsDict["SVWEl"]="lep1Pt<25 && lep2Pt<10 && met>180 && met<250 && mt>40 && mt<80 && nB3Jet==0 && jet1Pt>130 && jet2Pt>25 && AnalysisType==6"
+configMgr.cutsDict["SVTEl"]="lep1Pt<25 && lep2Pt<10 && met>180 && met<250 && mt>40 && mt<80 && nB3Jet>0 && jet1Pt>130 && jet2Pt>25 && AnalysisType==6"
+configMgr.cutsDict["SVWMu"]="lep1Pt<20 && lep2Pt<10 && met>180 && met<250 && mt>40 && mt<80 && nB3Jet==0 && jet1Pt>130 && jet2Pt>25 && AnalysisType==7"
+configMgr.cutsDict["SVTMu"]="lep1Pt<20 && lep2Pt<10 && met>180 && met<250 && mt>40 && mt<80 && nB3Jet>0 && jet1Pt>130 && jet2Pt>25 && AnalysisType==7"
 
 configMgr.cutsDict["SSEl"]="lep1Pt < 25 && lep2Pt<10 && met>250 && mt>100 && jet1Pt>130 && jet2Pt>25 && AnalysisType==6"
 configMgr.cutsDict["SSMu"]="lep1Pt < 20 && lep2Pt<10 && met>250 && mt>100 && jet1Pt>130 && jet2Pt>25 && AnalysisType==7"
@@ -424,6 +425,11 @@ nJetZmNBins = 8
 nJetZmBinLow = 3
 nJetZmBinHigh = 10
 
+nJetZsmRegions = ["SVWMu"]
+nJetZsmNBins = 8
+nJetZsmBinLow = 3
+nJetZsmBinHigh = 10
+
 nJetZeeRegions = ["ZRee"]
 nJetZeeNBins = 8
 nJetZeeBinLow = 2
@@ -433,6 +439,11 @@ nJetZeRegions = ["WREl"]
 nJetZeNBins = 8
 nJetZeBinLow = 3
 nJetZeBinHigh = 10
+
+nJetZseRegions = ["SVWEl"]
+nJetZseNBins = 8
+nJetZseBinLow = 3
+nJetZseBinHigh = 10
 
 ZptZmmRegions = ["ZRmm"]
 ZptZmmNBins = 50
@@ -480,23 +491,41 @@ if fullSyst:
 
 ##### nJet for Top ####
 
-# ele ele
-nJetTopeeChannel=bkgOnly.addChannel("nJet",["TRee"],nJetTopeeNBins,nJetTopeeBinLow,nJetTopeeBinHigh)
-nJetTopeeChannel.setFileList(bgdFiles_ee)
-#  single ele
-nJetTopeChannel=bkgOnly.addChannel("nJet",["TREl"],nJetTopeNBins,nJetTopeBinLow,nJetTopeBinHigh)
-nJetTopeChannel.setFileList(bgdFiles_e)
-#  ele mu
-nJetTopemChannel=bkgOnly.addChannel("nJet",["TRem"],nJetTopemNBins,nJetTopemBinLow,nJetTopemBinHigh)
-nJetTopemChannel.setFileList(bgdFiles_em)
-# mu mu
-nJetTopmmChannel=bkgOnly.addChannel("nJet",["TRmm"],nJetTopmmNBins,nJetTopmmBinLow,nJetTopmmBinHigh)
-nJetTopmmChannel.setFileList(bgdFiles_mm)
-# single mu
-nJetTopmChannel=bkgOnly.addChannel("nJet",["TRMu"],nJetTopmNBins,nJetTopmBinLow,nJetTopmBinHigh)
-nJetTopmChannel.setFileList(bgdFiles_m)
+topChannels = []
 
-topChannels = [nJetTopeeChannel, nJetTopeChannel, nJetTopemChannel,nJetTopmmChannel,nJetTopmChannel]
+if useDiLepCR:
+    # ele ele
+    nJetTopeeChannel=bkgOnly.addChannel("nJet",["TRee"],nJetTopeeNBins,nJetTopeeBinLow,nJetTopeeBinHigh)
+    nJetTopeeChannel.setFileList(bgdFiles_ee)
+    #  ele mu
+    nJetTopemChannel=bkgOnly.addChannel("nJet",["TRem"],nJetTopemNBins,nJetTopemBinLow,nJetTopemBinHigh)
+    nJetTopemChannel.setFileList(bgdFiles_em)
+    # mu mu
+    nJetTopmmChannel=bkgOnly.addChannel("nJet",["TRmm"],nJetTopmmNBins,nJetTopmmBinLow,nJetTopmmBinHigh)
+    nJetTopmmChannel.setFileList(bgdFiles_mm)
+    
+    topChannels += [nJetTopeeChannel,nJetTopemChannel,nJetTopmmChannel]
+
+if useHardLepCR:
+    #  single ele
+    nJetTopeChannel=bkgOnly.addChannel("nJet",["TREl"],nJetTopeNBins,nJetTopeBinLow,nJetTopeBinHigh)
+    nJetTopeChannel.setFileList(bgdFiles_e)
+    # single mu
+    nJetTopmChannel=bkgOnly.addChannel("nJet",["TRMu"],nJetTopmNBins,nJetTopmBinLow,nJetTopmBinHigh)
+    nJetTopmChannel.setFileList(bgdFiles_m)
+
+    topChannels += [nJetTopeChannel,nJetTopmChannel]
+
+if useSoftLepCR:
+    #  single soft ele
+    nJetTopseChannel=bkgOnly.addChannel("nJet",["SVTEl"],nJetTopeNBins,nJetTopeBinLow,nJetTopeBinHigh)
+    nJetTopseChannel.setFileList(bgdFiles_se)
+    # soft single mu
+    nJetTopsmChannel=bkgOnly.addChannel("nJet",["SVTMu"],nJetTopmNBins,nJetTopmBinLow,nJetTopmBinHigh)
+    nJetTopsmChannel.setFileList(bgdFiles_sm)
+
+    topChannels += [nJetTopseChannel,nJetTopsmChannel]
+
 
 # add systematics
 for chan in topChannels:
@@ -507,36 +536,64 @@ for chan in topChannels:
 
         
 ####### nJet for W/Z  #######
+
+
+WZChannels = []
+
+if useDiLepCR:
+    # ele ele    
+    nJetZeeChannel=bkgOnly.addChannel("nJet",nJetZeeRegions,nJetZeeNBins,nJetZeeBinLow,nJetZeeBinHigh)
+    nJetZeeChannel.setFileList(bgdFiles_ee)
+    nJetZeeChannel.hasBQCD = False
+    nJetZeeChannel.removeWeight("bTagWeight3Jet")
+    # mu mu
+    nJetZmmChannel=bkgOnly.addChannel("nJet",nJetZmmRegions,nJetZmmNBins,nJetZmmBinLow,nJetZmmBinHigh)
+    nJetZmmChannel.setFileList(bgdFiles_mm)
+    nJetZmmChannel.hasBQCD = False
+    nJetZmmChannel.removeWeight("bTagWeight3Jet")
+
+    WZChannels += [nJetZmmChannel,nJetZeeChannel]
     
-# ele ele    
-nJetZeeChannel=bkgOnly.addChannel("nJet",nJetZeeRegions,nJetZeeNBins,nJetZeeBinLow,nJetZeeBinHigh)
-nJetZeeChannel.setFileList(bgdFiles_ee)
-nJetZeeChannel.hasBQCD = False
-nJetZeeChannel.removeWeight("bTagWeight3Jet")
-# single ele
-nJetZeChannel=bkgOnly.addChannel("nJet",nJetZeRegions,nJetZeNBins,nJetZeBinLow,nJetZeBinHigh)
-nJetZeChannel.setFileList(bgdFiles_e)
-nJetZeChannel.hasBQCD = False
-[nJetZeChannel.addSystematic(syst) for syst in btagChanSyst]
-# mu mu
-nJetZmmChannel=bkgOnly.addChannel("nJet",nJetZmmRegions,nJetZmmNBins,nJetZmmBinLow,nJetZmmBinHigh)
-nJetZmmChannel.setFileList(bgdFiles_mm)
-nJetZmmChannel.hasBQCD = False
-nJetZmmChannel.removeWeight("bTagWeight3Jet")
-# single mu
-nJetZmChannel=bkgOnly.addChannel("nJet",nJetZmRegions,nJetZmNBins,nJetZmBinLow,nJetZmBinHigh)
-nJetZmChannel.setFileList(bgdFiles_m)
-nJetZmChannel.hasBQCD = False
-[nJetZmChannel.addSystematic(syst) for syst in btagChanSyst]
-                                                               
-WZChannels = [nJetZeeChannel, nJetZeChannel, nJetZmmChannel, nJetZmChannel]
+
+if useHardLepCR:
+    # single ele
+    nJetZeChannel=bkgOnly.addChannel("nJet",nJetZeRegions,nJetZeNBins,nJetZeBinLow,nJetZeBinHigh)
+    nJetZeChannel.setFileList(bgdFiles_e)
+    nJetZeChannel.hasBQCD = False
+    [nJetZeChannel.addSystematic(syst) for syst in btagChanSyst]
+    # single mu
+    nJetZmChannel=bkgOnly.addChannel("nJet",nJetZmRegions,nJetZmNBins,nJetZmBinLow,nJetZmBinHigh)
+    nJetZmChannel.setFileList(bgdFiles_m)
+    nJetZmChannel.hasBQCD = False
+    [nJetZmChannel.addSystematic(syst) for syst in btagChanSyst]
+
+    WZChannels += [nJetZmChannel,nJetZeChannel]
+
+
+if useSoftLepCR:    
+    # single soft mu
+    nJetZsmChannel=bkgOnly.addChannel("nJet",nJetZsmRegions,nJetZmNBins,nJetZmBinLow,nJetZmBinHigh)
+    nJetZsmChannel.setFileList(bgdFiles_sm)
+    nJetZsmChannel.hasB = True
+    nJetZsmChannel.hasBQCD = False
+    [nJetZsmChannel.addSystematic(syst) for syst in btagChanSyst]
+    # single soft ele
+    nJetZseChannel=bkgOnly.addChannel("nJet",nJetZseRegions,nJetZeNBins,nJetZeBinLow,nJetZeBinHigh)
+    nJetZseChannel.setFileList(bgdFiles_se)
+    nJetZseChannel.hasB = True
+    nJetZseChannel.hasBQCD = False
+    [nJetZseChannel.addSystematic(syst) for syst in btagChanSyst]
+
+    WZChannels += [nJetZsmChannel,nJetZseChannel]
+
 
 # Additional settings
 for chan in WZChannels:
     chan.hasBQCD = False    
     chan.useOverflowBin = False
         
-bkgOnly.setBkgConstrainChannels([nJetTopeeChannel,nJetZeeChannel,nJetTopeChannel,nJetZeChannel,nJetTopemChannel,nJetTopmmChannel,nJetZmmChannel,nJetTopmChannel,nJetZmChannel])
+bkgOnly.setBkgConstrainChannels(WZChannels+topChannels)
+
 
 #-------------------------------------------------
 # Signal regions - only do this if background only, add as validation regions! 
@@ -803,35 +860,44 @@ if doValidationDilepZ:
 if doValidationSoftLep:
     mmSVEl = bkgOnly.addValidationChannel("met/meff2Jet",["SVEl"],6,0.1,0.7)
     mmSVMu = bkgOnly.addValidationChannel("met/meff2Jet",["SVMu"],6,0.1,0.7)
-    mmSVWEl = bkgOnly.addValidationChannel("met/meff2Jet",["SVWEl"],6,0.1,0.7)
-    mmSVWMu = bkgOnly.addValidationChannel("met/meff2Jet",["SVWMu"],6,0.1,0.7)
-    mmSVTEl = bkgOnly.addValidationChannel("met/meff2Jet",["SVTEl"],6,0.1,0.7)
-    mmSVTMu = bkgOnly.addValidationChannel("met/meff2Jet",["SVTMu"],6,0.1,0.7)
-
-    bkgOnly.setValidationChannels([mmSVEl, mmSVMu, mmSVTEl, mmSVTMu, mmSVWEl, mmSVWMu])
+    softLepValChannels = [mmSVEl,mmSVMu]
+    if not useSoftLepCR:
+        mmSVWEl = bkgOnly.addValidationChannel("met/meff2Jet",["SVWEl"],6,0.1,0.7)
+        mmSVWMu = bkgOnly.addValidationChannel("met/meff2Jet",["SVWMu"],6,0.1,0.7)
+        mmSVTEl = bkgOnly.addValidationChannel("met/meff2Jet",["SVTEl"],6,0.1,0.7)
+        mmSVTMu = bkgOnly.addValidationChannel("met/meff2Jet",["SVTMu"],6,0.1,0.7)
+        softLepValChannels += [mmSVWEl,mmSVWMu,mmSVTEl,mmSVTMu]
+        
+    bkgOnly.setValidationChannels(softLepValChannels)
 
     validationSoftLepChannels = [mmSVEl, mmSVMu]
-    validationSoftLepBtagChannels =  [mmSVTEl, mmSVTMu]
-    validationSoftLepBvetoChannels =  [mmSVWEl, mmSVWMu]
-   
+    validationSoftLepBtagChannels =  []
+    validationSoftLepBvetoChannels =  []
+
+
     # add systematics
     for chan in validationSoftLepChannels:
         chan.useOverflowBin = True
         chan.removeWeight("bTagWeight3Jet")
 
-    # add systematics
-    for chan in validationSoftLepBtagChannels:
-        chan.hasBQCD = True
-        chan.useOverflowBin = True
-        for syst in btagChanSyst:
-            chan.addSystematic(syst)
+    if not useSoftLepCR:
 
-    # add systematics
-    for chan in validationSoftLepBvetoChannels:
-        chan.hasBQCD = False
-        chan.useOverflowBin = True
-        for syst in btagChanSyst:
-            chan.addSystematic(syst)
+        validationSoftLepBtagChannels =  [mmSVTEl, mmSVTMu]
+        validationSoftLepBvetoChannels =  [mmSVWEl, mmSVWMu]
+
+        # add systematics
+        for chan in validationSoftLepBtagChannels:
+            chan.hasBQCD = True
+            chan.useOverflowBin = True
+            for syst in btagChanSyst:
+                chan.addSystematic(syst)
+
+        # add systematics
+        for chan in validationSoftLepBvetoChannels:
+            chan.hasBQCD = False
+            chan.useOverflowBin = True
+            for syst in btagChanSyst:
+                chan.addSystematic(syst)
 
     for chan in validationSoftLepChannels+validationSoftLepBtagChannels+validationSoftLepBvetoChannels:
         if chan.name.find("El")>-1:
@@ -846,16 +912,12 @@ if doValidationSoftLep:
 
 if doExclusion_GMSB_combined or doExclusion_mSUGRA_dilepton_combined or doExclusion_GG_twostepCC_slepton or doExclusion_GG_onestepCC_combined:
 
+
     for sig in sigSamples:
         myTopLvl = configMgr.addTopLevelXMLClone(bkgOnly,"Sig_%s"%sig)
 
         sigSample = Sample(sig,kPink)
-
-        
         sigSample.setFileList(sigFiles)
-
-
-
         sigSample.setNormByTheory()
         sigSample.setNormFactor("mu_SIG",0.,0.,5.)
         sigSample.setStatConfig(useStat)
