@@ -28,21 +28,21 @@ def removeWeight(oldList,oldWeight):
     newList.remove(oldWeight)
     return newList
 
-onLxplus=False
+onLxplus=True
 doHardLep=True
 doSoftLep=False
 useStat=True
 fullSyst=True
 
 doValidationSRLoose=True
-doValidationSRTight=True
+doValidationSRTight=False
 doValidationSlope=False
 doValidationDilep=False
 doValidationDilepZ=False
 doValidationSoftLep=False
 
 doExclusion_GMSB_combined=False
-doExclusion_mSUGRA_dilepton_combined=True
+doExclusion_mSUGRA_dilepton_combined=False
 doExclusion_GG_onestepCC_combined=False
 doExclusion_GG_twostepCC_slepton=False
 blindS=False
@@ -51,7 +51,8 @@ doWptReweighting=False ## deprecated
 doSignalOnly=False #Remove all bkgs for signal histo creation step
 
 if not 'sigSamples' in dir():
-    sigSamples=["SU_580_240_0_10_P"]
+#    sigSamples=["SU_580_240_0_10_P"]
+    sigSamples=["SM_GG_onestepCC_445_245_45"]
 #    sigSamples=["GMSB_3_2d_50_250_3_10_1_1"]
 
 # First define HistFactory attributes
@@ -125,7 +126,7 @@ if doExclusion_GG_onestepCC_combined:
     if not onLxplus:
         sigFiles+=["data/SusyFitterTree_OneSoftMuo_SM_GG_onestepCC_v3.root","data/SusyFitterTree_OneSoftEle_SM_GG_onestepCC_v3.root"]
     else:
-        sigFiles+=[inputDirSig+"/SusyFitterTree_OneSoftMuo_SM_GG_onestepCC_v3.root",inputDirSig+"/SusyFitterTree_OneSoftMuo_SM_GG_onestepCC_v3.root"]
+        sigFiles+=[inputDirSig+"/SusyFitterTree_OneSoftMuo_SM_GG_onestepCC_v3.root",inputDirSig+"/SusyFitterTree_OneSoftEle_SM_GG_onestepCC_v3.root",inputDirSig+"/SusyFitterTree_p832_GGonestep_paper_v1.root"]
 
 # AnalysisType corresponds to ee,mumu,emu as I want to split these channels up
 
@@ -843,7 +844,7 @@ if doValidationSoftLep:
 # Exclusion fit
 #-------------------------------------------------
 
-if doExclusion_GMSB_combined or doExclusion_mSUGRA_dilepton_combined or doExclusion_GG_twostepCC_slepton:
+if doExclusion_GMSB_combined or doExclusion_mSUGRA_dilepton_combined or doExclusion_GG_twostepCC_slepton or doExclusion_GG_onestepCC_combined:
 
     for sig in sigSamples:
         myTopLvl = configMgr.addTopLevelXMLClone(bkgOnly,"Sig_%s"%sig)
@@ -872,6 +873,8 @@ if doExclusion_GMSB_combined or doExclusion_mSUGRA_dilepton_combined or doExclus
             #SRs=["S3El"]
         elif doExclusion_GG_twostepCC_slepton:
             SRs=["S4ee","S4em","S4mm"]
+        elif doExclusion_GG_onestepCC_combined:
+            SRs=["S3El","S3Mu","S4El","S4Mu"] # only hard lepton so far
 
         if doValidationSRLoose:
             for sr in SRs:
