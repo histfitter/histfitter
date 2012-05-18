@@ -30,7 +30,7 @@ def removeWeight(oldList,oldWeight):
 
 onLxplus=True
 useHardLepCR=True
-useSoftLepCR=True
+useSoftLepCR=False
 useDiLepCR=True
 useStat=True
 fullSyst=True
