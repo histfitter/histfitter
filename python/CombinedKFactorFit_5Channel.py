@@ -1,4 +1,4 @@
-################################################################
+ ################################################################
 ## In principle all you have to setup is defined in this file ##
 ################################################################
 
@@ -34,7 +34,7 @@ doSoftLep=False
 useStat=True
 fullSyst=True
 
-doValidationSRLoose=True
+doValidationSRLoose=False
 doValidationSRTight=False
 doValidationSlope=False
 doValidationDilep=False
@@ -44,7 +44,7 @@ doValidationSoftLep=False
 doExclusion_GMSB_combined=False
 doExclusion_mSUGRA_dilepton_combined=False
 doExclusion_GG_onestepCC_combined=False
-doExclusion_GG_twostepCC_slepton=False
+doExclusion_GG_twostepCC_slepton=True
 blindS=False
 useXsecUnc=True             # switch off when calucating excluded cross section (colour code in SM plots)
 doWptReweighting=False ## deprecated
@@ -124,9 +124,9 @@ if doExclusion_mSUGRA_dilepton_combined:
 
 if doExclusion_GG_onestepCC_combined:
     if not onLxplus:
-        sigFiles+=["data/SusyFitterTree_OneSoftMuo_SM_GG_onestepCC_v3.root","data/SusyFitterTree_OneSoftEle_SM_GG_onestepCC_v3.root"]
+        sigFiles_l+=["data/SusyFitterTree_OneSoftMuo_SM_GG_onestepCC_v3.root","data/SusyFitterTree_OneSoftEle_SM_GG_onestepCC_v3.root"]
     else:
-        sigFiles+=[inputDirSig+"/SusyFitterTree_OneSoftMuo_SM_GG_onestepCC_v3.root",inputDirSig+"/SusyFitterTree_OneSoftEle_SM_GG_onestepCC_v3.root",inputDirSig+"/SusyFitterTree_p832_GGonestep_paper_v1.root"]
+        sigFiles_l+=[inputDirSig+"/SusyFitterTree_OneSoftMuo_SM_GG_onestepCC_v3.root",inputDirSig+"/SusyFitterTree_OneSoftEle_SM_GG_onestepCC_v3.root",inputDirSig+"/SusyFitterTree_p832_GGonestep_paper_v1.root"]
 
 # AnalysisType corresponds to ee,mumu,emu as I want to split these channels up
 
@@ -850,7 +850,12 @@ if doExclusion_GMSB_combined or doExclusion_mSUGRA_dilepton_combined or doExclus
         myTopLvl = configMgr.addTopLevelXMLClone(bkgOnly,"Sig_%s"%sig)
 
         sigSample = Sample(sig,kPink)
+
+        
         sigSample.setFileList(sigFiles)
+
+
+
         sigSample.setNormByTheory()
         sigSample.setNormFactor("mu_SIG",0.,0.,5.)
         sigSample.setStatConfig(useStat)
