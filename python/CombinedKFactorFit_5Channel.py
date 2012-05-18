@@ -28,14 +28,14 @@ def removeWeight(oldList,oldWeight):
     newList.remove(oldWeight)
     return newList
 
-onLxplus=True
+onLxplus=False
 useHardLepCR=True
 useSoftLepCR=False
 useDiLepCR=True
 useStat=True
 fullSyst=True
 
-doValidationSRLoose=True
+doValidationSRLoose=False
 doValidationSRTight=False
 doValidationSlope=False
 doValidationDilep=False
@@ -45,11 +45,12 @@ doValidationSoftLep=False
 doExclusion_GMSB_combined=False
 doExclusion_mSUGRA_dilepton_combined=False
 doExclusion_GG_onestepCC_combined=False
-doExclusion_GG_twostepCC_slepton=False
+doExclusion_GG_twostepCC_slepton=True
 blindS=False
 useXsecUnc=True             # switch off when calucating excluded cross section (colour code in SM plots)
 doWptReweighting=False ## deprecated
-doSignalOnly=False #Remove all bkgs for signal histo creation step
+#doSignalOnly=False #Remove all bkgs for signal histo creation step
+doSignalOnly=True #Remove all bkgs for signal histo creation step
 
 if not 'sigSamples' in dir():
 #    sigSamples=["SU_580_240_0_10_P"]
@@ -128,6 +129,12 @@ if doExclusion_GG_onestepCC_combined:
         sigFiles_l+=["data/SusyFitterTree_OneSoftMuo_SM_GG_onestepCC_v3.root","data/SusyFitterTree_OneSoftEle_SM_GG_onestepCC_v3.root"]
     else:
         sigFiles_l+=[inputDirSig+"/SusyFitterTree_OneSoftMuo_SM_GG_onestepCC_v3.root",inputDirSig+"/SusyFitterTree_OneSoftEle_SM_GG_onestepCC_v3.root",inputDirSig+"/SusyFitterTree_p832_GGonestep_paper_v1.root"]
+
+if doExclusion_GG_twostepCC_slepton:
+    if not onLxplus:
+        sigFiles+=["data/SusyFitterTree_EleEle_SM_GG_twostepCC_slepton.root","data/SusyFitterTree_EleMu_SM_GG_twostepCC_slepton.root","data/SusyFitterTree_MuMu_SM_GG_twostepCC_slepton.root"]
+    else:
+        sigFiles+=[inputDirSig+"/SusyFitterTree_EleEle_SM_GG_twostepCC_slepton.root",inputDirSig+"/SusyFitterTree_EleMu_SM_GG_twostepCC_slepton.root",inputDirSig+"/SusyFitterTree_MuMu_SM_GG_twostepCC_slepton.root"]
 
 # AnalysisType corresponds to ee,mumu,emu as I want to split these channels up
 
@@ -921,9 +928,6 @@ if doExclusion_GMSB_combined or doExclusion_mSUGRA_dilepton_combined or doExclus
         sigSample.setNormByTheory()
         sigSample.setNormFactor("mu_SIG",0.,0.,5.)
         sigSample.setStatConfig(useStat)
-        myTopLvl.addSamples(sigSample)
-
-        #signal-specific uncertainties
         sigSample.addSystematic(jesSignal)
         if useXsecUnc:
             sigSample.addSystematic(xsecSig)
@@ -931,12 +935,17 @@ if doExclusion_GMSB_combined or doExclusion_mSUGRA_dilepton_combined or doExclus
             from SystematicsUtils import getISRSyst
             isrSyst = getISRSyst(sig)
             sigSample.addSystematic(isrSyst)
+
+        myTopLvl.addSamples(sigSample)
+
+        #signal-specific uncertainties
         
         SRs=["S3El","S3Mu","S4El","S4Mu","S2ee","S2em","S2mm","S4ee","S4em","S4mm"]
         if doExclusion_GMSB_combined:
             SRs=["S2ee","S2em","S2mm"]
         elif doExclusion_mSUGRA_dilepton_combined:
-            SRs=["S3El","S3Mu","S4El","S4Mu","S2ee","S2em","S2mm","S4ee","S4em","S4mm"]
+##            SRs=["S3El","S3Mu","S4El","S4Mu","S2ee","S2em","S2mm","S4ee","S4em","S4mm"]
+            SRs=["S2ee","S2em","S2mm","S4ee","S4em","S4mm"]
             #SRs=["S3El"]
         elif doExclusion_GG_twostepCC_slepton:
             SRs=["S4ee","S4em","S4mm"]
@@ -950,6 +959,10 @@ if doExclusion_GMSB_combined or doExclusion_mSUGRA_dilepton_combined or doExclus
                 iPop=myTopLvl.validationChannels.index(sr+"_meffInc")
                 myTopLvl.validationChannels.pop(iPop)
                 myTopLvl.setSignalChannels(ch)
+                ch.getSample(sig).removeSystematic("JHigh")
+                ch.getSample(sig).removeSystematic("JMedium")
+                ch.getSample(sig).removeSystematic("JLow")
+
         else:
             for sr in SRs:
                 if sr=="S3El" or sr=="S3Mu":
@@ -963,6 +976,7 @@ if doExclusion_GMSB_combined or doExclusion_mSUGRA_dilepton_combined or doExclus
                 else:
                     raise RuntimeError("Unexpected signal region %s"%sr)
                 ch.useOverflowBin=True
+
                 ch.removeWeight("bTagWeight3Jet")
 
                 if ch.name.find("El")>-1:
@@ -977,6 +991,11 @@ if doExclusion_GMSB_combined or doExclusion_mSUGRA_dilepton_combined or doExclus
                     ch.setFileList(bgdFiles_mm)
                                     
                 myTopLvl.setSignalChannels(ch)        
+                ch.getSample(sig).removeSystematic("JHigh")
+                ch.getSample(sig).removeSystematic("JMedium")
+                ch.getSample(sig).removeSystematic("JLow")
+        
+
 
         for (iChan,chan) in enumerate(myTopLvl.channels):
             if chan.name.find("El")>-1:
