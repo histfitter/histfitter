@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import sys
+import sys, commands
 import os, os.path
 import shutil
 
@@ -19,6 +19,8 @@ if __name__ == "__main__":
     from prepareHistos import TreePrepare,HistoPrepare
     configMgr.readFromTree = False
     configMgr.executeHistFactory=False
+    configMgr.calculatorType=0
+    configMgr.nTOYS=1000
     runInterpreter = False
     runFit = False
     printLimits = False
@@ -38,6 +40,7 @@ if __name__ == "__main__":
         print "-f fit the workspace (default: %s)"%(configMgr.executeHistFactory)
         print "-n <nTOYs> sets number of TOYs (<=0 means to use real data, default: %i)"%configMgr.nTOYs
         print "-s <number> set the random seed for toy generation (default is CPU clock: %i)" % configMgr.toySeed
+        print "-c <number> set the calculator type (0 = toys, 2 = asymptotic calculator)" 
         print "-a use Asimov dataset for fitting and plotting (default: %i)" % configMgr.useAsimovSet
         print "-i stays in interactive session after executing the script (default %s)"%runInterpreter
         print "-v verbose level (1: minimal, 2: print histogram names, 3: print XML files, default: %i)"%configMgr.verbose
@@ -53,7 +56,7 @@ if __name__ == "__main__":
         sys.exit(0)        
     
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "twfin:s:v:alpg:")
+        opts, args = getopt.getopt(sys.argv[1:], "twfin:c:s:v:alpg:")
     except:
         usage()
 
@@ -66,6 +69,8 @@ if __name__ == "__main__":
             runFit=True
         elif opt == '-n': 
             configMgr.nTOYs = int(arg)
+        elif opt == '-c': 
+            configMgr.calculatorType = int(arg)       
         elif opt == '-i':
             runInterpreter = True
         elif opt == '-v':
@@ -84,8 +89,17 @@ if __name__ == "__main__":
             sigSamples = arg.split(',')    
         pass
     gROOT.SetBatch(not runInterpreter)
+
+
+    if configMgr.calculatorType == 2:
+        configMgr.nTOYs = -1
+
     
-    print configMgr.nTOYs
+        
+    
+    print "------------------------ Now running hypo test :"
+    print "calculatorType : ", configMgr.calculatorType
+    print "nToys : ", configMgr.nTOYs
     
     ## outdir
     #outdir = 'test/'
@@ -93,20 +107,20 @@ if __name__ == "__main__":
     
 
     if doHypoTests:
-        outfileName="results/MyOneLeptonKtScaleFitR17_Output_hypotest.root"
-        outfile = TFile.Open("results/MyOneLeptonKtScaleFitR17_Output_hypotest.root","UPDATE");
+        outfileName="results/aleFitR17_Output_hypotest.root"
+        outfile = TFile.Open("results/"+sigSamples[0]+"_hypotest.root","UPDATE");
         if not outfile:
            print "ERROR TFile <"+ outfileName+"> could not be opened"
 	   #return
 
         #inFile = "results/MyOneLeptonKtScaleFitR17_Sig_"+sigSamples[0]+"_combined_NormalMeasurement_model.root"
-        inFile = TFile.Open("results/MyOneLeptonKtScaleFitR17_Sig_"+sigSamples[0]+"_combined_NormalMeasurement_model.root")
+        inFileName = commands.getstatusoutput("ls results/*"+sigSamples[0]+"*_model.root")[1]
+        inFile = TFile.Open(inFileName)
         if not inFile:
            print "ERROR TFile could not be opened"
            outfile.Close()
 	   #return
-  
-      
+        
         w = inFile.Get("combined")
         #Util.ReadWorkspace(inFile,"combined")
         #w=gDirectory.Get("w")	
@@ -131,7 +145,7 @@ if __name__ == "__main__":
            fitresult.Write()
            print ">>> Now storing RooFitResult <"+hypName+">"
    
-        hypo = RooStats.DoHypoTestInversion(w,1000,0,3)
+        hypo = RooStats.DoHypoTestInversion(w,configMgr.nTOYs,configMgr.calculatorType,3)
   
         if (hypo):     
            outfile.cd()
