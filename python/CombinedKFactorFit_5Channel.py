@@ -131,14 +131,15 @@ if doExclusion_mSUGRA_dilepton_combined:
     else:
         sigFiles+=[inputDirSig+"/SusyFitterTree_EleEle_mSUGRA.root",inputDirSig+"/SusyFitterTree_EleMu_mSUGRA.root",inputDirSig+"/SusyFitterTree_MuMu_mSUGRA.root"]
         sigFiles_l+=[inputDirSig+"/SusyFitterTree_p832_mSUGRA_paper_v1.root"]
-
-
+ 
 if doExclusion_GG_onestepCC_x12:
     if not onLxplus:
+        sigFiles+=["data/SusyFitterTree_EleEle_SM_GG_onestepCC.root","data/SusyFitterTree_MuMu_SM_GG_onestepCC.root","data/SusyFitterTree_EleMu_SM_GG_onestepCC.root"]
         sigFiles_l+=["data/SusyFitterTree_OneSoftMuo_SM_GG_onestepCC_v3.root","data/SusyFitterTree_OneSoftEle_SM_GG_onestepCC_v3.root"]
     else:
+        sigFiles+=[inputDirSig+"/SusyFitterTree_EleEle_SM_GG_onestepCC.root",inputDirSig+"/SusyFitterTree_MuMu_SM_GG_onestepCC.root",inputDirSig+"/SusyFitterTree_EleMu_SM_GG_onestepCC.root"]
         sigFiles_l+=[inputDirSig+"/SusyFitterTree_OneSoftMuo_SM_GG_onestepCC_v3.root",inputDirSig+"/SusyFitterTree_OneSoftEle_SM_GG_onestepCC_v3.root",inputDirSig+"/SusyFitterTree_p832_GGonestep_paper_v1.root"]
-
+        
 if doExclusion_GG_onestepCC_gridX:
     if not onLxplus:
         sigFiles_l+=["data/SusyFitterTree_OneSoftMuo_SM_GG_onestepCC_varyx_v3.root","data/SusyFitterTree_OneSoftEle_SM_GG_onestepCC_varyx_v3.root","data/SusyFitterTree_p832_GGonestepLSP60_paper_v1.root"]
@@ -1014,10 +1015,9 @@ if doExclusion_GMSB_combined or doExclusion_mSUGRA_dilepton_combined or doExclus
                 ch.getSample(sig).removeSystematic("JLow")
         
 
-
         for (iChan,chan) in enumerate(myTopLvl.channels):
             if chan.name.find("El")>-1:
-                chan.getSample(sig).setFileList(sigFiles_l)
+                chan.getSample(sig).setFileList(sigFiles_l)                
             elif chan.name.find("Mu")>-1:
                 chan.getSample(sig).setFileList(sigFiles_l)
             elif chan.name.find("ee")>-1:
@@ -1026,3 +1026,5 @@ if doExclusion_GMSB_combined or doExclusion_mSUGRA_dilepton_combined or doExclus
                 chan.getSample(sig).setFileList(sigFiles)
             elif chan.name.find("mm")>-1:
                 chan.getSample(sig).setFileList(sigFiles)
+
+                
