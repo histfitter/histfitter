@@ -24,10 +24,10 @@ ROOT.SetAtlasStyle()
 useStat=True
 doHardLep=False
 doSoftLep=True
-doValidation=False
+doValidation=True
 doDiscovery=False
 doDiscoveryTight=False
-doExclusion=True
+doExclusion=False
 fullSyst=False
 useISR=True
 useXsecUnc=True             # switch off when calucating excluded cross section (colour code in SM plots)
@@ -74,8 +74,8 @@ if configMgr.readFromTree:
         bgdFiles.append("samples/paper/SusyFitterTree_OneMu.root")
     #s1l
     if doSoftLep:
-        bgdFiles.append("samples/paper/SusyFitterTree_OneSoftEle_BG_v3.root")
-        bgdFiles.append("samples/paper/SusyFitterTree_OneSoftMuo_BG_v3.root")
+        bgdFiles.append("/afs/cern.ch/work/h/hyamaguc/public/samples/SusyFitterTree_OneSoftEle_BG_v5.root")
+        bgdFiles.append("/afs/cern.ch/work/h/hyamaguc/public/samples/SusyFitterTree_OneSoftMuo_BG_v5.root")
     if doHardLep and doExclusion:
         # mSUGRA
         sigFiles.append("samples/paper/SusyFitterTree_p832_mSUGRA_paper_v1.root")
@@ -478,7 +478,12 @@ if doSoftLep and not doHardLep:
     nJetWS.hasBQCD = False
     nJetWS.useOverflowBin = False
     nJetWS.addSystematic(jesSWR)
-    [s.mergeSamples([topSample.name,wzSample.name,bgSample.name]) for s in nJetWS.getSystematic(jesSWR.name)]
+    #print "bla:", nJetWS.getSystematic(jesSWR.name)
+    #for s in nJetWS.getSystematic(jesSWR.name):
+    #    print s
+    nJetWS.getSystematic(jesSWR.name).mergeSamples([topSample.name,wzSample.name,bgSample.name])
+
+    #[s.mergeSamples([topSample.name,wzSample.name,bgSample.name]) for s in nJetWS.getSystematic(jesSWR.name)]
     nJetWS.addSystematic(btagSWR)
     nJetWS.addSystematic(metcoSWR)
     nJetWS.addSystematic(metpuSWR)
@@ -498,7 +503,7 @@ if doSoftLep and not doHardLep:
     nJetTS.hasBQCD = True
     nJetTS.useOverflowBin = False    
     nJetTS.addSystematic(jesSTR)
-    [s.mergeSamples([topSample.name,wzSample.name,bgSample.name]) for s in nJetTS.getSystematic(jesSTR.name)]
+    nJetTS.getSystematic(jesSTR.name).mergeSamples([topSample.name,wzSample.name,bgSample.name])
     nJetTS.addSystematic(btagSTR)
     nJetTS.addSystematic(metcoSTR)
     nJetTS.addSystematic(metpuSTR)
@@ -668,7 +673,8 @@ if doValidation:
         # s1l2jT
         srs1l2jTChannel = bkt.addChannel("cuts",["SR1sl2j"],srNBins,srBinLow,srBinHigh)
         srs1l2jTChannel.addSystematic(jesSS2T)
-        [s.mergeSamples([topSample.name,wzSample.name,bgSample.name]) for s in srs1l2jTChannel.getSystematic(jesSS2T.name)]
+        #[s.mergeSamples([topSample.name,wzSample.name,bgSample.name]) for s in srs1l2jTChannel.getSystematic(jesSS2T.name)]
+        srs1l2jTChannel.getSystematic(jesSS2T.name).mergeSamples([topSample.name,wzSample.name,bgSample.name])
         [srs1l2jTChannel.getSample(sam).addSystematic(metcoSS2T) for sam in ["WZ","Top","BG"]]
         [srs1l2jTChannel.getSample(sam).addSystematic(metpuSS2T) for sam in ["WZ","Top","BG"]]
         srs1l2jTChannel.getSample("WZ").addSystematic(wzPtMin30SS2T)
@@ -684,7 +690,9 @@ if doValidation:
         # additional VRs if using soft lep CRs
         nJetSLVR2 = bkt.addChannel("nJet",["SLVR2"],nJetBinHighTR-nJetBinLowSoft,nJetBinLowSoft,nJetBinHighTR)
         nJetSLVR2.addSystematic(jesVR2SnJet)
-        [s.mergeSamples([topSample.name,wzSample.name,bgSample.name]) for s in nJetSLVR2.getSystematic(jesVR2SnJet.name)]
+        #[s.mergeSamples([topSample.name,wzSample.name,bgSample.name]) for s in nJetSLVR2.getSystematic(jesVR2SnJet.name)]
+        nJetSLVR2.getSystematic(jesVR2SnJet.name).mergeSamples([topSample.name,wzSample.name,bgSample.name])
+
         nJetSLVR2.addSystematic(metcoVR)
         nJetSLVR2.addSystematic(metpuVR)
         if fullSyst:
@@ -696,7 +704,9 @@ if doValidation:
 
         nBJetSLVR2 = bkt.addChannel("nBJet",["SLVR2"],nBJetBinHigh-nBJetBinLow,nBJetBinLow,nBJetBinHigh)
         nBJetSLVR2.addSystematic(jesVR2SnBJet)
-        [s.mergeSamples([topSample.name,wzSample.name,bgSample.name]) for s in nBJetSLVR2.getSystematic(jesVR2SnBJet.name)]
+        #[s.mergeSamples([topSample.name,wzSample.name,bgSample.name]) for s in nBJetSLVR2.getSystematic(jesVR2SnBJet.name)]
+        nBJetSLVR2.getSystematic(jesVR2SnBJet.name).mergeSamples([topSample.name,wzSample.name,bgSample.name])
+        
         nBJetSLVR2.addSystematic(metcoVR)
         nBJetSLVR2.addSystematic(metpuVR)
         if fullSyst:
@@ -708,7 +718,9 @@ if doValidation:
 
         meffSLVR2 = bkt.addChannel("meffInc",["SLVR2"],meffNBins,meffBinLow,meffBinHigh)
         meffSLVR2.addSystematic(jesVR2Smeff)
-        [s.mergeSamples([topSample.name,wzSample.name,bgSample.name]) for s in meffSLVR2.getSystematic(jesVR2Smeff.name)]
+        #[s.mergeSamples([topSample.name,wzSample.name,bgSample.name]) for s in meffSLVR2.getSystematic(jesVR2Smeff.name)]
+        meffSLVR2.getSystematic(jesVR2Smeff.name).mergeSamples([topSample.name,wzSample.name,bgSample.name])
+
         meffSLVR2.addSystematic(metcoVR)
         meffSLVR2.addSystematic(metpuVR)
         if fullSyst:
@@ -720,7 +732,9 @@ if doValidation:
 
         metmeffSLVR2 = bkt.addChannel("met/meff2Jet",["SLVR2"],6,0.1,0.7)
         metmeffSLVR2.addSystematic(jesVR2Smetmeff)
-        [s.mergeSamples([topSample.name,wzSample.name,bgSample.name]) for s in metmeffSLVR2.getSystematic(jesVR2Smetmeff.name)]
+        #[s.mergeSamples([topSample.name,wzSample.name,bgSample.name]) for s in metmeffSLVR2.getSystematic(jesVR2Smetmeff.name)]
+        metmeffSLVR2.getSystematic(jesVR2Smetmeff.name).mergeSamples([topSample.name,wzSample.name,bgSample.name])
+
         metmeffSLVR2.addSystematic(metcoVR)
         metmeffSLVR2.addSystematic(metpuVR)
         if fullSyst:
@@ -732,7 +746,9 @@ if doValidation:
 
         metSLVR2 = bkt.addChannel("met",["SLVR2"],7,180,250)
         metSLVR2.addSystematic(jesVR2Smet)
-        [s.mergeSamples([topSample.name,wzSample.name,bgSample.name]) for s in metSLVR2.getSystematic(jesVR2Smet.name)]
+        #[s.mergeSamples([topSample.name,wzSample.name,bgSample.name]) for s in metSLVR2.getSystematic(jesVR2Smet.name)]
+        metSLVR2.getSystematic(jesVR2Smet.name).mergeSamples([topSample.name,wzSample.name,bgSample.name])
+
         metSLVR2.addSystematic(metcoVR)
         metSLVR2.addSystematic(metpuVR)            
         if fullSyst:
@@ -746,7 +762,9 @@ if doValidation:
         mm2J = bkt.addChannel("met/meff2Jet",["SS"],6,0.1,0.7)
         mm2J.useOverflowBin=True
         mm2J.addSystematic(jesSS)
-        [s.mergeSamples([topSample.name,wzSample.name,bgSample.name]) for s in mm2J.getSystematic(jesSS.name)]
+        #[s.mergeSamples([topSample.name,wzSample.name,bgSample.name]) for s in mm2J.getSystematic(jesSS.name)]
+        mm2J.getSystematic(jesSS.name).mergeSamples([topSample.name,wzSample.name,bgSample.name])
+
         mm2J.addSystematic(metcoSS)
         mm2J.addSystematic(metpuSS)
         mm2J.getSample("WZ").addSystematic(wzPtMin30SS)
@@ -870,7 +888,8 @@ if doDiscovery or doDiscoveryTight:
             # s1l2jT
             srs1l2jTChannel = discovery.addChannel("cuts",["SR1sl2j"],srNBins,srBinLow,srBinHigh)
             srs1l2jTChannel.addSystematic(jesSS2T)
-            [s.mergeSamples([topSample.name,wzSample.name,bgSample.name]) for s in srs1l2jTChannel.getSystematic(jesSS2T.name)]
+            #[s.mergeSamples([topSample.name,wzSample.name,bgSample.name]) for s in srs1l2jTChannel.getSystematic(jesSS2T.name)]
+            srs1l2jTChannel.getSystematic(jesSS2T.name).mergeSamples([topSample.name,wzSample.name,bgSample.name])
             [srs1l2jTChannel.getSample(sam).addSystematic(metcoSS2T) for sam in ["WZ","Top","BG"]]
             [srs1l2jTChannel.getSample(sam).addSystematic(metpuSS2T) for sam in ["WZ","Top","BG"]]
             srs1l2jTChannel.getSample("WZ").addSystematic(wzPtMin30SS2T)
@@ -887,7 +906,9 @@ if doDiscovery or doDiscoveryTight:
             # s1l2jT
             ssChannel = discovery.addChannel("cuts",["SS"],srNBins,srBinLow,srBinHigh)
             ssChannel.addSystematic(jesSS)
-            [s.mergeSamples([topSample.name,wzSample.name,bgSample.name]) for s in ssChannel.getSystematic(jesSS.name)]
+            #[s.mergeSamples([topSample.name,wzSample.name,bgSample.name]) for s in ssChannel.getSystematic(jesSS.name)]
+            ssChannel.getSystematic(jesSS.name).mergeSamples([topSample.name,wzSample.name,bgSample.name])
+
             [ssChannel.getSample(sam).addSystematic(metcoSS) for sam in ["WZ","Top","BG"]]
             [ssChannel.getSample(sam).addSystematic(metpuSS) for sam in ["WZ","Top","BG"]]
             ssChannel.getSample("WZ").addSystematic(wzPtMin30SS)
