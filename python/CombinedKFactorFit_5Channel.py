@@ -34,10 +34,10 @@ useHardLepCR=True
 useSoftLepCR=False
 useDiLepCR=True
 useStat=True
-fullSyst=False
+fullSyst=True
 
 doValidationSRLoose=False
-doValidationSRTight=False
+doValidationSRTight=True
 doValidationSlope=False
 doValidationDilep=False
 doValidationDilepZ=False
@@ -795,7 +795,7 @@ if doValidationSRTight:
     meffS7T_El=bkgOnly.addValidationChannel("meffInc",["SR7jTEl"],1,750,meffBinHighHL)
     meffS7T_El.setFileList(bgdFiles_e)
     meffS7T_Mu=bkgOnly.addValidationChannel("meffInc",["SR7jTMu"],1,750,meffBinHighHL)
-    meffS7T_El.setFileList(bgdFiles_m)
+    meffS7T_Mu.setFileList(bgdFiles_m)
     # SOFT LEPTON SRS
     mmSSElT = bkgOnly.addValidationChannel("met/meff2Jet",["SSElT"],4,0.3,0.7)
     mmSSElT.setFileList(bgdFiles_e)
