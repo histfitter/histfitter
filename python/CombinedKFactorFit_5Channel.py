@@ -875,12 +875,14 @@ if doValidationDilepZ:
     for chan in validation2LepChannels:
         chan.hasBQCD = True
         chan.useOverflowBin = True
-        if chan.name.find("_ee")>-1:
+        if chan.name.endswith("ee")>-1:
             chan.setFileList(bgdFiles_ee)
-        elif chan.name.find("_em")>-1:
+        elif chan.name.endswith("em")>-1:
             chan.setFileList(bgdFiles_em)
-        else:
+        elif chan.name.endswith("mm"):
             chan.setFileList(bgdFiles_mm)
+        else:
+            raise RuntimeError("Unexpected channel name: %s"%(chan.name))
     
 
 if doValidationSoftLep:

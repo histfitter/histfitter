@@ -753,7 +753,7 @@ class ChannelXML(object):
         self.weights = deepcopy(weights)
 
         for s in self.sampleList:
-            if not sample.isData and not sample.isQCD and not sample.isDiscovery:
+            if not s.isData and not s.isQCD and not s.isDiscovery:
                 s.setWeights(weights)
 
         return
@@ -768,7 +768,7 @@ class ChannelXML(object):
             raise RuntimeError("Weight %s already defined in channel %s" % (weight,self.name))
 
         for s in self.sampleList:
-            if not sample.isData and not sample.isQCD and not sample.isDiscovery:
+            if not s.isData and not s.isQCD and not s.isDiscovery:
                 if not weight in s.weights:
                     s.addWeight(weight)
 
