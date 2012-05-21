@@ -115,8 +115,8 @@ if configMgr.readFromTree:
         bgdFiles_mm = [inputDir+"/SusyFitterTree_MuMu.root"]
         bgdFiles_e = [inputDir+"/SusyFitterTree_OneEle.root"]
         bgdFiles_m = [inputDir+"/SusyFitterTree_OneMu.root"]
-        bgdFiles_se = ["/afs/cern.ch/work/h/hyamaguc/public/samples/SusyFitterTree_OneSoftEle_BG_v5.root"]
-        bgdFiles_sm = ["/afs/cern.ch/work/h/hyamaguc/public/samples/SusyFitterTree_OneSoftMuo_BG_v5.root"]
+        bgdFiles_se = ["/afs/cern.ch/atlas/groups/susy/1lepton/samples/PaperSamples/SusyFitterTree_OneSoftEle_BG_v3_Zpt.root"]
+        bgdFiles_sm = ["/afs/cern.ch/atlas/groups/susy/1lepton/samples/PaperSamples/SusyFitterTree_OneSoftMuo_BG_v3_Zpt.root"]
   
 if doExclusion_GMSB_combined:
     if not onLxplus:
@@ -224,20 +224,20 @@ configMgr.cutsDict["SR4jTMu"]="AnalysisType==2 && met>250 && mt>100 && met/meff4
 configMgr.cutsDict["SR7jTEl"]="AnalysisType==1 && met>180 && mt>120 && jet1Pt>80 && jet7Pt>25 && meffInc>750"
 configMgr.cutsDict["SR7jTMu"]="AnalysisType==2 && met>180 && mt>120 && jet1Pt>80 && jet7Pt>25 && meffInc>750"
 
-configMgr.cutsDict["SVEl"]="(lep1Pt<25 && lep2Pt<10 && met>180 && met<250 && mt>80 && mt<100 && jet1Pt>130 && jet2Pt>25 && AnalysisType==6)"
-configMgr.cutsDict["SVMu"]="(lep1Pt<20 && lep2Pt<10 && met>180 && met<250 && mt>80 && mt<100 && jet1Pt>130 && jet2Pt>25 && AnalysisType==7)"
+configMgr.cutsDict["SVEl"]="(lep1Pt<25 && lep2Pt<10 && met>180 && met<250 && mt>80 && mt<100 && jet1Pt>130 && jet3Pt>25 && AnalysisType==6)"
+configMgr.cutsDict["SVMu"]="(lep1Pt<20 && lep2Pt<10 && met>180 && met<250 && mt>80 && mt<100 && jet1Pt>130 && jet3Pt>25 && AnalysisType==7)"
 
-configMgr.cutsDict["SVWEl"]="lep1Pt<25 && lep2Pt<10 && met>180 && met<250 && mt>40 && mt<80 && nB3Jet==0 && jet1Pt>130 && jet2Pt>25 && AnalysisType==6"
-configMgr.cutsDict["SVTEl"]="lep1Pt<25 && lep2Pt<10 && met>180 && met<250 && mt>40 && mt<80 && nB3Jet>0 && jet1Pt>130 && jet2Pt>25 && AnalysisType==6"
-configMgr.cutsDict["SVWMu"]="lep1Pt<20 && lep2Pt<10 && met>180 && met<250 && mt>40 && mt<80 && nB3Jet==0 && jet1Pt>130 && jet2Pt>25 && AnalysisType==7"
-configMgr.cutsDict["SVTMu"]="lep1Pt<20 && lep2Pt<10 && met>180 && met<250 && mt>40 && mt<80 && nB3Jet>0 && jet1Pt>130 && jet2Pt>25 && AnalysisType==7"
+configMgr.cutsDict["SVWEl"]="lep1Pt<25 && lep2Pt<10 && met>180 && met<250 && mt>40 && mt<80 && nB3Jet==0 && jet1Pt>130 && jet3Pt>25 && AnalysisType==6"
+configMgr.cutsDict["SVTEl"]="lep1Pt<25 && lep2Pt<10 && met>180 && met<250 && mt>40 && mt<80 && nB3Jet>0 && jet1Pt>130 && jet3Pt>25 && AnalysisType==6"
+configMgr.cutsDict["SVWMu"]="lep1Pt<20 && lep2Pt<10 && met>180 && met<250 && mt>40 && mt<80 && nB3Jet==0 && jet1Pt>130 && jet3Pt>25 && AnalysisType==7"
+configMgr.cutsDict["SVTMu"]="lep1Pt<20 && lep2Pt<10 && met>180 && met<250 && mt>40 && mt<80 && nB3Jet>0 && jet1Pt>130 && jet3Pt>25 && AnalysisType==7"
 
-configMgr.cutsDict["SSEl"]="lep1Pt < 25 && lep2Pt<10 && met>250 && mt>100 && jet1Pt>130 && jet2Pt>25 && AnalysisType==6"
-configMgr.cutsDict["SSMu"]="lep1Pt < 20 && lep2Pt<10 && met>250 && mt>100 && jet1Pt>130 && jet2Pt>25 && AnalysisType==7"
+configMgr.cutsDict["SSEl"]="lep1Pt < 25 && lep2Pt<10 && met>250 && mt>100 && jet1Pt>130 && jet3Pt>25 && AnalysisType==6"
+configMgr.cutsDict["SSMu"]="lep1Pt < 20 && lep2Pt<10 && met>250 && mt>100 && jet1Pt>130 && jet3Pt>25 && AnalysisType==7"
 
 d=configMgr.cutsDict
-configMgr.cutsDict["SSElT"] = d["SSEl"]+"&& met/meff2Jet>0.3"
-configMgr.cutsDict["SSMuT"] = d["SSMu"]+"&& met/meff2Jet>0.3"
+configMgr.cutsDict["SSElT"] = d["SSEl"]+"&& met/meff3Jet>0.3"
+configMgr.cutsDict["SSMuT"] = d["SSMu"]+"&& met/meff3Jet>0.3"
 #To allow 1-bin and multi-bins channels based on same cuts
 configMgr.cutsDict["S2eeT"] = d["S2ee"] 
 configMgr.cutsDict["S2emT"] = d["S2em"] 
@@ -541,10 +541,10 @@ if useHardLepCR:
 
 if useSoftLepCR:
     #  single soft ele
-    nJetTopseChannel=bkgOnly.addChannel("nJet",["SVTEl"],nJetTopeNBins,nJetTopeBinLow,nJetTopeBinHigh)
+    nJetTopseChannel=bkgOnly.addChannel("nJet",["SVTEl"],nJetTopeNBins-3,nJetTopeBinLow,nJetTopeBinHigh-3)
     nJetTopseChannel.setFileList(bgdFiles_se)
     # soft single mu
-    nJetTopsmChannel=bkgOnly.addChannel("nJet",["SVTMu"],nJetTopmNBins,nJetTopmBinLow,nJetTopmBinHigh)
+    nJetTopsmChannel=bkgOnly.addChannel("nJet",["SVTMu"],nJetTopmNBins-3,nJetTopmBinLow,nJetTopmBinHigh-3)
     nJetTopsmChannel.setFileList(bgdFiles_sm)
 
     topChannels += [nJetTopseChannel,nJetTopsmChannel]
@@ -595,13 +595,13 @@ if useHardLepCR:
 
 if useSoftLepCR:    
     # single soft mu
-    nJetZsmChannel=bkgOnly.addChannel("nJet",nJetZsmRegions,nJetZmNBins,nJetZmBinLow,nJetZmBinHigh)
+    nJetZsmChannel=bkgOnly.addChannel("nJet",nJetZsmRegions,nJetZmNBins-3,nJetZmBinLow,nJetZmBinHigh-3)
     nJetZsmChannel.setFileList(bgdFiles_sm)
     nJetZsmChannel.hasB = True
     nJetZsmChannel.hasBQCD = False
     [nJetZsmChannel.addSystematic(syst) for syst in btagChanSyst]
     # single soft ele
-    nJetZseChannel=bkgOnly.addChannel("nJet",nJetZseRegions,nJetZeNBins,nJetZeBinLow,nJetZeBinHigh)
+    nJetZseChannel=bkgOnly.addChannel("nJet",nJetZseRegions,nJetZeNBins-3,nJetZeBinLow,nJetZeBinHigh-3)
     nJetZseChannel.setFileList(bgdFiles_se)
     nJetZseChannel.hasB = True
     nJetZseChannel.hasBQCD = False
