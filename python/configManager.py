@@ -329,7 +329,8 @@ class ConfigManager(object):
         print "nTOYs: %i"%self.nTOYs
         print "doHypoTest: %s"%self.doHypoTest
         print "Systematics: %s"%self.systDict.keys()
-        print "Cuts Dictionnary: %s"%self.cutsDict
+        if verbose > 1:
+            print "Cuts Dictionnary: %s"%self.cutsDict
         print "readFromTree: %s"%self.readFromTree
         print "plotHistos: %s"%self.plotHistos
         print "executeHistFactory: %s"%self.executeHistFactory
