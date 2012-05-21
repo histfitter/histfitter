@@ -45,7 +45,7 @@ doValidationSoftLep=False
 
 doExclusion_GMSB_combined=False
 doExclusion_mSUGRA_dilepton_combined=False
-doExclusion_GG_onestepCC_x12=True
+doExclusion_GG_onestepCC_x12=False
 doExclusion_GG_onestepCC_gridX=False
 doExclusion_GG_twostepCC_slepton=False
 blindS=False
@@ -792,15 +792,16 @@ if doValidationSRTight:
     meffS4T_El.setFileList(bgdFiles_e)
     meffS4T_Mu=bkgOnly.addValidationChannel("meffInc",["SR4jTMu"],1,800,meffBinHighHL)
     meffS4T_Mu.setFileList(bgdFiles_m)
+    # MULTIJETS SRS
     meffS7T_El=bkgOnly.addValidationChannel("meffInc",["SR7jTEl"],1,750,meffBinHighHL)
     meffS7T_El.setFileList(bgdFiles_e)
     meffS7T_Mu=bkgOnly.addValidationChannel("meffInc",["SR7jTMu"],1,750,meffBinHighHL)
     meffS7T_Mu.setFileList(bgdFiles_m)
     # SOFT LEPTON SRS
-    mmSSElT = bkgOnly.addValidationChannel("met/meff2Jet",["SSElT"],4,0.3,0.7)
-    mmSSElT.setFileList(bgdFiles_e)
-    mmSSMuT = bkgOnly.addValidationChannel("met/meff2Jet",["SSMuT"],4,0.3,0.7)
-    mmSSMuT.setFileList(bgdFiles_m)
+    mmSSElT = bkgOnly.addValidationChannel("met/meff2Jet",["SSElT"],1,0.3,0.7)
+    mmSSElT.setFileList(bgdFiles_se)
+    mmSSMuT = bkgOnly.addValidationChannel("met/meff2Jet",["SSMuT"],1,0.3,0.7)
+    mmSSMuT.setFileList(bgdFiles_sm)
 
     validationSRChannels = [meff2ee, meff4ee, meff2em, meff4em, meff2mm, meff4mm, meffS3T_El, meffS3T_Mu, meffS4T_El, meffS4T_Mu, mmSSElT, mmSSMuT,meffS7T_El,meffS7T_Mu]                                                    
     for chan in validationSRChannels:
@@ -836,12 +837,14 @@ if doValidationDilep:
     for chan in validation2LepChannels:
         chan.useOverflowBin = True
         chan.removeWeight("bTagWeight3Jet")
-        if chan.name.find("_ee")>-1:
+        if chan.name.endswith("ee"):
             chan.setFileList(bgdFiles_ee)
-        elif chan.name.find("_em")>-1:
+        elif chan.name.endswith("em"):
             chan.setFileList(bgdFiles_em)
-        else:
+        elif chan.name.endswith("mm"):
             chan.setFileList(bgdFiles_mm)
+        else:
+            raise RuntimeError("Unexpected channel name: %s"%(chan.name))
 
     
 if doValidationDilepZ:
