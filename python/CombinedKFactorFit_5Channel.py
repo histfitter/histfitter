@@ -142,8 +142,10 @@ if doExclusion_GG_onestepCC_x12:
         
 if doExclusion_GG_onestepCC_gridX:
     if not onLxplus:
+        sigFiles+=["data/SusyFitterTree_EleEle_SM_GG_onestepCC.root","data/SusyFitterTree_MuMu_SM_GG_onestepCC.root","data/SusyFitterTree_EleMu_SM_GG_onestepCC.root"]
         sigFiles_l+=["data/SusyFitterTree_OneSoftMuo_SM_GG_onestepCC_varyx_v3.root","data/SusyFitterTree_OneSoftEle_SM_GG_onestepCC_varyx_v3.root","data/SusyFitterTree_p832_GGonestepLSP60_paper_v1.root"]
     else:
+        sigFiles+=[inputDirSig+"/SusyFitterTree_EleEle_SM_GG_onestepCC.root",inputDirSig+"/SusyFitterTree_MuMu_SM_GG_onestepCC.root",inputDirSig+"/SusyFitterTree_EleMu_SM_GG_onestepCC.root"]
         sigFiles_l+=[inputDirSig+"/SusyFitterTree_OneSoftMuo_SM_GG_onestepCC_varyx_v3.root",inputDirSig+"/SusyFitterTree_OneSoftEle_SM_GG_onestepCC_varyx_v3.root",inputDirSig+"/SusyFitterTree_p832_GGonestepLSP60_paper_v1.root"]
 
 if doExclusion_GG_twostepCC_slepton:
