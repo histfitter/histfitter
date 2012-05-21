@@ -29,7 +29,7 @@ def removeWeight(oldList,oldWeight):
     newList.remove(oldWeight)
     return newList
 
-onLxplus='lx' in commands.getstatusoutput("hostname")[1]
+onLxplus='lx' in commands.getstatusoutput("hostname")[1] or 'vm' in commands.getstatusoutput("hostname")[1]
 useHardLepCR=True
 useSoftLepCR=False
 useDiLepCR=True
