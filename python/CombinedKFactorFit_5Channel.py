@@ -31,7 +31,7 @@ def removeWeight(oldList,oldWeight):
 
 onLxplus='lx' in commands.getstatusoutput("hostname")[1] or 'vm' in commands.getstatusoutput("hostname")[1]
 useHardLepCR=True
-useSoftLepCR=False
+useSoftLepCR=True
 useDiLepCR=True
 useStat=True
 fullSyst=True
@@ -760,9 +760,9 @@ if doValidationSRLoose:
     meffS4_Mu=bkgOnly.addValidationChannel("meffInc",["S4Mu"],meffNBinsHL,meffBinLowHL,meffBinHighHL)
     meffS4_Mu.setFileList(bgdFiles_m)
     # SOFT LEPTON SRS
-    mmSSEl = bkgOnly.addValidationChannel("met/meff2Jet",["SSEl"],6,0.1,0.7)
+    mmSSEl = bkgOnly.addValidationChannel("met/meff3Jet",["SSEl"],6,0.1,0.7)
     mmSSEl.setFileList(bgdFiles_se)
-    mmSSMu = bkgOnly.addValidationChannel("met/meff2Jet",["SSMu"],6,0.1,0.7)
+    mmSSMu = bkgOnly.addValidationChannel("met/meff3Jet",["SSMu"],6,0.1,0.7)
     mmSSMu.setFileList(bgdFiles_sm)
 
     validationSRChannels = [meff2ee, meff4ee, meff2em, meff4em, meff2mm, meff4mm, meffS3_El, meffS3_Mu, meffS4_El, meffS4_Mu, mmSSEl, mmSSMu]
@@ -800,9 +800,9 @@ if doValidationSRTight:
     meffS7T_Mu=bkgOnly.addValidationChannel("meffInc",["SR7jTMu"],1,750,meffBinHighHL)
     meffS7T_Mu.setFileList(bgdFiles_m)
     # SOFT LEPTON SRS
-    mmSSElT = bkgOnly.addValidationChannel("met/meff2Jet",["SSElT"],1,0.3,0.7)
+    mmSSElT = bkgOnly.addValidationChannel("met/meff3Jet",["SSElT"],1,0.3,0.7)
     mmSSElT.setFileList(bgdFiles_se)
-    mmSSMuT = bkgOnly.addValidationChannel("met/meff2Jet",["SSMuT"],1,0.3,0.7)
+    mmSSMuT = bkgOnly.addValidationChannel("met/meff3Jet",["SSMuT"],1,0.3,0.7)
     mmSSMuT.setFileList(bgdFiles_sm)
 
     validationSRChannels = [meff2ee, meff4ee, meff2em, meff4em, meff2mm, meff4mm, meffS3T_El, meffS3T_Mu, meffS4T_El, meffS4T_Mu, mmSSElT, mmSSMuT,meffS7T_El,meffS7T_Mu]                                                    
@@ -888,14 +888,14 @@ if doValidationDilepZ:
     
 
 if doValidationSoftLep:
-    mmSVEl = bkgOnly.addValidationChannel("met/meff2Jet",["SVEl"],6,0.1,0.7)
-    mmSVMu = bkgOnly.addValidationChannel("met/meff2Jet",["SVMu"],6,0.1,0.7)
+    mmSVEl = bkgOnly.addValidationChannel("met/meff3Jet",["SVEl"],6,0.1,0.7)
+    mmSVMu = bkgOnly.addValidationChannel("met/meff3Jet",["SVMu"],6,0.1,0.7)
     softLepValChannels = [mmSVEl,mmSVMu]
     if not useSoftLepCR:
-        mmSVWEl = bkgOnly.addValidationChannel("met/meff2Jet",["SVWEl"],6,0.1,0.7)
-        mmSVWMu = bkgOnly.addValidationChannel("met/meff2Jet",["SVWMu"],6,0.1,0.7)
-        mmSVTEl = bkgOnly.addValidationChannel("met/meff2Jet",["SVTEl"],6,0.1,0.7)
-        mmSVTMu = bkgOnly.addValidationChannel("met/meff2Jet",["SVTMu"],6,0.1,0.7)
+        mmSVWEl = bkgOnly.addValidationChannel("met/meff3Jet",["SVWEl"],6,0.1,0.7)
+        mmSVWMu = bkgOnly.addValidationChannel("met/meff3Jet",["SVWMu"],6,0.1,0.7)
+        mmSVTEl = bkgOnly.addValidationChannel("met/meff3Jet",["SVTEl"],6,0.1,0.7)
+        mmSVTMu = bkgOnly.addValidationChannel("met/meff3Jet",["SVTMu"],6,0.1,0.7)
         softLepValChannels += [mmSVWEl,mmSVWMu,mmSVTEl,mmSVTMu]
         
     bkgOnly.setValidationChannels(softLepValChannels)
