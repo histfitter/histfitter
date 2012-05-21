@@ -31,7 +31,7 @@ def removeWeight(oldList,oldWeight):
 
 onLxplus='lx' in commands.getstatusoutput("hostname")[1] or 'vm' in commands.getstatusoutput("hostname")[1]
 useHardLepCR=True
-useSoftLepCR=True
+useSoftLepCR=False
 useDiLepCR=True
 useStat=True
 fullSyst=True
@@ -874,12 +874,12 @@ if doValidationDilepZ:
                               meffZVR4_ee, meffZVR4_em, meffZVR4_mm, nJetZVR4_ee, nJetZVR4_em, nJetZVR4_mm]
     
     # add systematics
-    for chan in validation2LepChannels:
-        chan.hasBQCD = True
+    for chan in validation2LepZChannels:
+        chan.hasBQCD = False
         chan.useOverflowBin = True
-        if chan.name.endswith("ee")>-1:
+        if chan.name.endswith("ee"):
             chan.setFileList(bgdFiles_ee)
-        elif chan.name.endswith("em")>-1:
+        elif chan.name.endswith("em"):
             chan.setFileList(bgdFiles_em)
         elif chan.name.endswith("mm"):
             chan.setFileList(bgdFiles_mm)
