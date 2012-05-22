@@ -31,7 +31,7 @@ def removeWeight(oldList,oldWeight):
 
 onLxplus='lx' in commands.getstatusoutput("hostname")[1] or 'vm' in commands.getstatusoutput("hostname")[1]
 useHardLepCR=True
-useSoftLepCR=False
+useSoftLepCR=True
 useDiLepCR=True
 useStat=True
 fullSyst=False
@@ -234,20 +234,20 @@ configMgr.cutsDict["SR4jTMu"]="AnalysisType==2 && met>250 && mt>100 && met/meff4
 configMgr.cutsDict["SR7jTEl"]="AnalysisType==1 && met>180 && mt>120 && jet1Pt>80 && jet7Pt>25 && meffInc>750"
 configMgr.cutsDict["SR7jTMu"]="AnalysisType==2 && met>180 && mt>120 && jet1Pt>80 && jet7Pt>25 && meffInc>750"
 
-configMgr.cutsDict["SVEl"]="(lep1Pt<25 && lep2Pt<10 && met>180 && met<250 && mt>80 && mt<100 && jet1Pt>130 && jet3Pt>25 && AnalysisType==6)"
-configMgr.cutsDict["SVMu"]="(lep1Pt<20 && lep2Pt<10 && met>180 && met<250 && mt>80 && mt<100 && jet1Pt>130 && jet3Pt>25 && AnalysisType==7)"
+configMgr.cutsDict["SVEl"]="(lep1Pt<25 && lep2Pt<10 && met>180 && met<250 && mt>80 && mt<100 && jet1Pt>130 && jet2Pt>25 && AnalysisType==6)"
+configMgr.cutsDict["SVMu"]="(lep1Pt<20 && lep2Pt<10 && met>180 && met<250 && mt>80 && mt<100 && jet1Pt>130 && jet2Pt>25 && AnalysisType==7)"
 
-configMgr.cutsDict["SVWEl"]="lep1Pt<25 && lep2Pt<10 && met>180 && met<250 && mt>40 && mt<80 && nB3Jet==0 && jet1Pt>130 && jet3Pt>25 && AnalysisType==6"
-configMgr.cutsDict["SVTEl"]="lep1Pt<25 && lep2Pt<10 && met>180 && met<250 && mt>40 && mt<80 && nB3Jet>0 && jet1Pt>130 && jet3Pt>25 && AnalysisType==6"
-configMgr.cutsDict["SVWMu"]="lep1Pt<20 && lep2Pt<10 && met>180 && met<250 && mt>40 && mt<80 && nB3Jet==0 && jet1Pt>130 && jet3Pt>25 && AnalysisType==7"
-configMgr.cutsDict["SVTMu"]="lep1Pt<20 && lep2Pt<10 && met>180 && met<250 && mt>40 && mt<80 && nB3Jet>0 && jet1Pt>130 && jet3Pt>25 && AnalysisType==7"
+configMgr.cutsDict["SVWEl"]="lep1Pt<25 && lep2Pt<10 && met>180 && met<250 && mt>40 && mt<80 && nB3Jet==0 && jet1Pt>130 && jet2Pt>25 && AnalysisType==6"
+configMgr.cutsDict["SVTEl"]="lep1Pt<25 && lep2Pt<10 && met>180 && met<250 && mt>40 && mt<80 && nB3Jet>0 && jet1Pt>130 && jet2Pt>25 && AnalysisType==6"
+configMgr.cutsDict["SVWMu"]="lep1Pt<20 && lep2Pt<10 && met>180 && met<250 && mt>40 && mt<80 && nB3Jet==0 && jet1Pt>130 && jet2Pt>25 && AnalysisType==7"
+configMgr.cutsDict["SVTMu"]="lep1Pt<20 && lep2Pt<10 && met>180 && met<250 && mt>40 && mt<80 && nB3Jet>0 && jet1Pt>130 && jet2Pt>25 && AnalysisType==7"
 
-configMgr.cutsDict["SSEl"]="lep1Pt < 25 && lep2Pt<10 && met>250 && mt>100 && jet1Pt>130 && jet3Pt>25 && AnalysisType==6"
-configMgr.cutsDict["SSMu"]="lep1Pt < 20 && lep2Pt<10 && met>250 && mt>100 && jet1Pt>130 && jet3Pt>25 && AnalysisType==7"
+configMgr.cutsDict["SSEl"]="lep1Pt < 25 && lep2Pt<10 && met>250 && mt>100 && jet1Pt>130 && jet2Pt>25 && AnalysisType==6"
+configMgr.cutsDict["SSMu"]="lep1Pt < 20 && lep2Pt<10 && met>250 && mt>100 && jet1Pt>130 && jet2Pt>25 && AnalysisType==7"
 
 d=configMgr.cutsDict
-configMgr.cutsDict["SSElT"] = d["SSEl"]+"&& met/meff3Jet>0.3"
-configMgr.cutsDict["SSMuT"] = d["SSMu"]+"&& met/meff3Jet>0.3"
+configMgr.cutsDict["SSElT"] = d["SSEl"]+"&& met/meff2Jet>0.3"
+configMgr.cutsDict["SSMuT"] = d["SSMu"]+"&& met/meff2Jet>0.3"
 #To allow 1-bin and multi-bins channels based on same cuts
 configMgr.cutsDict["S2eeT"] = d["S2ee"] 
 configMgr.cutsDict["S2emT"] = d["S2em"] 
@@ -437,6 +437,12 @@ nJetTopeNBins = 8
 nJetTopeBinLow = 3
 nJetTopeBinHigh = 10
 
+nJetTopseNBins = 9
+nJetTopseBinLow = 2
+nJetTopseBinHigh = 10
+
+
+
 nJetTopemNBins = 8
 nJetTopemBinLow = 2
 nJetTopemBinHigh = 10
@@ -448,6 +454,10 @@ nJetTopmmBinHigh = 10
 nJetTopmNBins = 8
 nJetTopmBinLow = 3
 nJetTopmBinHigh = 10
+
+nJetTopsmNBins = 9
+nJetTopsmBinLow = 2
+nJetTopsmBinHigh = 10
 
 # nJet Binning for W Control region
 nJetZmmRegions = ["ZRmm"]
@@ -461,8 +471,8 @@ nJetZmBinLow = 3
 nJetZmBinHigh = 10
 
 nJetZsmRegions = ["SVWMu"]
-nJetZsmNBins = 8
-nJetZsmBinLow = 3
+nJetZsmNBins = 9
+nJetZsmBinLow = 2
 nJetZsmBinHigh = 10
 
 nJetZeeRegions = ["ZRee"]
@@ -476,8 +486,8 @@ nJetZeBinLow = 3
 nJetZeBinHigh = 10
 
 nJetZseRegions = ["SVWEl"]
-nJetZseNBins = 8
-nJetZseBinLow = 3
+nJetZseNBins = 9
+nJetZseBinLow = 2
 nJetZseBinHigh = 10
 
 ZptZmmRegions = ["ZRmm"]
@@ -554,10 +564,10 @@ if useHardLepCR:
 
 if useSoftLepCR:
     #  single soft ele
-    nJetTopseChannel=bkgOnly.addChannel("nJet",["SVTEl"],nJetTopeNBins,nJetTopeBinLow,nJetTopeBinHigh)
+    nJetTopseChannel=bkgOnly.addChannel("nJet",["SVTEl"],nJetTopseNBins,nJetTopseBinLow,nJetTopseBinHigh)
     nJetTopseChannel.setFileList(bgdFiles_se)
     # soft single mu
-    nJetTopsmChannel=bkgOnly.addChannel("nJet",["SVTMu"],nJetTopmNBins,nJetTopmBinLow,nJetTopmBinHigh)
+    nJetTopsmChannel=bkgOnly.addChannel("nJet",["SVTMu"],nJetTopsmNBins,nJetTopsmBinLow,nJetTopsmBinHigh)
     nJetTopsmChannel.setFileList(bgdFiles_sm)
 
     topChannels += [nJetTopseChannel,nJetTopsmChannel]
@@ -608,13 +618,13 @@ if useHardLepCR:
 
 if useSoftLepCR:    
     # single soft mu
-    nJetZsmChannel=bkgOnly.addChannel("nJet",nJetZsmRegions,nJetZmNBins-3,nJetZmBinLow,nJetZmBinHigh-3)
+    nJetZsmChannel=bkgOnly.addChannel("nJet",nJetZsmRegions,nJetZsmNBins,nJetZsmBinLow,nJetZsmBinHigh)
     nJetZsmChannel.setFileList(bgdFiles_sm)
     nJetZsmChannel.hasB = True
     nJetZsmChannel.hasBQCD = False
     [nJetZsmChannel.addSystematic(syst) for syst in btagChanSyst]
     # single soft ele
-    nJetZseChannel=bkgOnly.addChannel("nJet",nJetZseRegions,nJetZeNBins-3,nJetZeBinLow,nJetZeBinHigh-3)
+    nJetZseChannel=bkgOnly.addChannel("nJet",nJetZseRegions,nJetZseNBins,nJetZseBinLow,nJetZseBinHigh)
     nJetZseChannel.setFileList(bgdFiles_se)
     nJetZseChannel.hasB = True
     nJetZseChannel.hasBQCD = False
@@ -771,9 +781,9 @@ if doValidationSRLoose:
     meffS4_Mu=bkgOnly.addValidationChannel("meffInc",["S4Mu"],meffNBinsHL,meffBinLowHL,meffBinHighHL)
     meffS4_Mu.setFileList(bgdFiles_m)
     # SOFT LEPTON SRS
-    mmSSEl = bkgOnly.addValidationChannel("met/meff3Jet",["SSEl"],6,0.1,0.7)
+    mmSSEl = bkgOnly.addValidationChannel("met/meff2Jet",["SSEl"],6,0.1,0.7)
     mmSSEl.setFileList(bgdFiles_se)
-    mmSSMu = bkgOnly.addValidationChannel("met/meff3Jet",["SSMu"],6,0.1,0.7)
+    mmSSMu = bkgOnly.addValidationChannel("met/meff2Jet",["SSMu"],6,0.1,0.7)
     mmSSMu.setFileList(bgdFiles_sm)
 
     validationSRChannels = [meff2ee, meff4ee, meff2em, meff4em, meff2mm, meff4mm, meffS3_El, meffS3_Mu, meffS4_El, meffS4_Mu, mmSSEl, mmSSMu]
@@ -811,9 +821,9 @@ if doValidationSRTight:
     meffS7T_Mu=bkgOnly.addValidationChannel("meffInc",["SR7jTMu"],1,750,meffBinHighHL)
     meffS7T_Mu.setFileList(bgdFiles_m)
     # SOFT LEPTON SRS
-    mmSSElT = bkgOnly.addValidationChannel("met/meff3Jet",["SSElT"],1,0.3,0.7)
+    mmSSElT = bkgOnly.addValidationChannel("met/meff2Jet",["SSElT"],1,0.3,0.7)
     mmSSElT.setFileList(bgdFiles_se)
-    mmSSMuT = bkgOnly.addValidationChannel("met/meff3Jet",["SSMuT"],1,0.3,0.7)
+    mmSSMuT = bkgOnly.addValidationChannel("met/meff2Jet",["SSMuT"],1,0.3,0.7)
     mmSSMuT.setFileList(bgdFiles_sm)
 
     validationSRChannels = [meff2ee, meff4ee, meff2em, meff4em, meff2mm, meff4mm, meffS3T_El, meffS3T_Mu, meffS4T_El, meffS4T_Mu, mmSSElT, mmSSMuT,meffS7T_El,meffS7T_Mu]                                                    
@@ -899,14 +909,14 @@ if doValidationDilepZ:
     
 
 if doValidationSoftLep:
-    mmSVEl = bkgOnly.addValidationChannel("met/meff3Jet",["SVEl"],6,0.1,0.7)
-    mmSVMu = bkgOnly.addValidationChannel("met/meff3Jet",["SVMu"],6,0.1,0.7)
+    mmSVEl = bkgOnly.addValidationChannel("nJet",["SVEl"],nJetZsmNBins,nJetZsmBinLow,nJetZsmBinHigh)
+    mmSVMu = bkgOnly.addValidationChannel("nJet",["SVMu"],nJetZsmNBins,nJetZsmBinLow,nJetZsmBinHigh)
     softLepValChannels = [mmSVEl,mmSVMu]
     if not useSoftLepCR:
-        mmSVWEl = bkgOnly.addValidationChannel("met/meff3Jet",["SVWEl"],6,0.1,0.7)
-        mmSVWMu = bkgOnly.addValidationChannel("met/meff3Jet",["SVWMu"],6,0.1,0.7)
-        mmSVTEl = bkgOnly.addValidationChannel("met/meff3Jet",["SVTEl"],6,0.1,0.7)
-        mmSVTMu = bkgOnly.addValidationChannel("met/meff3Jet",["SVTMu"],6,0.1,0.7)
+        mmSVWEl = bkgOnly.addValidationChannel("nJet",["SVWEl"],nJetZsmNBins,nJetZsmBinLow,nJetZsmBinHigh)
+        mmSVWMu = bkgOnly.addValidationChannel("nJet",["SVWMu"],nJetZsmNBins,nJetZsmBinLow,nJetZsmBinHigh)
+        mmSVTEl = bkgOnly.addValidationChannel("nJet",["SVTEl"],nJetZsmNBins,nJetZsmBinLow,nJetZsmBinHigh)
+        mmSVTMu = bkgOnly.addValidationChannel("nJet",["SVTMu"],nJetZsmNBins,nJetZsmBinLow,nJetZsmBinHigh)
         softLepValChannels += [mmSVWEl,mmSVWMu,mmSVTEl,mmSVTMu]
         
     bkgOnly.setValidationChannels(softLepValChannels)
@@ -988,7 +998,7 @@ if doExclusion_GMSB_combined or doExclusion_mSUGRA_dilepton_combined or doExclus
             SRs=["S3El","S3Mu","S4El","S4Mu"] # only hard lepton so far
         elif doExclusion_GG_onestepCC_gridX:
             SRs=["S3El","S3Mu","S4El","S4Mu"] # only hard lepton so far
-            #SRs = ["SSEl","SSMu"]
+            
         if doValidationSRLoose:
             for sr in SRs:
                 #don't re-create already existing channel, but unset as Validation and set as Signal channel
@@ -1010,6 +1020,9 @@ if doExclusion_GMSB_combined or doExclusion_mSUGRA_dilepton_combined or doExclus
                     ch = myTopLvl.addChannel("meffInc",[sr],meffNBinsS2,meffBinLowS2,meffBinHighS2)
                 elif sr=="S4ee" or sr=="S4em" or sr=="S4mm":
                     ch = myTopLvl.addChannel("meffInc",[sr],meffNBinsS4,meffBinLowS4,meffBinHighS4)
+                elif sr=="SSEl" or sr=="SSMu":
+                    ch = myTopLvl.addChannel("met/meff2Jet",[sr],6,0.1,0.7)
+                    
                 else:
                     raise RuntimeError("Unexpected signal region %s"%sr)
                 ch.useOverflowBin=True
@@ -1026,6 +1039,7 @@ if doExclusion_GMSB_combined or doExclusion_mSUGRA_dilepton_combined or doExclus
                     ch.setFileList(bgdFiles_em)
                 elif ch.name.find("mm")>-1:
                     ch.setFileList(bgdFiles_mm)
+                    
                                     
                 myTopLvl.setSignalChannels(ch)        
                 ch.getSample(sig).removeSystematic("JHigh")
