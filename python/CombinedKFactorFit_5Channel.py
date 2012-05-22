@@ -1012,6 +1012,9 @@ if doExclusion_GMSB_combined or doExclusion_mSUGRA_dilepton_combined or doExclus
                 ch.getSample(sig).removeSystematic("JLow")
 
         else:
+
+
+            
             for sr in SRs:
                 if sr=="S3El" or sr=="S3Mu":
                     ch = myTopLvl.addChannel("meffInc",[sr],meffNBins1lS3,meffBinLow1lS3,meffBinHigh1lS3)
@@ -1026,14 +1029,19 @@ if doExclusion_GMSB_combined or doExclusion_mSUGRA_dilepton_combined or doExclus
                     
                 else:
                     raise RuntimeError("Unexpected signal region %s"%sr)
+                
                 ch.useOverflowBin=True
-
                 ch.removeWeight("bTagWeight3Jet")
+                ch.setFileList(bgdFiles_se)
 
-                if ch.name.find("El")>-1:
+                if (ch.name.find("S3El")>-1 or ch.name.find("S4El")>-1):
                     ch.setFileList(bgdFiles_e)
-                elif ch.name.find("Mu")>-1:
+                elif ch.name.find("SSEl")>-1:
+                    ch.setFileList(bgdFiles_se)
+                elif (ch.name.find("S3Mu")>-1 or ch.name.find("S4Mu")>-1):
                     ch.setFileList(bgdFiles_m)
+                elif ch.name.find("SSMu")>-1:
+                    ch.setFileList(bgdFiles_sm)
                 elif ch.name.find("ee")>-1:
                     ch.setFileList(bgdFiles_ee)
                 elif ch.name.find("em")>-1:
