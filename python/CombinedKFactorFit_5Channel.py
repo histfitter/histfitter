@@ -31,13 +31,13 @@ def removeWeight(oldList,oldWeight):
 
 onLxplus='lx' in commands.getstatusoutput("hostname")[1] or 'vm' in commands.getstatusoutput("hostname")[1]
 useHardLepCR=True
-useSoftLepCR=False
+useSoftLepCR=True
 useDiLepCR=True
 useStat=True
 fullSyst=True
 
 doValidationSRLoose=False
-doValidationSRTight=True
+doValidationSRTight=False
 doValidationSlope=False
 doValidationDilep=False
 doValidationDilepZ=False
@@ -115,8 +115,8 @@ if configMgr.readFromTree:
         bgdFiles_mm = [inputDir+"/SusyFitterTree_MuMu.root"]
         bgdFiles_e = [inputDir+"/SusyFitterTree_OneEle.root"]
         bgdFiles_m = [inputDir+"/SusyFitterTree_OneMu.root"]
-        bgdFiles_se = ["/afs/cern.ch/atlas/groups/susy/1lepton/samples/PaperSamples/SusyFitterTree_OneSoftEle_BG_v3_Zpt.root"]
-        bgdFiles_sm = ["/afs/cern.ch/atlas/groups/susy/1lepton/samples/PaperSamples/SusyFitterTree_OneSoftMuo_BG_v3_Zpt.root"]
+        bgdFiles_se = ["/afs/cern.ch/work/h/hyamaguc/public/samples/SusyFitterTree_OneSoftEle_BG_v6.root"]
+        bgdFiles_sm = ["/afs/cern.ch/work/h/hyamaguc/public/samples/SusyFitterTree_OneSoftMuo_BG_v6.root"]        
   
 if doExclusion_GMSB_combined:
     if not onLxplus:
@@ -543,10 +543,10 @@ if useHardLepCR:
 
 if useSoftLepCR:
     #  single soft ele
-    nJetTopseChannel=bkgOnly.addChannel("nJet",["SVTEl"],nJetTopeNBins-3,nJetTopeBinLow,nJetTopeBinHigh-3)
+    nJetTopseChannel=bkgOnly.addChannel("nJet",["SVTEl"],nJetTopeNBins,nJetTopeBinLow,nJetTopeBinHigh)
     nJetTopseChannel.setFileList(bgdFiles_se)
     # soft single mu
-    nJetTopsmChannel=bkgOnly.addChannel("nJet",["SVTMu"],nJetTopmNBins-3,nJetTopmBinLow,nJetTopmBinHigh-3)
+    nJetTopsmChannel=bkgOnly.addChannel("nJet",["SVTMu"],nJetTopmNBins,nJetTopmBinLow,nJetTopmBinHigh)
     nJetTopsmChannel.setFileList(bgdFiles_sm)
 
     topChannels += [nJetTopseChannel,nJetTopsmChannel]
@@ -977,7 +977,7 @@ if doExclusion_GMSB_combined or doExclusion_mSUGRA_dilepton_combined or doExclus
             SRs=["S3El","S3Mu","S4El","S4Mu"] # only hard lepton so far
         elif doExclusion_GG_onestepCC_gridX:
             SRs=["S3El","S3Mu","S4El","S4Mu"] # only hard lepton so far
-            
+            #SRs = ["SSEl","SSMu"]
         if doValidationSRLoose:
             for sr in SRs:
                 #don't re-create already existing channel, but unset as Validation and set as Signal channel
