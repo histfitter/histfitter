@@ -31,7 +31,7 @@ def removeWeight(oldList,oldWeight):
 
 onLxplus='lx' in commands.getstatusoutput("hostname")[1] or 'vm' in commands.getstatusoutput("hostname")[1]
 useHardLepCR=True
-useSoftLepCR=True
+useSoftLepCR=False
 useDiLepCR=True
 useStat=True
 fullSyst=True
@@ -51,14 +51,15 @@ doExclusion_GG_twostepCC_slepton=False
 blindS=False
 useXsecUnc=True             # switch off when calucating excluded cross section (colour code in SM plots)
 doWptReweighting=False ## deprecated
-#doSignalOnly=False #Remove all bkgs for signal histo creation step
-doSignalOnly=True #Remove all bkgs for signal histo creation step
+doSignalOnly=False #Remove all bkgs for signal histo creation step
+#doSignalOnly=True #Remove all bkgs for signal histo creation step
 if configMgr.executeHistFactory:
     doSignalOnly=False
     
 if not 'sigSamples' in dir():
 #    sigSamples=["SU_580_240_0_10_P"]
-    sigSamples=["SM_GG_onestepCC_445_245_45"]
+#    sigSamples=["SM_GG_onestepCC_445_245_45"]
+    sigSamples=["SM_GG_twostepCC_slepton_415_215_115_15"]
 #    sigSamples=["GMSB_3_2d_50_250_3_10_1_1"]
 
 # First define HistFactory attributes
@@ -381,6 +382,8 @@ wzSample_Np5 = Sample("WZ_Np5",70)
 wzSample_Np5.setNormFactor("mu_WZ_Np5",1.,0.,5.)
 AlpGenSamples.append(wzSample_Np5)
 
+AlpGenSamples.sort(key=lambda x: x.name)
+
 for sam in AlpGenSamples:
     sam.setStatConfig(useStat)
     sam.addSystematic(Systematic("Zpt50GeV",configMgr.weights,pT50GeVHighWeights,pT50GeVLowWeights,"weight","overallSys"))
@@ -490,8 +493,9 @@ srBinHigh = 1.5
 #--------------------------------------------------------------
 bkgOnly = configMgr.addTopLevelXML("bkgonly")
 if not doSignalOnly:
+    bkgOnly.addSamples([qcdSample])
     bkgOnly.addSamples(bgdsamples)
-    bkgOnly.addSamples([qcdSample,dataSample])
+    bkgOnly.addSamples([dataSample])
 if useStat:
     bkgOnly.statErrThreshold=0.05 
 else:
