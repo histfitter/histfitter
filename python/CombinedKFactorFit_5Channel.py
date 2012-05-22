@@ -144,7 +144,7 @@ if doExclusion_GG_onestepCC_x12:
     else:
         sigFiles+=[inputDirSig+"/SusyFitterTree_EleEle_SM_GG_onestepCC.root",inputDirSig+"/SusyFitterTree_MuMu_SM_GG_onestepCC.root",inputDirSig+"/SusyFitterTree_EleMu_SM_GG_onestepCC.root"]
         sigFiles_l+=[sigfile_MH_v2] #inputDirSig+"/SusyFitterTree_p832_GGonestepLSP60_paper_v1.root"
-        sigFiles_l+=[inputDirSig+"/SusyFitterTree_OneSoftMuo_SM_GG_onestepCC_v3.root",inputDirSig+"/SusyFitterTree_OneSoftEle_SM_GG_onestepCC_v3.root"]
+        sigFiles_sl+=[inputDirSig+"/SusyFitterTree_OneSoftMuo_SM_GG_onestepCC_v3.root",inputDirSig+"/SusyFitterTree_OneSoftEle_SM_GG_onestepCC_v3.root"]
         
 if doExclusion_GG_onestepCC_gridX:
     if not onLxplus:
@@ -996,6 +996,7 @@ if doExclusion_GMSB_combined or doExclusion_mSUGRA_dilepton_combined or doExclus
             SRs=["S4ee","S4em","S4mm"]
         elif doExclusion_GG_onestepCC_x12:
             SRs=["S3El","S3Mu","S4El","S4Mu"] # only hard lepton so far
+            SRs=["SSEl","SSMu"]
         elif doExclusion_GG_onestepCC_gridX:
             SRs=["S3El","S3Mu","S4El","S4Mu"] # only hard lepton so far
             
