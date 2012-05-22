@@ -79,27 +79,23 @@ def GenerateFitAndPlot(tl):
     floatPars = Util.getFloatParList(simPdf, obsSet)
     # create an RooExpandedFitResult encompassing all the regions/parameters & save it to workspace
     expResultBefore = RooExpandedFitResult(floatPars)
-    #    expResultBefore.Print()
     Util.ImportInWorkspace(w,expResultBefore,"RooExpandedFitResult_beforeFit")
-    # plot before fit
-    #Util.PlotPdfWithComponents(w,tl.name,plotChannels,"beforeFit_ORIGINAL",None,toyMC)
-    Util.PlotPdfWithComponents(w,tl.name,plotChannels,"beforeFit",expResultBefore,toyMC,plotRatio)
-    #return
 
-    # fit of CRs only
-    # resultCR = Util.FitPdf(w,fitChannelsCR,lumiConst,toyMC)
-    # load original snapshot
-    #    w.loadSnapshot('snapshot_paramsVals_initial')
+    # plot before fit
+    Util.PlotPdfWithComponents(w,tl.name,plotChannels,"beforeFit",expResultBefore,toyMC,plotRatio)
+
     # fit of all regions
     result = Util.FitPdf(w,fitChannels,lumiConst,toyMC)
+
     # create an RooExpandedFitResult encompassing all the regions/parameters with the result & save it to workspace
     expResultAfter = RooExpandedFitResult(result, floatPars)
     Util.ImportInWorkspace(w,expResultAfter,"RooExpandedFitResult_afterFit")
+
     # plot after fit
-    #Util.PlotPdfWithComponents(w,tl.name,plotChannels,"afterFit_ORIGINAL",result,toyMC)
     Util.PlotPdfWithComponents(w,tl.name,plotChannels,"afterFit",expResultAfter,toyMC,plotRatio)
     # plot each component of each region separately with propagated error after fit  (interesting for debugging)
     #    Util.PlotSeparateComponents(tl.name,plotChannels,"afterFit",result,toyMC)
+
     # plot correlation matrix for result
     Util.PlotCorrelationMatrix(result)
     # Util.GetCorrelations(result, 0.85)
