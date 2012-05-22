@@ -34,7 +34,7 @@ useHardLepCR=True
 useSoftLepCR=False
 useDiLepCR=True
 useStat=True
-fullSyst=True
+fullSyst=False
 
 doValidationSRLoose=False
 doValidationSRTight=False
@@ -45,7 +45,7 @@ doValidationSoftLep=False
 
 doExclusion_GMSB_combined=False
 doExclusion_mSUGRA_dilepton_combined=False
-doExclusion_GG_onestepCC_x12=False
+doExclusion_GG_onestepCC_x12=True
 doExclusion_GG_onestepCC_gridX=False
 doExclusion_GG_twostepCC_slepton=False
 blindS=False
@@ -57,10 +57,10 @@ if configMgr.executeHistFactory:
     doSignalOnly=False
     
 if not 'sigSamples' in dir():
-#    sigSamples=["SU_580_240_0_10_P"]
-#    sigSamples=["SM_GG_onestepCC_445_245_45"]
-    sigSamples=["SM_GG_twostepCC_slepton_415_215_115_15"]
-#    sigSamples=["GMSB_3_2d_50_250_3_10_1_1"]
+    #    sigSamples=["SU_580_240_0_10_P"]
+    sigSamples=["SM_GG_onestepCC_445_245_45"]
+    #    sigSamples=["SM_GG_twostepCC_slepton_415_215_115_15"]
+    #    sigSamples=["GMSB_3_2d_50_250_3_10_1_1"]
 
 # First define HistFactory attributes
 configMgr.analysisName = "Combined_KFactorFit_5Channel" # Name to give the analysis
@@ -90,6 +90,7 @@ bgdFiles_sm = []
 
 sigFiles = []
 sigFiles_l = []
+sigFiles_sl = []
 
 configMgr.histCacheFile = "data/"+configMgr.analysisName+".root"
 inputDir="root://eosatlas//eos/atlas/atlascerngroupdisk/phys-susy/histfitter/stronglepton/Paper_v1/"
@@ -118,6 +119,8 @@ if configMgr.readFromTree:
         bgdFiles_m = [inputDir+"/SusyFitterTree_OneMu.root"]
         bgdFiles_se = ["/afs/cern.ch/work/h/hyamaguc/public/samples/SusyFitterTree_OneSoftEle_BG_v6.root"]
         bgdFiles_sm = ["/afs/cern.ch/work/h/hyamaguc/public/samples/SusyFitterTree_OneSoftMuo_BG_v6.root"]        
+
+sigfile_MH_v2 =  "/afs/cern.ch/work/h/hyamaguc/public/samples/SusyFitterTree_p832_GGonestep_paper_v2.root"
   
 if doExclusion_GMSB_combined:
     if not onLxplus:
@@ -136,18 +139,22 @@ if doExclusion_mSUGRA_dilepton_combined:
 if doExclusion_GG_onestepCC_x12:
     if not onLxplus:
         sigFiles+=["data/SusyFitterTree_EleEle_SM_GG_onestepCC.root","data/SusyFitterTree_MuMu_SM_GG_onestepCC.root","data/SusyFitterTree_EleMu_SM_GG_onestepCC.root"]
-        sigFiles_l+=["data/SusyFitterTree_OneSoftMuo_SM_GG_onestepCC_v3.root","data/SusyFitterTree_OneSoftEle_SM_GG_onestepCC_v3.root"]
+        sigFiles_l+=[sigfile_MH_v2] 
+        sigFiles_sl+=["data/SusyFitterTree_OneSoftMuo_SM_GG_onestepCC_v3.root","data/SusyFitterTree_OneSoftEle_SM_GG_onestepCC_v3.root"]
     else:
         sigFiles+=[inputDirSig+"/SusyFitterTree_EleEle_SM_GG_onestepCC.root",inputDirSig+"/SusyFitterTree_MuMu_SM_GG_onestepCC.root",inputDirSig+"/SusyFitterTree_EleMu_SM_GG_onestepCC.root"]
-        sigFiles_l+=[inputDirSig+"/SusyFitterTree_OneSoftMuo_SM_GG_onestepCC_v3.root",inputDirSig+"/SusyFitterTree_OneSoftEle_SM_GG_onestepCC_v3.root",inputDirSig+"/SusyFitterTree_p832_GGonestep_paper_v1.root"]
+        sigFiles_l+=[sigfile_MH_v2] #inputDirSig+"/SusyFitterTree_p832_GGonestepLSP60_paper_v1.root"
+        sigFiles_l+=[inputDirSig+"/SusyFitterTree_OneSoftMuo_SM_GG_onestepCC_v3.root",inputDirSig+"/SusyFitterTree_OneSoftEle_SM_GG_onestepCC_v3.root"]
         
 if doExclusion_GG_onestepCC_gridX:
     if not onLxplus:
         sigFiles+=["data/SusyFitterTree_EleEle_SM_GG_onestepCC.root","data/SusyFitterTree_MuMu_SM_GG_onestepCC.root","data/SusyFitterTree_EleMu_SM_GG_onestepCC.root"]
-        sigFiles_l+=["data/SusyFitterTree_OneSoftMuo_SM_GG_onestepCC_varyx_v3.root","data/SusyFitterTree_OneSoftEle_SM_GG_onestepCC_varyx_v3.root","data/SusyFitterTree_p832_GGonestepLSP60_paper_v1.root"]
+        sigFiles_l+=[sigfile_MH_v2] #inputDirSig+"/SusyFitterTree_p832_GGonestepLSP60_paper_v1.root"
+        sigFiles_sl+=["data/SusyFitterTree_OneSoftMuo_SM_GG_onestepCC_varyx_v3.root","data/SusyFitterTree_OneSoftEle_SM_GG_onestepCC_varyx_v3.root"]
     else:
         sigFiles+=[inputDirSig+"/SusyFitterTree_EleEle_SM_GG_onestepCC.root",inputDirSig+"/SusyFitterTree_MuMu_SM_GG_onestepCC.root",inputDirSig+"/SusyFitterTree_EleMu_SM_GG_onestepCC.root"]
-        sigFiles_l+=[inputDirSig+"/SusyFitterTree_OneSoftMuo_SM_GG_onestepCC_varyx_v3.root",inputDirSig+"/SusyFitterTree_OneSoftEle_SM_GG_onestepCC_varyx_v3.root",inputDirSig+"/SusyFitterTree_p832_GGonestepLSP60_paper_v1.root"]
+        sigFiles_l+=[sigfile_MH_v2]
+        sigFiles_sl+=[inputDirSig+"/SusyFitterTree_OneSoftMuo_SM_GG_onestepCC_varyx_v3.root",inputDirSig+"/SusyFitterTree_OneSoftEle_SM_GG_onestepCC_varyx_v3.root"]
 
 if doExclusion_GG_twostepCC_slepton:
     if not onLxplus:
@@ -953,7 +960,7 @@ if doExclusion_GMSB_combined or doExclusion_mSUGRA_dilepton_combined or doExclus
         sigSample = Sample(sig,kPink)
         sigSample.setFileList(sigFiles)
         sigSample.setNormByTheory()
-        sigSample.setNormFactor("mu_SIG",0.,0.,5.)
+        sigSample.setNormFactor("mu_SIG",1.,0.,5.)
 
         #signal-specific uncertainties
         sigSample.setStatConfig(useStat)
@@ -1028,14 +1035,19 @@ if doExclusion_GMSB_combined or doExclusion_mSUGRA_dilepton_combined or doExclus
 
         for (iChan,chan) in enumerate(myTopLvl.channels):
             if chan.name.find("El")>-1:
-                chan.getSample(sig).setFileList(sigFiles_l)                
+                if not chan.name.find("SS")>-1 :
+                    chan.getSample(sig).setFileList(sigFiles_l)
+                else:
+                    chan.getSample(sig).setFileList(sigFiles_sl)
             elif chan.name.find("Mu")>-1:
-                chan.getSample(sig).setFileList(sigFiles_l)
+                if not chan.name.find("SS")>-1 :
+                    chan.getSample(sig).setFileList(sigFiles_l)
+                else:
+                    chan.getSample(sig).setFileList(sigFiles_sl)
             elif chan.name.find("ee")>-1:
                 chan.getSample(sig).setFileList(sigFiles)
             elif chan.name.find("em")>-1:
                 chan.getSample(sig).setFileList(sigFiles)
             elif chan.name.find("mm")>-1:
                 chan.getSample(sig).setFileList(sigFiles)
-
                 
