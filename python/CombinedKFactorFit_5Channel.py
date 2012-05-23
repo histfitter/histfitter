@@ -31,10 +31,10 @@ def removeWeight(oldList,oldWeight):
 
 onLxplus='lx' in commands.getstatusoutput("hostname")[1] or 'vm' in commands.getstatusoutput("hostname")[1]
 useHardLepCR=True
-useSoftLepCR=True
+useSoftLepCR=False
 useDiLepCR=True
 useStat=True
-fullSyst=False
+fullSyst=True
 
 doValidationSRLoose=False
 doValidationSRTight=False
@@ -44,8 +44,8 @@ doValidationDilepZ=False
 doValidationSoftLep=False
 
 doExclusion_GMSB_combined=False
-doExclusion_mSUGRA_dilepton_combined=False
-doExclusion_GG_onestepCC_x12=True
+doExclusion_mSUGRA_dilepton_combined=True
+doExclusion_GG_onestepCC_x12=False
 doExclusion_GG_onestepCC_gridX=False
 doExclusion_GG_twostepCC_slepton=False
 blindS=False
@@ -57,13 +57,13 @@ if configMgr.executeHistFactory:
     doSignalOnly=False
     
 if not 'sigSamples' in dir():
-    #    sigSamples=["SU_580_240_0_10_P"]
-    sigSamples=["SM_GG_onestepCC_445_245_45"]
+        sigSamples=["SU_580_240_0_10_P"]
+    #sigSamples=["SM_GG_onestepCC_445_245_45"]
     #    sigSamples=["SM_GG_twostepCC_slepton_415_215_115_15"]
     #    sigSamples=["GMSB_3_2d_50_250_3_10_1_1"]
 
 # First define HistFactory attributes
-configMgr.analysisName = "CombinedKFactorFit_5Channel" # Name to give the analysis
+configMgr.analysisName = "Combined_KFactorFit_5Channel" # Name to give the analysis
 configMgr.outputFileName = "results/CombinedKFactorFit_5Channel.root"
 
 # Scaling calculated by outputLumi / inputLumi
@@ -990,8 +990,8 @@ if doExclusion_GMSB_combined or doExclusion_mSUGRA_dilepton_combined or doExclus
         if doExclusion_GMSB_combined:
             SRs=["S2ee","S2em","S2mm"]
         elif doExclusion_mSUGRA_dilepton_combined:
-            #  SRs=["S3El","S3Mu","S4El","S4Mu","S2ee","S2em","S2mm","S4ee","S4em","S4mm"]
-            SRs=["S2ee","S2em","S2mm","S4ee","S4em","S4mm"]
+               SRs=["S3El","S3Mu","S4El","S4Mu","S2ee","S2em","S2mm","S4ee","S4em","S4mm"]
+            #  SRs=["S2ee","S2em","S2mm","S4ee","S4em","S4mm"]
         elif doExclusion_GG_twostepCC_slepton:
             SRs=["S4ee","S4em","S4mm"]
         elif doExclusion_GG_onestepCC_x12:
@@ -1060,11 +1060,17 @@ if doExclusion_GMSB_combined or doExclusion_mSUGRA_dilepton_combined or doExclus
                     chan.getSample(sig).setFileList(sigFiles_l)
                 else:
                     chan.getSample(sig).setFileList(sigFiles_sl)
+                chan.getSample(sig).removeSystematic("LES")
+                chan.getSample(sig).removeSystematic("LRM")
+                chan.getSample(sig).removeSystematic("LRI")                
             elif chan.name.find("Mu")>-1:
                 if not chan.name.find("SS")>-1 :
                     chan.getSample(sig).setFileList(sigFiles_l)
                 else:
                     chan.getSample(sig).setFileList(sigFiles_sl)
+                chan.getSample(sig).removeSystematic("LES")
+                chan.getSample(sig).removeSystematic("LRM")
+                chan.getSample(sig).removeSystematic("LRI")       
             elif chan.name.find("ee")>-1:
                 chan.getSample(sig).setFileList(sigFiles)
             elif chan.name.find("em")>-1:
