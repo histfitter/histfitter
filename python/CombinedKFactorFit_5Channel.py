@@ -63,8 +63,8 @@ if not 'sigSamples' in dir():
     #    sigSamples=["GMSB_3_2d_50_250_3_10_1_1"]
 
 # First define HistFactory attributes
-configMgr.analysisName = "Combined_KFactorFit_5Channel" # Name to give the analysis
-configMgr.outputFileName = "results/Combined_KFactorFit_5Channel.root"
+configMgr.analysisName = "CombinedKFactorFit_5Channel" # Name to give the analysis
+configMgr.outputFileName = "results/CombinedKFactorFit_5Channel.root"
 
 # Scaling calculated by outputLumi / inputLumi
 configMgr.inputLumi = 0.001
