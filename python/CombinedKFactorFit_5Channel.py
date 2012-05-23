@@ -995,8 +995,7 @@ if doExclusion_GMSB_combined or doExclusion_mSUGRA_dilepton_combined or doExclus
         elif doExclusion_GG_twostepCC_slepton:
             SRs=["S4ee","S4em","S4mm"]
         elif doExclusion_GG_onestepCC_x12:
-            SRs=["S3El","S3Mu","S4El","S4Mu"] # only hard lepton so far
-            SRs=["SSEl","SSMu"]
+            SRs=["S3El","S3Mu","S4El","S4Mu","SSEl","SSMu"] # only hard lepton so far
         elif doExclusion_GG_onestepCC_gridX:
             SRs=["S3El","S3Mu","S4El","S4Mu"] # only hard lepton so far
             
@@ -1032,7 +1031,6 @@ if doExclusion_GMSB_combined or doExclusion_mSUGRA_dilepton_combined or doExclus
                 
                 ch.useOverflowBin=True
                 ch.removeWeight("bTagWeight3Jet")
-                ch.setFileList(bgdFiles_se)
 
                 if (ch.name.find("S3El")>-1 or ch.name.find("S4El")>-1):
                     ch.setFileList(bgdFiles_e)
