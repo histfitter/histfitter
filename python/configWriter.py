@@ -1256,9 +1256,13 @@ class Sample(object):
         """
         Add an OverallSys entry using the high and low values
         """
-        #if high==1.0 and low==1.0:
-        #    print "WARNING addOverallSys: high==1.0 and low==1.0... Skipping!"
-        #    return
+        if high==1.0 and low==1.0:
+            print "WARNING: addOverallSys for %s high==1.0 and low==1.0 remove from fit"%(systName)
+            return
+
+        if high==0.0 and low==0.0:
+            print "ERROR: addOverallSys for %s high=%g low=%g remove from fit." % (systName,systName,high,low)
+            return
 
         if high<1.0 and low<1.0:
             highOld=high

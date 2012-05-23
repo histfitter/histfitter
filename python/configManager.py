@@ -695,12 +695,12 @@ class ConfigManager(object):
                             try:
                                 overallSystHigh = highIntegral / nomIntegral
                             except ZeroDivisionError:
-                                print "Error generating High HistoSys for %s syst=%s nom=%g high=%g low=%g" % (nomName,syst.name,nomIntegral,highIntegral,lowIntegral)
+                                print "WARNING generating High HistoSys for %s syst=%s nom=%g high=%g low=%g" % (nomName,syst.name,nomIntegral,highIntegral,lowIntegral)
                                 overallSystHigh = 1.0 
                             try:
                                 overallSystLow = lowIntegral / nomIntegral
                             except ZeroDivisionError:
-                                print "Error generating Low HistoSys for %s syst=%s nom=%g high=%g low=%g" % (nomName,syst.name,nomIntegral,highIntegral,lowIntegral)
+                                print "WARNING generating Low HistoSys for %s syst=%s nom=%g high=%g low=%g" % (nomName,syst.name,nomIntegral,highIntegral,lowIntegral)
                                 overallSystLow = 1.0
                             chan.getSample(sam.name).addOverallSys(syst.name,overallSystHigh,overallSystLow)
                         elif syst.method == "userOverallSys":
