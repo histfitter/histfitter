@@ -34,9 +34,9 @@ useHardLepCR=True
 useSoftLepCR=False
 useDiLepCR=True
 useStat=True
-fullSyst=True
+fullSyst=False
 
-doValidationSRLoose=False
+doValidationSRLoose=True
 doValidationSRTight=False
 doValidationSlope=False
 doValidationDilep=False
@@ -117,8 +117,8 @@ if configMgr.readFromTree:
         bgdFiles_mm = [inputDir+"/SusyFitterTree_MuMu.root"]
         bgdFiles_e = [inputDir+"/SusyFitterTree_OneEle.root"]
         bgdFiles_m = [inputDir+"/SusyFitterTree_OneMu.root"]
-        bgdFiles_se = ["/afs/cern.ch/work/h/hyamaguc/public/samples/SusyFitterTree_OneSoftEle_BG_v6.root"]
-        bgdFiles_sm = ["/afs/cern.ch/work/h/hyamaguc/public/samples/SusyFitterTree_OneSoftMuo_BG_v6.root"]        
+        bgdFiles_se = ["/afs/cern.ch/work/h/hyamaguc/public/samples/SusyFitterTree_OneSoftEle_BG_v7.root"]
+        bgdFiles_sm = ["/afs/cern.ch/work/h/hyamaguc/public/samples/SusyFitterTree_OneSoftMuo_BG_v7.root"]        
 
 sigfile_MH_v2 =  "/afs/cern.ch/work/h/hyamaguc/public/samples/SusyFitterTree_p832_GGonestep_paper_v2.root"
   
@@ -1060,17 +1060,19 @@ if doExclusion_GMSB_combined or doExclusion_mSUGRA_dilepton_combined or doExclus
                     chan.getSample(sig).setFileList(sigFiles_l)
                 else:
                     chan.getSample(sig).setFileList(sigFiles_sl)
-                chan.getSample(sig).removeSystematic("LES")
-                chan.getSample(sig).removeSystematic("LRM")
-                chan.getSample(sig).removeSystematic("LRI")                
+                if fullSyst:
+                    chan.getSample(sig).removeSystematic("LES")
+                    chan.getSample(sig).removeSystematic("LRM")
+                    chan.getSample(sig).removeSystematic("LRI")                
             elif chan.name.find("Mu")>-1:
                 if not chan.name.find("SS")>-1 :
                     chan.getSample(sig).setFileList(sigFiles_l)
                 else:
                     chan.getSample(sig).setFileList(sigFiles_sl)
-                chan.getSample(sig).removeSystematic("LES")
-                chan.getSample(sig).removeSystematic("LRM")
-                chan.getSample(sig).removeSystematic("LRI")       
+                if fullSyst:
+                    chan.getSample(sig).removeSystematic("LES")
+                    chan.getSample(sig).removeSystematic("LRM")
+                    chan.getSample(sig).removeSystematic("LRI")       
             elif chan.name.find("ee")>-1:
                 chan.getSample(sig).setFileList(sigFiles)
             elif chan.name.find("em")>-1:
