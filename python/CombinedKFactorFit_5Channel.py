@@ -431,11 +431,11 @@ dataSample.setData()
 nJetTopeeBinLow = 2
 nJetTopeeBinHigh = 10
 
-nJetTopeNBins = 8
+nJetTopeBinLow = 3
 nJetTopeBinHigh = 10
 
 nJetTopseBinLow = 2
-nJetTopseBinHigh = 10
+nJetTopseBinHigh = 8
 
 nJetTopemBinLow = 2
 nJetTopemBinHigh = 10
@@ -447,7 +447,7 @@ nJetTopmBinLow = 3
 nJetTopmBinHigh = 10
 
 nJetTopsmBinLow = 2
-nJetTopsmBinHigh = 10
+nJetTopsmBinHigh = 8
 
 # nJet Binning for W Control region
 nJetZmmRegions = ["ZRmm"]
@@ -455,13 +455,12 @@ nJetZmmBinLow = 2
 nJetZmmBinHigh = 10
 
 nJetZmRegions = ["WRMu"]
-nJetZmNBins = 8
 nJetZmBinLow = 3
 nJetZmBinHigh = 10
 
 nJetZsmRegions = ["SVWMu"]
 nJetZsmBinLow = 2
-nJetZsmBinHigh = 10
+nJetZsmBinHigh = 8
 
 nJetZeeRegions = ["ZRee"]
 nJetZeeBinLow = 2
@@ -473,7 +472,7 @@ nJetZeBinHigh = 10
 
 nJetZseRegions = ["SVWEl"]
 nJetZseBinLow = 2
-nJetZseBinHigh = 10
+nJetZseBinHigh = 8
 
 ZptZmmRegions = ["ZRmm"]
 ZptZmmNBins = 40
