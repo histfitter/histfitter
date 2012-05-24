@@ -31,12 +31,12 @@ def removeWeight(oldList,oldWeight):
 
 onLxplus='lx' in commands.getstatusoutput("hostname")[1] or 'vm' in commands.getstatusoutput("hostname")[1]
 useHardLepCR=True
-useSoftLepCR=False
+useSoftLepCR=True
 useDiLepCR=True
 useStat=True
-fullSyst=False
+fullSyst=True
 
-doValidationSRLoose=True
+doValidationSRLoose=False
 doValidationSRTight=False
 doValidationSlope=False
 doValidationDilep=False
@@ -52,7 +52,6 @@ blindS=False
 useXsecUnc=True             # switch off when calucating excluded cross section (colour code in SM plots)
 doWptReweighting=False ## deprecated
 doSignalOnly=False #Remove all bkgs for signal histo creation step
-#doSignalOnly=True #Remove all bkgs for signal histo creation step
 if configMgr.executeHistFactory:
     doSignalOnly=False
     
@@ -429,39 +428,29 @@ dataSample = Sample("Data",kBlack)
 dataSample.setData()
 
 # nJet Binning for Top Control region
-nJetTopeeNBins = 8
 nJetTopeeBinLow = 2
 nJetTopeeBinHigh = 10
 
 nJetTopeNBins = 8
-nJetTopeBinLow = 3
 nJetTopeBinHigh = 10
 
-nJetTopseNBins = 9
 nJetTopseBinLow = 2
 nJetTopseBinHigh = 10
 
-
-
-nJetTopemNBins = 8
 nJetTopemBinLow = 2
 nJetTopemBinHigh = 10
 
-nJetTopmmNBins = 8
 nJetTopmmBinLow = 2
 nJetTopmmBinHigh = 10
 
-nJetTopmNBins = 8
 nJetTopmBinLow = 3
 nJetTopmBinHigh = 10
 
-nJetTopsmNBins = 9
 nJetTopsmBinLow = 2
 nJetTopsmBinHigh = 10
 
 # nJet Binning for W Control region
 nJetZmmRegions = ["ZRmm"]
-nJetZmmNBins = 8
 nJetZmmBinLow = 2
 nJetZmmBinHigh = 10
 
@@ -471,32 +460,28 @@ nJetZmBinLow = 3
 nJetZmBinHigh = 10
 
 nJetZsmRegions = ["SVWMu"]
-nJetZsmNBins = 9
 nJetZsmBinLow = 2
 nJetZsmBinHigh = 10
 
 nJetZeeRegions = ["ZRee"]
-nJetZeeNBins = 8
 nJetZeeBinLow = 2
 nJetZeeBinHigh = 10
 
 nJetZeRegions = ["WREl"]
-nJetZeNBins = 8
 nJetZeBinLow = 3
 nJetZeBinHigh = 10
 
 nJetZseRegions = ["SVWEl"]
-nJetZseNBins = 9
 nJetZseBinLow = 2
 nJetZseBinHigh = 10
 
 ZptZmmRegions = ["ZRmm"]
-ZptZmmNBins = 50
+ZptZmmNBins = 40
 ZptZmmBinLow = 0
 ZptZmmBinHigh = 1000
 
 ZptZeeRegions = ["ZRee"]
-ZptZeeNBins = 50
+ZptZeeNBins = 40
 ZptZeeBinLow = 0
 ZptZeeBinHigh = 1000
 
@@ -541,33 +526,33 @@ topChannels = []
 
 if useDiLepCR:
     # ele ele
-    nJetTopeeChannel=bkgOnly.addChannel("nJet",["TRee"],nJetTopeeNBins,nJetTopeeBinLow,nJetTopeeBinHigh)
+    nJetTopeeChannel=bkgOnly.addChannel("nJet",["TRee"],(nJetTopeeBinHigh-nJetTopeeBinLow),nJetTopeeBinLow,nJetTopeeBinHigh)
     nJetTopeeChannel.setFileList(bgdFiles_ee)
     #  ele mu
-    nJetTopemChannel=bkgOnly.addChannel("nJet",["TRem"],nJetTopemNBins,nJetTopemBinLow,nJetTopemBinHigh)
+    nJetTopemChannel=bkgOnly.addChannel("nJet",["TRem"],(nJetTopemBinHigh-nJetTopemBinLow),nJetTopemBinLow,nJetTopemBinHigh)
     nJetTopemChannel.setFileList(bgdFiles_em)
     # mu mu
-    nJetTopmmChannel=bkgOnly.addChannel("nJet",["TRmm"],nJetTopmmNBins,nJetTopmmBinLow,nJetTopmmBinHigh)
+    nJetTopmmChannel=bkgOnly.addChannel("nJet",["TRmm"],(nJetTopmmBinHigh-nJetTopmmBinLow),nJetTopmmBinLow,nJetTopmmBinHigh)
     nJetTopmmChannel.setFileList(bgdFiles_mm)
     
     topChannels += [nJetTopeeChannel,nJetTopemChannel,nJetTopmmChannel]
 
 if useHardLepCR:
     #  single ele
-    nJetTopeChannel=bkgOnly.addChannel("nJet",["TREl"],nJetTopeNBins,nJetTopeBinLow,nJetTopeBinHigh)
+    nJetTopeChannel=bkgOnly.addChannel("nJet",["TREl"],(nJetTopeBinHigh-nJetTopeBinLow),nJetTopeBinLow,nJetTopeBinHigh)
     nJetTopeChannel.setFileList(bgdFiles_e)
     # single mu
-    nJetTopmChannel=bkgOnly.addChannel("nJet",["TRMu"],nJetTopmNBins,nJetTopmBinLow,nJetTopmBinHigh)
+    nJetTopmChannel=bkgOnly.addChannel("nJet",["TRMu"],(nJetTopmBinHigh-nJetTopmBinLow),nJetTopmBinLow,nJetTopmBinHigh)
     nJetTopmChannel.setFileList(bgdFiles_m)
 
     topChannels += [nJetTopeChannel,nJetTopmChannel]
 
 if useSoftLepCR:
     #  single soft ele
-    nJetTopseChannel=bkgOnly.addChannel("nJet",["SVTEl"],nJetTopseNBins,nJetTopseBinLow,nJetTopseBinHigh)
+    nJetTopseChannel=bkgOnly.addChannel("nJet",["SVTEl"],(nJetTopseBinHigh-nJetTopseBinLow),nJetTopseBinLow,nJetTopseBinHigh)
     nJetTopseChannel.setFileList(bgdFiles_se)
     # soft single mu
-    nJetTopsmChannel=bkgOnly.addChannel("nJet",["SVTMu"],nJetTopsmNBins,nJetTopsmBinLow,nJetTopsmBinHigh)
+    nJetTopsmChannel=bkgOnly.addChannel("nJet",["SVTMu"],(nJetTopsmBinHigh-nJetTopsmBinLow),nJetTopsmBinLow,nJetTopsmBinHigh)
     nJetTopsmChannel.setFileList(bgdFiles_sm)
 
     topChannels += [nJetTopseChannel,nJetTopsmChannel]
@@ -588,12 +573,12 @@ WZChannels = []
 
 if useDiLepCR:
     # ele ele    
-    nJetZeeChannel=bkgOnly.addChannel("nJet",nJetZeeRegions,nJetZeeNBins,nJetZeeBinLow,nJetZeeBinHigh)
+    nJetZeeChannel=bkgOnly.addChannel("nJet",nJetZeeRegions,(nJetZeeBinHigh-nJetZeeBinLow),nJetZeeBinLow,nJetZeeBinHigh)
     nJetZeeChannel.setFileList(bgdFiles_ee)
     nJetZeeChannel.hasBQCD = False
     nJetZeeChannel.removeWeight("bTagWeight3Jet")
     # mu mu
-    nJetZmmChannel=bkgOnly.addChannel("nJet",nJetZmmRegions,nJetZmmNBins,nJetZmmBinLow,nJetZmmBinHigh)
+    nJetZmmChannel=bkgOnly.addChannel("nJet",nJetZmmRegions,(nJetZmmBinHigh-nJetZmmBinLow),nJetZmmBinLow,nJetZmmBinHigh)
     nJetZmmChannel.setFileList(bgdFiles_mm)
     nJetZmmChannel.hasBQCD = False
     nJetZmmChannel.removeWeight("bTagWeight3Jet")
@@ -603,12 +588,12 @@ if useDiLepCR:
 
 if useHardLepCR:
     # single ele
-    nJetZeChannel=bkgOnly.addChannel("nJet",nJetZeRegions,nJetZeNBins,nJetZeBinLow,nJetZeBinHigh)
+    nJetZeChannel=bkgOnly.addChannel("nJet",nJetZeRegions,(nJetZeBinHigh-nJetZeBinLow),nJetZeBinLow,nJetZeBinHigh)
     nJetZeChannel.setFileList(bgdFiles_e)
     nJetZeChannel.hasBQCD = False
     [nJetZeChannel.addSystematic(syst) for syst in btagChanSyst]
     # single mu
-    nJetZmChannel=bkgOnly.addChannel("nJet",nJetZmRegions,nJetZmNBins,nJetZmBinLow,nJetZmBinHigh)
+    nJetZmChannel=bkgOnly.addChannel("nJet",nJetZmRegions,(nJetZmBinHigh-nJetZmBinLow),nJetZmBinLow,nJetZmBinHigh)
     nJetZmChannel.setFileList(bgdFiles_m)
     nJetZmChannel.hasBQCD = False
     [nJetZmChannel.addSystematic(syst) for syst in btagChanSyst]
@@ -618,13 +603,13 @@ if useHardLepCR:
 
 if useSoftLepCR:    
     # single soft mu
-    nJetZsmChannel=bkgOnly.addChannel("nJet",nJetZsmRegions,nJetZsmNBins,nJetZsmBinLow,nJetZsmBinHigh)
+    nJetZsmChannel=bkgOnly.addChannel("nJet",nJetZsmRegions,(nJetZsmBinHigh-nJetZsmBinLow),nJetZsmBinLow,nJetZsmBinHigh)
     nJetZsmChannel.setFileList(bgdFiles_sm)
     nJetZsmChannel.hasB = True
     nJetZsmChannel.hasBQCD = False
     [nJetZsmChannel.addSystematic(syst) for syst in btagChanSyst]
     # single soft ele
-    nJetZseChannel=bkgOnly.addChannel("nJet",nJetZseRegions,nJetZseNBins,nJetZseBinLow,nJetZseBinHigh)
+    nJetZseChannel=bkgOnly.addChannel("nJet",nJetZseRegions,(nJetZseBinHigh-nJetZseBinLow),nJetZseBinLow,nJetZseBinHigh)
     nJetZseChannel.setFileList(bgdFiles_se)
     nJetZseChannel.hasB = True
     nJetZseChannel.hasBQCD = False
@@ -909,14 +894,14 @@ if doValidationDilepZ:
     
 
 if doValidationSoftLep:
-    mmSVEl = bkgOnly.addValidationChannel("nJet",["SVEl"],nJetZsmNBins,nJetZsmBinLow,nJetZsmBinHigh)
-    mmSVMu = bkgOnly.addValidationChannel("nJet",["SVMu"],nJetZsmNBins,nJetZsmBinLow,nJetZsmBinHigh)
+    mmSVEl = bkgOnly.addValidationChannel("nJet",["SVEl"],(nJetZsmBinHigh-nJetZsmBinLow),nJetZsmBinLow,nJetZsmBinHigh)
+    mmSVMu = bkgOnly.addValidationChannel("nJet",["SVMu"],(nJetZsmBinHigh-nJetZsmBinLow),nJetZsmBinLow,nJetZsmBinHigh)
     softLepValChannels = [mmSVEl,mmSVMu]
     if not useSoftLepCR:
-        mmSVWEl = bkgOnly.addValidationChannel("nJet",["SVWEl"],nJetZsmNBins,nJetZsmBinLow,nJetZsmBinHigh)
-        mmSVWMu = bkgOnly.addValidationChannel("nJet",["SVWMu"],nJetZsmNBins,nJetZsmBinLow,nJetZsmBinHigh)
-        mmSVTEl = bkgOnly.addValidationChannel("nJet",["SVTEl"],nJetZsmNBins,nJetZsmBinLow,nJetZsmBinHigh)
-        mmSVTMu = bkgOnly.addValidationChannel("nJet",["SVTMu"],nJetZsmNBins,nJetZsmBinLow,nJetZsmBinHigh)
+        mmSVWEl = bkgOnly.addValidationChannel("nJet",["SVWEl"],(nJetZsmBinHigh-nJetZsmBinLow),nJetZsmBinLow,nJetZsmBinHigh)
+        mmSVWMu = bkgOnly.addValidationChannel("nJet",["SVWMu"],(nJetZsmBinHigh-nJetZsmBinLow),nJetZsmBinLow,nJetZsmBinHigh)
+        mmSVTEl = bkgOnly.addValidationChannel("nJet",["SVTEl"],(nJetZsmBinHigh-nJetZsmBinLow),nJetZsmBinLow,nJetZsmBinHigh)
+        mmSVTMu = bkgOnly.addValidationChannel("nJet",["SVTMu"],(nJetZsmBinHigh-nJetZsmBinLow),nJetZsmBinLow,nJetZsmBinHigh)
         softLepValChannels += [mmSVWEl,mmSVWMu,mmSVTEl,mmSVTMu]
         
     bkgOnly.setValidationChannels(softLepValChannels)
