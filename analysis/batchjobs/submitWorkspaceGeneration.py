@@ -1,9 +1,9 @@
 import os
 
-####### CONFIGURATION #######
-configFile = 'Combined_KFactorFit_5Channel_x12_onlySoft_p_asymp.py'
-#configFile = 'CombinedKFactorFit_5Channel_l_asimov_HardLep_SM_GG_onestepCC.py' 
-pointsPerJob = 20
+####### CONFIGURATION ####### 
+configFile = 'CombinedKFactorFit_5Channel_SoftHard.py'
+#configFile = 'CombinedKFactorFit_5Channel_onlySoft.py' 
+pointsPerJob = 5
 dryRun =False
 #for later
 sample = "SM_GG_onestepCC"
@@ -62,7 +62,7 @@ for point in points:
     if nPoints >= pointsPerJob or point == points[-1]:
         pointsToSubmit += point
         jobNumber += 1
-        cmd = "bsub -q 1nd -R 'hname!=lxbsp20b26 && hname!=lxbsp20b14 && hname!=lxbsq2015 && hname!=lxbsp1543 && hname!=lxbsp2130 && hname!=lxbsp2209 && hname!=lxbsp20b06 && hname!=lxbrf18b01 && hname!=lxbsp2409 && hname!=lxbsp21b34' -e "+logDir+"/out_"+str(jobNumber)+".log.e -o "+logDir+"/out_"+str(jobNumber)+".log.o runWorkspaceGeneration.sh -p '"+SusyFitterDir+"' -g "+pointsToSubmit+" -c "+configFile+" -w "+workspaceDir+"  "+SusyFitterDir+"/test.log"
+        cmd = "bsub -q 1nd -R 'hname!=lxbsq2311 && hname!=lxbsp20b26 && hname!=lxbsp20b14 && hname!=lxbsq2015 && hname!=lxbsp1543 && hname!=lxbsp2130 && hname!=lxbsp2209 && hname!=lxbsp20b06 && hname!=lxbrf18b01 && hname!=lxbsp2409 && hname!=lxbsp21b34' -e "+logDir+"/out_"+str(jobNumber)+".log.e -o "+logDir+"/out_"+str(jobNumber)+".log.o runWorkspaceGeneration.sh -p '"+SusyFitterDir+"' -g "+pointsToSubmit+" -c "+configFile+" -w "+workspaceDir+"  "+SusyFitterDir+"/test.log"
         if dryRun:
             print cmd
             print ""

@@ -107,7 +107,7 @@ if __name__ == "__main__":
     
 
     if doHypoTests:
-        outfileName="results/aleFitR17_Output_hypotest.root"
+        outfileName="results/"+sigSamples[0]+"_hypotest.root"
         outfile = TFile.Open("results/"+sigSamples[0]+"_hypotest.root","UPDATE");
         if not outfile:
            print "ERROR TFile <"+ outfileName+"> could not be opened"
@@ -160,6 +160,76 @@ if __name__ == "__main__":
         outfile.Close()
 
         pass
+
+
+
+    if printLimits:
+        outfileName="results/"+sigSamples[0]+"_upperlimit.root"
+        outfile = TFile.Open("results/"+sigSamples[0]+"_upperlimit.root","UPDATE");
+        if not outfile:
+           print "ERROR TFile <"+ outfileName+"> could not be opened"
+	   #return
+
+        #inFile = "results/MyOneLeptonKtScaleFitR17_Sig_"+sigSamples[0]+"_combined_NormalMeasurement_model.root"
+#        inFile = TFile.Open("results/MyOneLeptonKtScaleFitR17_Sig_"+sigSamples[0]+"_combined_NormalMeasurement_model.root")
+##        inFile = TFile.Open("results/Combined_KFactorFit_5Channel_Final_dilepton_"+sigSamples[0]+"_combined_BasicMeasurement_model.root")
+#        inFile = TFile.Open("results/Combined_KFactorFit_5Channel_Sig_"+sigSamples[0]+"_combined_BasicMeasurement_model.root")
+        inFileName = commands.getstatusoutput("ls results/*"+sigSamples[0]+"*_model.root")[1]
+        inFile = TFile.Open(inFileName)
+        if not inFile:
+           print "ERROR TFile could not be opened"
+           outfile.Close()
+	   #return
+
+        w = inFile.Get("combined")
+        #Util.ReadWorkspace(inFile,"combined")
+        #w=gDirectory.Get("w")	
+        if not w:
+           print "workspace 'combined' does not exist in file"
+	   #return
+
+  
+        print "Processing analysis "+sigSamples[0]
+
+        ## first asumptotic limit, to get a quick but reliable estimate for the upper limit
+        ## dynamic evaluation of ranges
+        testStatType=3
+        calcType=2 #asympt
+        nToys=1000
+        nPoints=20 #mu sampling
+        hypo = RooStats.DoHypoTestInversion(w,1,2,testStatType,True,20,0,-1)
+
+        # then reevaluate with proper settings
+        if ( hypo!=0 ):
+            eul2 = 1.10 * hypo.GetExpectedUpperLimit(2)
+            del hypo
+            hypo=0
+            hypo = RooStats.DoHypoTestInversion(w,nToys,calcType,testStatType,True,nPoints,0,eul2)
+
+
+        ##store ul as nice plot ..
+        if ( hypo!=0 ):
+            RooStats.AnalyzeHypoTestInverterResult( hypo,calcType,testStatType,True,nPoints, sigSamples[0], "_"+sigSamples[0]+".eps")
+                  
+
+        ##save complete hypotestinverterresult to file
+        if(hypo!=0):
+            outfile.cd()
+            hypName="hypo_"+sigSamples[0]
+            hypo.SetName(hypName)
+            print ">>> Now storing HypoTestInverterResult <" +hypName+ ">"
+            hypo.Write()
+                            
+
+        if (hypo!=0):
+            del hypo
+
+        inFile.Close()
+            
+        outfile.Close()
+
+        pass
+
 
 
     

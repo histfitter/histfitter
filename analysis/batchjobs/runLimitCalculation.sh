@@ -2,7 +2,7 @@
 
 ## Check arguments
 if [ $# -lt 1 ] ; then
-   echo "Usage: runSusyLimitBatch.sh [-d] [-p <setupDir>] [-g <point>] [-w <workspaceDir>] [-r <resultsDir>] [-n <nToys>] [-c <calculatorType>] <logfile> " $#
+   echo "Usage: runSusyLimitBatch.sh [-d] [-m <mode>] [-p <setupDir>] [-g <point>] [-w <workspaceDir>] [-r <resultsDir>] [-n <nToys>] [-c <calculatorType>] [-j <jobId>] <logfile> " $#
    exit 1
 fi
 
@@ -11,6 +11,12 @@ DRYRUN=0
 if [ "$1" = "-d" ] ; then
   DRYRUN=1
   shift
+fi
+
+MODE=""
+if [ "$1" = "-m" ]; then
+  MODE=$2
+  shift 2
 fi
 
 ## SusyFitter dir
@@ -49,6 +55,13 @@ if [ "$1" = "-c" ]; then
   CTYPE=$2
   shift 2
 fi
+
+JOBID=""
+if [ "$1" = "-j" ]; then
+  JOBID=$2
+  shift 2
+fi
+
 
 LOGFILE=$1
 #rm -f ${LOGFILE} ${LOGFILE}.gz
@@ -89,7 +102,7 @@ echo "directory contains:"
 #mkdir -p -v /afs/cern.ch/user/j/jlorenz/scratch0/susyresults/$ARGS_hypotestresult 2>&1
 
 
-RUNCMD="python $SUSYDIR/scripts/HypoTest.py -s 5 -p -g ${ARGS} -n ${NTOYS} -c ${CTYPE}"
+RUNCMD="python $SUSYDIR/scripts/HypoTest.py -s 5 -${MODE} -g ${ARGS} -n ${NTOYS} -c ${CTYPE}"
 
 echo
 echo ">> Now running command:"
@@ -104,7 +117,20 @@ if [ $DRYRUN -ne 1 ]; then
 fi
 
 #echo '_file0->ls(); gSystem->Exit(0);' | root -b data/MyOneLeptonKtScaleFitR17.root
-cp results/*hypotest.root ${ROUT}
+
+
+
+
+OUTNAME=$(ls -1 results | grep "hypotest.root")
+
+
+OUTNAME=${OUTNAME/hypotest/hypotest_${JOBID}}
+
+cp results/*hypotest.root  $ROUT"/"$OUTNAME
+cp results/*upperlimit.root  $ROUT"/"$OUTNAME
+
+cp results/*.eps  $ROUT
+cp *.eps  $ROUT
 
 echo
 echo ">> Finished command:"
