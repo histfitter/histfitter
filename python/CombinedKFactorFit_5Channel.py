@@ -36,15 +36,15 @@ useDiLepCR=True
 useStat=True
 fullSyst=True
 
-doValidationSRLoose=False
-doValidationSRTight=False
-doValidationSlope=False
-doValidationDilep=False
-doValidationDilepZ=False
-doValidationSoftLep=False
+doValidationSRLoose=True
+doValidationSRTight=True
+doValidationSlope=True
+doValidationDilep=True
+doValidationDilepZ=True
+doValidationSoftLep=True
 
 doExclusion_GMSB_combined=False
-doExclusion_mSUGRA_dilepton_combined=False
+doExclusion_mSUGRA_dilepton_combined=True
 doExclusion_GG_onestepCC_x12=False
 doExclusion_GG_onestepCC_gridX=False
 doExclusion_GG_twostepCC_slepton=False
@@ -820,21 +820,21 @@ if doValidationDilep:
     meffVR4_ee=bkgOnly.addValidationChannel("meffInc",["VR4ee"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
     meffVR4_em=bkgOnly.addValidationChannel("meffInc",["VR4em"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
     meffVR4_mm=bkgOnly.addValidationChannel("meffInc",["VR4mm"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
-    nJetVR4_ee=bkgOnly.addValidationChannel("nJet",["VR4ee"],nJetZmNBins,nJetZmBinLow,nJetZmBinHigh)
-    nJetVR4_em=bkgOnly.addValidationChannel("nJet",["VR4em"],nJetZmNBins,nJetZmBinLow,nJetZmBinHigh)
-    nJetVR4_mm=bkgOnly.addValidationChannel("nJet",["VR4mm"],nJetZmNBins,nJetZmBinLow,nJetZmBinHigh)
+    nJetVR4_ee=bkgOnly.addValidationChannel("nJet",["VR4ee"],(nJetZmBinHigh-nJetZmBinLow),nJetZmBinLow,nJetZmBinHigh)
+    nJetVR4_em=bkgOnly.addValidationChannel("nJet",["VR4em"],(nJetZmBinHigh-nJetZmBinLow),nJetZmBinLow,nJetZmBinHigh)
+    nJetVR4_mm=bkgOnly.addValidationChannel("nJet",["VR4mm"],(nJetZmBinHigh-nJetZmBinLow),nJetZmBinLow,nJetZmBinHigh)
     meffVR2_ee=bkgOnly.addValidationChannel("meffInc",["VR2ee"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
     meffVR2_em=bkgOnly.addValidationChannel("meffInc",["VR2em"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
     meffVR2_mm=bkgOnly.addValidationChannel("meffInc",["VR2mm"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
-    nJetVR2_ee=bkgOnly.addValidationChannel("nJet",["VR2ee"],nJetZmNBins,nJetZmBinLow,nJetZmBinHigh)
-    nJetVR2_em=bkgOnly.addValidationChannel("nJet",["VR2em"],nJetZmNBins,nJetZmBinLow,nJetZmBinHigh)
-    nJetVR2_mm=bkgOnly.addValidationChannel("nJet",["VR2mm"],nJetZmNBins,nJetZmBinLow,nJetZmBinHigh)
+    nJetVR2_ee=bkgOnly.addValidationChannel("nJet",["VR2ee"],(nJetZmBinHigh-nJetZmBinLow),nJetZmBinLow,nJetZmBinHigh)
+    nJetVR2_em=bkgOnly.addValidationChannel("nJet",["VR2em"],(nJetZmBinHigh-nJetZmBinLow),nJetZmBinLow,nJetZmBinHigh)
+    nJetVR2_mm=bkgOnly.addValidationChannel("nJet",["VR2mm"],(nJetZmBinHigh-nJetZmBinLow),nJetZmBinLow,nJetZmBinHigh)
     meffVR3_ee=bkgOnly.addValidationChannel("meffInc",["VR3ee"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
     meffVR3_em=bkgOnly.addValidationChannel("meffInc",["VR3em"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
     meffVR3_mm=bkgOnly.addValidationChannel("meffInc",["VR3mm"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
-    nJetVR3_ee=bkgOnly.addValidationChannel("nJet",["VR3ee"],nJetZmNBins,nJetZmBinLow,nJetZmBinHigh)
-    nJetVR3_em=bkgOnly.addValidationChannel("nJet",["VR3em"],nJetZmNBins,nJetZmBinLow,nJetZmBinHigh)
-    nJetVR3_mm=bkgOnly.addValidationChannel("nJet",["VR3mm"],nJetZmNBins,nJetZmBinLow,nJetZmBinHigh)
+    nJetVR3_ee=bkgOnly.addValidationChannel("nJet",["VR3ee"],(nJetZmBinHigh-nJetZmBinLow),nJetZmBinLow,nJetZmBinHigh)
+    nJetVR3_em=bkgOnly.addValidationChannel("nJet",["VR3em"],(nJetZmBinHigh-nJetZmBinLow),nJetZmBinLow,nJetZmBinHigh)
+    nJetVR3_mm=bkgOnly.addValidationChannel("nJet",["VR3mm"],(nJetZmBinHigh-nJetZmBinLow),nJetZmBinLow,nJetZmBinHigh)
 
     validation2LepChannels = [meffVR2_ee, meffVR2_em, meffVR2_mm, nJetVR2_ee, nJetVR2_em, nJetVR2_mm,
                               meffVR3_ee, meffVR3_em, meffVR3_mm, nJetVR3_ee, nJetVR3_em, nJetVR3_mm,
@@ -858,21 +858,21 @@ if doValidationDilepZ:
     meffZVR4_ee=bkgOnly.addValidationChannel("meffInc",["VZR4ee"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
     meffZVR4_em=bkgOnly.addValidationChannel("meffInc",["VZR4em"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
     meffZVR4_mm=bkgOnly.addValidationChannel("meffInc",["VZR4mm"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
-    nJetZVR4_ee=bkgOnly.addValidationChannel("nJet",["VZR4ee"],nJetZmNBins,nJetZmBinLow,nJetZmBinHigh)
-    nJetZVR4_em=bkgOnly.addValidationChannel("nJet",["VZR4em"],nJetZmNBins,nJetZmBinLow,nJetZmBinHigh)
-    nJetZVR4_mm=bkgOnly.addValidationChannel("nJet",["VZR4mm"],nJetZmNBins,nJetZmBinLow,nJetZmBinHigh)
+    nJetZVR4_ee=bkgOnly.addValidationChannel("nJet",["VZR4ee"],(nJetZmBinHigh-nJetZmBinLow),nJetZmBinLow,nJetZmBinHigh)
+    nJetZVR4_em=bkgOnly.addValidationChannel("nJet",["VZR4em"],(nJetZmBinHigh-nJetZmBinLow),nJetZmBinLow,nJetZmBinHigh)
+    nJetZVR4_mm=bkgOnly.addValidationChannel("nJet",["VZR4mm"],(nJetZmBinHigh-nJetZmBinLow),nJetZmBinLow,nJetZmBinHigh)
     meffZVR2_ee=bkgOnly.addValidationChannel("meffInc",["VZR2ee"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
     meffZVR2_em=bkgOnly.addValidationChannel("meffInc",["VZR2em"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
     meffZVR2_mm=bkgOnly.addValidationChannel("meffInc",["VZR2mm"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
-    nJetZVR2_ee=bkgOnly.addValidationChannel("nJet",["VZR2ee"],nJetZmNBins,nJetZmBinLow,nJetZmBinHigh)
-    nJetZVR2_em=bkgOnly.addValidationChannel("nJet",["VZR2em"],nJetZmNBins,nJetZmBinLow,nJetZmBinHigh)
-    nJetZVR2_mm=bkgOnly.addValidationChannel("nJet",["VZR2mm"],nJetZmNBins,nJetZmBinLow,nJetZmBinHigh)
+    nJetZVR2_ee=bkgOnly.addValidationChannel("nJet",["VZR2ee"],(nJetZmBinHigh-nJetZmBinLow),nJetZmBinLow,nJetZmBinHigh)
+    nJetZVR2_em=bkgOnly.addValidationChannel("nJet",["VZR2em"],(nJetZmBinHigh-nJetZmBinLow),nJetZmBinLow,nJetZmBinHigh)
+    nJetZVR2_mm=bkgOnly.addValidationChannel("nJet",["VZR2mm"],(nJetZmBinHigh-nJetZmBinLow),nJetZmBinLow,nJetZmBinHigh)
     meffZVR3_ee=bkgOnly.addValidationChannel("meffInc",["VZR3ee"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
     meffZVR3_em=bkgOnly.addValidationChannel("meffInc",["VZR3em"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
     meffZVR3_mm=bkgOnly.addValidationChannel("meffInc",["VZR3mm"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
-    nJetZVR3_ee=bkgOnly.addValidationChannel("nJet",["VZR3ee"],nJetZmNBins,nJetZmBinLow,nJetZmBinHigh)
-    nJetZVR3_em=bkgOnly.addValidationChannel("nJet",["VZR3em"],nJetZmNBins,nJetZmBinLow,nJetZmBinHigh)
-    nJetZVR3_mm=bkgOnly.addValidationChannel("nJet",["VZR3mm"],nJetZmNBins,nJetZmBinLow,nJetZmBinHigh)
+    nJetZVR3_ee=bkgOnly.addValidationChannel("nJet",["VZR3ee"],(nJetZmBinHigh-nJetZmBinLow),nJetZmBinLow,nJetZmBinHigh)
+    nJetZVR3_em=bkgOnly.addValidationChannel("nJet",["VZR3em"],(nJetZmBinHigh-nJetZmBinLow),nJetZmBinLow,nJetZmBinHigh)
+    nJetZVR3_mm=bkgOnly.addValidationChannel("nJet",["VZR3mm"],(nJetZmBinHigh-nJetZmBinLow),nJetZmBinLow,nJetZmBinHigh)
     
     validation2LepZChannels = [meffZVR2_ee, meffZVR2_em, meffZVR2_mm, nJetZVR2_ee, nJetZVR2_em, nJetZVR2_mm,
                               meffZVR3_ee, meffZVR3_em, meffZVR3_mm, nJetZVR3_ee, nJetZVR3_em, nJetZVR3_mm,
