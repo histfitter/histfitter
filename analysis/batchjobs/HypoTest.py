@@ -183,13 +183,18 @@ if __name__ == "__main__":
 
         w = inFile.Get("combined")
         #Util.ReadWorkspace(inFile,"combined")
-        #w=gDirectory.Get("w")	
+        #w=gDirectory.Get("w")
         if not w:
            print "workspace 'combined' does not exist in file"
 	   #return
 
   
         print "Processing analysis "+sigSamples[0]
+
+        if 'onestepCC' in sigSamples[0] and int(sigSamples[0].split("_")[3])>900:
+            w.var("mu_SIG").setMax(50000.)
+            print "Gluino mass above 900 - extending mu_SIG range \n"
+
 
         ## first asumptotic limit, to get a quick but reliable estimate for the upper limit
         ## dynamic evaluation of ranges
