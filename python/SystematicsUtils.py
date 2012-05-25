@@ -9,8 +9,7 @@ def addWeight(oldList,newWeight):
     newList.append(newWeight)
     return newList
             
-
-def getISRSyst(sig):
+def getISRerr(sig):
     errisr = 0.
     if "slepton" in sig:
         mgl = int(sig.split('_')[4])
@@ -25,11 +24,31 @@ def getISRSyst(sig):
     if mgl<300: norm += (1.-(mgl-200)/100.)*0.25
     if mdiff<300: errisr = (1.-(mdiff/300.))*norm # the uncertainty grows towards the mass diagonal, and when mgl gets smaller.
 
+    return errisr
+
+def getISRSyst(sig):
+
+    errisr=getISRerr(sig)
 
     isrHighWeights = addWeight(configMgr.weights,str(1+errisr)) 
     isrLowWeights = addWeight(configMgr.weights,str(1-errisr)) 
 
     isrUnc = Systematic("ISR",configMgr.weights,isrHighWeights,isrLowWeights,"weight","overallSys")
     return isrUnc
+
+def getISRWeightsHigh(sig):
+
+    errisr=getISRerr(sig)
+
+    isrHighWeights = addWeight(configMgr.weights,str(1+errisr)) 
+    return isrHighWeights
+
+
+def getISRWeightsLow(sig):
+
+    errisr=getISRerr(sig)
+
+    isrLowWeights = addWeight(configMgr.weights,str(1-errisr)) 
+    return isrLowWeights
 
 

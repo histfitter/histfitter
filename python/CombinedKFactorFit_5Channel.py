@@ -36,28 +36,38 @@ useDiLepCR=True
 useStat=True
 fullSyst=True
 
-doValidationSRLoose=True
-doValidationSRTight=True
-doValidationSlope=True
-doValidationDilep=True
-doValidationDilepZ=True
-doValidationSoftLep=True
+doValidationSRLoose=False
+doValidationSRTight=False
+doValidationSlope=False
+doValidationDilep=False
+doValidationDilepZ=False
+doValidationSoftLep=False
 
 doExclusion_GMSB_combined=False
-doExclusion_mSUGRA_dilepton_combined=True
+doExclusion_mSUGRA_dilepton_combined=False
 doExclusion_GG_onestepCC_x12=False
 doExclusion_GG_onestepCC_gridX=False
 doExclusion_GG_twostepCC_slepton=False
 blindS=False
-useXsecUnc=True             # switch off when calucating excluded cross section (colour code in SM plots)
+
+#theory uncertainties with new plotting style: Either full pdf+scale+ISR, or only pdf+scale uncertainties
+useTheoryUncUp=False
+useTheoryUncDown=False
+#leave out ISR systematics in case you want to separate these. Probably not useful as will lead to crowded plots.
+useTheoryXsecOnlyUp=False
+useTheoryXsecOnlyDown=False
+
+if (useTheoryUncUp+useTheoryUncDown+useTheoryXsecOnlyUp+useTheoryXsecOnlyDown)>1:
+    raise RuntimeError("Impossible combination of theory uncertainties")
+
 doWptReweighting=False ## deprecated
 doSignalOnly=False #Remove all bkgs for signal histo creation step
 if configMgr.executeHistFactory:
     doSignalOnly=False
     
 if not 'sigSamples' in dir():
-        sigSamples=["SU_580_240_0_10_P"]
-    #sigSamples=["SM_GG_onestepCC_445_245_45"]
+#        sigSamples=["SU_580_240_0_10_P"]
+        sigSamples=["SM_GG_onestepCC_445_245_45"]
     #    sigSamples=["SM_GG_twostepCC_slepton_415_215_115_15"]
     #    sigSamples=["GMSB_3_2d_50_250_3_10_1_1"]
 
@@ -108,8 +118,8 @@ if configMgr.readFromTree:
         bgdFiles_mm = ["data/SusyFitterTree_MuMu.root"]
         bgdFiles_e = ["data/SusyFitterTree_OneEle.root"]
         bgdFiles_m = ["data/SusyFitterTree_OneMu.root"]
-        bgdFiles_se = ["data/SusyFitterTree_OneSoftEle_BG_v5.root"]
-        bgdFiles_sm = ["data/SusyFitterTree_OneSoftMuo_BG_v5.root"]
+        bgdFiles_se = ["data/SusyFitterTree_OneSoftEle_BG_v7.root"]
+        bgdFiles_sm = ["data/SusyFitterTree_OneSoftMuo_BG_v7.root"]
     else:
         bgdFiles_ee = [inputDir+"/SusyFitterTree_EleEle.root"]
         bgdFiles_em = [inputDir+"/SusyFitterTree_EleMu.root"]
@@ -269,8 +279,8 @@ configMgr.weights = weights
 configMgr.weightsQCD = "qcdWeight"
 configMgr.weightsQCDWithB = "qcdBWeight"
 
-xsecSigHighWeights = replaceWeight(weights,"genWeight","genWeightUp")
-xsecSigLowWeights = replaceWeight(weights,"genWeight","genWeightDown")
+#xsecSigHighWeights = replaceWeight(weights,"genWeight","genWeightUp")
+#xsecSigLowWeights = replaceWeight(weights,"genWeight","genWeightDown")
 
 #ktScaleWHighWeights = addWeight(weights,"ktfacUpWeightW")
 #ktScaleWHighWeights = addWeight(weights,"ktfacDownWeightW")
@@ -314,8 +324,8 @@ hfLowWeights = addWeight(weights,"hfWeightDown")
 #--------------------
 configMgr.nomName = "_NoSys"
 
-# Signal XSec uncertainty as overallSys (pure yeild affect)
-xsecSig = Systematic("XSS",configMgr.weights,xsecSigHighWeights,xsecSigLowWeights,"weight","overallSys")
+# Signal XSec uncertainty as overallSys (pure yeild affect) DEPRECATED
+##xsecSig = Systematic("XSS",configMgr.weights,xsecSigHighWeights,xsecSigLowWeights,"weight","overallSys")
 
 # JES uncertainty as shapeSys - one systematic per region (combine WR and TR), merge samples
 jesSignal = Systematic("JSig","_NoSys","_JESup","_JESdown","tree","histoSys")
@@ -959,23 +969,42 @@ if doExclusion_GMSB_combined or doExclusion_mSUGRA_dilepton_combined or doExclus
         #signal-specific uncertainties
         sigSample.setStatConfig(useStat)
         sigSample.addSystematic(jesSignal)
-        if useXsecUnc:
-            sigSample.addSystematic(xsecSig)
-        if sig.startswith("SM"):
-            from SystematicsUtils import getISRSyst
-            isrSyst = getISRSyst(sig)
-            sigSample.addSystematic(isrSyst)
 
+        if useTheoryUncUp:
+            weights=replaceWeight(weights,"genWeight","genWeightUp")
+            configMgr.weights=weights
+            if sig.startswith("SM"):
+                from SystematicsUtils import getISRWeightsHigh
+                weights=getISRWeightsHigh(sig)
+            configMgr.weights=weights
+        elif useTheoryUncDown:
+            weights=replaceWeight(weights,"genWeight","genWeightDown")
+            configMgr.weights=weights
+            if sig.startswith("SM"):
+                from SystematicsUtils import getISRWeightsLow
+                weights=getISRWeightsLow(sig)
+            configMgr.weights=weights
+        elif useTheoryXsecOnlyUp:
+            weights=replaceWeight(weights,"genWeight","genWeightUp")
+            configMgr.weights=weights
+        elif useTheoryXsecOnlyDown:
+            weights=replaceWeight(weights,"genWeight","genWeightUp")
+            configMgr.weights=weights
+
+        print configMgr.weights
+                      
         myTopLvl.addSamples(sigSample)
         myTopLvl.setSignalSample(sigSample)
-
         
         SRs=["S3El","S3Mu","S4El","S4Mu","S2ee","S2em","S2mm","S4ee","S4em","S4mm"]
         if doExclusion_GMSB_combined:
-            SRs=["S2ee","S2em","S2mm"]
+##            SRs=["S4ee","S4em","S4mm"]
+##            SRs=["S2mm","S4mm"]
+##            SRs=["S4mm"]
+            SRs=["S2ee","S2em","S2mm","S4ee","S4em","S4mm"]
         elif doExclusion_mSUGRA_dilepton_combined:
-               SRs=["S3El","S3Mu","S4El","S4Mu","S2ee","S2em","S2mm","S4ee","S4em","S4mm"]
-            #  SRs=["S2ee","S2em","S2mm","S4ee","S4em","S4mm"]
+            SRs=["S3El","S3Mu","S4El","S4Mu","S2ee","S2em","S2mm","S4ee","S4em","S4mm"]
+##            SRs=["S2ee","S2em","S2mm","S4ee","S4em","S4mm"]
         elif doExclusion_GG_twostepCC_slepton:
             SRs=["S4ee","S4em","S4mm"]
         elif doExclusion_GG_onestepCC_x12:
