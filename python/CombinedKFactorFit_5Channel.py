@@ -346,6 +346,31 @@ fullChanSyst.append(Systematic("LRI","_NoSys","_LERIDup","_LERIDdown","tree","ov
 
 btagChanSyst = [Systematic("BT",configMgr.weights,bTagHighWeights,bTagLowWeights,"weight","overallSys")]
 
+##### Ptmin
+# CRs
+topPtMin30HLCR = Systematic("PtMinTopHLCR",configMgr.weights,[1.06,1.09,1.13,1.15,1.18,1.13,1.22],[0.94,0.91,0.87,0.85,0.82,0.87,0.78],"user","userNormHistoSys")
+wzPtMin30HLCR = Systematic("PtMinWZHLCR",configMgr.weights,[1.18,1.2,1.18,1.13,1.02,1.16,1.13],[0.82,0.8,0.82,0.87,0.98,0.84,0.87],"user","userNormHistoSys")
+
+topPtMin30DLCR = Systematic("PtMinTopDLCR",configMgr.weights,[1.03,1.05,1.09,1.16,1.15,1.02,1.04,1.18],[0.97,0.95,0.91,0.84,0.85,0.98,0.96,0.82],"user","userNormHistoSys")
+wzPtMin30DLCR = Systematic("PtMinWZDLCR",configMgr.weights,[1.08,1.14,1.17,1.14,1.06,1.01,1.1,1.12],[0.92,0.86,0.83,0.86,0.94,0.99,0.9,0.88],"user","userNormHistoSys")
+
+topPtMin30SLCR = Systematic("PtMinTopSLCR",configMgr.weights,[1.07,1.06,1.12,1.06,1.2,1.24],[0.93,0.94,0.88,0.94,0.8,0.76],"user","userNormHistoSys")
+wzPtMin30SLCR = Systematic("PtMinWZSLCR",configMgr.weights,[1.13,1.2,1.24,1.28,1.26,1.14],[0.87,0.8,0.76,0.72,0.74,0.86],"user","userNormHistoSys")
+
+#SRs
+topPtMin30S3 = Systematic("PtMinTop3",configMgr.weights,1.12,0.88,"user","userOverallSys")
+wzPtMin30S3 = Systematic("PtMinWZ3",configMgr.weights,1.19,0.81,"user","userOverallSys")
+topPtMin30S4 = Systematic("PtMinTop4",configMgr.weights,1.16,0.84,"user","userOverallSys")
+wzPtMin30S4 = Systematic("PtMinWZ4",configMgr.weights,1.08,0.92,"user","userOverallSys")
+topPtMin30SS = Systematic("PtMinTopSS",configMgr.weights,1.02,0.98,"user","userOverallSys")
+wzPtMin30SS = Systematic("PtMinWZSS",configMgr.weights,1.30,0.70,"user","userOverallSys")
+topPtMin30SS = Systematic("PtMinTopSS",configMgr.weights,1.02,0.98,"user","userOverallSys")
+wzPtMin30SS = Systematic("PtMinWZSS",configMgr.weights,1.30,0.70,"user","userOverallSys")
+topPtMin30DLS2 = Systematic("PtMinTopDLS2",configMgr.weights,1.11,0.89,"user","userOverallSys")
+wzPtMin30DLS2 = Systematic("PtMinWZDLS2",configMgr.weights,1.14,0.86,"user","userOverallSys")
+topPtMin30DLS4 = Systematic("PtMinTopDLS4",configMgr.weights,1.01,0.99,"user","userOverallSys")
+wzPtMin30DLS4 = Systematic("PtMinWZDLS4",configMgr.weights,1.08,0.92,"user","userOverallSys")
+
 
 # List of samples and their plotting colours
 AlpGenSamples=[]
