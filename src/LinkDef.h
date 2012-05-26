@@ -11,10 +11,14 @@
 #pragma link C++ class ConfigMgr;
 #pragma link C++ class FitConfig;
 #pragma link C++ class RooExpandedFitResult;
+#pragma link C++ class XtraValues;
 
 #pragma link C++ namespace Util;
-
 #pragma link C++ function Util::GetToyMC;
+
+#pragma link C++ namespace ValidationUtils;
+#pragma link C++ function ValidationUtils::PullPlot3;
+
 
 //////////////////////////////////////
 /// Functions from combination package
