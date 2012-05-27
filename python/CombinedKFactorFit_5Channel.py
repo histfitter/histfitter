@@ -334,7 +334,7 @@ basicChanSyst = []
 basicChanSyst.append(Systematic("JLow","_NoSys","_JESLowup","_JESLowdown","tree","histoSys")) # JES uncertainty - for low pt jets
 basicChanSyst.append(Systematic("JMedium","_NoSys","_JESMediumup","_JESMediumdown","tree","histoSys")) # JES uncertainty - for medium pt jets
 basicChanSyst.append(Systematic("JHigh","_NoSys","_JESHighup","_JESHighdown","tree","histoSys")) # JES uncertainty - for high pt jets
-basicChanSyst.append(Systematic("MC","_NoSys","_METCOup","_METCOdown","tree","overallSys")) # MET cell-out uncertainty - one per channel
+basicChanSyst.append(Systematic("MC","_NoSys","_METCOup","_METCOdown","tree","histoSys")) # MET cell-out uncertainty - one per channel
 basicChanSyst.append(Systematic("MP","_NoSys","_METPUup","_METPUdown","tree","histoSys")) # MET pileup uncertainty - one per channel
              
 fullChanSyst = []
@@ -348,14 +348,49 @@ btagChanSyst = [Systematic("BT",configMgr.weights,bTagHighWeights,bTagLowWeights
 
 ##### Ptmin
 # CRs
-topPtMin30HLCR = Systematic("PtMinTopHLCR",configMgr.weights,[1.06,1.09,1.13,1.15,1.18,1.13,1.22],[0.94,0.91,0.87,0.85,0.82,0.87,0.78],"user","userNormHistoSys")
-wzPtMin30HLCR = Systematic("PtMinWZHLCR",configMgr.weights,[1.18,1.2,1.18,1.13,1.02,1.16,1.13],[0.82,0.8,0.82,0.87,0.98,0.84,0.87],"user","userNormHistoSys")
+# symmetric
 
-topPtMin30DLCR = Systematic("PtMinTopDLCR",configMgr.weights,[1.03,1.05,1.09,1.16,1.15,1.02,1.04,1.18],[0.97,0.95,0.91,0.84,0.85,0.98,0.96,0.82],"user","userNormHistoSys")
-wzPtMin30DLCR = Systematic("PtMinWZDLCR",configMgr.weights,[1.08,1.14,1.17,1.14,1.06,1.01,1.1,1.12],[0.92,0.86,0.83,0.86,0.94,0.99,0.9,0.88],"user","userNormHistoSys")
+#topPtMin30HLCR = Systematic("PtMinTopHLCR",configMgr.weights,[1.06,1.09,1.13,1.15,1.18,1.13,1.22],[0.94,0.91,0.87,0.85,0.82,0.87,0.78],"user","userNormHistoSys")
+#wzPtMin30HLCR = Systematic("PtMinWZHLCR",configMgr.weights,[1.18,1.2,1.18,1.13,1.02,1.16,1.13],[0.82,0.8,0.82,0.87,0.98,0.84,0.87],"user","userNormHistoSys")
 
-topPtMin30SLCR = Systematic("PtMinTopSLCR",configMgr.weights,[1.07,1.06,1.12,1.06,1.2,1.24],[0.93,0.94,0.88,0.94,0.8,0.76],"user","userNormHistoSys")
-wzPtMin30SLCR = Systematic("PtMinWZSLCR",configMgr.weights,[1.13,1.2,1.24,1.28,1.26,1.14],[0.87,0.8,0.76,0.72,0.74,0.86],"user","userNormHistoSys")
+#topPtMin30DLCR = Systematic("PtMinTopDLCR",configMgr.weights,[1.03,1.05,1.09,1.16,1.15,1.02,1.04,1.18],[0.97,0.95,0.91,0.84,0.85,0.98,0.96,0.82],"user","userNormHistoSys")
+#wzPtMin30DLCR = Systematic("PtMinWZDLCR",configMgr.weights,[1.08,1.14,1.17,1.14,1.06,1.01,1.1,1.12],[0.92,0.86,0.83,0.86,0.94,0.99,0.9,0.88],"user","userNormHistoSys")
+
+#topPtMin30SLCR = Systematic("PtMinTopSLCR",configMgr.weights,[1.07,1.06,1.12,1.06,1.2,1.24],[0.93,0.94,0.88,0.94,0.8,0.76],"user","userNormHistoSys")
+#wzPtMin30SLCR = Systematic("PtMinWZSLCR",configMgr.weights,[1.13,1.2,1.24,1.28,1.26,1.14],[0.87,0.8,0.76,0.72,0.74,0.86],"user","userNormHistoSys")
+
+# asymmetric
+
+#topPtMin30HLCR = Systematic("PtMinTopHLCR",configMgr.weights,[1,1,1,1,1,1,1],[0.94,0.91,0.87,0.85,0.82,0.87,0.78],"user","userNormHistoSys")
+#wzPtMin30HLCR = Systematic("PtMinWZHLCR",configMgr.weights,[1,1,1,1,1,1,1],[0.82,0.8,0.82,0.87,0.98,0.84,0.87],"user","userNormHistoSys")
+
+#topPtMin30DLCR = Systematic("PtMinTopDLCR",configMgr.weights,[1,1,1,1,1,1.02,1,1.18],[0.97,0.95,0.91,0.84,0.85,1,0.96,1],"user","userNormHistoSys")
+#wzPtMin30DLCR = Systematic("PtMinWZDLCR",configMgr.weights,[1,1,1,1,1,1.01,1.1,1.12],[0.92,0.86,0.83,0.86,0.94,1,1,1],"user","userNormHistoSys")
+
+#topPtMin30SLCR = Systematic("PtMinTopSLCR",configMgr.weights,[1,1,1,1,1,1.24],[0.93,0.94,0.88,0.94,0.8,1],"user","userNormHistoSys")
+#wzPtMin30SLCR = Systematic("PtMinWZSLCR",configMgr.weights,[1,1,1,1,1,1],[0.87,0.8,0.76,0.72,0.74,0.86],"user","userNormHistoSys")
+
+# symmetric normalized
+
+#topPtMin30HLCR = Systematic("PtMinTopHLCR",configMgr.weights,[1.08,1.05,1.003,1.02,1.05,1.004,1.1],[0.92,0.95,0.997,0.98,0.95,0.996,0.9],"user","userNormHistoSys")
+#wzPtMin30HLCR = Systematic("PtMinWZHLCR",configMgr.weights,[1.001,1.02,1.006,1.06,1.2,1.02,1.06],[0.999,0.98,0.994,0.94,0.8,0.98,0.94],"user","userNormHistoSys")
+
+#topPtMin30DLCR = Systematic("PtMinTopDLCR",configMgr.weights,[1.06,1.04,1.01,1.08,1.07,1.11,1.05,1],[0.94,0.96,0.99,0.92,0.93,0.89,0.95,1],"user","userNormHistoSys")
+#wzPtMin30DLCR = Systematic("PtMinWZDLCR",configMgr.weights,[1.03,1.03,1.07,1.04,1.05,1.13,1,1],[0.97,0.97,0.93,0.96,0.95,0.87,1,1],"user","userNormHistoSys")
+
+#topPtMin30SLCR = Systematic("PtMinTopSLCR",configMgr.weights,[1.003,1.03,1.01,1.02,1.04,1.11],[0.997,0.97,0.99,0.98,0.96,0.89],"user","userNormHistoSys")
+#wzPtMin30SLCR = Systematic("PtMinWZSLCR",configMgr.weights,[1.03,1.04,1.1,1.14,1.12,1.03],[0.97,0.96,0.9,0.86,0.88,0.97],"user","userNormHistoSys")
+
+# asymmetric normalized
+
+topPtMin30HLCR = Systematic("PtMinTopHLCR",configMgr.weights,[1.08,1.05,1.003,1.001,1.001,1.004,1.001],[0.999,0.999,0.999,0.98,0.95,0.999,0.9],"user","userNormHistoSys")
+wzPtMin30HLCR = Systematic("PtMinWZHLCR",configMgr.weights,[1.001,1.001,1.006,1.06,1.2,1.02,1.06],[0.999,0.98,0.999,0.999,0.999,0.999,0.999],"user","userNormHistoSys")
+
+topPtMin30DLCR = Systematic("PtMinTopDLCR",configMgr.weights,[1.06,1.04,1.001,1.001,1.001,1.11,1.05,1],[0.999,0.999,0.99,0.92,0.93,0.999,0.999,1],"user","userNormHistoSys")
+wzPtMin30DLCR = Systematic("PtMinWZDLCR",configMgr.weights,[1.03,1.001,1.001,1.001,1.05,1.13,1,1],[0.999,0.97,0.93,0.96,0.999,0.999,1,1],"user","userNormHistoSys")
+topPtMin30SLCR = Systematic("PtMinTopSLCR",configMgr.weights,[1.003,1.04,1.001,1.001,1.001,1.11],[0.999,0.999,0.99,0.98,0.96,0.999],"user","userNormHistoSys")
+wzPtMin30SLCR = Systematic("PtMinWZSLCR",configMgr.weights,[1.03,1.001,1.001,1.001,1.001,1.03],[0.999,0.96,0.9,0.86,0.88,0.999],"user","userNormHistoSys")
+
 
 #SRs
 topPtMin30S3 = Systematic("PtMinTop3",configMgr.weights,1.12,0.88,"user","userOverallSys")
