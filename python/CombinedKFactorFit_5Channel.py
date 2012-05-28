@@ -31,7 +31,7 @@ def removeWeight(oldList,oldWeight):
 
 onLxplus='lx' in commands.getstatusoutput("hostname")[1] or 'vm' in commands.getstatusoutput("hostname")[1]
 useHardLepCR=True
-useSoftLepCR=False
+useSoftLepCR=True
 useDiLepCR=True
 useStat=True
 fullSyst=True
@@ -383,26 +383,26 @@ btagChanSyst = [Systematic("BT",configMgr.weights,bTagHighWeights,bTagLowWeights
 
 # asymmetric normalized
 
-topPtMin30HLCR = Systematic("PtMinTopHLCR",configMgr.weights,[1.08,1.05,1.003,1.001,1.001,1.004,1.001],[0.999,0.999,0.999,0.98,0.95,0.999,0.9],"user","userNormHistoSys")
-wzPtMin30HLCR = Systematic("PtMinWZHLCR",configMgr.weights,[1.001,1.001,1.006,1.06,1.2,1.02,1.06],[0.999,0.98,0.999,0.999,0.999,0.999,0.999],"user","userNormHistoSys")
+topPtMin30HLCR = Systematic("PtMinTop",configMgr.weights,[1.08,1.05,1.003,1.001,1.001,1.004,1.001],[0.999,0.999,0.999,0.98,0.95,0.999,0.9],"user","userNormHistoSys")
+wzPtMin30HLCR = Systematic("PtMinWZ",configMgr.weights,[1.001,1.001,1.006,1.06,1.2,1.02,1.06],[0.999,0.98,0.999,0.999,0.999,0.999,0.999],"user","userNormHistoSys")
 
-topPtMin30DLCR = Systematic("PtMinTopDLCR",configMgr.weights,[1.06,1.04,1.001,1.001,1.001,1.11,1.05,1],[0.999,0.999,0.99,0.92,0.93,0.999,0.999,1],"user","userNormHistoSys")
-wzPtMin30DLCR = Systematic("PtMinWZDLCR",configMgr.weights,[1.03,1.001,1.001,1.001,1.05,1.13,1,1],[0.999,0.97,0.93,0.96,0.999,0.999,1,1],"user","userNormHistoSys")
-topPtMin30SLCR = Systematic("PtMinTopSLCR",configMgr.weights,[1.003,1.04,1.001,1.001,1.001,1.11],[0.999,0.999,0.99,0.98,0.96,0.999],"user","userNormHistoSys")
-wzPtMin30SLCR = Systematic("PtMinWZSLCR",configMgr.weights,[1.03,1.001,1.001,1.001,1.001,1.03],[0.999,0.96,0.9,0.86,0.88,0.999],"user","userNormHistoSys")
+topPtMin30DLCR = Systematic("PtMinTop",configMgr.weights,[1.06,1.04,1.001,1.001,1.001,1.11,1.05,1],[0.999,0.999,0.99,0.92,0.93,0.999,0.999,1],"user","userNormHistoSys")
+wzPtMin30DLCR = Systematic("PtMinWZ",configMgr.weights,[1.03,1.001,1.001,1.001,1.05,1.13,1,1],[0.999,0.97,0.93,0.96,0.999,0.999,1,1],"user","userNormHistoSys")
+topPtMin30SLCR = Systematic("PtMinTop",configMgr.weights,[1.003,1.04,1.001,1.001,1.001,1.11],[0.999,0.999,0.99,0.98,0.96,0.999],"user","userNormHistoSys")
+wzPtMin30SLCR = Systematic("PtMinWZ",configMgr.weights,[1.03,1.001,1.001,1.001,1.001,1.03],[0.999,0.96,0.9,0.86,0.88,0.999],"user","userNormHistoSys")
 
 
 #SRs
-topPtMin30S3 = Systematic("PtMinTop3",configMgr.weights,1.12,0.88,"user","userOverallSys")
-wzPtMin30S3 = Systematic("PtMinWZ3",configMgr.weights,1.19,0.81,"user","userOverallSys")
-topPtMin30S4 = Systematic("PtMinTop4",configMgr.weights,1.16,0.84,"user","userOverallSys")
-wzPtMin30S4 = Systematic("PtMinWZ4",configMgr.weights,1.08,0.92,"user","userOverallSys")
-topPtMin30SS = Systematic("PtMinTopSS",configMgr.weights,1.02,0.98,"user","userOverallSys")
-wzPtMin30SS = Systematic("PtMinWZSS",configMgr.weights,1.30,0.70,"user","userOverallSys")
-topPtMin30DLS2 = Systematic("PtMinTopDLS2",configMgr.weights,1.11,0.89,"user","userOverallSys")
-wzPtMin30DLS2 = Systematic("PtMinWZDLS2",configMgr.weights,1.14,0.86,"user","userOverallSys")
-topPtMin30DLS4 = Systematic("PtMinTopDLS4",configMgr.weights,1.01,0.99,"user","userOverallSys")
-wzPtMin30DLS4 = Systematic("PtMinWZDLS4",configMgr.weights,1.08,0.92,"user","userOverallSys")
+topPtMin30S3 = Systematic("PtMinTop",configMgr.weights,1.12,0.88,"user","userOverallSys")
+wzPtMin30S3 = Systematic("PtMinWZ",configMgr.weights,1.19,0.81,"user","userOverallSys")
+topPtMin30S4 = Systematic("PtMinTop",configMgr.weights,1.16,0.84,"user","userOverallSys")
+wzPtMin30S4 = Systematic("PtMinWZ",configMgr.weights,1.08,0.92,"user","userOverallSys")
+topPtMin30SS = Systematic("PtMinTop",configMgr.weights,1.02,0.98,"user","userOverallSys")
+wzPtMin30SS = Systematic("PtMinWZ",configMgr.weights,1.30,0.70,"user","userOverallSys")
+topPtMin30DLS2 = Systematic("PtMinTop",configMgr.weights,1.11,0.89,"user","userOverallSys")
+wzPtMin30DLS2 = Systematic("PtMinWZ",configMgr.weights,1.14,0.86,"user","userOverallSys")
+topPtMin30DLS4 = Systematic("PtMinTop",configMgr.weights,1.01,0.99,"user","userOverallSys")
+wzPtMin30DLS4 = Systematic("PtMinWZ",configMgr.weights,1.08,0.92,"user","userOverallSys")
 
 
 # List of samples and their plotting colours
