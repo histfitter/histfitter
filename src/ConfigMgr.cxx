@@ -30,6 +30,7 @@ ConfigMgr::ConfigMgr()
   m_saveTree=false;
   m_doHypoTest=false;
   m_useCLs=true;
+  m_fixSigXSec=false;
   m_doUL=true;
   m_seed=0;
   m_nPoints=10;
@@ -134,72 +135,89 @@ ConfigMgr::fit(FitConfig* fc)
 void 
 ConfigMgr::doHypoTestAll(TString outdir)
 {
-  for(unsigned int i=0; i<m_fitConfigs.size(); i++) {
-    doHypoTest( m_fitConfigs.at(i) , outdir);
+   for(unsigned int i=0; i<m_fitConfigs.size(); i++) {
+      if( m_fixSigXSec ){
+         doHypoTest( m_fitConfigs.at(i), outdir, 0. );
+         double SigXSecSysnsigma = 1.;
+         doHypoTest( m_fitConfigs.at(i), outdir, SigXSecSysnsigma );
+         doHypoTest( m_fitConfigs.at(i), outdir, SigXSecSysnsigma*(-1.) );
+      }else{
+         doHypoTest( m_fitConfigs.at(i) , outdir, 0.);
+      }
   }
   return;
 }
 
 void 
-ConfigMgr::doHypoTest(int i , TString outdir)
+ConfigMgr::doHypoTest(int i , TString outdir, double SigXSecSysnsigma)
 {
-  return doHypoTest( m_fitConfigs.at(i), outdir );
+   return doHypoTest( m_fitConfigs.at(i), outdir, SigXSecSysnsigma );
 }
 
 void 
-ConfigMgr::doHypoTest(FitConfig* fc, TString outdir)
+ConfigMgr::doHypoTest(FitConfig* fc, TString outdir, double SigXSecSysnsigma)
 {
-  TString outfileName = m_outputFileName;
-  outfileName.ReplaceAll(".root","_hypotest.root");
-  outfileName.ReplaceAll("results/",outdir);
-  TFile* outfile = TFile::Open(outfileName,"UPDATE");
-  if(!outfile){ cerr<<"ERROR TFile <" << outfileName << "> could not be opened"<<endl; return; }
+   TString outfileName = m_outputFileName;
+   TString suffix = "_hypotest.root";
+   if ( m_fixSigXSec ){
+      TString SigXSec = ( SigXSecSysnsigma > 0.? "Up" : ( SigXSecSysnsigma < 0. ? "Down" : "Nominal" ));
+      suffix = "_fixSigXSec"+SigXSec+"_hypotest.root";
+   }
+   outfileName.ReplaceAll(".root", suffix);
+   outfileName.ReplaceAll("results/",outdir);
+   TFile* outfile = TFile::Open(outfileName,"UPDATE");
+   if(!outfile){ cerr<<"ERROR TFile <" << outfileName << "> could not be opened"<<endl; return; }
+   
+   TFile* inFile = TFile::Open(fc->m_inputWorkspaceFileName);
+   if(!inFile){ cout<<"ERROR TFile could not be opened"<<endl; return; }
+   
+   RooWorkspace* w = (RooWorkspace*)inFile->Get("combined");
+   if(w==NULL){ cout<<"workspace 'combined' does not exist in file"<<endl; return; }
+   
+   cout << "Processing analysis " << fc->m_signalSampleName << endl;
+   
+   if ((fc->m_signalSampleName).Contains("Bkg") || (fc->m_signalSampleName) == "") {
+      cout << "No hypothesis test performed for background fits." << endl;
+      inFile->Close();  
+      outfile->Close(); 
+      return;
+   }
 
-  TFile* inFile = TFile::Open(fc->m_inputWorkspaceFileName);
-  if(!inFile){ cout<<"ERROR TFile could not be opened"<<endl; return; }
+   if(m_fixSigXSec && fc->m_signalSampleName != "" ){
+      w->var("alpha_SigXSec")->setVal(SigXSecSysnsigma);
+      w->var("alpha_SigXSec")->setConstant(true);
+   }
   
-  RooWorkspace* w = (RooWorkspace*)inFile->Get("combined");
-  if(w==NULL){ cout<<"workspace 'combined' does not exist in file"<<endl; return; }
-  
-  cout << "Processing analysis " << fc->m_signalSampleName << endl;
-  
-  if ((fc->m_signalSampleName).Contains("Bkg") || (fc->m_signalSampleName) == "") {
-    cout << "No hypothesis test performed for background fits." << endl;
-    inFile->Close();  
-    outfile->Close(); 
-    return;
-  }
-  
-  //Do first fit and save fit result in order to control fit quality
-  
-  RooFitResult* fitresult = Util::doFreeFit( w, 0, false, true ); // reset fit paremeters after the fit ...
-  
-  if(fitresult) {	
-    outfile->cd();
-    TString hypName="fitTo_"+fc->m_signalSampleName;
-    fitresult->SetName(hypName);
-    fitresult->Print();
-    fitresult->Write();
-    cout << ">>> Now storing RooFitResult <" << hypName << ">" << endl;
-  }
-  
-  RooStats::HypoTestInverterResult* hypo = RooStats::DoHypoTestInversion(w,m_nToys,m_calcType,m_testStatType); 
-  
-  if(hypo){	
-    outfile->cd();
-    TString hypName="hypo_"+fc->m_signalSampleName;
-    hypo->SetName(hypName);
-    hypo->Write();
-    cout << ">>> Now storing HypoTestInverterResult <" << hypName << ">" << endl;
-    delete hypo;
-  }
-
-  cout << ">>> Done. Stored HypoTestInverterResult and fit result in file <" << outfileName << ">" << endl;
-  
-  inFile->Close();  
-  outfile->Close();
-
-  return;
+   //Do first fit and save fit result in order to control fit quality
+   
+   RooFitResult* fitresult = Util::doFreeFit( w, 0, false, true ); // reset fit paremeters after the fit ...
+   
+   if(fitresult) {	
+      outfile->cd();
+      TString hypName="fitTo_"+fc->m_signalSampleName;
+      fitresult->SetName(hypName);
+      fitresult->Print();
+      fitresult->Write();
+      cout << ">>> Now storing RooFitResult <" << hypName << ">" << endl;
+   }
+   
+   RooStats::HypoTestInverterResult* hypo = RooStats::DoHypoTestInversion(w,m_nToys,m_calcType,m_testStatType); 
+   
+   if(hypo){	
+      outfile->cd();
+      TString hypName="hypo_"+fc->m_signalSampleName;
+      hypo->SetName(hypName);
+      hypo->Write();
+      cout << ">>> Now storing HypoTestInverterResult <" << hypName << ">" << endl;
+      delete hypo;
+   }
+   
+   cout << ">>> Done. Stored HypoTestInverterResult and fit result in file <" << outfileName << ">" << endl;
+   
+   inFile->Close();  
+   outfile->Close();
+   
+   return;
 }
 
 

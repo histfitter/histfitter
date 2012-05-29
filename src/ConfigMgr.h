@@ -47,8 +47,8 @@ public:
 
   void fit(int i);
   void fit(FitConfig* fc);
-  void doHypoTest(int i, TString outdir="results/");
-  void doHypoTest(FitConfig* fc, TString outdir="results/");
+  void doHypoTest(int i, TString outdir="results/", double nsigma=0.);
+  void doHypoTest(FitConfig* fc, TString outdir="results/", double nsigma=0.);
   void doUpperLimit(int i);
   void doUpperLimit(FitConfig* fc);
   void runToys(int i);
@@ -73,6 +73,9 @@ public:
   void setCLs(const bool& cls=true) { m_useCLs=cls; }
   bool getCLs() { return m_useCLs; }
 
+  void setfixSigXSec(const bool& fix=true) { m_fixSigXSec = fix; }
+  bool getfixSigXSec() { return m_fixSigXSec; }
+    
   void setExclusion(const bool& cls=true) { m_doUL=cls; }
   bool getExclusion() { return m_doUL; }
 
@@ -102,6 +105,7 @@ public:
   int  m_calcType;
   int  m_testStatType;
   bool m_useCLs;
+  bool m_fixSigXSec;
   bool m_doUL;
   int  m_nPoints;
   int  m_seed;

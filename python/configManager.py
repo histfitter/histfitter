@@ -46,6 +46,7 @@ class ConfigManager(object):
         self.testStatType=3   # one-sided test statistic
         self.useCLs=True # use CLs for upper limits, or not
         self.doExclusion=True # true = exclusion, false = discovery test
+        self.fixSigXSec=False # true = fix SigXSec by nominal, +/-1sigma
         self.nPoints=20 # number of points in upper limit evaluation
         self.seed=0 # seed for random generator. default is clock
         self.muValGen = 0.0 # mu_sig used for toy generation
@@ -242,6 +243,7 @@ class ConfigManager(object):
         self.cppMgr.setTestStatType( self.testStatType )  # one-sided test statistic
         self.cppMgr.setCLs( self.useCLs )
         self.cppMgr.setExclusion( self.doExclusion )
+        self.cppMgr.setfixSigXSec( self.fixSigXSec )
         self.cppMgr.setNPoints( self.nPoints )
         self.cppMgr.setSeed( self.seed )
         self.cppMgr.setMuValGen( self.muValGen )
@@ -328,6 +330,7 @@ class ConfigManager(object):
         print "outputLumi: %.3f"%self.outputLumi
         print "nTOYs: %i"%self.nTOYs
         print "doHypoTest: %s"%self.doHypoTest
+        print "fixSigXSec: %s"%self.fixSigXSec
         print "Systematics: %s"%self.systDict.keys()
         if verbose > 1:
             print "Cuts Dictionnary: %s"%self.cutsDict
