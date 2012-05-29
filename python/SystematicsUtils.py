@@ -52,24 +52,38 @@ def getISRWeightsLow(sig):
     return isrLowWeights
 
 
-def getHadronizationSyst(CRval,SRval,sample,observable):
+def hadroSys(CRval,SRval,sample,observable):
     if CRval>SRval:
         raise RuntimeError("Unsupported case: CRval=%f is larger than SRval=%f"%(CRval,SRval))
     #Linear relation of form: y=ax+b
 
     if sample=="ttbar" and observable=="meff":
-        a=0.000220 #+- 0.000083
+        #f(x) = 1.092 -0.000220*x
+        a=-0.000220 #+- 0.000083
         #b=1.092 +- 0.045
     elif sample=="ttbar" and observable=="met":
+        #f(x) = 1.015 - 0.000216 * x
+        a=-0.000216
+        #b=1.015
+    elif sample=="WZ" and observable=="meff":
+        #f(x)= 1.075 - 0.000177*x
+        a=-0.000177
+        #b=1.075
+    elif sample=="WZ" and observable=="met":
+        #f(x) = 9.918109e-01+1.109077e-04 * x
         a=0.0001109077
         #b=0.9918109
-    elif sample=="WZ" and observable=="meff":
-        raise RuntimeError("Unsupported case: sample=%s, observable=%s"%(sample,observable))
-    elif sample=="WZ" and observable=="met":
-        raise RuntimeError("Unsupported case: sample=%s, observable=%s"%(sample,observable))
     else:
         raise RuntimeError("Unsupported case: sample=%s, observable=%s"%(sample,observable))
 
     syst=a*(SRval-CRval)
-    print "%s %s CR=%f SR=%f --> syst=%f"%(sample,observable,CRval,SRval,syst)
+    #print "hadronization systematic for %s %s CR=%f SR=%f --> syst=%f"%(sample,observable,CRval,SRval,syst)
     return syst
+
+def addHadronizationSyst(chan,topSyst,WZSyst):
+    for s in chan.sampleList:
+        if s.name.startswith("Top"):
+            s.addSystematic(topSyst)
+        elif s.name.startswith("WZ"):
+            s.addSystematic(WZSyst)
+    return
