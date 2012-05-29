@@ -36,15 +36,16 @@ useDiLepCR=True
 useStat=True
 fullSyst=True
 
+doTableInputs=True #This effectively means no validation plots but only validation tables (but is 100x faster)
 doValidationSRLoose=False
-doValidationSRTight=False
-doValidationSlope=False
-doValidationDilep=False
-doValidationDilepZ=False
-doValidationSoftLep=False
+doValidationSRTight=True
+doValidationSlope=True
+doValidationDilep=True
+doValidationDilepZ=True
+doValidationSoftLep=True
 
 doExclusion_GMSB_combined=False
-doExclusion_mSUGRA_dilepton_combined=False
+doExclusion_mSUGRA_dilepton_combined=True
 doExclusion_GG_onestepCC_x12=False
 doExclusion_GG_onestepCC_gridX=False
 doExclusion_GG_twostepCC_slepton=False
@@ -66,8 +67,8 @@ if configMgr.executeHistFactory:
     doSignalOnly=False
     
 if not 'sigSamples' in dir():
-#        sigSamples=["SU_580_240_0_10_P"]
-        sigSamples=["SM_GG_onestepCC_445_245_45"]
+        sigSamples=["SU_580_240_0_10_P"]
+        #sigSamples=["SM_GG_onestepCC_445_245_45"]
     #    sigSamples=["SM_GG_twostepCC_slepton_415_215_115_15"]
     #    sigSamples=["GMSB_3_2d_50_250_3_10_1_1"]
 
@@ -346,51 +347,15 @@ fullChanSyst.append(Systematic("LRI","_NoSys","_LERIDup","_LERIDdown","tree","ov
 
 btagChanSyst = [Systematic("BT",configMgr.weights,bTagHighWeights,bTagLowWeights,"weight","overallSys")]
 
-##### Ptmin
+##### Ptmin (asymmetric normalized)
+
 # CRs
-# symmetric
-
-#topPtMin30HLCR = Systematic("PtMinTopHLCR",configMgr.weights,[1.06,1.09,1.13,1.15,1.18,1.13,1.22],[0.94,0.91,0.87,0.85,0.82,0.87,0.78],"user","userNormHistoSys")
-#wzPtMin30HLCR = Systematic("PtMinWZHLCR",configMgr.weights,[1.18,1.2,1.18,1.13,1.02,1.16,1.13],[0.82,0.8,0.82,0.87,0.98,0.84,0.87],"user","userNormHistoSys")
-
-#topPtMin30DLCR = Systematic("PtMinTopDLCR",configMgr.weights,[1.03,1.05,1.09,1.16,1.15,1.02,1.04,1.18],[0.97,0.95,0.91,0.84,0.85,0.98,0.96,0.82],"user","userNormHistoSys")
-#wzPtMin30DLCR = Systematic("PtMinWZDLCR",configMgr.weights,[1.08,1.14,1.17,1.14,1.06,1.01,1.1,1.12],[0.92,0.86,0.83,0.86,0.94,0.99,0.9,0.88],"user","userNormHistoSys")
-
-#topPtMin30SLCR = Systematic("PtMinTopSLCR",configMgr.weights,[1.07,1.06,1.12,1.06,1.2,1.24],[0.93,0.94,0.88,0.94,0.8,0.76],"user","userNormHistoSys")
-#wzPtMin30SLCR = Systematic("PtMinWZSLCR",configMgr.weights,[1.13,1.2,1.24,1.28,1.26,1.14],[0.87,0.8,0.76,0.72,0.74,0.86],"user","userNormHistoSys")
-
-# asymmetric
-
-#topPtMin30HLCR = Systematic("PtMinTopHLCR",configMgr.weights,[1,1,1,1,1,1,1],[0.94,0.91,0.87,0.85,0.82,0.87,0.78],"user","userNormHistoSys")
-#wzPtMin30HLCR = Systematic("PtMinWZHLCR",configMgr.weights,[1,1,1,1,1,1,1],[0.82,0.8,0.82,0.87,0.98,0.84,0.87],"user","userNormHistoSys")
-
-#topPtMin30DLCR = Systematic("PtMinTopDLCR",configMgr.weights,[1,1,1,1,1,1.02,1,1.18],[0.97,0.95,0.91,0.84,0.85,1,0.96,1],"user","userNormHistoSys")
-#wzPtMin30DLCR = Systematic("PtMinWZDLCR",configMgr.weights,[1,1,1,1,1,1.01,1.1,1.12],[0.92,0.86,0.83,0.86,0.94,1,1,1],"user","userNormHistoSys")
-
-#topPtMin30SLCR = Systematic("PtMinTopSLCR",configMgr.weights,[1,1,1,1,1,1.24],[0.93,0.94,0.88,0.94,0.8,1],"user","userNormHistoSys")
-#wzPtMin30SLCR = Systematic("PtMinWZSLCR",configMgr.weights,[1,1,1,1,1,1],[0.87,0.8,0.76,0.72,0.74,0.86],"user","userNormHistoSys")
-
-# symmetric normalized
-
-#topPtMin30HLCR = Systematic("PtMinTopHLCR",configMgr.weights,[1.08,1.05,1.003,1.02,1.05,1.004,1.1],[0.92,0.95,0.997,0.98,0.95,0.996,0.9],"user","userNormHistoSys")
-#wzPtMin30HLCR = Systematic("PtMinWZHLCR",configMgr.weights,[1.001,1.02,1.006,1.06,1.2,1.02,1.06],[0.999,0.98,0.994,0.94,0.8,0.98,0.94],"user","userNormHistoSys")
-
-#topPtMin30DLCR = Systematic("PtMinTopDLCR",configMgr.weights,[1.06,1.04,1.01,1.08,1.07,1.11,1.05,1],[0.94,0.96,0.99,0.92,0.93,0.89,0.95,1],"user","userNormHistoSys")
-#wzPtMin30DLCR = Systematic("PtMinWZDLCR",configMgr.weights,[1.03,1.03,1.07,1.04,1.05,1.13,1,1],[0.97,0.97,0.93,0.96,0.95,0.87,1,1],"user","userNormHistoSys")
-
-#topPtMin30SLCR = Systematic("PtMinTopSLCR",configMgr.weights,[1.003,1.03,1.01,1.02,1.04,1.11],[0.997,0.97,0.99,0.98,0.96,0.89],"user","userNormHistoSys")
-#wzPtMin30SLCR = Systematic("PtMinWZSLCR",configMgr.weights,[1.03,1.04,1.1,1.14,1.12,1.03],[0.97,0.96,0.9,0.86,0.88,0.97],"user","userNormHistoSys")
-
-# asymmetric normalized
-
 topPtMin30HLCR = Systematic("PtMinTop",configMgr.weights,[1.08,1.05,1.003,1.001,1.001,1.004,1.001],[0.999,0.999,0.999,0.98,0.95,0.999,0.9],"user","userNormHistoSys")
 wzPtMin30HLCR = Systematic("PtMinWZ",configMgr.weights,[1.001,1.001,1.006,1.06,1.2,1.02,1.06],[0.999,0.98,0.999,0.999,0.999,0.999,0.999],"user","userNormHistoSys")
-
 topPtMin30DLCR = Systematic("PtMinTop",configMgr.weights,[1.06,1.04,1.001,1.001,1.001,1.11,1.05,1],[0.999,0.999,0.99,0.92,0.93,0.999,0.999,1],"user","userNormHistoSys")
 wzPtMin30DLCR = Systematic("PtMinWZ",configMgr.weights,[1.03,1.001,1.001,1.001,1.05,1.13,1,1],[0.999,0.97,0.93,0.96,0.999,0.999,1,1],"user","userNormHistoSys")
 topPtMin30SLCR = Systematic("PtMinTop",configMgr.weights,[1.003,1.04,1.001,1.001,1.001,1.11],[0.999,0.999,0.99,0.98,0.96,0.999],"user","userNormHistoSys")
 wzPtMin30SLCR = Systematic("PtMinWZ",configMgr.weights,[1.03,1.001,1.001,1.001,1.001,1.03],[0.999,0.96,0.9,0.86,0.88,0.999],"user","userNormHistoSys")
-
 
 #SRs
 topPtMin30S3 = Systematic("PtMinTop",configMgr.weights,1.12,0.88,"user","userOverallSys")
@@ -404,6 +369,25 @@ wzPtMin30DLS2 = Systematic("PtMinWZ",configMgr.weights,1.14,0.86,"user","userOve
 topPtMin30DLS4 = Systematic("PtMinTop",configMgr.weights,1.01,0.99,"user","userOverallSys")
 wzPtMin30DLS4 = Systematic("PtMinWZ",configMgr.weights,1.08,0.92,"user","userOverallSys")
 
+##Hadronization in SRs
+from SystematicsUtils import hadroSys,addHadronizationSyst
+hadTop_SR3jT = Systematic("had",configMgr.weights,1.0+hadroSys(500.0,1200.0,"ttbar","meff"),1.0-hadroSys(500.0,1200.0,"ttbar","meff"),"user","userOverallSys")
+hadWZ_SR3jT  = Systematic("had",configMgr.weights,1.0+hadroSys(500.0,1200.0,"WZ","meff"),   1.0-hadroSys(500.0,1200.0,"WZ","meff"),"user","userOverallSys")
+#SR4jT
+hadTop_SR4jT = Systematic("had",configMgr.weights,1.0+hadroSys(500.0,800.0,"ttbar","meff"),1.0-hadroSys(500.0,800.0,"ttbar","meff"),"user","userOverallSys")
+hadWZ_SR4jT  = Systematic("had",configMgr.weights,1.0+hadroSys(500.0,800.0,"WZ","meff"),   1.0-hadroSys(500.0,800.0,"WZ","meff"),"user","userOverallSys")
+#SR7jT
+hadTop_SR7jT = Systematic("had",configMgr.weights,1.0+hadroSys(500.0,650.0,"ttbar","meff"),1.0-hadroSys(500.0,750.0,"ttbar","meff"),"user","userOverallSys")
+hadWZ_SR7jT  = Systematic("had",configMgr.weights,1.0+hadroSys(500.0,650.0,"WZ","meff"),   1.0-hadroSys(500.0,750.0,"WZ","meff"),"user","userOverallSys")
+#SL
+hadTop_SRSL = Systematic("had",configMgr.weights,1.0+hadroSys(180.0,250.0,"ttbar","met"),1.0-hadroSys(180.0,250.0,"ttbar","met"),"user","userOverallSys")
+hadWZ_SRSL  = Systematic("had",configMgr.weights,1.0+hadroSys(180.0,250.0,"WZ","met"),   1.0-hadroSys(180.0,250.0,"WZ","met"),"user","userOverallSys")
+#S2
+hadTop_SRS2 = Systematic("had",configMgr.weights,1.0+hadroSys(80.0,300.0,"ttbar","met"),1.0-hadroSys(80.0,300.0,"ttbar","met"),"user","userOverallSys")
+hadWZ_SRS2  = Systematic("had",configMgr.weights,1.0+hadroSys(50.0,300.0,"WZ","met"),   1.0-hadroSys(50.0,300.0,"WZ","met"),"user","userOverallSys")
+#S4
+hadTop_SRS4 = Systematic("had",configMgr.weights,1.0+hadroSys(0.0,650.0,"ttbar","meff"),1.0-hadroSys(0.0,650.0,"ttbar","meff"),"user","userOverallSys")
+hadWZ_SRS4  = Systematic("had",configMgr.weights,1.0+hadroSys(0.0,650.0,"WZ","meff"),   1.0-hadroSys(0.0,650.0,"WZ","meff"),"user","userOverallSys")
 
 # List of samples and their plotting colours
 AlpGenSamples=[]
@@ -918,20 +902,25 @@ pt2BinLowTR = 0.
 #meffBinLow = 0.
 pt2BinHighTR = 800.
 
-if doValidationSlope:
+if doValidationSlope or doTableInputs:
     # check impact of kfactor fit on several distributions
     #TR
-    meffTR_El=bkgOnly.addValidationChannel("meffInc",["TRElVR"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
-    meffTR_Mu=bkgOnly.addValidationChannel("meffInc",["TRMuVR"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
-    metTR_El=bkgOnly.addValidationChannel("met",["TRElVR2"],metNBinsTR,metBinLowTR,metBinHighTR)
-    metTR_Mu=bkgOnly.addValidationChannel("met",["TRMuVR2"],metNBinsTR,metBinLowTR,metBinHighTR)
-    pt1TR_El=bkgOnly.addValidationChannel("jet1Pt",["TRElVR"],pt1NBinsTR,pt1BinLowTR,pt1BinHighTR)
-    pt1TR_Mu=bkgOnly.addValidationChannel("jet1Pt",["TRMuVR"],pt1NBinsTR,pt1BinLowTR,pt1BinHighTR)
-    pt2TR_El=bkgOnly.addValidationChannel("jet2Pt",["TRElVR"],pt2NBinsTR,pt2BinLowTR,pt2BinHighTR)
-    pt2TR_Mu=bkgOnly.addValidationChannel("jet2Pt",["TRMuVR"],pt2NBinsTR,pt2BinLowTR,pt2BinHighTR)
-
-    validationSlopeTRChannels = [meffTR_El,meffTR_Mu,metTR_El,metTR_Mu,pt1TR_El,pt1TR_Mu,pt2TR_El,pt2TR_Mu]
-    
+    validationSlopeTRChannels=[]
+    if doTableInputs:
+        validationSlopeTRChannels.append( bkgOnly.addValidationChannel("meffInc",["TRElVR"],1,meffBinLowTR,meffBinHighTR) )
+        validationSlopeTRChannels.append( bkgOnly.addValidationChannel("meffInc",["TRMuVR"],1,meffBinLowTR,meffBinHighTR) )
+        validationSlopeTRChannels.append( bkgOnly.addValidationChannel("met",["TRElVR2"],1,metBinLowTR,metBinHighTR) )
+        validationSlopeTRChannels.append( bkgOnly.addValidationChannel("met",["TRMuVR2"],1,metBinLowTR,metBinHighTR) )
+    else:
+        validationSlopeTRChannels.append( bkgOnly.addValidationChannel("meffInc",["TRElVR"],meffNBinsTR,meffBinLowTR,meffBinHighTR) )
+        validationSlopeTRChannels.append( bkgOnly.addValidationChannel("meffInc",["TRMuVR"],meffNBinsTR,meffBinLowTR,meffBinHighTR) )
+        validationSlopeTRChannels.append( bkgOnly.addValidationChannel("met",["TRElVR2"],metNBinsTR,metBinLowTR,metBinHighTR) )
+        validationSlopeTRChannels.append( bkgOnly.addValidationChannel("met",["TRMuVR2"],metNBinsTR,metBinLowTR,metBinHighTR) )
+        validationSlopeTRChannels.append( bkgOnly.addValidationChannel("jet1Pt",["TRElVR"],pt1NBinsTR,pt1BinLowTR,pt1BinHighTR) )
+        validationSlopeTRChannels.append( bkgOnly.addValidationChannel("jet1Pt",["TRMuVR"],pt1NBinsTR,pt1BinLowTR,pt1BinHighTR) )
+        validationSlopeTRChannels.append( bkgOnly.addValidationChannel("jet2Pt",["TRElVR"],pt2NBinsTR,pt2BinLowTR,pt2BinHighTR) )
+        validationSlopeTRChannels.append( bkgOnly.addValidationChannel("jet2Pt",["TRMuVR"],pt2NBinsTR,pt2BinLowTR,pt2BinHighTR) )
+        pass
     # add systematics
     for chan in validationSlopeTRChannels:
         if chan.name.find("El")>-1:
@@ -944,13 +933,16 @@ if doValidationSlope:
             chan.addSystematic(syst)
                     
     # WR
-    wptWR_El=bkgOnly.addValidationChannel("Wpt",["WRElVR"],metNBinsTR,metBinLowTR,metBinHighTR)
-    wptWR_Mu=bkgOnly.addValidationChannel("Wpt",["WRMuVR"],metNBinsTR,metBinLowTR,metBinHighTR)
-    metWR_El=bkgOnly.addValidationChannel("met",["WRElVR"],metNBinsTR,metBinLowTR,metBinHighTR)
-    metWR_Mu=bkgOnly.addValidationChannel("met",["WRMuVR"],metNBinsTR,metBinLowTR,metBinHighTR)
-    
-    validationSlopeWRChannels = [wptWR_El, wptWR_Mu, metWR_El, metWR_Mu]
-    
+    validationSlopeWRChannels=[]
+    if doTableInputs:
+        validationSlopeWRChannels.append( bkgOnly.addValidationChannel("met",["WRElVR"],1,metBinLowTR,metBinHighTR) )
+        validationSlopeWRChannels.append( bkgOnly.addValidationChannel("met",["WRMuVR"],1,metBinLowTR,metBinHighTR) )
+    else:
+        validationSlopeWRChannels.append( bkgOnly.addValidationChannel("Wpt",["WRElVR"],metNBinsTR,metBinLowTR,metBinHighTR) )
+        validationSlopeWRChannels.append( bkgOnly.addValidationChannel("Wpt",["WRMuVR"],metNBinsTR,metBinLowTR,metBinHighTR) )
+        validationSlopeWRChannels.append( bkgOnly.addValidationChannel("met",["WRElVR"],metNBinsTR,metBinLowTR,metBinHighTR) )
+        validationSlopeWRChannels.append( bkgOnly.addValidationChannel("met",["WRMuVR"],metNBinsTR,metBinLowTR,metBinHighTR) )
+        pass
     # add systematics
     for chan in validationSlopeWRChannels:
         if chan.name.find("El")>-1:
@@ -963,11 +955,14 @@ if doValidationSlope:
             chan.addSystematic(syst)
 
     #ZR
-    ZptZR_ee=bkgOnly.addValidationChannel("Zpt",["ZRee"],metNBinsTR,metBinLowTR,metBinHighTR)
-    ZptZR_mm=bkgOnly.addValidationChannel("Zpt",["ZRmm"],metNBinsTR,metBinLowTR,metBinHighTR)
-    
-    validationSlopeZRChannels = [ZptZR_ee, ZptZR_mm]
-    
+    validationSlopeZRChannels = []
+    if doTableInputs:
+        validationSlopeZRChannels.append( bkgOnly.addValidationChannel("Zpt",["ZRee"],1,metBinLowTR,metBinHighTR) )
+        validationSlopeZRChannels.append( bkgOnly.addValidationChannel("Zpt",["ZRmm"],1,metBinLowTR,metBinHighTR) )
+    else:
+        validationSlopeZRChannels.append( bkgOnly.addValidationChannel("Zpt",["ZRee"],metNBinsTR,metBinLowTR,metBinHighTR) )
+        validationSlopeZRChannels.append( bkgOnly.addValidationChannel("Zpt",["ZRmm"],metNBinsTR,metBinLowTR,metBinHighTR) )
+        pass
     # add systematics
     for chan in validationSlopeZRChannels:
         if chan.name.find("ee")>-1:
@@ -1016,67 +1011,85 @@ if doValidationSRTight:
     #DILEPTONS
     meff2ee = bkgOnly.addValidationChannel("meffInc",["S2eeT"],1,meffBinLowS2,meffBinHighS2)
     meff2ee.setFileList(bgdFiles_ee)
+    addHadronizationSyst(meff2ee,hadTop_SRS2,hadWZ_SRS2)
     meff4ee = bkgOnly.addValidationChannel("meffInc",["S4eeT"],1,meffBinLowS4,meffBinHighS4)
     meff4ee.setFileList(bgdFiles_ee)
+    addHadronizationSyst(meff4ee,hadTop_SRS4,hadWZ_SRS4)
     meff2em = bkgOnly.addValidationChannel("meffInc",["S2emT"],1,meffBinLowS2,meffBinHighS2)
     meff2em.setFileList(bgdFiles_em)
+    addHadronizationSyst(meff2em,hadTop_SRS2,hadWZ_SRS2)
     meff4em = bkgOnly.addValidationChannel("meffInc",["S4emT"],1,meffBinLowS4,meffBinHighS4)
     meff4em.setFileList(bgdFiles_em)
+    addHadronizationSyst(meff4em,hadTop_SRS4,hadWZ_SRS4)
     meff2mm = bkgOnly.addValidationChannel("meffInc",["S2mmT"],1,meffBinLowS2,meffBinHighS2)
     meff2mm.setFileList(bgdFiles_mm)
+    addHadronizationSyst(meff2mm,hadTop_SRS2,hadWZ_SRS2)
     meff4mm = bkgOnly.addValidationChannel("meffInc",["S4mmT"],1,meffBinLowS4,meffBinHighS4)
     meff4mm.setFileList(bgdFiles_mm)
-    
+    addHadronizationSyst(meff4mm,hadTop_SRS4,hadWZ_SRS4)
     # HARD LEPTON SRS
     meffS3T_El=bkgOnly.addValidationChannel("meffInc",["SR3jTEl"],1,1200,meffBinHighHL)
     meffS3T_El.setFileList(bgdFiles_e)
+    addHadronizationSyst(meffS3T_El,hadTop_SR3jT,hadWZ_SR3jT)
     meffS3T_Mu=bkgOnly.addValidationChannel("meffInc",["SR3jTMu"],1,1200,meffBinHighHL)
     meffS3T_Mu.setFileList(bgdFiles_m)
+    addHadronizationSyst(meffS3T_Mu,hadTop_SR3jT,hadWZ_SR3jT)
     meffS4T_El=bkgOnly.addValidationChannel("meffInc",["SR4jTEl"],1,800,meffBinHighHL)
     meffS4T_El.setFileList(bgdFiles_e)
+    addHadronizationSyst(meffS4T_El,hadTop_SR4jT,hadWZ_SR4jT)
     meffS4T_Mu=bkgOnly.addValidationChannel("meffInc",["SR4jTMu"],1,800,meffBinHighHL)
     meffS4T_Mu.setFileList(bgdFiles_m)
+    addHadronizationSyst(meffS4T_Mu,hadTop_SR4jT,hadWZ_SR4jT)
     # MULTIJETS SRS
     meffS7T_El=bkgOnly.addValidationChannel("meffInc",["SR7jTEl"],1,750,meffBinHighHL)
     meffS7T_El.setFileList(bgdFiles_e)
+    addHadronizationSyst(meffS7T_El,hadTop_SR7jT,hadWZ_SR7jT)
     meffS7T_Mu=bkgOnly.addValidationChannel("meffInc",["SR7jTMu"],1,750,meffBinHighHL)
     meffS7T_Mu.setFileList(bgdFiles_m)
+    addHadronizationSyst(meffS7T_Mu,hadTop_SR7jT,hadWZ_SR7jT)
     # SOFT LEPTON SRS
     mmSSElT = bkgOnly.addValidationChannel("met/meff2Jet",["SSElT"],1,0.3,0.7)
     mmSSElT.setFileList(bgdFiles_se)
+    addHadronizationSyst(mmSSElT,hadTop_SRSL,hadWZ_SRSL)
     mmSSMuT = bkgOnly.addValidationChannel("met/meff2Jet",["SSMuT"],1,0.3,0.7)
     mmSSMuT.setFileList(bgdFiles_sm)
+    addHadronizationSyst(mmSSMuT,hadTop_SRSL,hadWZ_SRSL)
 
-    validationSRChannels = [meff2ee, meff4ee, meff2em, meff4em, meff2mm, meff4mm, meffS3T_El, meffS3T_Mu, meffS4T_El, meffS4T_Mu, mmSSElT, mmSSMuT,meffS7T_El,meffS7T_Mu]                                                    
+    validationSRChannels = [meff2ee, meff4ee, meff2em, meff4em, meff2mm, meff4mm, meffS3T_El, meffS3T_Mu, meffS4T_El, meffS4T_Mu, mmSSElT, mmSSMuT,meffS7T_El,meffS7T_Mu]
     for chan in validationSRChannels:
         chan.useOverflowBin = True
         chan.removeWeight("bTagWeight3Jet")
 
 
 if doValidationDilep:
-    meffVR4_ee=bkgOnly.addValidationChannel("meffInc",["VR4ee"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
-    meffVR4_em=bkgOnly.addValidationChannel("meffInc",["VR4em"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
-    meffVR4_mm=bkgOnly.addValidationChannel("meffInc",["VR4mm"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
-    nJetVR4_ee=bkgOnly.addValidationChannel("nJet",["VR4ee"],(nJetZmBinHigh-nJetZmBinLow),nJetZmBinLow,nJetZmBinHigh)
-    nJetVR4_em=bkgOnly.addValidationChannel("nJet",["VR4em"],(nJetZmBinHigh-nJetZmBinLow),nJetZmBinLow,nJetZmBinHigh)
-    nJetVR4_mm=bkgOnly.addValidationChannel("nJet",["VR4mm"],(nJetZmBinHigh-nJetZmBinLow),nJetZmBinLow,nJetZmBinHigh)
-    meffVR2_ee=bkgOnly.addValidationChannel("meffInc",["VR2ee"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
-    meffVR2_em=bkgOnly.addValidationChannel("meffInc",["VR2em"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
-    meffVR2_mm=bkgOnly.addValidationChannel("meffInc",["VR2mm"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
-    nJetVR2_ee=bkgOnly.addValidationChannel("nJet",["VR2ee"],(nJetZmBinHigh-nJetZmBinLow),nJetZmBinLow,nJetZmBinHigh)
-    nJetVR2_em=bkgOnly.addValidationChannel("nJet",["VR2em"],(nJetZmBinHigh-nJetZmBinLow),nJetZmBinLow,nJetZmBinHigh)
-    nJetVR2_mm=bkgOnly.addValidationChannel("nJet",["VR2mm"],(nJetZmBinHigh-nJetZmBinLow),nJetZmBinLow,nJetZmBinHigh)
-    meffVR3_ee=bkgOnly.addValidationChannel("meffInc",["VR3ee"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
-    meffVR3_em=bkgOnly.addValidationChannel("meffInc",["VR3em"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
-    meffVR3_mm=bkgOnly.addValidationChannel("meffInc",["VR3mm"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
-    nJetVR3_ee=bkgOnly.addValidationChannel("nJet",["VR3ee"],(nJetZmBinHigh-nJetZmBinLow),nJetZmBinLow,nJetZmBinHigh)
-    nJetVR3_em=bkgOnly.addValidationChannel("nJet",["VR3em"],(nJetZmBinHigh-nJetZmBinLow),nJetZmBinLow,nJetZmBinHigh)
-    nJetVR3_mm=bkgOnly.addValidationChannel("nJet",["VR3mm"],(nJetZmBinHigh-nJetZmBinLow),nJetZmBinLow,nJetZmBinHigh)
-
-    validation2LepChannels = [meffVR2_ee, meffVR2_em, meffVR2_mm, nJetVR2_ee, nJetVR2_em, nJetVR2_mm,
-                              meffVR3_ee, meffVR3_em, meffVR3_mm, nJetVR3_ee, nJetVR3_em, nJetVR3_mm,
-                              meffVR4_ee, meffVR4_em, meffVR4_mm, nJetVR4_ee, nJetVR4_em, nJetVR4_mm]
-    
+    validation2LepChannels = []
+    if doTableInputs:
+        validation2LepChannels.append( bkgOnly.addValidationChannel("meffInc",["VR4ee"],1,meffBinLowTR,meffBinHighTR) )
+        validation2LepChannels.append( bkgOnly.addValidationChannel("meffInc",["VR4em"],1,meffBinLowTR,meffBinHighTR) )
+        validation2LepChannels.append( bkgOnly.addValidationChannel("meffInc",["VR4mm"],1,meffBinLowTR,meffBinHighTR) )
+        validation2LepChannels.append( bkgOnly.addValidationChannel("meffInc",["VR2ee"],1,meffBinLowTR,meffBinHighTR) )
+        validation2LepChannels.append( bkgOnly.addValidationChannel("meffInc",["VR2em"],1,meffBinLowTR,meffBinHighTR) )
+        validation2LepChannels.append( bkgOnly.addValidationChannel("meffInc",["VR2mm"],1,meffBinLowTR,meffBinHighTR) )
+    else:
+        validation2LepChannels.append( bkgOnly.addValidationChannel("meffInc",["VR4ee"],meffNBinsTR,meffBinLowTR,meffBinHighTR) )
+        validation2LepChannels.append( bkgOnly.addValidationChannel("meffInc",["VR4em"],meffNBinsTR,meffBinLowTR,meffBinHighTR) )
+        validation2LepChannels.append( bkgOnly.addValidationChannel("meffInc",["VR4mm"],meffNBinsTR,meffBinLowTR,meffBinHighTR) )
+        validation2LepChannels.append( bkgOnly.addValidationChannel("nJet",["VR4ee"],(nJetZmBinHigh-nJetZmBinLow),nJetZmBinLow,nJetZmBinHigh) )
+        validation2LepChannels.append( bkgOnly.addValidationChannel("nJet",["VR4em"],(nJetZmBinHigh-nJetZmBinLow),nJetZmBinLow,nJetZmBinHigh) )
+        validation2LepChannels.append( bkgOnly.addValidationChannel("nJet",["VR4mm"],(nJetZmBinHigh-nJetZmBinLow),nJetZmBinLow,nJetZmBinHigh) )
+        validation2LepChannels.append( bkgOnly.addValidationChannel("meffInc",["VR2ee"],meffNBinsTR,meffBinLowTR,meffBinHighTR) )
+        validation2LepChannels.append( bkgOnly.addValidationChannel("meffInc",["VR2em"],meffNBinsTR,meffBinLowTR,meffBinHighTR) )
+        validation2LepChannels.append( bkgOnly.addValidationChannel("meffInc",["VR2mm"],meffNBinsTR,meffBinLowTR,meffBinHighTR) )
+        validation2LepChannels.append( bkgOnly.addValidationChannel("nJet",["VR2ee"],(nJetZmBinHigh-nJetZmBinLow),nJetZmBinLow,nJetZmBinHigh) )
+        validation2LepChannels.append( bkgOnly.addValidationChannel("nJet",["VR2em"],(nJetZmBinHigh-nJetZmBinLow),nJetZmBinLow,nJetZmBinHigh) )
+        validation2LepChannels.append( bkgOnly.addValidationChannel("nJet",["VR2mm"],(nJetZmBinHigh-nJetZmBinLow),nJetZmBinLow,nJetZmBinHigh) )
+        validation2LepChannels.append( bkgOnly.addValidationChannel("meffInc",["VR3ee"],meffNBinsTR,meffBinLowTR,meffBinHighTR) )
+        validation2LepChannels.append( bkgOnly.addValidationChannel("meffInc",["VR3em"],meffNBinsTR,meffBinLowTR,meffBinHighTR) )
+        validation2LepChannels.append( bkgOnly.addValidationChannel("meffInc",["VR3mm"],meffNBinsTR,meffBinLowTR,meffBinHighTR) )
+        validation2LepChannels.append( bkgOnly.addValidationChannel("nJet",["VR3ee"],(nJetZmBinHigh-nJetZmBinLow),nJetZmBinLow,nJetZmBinHigh) )
+        validation2LepChannels.append( bkgOnly.addValidationChannel("nJet",["VR3em"],(nJetZmBinHigh-nJetZmBinLow),nJetZmBinLow,nJetZmBinHigh) )
+        validation2LepChannels.append( bkgOnly.addValidationChannel("nJet",["VR3mm"],(nJetZmBinHigh-nJetZmBinLow),nJetZmBinLow,nJetZmBinHigh) )
+        pass
     # add systematics
     for chan in validation2LepChannels:
         chan.useOverflowBin = True
@@ -1092,29 +1105,34 @@ if doValidationDilep:
 
     
 if doValidationDilepZ:
-    meffZVR4_ee=bkgOnly.addValidationChannel("meffInc",["VZR4ee"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
-    meffZVR4_em=bkgOnly.addValidationChannel("meffInc",["VZR4em"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
-    meffZVR4_mm=bkgOnly.addValidationChannel("meffInc",["VZR4mm"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
-    nJetZVR4_ee=bkgOnly.addValidationChannel("nJet",["VZR4ee"],(nJetZmBinHigh-nJetZmBinLow),nJetZmBinLow,nJetZmBinHigh)
-    nJetZVR4_em=bkgOnly.addValidationChannel("nJet",["VZR4em"],(nJetZmBinHigh-nJetZmBinLow),nJetZmBinLow,nJetZmBinHigh)
-    nJetZVR4_mm=bkgOnly.addValidationChannel("nJet",["VZR4mm"],(nJetZmBinHigh-nJetZmBinLow),nJetZmBinLow,nJetZmBinHigh)
-    meffZVR2_ee=bkgOnly.addValidationChannel("meffInc",["VZR2ee"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
-    meffZVR2_em=bkgOnly.addValidationChannel("meffInc",["VZR2em"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
-    meffZVR2_mm=bkgOnly.addValidationChannel("meffInc",["VZR2mm"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
-    nJetZVR2_ee=bkgOnly.addValidationChannel("nJet",["VZR2ee"],(nJetZmBinHigh-nJetZmBinLow),nJetZmBinLow,nJetZmBinHigh)
-    nJetZVR2_em=bkgOnly.addValidationChannel("nJet",["VZR2em"],(nJetZmBinHigh-nJetZmBinLow),nJetZmBinLow,nJetZmBinHigh)
-    nJetZVR2_mm=bkgOnly.addValidationChannel("nJet",["VZR2mm"],(nJetZmBinHigh-nJetZmBinLow),nJetZmBinLow,nJetZmBinHigh)
-    meffZVR3_ee=bkgOnly.addValidationChannel("meffInc",["VZR3ee"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
-    meffZVR3_em=bkgOnly.addValidationChannel("meffInc",["VZR3em"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
-    meffZVR3_mm=bkgOnly.addValidationChannel("meffInc",["VZR3mm"],meffNBinsTR,meffBinLowTR,meffBinHighTR)
-    nJetZVR3_ee=bkgOnly.addValidationChannel("nJet",["VZR3ee"],(nJetZmBinHigh-nJetZmBinLow),nJetZmBinLow,nJetZmBinHigh)
-    nJetZVR3_em=bkgOnly.addValidationChannel("nJet",["VZR3em"],(nJetZmBinHigh-nJetZmBinLow),nJetZmBinLow,nJetZmBinHigh)
-    nJetZVR3_mm=bkgOnly.addValidationChannel("nJet",["VZR3mm"],(nJetZmBinHigh-nJetZmBinLow),nJetZmBinLow,nJetZmBinHigh)
-    
-    validation2LepZChannels = [meffZVR2_ee, meffZVR2_em, meffZVR2_mm, nJetZVR2_ee, nJetZVR2_em, nJetZVR2_mm,
-                              meffZVR3_ee, meffZVR3_em, meffZVR3_mm, nJetZVR3_ee, nJetZVR3_em, nJetZVR3_mm,
-                              meffZVR4_ee, meffZVR4_em, meffZVR4_mm, nJetZVR4_ee, nJetZVR4_em, nJetZVR4_mm]
-    
+    validation2LepZChannels=[]
+    if doTableInputs:
+        validation2LepZChannels.append( bkgOnly.addValidationChannel("meffInc",["VZR4ee"],1,meffBinLowTR,meffBinHighTR) )
+        validation2LepZChannels.append( bkgOnly.addValidationChannel("meffInc",["VZR4em"],1,meffBinLowTR,meffBinHighTR) )
+        validation2LepZChannels.append( bkgOnly.addValidationChannel("meffInc",["VZR4mm"],1,meffBinLowTR,meffBinHighTR) )
+        validation2LepZChannels.append( bkgOnly.addValidationChannel("meffInc",["VZR2ee"],1,meffBinLowTR,meffBinHighTR) )
+        validation2LepZChannels.append( bkgOnly.addValidationChannel("meffInc",["VZR2em"],1,meffBinLowTR,meffBinHighTR) )
+        validation2LepZChannels.append( bkgOnly.addValidationChannel("meffInc",["VZR2mm"],1,meffBinLowTR,meffBinHighTR) )
+    else:
+        validation2LepZChannels.append( bkgOnly.addValidationChannel("meffInc",["VZR4ee"],meffNBinsTR,meffBinLowTR,meffBinHighTR) )
+        validation2LepZChannels.append( bkgOnly.addValidationChannel("meffInc",["VZR4em"],meffNBinsTR,meffBinLowTR,meffBinHighTR) )
+        validation2LepZChannels.append( bkgOnly.addValidationChannel("meffInc",["VZR4mm"],meffNBinsTR,meffBinLowTR,meffBinHighTR) )
+        validation2LepZChannels.append( bkgOnly.addValidationChannel("nJet",["VZR4ee"],(nJetZmBinHigh-nJetZmBinLow),nJetZmBinLow,nJetZmBinHigh) )
+        validation2LepZChannels.append( bkgOnly.addValidationChannel("nJet",["VZR4em"],(nJetZmBinHigh-nJetZmBinLow),nJetZmBinLow,nJetZmBinHigh) )
+        validation2LepZChannels.append( bkgOnly.addValidationChannel("nJet",["VZR4mm"],(nJetZmBinHigh-nJetZmBinLow),nJetZmBinLow,nJetZmBinHigh) )
+        validation2LepZChannels.append( bkgOnly.addValidationChannel("meffInc",["VZR2ee"],meffNBinsTR,meffBinLowTR,meffBinHighTR) )
+        validation2LepZChannels.append( bkgOnly.addValidationChannel("meffInc",["VZR2em"],meffNBinsTR,meffBinLowTR,meffBinHighTR) )
+        validation2LepZChannels.append( bkgOnly.addValidationChannel("meffInc",["VZR2mm"],meffNBinsTR,meffBinLowTR,meffBinHighTR) )
+        validation2LepZChannels.append( bkgOnly.addValidationChannel("nJet",["VZR2ee"],(nJetZmBinHigh-nJetZmBinLow),nJetZmBinLow,nJetZmBinHigh) )
+        validation2LepZChannels.append( bkgOnly.addValidationChannel("nJet",["VZR2em"],(nJetZmBinHigh-nJetZmBinLow),nJetZmBinLow,nJetZmBinHigh) )
+        validation2LepZChannels.append( bkgOnly.addValidationChannel("nJet",["VZR2mm"],(nJetZmBinHigh-nJetZmBinLow),nJetZmBinLow,nJetZmBinHigh) )
+        validation2LepZChannels.append( bkgOnly.addValidationChannel("meffInc",["VZR3ee"],meffNBinsTR,meffBinLowTR,meffBinHighTR) )
+        validation2LepZChannels.append( bkgOnly.addValidationChannel("meffInc",["VZR3em"],meffNBinsTR,meffBinLowTR,meffBinHighTR) )
+        validation2LepZChannels.append( bkgOnly.addValidationChannel("meffInc",["VZR3mm"],meffNBinsTR,meffBinLowTR,meffBinHighTR) )
+        validation2LepZChannels.append( bkgOnly.addValidationChannel("nJet",["VZR3ee"],(nJetZmBinHigh-nJetZmBinLow),nJetZmBinLow,nJetZmBinHigh) )
+        validation2LepZChannels.append( bkgOnly.addValidationChannel("nJet",["VZR3em"],(nJetZmBinHigh-nJetZmBinLow),nJetZmBinLow,nJetZmBinHigh) )
+        validation2LepZChannels.append( bkgOnly.addValidationChannel("nJet",["VZR3mm"],(nJetZmBinHigh-nJetZmBinLow),nJetZmBinLow,nJetZmBinHigh) )
+        pass
     # add systematics
     for chan in validation2LepZChannels:
         chan.hasBQCD = False
@@ -1130,33 +1148,33 @@ if doValidationDilepZ:
     
 
 if doValidationSoftLep:
-    mmSVEl = bkgOnly.addValidationChannel("nJet",["SVEl"],(nJetZsmBinHigh-nJetZsmBinLow),nJetZsmBinLow,nJetZsmBinHigh)
-    mmSVMu = bkgOnly.addValidationChannel("nJet",["SVMu"],(nJetZsmBinHigh-nJetZsmBinLow),nJetZsmBinLow,nJetZsmBinHigh)
-    softLepValChannels = [mmSVEl,mmSVMu]
-    if not useSoftLepCR:
-        mmSVWEl = bkgOnly.addValidationChannel("nJet",["SVWEl"],(nJetZsmBinHigh-nJetZsmBinLow),nJetZsmBinLow,nJetZsmBinHigh)
-        mmSVWMu = bkgOnly.addValidationChannel("nJet",["SVWMu"],(nJetZsmBinHigh-nJetZsmBinLow),nJetZsmBinLow,nJetZsmBinHigh)
-        mmSVTEl = bkgOnly.addValidationChannel("nJet",["SVTEl"],(nJetZsmBinHigh-nJetZsmBinLow),nJetZsmBinLow,nJetZsmBinHigh)
-        mmSVTMu = bkgOnly.addValidationChannel("nJet",["SVTMu"],(nJetZsmBinHigh-nJetZsmBinLow),nJetZsmBinLow,nJetZsmBinHigh)
-        softLepValChannels += [mmSVWEl,mmSVWMu,mmSVTEl,mmSVTMu]
-        
-    bkgOnly.setValidationChannels(softLepValChannels)
-
-    validationSoftLepChannels = [mmSVEl, mmSVMu]
-    validationSoftLepBtagChannels =  []
-    validationSoftLepBvetoChannels =  []
-
-
+    validationSoftLepChannels = []
+    validationSoftLepBtagChannels = []
+    validationSoftLepBvetoChannels = []
+    if doTableInputs:
+        validationSoftLepChannels.append( bkgOnly.addValidationChannel("nJet",["SVEl"],1,nJetZsmBinLow,nJetZsmBinHigh) )
+        validationSoftLepChannels.append( bkgOnly.addValidationChannel("nJet",["SVMu"],1,nJetZsmBinLow,nJetZsmBinHigh) )
+    else:
+        validationSoftLepChannels.append( bkgOnly.addValidationChannel("nJet",["SVEl"],(nJetZsmBinHigh-nJetZsmBinLow),nJetZsmBinLow,nJetZsmBinHigh) )
+        validationSoftLepChannels.append( bkgOnly.addValidationChannel("nJet",["SVMu"],(nJetZsmBinHigh-nJetZsmBinLow),nJetZsmBinLow,nJetZsmBinHigh) )
+        pass
     # add systematics
     for chan in validationSoftLepChannels:
         chan.useOverflowBin = True
         chan.removeWeight("bTagWeight3Jet")
 
     if not useSoftLepCR:
-
-        validationSoftLepBtagChannels =  [mmSVTEl, mmSVTMu]
-        validationSoftLepBvetoChannels =  [mmSVWEl, mmSVWMu]
-
+        if doTableInputs:
+            validationSoftLepBvetoChannels.append( bkgOnly.addValidationChannel("nJet",["SVWEl"],1,nJetZsmBinLow,nJetZsmBinHigh) )
+            validationSoftLepBvetoChannels.append( bkgOnly.addValidationChannel("nJet",["SVWMu"],1,nJetZsmBinLow,nJetZsmBinHigh) )
+            validationSoftLepBtagChannels.append( bkgOnly.addValidationChannel("nJet",["SVTEl"],1,nJetZsmBinLow,nJetZsmBinHigh) )
+            validationSoftLepBtagChannels.append( bkgOnly.addValidationChannel("nJet",["SVTMu"],1,nJetZsmBinLow,nJetZsmBinHigh) )
+        else:
+            validationSoftLepBvetoChannels.append( bkgOnly.addValidationChannel("nJet",["SVWEl"],(nJetZsmBinHigh-nJetZsmBinLow),nJetZsmBinLow,nJetZsmBinHigh) )
+            validationSoftLepBvetoChannels.append( bkgOnly.addValidationChannel("nJet",["SVWMu"],(nJetZsmBinHigh-nJetZsmBinLow),nJetZsmBinLow,nJetZsmBinHigh) )
+            validationSoftLepBtagChannels.append( bkgOnly.addValidationChannel("nJet",["SVTEl"],(nJetZsmBinHigh-nJetZsmBinLow),nJetZsmBinLow,nJetZsmBinHigh) )
+            validationSoftLepBtagChannels.append( bkgOnly.addValidationChannel("nJet",["SVTMu"],(nJetZsmBinHigh-nJetZsmBinLow),nJetZsmBinLow,nJetZsmBinHigh) )
+            pass
         # add systematics
         for chan in validationSoftLepBtagChannels:
             chan.hasBQCD = True
@@ -1170,7 +1188,10 @@ if doValidationSoftLep:
             chan.useOverflowBin = True
             for syst in btagChanSyst:
                 chan.addSystematic(syst)
-
+                pass
+            pass
+        pass
+    
     for chan in validationSoftLepChannels+validationSoftLepBtagChannels+validationSoftLepBvetoChannels:
         if chan.name.find("El")>-1:
             chan.setFileList(bgdFiles_se)
