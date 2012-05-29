@@ -52,3 +52,24 @@ def getISRWeightsLow(sig):
     return isrLowWeights
 
 
+def getHadronizationSyst(CRval,SRval,sample,observable):
+    if CRval>SRval:
+        raise RuntimeError("Unsupported case: CRval=%f is larger than SRval=%f"%(CRval,SRval))
+    #Linear relation of form: y=ax+b
+
+    if sample=="ttbar" and observable=="meff":
+        a=0.000220 #+- 0.000083
+        #b=1.092 +- 0.045
+    elif sample=="ttbar" and observable=="met":
+        a=0.0001109077
+        #b=0.9918109
+    elif sample=="WZ" and observable=="meff":
+        raise RuntimeError("Unsupported case: sample=%s, observable=%s"%(sample,observable))
+    elif sample=="WZ" and observable=="met":
+        raise RuntimeError("Unsupported case: sample=%s, observable=%s"%(sample,observable))
+    else:
+        raise RuntimeError("Unsupported case: sample=%s, observable=%s"%(sample,observable))
+
+    syst=a*(SRval-CRval)
+    print "%s %s CR=%f SR=%f --> syst=%f"%(sample,observable,CRval,SRval,syst)
+    return syst
