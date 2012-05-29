@@ -1,3 +1,7 @@
+2012-05-30 David Cote <david.cote@cern.ch>
+	* Tag for support note sent to EdBoard on 30.05.2012
+	* Tagging HistFitter-00-00-06
+
 2012-05-09 David Cote <david.cote@cern.ch>
 	* Copy with some clean-up from atlasgrp/Physics/SUSY/Analyses/SusyFitter to
 	  atlastest/Physics/SUSY/Analyses/HistFitter as a temporary work around to atlasgrp svn screw up
