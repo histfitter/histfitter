@@ -34,7 +34,7 @@ useHardLepCR=True
 useSoftLepCR=True
 useDiLepCR=True
 useStat=True
-fullSyst=True
+fullSyst=False
 
 doTableInputs=False #This effectively means no validation plots but only validation tables (but is 100x faster)
 doValidationSRLoose=False
@@ -51,26 +51,16 @@ doExclusion_GG_onestepCC_gridX=False
 doExclusion_GG_twostepCC_slepton=False
 blindS=False
 
-#theory uncertainties with new plotting style: Either full pdf+scale+ISR, or only pdf+scale uncertainties
-useTheoryUncUp=False
-useTheoryUncDown=False
-#leave out ISR systematics in case you want to separate these. Probably not useful as will lead to crowded plots.
-useTheoryXsecOnlyUp=False
-useTheoryXsecOnlyDown=False
-
-if (useTheoryUncUp+useTheoryUncDown+useTheoryXsecOnlyUp+useTheoryXsecOnlyDown)>1:
-    raise RuntimeError("Impossible combination of theory uncertainties")
-
 doWptReweighting=False ## deprecated
 doSignalOnly=False #Remove all bkgs for signal histo creation step
 if configMgr.executeHistFactory:
     doSignalOnly=False
     
 if not 'sigSamples' in dir():
-        sigSamples=["SU_580_240_0_10_P"]
+    sigSamples=["SU_580_240_0_10_P"]
         #sigSamples=["SM_GG_onestepCC_445_245_45"]
     #    sigSamples=["SM_GG_twostepCC_slepton_415_215_115_15"]
-    #    sigSamples=["GMSB_3_2d_50_250_3_10_1_1"]
+#    sigSamples=["GMSB_3_2d_50_250_3_10_1_1"]
 
 # First define HistFactory attributes
 configMgr.analysisName = "Combined_KFactorFit_5Channel" # Name to give the analysis
@@ -84,8 +74,9 @@ configMgr.setLumiUnits("fb-1")
 
 #configMgr.doHypoTest=True
 #configMgr.nTOYs=100
-#configMgr.calculatorType=0
-configMgr.calculatorType=2
+#configMgr.calculatorType=0 #toys
+configMgr.fixSigXSec=True
+configMgr.calculatorType=2 #asimov
 configMgr.testStaType=3
 configMgr.nPoints=20
 
@@ -280,8 +271,8 @@ configMgr.weights = weights
 configMgr.weightsQCD = "qcdWeight"
 configMgr.weightsQCDWithB = "qcdBWeight"
 
-#xsecSigHighWeights = replaceWeight(weights,"genWeight","genWeightUp")
-#xsecSigLowWeights = replaceWeight(weights,"genWeight","genWeightDown")
+xsecSigHighWeights = replaceWeight(weights,"genWeight","genWeightUp")
+xsecSigLowWeights = replaceWeight(weights,"genWeight","genWeightDown")
 
 #ktScaleWHighWeights = addWeight(weights,"ktfacUpWeightW")
 #ktScaleWHighWeights = addWeight(weights,"ktfacDownWeightW")
@@ -326,7 +317,7 @@ hfLowWeights = addWeight(weights,"hfWeightDown")
 configMgr.nomName = "_NoSys"
 
 # Signal XSec uncertainty as overallSys (pure yeild affect) DEPRECATED
-##xsecSig = Systematic("XSS",configMgr.weights,xsecSigHighWeights,xsecSigLowWeights,"weight","overallSys")
+xsecSig = Systematic("SigXSec",configMgr.weights,xsecSigHighWeights,xsecSigLowWeights,"weight","overallSys")
 
 # JES uncertainty as shapeSys - one systematic per region (combine WR and TR), merge samples
 jesSignal = Systematic("JSig","_NoSys","_JESup","_JESdown","tree","histoSys")
@@ -369,25 +360,65 @@ wzPtMin30DLS2 = Systematic("PtMinWZ",configMgr.weights,1.14,0.86,"user","userOve
 topPtMin30DLS4 = Systematic("PtMinTop",configMgr.weights,1.01,0.99,"user","userOverallSys")
 wzPtMin30DLS4 = Systematic("PtMinWZ",configMgr.weights,1.08,0.92,"user","userOverallSys")
 
-##Hadronization in SRs
-from SystematicsUtils import hadroSys,addHadronizationSyst
-hadTop_SR3jT = Systematic("had",configMgr.weights,1.0+hadroSys(500.0,1200.0,"ttbar","meff"),1.0-hadroSys(500.0,1200.0,"ttbar","meff"),"user","userOverallSys")
-hadWZ_SR3jT  = Systematic("had",configMgr.weights,1.0+hadroSys(500.0,1200.0,"WZ","meff"),   1.0-hadroSys(500.0,1200.0,"WZ","meff"),"user","userOverallSys")
+##Hadronization in SRs as userOverallSys for VRs
+
+meffCR_SR347=500.0
+metCR_SRSL=180.
+meffCRT_SR24=150.
+meffCRWZ_SR24=100.
+
+from SystematicsUtils import hadroSys,addHadronizationSyst,hadroSysBins
+hadTop_SR3jT = Systematic("had",configMgr.weights,1.0+hadroSys(meffCR_SR347,1200.0,"ttbar","meff"),1.0-hadroSys(meffCR_SR347,1200.0,"ttbar","meff"),"user","userOverallSys")
+hadWZ_SR3jT  = Systematic("had",configMgr.weights,1.0+hadroSys(meffCR_SR347,1200.0,"WZ","meff"),   1.0-hadroSys(meffCR_SR347,1200.0,"WZ","meff"),"user","userOverallSys")
 #SR4jT
-hadTop_SR4jT = Systematic("had",configMgr.weights,1.0+hadroSys(500.0,800.0,"ttbar","meff"),1.0-hadroSys(500.0,800.0,"ttbar","meff"),"user","userOverallSys")
-hadWZ_SR4jT  = Systematic("had",configMgr.weights,1.0+hadroSys(500.0,800.0,"WZ","meff"),   1.0-hadroSys(500.0,800.0,"WZ","meff"),"user","userOverallSys")
+hadTop_SR4jT = Systematic("had",configMgr.weights,1.0+hadroSys(meffCR_SR347,800.0,"ttbar","meff"),1.0-hadroSys(meffCR_SR347,800.0,"ttbar","meff"),"user","userOverallSys")
+hadWZ_SR4jT  = Systematic("had",configMgr.weights,1.0+hadroSys(meffCR_SR347,800.0,"WZ","meff"),   1.0-hadroSys(meffCR_SR347,800.0,"WZ","meff"),"user","userOverallSys")
 #SR7jT
-hadTop_SR7jT = Systematic("had",configMgr.weights,1.0+hadroSys(500.0,650.0,"ttbar","meff"),1.0-hadroSys(500.0,750.0,"ttbar","meff"),"user","userOverallSys")
-hadWZ_SR7jT  = Systematic("had",configMgr.weights,1.0+hadroSys(500.0,650.0,"WZ","meff"),   1.0-hadroSys(500.0,750.0,"WZ","meff"),"user","userOverallSys")
+hadTop_SR7jT = Systematic("had",configMgr.weights,1.0+hadroSys(meffCR_SR347,650.0,"ttbar","meff"),1.0-hadroSys(meffCR_SR347,750.0,"ttbar","meff"),"user","userOverallSys")
+hadWZ_SR7jT  = Systematic("had",configMgr.weights,1.0+hadroSys(meffCR_SR347,650.0,"WZ","meff"),   1.0-hadroSys(meffCR_SR347,750.0,"WZ","meff"),"user","userOverallSys")
 #SL
-hadTop_SRSL = Systematic("had",configMgr.weights,1.0+hadroSys(180.0,250.0,"ttbar","met"),1.0-hadroSys(180.0,250.0,"ttbar","met"),"user","userOverallSys")
-hadWZ_SRSL  = Systematic("had",configMgr.weights,1.0+hadroSys(180.0,250.0,"WZ","met"),   1.0-hadroSys(180.0,250.0,"WZ","met"),"user","userOverallSys")
+hadTop_SRSL = Systematic("had",configMgr.weights,1.0+hadroSys(metCR_SRSL,250.0,"ttbar","met"),1.0-hadroSys(metCR_SRSL,250.0,"ttbar","met"),"user","userOverallSys")
+hadWZ_SRSL  = Systematic("had",configMgr.weights,1.0+hadroSys(metCR_SRSL,250.0,"WZ","met"),   1.0-hadroSys(metCR_SRSL,250.0,"WZ","met"),"user","userOverallSys")
 #S2
-hadTop_SRS2 = Systematic("had",configMgr.weights,1.0+hadroSys(80.0,300.0,"ttbar","met"),1.0-hadroSys(80.0,300.0,"ttbar","met"),"user","userOverallSys")
-hadWZ_SRS2  = Systematic("had",configMgr.weights,1.0+hadroSys(50.0,300.0,"WZ","met"),   1.0-hadroSys(50.0,300.0,"WZ","met"),"user","userOverallSys")
+hadTop_SRS2 = Systematic("had",configMgr.weights,1.0+hadroSys(meffCRT_SR24,700.0,"ttbar","meff"),1.0-hadroSys(meffCRT_SR24,700.0,"ttbar","met"),"user","userOverallSys")
+hadWZ_SRS2  = Systematic("had",configMgr.weights,1.0+hadroSys(meffCRWZ_SR24,700.0,"WZ","meff"),   1.0-hadroSys(meffCRWZ_SR24,700.0,"WZ","met"),"user","userOverallSys")
 #S4
-hadTop_SRS4 = Systematic("had",configMgr.weights,1.0+hadroSys(0.0,650.0,"ttbar","meff"),1.0-hadroSys(0.0,650.0,"ttbar","meff"),"user","userOverallSys")
-hadWZ_SRS4  = Systematic("had",configMgr.weights,1.0+hadroSys(0.0,650.0,"WZ","meff"),   1.0-hadroSys(0.0,650.0,"WZ","meff"),"user","userOverallSys")
+hadTop_SRS4 = Systematic("had",configMgr.weights,1.0+hadroSys(meffCRT_SR24,650.0,"ttbar","meff"),1.0-hadroSys(meffCRT_SR24,650.0,"ttbar","meff"),"user","userOverallSys")
+hadWZ_SRS4  = Systematic("had",configMgr.weights,1.0+hadroSys(meffCRWZ_SR24,650.0,"WZ","meff"),   1.0-hadroSys(meffCRWZ_SR24,650.0,"WZ","meff"),"user","userOverallSys")
+
+##Hadronization in SRs as userHistoSys for exclusion fits
+#Hard 1 lepton SR binning
+meffNBins1lS3 = 6
+meffBinLow1lS3 = 400.
+meffBinHigh1lS3 = 1600.
+
+meffNBins1lS4 = 4
+meffBinLow1lS4 = 800.
+meffBinHigh1lS4 = 1600.
+
+#Dilepton SR binning
+meffNBinsS2 = 5
+meffBinLowS2 = 700.
+meffBinHighS2 = 1700.
+
+meffNBinsS4 = 5
+meffBinLowS4 = 600.
+meffBinHighS4 = 1600.
+
+meffNBinsHL = 6
+meffBinLowHL = 400.
+#meffBinLow = 0.
+meffBinHighHL = 1600.
+
+hadTop_SR3jT_hist = Systematic(*(("hadTop",configMgr.weights)+hadroSysBins(meffCR_SR347,meffNBins1lS3,meffBinLow1lS3,meffBinHigh1lS3,"ttbar","meff")+("user","userNormHistoSys")))
+hadWZ_SR3jT_hist = Systematic(*(("hadWZ",configMgr.weights)+hadroSysBins(meffCR_SR347,meffNBins1lS3,meffBinLow1lS3,meffBinHigh1lS3,"WZ","meff")+("user","userNormHistoSys")))
+hadTop_SR4jT_hist = Systematic(*(("hadTop",configMgr.weights)+hadroSysBins(meffCR_SR347,meffNBins1lS4,meffBinLow1lS4,meffBinHigh1lS4,"ttbar","meff")+("user","userNormHistoSys")))
+hadWZ_SR4jT_hist = Systematic(*(("hadWZ",configMgr.weights)+hadroSysBins(meffCR_SR347,meffNBins1lS4,meffBinLow1lS4,meffBinHigh1lS4,"WZ","meff")+("user","userNormHistoSys")))
+
+hadTop_SRS2_hist = Systematic(*(("hadTop",configMgr.weights)+hadroSysBins(meffCRT_SR24,meffNBinsS2,meffBinLowS2,meffBinHighS2,"ttbar","meff")+("user","userNormHistoSys")))
+hadWZ_SRS2_hist = Systematic(*(("hadWZ",configMgr.weights)+hadroSysBins(meffCRWZ_SR24,meffNBinsS2,meffBinLowS2,meffBinHighS2,"WZ","meff")+("user","userNormHistoSys")))
+hadTop_SRS4_hist = Systematic(*(("hadTop",configMgr.weights)+hadroSysBins(meffCRT_SR24,meffNBinsS4,meffBinLowS4,meffBinHighS4,"ttbar","meff")+("user","userNormHistoSys")))
+hadWZ_SRS4_hist = Systematic(*(("hadWZ",configMgr.weights)+hadroSysBins(meffCRWZ_SR24,meffNBinsS4,meffBinLowS4,meffBinHighS4,"WZ","meff")+("user","userNormHistoSys")))
 
 
 
@@ -857,28 +888,6 @@ bkgOnly.setBkgConstrainChannels(WZChannels+topChannels)
 # meffBinLow = 0.
 # meffBinHigh = 1600.
 
-#Hard 1 lepton SR binning
-meffNBins1lS3 = 6
-meffBinLow1lS3 = 400.
-meffBinHigh1lS3 = 1600.
-
-meffNBins1lS4 = 4
-meffBinLow1lS4 = 800.
-meffBinHigh1lS4 = 1600.
-
-#Dilepton SR binning
-meffNBinsS2 = 5
-meffBinLowS2 = 700.
-meffBinHighS2 = 1700.
-
-meffNBinsS4 = 5
-meffBinLowS4 = 600.
-meffBinHighS4 = 1600.
-
-meffNBinsHL = 6
-meffBinLowHL = 400.
-#meffBinLow = 0.
-meffBinHighHL = 1600.
 
 
 meffNBinsTR = 20
@@ -1220,29 +1229,12 @@ if doExclusion_GMSB_combined or doExclusion_mSUGRA_dilepton_combined or doExclus
         sigSample.setStatConfig(useStat)
         sigSample.addSystematic(jesSignal)
 
-        if useTheoryUncUp:
-            weights=replaceWeight(weights,"genWeight","genWeightUp")
-            configMgr.weights=weights
-            if sig.startswith("SM"):
-                from SystematicsUtils import getISRWeightsHigh
-                weights=getISRWeightsHigh(sig)
-            configMgr.weights=weights
-        elif useTheoryUncDown:
-            weights=replaceWeight(weights,"genWeight","genWeightDown")
-            configMgr.weights=weights
-            if sig.startswith("SM"):
-                from SystematicsUtils import getISRWeightsLow
-                weights=getISRWeightsLow(sig)
-            configMgr.weights=weights
-        elif useTheoryXsecOnlyUp:
-            weights=replaceWeight(weights,"genWeight","genWeightUp")
-            configMgr.weights=weights
-        elif useTheoryXsecOnlyDown:
-            weights=replaceWeight(weights,"genWeight","genWeightUp")
-            configMgr.weights=weights
-
-        print configMgr.weights
-                      
+        sigSample.addSystematic(xsecSig)
+        if sig.startswith("SM"):
+            from SystematicsUtils import getISRSyst
+            isrSyst = getISRSyst(sig)
+            sigSample.addSystematic(isrSyst)
+                     
         myTopLvl.addSamples(sigSample)
         myTopLvl.setSignalSample(sigSample)
         
@@ -1253,8 +1245,8 @@ if doExclusion_GMSB_combined or doExclusion_mSUGRA_dilepton_combined or doExclus
 ##            SRs=["S4mm"]
             SRs=["S2ee","S2em","S2mm","S4ee","S4em","S4mm"]
         elif doExclusion_mSUGRA_dilepton_combined:
-            SRs=["S3El","S3Mu","S4El","S4Mu","S2ee","S2em","S2mm","S4ee","S4em","S4mm"]
-##            SRs=["S2ee","S2em","S2mm","S4ee","S4em","S4mm"]
+##            SRs=["S3El","S3Mu","S4El","S4Mu","S2ee","S2em","S2mm","S4ee","S4em","S4mm"]
+            SRs=["S2ee","S2em","S2mm","S4ee","S4em","S4mm"]
         elif doExclusion_GG_twostepCC_slepton:
             SRs=["S4ee","S4em","S4mm"]
         elif doExclusion_GG_onestepCC_x12:
@@ -1280,12 +1272,16 @@ if doExclusion_GMSB_combined or doExclusion_mSUGRA_dilepton_combined or doExclus
             for sr in SRs:
                 if sr=="S3El" or sr=="S3Mu":
                     ch = myTopLvl.addChannel("meffInc",[sr],meffNBins1lS3,meffBinLow1lS3,meffBinHigh1lS3)
+                    addHadronizationSyst(ch,hadTop_SR3jT_hist,hadWZ_SR3jT_hist)
                 elif sr=="S4El" or sr=="S4Mu":
                     ch = myTopLvl.addChannel("meffInc",[sr],meffNBins1lS4,meffBinLow1lS4,meffBinHigh1lS4)
+                    addHadronizationSyst(ch,hadTop_SR4jT_hist,hadWZ_SR4jT_hist)
                 elif sr=="S2ee" or sr=="S2em" or sr=="S2mm":
                     ch = myTopLvl.addChannel("meffInc",[sr],meffNBinsS2,meffBinLowS2,meffBinHighS2)
+                    addHadronizationSyst(ch,hadTop_SRS2_hist,hadWZ_SRS2_hist)
                 elif sr=="S4ee" or sr=="S4em" or sr=="S4mm":
                     ch = myTopLvl.addChannel("meffInc",[sr],meffNBinsS4,meffBinLowS4,meffBinHighS4)
+                    addHadronizationSyst(ch,hadTop_SRS4_hist,hadWZ_SRS4_hist)
                 elif sr=="SSEl" or sr=="SSMu":
                     ch = myTopLvl.addChannel("met/meff2Jet",[sr],6,0.1,0.7)
                     
@@ -1295,6 +1291,7 @@ if doExclusion_GMSB_combined or doExclusion_mSUGRA_dilepton_combined or doExclus
                 ch.useOverflowBin=True
                 ch.removeWeight("bTagWeight3Jet")
 
+                
                 if (ch.name.find("S3El")>-1 or ch.name.find("S4El")>-1):
                     ch.setFileList(bgdFiles_e)
                 elif ch.name.find("SSEl")>-1:
@@ -1315,6 +1312,7 @@ if doExclusion_GMSB_combined or doExclusion_mSUGRA_dilepton_combined or doExclus
                 ch.getSample(sig).removeSystematic("JHigh")
                 ch.getSample(sig).removeSystematic("JMedium")
                 ch.getSample(sig).removeSystematic("JLow")
+                
 
                 ## Ptmin
                 if fullSyst and not doSignalOnly:
@@ -1410,3 +1408,4 @@ if doExclusion_GMSB_combined or doExclusion_mSUGRA_dilepton_combined or doExclus
             elif chan.name.find("mm")>-1:
                 chan.getSample(sig).setFileList(sigFiles)
                 
+

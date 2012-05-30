@@ -60,7 +60,7 @@ def hadroSys(CRval,SRval,sample,observable):
     if sample=="ttbar" and observable=="meff":
         #f(x) = 1.092 -0.000220*x
         a=-0.000220 #+- 0.000083
-        #b=1.092 +- 0.045
+        #b=1.092 #+- 0.045
     elif sample=="ttbar" and observable=="met":
         #f(x) = 1.015 - 0.000216 * x
         a=-0.000216
@@ -76,9 +76,20 @@ def hadroSys(CRval,SRval,sample,observable):
     else:
         raise RuntimeError("Unsupported case: sample=%s, observable=%s"%(sample,observable))
 
-    syst=a*(SRval-CRval)
+
+    
+    syst=abs(a*(SRval-CRval))
     #print "hadronization systematic for %s %s CR=%f SR=%f --> syst=%f"%(sample,observable,CRval,SRval,syst)
     return syst
+
+def hadroSysBins(CRval,SRNBins,SRBinLow,SRBinHigh,sample,observable):
+    weights_up=[]
+    weights_down=[]
+    for bin in xrange(SRNBins):
+        hadsystvalue=hadroSys(CRval,SRBinLow+(SRBinHigh-SRBinLow)*(bin+0.5)/SRNBins,sample,observable)
+        weights_up.append(1+hadsystvalue)
+        weights_down.append(1-hadsystvalue)
+    return weights_up,weights_down
 
 def addHadronizationSyst(chan,topSyst,WZSyst):
     for s in chan.sampleList:
@@ -87,3 +98,6 @@ def addHadronizationSyst(chan,topSyst,WZSyst):
         elif s.name.startswith("WZ"):
             s.addSystematic(WZSyst)
     return
+
+
+
