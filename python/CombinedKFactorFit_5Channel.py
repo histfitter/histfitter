@@ -34,18 +34,18 @@ useHardLepCR=True
 useSoftLepCR=True
 useDiLepCR=True
 useStat=True
-fullSyst=False
+fullSyst=True
 
 doTableInputs=False #This effectively means no validation plots but only validation tables (but is 100x faster)
-doValidationSRLoose=False
-doValidationSRTight=False
-doValidationSlope=False
-doValidationDilep=False
-doValidationDilepZ=False
-doValidationSoftLep=False
+doValidationSRLoose=True
+doValidationSRTight=True
+doValidationSlope=True
+doValidationDilep=True
+doValidationDilepZ=True
+doValidationSoftLep=True
 
 doExclusion_GMSB_combined=False
-doExclusion_mSUGRA_dilepton_combined=True
+doExclusion_mSUGRA_dilepton_combined=False
 doExclusion_GG_onestepCC_x12=False
 doExclusion_GG_onestepCC_gridX=False
 doExclusion_GG_twostepCC_slepton=False
@@ -167,11 +167,11 @@ if doExclusion_GG_twostepCC_slepton:
 
 # Map regions to cut strings
 configMgr.cutsDict = {}
-configMgr.cutsDict["TRee"]="(mll<80 || mll>100) && met > 30 && met < 80 && jet2Pt > 50 && nB3Jet > 0 && AnalysisType==3"
-configMgr.cutsDict["TRmm"]="(mll<80 || mll>100) && met > 30 && met < 80 && jet2Pt > 50 && nB3Jet > 0 && AnalysisType==4"
-configMgr.cutsDict["TRem"]="(mll<80 || mll>100) && met > 30 && met < 80 && jet2Pt > 50 && nB3Jet > 0 && AnalysisType==5"
-configMgr.cutsDict["ZRee"]="mll>80 && mll<100  && met < 50 && jet2Pt > 50 && AnalysisType==3"
-configMgr.cutsDict["ZRmm"]="mll>80 && mll<100  && met < 50 && jet2Pt > 50 && AnalysisType==4"
+configMgr.cutsDict["TRee"]="(mll<80 || mll>100) && met > 30 && met < 80 && jet2Pt > 50 && (jet1Pt > 80 || jet4Pt > 50) && nB3Jet > 0 && AnalysisType==3"
+configMgr.cutsDict["TRmm"]="(mll<80 || mll>100) && met > 30 && met < 80 && jet2Pt > 50 && (jet1Pt > 80 || jet4Pt > 50) && nB3Jet > 0 && AnalysisType==4"
+configMgr.cutsDict["TRem"]="(mll<80 || mll>100) && met > 30 && met < 80 && jet2Pt > 50 && (jet1Pt > 80 || jet4Pt > 50) && nB3Jet > 0 && AnalysisType==5"
+configMgr.cutsDict["ZRee"]="mll>80 && mll<100  && met < 50 && jet2Pt > 50 && (jet1Pt > 80 || jet4Pt > 50) && AnalysisType==3"
+configMgr.cutsDict["ZRmm"]="mll>80 && mll<100  && met < 50 && jet2Pt > 50 && (jet1Pt > 80 || jet4Pt > 50) && AnalysisType==4"
 
 configMgr.cutsDict["S2ee"]="met > 300 && nJet>=2 && jet2Pt > 200 && jet4Pt < 50 && AnalysisType==3"
 configMgr.cutsDict["S2mm"]="met > 300 && nJet>=2 && jet2Pt > 200 && jet4Pt < 50 && AnalysisType==4"
@@ -180,25 +180,25 @@ configMgr.cutsDict["S4ee"]="met > 100 && nJet>=4 && jet4Pt > 50 && met/meff4Jet 
 configMgr.cutsDict["S4mm"]="met > 100 && nJet>=4 && jet4Pt > 50 && met/meff4Jet > 0.2 && meffInc > 650 && AnalysisType==4"
 configMgr.cutsDict["S4em"]="met > 100 && nJet>=4 && jet4Pt > 50 && met/meff4Jet > 0.2 && meffInc > 650 && AnalysisType==5"
 
-configMgr.cutsDict["VR2ee"]="met > 100 && met < 300 && jet4Pt < 50 && jet2Pt > 50 && AnalysisType==3"
-configMgr.cutsDict["VR2em"]="met > 100 && met < 300 && jet4Pt < 50 && jet2Pt > 50 && AnalysisType==5"
-configMgr.cutsDict["VR2mm"]="met > 100 && met < 300 && jet4Pt < 50 && jet2Pt > 50 && AnalysisType==4"
+configMgr.cutsDict["VR2ee"]="met > 100 && met < 300 && jet4Pt < 50 && jet2Pt > 50 && jet1Pt > 80 && AnalysisType==3"
+configMgr.cutsDict["VR2em"]="met > 100 && met < 300 && jet4Pt < 50 && jet2Pt > 50 && jet1Pt > 80 && AnalysisType==5"
+configMgr.cutsDict["VR2mm"]="met > 100 && met < 300 && jet4Pt < 50 && jet2Pt > 50 && jet1Pt > 80 && AnalysisType==4"
 
-configMgr.cutsDict["VR3ee"]="met > 100 && met < 300 && jet4Pt < 50 && jet3Pt > 50 && AnalysisType==3"
-configMgr.cutsDict["VR3em"]="met > 100 && met < 300 && jet4Pt < 50 && jet3Pt > 50 && AnalysisType==5"
-configMgr.cutsDict["VR3mm"]="met > 100 && met < 300 && jet4Pt < 50 && jet3Pt > 50 && AnalysisType==4"
+configMgr.cutsDict["VR3ee"]="met > 100 && met < 300 && jet4Pt < 50 && jet3Pt > 50 && jet1Pt > 80 && AnalysisType==3"
+configMgr.cutsDict["VR3em"]="met > 100 && met < 300 && jet4Pt < 50 && jet3Pt > 50 && jet1Pt > 80 && AnalysisType==5"
+configMgr.cutsDict["VR3mm"]="met > 100 && met < 300 && jet4Pt < 50 && jet3Pt > 50 && jet1Pt > 80 && AnalysisType==4"
 
 configMgr.cutsDict["VR4ee"]="met < 100 && jet4Pt > 50 && AnalysisType==3"
 configMgr.cutsDict["VR4em"]="met < 100 && jet4Pt > 50  && AnalysisType==5"
 configMgr.cutsDict["VR4mm"]="met < 100  && jet4Pt > 50 && AnalysisType==4"
 
-configMgr.cutsDict["VZR2ee"]="met > 50 && met < 100 && jet2Pt > 50 && nB3Jet == 0 && AnalysisType==3"
-configMgr.cutsDict["VZR2em"]="met > 50 && met < 100 && jet2Pt > 50 && nB3Jet == 0 && AnalysisType==5"                    
-configMgr.cutsDict["VZR2mm"]="met > 50 && met < 100 && jet2Pt > 50 && nB3Jet == 0 && AnalysisType==4"
+configMgr.cutsDict["VZR2ee"]="met > 50 && met < 100 && jet2Pt > 50 && jet1Pt > 80 && nB3Jet == 0 && AnalysisType==3"
+configMgr.cutsDict["VZR2em"]="met > 50 && met < 100 && jet2Pt > 50 && jet1Pt > 80 && nB3Jet == 0 && AnalysisType==5"                    
+configMgr.cutsDict["VZR2mm"]="met > 50 && met < 100 && jet2Pt > 50 && jet1Pt > 80 && nB3Jet == 0 && AnalysisType==4"
 
-configMgr.cutsDict["VZR3ee"]="met > 50 && met < 100  && jet3Pt > 50 && nB3Jet == 0 && AnalysisType==3"
-configMgr.cutsDict["VZR3em"]="met > 50 && met < 100 && jet3Pt > 50 && nB3Jet == 0 && AnalysisType==5"
-configMgr.cutsDict["VZR3mm"]="met > 50 && met < 100 && jet3Pt > 50 && nB3Jet == 0 && AnalysisType==4"
+configMgr.cutsDict["VZR3ee"]="met > 50 && met < 100  && jet3Pt > 50 && jet1Pt > 80 && nB3Jet == 0 && AnalysisType==3"
+configMgr.cutsDict["VZR3em"]="met > 50 && met < 100 && jet3Pt > 50 && jet1Pt > 80 && nB3Jet == 0 && AnalysisType==5"
+configMgr.cutsDict["VZR3mm"]="met > 50 && met < 100 && jet3Pt > 50 && && jet1Pt > 80 nB3Jet == 0 && AnalysisType==4"
 
 configMgr.cutsDict["VZR4ee"]="met > 50 && met < 100 & jet4Pt > 50  && nB3Jet == 0 && AnalysisType==3"
 configMgr.cutsDict["VZR4em"]="met > 50 && met < 100 & jet4Pt > 50 && nB3Jet == 0 && AnalysisType==5"
