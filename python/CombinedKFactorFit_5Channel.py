@@ -389,6 +389,8 @@ hadWZ_SRS2  = Systematic("had",configMgr.weights,1.0+hadroSys(50.0,300.0,"WZ","m
 hadTop_SRS4 = Systematic("had",configMgr.weights,1.0+hadroSys(0.0,650.0,"ttbar","meff"),1.0-hadroSys(0.0,650.0,"ttbar","meff"),"user","userOverallSys")
 hadWZ_SRS4  = Systematic("had",configMgr.weights,1.0+hadroSys(0.0,650.0,"WZ","meff"),   1.0-hadroSys(0.0,650.0,"WZ","meff"),"user","userOverallSys")
 
+
+
 # List of samples and their plotting colours
 AlpGenSamples=[]
 
@@ -1313,7 +1315,74 @@ if doExclusion_GMSB_combined or doExclusion_mSUGRA_dilepton_combined or doExclus
                 ch.getSample(sig).removeSystematic("JHigh")
                 ch.getSample(sig).removeSystematic("JMedium")
                 ch.getSample(sig).removeSystematic("JLow")
-        
+
+                ## Ptmin
+                if fullSyst and not doSignalOnly:
+                    if (ch.name.find("S3El")>-1 or ch.name.find("S3Mu")>-1):
+                        ch.getSample("Top_Np0").addSystematic(topPtMin30S3)
+                        ch.getSample("Top_Np1").addSystematic(topPtMin30S3)
+                        ch.getSample("Top_Np2").addSystematic(topPtMin30S3)
+                        ch.getSample("Top_Np3").addSystematic(topPtMin30S3)
+                        ch.getSample("Top_Np4").addSystematic(topPtMin30S3)
+                        ch.getSample("Top_Np5").addSystematic(topPtMin30S3)
+                        ch.getSample("WZ_Np0").addSystematic(wzPtMin30S3)
+                        ch.getSample("WZ_Np1").addSystematic(wzPtMin30S3)
+                        ch.getSample("WZ_Np2").addSystematic(wzPtMin30S3)
+                        ch.getSample("WZ_Np3").addSystematic(wzPtMin30S3)
+                        ch.getSample("WZ_Np4").addSystematic(wzPtMin30S3)
+                        ch.getSample("WZ_Np5").addSystematic(wzPtMin30S3)
+                    elif (ch.name.find("S4El")>-1 or ch.name.find("S4Mu")>-1):
+                        ch.getSample("Top_Np0").addSystematic(topPtMin30S4)
+                        ch.getSample("Top_Np1").addSystematic(topPtMin30S4)
+                        ch.getSample("Top_Np2").addSystematic(topPtMin30S4)
+                        ch.getSample("Top_Np3").addSystematic(topPtMin30S4)
+                        ch.getSample("Top_Np4").addSystematic(topPtMin30S4)
+                        ch.getSample("Top_Np5").addSystematic(topPtMin30S4)
+                        ch.getSample("WZ_Np0").addSystematic(wzPtMin30S4)
+                        ch.getSample("WZ_Np1").addSystematic(wzPtMin30S4)
+                        ch.getSample("WZ_Np2").addSystematic(wzPtMin30S4)
+                        ch.getSample("WZ_Np3").addSystematic(wzPtMin30S4)
+                        ch.getSample("WZ_Np4").addSystematic(wzPtMin30S4)
+                        ch.getSample("WZ_Np5").addSystematic(wzPtMin30S4)
+                    elif (ch.name.find("S2ee")>-1 or ch.name.find("S2mm")>-1 or ch.name.find("S2em")>-1):
+                        ch.getSample("Top_Np0").addSystematic(topPtMin30DLS2)
+                        ch.getSample("Top_Np1").addSystematic(topPtMin30DLS2)
+                        ch.getSample("Top_Np2").addSystematic(topPtMin30DLS2)
+                        ch.getSample("Top_Np3").addSystematic(topPtMin30DLS2)
+                        ch.getSample("Top_Np4").addSystematic(topPtMin30DLS2)
+                        ch.getSample("Top_Np5").addSystematic(topPtMin30DLS2)
+                        ch.getSample("WZ_Np0").addSystematic(wzPtMin30DLS2)
+                        ch.getSample("WZ_Np1").addSystematic(wzPtMin30DLS2)
+                        ch.getSample("WZ_Np2").addSystematic(wzPtMin30DLS2)
+                        ch.getSample("WZ_Np3").addSystematic(wzPtMin30DLS2)
+                        ch.getSample("WZ_Np4").addSystematic(wzPtMin30DLS2)
+                        ch.getSample("WZ_Np5").addSystematic(wzPtMin30DLS2)
+                    elif (ch.name.find("S4ee")>-1 or ch.name.find("S4mm")>-1 or ch.name.find("S4em")>-1):
+                        ch.getSample("Top_Np0").addSystematic(topPtMin30DLS4)
+                        ch.getSample("Top_Np1").addSystematic(topPtMin30DLS4)
+                        ch.getSample("Top_Np2").addSystematic(topPtMin30DLS4)
+                        ch.getSample("Top_Np3").addSystematic(topPtMin30DLS4)
+                        ch.getSample("Top_Np4").addSystematic(topPtMin30DLS4)
+                        ch.getSample("Top_Np5").addSystematic(topPtMin30DLS4)
+                        ch.getSample("WZ_Np0").addSystematic(wzPtMin30DLS4)
+                        ch.getSample("WZ_Np1").addSystematic(wzPtMin30DLS4)
+                        ch.getSample("WZ_Np2").addSystematic(wzPtMin30DLS4)
+                        ch.getSample("WZ_Np3").addSystematic(wzPtMin30DLS4)
+                        ch.getSample("WZ_Np4").addSystematic(wzPtMin30DLS4)
+                        ch.getSample("WZ_Np5").addSystematic(wzPtMin30DLS4)
+                    elif (ch.name.find("SSEl")>-1 or ch.name.find("SSMu")>-1):
+                        ch.getSample("Top_Np0").addSystematic(topPtMin30SS)
+                        ch.getSample("Top_Np1").addSystematic(topPtMin30SS)
+                        ch.getSample("Top_Np2").addSystematic(topPtMin30SS)
+                        ch.getSample("Top_Np3").addSystematic(topPtMin30SS)
+                        ch.getSample("Top_Np4").addSystematic(topPtMin30SS)
+                        ch.getSample("Top_Np5").addSystematic(topPtMin30SS)
+                        ch.getSample("WZ_Np0").addSystematic(wzPtMin30SS)
+                        ch.getSample("WZ_Np1").addSystematic(wzPtMin30SS)
+                        ch.getSample("WZ_Np2").addSystematic(wzPtMin30SS)
+                        ch.getSample("WZ_Np3").addSystematic(wzPtMin30SS)
+                        ch.getSample("WZ_Np4").addSystematic(wzPtMin30SS)
+                        ch.getSample("WZ_Np5").addSystematic(wzPtMin30SS)          
 
         for (iChan,chan) in enumerate(myTopLvl.channels):
             if chan.name.find("El")>-1:
