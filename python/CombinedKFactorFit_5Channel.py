@@ -36,8 +36,8 @@ useDiLepCR=True
 useStat=True
 fullSyst=True
 
-doTableInputs=False #This effectively means no validation plots but only validation tables (but is 100x faster)
-doValidationSRLoose=True
+doTableInputs=True #This effectively means no validation plots but only validation tables (but is 100x faster)
+doValidationSRLoose=False
 doValidationSRTight=True
 doValidationSlope=True
 doValidationDilep=True
@@ -45,7 +45,7 @@ doValidationDilepZ=True
 doValidationSoftLep=True
 
 doExclusion_GMSB_combined=False
-doExclusion_mSUGRA_dilepton_combined=False
+doExclusion_mSUGRA_dilepton_combined=True
 doExclusion_GG_onestepCC_x12=False
 doExclusion_GG_onestepCC_gridX=False
 doExclusion_GG_twostepCC_slepton=False
@@ -1078,6 +1078,9 @@ if doValidationDilep:
         validation2LepChannels.append( bkgOnly.addValidationChannel("meffInc",["VR4ee"],1,meffBinLowTR,meffBinHighTR) )
         validation2LepChannels.append( bkgOnly.addValidationChannel("meffInc",["VR4em"],1,meffBinLowTR,meffBinHighTR) )
         validation2LepChannels.append( bkgOnly.addValidationChannel("meffInc",["VR4mm"],1,meffBinLowTR,meffBinHighTR) )
+        validation2LepChannels.append( bkgOnly.addValidationChannel("meffInc",["VR3ee"],1,meffBinLowTR,meffBinHighTR) )
+        validation2LepChannels.append( bkgOnly.addValidationChannel("meffInc",["VR3em"],1,meffBinLowTR,meffBinHighTR) )
+        validation2LepChannels.append( bkgOnly.addValidationChannel("meffInc",["VR3mm"],1,meffBinLowTR,meffBinHighTR) )
         validation2LepChannels.append( bkgOnly.addValidationChannel("meffInc",["VR2ee"],1,meffBinLowTR,meffBinHighTR) )
         validation2LepChannels.append( bkgOnly.addValidationChannel("meffInc",["VR2em"],1,meffBinLowTR,meffBinHighTR) )
         validation2LepChannels.append( bkgOnly.addValidationChannel("meffInc",["VR2mm"],1,meffBinLowTR,meffBinHighTR) )
@@ -1121,6 +1124,9 @@ if doValidationDilepZ:
         validation2LepZChannels.append( bkgOnly.addValidationChannel("meffInc",["VZR4ee"],1,meffBinLowTR,meffBinHighTR) )
         validation2LepZChannels.append( bkgOnly.addValidationChannel("meffInc",["VZR4em"],1,meffBinLowTR,meffBinHighTR) )
         validation2LepZChannels.append( bkgOnly.addValidationChannel("meffInc",["VZR4mm"],1,meffBinLowTR,meffBinHighTR) )
+        validation2LepZChannels.append( bkgOnly.addValidationChannel("meffInc",["VZR3ee"],1,meffBinLowTR,meffBinHighTR) )
+        validation2LepZChannels.append( bkgOnly.addValidationChannel("meffInc",["VZR3em"],1,meffBinLowTR,meffBinHighTR) )
+        validation2LepZChannels.append( bkgOnly.addValidationChannel("meffInc",["VZR3mm"],1,meffBinLowTR,meffBinHighTR) )
         validation2LepZChannels.append( bkgOnly.addValidationChannel("meffInc",["VZR2ee"],1,meffBinLowTR,meffBinHighTR) )
         validation2LepZChannels.append( bkgOnly.addValidationChannel("meffInc",["VZR2em"],1,meffBinLowTR,meffBinHighTR) )
         validation2LepZChannels.append( bkgOnly.addValidationChannel("meffInc",["VZR2mm"],1,meffBinLowTR,meffBinHighTR) )
