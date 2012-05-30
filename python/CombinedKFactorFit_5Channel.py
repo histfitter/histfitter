@@ -36,13 +36,13 @@ useDiLepCR=True
 useStat=True
 fullSyst=True
 
-doTableInputs=True #This effectively means no validation plots but only validation tables (but is 100x faster)
+doTableInputs=False #This effectively means no validation plots but only validation tables (but is 100x faster)
 doValidationSRLoose=False
-doValidationSRTight=True
-doValidationSlope=True
-doValidationDilep=True
-doValidationDilepZ=True
-doValidationSoftLep=True
+doValidationSRTight=False
+doValidationSlope=False
+doValidationDilep=False
+doValidationDilepZ=False
+doValidationSoftLep=False
 
 doExclusion_GMSB_combined=False
 doExclusion_mSUGRA_dilepton_combined=True
@@ -579,7 +579,7 @@ if useDiLepCR:
     # ele ele
     nJetTopeeChannel=bkgOnly.addChannel("nJet",["TRee"],(nJetTopeeBinHigh-nJetTopeeBinLow),nJetTopeeBinLow,nJetTopeeBinHigh)
     nJetTopeeChannel.setFileList(bgdFiles_ee)
-    if fullSyst:
+    if fullSyst and not doSignalOnly:
         nJetTopeeChannel.getSample("Top_Np0").addSystematic(topPtMin30DLCR)
         nJetTopeeChannel.getSample("Top_Np1").addSystematic(topPtMin30DLCR)
         nJetTopeeChannel.getSample("Top_Np2").addSystematic(topPtMin30DLCR)
@@ -595,7 +595,7 @@ if useDiLepCR:
     #  ele mu
     nJetTopemChannel=bkgOnly.addChannel("nJet",["TRem"],(nJetTopemBinHigh-nJetTopemBinLow),nJetTopemBinLow,nJetTopemBinHigh)
     nJetTopemChannel.setFileList(bgdFiles_em)
-    if fullSyst:
+    if fullSyst and not doSignalOnly:
         nJetTopemChannel.getSample("Top_Np0").addSystematic(topPtMin30DLCR)
         nJetTopemChannel.getSample("Top_Np1").addSystematic(topPtMin30DLCR)
         nJetTopemChannel.getSample("Top_Np2").addSystematic(topPtMin30DLCR)
@@ -611,7 +611,7 @@ if useDiLepCR:
     # mu mu
     nJetTopmmChannel=bkgOnly.addChannel("nJet",["TRmm"],(nJetTopmmBinHigh-nJetTopmmBinLow),nJetTopmmBinLow,nJetTopmmBinHigh)
     nJetTopmmChannel.setFileList(bgdFiles_mm)
-    if fullSyst:
+    if fullSyst and not doSignalOnly:
         nJetTopmmChannel.getSample("Top_Np0").addSystematic(topPtMin30DLCR)
         nJetTopmmChannel.getSample("Top_Np1").addSystematic(topPtMin30DLCR)
         nJetTopmmChannel.getSample("Top_Np2").addSystematic(topPtMin30DLCR)
@@ -631,7 +631,7 @@ if useHardLepCR:
     #  single ele
     nJetTopeChannel=bkgOnly.addChannel("nJet",["TREl"],(nJetTopeBinHigh-nJetTopeBinLow),nJetTopeBinLow,nJetTopeBinHigh)
     nJetTopeChannel.setFileList(bgdFiles_e)
-    if fullSyst:
+    if fullSyst and not doSignalOnly:
         nJetTopeChannel.getSample("Top_Np0").addSystematic(topPtMin30HLCR)
         nJetTopeChannel.getSample("Top_Np1").addSystematic(topPtMin30HLCR)
         nJetTopeChannel.getSample("Top_Np2").addSystematic(topPtMin30HLCR)
@@ -647,7 +647,7 @@ if useHardLepCR:
     # single mu
     nJetTopmChannel=bkgOnly.addChannel("nJet",["TRMu"],(nJetTopmBinHigh-nJetTopmBinLow),nJetTopmBinLow,nJetTopmBinHigh)
     nJetTopmChannel.setFileList(bgdFiles_m)
-    if fullSyst:
+    if fullSyst and not doSignalOnly:
         nJetTopmChannel.getSample("Top_Np0").addSystematic(topPtMin30HLCR)
         nJetTopmChannel.getSample("Top_Np1").addSystematic(topPtMin30HLCR)
         nJetTopmChannel.getSample("Top_Np2").addSystematic(topPtMin30HLCR)
@@ -667,7 +667,7 @@ if useSoftLepCR:
     #  single soft ele
     nJetTopseChannel=bkgOnly.addChannel("nJet",["SVTEl"],(nJetTopseBinHigh-nJetTopseBinLow),nJetTopseBinLow,nJetTopseBinHigh)
     nJetTopseChannel.setFileList(bgdFiles_se)
-    if fullSyst:
+    if fullSyst and not doSignalOnly:
         nJetTopseChannel.getSample("Top_Np0").addSystematic(topPtMin30SLCR)
         nJetTopseChannel.getSample("Top_Np1").addSystematic(topPtMin30SLCR)
         nJetTopseChannel.getSample("Top_Np2").addSystematic(topPtMin30SLCR)
@@ -683,7 +683,7 @@ if useSoftLepCR:
     # soft single mu
     nJetTopsmChannel=bkgOnly.addChannel("nJet",["SVTMu"],(nJetTopsmBinHigh-nJetTopsmBinLow),nJetTopsmBinLow,nJetTopsmBinHigh)
     nJetTopsmChannel.setFileList(bgdFiles_sm)
-    if fullSyst:
+    if fullSyst and not doSignalOnly:
         nJetTopsmChannel.getSample("Top_Np0").addSystematic(topPtMin30SLCR)
         nJetTopsmChannel.getSample("Top_Np1").addSystematic(topPtMin30SLCR)
         nJetTopsmChannel.getSample("Top_Np2").addSystematic(topPtMin30SLCR)
@@ -717,7 +717,7 @@ if useDiLepCR:
     # ele ele    
     nJetZeeChannel=bkgOnly.addChannel("nJet",nJetZeeRegions,(nJetZeeBinHigh-nJetZeeBinLow),nJetZeeBinLow,nJetZeeBinHigh)
     nJetZeeChannel.setFileList(bgdFiles_ee)
-    if fullSyst:
+    if fullSyst and not doSignalOnly:
         nJetZeeChannel.getSample("WZ_Np0").addSystematic(wzPtMin30DLCR)
         nJetZeeChannel.getSample("WZ_Np1").addSystematic(wzPtMin30DLCR)
         nJetZeeChannel.getSample("WZ_Np2").addSystematic(wzPtMin30DLCR)
@@ -735,7 +735,7 @@ if useDiLepCR:
     # mu mu
     nJetZmmChannel=bkgOnly.addChannel("nJet",nJetZmmRegions,(nJetZmmBinHigh-nJetZmmBinLow),nJetZmmBinLow,nJetZmmBinHigh)
     nJetZmmChannel.setFileList(bgdFiles_mm)
-    if fullSyst:
+    if fullSyst and not doSignalOnly:
         nJetZmmChannel.getSample("WZ_Np0").addSystematic(wzPtMin30DLCR)
         nJetZmmChannel.getSample("WZ_Np1").addSystematic(wzPtMin30DLCR)
         nJetZmmChannel.getSample("WZ_Np2").addSystematic(wzPtMin30DLCR)
@@ -758,7 +758,7 @@ if useHardLepCR:
     # single ele
     nJetZeChannel=bkgOnly.addChannel("nJet",nJetZeRegions,(nJetZeBinHigh-nJetZeBinLow),nJetZeBinLow,nJetZeBinHigh)
     nJetZeChannel.setFileList(bgdFiles_e)
-    if fullSyst:
+    if fullSyst and not doSignalOnly:
         nJetZeChannel.getSample("WZ_Np0").addSystematic(wzPtMin30HLCR)
         nJetZeChannel.getSample("WZ_Np1").addSystematic(wzPtMin30HLCR)
         nJetZeChannel.getSample("WZ_Np2").addSystematic(wzPtMin30HLCR)
@@ -776,7 +776,7 @@ if useHardLepCR:
     # single mu
     nJetZmChannel=bkgOnly.addChannel("nJet",nJetZmRegions,(nJetZmBinHigh-nJetZmBinLow),nJetZmBinLow,nJetZmBinHigh)
     nJetZmChannel.setFileList(bgdFiles_m)
-    if fullSyst:
+    if fullSyst and not doSignalOnly:
         nJetZmChannel.getSample("WZ_Np0").addSystematic(wzPtMin30HLCR)
         nJetZmChannel.getSample("WZ_Np1").addSystematic(wzPtMin30HLCR)
         nJetZmChannel.getSample("WZ_Np2").addSystematic(wzPtMin30HLCR)
@@ -799,7 +799,7 @@ if useSoftLepCR:
     # single soft mu
     nJetZsmChannel=bkgOnly.addChannel("nJet",nJetZsmRegions,(nJetZsmBinHigh-nJetZsmBinLow),nJetZsmBinLow,nJetZsmBinHigh)
     nJetZsmChannel.setFileList(bgdFiles_sm)
-    if fullSyst:
+    if fullSyst and not doSignalOnly:
         nJetZsmChannel.getSample("WZ_Np0").addSystematic(wzPtMin30SLCR)
         nJetZsmChannel.getSample("WZ_Np1").addSystematic(wzPtMin30SLCR)
         nJetZsmChannel.getSample("WZ_Np2").addSystematic(wzPtMin30SLCR)
@@ -818,7 +818,7 @@ if useSoftLepCR:
     # single soft ele
     nJetZseChannel=bkgOnly.addChannel("nJet",nJetZseRegions,(nJetZseBinHigh-nJetZseBinLow),nJetZseBinLow,nJetZseBinHigh)
     nJetZseChannel.setFileList(bgdFiles_se)
-    if fullSyst:
+    if fullSyst and not doSignalOnly:
         nJetZseChannel.getSample("WZ_Np0").addSystematic(wzPtMin30SLCR)
         nJetZseChannel.getSample("WZ_Np1").addSystematic(wzPtMin30SLCR)
         nJetZseChannel.getSample("WZ_Np2").addSystematic(wzPtMin30SLCR)
