@@ -368,23 +368,23 @@ meffCRT_SR24=150.
 meffCRWZ_SR24=100.
 
 from SystematicsUtils import hadroSys,addHadronizationSyst,hadroSysBins
-hadTop_SR3jT = Systematic("had",configMgr.weights,1.0+hadroSys(meffCR_SR347,1200.0,"ttbar","meff"),1.0-hadroSys(meffCR_SR347,1200.0,"ttbar","meff"),"user","userOverallSys")
-hadWZ_SR3jT  = Systematic("had",configMgr.weights,1.0+hadroSys(meffCR_SR347,1200.0,"WZ","meff"),   1.0-hadroSys(meffCR_SR347,1200.0,"WZ","meff"),"user","userOverallSys")
+hadTop_SR3jT = Systematic("hadTop",configMgr.weights,1.0+hadroSys(meffCR_SR347,1200.0,"ttbar","meff"),1.0-hadroSys(meffCR_SR347,1200.0,"ttbar","meff"),"user","userOverallSys")
+hadWZ_SR3jT  = Systematic("hadWZ",configMgr.weights,1.0+hadroSys(meffCR_SR347,1200.0,"WZ","meff"),   1.0-hadroSys(meffCR_SR347,1200.0,"WZ","meff"),"user","userOverallSys")
 #SR4jT
-hadTop_SR4jT = Systematic("had",configMgr.weights,1.0+hadroSys(meffCR_SR347,800.0,"ttbar","meff"),1.0-hadroSys(meffCR_SR347,800.0,"ttbar","meff"),"user","userOverallSys")
-hadWZ_SR4jT  = Systematic("had",configMgr.weights,1.0+hadroSys(meffCR_SR347,800.0,"WZ","meff"),   1.0-hadroSys(meffCR_SR347,800.0,"WZ","meff"),"user","userOverallSys")
+hadTop_SR4jT = Systematic("hadTop",configMgr.weights,1.0+hadroSys(meffCR_SR347,800.0,"ttbar","meff"),1.0-hadroSys(meffCR_SR347,800.0,"ttbar","meff"),"user","userOverallSys")
+hadWZ_SR4jT  = Systematic("hadWZ",configMgr.weights,1.0+hadroSys(meffCR_SR347,800.0,"WZ","meff"),   1.0-hadroSys(meffCR_SR347,800.0,"WZ","meff"),"user","userOverallSys")
 #SR7jT
-hadTop_SR7jT = Systematic("had",configMgr.weights,1.0+hadroSys(meffCR_SR347,650.0,"ttbar","meff"),1.0-hadroSys(meffCR_SR347,750.0,"ttbar","meff"),"user","userOverallSys")
-hadWZ_SR7jT  = Systematic("had",configMgr.weights,1.0+hadroSys(meffCR_SR347,650.0,"WZ","meff"),   1.0-hadroSys(meffCR_SR347,750.0,"WZ","meff"),"user","userOverallSys")
+hadTop_SR7jT = Systematic("hadTop",configMgr.weights,1.0+hadroSys(meffCR_SR347,650.0,"ttbar","meff"),1.0-hadroSys(meffCR_SR347,750.0,"ttbar","meff"),"user","userOverallSys")
+hadWZ_SR7jT  = Systematic("hadWZ",configMgr.weights,1.0+hadroSys(meffCR_SR347,650.0,"WZ","meff"),   1.0-hadroSys(meffCR_SR347,750.0,"WZ","meff"),"user","userOverallSys")
 #SL
-hadTop_SRSL = Systematic("had",configMgr.weights,1.0+hadroSys(metCR_SRSL,250.0,"ttbar","met"),1.0-hadroSys(metCR_SRSL,250.0,"ttbar","met"),"user","userOverallSys")
-hadWZ_SRSL  = Systematic("had",configMgr.weights,1.0+hadroSys(metCR_SRSL,250.0,"WZ","met"),   1.0-hadroSys(metCR_SRSL,250.0,"WZ","met"),"user","userOverallSys")
+hadTop_SRSL = Systematic("hadTop",configMgr.weights,1.0+hadroSys(metCR_SRSL,250.0,"ttbar","met"),1.0-hadroSys(metCR_SRSL,250.0,"ttbar","met"),"user","userOverallSys")
+hadWZ_SRSL  = Systematic("hadWZ",configMgr.weights,1.0+hadroSys(metCR_SRSL,250.0,"WZ","met"),   1.0-hadroSys(metCR_SRSL,250.0,"WZ","met"),"user","userOverallSys")
 #S2
-hadTop_SRS2 = Systematic("had",configMgr.weights,1.0+hadroSys(meffCRT_SR24,700.0,"ttbar","meff"),1.0-hadroSys(meffCRT_SR24,700.0,"ttbar","met"),"user","userOverallSys")
-hadWZ_SRS2  = Systematic("had",configMgr.weights,1.0+hadroSys(meffCRWZ_SR24,700.0,"WZ","meff"),   1.0-hadroSys(meffCRWZ_SR24,700.0,"WZ","met"),"user","userOverallSys")
+hadTop_SRS2 = Systematic("hadTop",configMgr.weights,1.0+hadroSys(meffCRT_SR24,700.0,"ttbar","meff"),1.0-hadroSys(meffCRT_SR24,700.0,"ttbar","met"),"user","userOverallSys")
+hadWZ_SRS2  = Systematic("hadWZ",configMgr.weights,1.0+hadroSys(meffCRWZ_SR24,700.0,"WZ","meff"),   1.0-hadroSys(meffCRWZ_SR24,700.0,"WZ","met"),"user","userOverallSys")
 #S4
-hadTop_SRS4 = Systematic("had",configMgr.weights,1.0+hadroSys(meffCRT_SR24,650.0,"ttbar","meff"),1.0-hadroSys(meffCRT_SR24,650.0,"ttbar","meff"),"user","userOverallSys")
-hadWZ_SRS4  = Systematic("had",configMgr.weights,1.0+hadroSys(meffCRWZ_SR24,650.0,"WZ","meff"),   1.0-hadroSys(meffCRWZ_SR24,650.0,"WZ","meff"),"user","userOverallSys")
+hadTop_SRS4 = Systematic("hadTop",configMgr.weights,1.0+hadroSys(meffCRT_SR24,650.0,"ttbar","meff"),1.0-hadroSys(meffCRT_SR24,650.0,"ttbar","meff"),"user","userOverallSys")
+hadWZ_SRS4  = Systematic("hadWZ",configMgr.weights,1.0+hadroSys(meffCRWZ_SR24,650.0,"WZ","meff"),   1.0-hadroSys(meffCRWZ_SR24,650.0,"WZ","meff"),"user","userOverallSys")
 
 ##Hadronization in SRs as userHistoSys for exclusion fits
 #Hard 1 lepton SR binning
