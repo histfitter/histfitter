@@ -36,16 +36,16 @@ useDiLepCR=True
 useStat=True
 fullSyst=True
 
-doTableInputs=True #This effectively means no validation plots but only validation tables (but is 100x faster)
+doTableInputs=False #This effectively means no validation plots but only validation tables (but is 100x faster)
 doValidationSRLoose=False
-doValidationSRTight=True
-doValidationSlope=True
-doValidationDilep=True
-doValidationDilepZ=True
-doValidationSoftLep=True
+doValidationSRTight=False
+doValidationSlope=False
+doValidationDilep=False
+doValidationDilepZ=False
+doValidationSoftLep=False
 
 doExclusion_GMSB_combined=False
-doExclusion_mSUGRA_dilepton_combined=True
+doExclusion_mSUGRA_dilepton_combined=False
 doExclusion_GG_onestepCC_x12=False
 doExclusion_GG_onestepCC_gridX=False
 doExclusion_GG_twostepCC_slepton=False
@@ -57,10 +57,10 @@ if configMgr.executeHistFactory:
     doSignalOnly=False
     
 if not 'sigSamples' in dir():
-    sigSamples=["SU_580_240_0_10_P"]
+#    sigSamples=["SU_580_240_0_10_P"]
         #sigSamples=["SM_GG_onestepCC_445_245_45"]
     #    sigSamples=["SM_GG_twostepCC_slepton_415_215_115_15"]
-#    sigSamples=["GMSB_3_2d_50_250_3_10_1_1"]
+    sigSamples=["GMSB_3_2d_50_250_3_10_1_1"]
 
 # First define HistFactory attributes
 configMgr.analysisName = "Combined_KFactorFit_5Channel" # Name to give the analysis
@@ -364,6 +364,7 @@ wzPtMin30DLS4 = Systematic("PtMinWZ",configMgr.weights,1.08,0.92,"user","userOve
 
 meffCR_SR347=500.0
 metCR_SRSL=180.
+metovermeffCR_SRSL=0.1
 meffCRT_SR24=150.
 meffCRWZ_SR24=100.
 
@@ -378,7 +379,7 @@ hadTop_SR7jT = Systematic("hadTop",configMgr.weights,1.0+hadroSys(meffCR_SR347,6
 hadWZ_SR7jT  = Systematic("hadWZ",configMgr.weights,1.0+hadroSys(meffCR_SR347,650.0,"WZ","meff"),   1.0-hadroSys(meffCR_SR347,750.0,"WZ","meff"),"user","userOverallSys")
 #SL
 hadTop_SRSL = Systematic("hadTop",configMgr.weights,1.0+hadroSys(metCR_SRSL,250.0,"ttbar","met"),1.0-hadroSys(metCR_SRSL,250.0,"ttbar","met"),"user","userOverallSys")
-hadWZ_SRSL  = Systematic("hadWZ",configMgr.weights,1.0+hadroSys(metCR_SRSL,250.0,"WZ","met"),   1.0-hadroSys(metCR_SRSL,250.0,"WZ","met"),"user","userOverallSys")
+hadWZ_SRSL  = Systematic("hadWZ",configMgr.weights,1.0+hadroSys(metovermeffCR_SRSL,0.7,"WZ","metovermeff"),   1.0-hadroSys(metovermeffCR_SRSL,0.7,"WZ","metovermeff"),"user","userOverallSys")
 #S2
 hadTop_SRS2 = Systematic("hadTop",configMgr.weights,1.0+hadroSys(meffCRT_SR24,700.0,"ttbar","meff"),1.0-hadroSys(meffCRT_SR24,700.0,"ttbar","met"),"user","userOverallSys")
 hadWZ_SRS2  = Systematic("hadWZ",configMgr.weights,1.0+hadroSys(meffCRWZ_SR24,700.0,"WZ","meff"),   1.0-hadroSys(meffCRWZ_SR24,700.0,"WZ","met"),"user","userOverallSys")
@@ -410,6 +411,10 @@ meffBinLowHL = 400.
 #meffBinLow = 0.
 meffBinHighHL = 1600.
 
+metovermeffNBinsSL = 6
+metovermeffBinLowSL = 0.1
+metovermeffBinHighSL = 0.7
+
 hadTop_SR3jT_hist = Systematic(*(("hadTop",configMgr.weights)+hadroSysBins(meffCR_SR347,meffNBins1lS3,meffBinLow1lS3,meffBinHigh1lS3,"ttbar","meff")+("user","userNormHistoSys")))
 hadWZ_SR3jT_hist = Systematic(*(("hadWZ",configMgr.weights)+hadroSysBins(meffCR_SR347,meffNBins1lS3,meffBinLow1lS3,meffBinHigh1lS3,"WZ","meff")+("user","userNormHistoSys")))
 hadTop_SR4jT_hist = Systematic(*(("hadTop",configMgr.weights)+hadroSysBins(meffCR_SR347,meffNBins1lS4,meffBinLow1lS4,meffBinHigh1lS4,"ttbar","meff")+("user","userNormHistoSys")))
@@ -420,7 +425,7 @@ hadWZ_SRS2_hist = Systematic(*(("hadWZ",configMgr.weights)+hadroSysBins(meffCRWZ
 hadTop_SRS4_hist = Systematic(*(("hadTop",configMgr.weights)+hadroSysBins(meffCRT_SR24,meffNBinsS4,meffBinLowS4,meffBinHighS4,"ttbar","meff")+("user","userNormHistoSys")))
 hadWZ_SRS4_hist = Systematic(*(("hadWZ",configMgr.weights)+hadroSysBins(meffCRWZ_SR24,meffNBinsS4,meffBinLowS4,meffBinHighS4,"WZ","meff")+("user","userNormHistoSys")))
 
-
+hadWZ_SRSL_hist = Systematic(*(("hadWZ",configMgr.weights)+hadroSysBins(metovermeffCR_SRSL,metovermeffNBinsSL,metovermeffBinLowSL,metovermeffBinHighSL,"WZ","metovermeff")+("user","userNormHistoSys")))
 
 # List of samples and their plotting colours
 AlpGenSamples=[]
@@ -1290,6 +1295,7 @@ if doExclusion_GMSB_combined or doExclusion_mSUGRA_dilepton_combined or doExclus
                     addHadronizationSyst(ch,hadTop_SRS4_hist,hadWZ_SRS4_hist)
                 elif sr=="SSEl" or sr=="SSMu":
                     ch = myTopLvl.addChannel("met/meff2Jet",[sr],6,0.1,0.7)
+                    addHadronizationSyst(ch,hadTop_SRSL,hadWZ_SRSL_hist)
                     
                 else:
                     raise RuntimeError("Unexpected signal region %s"%sr)
