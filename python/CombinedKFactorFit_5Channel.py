@@ -198,7 +198,7 @@ configMgr.cutsDict["VZR2mm"]="met > 50 && met < 100 && jet2Pt > 50 && jet1Pt > 8
 
 configMgr.cutsDict["VZR3ee"]="met > 50 && met < 100  && jet3Pt > 50 && jet1Pt > 80 && nB3Jet == 0 && AnalysisType==3"
 configMgr.cutsDict["VZR3em"]="met > 50 && met < 100 && jet3Pt > 50 && jet1Pt > 80 && nB3Jet == 0 && AnalysisType==5"
-configMgr.cutsDict["VZR3mm"]="met > 50 && met < 100 && jet3Pt > 50 && && jet1Pt > 80 nB3Jet == 0 && AnalysisType==4"
+configMgr.cutsDict["VZR3mm"]="met > 50 && met < 100 && jet3Pt > 50 && jet1Pt > 80 && nB3Jet == 0 && AnalysisType==4"
 
 configMgr.cutsDict["VZR4ee"]="met > 50 && met < 100 & jet4Pt > 50  && nB3Jet == 0 && AnalysisType==3"
 configMgr.cutsDict["VZR4em"]="met > 50 && met < 100 & jet4Pt > 50 && nB3Jet == 0 && AnalysisType==5"
@@ -379,7 +379,8 @@ hadTop_SR7jT = Systematic("hadTop",configMgr.weights,1.0+hadroSys(meffCR_SR347,6
 hadWZ_SR7jT  = Systematic("hadWZ",configMgr.weights,1.0+hadroSys(meffCR_SR347,650.0,"WZ","meff"),   1.0-hadroSys(meffCR_SR347,750.0,"WZ","meff"),"user","userOverallSys")
 #SL
 hadTop_SRSL = Systematic("hadTop",configMgr.weights,1.0+hadroSys(metCR_SRSL,250.0,"ttbar","met"),1.0-hadroSys(metCR_SRSL,250.0,"ttbar","met"),"user","userOverallSys")
-hadWZ_SRSL  = Systematic("hadWZ",configMgr.weights,1.0+hadroSys(metovermeffCR_SRSL,0.7,"WZ","metovermeff"),   1.0-hadroSys(metovermeffCR_SRSL,0.7,"WZ","metovermeff"),"user","userOverallSys")
+hadWZ_SRSL  = Systematic("had",configMgr.weights,1.0+hadroSys(metCR_SRSL,250.0,"WZ","met"),   1.0-hadroSys(metCR_SRSL,250.0,"WZ","met"),"user","userOverallSys")
+#hadWZ_SRSL  = Systematic("hadWZ",configMgr.weights,1.0+hadroSys(metovermeffCR_SRSL,0.7,"WZ","metovermeff"),   1.0-hadroSys(metovermeffCR_SRSL,0.7,"WZ","metovermeff"),"user","userOverallSys")
 #S2
 hadTop_SRS2 = Systematic("hadTop",configMgr.weights,1.0+hadroSys(meffCRT_SR24,700.0,"ttbar","meff"),1.0-hadroSys(meffCRT_SR24,700.0,"ttbar","met"),"user","userOverallSys")
 hadWZ_SRS2  = Systematic("hadWZ",configMgr.weights,1.0+hadroSys(meffCRWZ_SR24,700.0,"WZ","meff"),   1.0-hadroSys(meffCRWZ_SR24,700.0,"WZ","met"),"user","userOverallSys")
@@ -425,7 +426,7 @@ hadWZ_SRS2_hist = Systematic(*(("hadWZ",configMgr.weights)+hadroSysBins(meffCRWZ
 hadTop_SRS4_hist = Systematic(*(("hadTop",configMgr.weights)+hadroSysBins(meffCRT_SR24,meffNBinsS4,meffBinLowS4,meffBinHighS4,"ttbar","meff")+("user","userNormHistoSys")))
 hadWZ_SRS4_hist = Systematic(*(("hadWZ",configMgr.weights)+hadroSysBins(meffCRWZ_SR24,meffNBinsS4,meffBinLowS4,meffBinHighS4,"WZ","meff")+("user","userNormHistoSys")))
 
-hadWZ_SRSL_hist = Systematic(*(("hadWZ",configMgr.weights)+hadroSysBins(metovermeffCR_SRSL,metovermeffNBinsSL,metovermeffBinLowSL,metovermeffBinHighSL,"WZ","metovermeff")+("user","userNormHistoSys")))
+#hadWZ_SRSL_hist = Systematic(*(("hadWZ",configMgr.weights)+hadroSysBins(metovermeffCR_SRSL,metovermeffNBinsSL,metovermeffBinLowSL,metovermeffBinHighSL,"WZ","metovermeff")+("user","userNormHistoSys")))
 
 # List of samples and their plotting colours
 AlpGenSamples=[]
@@ -1295,8 +1296,7 @@ if doExclusion_GMSB_combined or doExclusion_mSUGRA_dilepton_combined or doExclus
                     addHadronizationSyst(ch,hadTop_SRS4_hist,hadWZ_SRS4_hist)
                 elif sr=="SSEl" or sr=="SSMu":
                     ch = myTopLvl.addChannel("met/meff2Jet",[sr],6,0.1,0.7)
-                    addHadronizationSyst(ch,hadTop_SRSL,hadWZ_SRSL_hist)
-                    
+                    addHadronizationSyst(ch,hadTop_SRSL,hadWZ_SRSL)
                 else:
                     raise RuntimeError("Unexpected signal region %s"%sr)
                 
