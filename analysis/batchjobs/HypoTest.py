@@ -14,6 +14,76 @@ gSystem.Load("libSusyFitter.so")
 gROOT.Reset()
 
 
+def doHypoTest(fixSigXSec, SigXSecSysnsigma,sigSamples):
+
+    outfileName="results/"+sigSamples[0]+"_hypotest.root"
+    if SigXSecSysnsigma > 0.:
+        outPrefix = "Up"
+    elif SigXSecSysnsigma == 0.:
+        outPrefix = "Nominal"
+    elif SigXSecSysnsigma < 0.:
+        outPrefix = "Down"
+    
+    outfile = TFile.Open("results/"+sigSamples[0]+"_"+outPrefix+"_hypotest.root","UPDATE");
+    if not outfile:
+        print "ERROR TFile <"+ outfileName+"> could not be opened"
+        #return
+
+    #inFile = "results/MyOneLeptonKtScaleFitR17_Sig_"+sigSamples[0]+"_combined_NormalMeasurement_model.root"
+    inFileName = commands.getstatusoutput("ls results/*"+sigSamples[0]+"*_model.root")[1]
+    inFile = TFile.Open(inFileName)
+    if not inFile:
+        print "ERROR TFile could not be opened"
+        outfile.Close()
+        #return
+        
+    w = inFile.Get("combined")
+    #Util.ReadWorkspace(inFile,"combined")
+    #w=gDirectory.Get("w")	
+    if not w:
+        print "workspace 'combined' does not exist in file"
+        #return
+
+    print "Processing analysis "+sigSamples[0]
+
+    if(fixSigXSec and not sigSamples[0] == "" ):
+        w.var("alpha_SigXSec").setVal(SigXSecSysnsigma)
+        w.var("alpha_SigXSec").setConstant(True)
+  
+
+  
+    #Do first fit and save fit result in order to control fit quality
+  
+    fitresult = Util.doFreeFit( w , 0, False, True )
+  
+    if (fitresult):
+        outfile.cd()
+        hypName="fitTo_"+sigSamples[0]
+        fitresult.SetName(hypName);
+        fitresult.Print()
+        fitresult.Write()
+        print ">>> Now storing RooFitResult <"+hypName+">"
+   
+    hypo = RooStats.DoHypoTestInversion(w,configMgr.nTOYs,configMgr.calculatorType,3)
+  
+    if (hypo):     
+        outfile.cd()
+        hypName2="hypo_"+sigSamples[0]
+        hypo.SetName(hypName2)
+        hypo.Write()
+        print ">>> Now storing HypoTestInverterResult <"+hypName2+">"
+        del(hypo)
+
+    print ">>> Done. Stored HypoTestInverterResult and fit result in file <"+outfileName+">"
+        
+    outfile.Close()
+
+    pass
+
+    return 0
+
+
+
 if __name__ == "__main__":
     from configManager import configMgr
     from prepareHistos import TreePrepare,HistoPrepare
@@ -47,6 +117,7 @@ if __name__ == "__main__":
         print "-l make limit plot of workspace (default %s)" % printLimits
         print "-p run hypothesis test on workspace (default %s)" % doHypoTests
         print "-g <grid points to be processed> - give as comma separated list (default: %s)" % str(sigSamples)
+        print "-x fix cross signal section parameter and run nominal, +- 1 sigma"
         print "\nAlso see the README file.\n"
         print "Command examples:"
         print "HistFitter.py -i python/MySusyFitterConfig.py           #only runs initialization in interactive mode (try e.g.: configMgr.<tab>)"
@@ -56,7 +127,7 @@ if __name__ == "__main__":
         sys.exit(0)        
     
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "twfin:c:s:v:alpg:")
+        opts, args = getopt.getopt(sys.argv[1:], "twfin:c:s:v:alpg:x")
     except:
         usage()
 
@@ -86,7 +157,10 @@ if __name__ == "__main__":
         elif opt == '-a':
             configMgr.useAsimovSet = True
         elif opt == '-g':
-            sigSamples = arg.split(',')    
+            sigSamples = arg.split(',')
+        elif opt == '-x':
+            fixSigXSec = True
+
         pass
     gROOT.SetBatch(not runInterpreter)
 
@@ -100,66 +174,22 @@ if __name__ == "__main__":
     print "------------------------ Now running hypo test :"
     print "calculatorType : ", configMgr.calculatorType
     print "nToys : ", configMgr.nTOYs
+    print "fixSigXSec : ",fixSigXSec
     
     ## outdir
     #outdir = 'test/'
     #outdir = '/afs/cern.ch/atlas/project/cern/susy/users/jlorenz/'+sigSamples[0]+'_hypotestresult/'
     
 
+
+
     if doHypoTests:
-        outfileName="results/"+sigSamples[0]+"_hypotest.root"
-        outfile = TFile.Open("results/"+sigSamples[0]+"_hypotest.root","UPDATE");
-        if not outfile:
-           print "ERROR TFile <"+ outfileName+"> could not be opened"
-	   #return
-
-        #inFile = "results/MyOneLeptonKtScaleFitR17_Sig_"+sigSamples[0]+"_combined_NormalMeasurement_model.root"
-        inFileName = commands.getstatusoutput("ls results/*"+sigSamples[0]+"*_model.root")[1]
-        inFile = TFile.Open(inFileName)
-        if not inFile:
-           print "ERROR TFile could not be opened"
-           outfile.Close()
-	   #return
-        
-        w = inFile.Get("combined")
-        #Util.ReadWorkspace(inFile,"combined")
-        #w=gDirectory.Get("w")	
-        if not w:
-           print "workspace 'combined' does not exist in file"
-	   #return
-
-  
-        print "Processing analysis "+sigSamples[0]
-  
-
-  
-        #Do first fit and save fit result in order to control fit quality
-  
-        fitresult = Util.doFreeFit( w , 0, False, True )
-  
-        if (fitresult):
-           outfile.cd()
-           hypName="fitTo_"+sigSamples[0]
-           fitresult.SetName(hypName);
-           fitresult.Print()
-           fitresult.Write()
-           print ">>> Now storing RooFitResult <"+hypName+">"
-   
-        hypo = RooStats.DoHypoTestInversion(w,configMgr.nTOYs,configMgr.calculatorType,3)
-  
-        if (hypo):     
-           outfile.cd()
-           hypName2="hypo_"+sigSamples[0]
-           hypo.SetName(hypName2)
-           hypo.Write()
-           print ">>> Now storing HypoTestInverterResult <"+hypName2+">"
-           del(hypo)
-
-        print ">>> Done. Stored HypoTestInverterResult and fit result in file <"+outfileName+">"
-        
-        outfile.Close()
-
-        pass
+        if( fixSigXSec ):        
+            doHypoTest(fixSigXSec, 0.,sigSamples)
+            doHypoTest(fixSigXSec, 1.,sigSamples)
+            doHypoTest(fixSigXSec,-1.,sigSamples)
+        else:
+            doHypoTest(fixSigXSec, 0.,sigSamples)
 
 
 
@@ -182,6 +212,10 @@ if __name__ == "__main__":
 	   #return
 
         w = inFile.Get("combined")
+
+        w.var("alpha_SigXSec").setVal(0.)
+        w.var("alpha_SigXSec").setConstant(True)
+
         #Util.ReadWorkspace(inFile,"combined")
         #w=gDirectory.Get("w")
         if not w:
