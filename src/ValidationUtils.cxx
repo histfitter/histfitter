@@ -24,6 +24,34 @@ void ValidationUtils::Horizontal( TH1 *h, Int_t nbin, Bool_t kLINE, Int_t color,
    else         box->Draw("F");   
 }
 
+void ValidationUtils::HorizontalElMu( TH1 *h, Int_t nbin, Bool_t kLINE, Int_t color, Int_t color2, float yWidthScale )
+{
+   // Draw histogram h horizontaly with bars
+   TAxis *axis   = h->GetXaxis();
+   Double_t dy;
+   Double_t x1,y1,x2,y2;
+   
+   Int_t i = nbin;
+   dy = axis->GetBinWidth(i);
+   x1 = 0;
+   y1 = axis->GetBinCenter(i)-yWidthScale*dy+1;
+   x2 = h->GetBinContent(i);
+   y2 = axis->GetBinCenter(i)+yWidthScale*dy+1;
+
+   Double_t x[5] = { x1, x1, x2, x2, x1 };
+   Double_t y[5] = { y1, y2, y2, y1, y1 };
+   TGraph *box = new TGraph(5, x, y);
+   box->SetFillColor( color );
+   box->SetLineColor( color );
+   box->Draw("F"); 
+
+   TGraph *box2 = new TGraph(5, x, y);
+   box2->SetFillColor( color2 );
+   box2->SetFillStyle( 3544 );
+   box2->Draw("F"); 
+
+}
+
 void ValidationUtils::SetCombinationStyle() 
 {
   TStyle *CombinationStyle = gROOT->GetStyle("Combination");
@@ -37,7 +65,7 @@ void ValidationUtils::SetCombinationStyle()
   CombinationStyle->SetTitle("Combination style based on Plain with modifications define in CombinationGlob.C");
   gROOT->GetListOfStyles()->Add(CombinationStyle);
   gROOT->SetStyle("Combination");
-  
+
   CombinationStyle->SetLineStyleString( 5, "[52 12]" );
   CombinationStyle->SetLineStyleString( 6, "[22 12]" );
   CombinationStyle->SetLineStyleString( 7, "[22 10 7 10]" );
@@ -77,6 +105,9 @@ void ValidationUtils::SetCombinationStyle()
   // put tick marks on top and RHS of plots
   CombinationStyle->SetPadTickX(1);
   CombinationStyle->SetPadTickY(1);
+
+  CombinationStyle->SetHatchesLineWidth(2);
+
   return;
 }
 
@@ -178,7 +209,7 @@ void ValidationUtils::PullPlot3(XtraValues* inValsEl, XtraValues* inValsMu, cons
    frame->SetLineColor(0);
    frame->SetTickLength(0,"Y");
    frame->SetLabelSize(0.034, "X");
-   frame->SetXTitle( "(n_{pred} - n_{obs}) / #sigma_{tot}"+XTitleSpaces );
+   frame->SetXTitle( "(n_{obs} - n_{pred}) / #sigma_{tot}"+XTitleSpaces );
    frame->SetLabelOffset( 0.001, "X" );
    frame->SetTitleOffset( 0.85 , "X");
    frame->SetTitleSize( 0.046, "X" );
@@ -231,35 +262,42 @@ void ValidationUtils::PullPlot3(XtraValues* inValsEl, XtraValues* inValsMu, cons
    }
 
 
-   //The boxes -- electron channel
+   //The boxes
    TH1F *hPullEl = new TH1F( "hPullEl"+outFileNamePrefix, "hPullEl", Npar, -1, Npar-1 );
    hPullEl->SetLineColor(colEl);
    hPullEl->SetFillColor(colElL);
+   TH1F *hPullMu = new TH1F( "hPullMu"+outFileNamePrefix, "hPullMu", Npar, -1, Npar-1 );
+   hPullMu->SetLineColor(colMu);
+   hPullMu->SetFillColor(colMuL);
+   //Fill values - electron channel
    for (Int_t i=0; i<Npar; i++) {
-      Float_t delta = inValsEl->m_nPred.at(i) - inValsEl->m_nObs.at(i);
+      Float_t delta = inValsEl->m_nObs.at(i) - inValsEl->m_nPred.at(i);
       Float_t err=inValsEl->m_Delta_eTot.at(i);
       Float_t pull = 0;
       if(fabs(err)>0){ pull=delta/err; }
       hPullEl->SetBinContent( Npar-i, pull );
    }
+   //Fill values -- muon channel
    for (Int_t i=0; i<Npar; i++) {
-     Horizontal( hPullEl, Npar-i, kFALSE, hPullEl->GetFillColor() );
-     Horizontal( hPullEl, Npar-i, kTRUE, hPullEl->GetLineColor() );
-   }
-   //The boxes -- muon channel
-   TH1F *hPullMu = new TH1F( "hPullMu"+outFileNamePrefix, "hPullMu", Npar, -1, Npar-1 );
-   hPullMu->SetLineColor(colMu);
-   hPullMu->SetFillColor(colMuL);
-   for (Int_t i=0; i<Npar; i++) {
-      Float_t delta = inValsMu->m_nPred.at(i) - inValsMu->m_nObs.at(i);
+      Float_t delta = inValsMu->m_nObs.at(i) - inValsMu->m_nPred.at(i);
       Float_t err=inValsMu->m_Delta_eTot.at(i);
       Float_t pull = 0;
       if(fabs(err)>0){ pull=delta/err; }
       hPullMu->SetBinContent( Npar-i, pull );
    }
+   //Draw boxes
    for (Int_t i=0; i<Npar; i++) {
-     Horizontal( hPullMu, Npar-i, kFALSE, hPullMu->GetFillColor(), 0.16 );
-     Horizontal( hPullMu, Npar-i, kTRUE, hPullMu->GetLineColor(), 0.16 );
+     if(inValsEl->m_reg_names.at(i).Contains("em")){
+       HorizontalElMu( hPullEl, Npar-i, kFALSE, hPullEl->GetFillColor(), hPullMu->GetFillColor(), 0.2 );
+       Horizontal( hPullEl, Npar-i, kTRUE, hPullEl->GetLineColor(), 0.2);
+
+     }
+     else{
+       Horizontal( hPullEl, Npar-i, kFALSE, hPullEl->GetFillColor() );
+       Horizontal( hPullEl, Npar-i, kTRUE, hPullEl->GetLineColor() );
+       Horizontal( hPullMu, Npar-i, kFALSE, hPullMu->GetFillColor(), 0.16 );
+       Horizontal( hPullMu, Npar-i, kTRUE, hPullMu->GetLineColor(), 0.16 );
+     }
    }
 
    TLegend* leg = new TLegend(xLeft,0.9,xLeft+0.5,0.96,"");

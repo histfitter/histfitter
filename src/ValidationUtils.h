@@ -25,6 +25,8 @@ using std::endl;
 namespace ValidationUtils
 {
   void Horizontal( TH1 *h, Int_t nbin, Bool_t kLINE, Int_t color, float yWidthScale=0.25 );
+  void HorizontalElMu( TH1 *h, Int_t nbin, Bool_t kLINE, Int_t color, Int_t color2, float yWidthScale=0.25 );
+
 
   void SetCombinationStyle();
 
