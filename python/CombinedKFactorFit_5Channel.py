@@ -36,7 +36,7 @@ useDiLepCR=True
 useStat=True
 fullSyst=True
 
-doTableInputs=False #This effectively means no validation plots but only validation tables (but is 100x faster)
+doTableInputs=True #This effectively means no validation plots but only validation tables (but is 100x faster)
 doValidationSRLoose=False
 doValidationSRTight=False
 doValidationSlope=False
@@ -44,6 +44,7 @@ doValidationDilep=False
 doValidationDilepZ=False
 doValidationSoftLep=False
 
+doDiscovery=True
 doExclusion_GMSB_combined=False
 doExclusion_mSUGRA_dilepton_combined=False
 doExclusion_GG_onestepCC_x12=False
@@ -57,10 +58,10 @@ if configMgr.executeHistFactory:
     doSignalOnly=False
     
 if not 'sigSamples' in dir():
-#    sigSamples=["SU_580_240_0_10_P"]
-        #sigSamples=["SM_GG_onestepCC_445_245_45"]
-    #    sigSamples=["SM_GG_twostepCC_slepton_415_215_115_15"]
-    sigSamples=["GMSB_3_2d_50_250_3_10_1_1"]
+    sigSamples=["SU_580_240_0_10_P"]
+    #sigSamples=["SM_GG_onestepCC_445_245_45"]
+    #sigSamples=["SM_GG_twostepCC_slepton_415_215_115_15"]
+    #sigSamples=["GMSB_3_2d_50_250_3_10_1_1"]
 
 # First define HistFactory attributes
 configMgr.analysisName = "Combined_KFactorFit_5Channel" # Name to give the analysis
@@ -574,10 +575,6 @@ ZptZeeRegions = ["ZRee"]
 ZptZeeNBins = 40
 ZptZeeBinLow = 0
 ZptZeeBinHigh = 1000
-
-srNBins = 1
-srBinLow = 0.5
-srBinHigh = 1.5
 
 
 #--------------------------------------------------------------
@@ -1421,3 +1418,35 @@ if doExclusion_GMSB_combined or doExclusion_mSUGRA_dilepton_combined or doExclus
                 chan.getSample(sig).setFileList(sigFiles)
                 
 
+
+#-------------------------------------------------
+# Discovery fit
+#-------------------------------------------------
+
+signalRegions = ["SR3jTEl", "SR3jTMu", "SR4jTEl", "SR4jTMu", "SSElT", "SSMuT", "S2eeT", "S2emT", "S2mmT", "S4eeT", "S4emT", "S4mmT"]
+
+srNBins = 1
+srBinLow = 0.5
+srBinHigh = 1.5
+
+for iSR,sr in enumerate(signalRegions):
+        discovery = configMgr.addTopLevelXMLClone(bkgOnly,"Discovery_%s"%sr)
+        srChannel = discovery.addChannel("cuts",[sr],srNBins,srBinLow,srBinHigh)
+        discovery.setSignalChannels([srChannel])
+
+        srChannel.addDiscoverySamples([sr],[1.],[0.],[100.],[kMagenta])     
+
+        if (srChannel.name.find("SR3jTEl")>-1 or srChannel.name.find("SR4jTEl")>-1):
+            srChannel.setFileList(bgdFiles_e)
+        elif srChannel.name.find("SSEl")>-1:
+            srChannel.setFileList(bgdFiles_se)
+        elif (srChannel.name.find("SR3jTMu")>-1 or srChannel.name.find("SR4jTMu")>-1):
+            srChannel.setFileList(bgdFiles_m)
+        elif srChannel.name.find("SSMu")>-1:
+            srChannel.setFileList(bgdFiles_sm)
+        elif srChannel.name.find("ee")>-1:
+            srChannel.setFileList(bgdFiles_ee)
+        elif srChannel.name.find("em")>-1:
+            srChannel.setFileList(bgdFiles_em)
+        elif srChannel.name.find("mm")>-1:
+            srChannel.setFileList(bgdFiles_mm)
