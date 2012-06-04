@@ -121,6 +121,7 @@ class ConfigManager(object):
         newTLX.verbose=self.verbose
         newTLX.setWeights(self.weights)
         self.topLvls.append(newTLX)
+        print "Created Fit Config: %s"%(newName)
         return self.topLvls[len(self.topLvls)-1]
 
     def addTopLevelXMLClone(self,obj,name): 
@@ -143,6 +144,7 @@ class ConfigManager(object):
         return 0
 
     def initialize(self):        
+        print "Initializing..."
         if self.histCacheFile=='':
             tmpName="data/"+self.analysisName+".root"
             print "Giving default name histCacheFile: %s"%(tmpName)
