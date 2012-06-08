@@ -1096,7 +1096,7 @@ class Sample(object):
                 high = highIntegral / nomIntegral
                 low = lowIntegral / nomIntegral
             except ZeroDivisionError:
-                print "ERROR: generating HistoSys for %s syst=%s nom=%g high=%g low=%g remove from fit." % (nomName,systName,nomIntegral,highIntegral,lowIntegral)
+                print "    ERROR: generating HistoSys for %s syst=%s nom=%g high=%g low=%g remove from fit." % (nomName,systName,nomIntegral,highIntegral,lowIntegral)
                 return
 
             configMgr.hists[highName+"Norm"] = configMgr.hists[highName].Clone(highName+"Norm")
@@ -1107,7 +1107,7 @@ class Sample(object):
                 configMgr.hists[lowName+"Norm"].Scale(1./low)
 
             except ZeroDivisionError:
-                print "ERROR: generating HistoSys for %s syst=%s nom=%g high=%g low=%g remove from fit." % (nomName,systName,nomIntegral,highIntegral,lowIntegral)
+                print "    ERROR: generating HistoSys for %s syst=%s nom=%g high=%g low=%g remove from fit." % (nomName,systName,nomIntegral,highIntegral,lowIntegral)
                 return
             if oneSide:
                 if configMgr.hists[highName].Integral() > configMgr.hists[nomName].Integral():                
@@ -1124,7 +1124,7 @@ class Sample(object):
                 high = highIntegral / nomIntegral
                 low = lowIntegral / nomIntegral
             except ZeroDivisionError:
-                print "ERROR: generating HistoSys for %s syst=%s nom=%g high=%g low=%g remove from fit." % (nomName,systName,nomIntegral,highIntegral,lowIntegral)
+                print "    ERROR: generating HistoSys for %s syst=%s nom=%g high=%g low=%g remove from fit." % (nomName,systName,nomIntegral,highIntegral,lowIntegral)
                 return
 
             configMgr.hists[highName+"Norm"] = configMgr.hists[highName].Clone(highName+"Norm")
@@ -1133,7 +1133,7 @@ class Sample(object):
                 configMgr.hists[highName+"Norm"].Scale(1./high)
                 configMgr.hists[lowName+"Norm"].Scale(1./low)
             except ZeroDivisionError:
-                print "ERROR: generating HistoSys for %s syst=%s nom=%g high=%g low=%g keeping in fit (offending histogram should be empty)." % (nomName,systName,nomIntegral,highIntegral,lowIntegral)
+                print "    ERROR: generating HistoSys for %s syst=%s nom=%g high=%g low=%g keeping in fit (offending histogram should be empty)." % (nomName,systName,nomIntegral,highIntegral,lowIntegral)
             if high<1.0 and low<1.0:
                 print "    WARNING addHistoSys: high=%f is < 1.0 in %s. Taking symmetric value from low %f %f"%(high,systName,low,2.-low)
                 high = 2.-low
@@ -1155,7 +1155,7 @@ class Sample(object):
                     high = highIntegral / nomIntegral
                     low = lowIntegral / nomIntegral
                 except ZeroDivisionError:
-                    print "ERROR: generating HistoSys for %s syst=%s nom=%g high=%g low=%g remove from fit." % (nomName,systName,nomIntegral,highIntegral,lowIntegral)
+                    print "    ERROR: generating HistoSys for %s syst=%s nom=%g high=%g low=%g remove from fit." % (nomName,systName,nomIntegral,highIntegral,lowIntegral)
                     return
                 if high<1.0 and low<1.0:
                     print "    WARNING addHistoSys: high=%f is < 1.0 in %s. Taking symmetric value from low %f %f"%(high,systName,low,2.-low)
@@ -1163,7 +1163,7 @@ class Sample(object):
                     try:
                         configMgr.hists[highName+"Norm"].Scale((2.-low)/high)
                     except ZeroDivisionError:
-                        print "ERROR: generating HistoSys for %s syst=%s nom=%g high=%g low=%g remove from fit." % (nomName,systName,nomIntegral,highIntegral,lowIntegral)
+                        print "    ERROR: generating HistoSys for %s syst=%s nom=%g high=%g low=%g remove from fit." % (nomName,systName,nomIntegral,highIntegral,lowIntegral)
                         return
                     self.histoSystList.append((systName,highName+"Norm",lowName,configMgr.histCacheFile,"","","",""))
                     if not systName in configMgr.systDict.keys():
@@ -1175,7 +1175,7 @@ class Sample(object):
                     try:
                         configMgr.hists[lowName+"Norm"].Scale((2.-high)/low)
                     except ZeroDivisionError:
-                        print "ERROR: generating HistoSys for %s syst=%s nom=%g high=%g low=%g remove from fit." % (nomName,systName,nomIntegral,highIntegral,lowIntegral)
+                        print "    ERROR: generating HistoSys for %s syst=%s nom=%g high=%g low=%g remove from fit." % (nomName,systName,nomIntegral,highIntegral,lowIntegral)
                         return
                     self.histoSystList.append((systName,highName,lowName+"Norm",configMgr.histCacheFile,"","","",""))
                     if not systName in configMgr.systDict.keys():
