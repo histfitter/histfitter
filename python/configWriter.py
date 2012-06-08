@@ -1135,13 +1135,13 @@ class Sample(object):
             except ZeroDivisionError:
                 print "ERROR: generating HistoSys for %s syst=%s nom=%g high=%g low=%g keeping in fit (offending histogram should be empty)." % (nomName,systName,nomIntegral,highIntegral,lowIntegral)
             if high<1.0 and low<1.0:
-                print "WARNING addHistoSys: high=%f is < 1.0 in %s. Taking symmetric value from low %f %f"%(high,systName,low,2.-low)
+                print "    WARNING addHistoSys: high=%f is < 1.0 in %s. Taking symmetric value from low %f %f"%(high,systName,low,2.-low)
                 high = 2.-low
             if low>1.0 and high>1.0:
-                print "WARNING addHistoSys: low=%f is > 1.0 in %s. Taking symmetric value from high %f %f"%(low,systName,high,2.-high)
+                print "    WARNING addHistoSys: low=%f is > 1.0 in %s. Taking symmetric value from high %f %f"%(low,systName,high,2.-high)
                 low = 2.-high
             if low<0.:
-                print "WARNING addHistoSys: low=%f < 0.0 in %s. Setting low=0.0."%(low,systName)
+                print "    WARNING addHistoSys: low=%f < 0.0 in %s. Setting low=0.0."%(low,systName)
                 low = 0.
 
             self.histoSystList.append((systName,highName+"Norm",lowName+"Norm",configMgr.histCacheFile,"","","",""))
@@ -1158,7 +1158,7 @@ class Sample(object):
                     print "ERROR: generating HistoSys for %s syst=%s nom=%g high=%g low=%g remove from fit." % (nomName,systName,nomIntegral,highIntegral,lowIntegral)
                     return
                 if high<1.0 and low<1.0:
-                    print "WARNING addHistoSys: high=%f is < 1.0 in %s. Taking symmetric value from low %f %f"%(high,systName,low,2.-low)
+                    print "    WARNING addHistoSys: high=%f is < 1.0 in %s. Taking symmetric value from low %f %f"%(high,systName,low,2.-low)
                     configMgr.hists[highName+"Norm"] = configMgr.hists[highName].Clone(highName+"Norm")
                     try:
                         configMgr.hists[highName+"Norm"].Scale((2.-low)/high)
@@ -1170,7 +1170,7 @@ class Sample(object):
                         self.systList.append(systName)
                     return
                 if low>1.0 and high>1.0:
-                    print "WARNING addHistoSys: low=%f is > 1.0 in %s. Taking symmetric value from high %f %f"%(low,systName,high,2.-high)
+                    print "    WARNING addHistoSys: low=%f is > 1.0 in %s. Taking symmetric value from high %f %f"%(low,systName,high,2.-high)
                     configMgr.hists[lowName+"Norm"] = configMgr.hists[lowName].Clone(lowName+"Norm")
                     try:
                         configMgr.hists[lowName+"Norm"].Scale((2.-high)/low)
@@ -1182,7 +1182,7 @@ class Sample(object):
                         self.systList.append(systName)
                     return
                 if low<0.:
-                    print "WARNING addHistoSys: low=%f is < 0.0 in %s. Setting negative bins to 0.0."%(low,systName)
+                    print "    WARNING addHistoSys: low=%f is < 0.0 in %s. Setting negative bins to 0.0."%(low,systName)
                     configMgr.hists[lowName+"Norm"] = configMgr.hists[lowName].Clone(lowName+"Norm")
                     for iBin in xrange(1,configMgr.hists[lowName+"Norm"].GetNbinsX()+1):
                         if configMgr.hists[lowName+"Norm"].GetBinContent(iBin) < 0.:
@@ -1257,11 +1257,11 @@ class Sample(object):
         Add an OverallSys entry using the high and low values
         """
         if high==1.0 and low==1.0:
-            print "WARNING: addOverallSys for %s high==1.0 and low==1.0 remove from fit"%(systName)
+            print "    WARNING: addOverallSys for %s high==1.0 and low==1.0 remove from fit"%(systName)
             return
 
         if high==0.0 and low==0.0:
-            print "WARNING: addOverallSys for %s high=%g low=%g remove from fit." % (systName,systName,high,low)
+            print "    WARNING: addOverallSys for %s high=%g low=%g remove from fit." % (systName,systName,high,low)
             return
 
 ##         if high<1.0 and low<1.0:
@@ -1277,19 +1277,19 @@ class Sample(object):
         if high==1.0 and low>0.0 and low!=1.0:
             highOld=high
             high = 2.0 - low
-            print "WARNING addOverallSys: high=%f in %s. Taking symmetric value from low %f %f"%(highOld,systName,low,high)
+            print "    WARNING addOverallSys: high=%f in %s. Taking symmetric value from low %f %f"%(highOld,systName,low,high)
 
         if low==1.0 and high>0.0 and high!=1.0:
             lowOld=low
             low = 2.0 - high
-            print "WARNING addOverallSys: low=%f in %s. Taking symmetric value from high %f %f"%(lowOld,systName,low,high)
+            print "    WARNING addOverallSys: low=%f in %s. Taking symmetric value from high %f %f"%(lowOld,systName,low,high)
 
         if low<0.0:
-            print "WARNING addOverallSys: low=%f is < 0.0 in %s. Setting to low=0.0. High=%f."%(low,systName,high)
+            print "    WARNING addOverallSys: low=%f is < 0.0 in %s. Setting to low=0.0. High=%f."%(low,systName,high)
             low = 0.0
 
         if high<0.0:
-            print "WARNING addOverallSys: high=%f is < 0.0 in %s. Setting to high=0.0. Low=%f."%(high,systName,low)
+            print "    WARNING addOverallSys: high=%f is < 0.0 in %s. Setting to high=0.0. Low=%f."%(high,systName,low)
             high = 0.0
 
         self.overallSystList.append((systName,high,low))

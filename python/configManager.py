@@ -156,6 +156,7 @@ class ConfigManager(object):
             pass
 
         # Propagate stuff down from config manager
+        print "  -initialize python objects..."
         for tl in self.topLvls:
             tl.initialize()
             for chan in tl.channels:
@@ -169,6 +170,7 @@ class ConfigManager(object):
                     elif sam.isQCD or sam.isData:
                         chan.getSample(sam.name).setWrite(False)
 
+        print "  -initialize global histogram dictionary..."
         for tl in self.topLvls:
             for chan in tl.channels:
                 for sam in chan.sampleList:
@@ -221,15 +223,20 @@ class ConfigManager(object):
                                     self.hists["h"+mergedName+syst.name+"High_"+regString+"_obs_"+replaceSymbols(chan.variableName)] = None
                                 if not "h"+mergedName+syst.name+"Low_"+regString+"_obs_"+replaceSymbols(chan.variableName) in self.hists.keys(): 
                                     self.hists["h"+mergedName+syst.name+"Low_"+regString+"_obs_"+replaceSymbols(chan.variableName)] = None
+
         if self.readFromTree:
+            print "  -build TreePrepare()..."
             self.prepare = TreePrepare()
             if self.plotHistos==None:    #set plotHistos if not already set by user
                 self.plotHistos = False  #this is essentially for debugging
                 pass
         else:
+            print "  -build HistoPrepare()..."
             self.prepare = HistoPrepare(self.histCacheFile)        
         #C++ alter-ego
+        print "  -initialize C++ mgr..."
         self.initializeCppMgr()
+        print "  -propagate file list and tree names..."
         self.propagateFileList() # propagate file lists down the tree
         ## Assume that all tree names have been set
         self.propagateTreeName()
@@ -718,7 +725,7 @@ class ConfigManager(object):
                             chan.getSample(sam.name).addHistoSys(syst.name,nomName,highName,lowName,False,True,False,True)
                         elif syst.method == "userHistoSys":
                             if not len(syst.high) == configMgr.hists[nomName].GetNbinsX() or not len(syst.low) == configMgr.hists[nomName].GetNbinsX():
-                                raise ValueError("High and low must both be the same as the binning in nominal for userHistoSys")
+                                raise ValueError("High and low must both be the same as the binning in nominal for userHistoSys %s"%(syst.name))
                             if configMgr.hists[highName] == None:
                                 configMgr.hists[highName] = TH1F(highName,highName,configMgr.hists[nomName].GetNbinsX(),configMgr.hists[nomName].GetXaxis().GetXmin(),configMgr.hists[nomName].GetXaxis().GetXmax())
                                 for iBin in xrange(configMgr.hists[nomName].GetNbinsX()):
