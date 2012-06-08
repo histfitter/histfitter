@@ -3,8 +3,8 @@
 if [ ! $ROOTSYS ]; then
   export CWD=$PWD
   #cd /afs/cern.ch/atlas/groups/susy/1lepton/root/root-532-patches
-  #cd /afs/cern.ch/atlas/offline/external/FullChainTest/tier0/test/mbaak/root/root-v5.32.02
-  cd /afs/cern.ch/atlas/groups/susy/1lepton/root/root-v5-32-02
+  cd /afs/cern.ch/atlas/offline/external/FullChainTest/tier0/test/mbaak/root/root-v5.32.02
+  #cd /afs/cern.ch/atlas/groups/susy/1lepton/root/root-v5-32-02
   source bin/thisroot.sh
   cd $CWD
 fi
