@@ -38,11 +38,11 @@ fullSyst=True
 
 doTableInputs=True #This effectively means no validation plots but only validation tables (but is 100x faster)
 doValidationSRLoose=False
-doValidationSRTight=False
-doValidationSlope=False
-doValidationDilep=False
-doValidationDilepZ=False
-doValidationSoftLep=False
+doValidationSRTight=True
+doValidationSlope=doTableInputs
+doValidationDilep=doTableInputs
+doValidationDilepZ=doTableInputs
+doValidationSoftLep=doTableInputs
 
 doDiscovery=True
 doExclusion_GMSB_combined=False
@@ -177,37 +177,44 @@ configMgr.cutsDict["ZRmm"]="mll>80 && mll<100  && met < 50 && jet2Pt > 50 && (je
 configMgr.cutsDict["S2ee"]="met > 300 && nJet>=2 && jet2Pt > 200 && jet4Pt < 50 && AnalysisType==3"
 configMgr.cutsDict["S2mm"]="met > 300 && nJet>=2 && jet2Pt > 200 && jet4Pt < 50 && AnalysisType==4"
 configMgr.cutsDict["S2em"]="met > 300 && nJet>=2 && jet2Pt > 200 && jet4Pt < 50 && AnalysisType==5"
+
+configMgr.cutsDict["TVJ2ee"]="met > 100 && met < 300 && jet4Pt < 50 && jet2Pt > 120 && AnalysisType==3"
+configMgr.cutsDict["TVJ2em"]="met > 100 && met < 300 && jet4Pt < 50 && jet2Pt > 120 && AnalysisType==5"
+configMgr.cutsDict["TVJ2mm"]="met > 100 && met < 300 && jet4Pt < 50 && jet2Pt > 120 && AnalysisType==4"
+
+configMgr.cutsDict["ZVJ2ee"]="met > 50 && met < 100 && jet4Pt < 50 && jet2Pt > 120 && nB3Jet == 0 && AnalysisType==3"
+configMgr.cutsDict["ZVJ2em"]="met > 50 && met < 100 && jet4Pt < 50 && jet2Pt > 120 && nB3Jet == 0 && AnalysisType==5"                    
+configMgr.cutsDict["ZVJ2mm"]="met > 50 && met < 100 && jet4Pt < 50 && jet2Pt > 120 && nB3Jet == 0 && AnalysisType==4"
+
 configMgr.cutsDict["S4ee"]="met > 100 && nJet>=4 && jet4Pt > 50 && met/meff4Jet > 0.2 && meffInc > 650 && AnalysisType==3"
 configMgr.cutsDict["S4mm"]="met > 100 && nJet>=4 && jet4Pt > 50 && met/meff4Jet > 0.2 && meffInc > 650 && AnalysisType==4"
 configMgr.cutsDict["S4em"]="met > 100 && nJet>=4 && jet4Pt > 50 && met/meff4Jet > 0.2 && meffInc > 650 && AnalysisType==5"
 
-configMgr.cutsDict["VR2ee"]="met > 100 && met < 300 && jet4Pt < 50 && jet2Pt > 50 && jet1Pt > 80 && AnalysisType==3"
-configMgr.cutsDict["VR2em"]="met > 100 && met < 300 && jet4Pt < 50 && jet2Pt > 50 && jet1Pt > 80 && AnalysisType==5"
-configMgr.cutsDict["VR2mm"]="met > 100 && met < 300 && jet4Pt < 50 && jet2Pt > 50 && jet1Pt > 80 && AnalysisType==4"
+configMgr.cutsDict["TVJ4ee"]="met > 80 && met < 100 && jet4Pt > 50 && nB3Jet > 0 && AnalysisType==3"
+configMgr.cutsDict["TVJ4em"]="met > 80 && met < 100 && jet4Pt > 50 && nB3Jet > 0 && AnalysisType==5"
+configMgr.cutsDict["TVJ4mm"]="met > 80 && met < 100 && jet4Pt > 50 && nB3Jet > 0 && AnalysisType==4"
+
+configMgr.cutsDict["ZVJ4ee"]="met > 50 && met < 100 & jet4Pt > 50 && nB3Jet == 0 && AnalysisType==3"
+configMgr.cutsDict["ZVJ4em"]="met > 50 && met < 100 & jet4Pt > 50 && nB3Jet == 0 && AnalysisType==5"
+configMgr.cutsDict["ZVJ4mm"]="met > 50 && met < 100 & jet4Pt > 50 && nB3Jet == 0 && AnalysisType==4"
 
 configMgr.cutsDict["VR3ee"]="met > 100 && met < 300 && jet4Pt < 50 && jet3Pt > 50 && jet1Pt > 80 && AnalysisType==3"
 configMgr.cutsDict["VR3em"]="met > 100 && met < 300 && jet4Pt < 50 && jet3Pt > 50 && jet1Pt > 80 && AnalysisType==5"
 configMgr.cutsDict["VR3mm"]="met > 100 && met < 300 && jet4Pt < 50 && jet3Pt > 50 && jet1Pt > 80 && AnalysisType==4"
 
-configMgr.cutsDict["VR4ee"]="met < 100 && jet4Pt > 50 && AnalysisType==3"
-configMgr.cutsDict["VR4em"]="met < 100 && jet4Pt > 50  && AnalysisType==5"
-configMgr.cutsDict["VR4mm"]="met < 100  && jet4Pt > 50 && AnalysisType==4"
-
-configMgr.cutsDict["VZR2ee"]="met > 50 && met < 100 && jet2Pt > 50 && jet1Pt > 80 && nB3Jet == 0 && AnalysisType==3"
-configMgr.cutsDict["VZR2em"]="met > 50 && met < 100 && jet2Pt > 50 && jet1Pt > 80 && nB3Jet == 0 && AnalysisType==5"                    
-configMgr.cutsDict["VZR2mm"]="met > 50 && met < 100 && jet2Pt > 50 && jet1Pt > 80 && nB3Jet == 0 && AnalysisType==4"
-
 configMgr.cutsDict["VZR3ee"]="met > 50 && met < 100  && jet3Pt > 50 && jet1Pt > 80 && nB3Jet == 0 && AnalysisType==3"
 configMgr.cutsDict["VZR3em"]="met > 50 && met < 100 && jet3Pt > 50 && jet1Pt > 80 && nB3Jet == 0 && AnalysisType==5"
 configMgr.cutsDict["VZR3mm"]="met > 50 && met < 100 && jet3Pt > 50 && jet1Pt > 80 && nB3Jet == 0 && AnalysisType==4"
 
-configMgr.cutsDict["VZR4ee"]="met > 50 && met < 100 & jet4Pt > 50  && nB3Jet == 0 && AnalysisType==3"
-configMgr.cutsDict["VZR4em"]="met > 50 && met < 100 & jet4Pt > 50 && nB3Jet == 0 && AnalysisType==5"
-configMgr.cutsDict["VZR4mm"]="met > 50 && met < 100 & jet4Pt > 50  && nB3Jet == 0 && AnalysisType==4"
+configMgr.cutsDict["HMTVL1El"]="AnalysisType==1 && met>40 && met<250 && mt>80 && jet1Pt>80 && jet3Pt>25 && meffInc>500"
+configMgr.cutsDict["HMTVL1Mu"]="AnalysisType==2 && met>40 && met<250 && mt>80 && jet1Pt>80 && jet3Pt>25 && meffInc>500"
 
-configMgr.cutsDict["HMTVL1El"]="AnalysisType==1 && met>30 && met<250 && mt>80 && jet1Pt>80 && jet3Pt>25 && meffInc>400"
-configMgr.cutsDict["HMTVL1Mu"]="AnalysisType==2 && met>30 && met<250 && mt>80 && jet1Pt>80 && jet3Pt>25 && meffInc>400"
-                      
+configMgr.cutsDict["WVL1El"]="lep2Pt<10 && met>150 && met<250 && mt>40 && mt<80 && nB3Jet==0 && jet1Pt>80 && jet3Pt>25 && meffInc > 500 && AnalysisType==1"
+configMgr.cutsDict["WVL1Mu"]="lep2Pt<10 && met>150 && met<250 && mt>40 && mt<80 && nB3Jet==0 && jet1Pt>80 && jet3Pt>25 && meffInc > 500 && AnalysisType==2"
+
+configMgr.cutsDict["TVL1El"]="lep2Pt<10 && met>150 && met<250 && mt>40 && mt<80 && nB3Jet>0 && jet1Pt>80 && jet3Pt>25 && meffInc > 500 && AnalysisType==1"
+configMgr.cutsDict["TVL1Mu"]="lep2Pt<10 && met>150 && met<250 && mt>40 && mt<80 && nB3Jet>0 && jet1Pt>80 && jet3Pt>25 && meffInc > 500 && AnalysisType==2"
+
 configMgr.cutsDict["WREl"]="lep2Pt<10 && met>40 && met<150 && mt>40 && mt<80 && nB3Jet==0 && jet1Pt>80 && jet3Pt>25 && meffInc > 500 && AnalysisType==1"
 configMgr.cutsDict["TREl"]="lep2Pt<10 && met>40 && met<150 && mt>40 && mt<80 && nB3Jet>0 && jet1Pt>80 && jet3Pt>25 && meffInc > 500 && AnalysisType==1"
 configMgr.cutsDict["WRMu"]="lep2Pt<10 && met>40 && met<150 && mt>40 && mt<80 && nB3Jet==0 && jet1Pt>80 && jet3Pt>25 && meffInc > 500 && AnalysisType==2"
@@ -368,6 +375,7 @@ metCR_SRSL=180.
 metovermeffCR_SRSL=0.1
 meffCRT_SR24=150.
 meffCRWZ_SR24=100.
+meffMax=10000.0
 
 from SystematicsUtils import hadroSys,addHadronizationSyst,hadroSysBins
 hadTop_SR3jT = Systematic("hadTop",configMgr.weights,1.0+hadroSys(meffCR_SR347,1200.0,"ttbar","meff"),1.0-hadroSys(meffCR_SR347,1200.0,"ttbar","meff"),"user","userOverallSys")
@@ -921,10 +929,8 @@ if doValidationSlope or doTableInputs:
     #TR
     validationSlopeTRChannels=[]
     if doTableInputs:
-        validationSlopeTRChannels.append( bkgOnly.addValidationChannel("meffInc",["TRElVR"],1,meffBinLowTR,meffBinHighTR) )
-        validationSlopeTRChannels.append( bkgOnly.addValidationChannel("meffInc",["TRMuVR"],1,meffBinLowTR,meffBinHighTR) )
-        validationSlopeTRChannels.append( bkgOnly.addValidationChannel("met",["TRElVR2"],1,metBinLowTR,metBinHighTR) )
-        validationSlopeTRChannels.append( bkgOnly.addValidationChannel("met",["TRMuVR2"],1,metBinLowTR,metBinHighTR) )
+        validationSlopeTRChannels.append( bkgOnly.addValidationChannel("meffInc",["TVL1El"],1,0,meffMax) )
+        validationSlopeTRChannels.append( bkgOnly.addValidationChannel("meffInc",["TVL1Mu"],1,0,meffMax) )
     else:
         validationSlopeTRChannels.append( bkgOnly.addValidationChannel("meffInc",["TRElVR"],meffNBinsTR,meffBinLowTR,meffBinHighTR) )
         validationSlopeTRChannels.append( bkgOnly.addValidationChannel("meffInc",["TRMuVR"],meffNBinsTR,meffBinLowTR,meffBinHighTR) )
@@ -942,15 +948,15 @@ if doValidationSlope or doTableInputs:
         else:
             chan.setFileList(bgdFiles_m)
         chan.hasBQCD = True
-        chan.useOverflowBin = True
+        chan.useOverflowBin = False
         for syst in btagChanSyst:
             chan.addSystematic(syst)
                     
     # WR
     validationSlopeWRChannels=[]
     if doTableInputs:
-        validationSlopeWRChannels.append( bkgOnly.addValidationChannel("met",["WRElVR"],1,metBinLowTR,metBinHighTR) )
-        validationSlopeWRChannels.append( bkgOnly.addValidationChannel("met",["WRMuVR"],1,metBinLowTR,metBinHighTR) )
+        validationSlopeWRChannels.append( bkgOnly.addValidationChannel("meffInc",["WVL1El"],1,0,meffMax) )
+        validationSlopeWRChannels.append( bkgOnly.addValidationChannel("meffInc",["WVL1Mu"],1,0,meffMax) )
     else:
         validationSlopeWRChannels.append( bkgOnly.addValidationChannel("Wpt",["WRElVR"],metNBinsTR,metBinLowTR,metBinHighTR) )
         validationSlopeWRChannels.append( bkgOnly.addValidationChannel("Wpt",["WRMuVR"],metNBinsTR,metBinLowTR,metBinHighTR) )
@@ -964,28 +970,34 @@ if doValidationSlope or doTableInputs:
         else:
             chan.setFileList(bgdFiles_m)
         chan.hasBQCD = False
-        chan.useOverflowBin = True
+        chan.useOverflowBin = False
         for syst in btagChanSyst:
             chan.addSystematic(syst)
 
     #ZR
     validationSlopeZRChannels = []
     if doTableInputs:
-        validationSlopeZRChannels.append( bkgOnly.addValidationChannel("Zpt",["ZRee"],1,metBinLowTR,metBinHighTR) )
-        validationSlopeZRChannels.append( bkgOnly.addValidationChannel("Zpt",["ZRmm"],1,metBinLowTR,metBinHighTR) )
+        validationSlopeZRChannels.append( bkgOnly.addValidationChannel("meffInc",["HMTVL1El"],1,0,meffMax) )
+        validationSlopeZRChannels.append( bkgOnly.addValidationChannel("meffInc",["HMTVL1Mu"],1,0,meffMax) )
     else:
         validationSlopeZRChannels.append( bkgOnly.addValidationChannel("Zpt",["ZRee"],metNBinsTR,metBinLowTR,metBinHighTR) )
         validationSlopeZRChannels.append( bkgOnly.addValidationChannel("Zpt",["ZRmm"],metNBinsTR,metBinLowTR,metBinHighTR) )
         pass
     # add systematics
     for chan in validationSlopeZRChannels:
-        if chan.name.find("ee")>-1:
+        if chan.name.find("El")>-1:
+            chan.setFileList(bgdFiles_e)
+        elif chan.name.find("Mu")>-1:
+            chan.setFileList(bgdFiles_m)
+        elif chan.name.find("ee")>-1:
             chan.setFileList(bgdFiles_ee)
-        else:
+        elif chan.name.find("mm")>-1:
             chan.setFileList(bgdFiles_mm)
+        else:
+            raise ValueError("Unexpected case")
         chan.removeWeight("bTagWeight3Jet")
         chan.hasBQCD = False
-        chan.useOverflowBin = True
+        chan.useOverflowBin = False
 
 if doValidationSRLoose:
     #DILEPTONS
@@ -1078,15 +1090,9 @@ if doValidationSRTight:
 if doValidationDilep:
     validation2LepChannels = []
     if doTableInputs:
-        validation2LepChannels.append( bkgOnly.addValidationChannel("meffInc",["VR4ee"],1,meffBinLowTR,meffBinHighTR) )
-        validation2LepChannels.append( bkgOnly.addValidationChannel("meffInc",["VR4em"],1,meffBinLowTR,meffBinHighTR) )
-        validation2LepChannels.append( bkgOnly.addValidationChannel("meffInc",["VR4mm"],1,meffBinLowTR,meffBinHighTR) )
-        validation2LepChannels.append( bkgOnly.addValidationChannel("meffInc",["VR3ee"],1,meffBinLowTR,meffBinHighTR) )
-        validation2LepChannels.append( bkgOnly.addValidationChannel("meffInc",["VR3em"],1,meffBinLowTR,meffBinHighTR) )
-        validation2LepChannels.append( bkgOnly.addValidationChannel("meffInc",["VR3mm"],1,meffBinLowTR,meffBinHighTR) )
-        validation2LepChannels.append( bkgOnly.addValidationChannel("meffInc",["VR2ee"],1,meffBinLowTR,meffBinHighTR) )
-        validation2LepChannels.append( bkgOnly.addValidationChannel("meffInc",["VR2em"],1,meffBinLowTR,meffBinHighTR) )
-        validation2LepChannels.append( bkgOnly.addValidationChannel("meffInc",["VR2mm"],1,meffBinLowTR,meffBinHighTR) )
+        validation2LepChannels.append( bkgOnly.addValidationChannel("meffInc",["TVJ2ee"],1,0,meffMax) )
+        validation2LepChannels.append( bkgOnly.addValidationChannel("meffInc",["TVJ2em"],1,0,meffMax) )
+        validation2LepChannels.append( bkgOnly.addValidationChannel("meffInc",["TVJ2mm"],1,0,meffMax) )
     else:
         validation2LepChannels.append( bkgOnly.addValidationChannel("meffInc",["VR4ee"],meffNBinsTR,meffBinLowTR,meffBinHighTR) )
         validation2LepChannels.append( bkgOnly.addValidationChannel("meffInc",["VR4em"],meffNBinsTR,meffBinLowTR,meffBinHighTR) )
@@ -1120,19 +1126,35 @@ if doValidationDilep:
         else:
             raise RuntimeError("Unexpected channel name: %s"%(chan.name))
 
+    validation2LepTopChannels = []
+    if doTableInputs:
+        validation2LepTopChannels.append( bkgOnly.addValidationChannel("meffInc",["TVJ4ee"],1,0,meffMax) )
+        validation2LepTopChannels.append( bkgOnly.addValidationChannel("meffInc",["TVJ4em"],1,0,meffMax) )
+        validation2LepTopChannels.append( bkgOnly.addValidationChannel("meffInc",["TVJ4mm"],1,0,meffMax) )
+    # add systematics
+    for chan in validation2LepTopChannels:
+        chan.useOverflowBin = False
+        chan.hasBQCD = True
+        if chan.name.endswith("ee"):
+            chan.setFileList(bgdFiles_ee)
+        elif chan.name.endswith("em"):
+            chan.setFileList(bgdFiles_em)
+        elif chan.name.endswith("mm"):
+            chan.setFileList(bgdFiles_mm)
+        else:
+            raise RuntimeError("Unexpected channel name: %s"%(chan.name))
+
+
     
 if doValidationDilepZ:
     validation2LepZChannels=[]
     if doTableInputs:
-        validation2LepZChannels.append( bkgOnly.addValidationChannel("meffInc",["VZR4ee"],1,meffBinLowTR,meffBinHighTR) )
-        validation2LepZChannels.append( bkgOnly.addValidationChannel("meffInc",["VZR4em"],1,meffBinLowTR,meffBinHighTR) )
-        validation2LepZChannels.append( bkgOnly.addValidationChannel("meffInc",["VZR4mm"],1,meffBinLowTR,meffBinHighTR) )
-        validation2LepZChannels.append( bkgOnly.addValidationChannel("meffInc",["VZR3ee"],1,meffBinLowTR,meffBinHighTR) )
-        validation2LepZChannels.append( bkgOnly.addValidationChannel("meffInc",["VZR3em"],1,meffBinLowTR,meffBinHighTR) )
-        validation2LepZChannels.append( bkgOnly.addValidationChannel("meffInc",["VZR3mm"],1,meffBinLowTR,meffBinHighTR) )
-        validation2LepZChannels.append( bkgOnly.addValidationChannel("meffInc",["VZR2ee"],1,meffBinLowTR,meffBinHighTR) )
-        validation2LepZChannels.append( bkgOnly.addValidationChannel("meffInc",["VZR2em"],1,meffBinLowTR,meffBinHighTR) )
-        validation2LepZChannels.append( bkgOnly.addValidationChannel("meffInc",["VZR2mm"],1,meffBinLowTR,meffBinHighTR) )
+        validation2LepZChannels.append( bkgOnly.addValidationChannel("meffInc",["ZVJ2ee"],1,0,meffMax) )
+        validation2LepZChannels.append( bkgOnly.addValidationChannel("meffInc",["ZVJ2em"],1,0,meffMax) )
+        validation2LepZChannels.append( bkgOnly.addValidationChannel("meffInc",["ZVJ2mm"],1,0,meffMax) )
+        validation2LepZChannels.append( bkgOnly.addValidationChannel("meffInc",["ZVJ4ee"],1,0,meffMax) )
+        validation2LepZChannels.append( bkgOnly.addValidationChannel("meffInc",["ZVJ4em"],1,0,meffMax) )
+        validation2LepZChannels.append( bkgOnly.addValidationChannel("meffInc",["ZVJ4mm"],1,0,meffMax) )
     else:
         validation2LepZChannels.append( bkgOnly.addValidationChannel("meffInc",["VZR4ee"],meffNBinsTR,meffBinLowTR,meffBinHighTR) )
         validation2LepZChannels.append( bkgOnly.addValidationChannel("meffInc",["VZR4em"],meffNBinsTR,meffBinLowTR,meffBinHighTR) )
@@ -1425,13 +1447,10 @@ if doExclusion_GMSB_combined or doExclusion_mSUGRA_dilepton_combined or doExclus
 
 signalRegions = ["SR3jTEl", "SR3jTMu", "SR4jTEl", "SR4jTMu", "SSElT", "SSMuT", "S2eeT", "S2emT", "S2mmT", "S4eeT", "S4emT", "S4mmT"]
 
-srNBins = 1
-srBinLow = 0.5
-srBinHigh = 1.5
-
-for iSR,sr in enumerate(signalRegions):
+if doDiscovery:
+    for iSR,sr in enumerate(signalRegions):
         discovery = configMgr.addTopLevelXMLClone(bkgOnly,"Discovery_%s"%sr)
-        srChannel = discovery.addChannel("cuts",[sr],srNBins,srBinLow,srBinHigh)
+        srChannel = discovery.addChannel("meffInc",[sr],1,0,meffMax)
         discovery.setSignalChannels([srChannel])
 
         srChannel.addDiscoverySamples([sr],[1.],[0.],[100.],[kMagenta])     
