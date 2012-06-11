@@ -38,11 +38,9 @@ export PYTHONPATH=$ROOTSYS/lib:$PYTHONPATH
 
 
 # set SVN path to defaults
-export SVNOFF="svn+ssh://svn.cern.ch/reps/atlasoff"
-export SVNGRP="svn+ssh://svn.cern.ch/reps/atlasgrp"
-export SVNUSR="svn+ssh://svn.cern.ch/reps/atlasusr"
 export SVNTEST="svn+ssh://svn.cern.ch/reps/atlastest"
 export SVNROOT="svn+ssh://svn.cern.ch/reps/atlasoff"
+export SVNPHYS="svn+ssh://svn.cern.ch/reps/atlasphys"
 
 # Hack for mac ?
 export LC_ALL=C 
