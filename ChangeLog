@@ -1,3 +1,11 @@
+2012-06-08 David Cote <david.cote@cern.ch>
+	* Only minor modifications to python/CombinedKFactorFit_5Channel.py
+	* Tagging HistFitter-00-00-08 (not very significant)
+
+2012-06-01 David Cote <david.cote@cern.ch>
+	* Tag for SUSY approval of MET+jets+leptons on June 5th 2012
+	* Tagging HistFitter-00-00-07
+
 2012-05-30 David Cote <david.cote@cern.ch>
 	* Tag for support note sent to EdBoard on 30.05.2012
 	* Tagging HistFitter-00-00-06
