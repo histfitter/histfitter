@@ -6,7 +6,7 @@ for all HistFitter options.
 
 Described below is a simple channel example, based on input histograms.
 This can be used in combination with the example in :
-macros/contourplot/README
+macros/Examples/contourplot/README
 
 2.
 ## To make root files containing the workspaces for grid point you want to assess.

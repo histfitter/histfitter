@@ -91,8 +91,8 @@ root -b -q makecontourhists.C # make sure that the right list file is specified,
 python makePrettyPlots.py
 
 # make sure you adjust the input pile from step A and B accordingly, in my case:
-# xsecFile = ROOT.TFile.Open("/afs/cern.ch/atlas/project/cern/susy/users/mbackes/SusyFitterDev/macros/contourplot/MySoftOneLeptonKtScaleFitMetMeff_SM_GG_onestepCC_R17_Output_upperlimit__1_harvest_list.root")
-# exclFile3jl = ROOT.TFile.Open('/afs/cern.ch/atlas/project/cern/susy/users/mbackes/SusyFitterDev/macros/contourplot/MySoftOneLeptonKtScaleFitMetMeffR17_Output_hypotest__1_harvest_list_graphs.root')
+# xsecFile = ROOT.TFile.Open("/afs/cern.ch/atlas/project/cern/susy/users/mbackes/SusyFitterDev/macros/Examples/contourplot/MySoftOneLeptonKtScaleFitMetMeff_SM_GG_onestepCC_R17_Output_upperlimit__1_harvest_list.root")
+# exclFile3jl = ROOT.TFile.Open('/afs/cern.ch/atlas/project/cern/susy/users/mbackes/SusyFitterDev/macros/Examples/contourplot/MySoftOneLeptonKtScaleFitMetMeffR17_Output_hypotest__1_harvest_list_graphs.root')
 # please check if the grid description is up to date for your model
 
 --------------------------------------------------------------------

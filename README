@@ -59,10 +59,9 @@ HistFitter.py -t -i python/MySusyFitterConfig.py
 take a look at the examples in: scripts/README
 
 2. To create contour plots based on these root files, take a look at the examples in:
-macros/contourplot/README
+macros/Examples/contourplot/README
 
-3. Construct one simple counting experiment, where you set the signal expectation, errors, and 
-error treatment yourself:
+3. Construct one simple counting experiment, where you set the signal expectation, errors, and error treatment yourself:
 analysis/simplechannel/README
 
 4. To fit the simple counting experiment created under 3, look at:
