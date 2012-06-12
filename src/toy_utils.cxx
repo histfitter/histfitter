@@ -33,6 +33,7 @@
 
 #include <stdexcept>
 
+using namespace std;
 using namespace RooFit;
 using namespace RooStats;
 

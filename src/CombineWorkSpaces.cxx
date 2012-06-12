@@ -26,6 +26,7 @@
 #include "RooMCStudy.h"
 #include "RooFitResult.h"
 
+using namespace std;
 using namespace RooFit ;
 using namespace RooStats ;
 

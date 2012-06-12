@@ -7,6 +7,7 @@
 #include "RooWorkspace.h"
 #include "TTree.h"
 
+using namespace std;
 
 //________________________________________________________________________________________________
 void 
