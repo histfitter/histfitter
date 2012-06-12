@@ -38,15 +38,15 @@ fullSyst=True
 
 doTableInputs=True #This effectively means no validation plots but only validation tables (but is 100x faster)
 doValidationSRLoose=False
-doValidationSRTight=True
+doValidationSRTight=doTableInputs
 doValidationSlope=doTableInputs
 doValidationDilep=doTableInputs
 doValidationDilepZ=doTableInputs
 doValidationSoftLep=doTableInputs
 
-doDiscovery=True
+doDiscovery=False
 doExclusion_GMSB_combined=False
-doExclusion_mSUGRA_dilepton_combined=False
+doExclusion_mSUGRA_dilepton_combined=True
 doExclusion_GG_onestepCC_x12=False
 doExclusion_GG_onestepCC_gridX=False
 doExclusion_GG_twostepCC_slepton=False
@@ -96,6 +96,7 @@ sigFiles_sl = []
 
 configMgr.histCacheFile = "data/"+configMgr.analysisName+".root"
 inputDir="root://eosatlas//eos/atlas/atlascerngroupdisk/phys-susy/histfitter/stronglepton/Paper_v1/"
+inputDir2="root://eosatlas//eos/atlas/atlascerngroupdisk/phys-susy/histfitter/stronglepton/Paper_v2/"
 inputDirSig="root://eosatlas//eos/atlas/atlascerngroupdisk/phys-susy/histfitter/stronglepton/"
 
 if not onLxplus:
@@ -117,8 +118,8 @@ if configMgr.readFromTree:
         bgdFiles_ee = [inputDir+"/SusyFitterTree_EleEle.root"]
         bgdFiles_em = [inputDir+"/SusyFitterTree_EleMu.root"]
         bgdFiles_mm = [inputDir+"/SusyFitterTree_MuMu.root"]
-        bgdFiles_e = [inputDir+"/SusyFitterTree_OneEle.root"]
-        bgdFiles_m = [inputDir+"/SusyFitterTree_OneMu.root"]
+        bgdFiles_e = [inputDir2+"/SusyFitterTree_OneEle.root"]
+        bgdFiles_m = [inputDir2+"/SusyFitterTree_OneMu.root"]
         bgdFiles_se = ["/afs/cern.ch/work/h/hyamaguc/public/samples/SusyFitterTree_OneSoftEle_BG_v7.root"]
         bgdFiles_sm = ["/afs/cern.ch/work/h/hyamaguc/public/samples/SusyFitterTree_OneSoftMuo_BG_v7.root"]        
 
