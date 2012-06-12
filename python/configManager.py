@@ -958,6 +958,9 @@ class ConfigManager(object):
             outputRootFile = TFile(self.histCacheFile,"RECREATE")
         elif self.prepare.recreate:
             outputRootFile = self.prepare.cacheFile
+            if not outputRootFile.IsOpen():
+                outputRootFile = outputRootFile.Open(self.histCacheFile,"UPDATE")
+
         if outputRootFile:
             outputRootFile.cd()
             histosToWrite = self.hists.values()
@@ -968,9 +971,6 @@ class ConfigManager(object):
                 if histo:
                     histo.Write()
             outputRootFile.Close()
-
-        #if not self.readFromTree:
-            #self.prepare.close()
 
         if self.executeHistFactory:
             topLvl.close()   #<--- this internally calls channel.close()
