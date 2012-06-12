@@ -1261,7 +1261,7 @@ class Sample(object):
             return
 
         if high==0.0 and low==0.0:
-            print "    WARNING: addOverallSys for %s high=%g low=%g remove from fit." % (systName,systName,high,low)
+            print "    WARNING: addOverallSys for %s high=%g low=%g remove from fit." % (systName,high,low)
             return
 
 ##         if high<1.0 and low<1.0:
