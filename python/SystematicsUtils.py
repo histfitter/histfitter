@@ -3,6 +3,20 @@ from configManager import configMgr
 from ROOT import TMath
 from copy import deepcopy
 
+def matchName(aChan,chanList):
+    for chan in chanList:
+        if aChan.name==chan.name:
+            return True
+        pass
+    return False
+
+def appendIfMatchName(aChan,chanList):
+    if aChan in chanList:
+        print "WARNING instance of channel %s already in chanList. Not the typical use case."%(aChan.name)
+    if matchName(aChan,chanList):
+        chanList.append(aChan)
+        pass
+    return
 
 def addWeight(oldList,newWeight):
     newList = deepcopy(oldList)
