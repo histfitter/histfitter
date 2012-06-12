@@ -349,6 +349,8 @@ class ConfigManager(object):
         print "TopLevelXML objects:"
         for tl in self.topLvls:
             print "  %s"%tl.name
+            for c in tl.channels:
+                print "    %s: %s"%(c.name,c.systDict.keys())
         print "C++ ConfigMgr status: %s"%(self.cppMgr.m_status)
         print "Histogram names: (requires verbose > 1)"
         if verbose > 1:
