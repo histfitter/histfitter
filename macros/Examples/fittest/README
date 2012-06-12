@@ -1,0 +1,8 @@
+1. Execute:
+root -b -q fittest.C
+
+to fit the "simple channel" counting experiment created at :
+analysis/simplechannel/README
+
+the macro is short and explains it all.
+
