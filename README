@@ -80,7 +80,6 @@ Directory structure:
 analysis ## contains all files related to an analysis. E.g. ZeroLepton/
 data     ## contains data text files, provided externally, used to create workspaces for analysis
 doc      ## documentation
-include	 ## include files added during compilation
 lib	 ## location shared libary
 macros	 ## macros for making plots, testing the fit, ongoing work, etc
 python	 ## pyton base classes
