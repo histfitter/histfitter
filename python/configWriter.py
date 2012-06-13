@@ -8,6 +8,7 @@ TH1.SetDefaultSumw2(True)
 
 from copy import deepcopy,copy
 from configManager import configMgr
+from systematic import Systematic
 
 class TopLevelXML(object):
     """
@@ -518,11 +519,21 @@ class TopLevelXML(object):
         self.systDict.clear()
         return
 
-    def removeSystematic(self,name):
+    def removeSystematic(self,syst):
         """
         Remove a single systematic from this TopLevel
         """
-        del self.systDict[name]
+        if isinstance(syst,Systematic):
+            systName=syst.name
+        elif isinstance(syst,str):
+            systName=syst
+        else:
+            raise ValueError("type %s not supported"%(type(syst)))
+
+        if self.systDict.has_key(systName):
+            del self.systDict[systName]
+        else:
+            print "WARNING sample %s cannot remove systematic %s"%(self.name,systName)
         return
 
     def setTreeName(self,treeName):
@@ -716,6 +727,19 @@ class ChannelXML(object):
             if s.name == name:
                 return s
         raise Exception("Could not find sample with name %s in %s"%(name,self.sampleList))
+
+    def removeSample(self,sample):
+        if isinstance(sample,Sample):
+            aSam=sample
+        elif isinstance(sample,str):
+            aSam=self.getSample(sample)
+        else:
+            raise ValueError("type %s not supported"%(type(sample)))
+        try:
+            self.sampleList.remove(aSam)
+        except:
+            print "WARNING unable to remove sample %s from channel %s"%(aSam.name,self.name)
+        return
 
     def setFileList(self,filelist):
         """
@@ -1091,7 +1115,7 @@ class Sample(object):
             highIntegral = configMgr.hists["h"+samName+systName+"High_"+normString+"Norm"].Integral()
             lowIntegral = configMgr.hists["h"+samName+systName+"Low_"+normString+"Norm"].Integral()
             nomIntegral = configMgr.hists["h"+samName+"Nom_"+normString+"Norm"].Integral()
-
+            
             try:
                 high = highIntegral / nomIntegral
                 low = lowIntegral / nomIntegral
@@ -1360,11 +1384,22 @@ class Sample(object):
         except KeyError:
             raise KeyError("Could not find systematic %s in topLevel %s" % (systName,self.name))
 
-    def removeSystematic(self,name):
+    def removeSystematic(self,syst):
         """
         Remove a systematic
         """
-        del self.systDict[name]
+        if isinstance(syst,Systematic):
+            systName=syst.name
+        elif isinstance(syst,str):
+            systName=syst
+        else:
+            raise ValueError("type %s not supported"%(type(syst)))
+
+        if self.systDict.has_key(systName):
+            del self.systDict[systName]
+        else:
+            print "WARNING sample %s cannot remove systematic %s"%(self.name,systName)
+        return
 
     def clearSystematics(self):
         """
