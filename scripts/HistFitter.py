@@ -140,6 +140,7 @@ if __name__ == "__main__":
     runFit = False
     printLimits = False
     doHypoTests = False
+    pickedSRs = []
  
     print "\n * * * Welcome to HistFitter * * *\n"
 
@@ -159,6 +160,7 @@ if __name__ == "__main__":
         print "-l make limit plot of workspace (default %s)" % printLimits
         print "-p run hypothesis test on workspace (default %s)" % doHypoTests
         print "-g <grid points to be processed> - give as comma separated list"
+        print "-r signal region to be processed - give as comma separated list (default = all)"
         print "\nAlso see the README file.\n"
         print "Command examples:"
         print "HistFitter.py -i python/MySusyFitterConfig.py           #only runs initialization in interactive mode (try e.g.: configMgr.<tab>)"
@@ -198,6 +200,8 @@ if __name__ == "__main__":
             configMgr.useAsimovSet = True
         elif opt == '-g':
             sigSamples = arg.split(',')
+        elif opt == '-r':
+            pickedSRs = arg.split(',')
         pass
     gROOT.SetBatch(not runInterpreter)
     
