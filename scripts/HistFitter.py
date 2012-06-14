@@ -220,7 +220,7 @@ if __name__ == "__main__":
         if len(configMgr.topLvls)>0:
             r=GenerateFitAndPlot(configMgr.topLvls[0])
             #for idx in range(len(configMgr.topLvls)):
-            #    r=GenerateFitAndPlot(configMgr.topLvls[idx]) #1])
+            #    r=GenerateFitAndPlot(configMgr.topLvls[idx]) 
             pass
         #configMgr.cppMgr.fitAll()
         print "\nr0=GenerateFitAndPlot(configMgr.topLvls[0])"
