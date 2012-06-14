@@ -3,7 +3,7 @@ from ROOT import gROOT,gSystem,gDirectory,RooAbsData,RooRandom,RooWorkspace
 gSystem.Load("libSusyFitter.so")
 gROOT.Reset()
 
-def GenerateFitAndPlot(tl):
+def GenerateFitAndPlot(tl,drawBeforeAfterFit):
     from configManager import configMgr
 
     from ROOT import Util
@@ -82,7 +82,8 @@ def GenerateFitAndPlot(tl):
     Util.ImportInWorkspace(w,expResultBefore,"RooExpandedFitResult_beforeFit")
 
     # plot before fit
-    Util.PlotPdfWithComponents(w,tl.name,plotChannels,"beforeFit",expResultBefore,toyMC,plotRatio)
+    if drawBeforeAfterFit:
+        Util.PlotPdfWithComponents(w,tl.name,plotChannels,"beforeFit",expResultBefore,toyMC,plotRatio)
 
     # fit of all regions
     result = Util.FitPdf(w,fitChannels,lumiConst,toyMC)
@@ -92,15 +93,15 @@ def GenerateFitAndPlot(tl):
     Util.ImportInWorkspace(w,expResultAfter,"RooExpandedFitResult_afterFit")
 
     # plot after fit
-    Util.PlotPdfWithComponents(w,tl.name,plotChannels,"afterFit",expResultAfter,toyMC,plotRatio)
-    # plot each component of each region separately with propagated error after fit  (interesting for debugging)
-    #    Util.PlotSeparateComponents(tl.name,plotChannels,"afterFit",result,toyMC)
+    if drawBeforeAfterFit:
+        Util.PlotPdfWithComponents(w,tl.name,plotChannels,"afterFit",expResultAfter,toyMC,plotRatio)
+        #plot each component of each region separately with propagated error after fit  (interesting for debugging)
+        #Util.PlotSeparateComponents(tl.name,plotChannels,"afterFit",result,toyMC)
 
-    # plot correlation matrix for result
-    Util.PlotCorrelationMatrix(result)
-    # Util.GetCorrelations(result, 0.85)
-    #     plotPLL = False
-    #     Util.PlotNLL(w, result, plotPLL, "", toyMC)
+        # plot correlation matrix for result
+        Util.PlotCorrelationMatrix(result)    
+        #plotPLL = False
+        #Util.PlotNLL(w, result, plotPLL, "", toyMC)
     
     if toyMC:
         Util.WriteWorkspace(w, tl.wsFileName,toyMC.GetName())
@@ -140,6 +141,7 @@ if __name__ == "__main__":
     runFit = False
     printLimits = False
     doHypoTests = False
+    drawBeforeAfterFit=False
     pickedSRs = []
  
     print "\n * * * Welcome to HistFitter * * *\n"
@@ -147,7 +149,7 @@ if __name__ == "__main__":
     import os, sys
     import getopt
     def usage():
-        print "HistFitter.py [-i] [-t] [-w] [-f] [-l] [-l] [-p] [-n nTOYs] [-s seed] [-g gridPoint] <configuration_file>\n"
+        print "HistFitter.py [-i] [-t] [-w] [-f] [-l] [-p] [-d] [-n nTOYs] [-s seed] [-r SRs] [-g gridPoint] <configuration_file>\n"
         print "(all OFF by default. Turn steps ON with options)"
         print "-t re-create histograms from TTrees (default: %s)"%(configMgr.readFromTree)
         print "-w re-create workspace from histograms (default: %s)"%(configMgr.executeHistFactory)
@@ -161,6 +163,7 @@ if __name__ == "__main__":
         print "-p run hypothesis test on workspace (default %s)" % doHypoTests
         print "-g <grid points to be processed> - give as comma separated list"
         print "-r signal region to be processed - give as comma separated list (default = all)"
+        print "-d Draw before/after fit plots of all channels (default: %s)"%drawBeforeAfterFit
         print "\nAlso see the README file.\n"
         print "Command examples:"
         print "HistFitter.py -i python/MySusyFitterConfig.py           #only runs initialization in interactive mode (try e.g.: configMgr.<tab>)"
@@ -171,7 +174,7 @@ if __name__ == "__main__":
         sys.exit(0)        
     
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "twfin:s:v:alpgr:")
+        opts, args = getopt.getopt(sys.argv[1:], "dtwfin:s:v:alpgr:")
         configFile = str(args[0])
     except:
         usage()
@@ -193,6 +196,8 @@ if __name__ == "__main__":
             printLimits = True
         elif opt == '-p':
             doHypoTests = True
+        elif opt == '-d':
+            drawBeforeAfterFit = True
         elif opt == '-s':
             configMgr.toySeedSet = True
             configMgr.toySeed = int(arg)
@@ -218,14 +223,14 @@ if __name__ == "__main__":
 
     if runFit:
         if len(configMgr.topLvls)>0:
-            r=GenerateFitAndPlot(configMgr.topLvls[0])
+            r=GenerateFitAndPlot(configMgr.topLvls[0],drawBeforeAfterFit)
             #for idx in range(len(configMgr.topLvls)):
-            #    r=GenerateFitAndPlot(configMgr.topLvls[idx]) 
+            #    r=GenerateFitAndPlot(configMgr.topLvls[idx],drawBeforeAfterFit) 
             pass
         #configMgr.cppMgr.fitAll()
-        print "\nr0=GenerateFitAndPlot(configMgr.topLvls[0])"
-        print "r1=GenerateFitAndPlot(configMgr.topLvls[1])"
-        print "r2=GenerateFitAndPlot(configMgr.topLvls[2])"
+        print "\nr0=GenerateFitAndPlot(configMgr.topLvls[0],False)"
+        print "r1=GenerateFitAndPlot(configMgr.topLvls[1],False)"
+        print "r2=GenerateFitAndPlot(configMgr.topLvls[2],False)"
         pass
         
     if printLimits:
