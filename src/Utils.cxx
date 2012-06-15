@@ -2220,6 +2220,14 @@ TString Util::GetXTitle(RooRealVar* regionVar){
   else if(  varName.Contains("meff")) outName = "m_{eff} [GeV]"; 
   else if(  varName.Contains("nJet")) outName = "N jets"; 
   else if( varName.Contains("met/meff")) outName = "E_{T}^{miss}/m_{eff}"; 
+  else if(  varName.Contains("Wpt")) outName = "p_{T}^{W} [GeV]"; 
+  else if(  varName.Contains("Zpt")) outName = "p_{T}^{Z} [GeV]"; 
+  else if(  varName.Contains("lep1Pt")) outName = "p_{T}^{lep1} [GeV]"; 
+  else if(  varName.Contains("lep2Pt")) outName = "p_{T}^{lep2} [GeV]"; 
+  else if(  varName.Contains("jet1Pt")) outName = "p_{T}^{jet1} [GeV]"; 
+  else if(  varName.Contains("jet2Pt")) outName = "p_{T}^{jet2} [GeV]"; 
+  else if(  varName.Contains("jet3Pt")) outName = "p_{T}^{jet3} [GeV]"; 
+  else if(  varName.Contains("jet4Pt")) outName = "p_{T}^{jet4} [GeV]"; 
   
   return outName;
 }
