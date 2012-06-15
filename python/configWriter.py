@@ -665,7 +665,7 @@ class ChannelXML(object):
         if not statErrorThreshold == None:
             self.hasStatConfig = True
             self.statErrorThreshold = statErrorThreshold
-            self.statErrorType = "Poisson"
+            self.statErrorType = "Gaussian" #"Poisson"
         self.files = []
         self.treeName = ''
         # Plot cosmetics
