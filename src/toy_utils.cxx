@@ -142,8 +142,7 @@ Combination::CollectHypoTestResults( const TString& infile, const TString& forma
     
     LimitResult result = RooStats::get_Pvalue( ht );
     result.AddMetaData ( Combination::ParseWorkspaceID(itr->first) );
-    //if (!failed_fit) 
-    limres.push_back(result); // store info from interpretation string (eg m0 and m12 value) 
+    if (!failed_fit) limres.push_back(result); // store info from interpretation string (eg m0 and m12 value) 
     delete ht;
   }
 
