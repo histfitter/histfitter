@@ -128,13 +128,13 @@ Combination::CollectHypoTestResults( const TString& infile, const TString& forma
     
     if (fitresult){
        if (fitresult->status()!=0) {
-           cout << "Fit failed for point " << fitresultname.Data() << " - do not use hypo test result" << endl;
+           cout << "WARNING: Fit failed for point " << fitresultname.Data() << " - do not use hypo test result" << endl;
 	   counter_failed_fits++;
            fitresult->Print();	
 	   failed_fit = true;   
        }
        if (fitresult->covQual() < 2.1) {
-           cout << "Fit result " << fitresultname.Data() << " has bad covariance matrix quality" << endl;
+           cout << "WARNING: Fit result " << fitresultname.Data() << " has bad covariance matrix quality! Check your fit setup!" << endl;
 	   counter_badcovquality++;
 	   failed_fit = true;
        }
@@ -142,7 +142,8 @@ Combination::CollectHypoTestResults( const TString& infile, const TString& forma
     
     LimitResult result = RooStats::get_Pvalue( ht );
     result.AddMetaData ( Combination::ParseWorkspaceID(itr->first) );
-    if (!failed_fit) limres.push_back(result); // store info from interpretation string (eg m0 and m12 value)
+    //if (!failed_fit) 
+    limres.push_back(result); // store info from interpretation string (eg m0 and m12 value) 
     delete ht;
   }
 
