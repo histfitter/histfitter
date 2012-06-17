@@ -579,7 +579,15 @@ class ConfigManager(object):
 
                 elif not sam.isQCD and not sam.isDiscovery:
                     if not len(sam.shapeFactorList):
-                        self.prepare.addHisto("h"+sam.name+"Nom_"+regionString+"_obs_"+replaceSymbols(chan.variableName),useOverflow=chan.useOverflowBin,useUnderflow=chan.useUnderflowBin)                
+                        tmpName="h"+sam.name+"Nom_"+regionString+"_obs_"+replaceSymbols(chan.variableName)
+                        self.prepare.addHisto(tmpName,useOverflow=chan.useOverflowBin,useUnderflow=chan.useUnderflowBin)
+                        #check that nominal sample is not empty for that channel
+                        if self.hists[tmpName].GetSum() == 0.0:
+                            print "    ***WARNING nominal sample %s is empty for channel %s. Remove from PDF.***"%(sam.name,chan.name)
+                            chan.removeSample(sam.name)
+                            del self.hists[tmpName]
+                            self.hists[tmpName]=None
+                            continue
                     else:
                         self.hists["h"+sam.name+"Nom_"+regionString+"_obs_"+replaceSymbols(chan.variableName)] = TH1F("h"+sam.name+"Nom_"+regionString+"_obs_"+replaceSymbols(chan.variableName),"h"+sam.name+"Nom_"+regionString+"_obs_"+replaceSymbols(chan.variableName),chan.nBins,chan.binLow,chan.binHigh)
                         for iBin in xrange(self.hists["h"+sam.name+"Nom_"+regionString+"_obs_"+replaceSymbols(chan.variableName)].GetNbinsX()+1):
