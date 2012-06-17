@@ -223,9 +223,9 @@ if __name__ == "__main__":
 
     if runFit:
         if len(configMgr.topLvls)>0:
-            r=GenerateFitAndPlot(configMgr.topLvls[0],drawBeforeAfterFit)
-            #for idx in range(len(configMgr.topLvls)):
-            #    r=GenerateFitAndPlot(configMgr.topLvls[idx],drawBeforeAfterFit) 
+            #r=GenerateFitAndPlot(configMgr.topLvls[0],drawBeforeAfterFit)
+            for idx in range(len(configMgr.topLvls)):
+                r=GenerateFitAndPlot(configMgr.topLvls[idx],drawBeforeAfterFit) 
             pass
         #configMgr.cppMgr.fitAll()
         print "\nr0=GenerateFitAndPlot(configMgr.topLvls[0],False)"
