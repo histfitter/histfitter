@@ -149,7 +149,7 @@ if __name__ == "__main__":
     import os, sys
     import getopt
     def usage():
-        print "HistFitter.py [-i] [-t] [-w] [-f] [-l] [-p] [-d] [-n nTOYs] [-s seed] [-r SRs] [-g gridPoint] <configuration_file>\n"
+        print "HistFitter.py [-i] [-t] [-w] [-f] [-l] [-p] [-d] [-n nTOYs] [-s seed] [-r SRs] [-g gridPoint] [-b bkgParName,value] <configuration_file>\n"
         print "(all OFF by default. Turn steps ON with options)"
         print "-t re-create histograms from TTrees (default: %s)"%(configMgr.readFromTree)
         print "-w re-create workspace from histograms (default: %s)"%(configMgr.executeHistFactory)
@@ -164,6 +164,7 @@ if __name__ == "__main__":
         print "-g <grid points to be processed> - give as comma separated list"
         print "-r signal region to be processed - give as comma separated list (default = all)"
         print "-d Draw before/after fit plots of all channels (default: %s)"%drawBeforeAfterFit
+        print "-b when doing hypotest, correct bkg-level to: bkg strength parameter, bkg value"
         print "\nAlso see the README file.\n"
         print "Command examples:"
         print "HistFitter.py -i python/MySusyFitterConfig.py           #only runs initialization in interactive mode (try e.g.: configMgr.<tab>)"
@@ -174,7 +175,7 @@ if __name__ == "__main__":
         sys.exit(0)        
     
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "dtwfin:s:v:alpgr:")
+        opts, args = getopt.getopt(sys.argv[1:], "dtwfin:s:v:alpgrb:")
         configFile = str(args[0])
     except:
         usage()
@@ -207,6 +208,10 @@ if __name__ == "__main__":
             sigSamples = arg.split(',')
         elif opt == '-r':
             pickedSRs = arg.split(',')
+        elif opt == '-b':
+            bkgArgs = arg.split(',')
+            configMgr.bkgParName = bkgArgs[0]
+            configMgr.bkgCorrVal = float(bkgArgs[1])
         pass
     gROOT.SetBatch(not runInterpreter)
     
