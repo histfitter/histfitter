@@ -83,6 +83,9 @@ class ConfigManager(object):
         self.histCacheFile = ""
         self.fileList = [] # File list to be used for tree production
         self.treeName = ''
+
+        self.bkgParName = ''
+        self.bkgCorrVal = -1.
         return
 
     def setLumiUnits(self,unit):
@@ -256,6 +259,8 @@ class ConfigManager(object):
         self.cppMgr.setNPoints( self.nPoints )
         self.cppMgr.setSeed( self.seed )
         self.cppMgr.setMuValGen( self.muValGen )
+        self.cppMgr.setBkgCorrVal( self.bkgCorrVal )
+        self.cppMgr.setBkgParName( self.bkgParName ) 
 
         if self.outputFileName:
             self.cppMgr.m_outputFileName = self.outputFileName
