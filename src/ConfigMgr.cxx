@@ -35,6 +35,7 @@ ConfigMgr::ConfigMgr()
   m_seed=0;
   m_nPoints=10;
   m_muValGen=0.0;
+  m_bkgCorrVal=-1.0;
 }
 
 FitConfig* ConfigMgr::addFitConfig(const TString& name){
@@ -137,12 +138,12 @@ ConfigMgr::doHypoTestAll(TString outdir)
 {
    for(unsigned int i=0; i<m_fitConfigs.size(); i++) {
       if( m_fixSigXSec ){
-         doHypoTest( m_fitConfigs.at(i), outdir, 0. );
-         double SigXSecSysnsigma = 1.;
-         doHypoTest( m_fitConfigs.at(i), outdir, SigXSecSysnsigma );
-         doHypoTest( m_fitConfigs.at(i), outdir, SigXSecSysnsigma*(-1.) );
+	doHypoTest( m_fitConfigs.at(i), outdir, 0.);
+	double SigXSecSysnsigma = 1.;
+	doHypoTest( m_fitConfigs.at(i), outdir, SigXSecSysnsigma);
+	doHypoTest( m_fitConfigs.at(i), outdir, SigXSecSysnsigma*(-1.));
       }else{
-         doHypoTest( m_fitConfigs.at(i) , outdir, 0.);
+	doHypoTest( m_fitConfigs.at(i) , outdir, 0.);
       }
   }
   return;
@@ -151,7 +152,7 @@ ConfigMgr::doHypoTestAll(TString outdir)
 void 
 ConfigMgr::doHypoTest(int i , TString outdir, double SigXSecSysnsigma)
 {
-   return doHypoTest( m_fitConfigs.at(i), outdir, SigXSecSysnsigma );
+  return doHypoTest( m_fitConfigs.at(i), outdir, SigXSecSysnsigma );
 }
 
 void 
@@ -200,8 +201,26 @@ ConfigMgr::doHypoTest(FitConfig* fc, TString outdir, double SigXSecSysnsigma)
       fitresult->Write();
       cout << ">>> Now storing RooFitResult <" << hypName << ">" << endl;
    }
-   
-   RooStats::HypoTestInverterResult* hypo = RooStats::DoHypoTestInversion(w,m_nToys,m_calcType,m_testStatType); 
+
+   bool useCLs = true;  
+   int npoints = 1;   
+   double poimin = 1.0;  
+   double poimax = 1.0; 
+   bool doAnalyze = false;
+   bool useNumberCounting = false;
+   TString modelSBName = "ModelConfig";
+   TString modelBName;
+   const char * dataName = "obsData";                 
+   const char * nuisPriorName = 0;
+
+   if (m_bkgCorrVal>0. && !m_bkgParName.IsNull()) {
+     cout << "Performing bkg correction for bkg-only toys: " << m_bkgParName << " " << m_bkgCorrVal << endl;
+     modelBName = makeCorrectedBkgModelConfig(w,modelSBName);
+   }
+
+   RooStats::HypoTestInverterResult* hypo = RooStats::DoHypoTestInversion(w,m_nToys,m_calcType,m_testStatType,
+									  useCLs,npoints,poimin,poimax,doAnalyze,useNumberCounting,
+									  modelSBName.Data(),modelBName.Data(),dataName,nuisPriorName); 
    
    if(hypo){	
       outfile->cd();
@@ -218,6 +237,51 @@ ConfigMgr::doHypoTest(FitConfig* fc, TString outdir, double SigXSecSysnsigma)
    outfile->Close();
    
    return;
+}
+
+
+TString
+ConfigMgr::makeCorrectedBkgModelConfig( RooWorkspace* w, const char* modelSBName )
+{
+  TString bModelStr;
+
+  if (m_bkgCorrVal<0.) { cout << "Bkg correction value undefined." << endl; return bModelStr; }
+
+  RooStats::ModelConfig* sbModel = Util::GetModelConfig( w, modelSBName );
+  if (sbModel==NULL) { cout << "No signal model config found. Return." << endl; return bModelStr; }
+
+  RooAbsPdf* pdf = sbModel->GetPdf();
+  if (pdf==NULL) { cout << "No pdf found. Return." << endl; return bModelStr; }
+
+  RooRealVar * var = dynamic_cast<RooRealVar*>(sbModel->GetParametersOfInterest()->first());
+  if (!var) { cout << "No signal strength parameter found. Return." << endl; return bModelStr; }
+  RooRealVar *totbk = w->var(m_bkgParName.Data());
+  if (!totbk) { cout << "No bkg strength parameter found. Return." << endl; return bModelStr; }
+
+  bModelStr = TString(modelSBName)+TString("_with_poi_0");
+  RooStats::ModelConfig* bModel = Util::GetModelConfig( w, bModelStr.Data(), false );
+  if (bModel!=NULL) { cout << "Bkg model config already defined. Return." << endl; return bModelStr; }
+
+  bModel = (RooStats::ModelConfig*) sbModel->Clone();
+  bModel->SetName(bModelStr.Data());      
+
+  double oldval = var->getVal();
+  var->setVal(0); /// MB : turn off the signal component
+  double oldtotbk = totbk->getVal(); /// MB: get total bkg in bin
+  oldtotbk = pdf->getVal(); /// MB:  assuming RooRealSumPdf with one bin
+
+  /// MB : do the bkg reset here
+  totbk->setVal( m_bkgCorrVal / oldtotbk );
+  bModel->SetSnapshot( RooArgSet(*var,*totbk)  );
+  /// MB : and reimport the configuration into the WS
+  w->import( *bModel );
+
+  /// reset
+  var->setVal(oldval);
+  totbk->setVal(oldtotbk);
+
+  // pass on the name of the bkg model config
+  return bModelStr;
 }
 
 

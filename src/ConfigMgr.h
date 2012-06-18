@@ -14,6 +14,8 @@
 
 #include "FitConfig.h"
 
+class RooWorkspace;
+
 class ConfigMgr
 {
 private:
@@ -60,6 +62,8 @@ public:
   FitConfig* addFitConfig(const TString& name);
   FitConfig* getFitConfig(const TString& name);
 
+  TString makeCorrectedBkgModelConfig(RooWorkspace* w, const char* modelSBName="ModelConfig");
+
   //get/set methods
   void setNToys (const int& val) { m_nToys = val; }
   int  getNToys() { return m_nToys; }
@@ -88,6 +92,11 @@ public:
   void setMuValGen(const double& val) { m_muValGen = val; }
   double getMuValGen() { return m_muValGen; }
 
+  void setBkgCorrVal(const double& val) { m_bkgCorrVal = val; }
+  double getBkgCorrVal() { return m_bkgCorrVal; }
+
+  void setBkgParName(const char* parName) { m_bkgParName=parName; }
+  TString getBkgParName() { return m_bkgParName; }
 
   //class data members
  public:
@@ -110,6 +119,9 @@ public:
   int  m_nPoints;
   int  m_seed;
   double m_muValGen;
+
+  double m_bkgCorrVal;
+  TString m_bkgParName;
 
   static ConfigMgr *_singleton;
 };

@@ -342,7 +342,8 @@ RooFitResult* Util::FitPdf( RooWorkspace* w, TString fitRegions, bool lumiConst,
     //////////////////////////////////////////////////////////////  
   }
   else{
-    // r = simPdfFitRegions->fitTo(*dataFitRegions,Save(),SumW2Error(kFALSE));
+
+    //r = simPdfFitRegions->fitTo(*dataFitRegions,Save(),SumW2Error(kFALSE));
 
     /////////////////////////////////////////////////////////////
     
@@ -1261,22 +1262,22 @@ Util::GetWorkspaceFromFile( const TString& infile, const TString& wsname )
 
 //________________________________________________________________________________________________
 RooStats::ModelConfig* 
-Util::GetModelConfig( const RooWorkspace* w, const TString& mcName )
+Util::GetModelConfig( const RooWorkspace* w, const TString& mcName, const bool& verbose )
 {
   if (w==0) {
-    cout << "ERROR : Workspace is a null pointer." << endl;
+    if (verbose) cout << "ERROR : Workspace is a null pointer." << endl;
     return NULL;
   }
 
   TObject* obj = w->obj( mcName.Data() ) ;
   if (obj==0) {
-    cout << "ERROR : Cannot open ModelConfig <" << mcName << "> from workspace." << endl;
+    if (verbose) cout << "ERROR : Cannot open ModelConfig <" << mcName << "> from workspace." << endl;
     return NULL;
   }
   
   RooStats::ModelConfig* mc = (RooStats::ModelConfig *)(obj);
   if ( mc==0 ) {
-    cout << "ERROR : Cannot open ModelConfig <" << mcName << "> from workspace" << endl;
+    if (verbose) cout << "ERROR : Cannot open ModelConfig <" << mcName << "> from workspace" << endl;
     return NULL;
   }
 

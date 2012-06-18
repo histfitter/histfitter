@@ -91,7 +91,7 @@ namespace Util
 
   /// Functions for toy generation with ToyMCSampler
 
-  RooStats::ModelConfig* GetModelConfig( const RooWorkspace* w, const TString& mcName="ModelConfig" );
+  RooStats::ModelConfig* GetModelConfig( const RooWorkspace* w, const TString& mcName="ModelConfig", const bool& verbose=true );
   RooFitResult* doFreeFit( RooWorkspace* w, RooDataSet* inputdata=0, const bool& verbose=false, const bool& resetAfterFit=false );
   RooRealVar* GetPOI( const RooWorkspace* w );
   RooMCStudy* GetMCStudy( const RooWorkspace* w );
