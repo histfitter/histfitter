@@ -175,7 +175,7 @@ if __name__ == "__main__":
         sys.exit(0)        
     
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "dtwfinalps:v:r:b:g:")
+        opts, args = getopt.getopt(sys.argv[1:], "dtwfinals:v:r:b:g:p")
         configFile = str(args[0])
     except:
         usage()
