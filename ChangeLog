@@ -1,5 +1,6 @@
 2012-06-21 Dan Short <daniel.short@cern.ch>
 	* Added new options for blinding
+	* HistFitter-00-00-10
 
 2012-06-14 David Cote <david.cote@cern.ch>
 	* Macros clean-up by Max
