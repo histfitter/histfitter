@@ -50,9 +50,11 @@ class ConfigManager(object):
         self.nPoints=20 # number of points in upper limit evaluation
         self.seed=0 # seed for random generator. default is clock
         self.muValGen = 0.0 # mu_sig used for toy generation
-        self.toySeedSet = False
+        self.toySeedSet = False # Set the seed for toys
         self.toySeed = 0 # CPU clock, default
-        self.useAsimovSet = False
+        self.useAsimovSet = False # Use the Asimov dataset
+        self.blindSR = False # Blind the SRs only
+        self.blindCR = False # Blind the CRs only
 
         self.normList = [] # List of normalization factors
         self.outputFileName = None # Output file name used to store fit results
@@ -184,8 +186,20 @@ class ConfigManager(object):
                         #self.hists["h"+sam.name+"Low_"+reg+"_obs_"+chan.variableName] = None
                         regString += reg
                     if sam.isData:
-                        if not "h"+sam.name+"_"+regString+"_obs_"+replaceSymbols(chan.variableName) in self.hists.keys():
-                            self.hists["h"+sam.name+"_"+regString+"_obs_"+replaceSymbols(chan.variableName)] = None
+                        if chan.channelName in tl.signalChannels:
+                            if self.blindSR:
+                                if not "h"+sam.name+"Blind_"+regString+"_obs_"+replaceSymbols(chan.variableName) in self.hists.keys():
+                                    self.hists["h"+sam.name+"Blind_"+regString+"_obs_"+replaceSymbols(chan.variableName)] = None
+                            else:
+                                if not "h"+sam.name+"_"+regString+"_obs_"+replaceSymbols(chan.variableName) in self.hists.keys():
+                                    self.hists["h"+sam.name+"_"+regString+"_obs_"+replaceSymbols(chan.variableName)] = None
+                        elif chan.channelName in tl.bkgConstrainChannels:
+                            if self.blindCR:
+                                if not "h"+sam.name+"Blind_"+regString+"_obs_"+replaceSymbols(chan.variableName) in self.hists.keys():
+                                    self.hists["h"+sam.name+"Blind_"+regString+"_obs_"+replaceSymbols(chan.variableName)] = None
+                            else:
+                                if not "h"+sam.name+"_"+regString+"_obs_"+replaceSymbols(chan.variableName) in self.hists.keys():
+                                    self.hists["h"+sam.name+"_"+regString+"_obs_"+replaceSymbols(chan.variableName)] = None
                     elif sam.isQCD:
                         if not "h"+sam.name+"Nom_"+regString+"_obs_"+replaceSymbols(chan.variableName) in self.hists.keys():
                             self.hists["h"+sam.name+"Nom_"+regString+"_obs_"+replaceSymbols(chan.variableName)] = None
@@ -578,9 +592,18 @@ class ConfigManager(object):
                     self.prepare.var = chan.variableName+"/1000."
                 
                 if sam.isData:
-                    self.prepare.addHisto("h"+sam.name+"_"+regionString+"_obs_"+replaceSymbols(chan.variableName),useOverflow=chan.useOverflowBin,useUnderflow=chan.useUnderflowBin)
-                    chan.addData("h"+sam.name+"_"+regionString+"_obs_"+replaceSymbols(chan.variableName))
-
+                    if chan.channelName in topLvl.signalChannels:
+                        if self.blindSR:
+                            chan.addData("h"+sam.name+"Blind_"+regionString+"_obs_"+replaceSymbols(chan.variableName))
+                        else:
+                            self.prepare.addHisto("h"+sam.name+"_"+regionString+"_obs_"+replaceSymbols(chan.variableName),useOverflow=chan.useOverflowBin,useUnderflow=chan.useUnderflowBin)
+                            chan.addData("h"+sam.name+"_"+regionString+"_obs_"+replaceSymbols(chan.variableName))
+                    elif chan.channelName in topLvl.bkgConstrainChannels:
+                        if self.blindCR:
+                            chan.addData("h"+sam.name+"Blind_"+regionString+"_obs_"+replaceSymbols(chan.variableName))
+                        else:
+                            self.prepare.addHisto("h"+sam.name+"_"+regionString+"_obs_"+replaceSymbols(chan.variableName),useOverflow=chan.useOverflowBin,useUnderflow=chan.useUnderflowBin)
+                            chan.addData("h"+sam.name+"_"+regionString+"_obs_"+replaceSymbols(chan.variableName))
 
                 elif not sam.isQCD and not sam.isDiscovery:
                     if not len(sam.shapeFactorList):
@@ -861,6 +884,30 @@ class ConfigManager(object):
                 except ZeroDivisionError:
                     print "ERROR: generating HistoSys for %s syst=%s nom=%g high=%g low=%g remove from fit." % (nom,syst,nomIntegral,highIntegral,lowIntegral)
 
+        # Build blinded histograms here
+        for (iChan,chan) in enumerate(topLvl.channels):
+            for sam in chan.sampleList:
+                if sam.isData:
+                    regString = ""
+                    for reg in chan.regions:
+                        regString += reg
+                    if chan.channelName in topLvl.signalChannels:
+                        if self.blindSR:
+                            if not self.hists["h"+sam.name+"Blind_"+regString+"_obs_"+replaceSymbols(chan.variableName)]:
+                                self.hists["h"+sam.name+"Blind_"+regionString+"_obs_"+replaceSymbols(chan.variableName)] = TH1F("h"+sam.name+"Blind_"+regionString+"_obs_"+replaceSymbols(chan.variableName),"h"+sam.name+"Blind_"+regionString+"_obs_"+replaceSymbols(chan.variableName),chan.nBins,chan.binLow,chan.binHigh)
+                                for s in chan.sampleList:
+                                    if not s.isData and not s.name == topLvl.signalSample:
+                                        self.hists["h"+sam.name+"Blind_"+regionString+"_obs_"+replaceSymbols(chan.variableName)].Add(self.hists["h"+s.name+"Nom_"+regString+"_obs_"+replaceSymbols(chan.variableName)])
+                    elif chan.channelName in topLvl.bkgConstrainChannels:
+                        if self.blindCR:
+                            if not self.hists["h"+sam.name+"Blind_"+regString+"_obs_"+replaceSymbols(chan.variableName)]:
+                                self.hists["h"+sam.name+"Blind_"+regionString+"_obs_"+replaceSymbols(chan.variableName)] = TH1F("h"+sam.name+"Blind_"+regionString+"_obs_"+replaceSymbols(chan.variableName),"h"+sam.name+"Blind_"+regionString+"_obs_"+replaceSymbols(chan.variableName),chan.nBins,chan.binLow,chan.binHigh)
+                                for s in chan.sampleList:
+                                    if not s.isData and not s.name == topLvl.signalSample: 
+                                        self.hists["h"+sam.name+"Blind_"+regionString+"_obs_"+replaceSymbols(chan.variableName)].Add(self.hists["h"+s.name+"Nom_"+regString+"_obs_"+replaceSymbols(chan.variableName)])
+                else:
+                     pass   
+                    
         if self.plotHistos:
             if not os.path.isdir("plots/"+self.analysisName):
                 os.makedirs("plots/"+self.analysisName)
@@ -915,8 +962,20 @@ class ConfigManager(object):
                             self.hists["h"+samName+"High_"+regString+"_obs_"+replaceSymbols(chan.variableName)].SetFillColor(topLvl.getSample(samName).color)
                             qcdNameDict[(regString,replaceSymbols(chan.variableName))] = "h"+samName+"Nom_"+regString+"_obs_"+replaceSymbols(chan.variableName)
                         else:
-                            self.hists["h"+samName+"_"+regString+"_obs_"+replaceSymbols(chan.variableName)].SetLineColor(topLvl.getSample(samName).color)
-                            dataNameDict[(regString,replaceSymbols(chan.variableName))] = "h"+samName+"_"+regString+"_obs_"+replaceSymbols(chan.variableName)
+                            if chan.channelName in topLvl.signalChannels:
+                                if self.blindSR:
+                                    self.hists["h"+samName+"Blind_"+regString+"_obs_"+replaceSymbols(chan.variableName)].SetLineColor(topLvl.getSample(samName).color)
+                                    dataNameDict[(regString,replaceSymbols(chan.variableName))] = "h"+samName+"Blind_"+regString+"_obs_"+replaceSymbols(chan.variableName)
+                                else:
+                                    self.hists["h"+samName+"_"+regString+"_obs_"+replaceSymbols(chan.variableName)].SetLineColor(topLvl.getSample(samName).color)
+                                    dataNameDict[(regString,replaceSymbols(chan.variableName))] = "h"+samName+"_"+regString+"_obs_"+replaceSymbols(chan.variableName)
+                            if chan.channelName in topLvl.bkgConstrainChannels:
+                                if self.blindCR:
+                                    self.hists["h"+samName+"Blind_"+regString+"_obs_"+replaceSymbols(chan.variableName)].SetLineColor(topLvl.getSample(samName).color)
+                                    dataNameDict[(regString,replaceSymbols(chan.variableName))] = "h"+samName+"Blind_"+regString+"_obs_"+replaceSymbols(chan.variableName)
+                                else:
+                                    self.hists["h"+samName+"_"+regString+"_obs_"+replaceSymbols(chan.variableName)].SetLineColor(topLvl.getSample(samName).color)
+                                    dataNameDict[(regString,replaceSymbols(chan.variableName))] = "h"+samName+"_"+regString+"_obs_"+replaceSymbols(chan.variableName)
 
                 for info in stackDict.keys():
                     canDict[info].cd()
