@@ -611,6 +611,8 @@ void Util::PlotPdfWithComponents(RooWorkspace* w, TString fcName, TString plotRe
       }
 
       // draw frame
+      frame->SetTitle("");
+      frame->GetXaxis()->SetLabelSize(0.); 
       frame->Draw();
       
       // add cosmetics
@@ -796,6 +798,8 @@ void Util::PlotPdfWithComponents(RooWorkspace* w, TString fcName, TString plotRe
       frame2->GetXaxis()->SetLabelOffset(0.03);
       frame2->GetXaxis()->SetTickLength(0.06);
       
+      frame2->SetTitle("");
+      frame2->GetYaxis()->CenterTitle(); 
       frame2->Draw();
 
       canVec[iVec]->SaveAs("results/"+canName+".pdf");
@@ -1560,6 +1564,7 @@ RooAbsReal* Util::GetComponent(RooWorkspace* w, TString component, TString regio
   RooArgList compCoefList;
   for(unsigned int iReg=0; iReg<regionCompNameVec.size(); iReg++){
     for(unsigned int iComp=0; iComp< componentVec.size(); iComp++){
+      //      cout << " regionCompNameVec[" << iReg << "] = " << regionCompNameVec[iReg] << " componentVec[" << iComp << "] = " << componentVec[iComp] << endl;
       if(  regionCompNameVec[iReg].Contains(componentVec[iComp])) {
        	compFuncList.add(*(RooProduct*)w->obj(regionCompNameVec[iReg]));
        	compCoefList.add(*regionBinWidth);
@@ -1568,7 +1573,8 @@ RooAbsReal* Util::GetComponent(RooWorkspace* w, TString component, TString regio
   } 
 
   if (compFuncList.getSize()==0 || compCoefList.getSize()==0 || compCoefList.getSize()!=compFuncList.getSize()){
-    cout << " Something wrong with compFuncList or compCoefList in Util::GetComponent() "<< endl;
+    cout << " Something wrong with compFuncList or compCoefList in Util::GetComponent() "
+	 << " compFuncList.getSize() = " << compFuncList.getSize() << " compCoefList.getSize() = " << compCoefList.getSize() << endl;
     return NULL;
   }
 
