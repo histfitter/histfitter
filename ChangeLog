@@ -1,3 +1,6 @@
+2012-06-21 Evgeny Khramov <evgeniy.khramov@cern.ch>
+  * Some beautification tuning of plots: legend, log scale, ATLAS and lumi labels are set permanently
+
 2012-06-21 Dan Short <daniel.short@cern.ch>
 	* Added new options for blinding
 	* HistFitter-00-00-10

@@ -342,8 +342,7 @@ RooFitResult* Util::FitPdf( RooWorkspace* w, TString fitRegions, bool lumiConst,
     //////////////////////////////////////////////////////////////  
   }
   else{
-
-    //r = simPdfFitRegions->fitTo(*dataFitRegions,Save(),SumW2Error(kFALSE));
+    // r = simPdfFitRegions->fitTo(*dataFitRegions,Save(),SumW2Error(kFALSE));
 
     /////////////////////////////////////////////////////////////
     
@@ -576,7 +575,6 @@ void Util::PlotPdfWithComponents(RooWorkspace* w, TString fcName, TString plotRe
       
       // visualize error of fit
       if(rFit != NULL) 	regionPdf->plotOn(frame,Normalization(normCount,RooAbsReal::NumEvent),Precision(1e-5),FillColor(fc->getErrorFillColor()),FillStyle(fc->getErrorFillStyle()),LineColor(fc->getErrorLineColor()),LineStyle(fc->getErrorLineStyle()),VisualizeError(*rFit));
-      
       // re-plot data and pdf, so they are on top of error and components
       regionPdf->plotOn(frame,Normalization(normCount,RooAbsReal::NumEvent),Precision(1e-5),LineColor(fc->getTotalPdfColor()));
       regionData->plotOn(frame,RooFit::DataError(RooAbsData::Poisson),MarkerColor(fc->getDataColor()),LineColor(fc->getDataColor()));
@@ -593,49 +591,59 @@ void Util::PlotPdfWithComponents(RooWorkspace* w, TString fcName, TString plotRe
       pad2->SetBottomMargin(0.3);
       pad2->SetFillColor(kWhite);
       
-      canVec[iVec]->cd();
-      if(fc->getChannelLogY(regionCatLabel)) pad1->SetLogy();
+      //if(fc->getChannelLogY(regionCatLabel)) pad1->SetLogy();
+      pad1->SetLogy();
       pad1->Draw();
       pad2->Draw();
 
       pad1->cd();
 
       if( fabs(fc->getChannelMinY(regionCatLabel) + 9999.) > 0.000001){
-	frame->SetMinimum(fc->getChannelMinY(regionCatLabel));
+        frame->SetMinimum(fc->getChannelMinY(regionCatLabel));
       } else{
-	frame->SetMinimum(0.01);
+        frame->SetMinimum(0.05);
       }
       
       if( fabs(fc->getChannelMaxY(regionCatLabel) + 999.) > 0.000001){
-	frame->SetMaximum(fc->getChannelMaxY(regionCatLabel));
+	      frame->SetMaximum(fc->getChannelMaxY(regionCatLabel));
       }
+      else frame->SetMaximum(frame->GetMaximum()*10000);
 
       // draw frame
-      frame->SetTitle("");
+      frame->SetTitle(""); 
       frame->GetXaxis()->SetLabelSize(0.); 
       frame->Draw();
       
       // add cosmetics
       if( (fabs(fc->getChannelATLASLabelX(regionCatLabel) + 1.) > 0.000001) &&  (fabs(fc->getChannelATLASLabelY(regionCatLabel) + 1.) > 0.000001) ){
-	ATLASLabel(fc->getChannelATLASLabelX(regionCatLabel),fc->getChannelATLASLabelY(regionCatLabel),fc->getChannelATLASLabelText(regionCatLabel)) ; //"for approval");
+	      ATLASLabel(fc->getChannelATLASLabelX(regionCatLabel),fc->getChannelATLASLabelY(regionCatLabel),fc->getChannelATLASLabelText(regionCatLabel)) ; //"for approval");
       }
+      else ATLASLabel(0.195,0.8,"for approval");
 
       if( fc->getChannelShowLumi(regionCatLabel) ){
-	Float_t lumi =  fc->getLumi(); 
-	AddText(0.175,0.775,Form("#int Ldt = %.1f fb^{-1}",lumi));
+	      Float_t lumi =  fc->getLumi(); 
+	      AddText(0.175,0.775,Form("#int Ldt = %.1f fb^{-1}",lumi));
       }
-      
+      else {
+        Float_t lumi =  fc->getLumi();
+        AddText(0.05,0.7,Form("#int Ldt = %.1f fb^{-1}",lumi));
+      }
+
+      // uncomments to label the channel
+      //if (canName.Contains("Mu")) AddText(0.05,0.60,"1 muon, #geq 7 jets");
+      //else if (canName.Contains("El")) AddText(0.05,0.60,"1 electron, #geq 7 jets");
+
       TLegend* leg = fc->getTLegend();
       // default TLegend built from sample names/colors
       if(leg == NULL){
-	leg = new TLegend(0.6,0.475,0.9,0.925,"");
+	leg = new TLegend(0.5,0.44,0.895,0.895,"");
 	leg->SetFillStyle(0);
 	leg->SetFillColor(0);
 	leg->SetBorderSize(0);
 	TLegendEntry* entry=leg->AddEntry("","Data 2011 (#sqrt{s}=7 TeV)","p") ;
 	entry->SetMarkerColor(fc->getDataColor());
 	entry->SetMarkerStyle(20);
-	entry=leg->AddEntry("","Total pdf","lf") ;
+	entry=leg->AddEntry("","Standard Model","lf") ;
 	entry->SetLineColor(fc->getTotalPdfColor());
 	entry->SetFillColor(fc->getErrorFillColor());
 	entry->SetFillStyle(fc->getErrorFillStyle());
@@ -653,15 +661,21 @@ void Util::PlotPdfWithComponents(RooWorkspace* w, TString fcName, TString plotRe
 	  compNameVec.push_back(componentName);
 	}
 	
+  char NP[10];
+  TString NP_str;
 	for( int iComp = (compNameVec.size()-1) ; iComp>-1; iComp--){
 	  Int_t  compPlotColor    = ( (fc!=0) ? fc->getSampleColor(compNameVec[iComp]) : iComp );
-	  TString  compShortName  = ( (fc!=0) ? fc->getSampleName(compNameVec[iComp])  : "" );
-	  
-	  TString legName = compShortName; //"";
+    TString  compShortName  = ( (fc!=0) ? fc->getSampleName(compNameVec[iComp])  : "" );
+
+    TString legName = compShortName; //"";
 	  if(compShortName.Contains("BG")) legName = "single top & diboson";
-	  if(compShortName.Contains("WZ")) legName = "W+jets & Z+jets";
-	  if(compShortName.Contains("Top")) legName = "t#bar{t}";
-	  if(compShortName.Contains("QCD")) legName = "multijets (data estimate)";
+    for (int inp=0; inp<6; inp++) {
+      sprintf(NP,"Np%d",inp);
+      NP_str = NP;
+      if(compShortName.Contains("WZ") && compShortName.Contains(NP)) legName = "WZ+"+NP_str;
+	    if(compShortName.Contains("Top") && compShortName.Contains(NP)) legName = "t#bar{t}+"+NP_str;
+    }
+    if(compShortName.Contains("QCD")) legName = "multijets (data estimate)";
 	  if(compShortName.Contains("Discovery")) legName = "signal";
 	  //
 	  if(compShortName.Contains("WZpT0GeV"))   legName = "W/Z (p_{T}^{V,Truth}=0-50GeV)";
@@ -677,7 +691,6 @@ void Util::PlotPdfWithComponents(RooWorkspace* w, TString fcName, TString plotRe
 	  entry->SetFillStyle(1001);
 	}
       }
-      
       leg->Draw();	
       //      frameVec[iVec]=frame;
 
@@ -797,7 +810,7 @@ void Util::PlotPdfWithComponents(RooWorkspace* w, TString fcName, TString plotRe
       frame2->GetYaxis()->SetLabelOffset(0.01);
       frame2->GetXaxis()->SetLabelOffset(0.03);
       frame2->GetXaxis()->SetTickLength(0.06);
-      
+
       frame2->SetTitle("");
       frame2->GetYaxis()->CenterTitle(); 
       frame2->Draw();
@@ -1266,7 +1279,7 @@ Util::GetWorkspaceFromFile( const TString& infile, const TString& wsname )
 
 //________________________________________________________________________________________________
 RooStats::ModelConfig* 
-Util::GetModelConfig( const RooWorkspace* w, const TString& mcName, const bool& verbose )
+Util::GetModelConfig( const RooWorkspace* w, const TString& mcName, const bool& verbose  )
 {
   if (w==0) {
     if (verbose) cout << "ERROR : Workspace is a null pointer." << endl;
@@ -2222,20 +2235,20 @@ TString Util::GetXTitle(RooRealVar* regionVar){
   TString varName = regionVar->GetName();
   TString outName = varName;
   
-  if( varName.Contains("met")) outName = "E_{T}^{miss} [GeV]"; 
-  else if(  varName.Contains("mt")) outName = "m_{T} [GeV]"; 
-  else if(  varName.Contains("meff")) outName = "m_{eff} [GeV]"; 
-  else if(  varName.Contains("nJet")) outName = "N jets"; 
-  else if( varName.Contains("met/meff")) outName = "E_{T}^{miss}/m_{eff}"; 
-  else if(  varName.Contains("Wpt")) outName = "p_{T}^{W} [GeV]"; 
-  else if(  varName.Contains("Zpt")) outName = "p_{T}^{Z} [GeV]"; 
-  else if(  varName.Contains("lep1Pt")) outName = "p_{T}^{lep1} [GeV]"; 
-  else if(  varName.Contains("lep2Pt")) outName = "p_{T}^{lep2} [GeV]"; 
-  else if(  varName.Contains("jet1Pt")) outName = "p_{T}^{jet1} [GeV]"; 
-  else if(  varName.Contains("jet2Pt")) outName = "p_{T}^{jet2} [GeV]"; 
-  else if(  varName.Contains("jet3Pt")) outName = "p_{T}^{jet3} [GeV]"; 
-  else if(  varName.Contains("jet4Pt")) outName = "p_{T}^{jet4} [GeV]"; 
-  
+  if( varName.Contains("_met")) outName = "E_{T}^{miss} [GeV]"; 
+  else if(  varName.Contains("_mt")) outName = "m_{T} [GeV]"; 
+  else if(  varName.Contains("_meff")) outName = "m_{eff} [GeV]"; 
+  else if(  varName.Contains("_nJet")) outName = "N jets"; 
+  else if( varName.Contains("_met/meff")) outName = "E_{T}^{miss}/m_{eff}"; 
+  else if(  varName.Contains("_Wpt")) outName = "p_{T}^{W} [GeV]"; 
+  else if(  varName.Contains("_Zpt")) outName = "p_{T}^{Z} [GeV]"; 
+  else if(  varName.Contains("_lep1Pt")) outName = "p_{T}^{lep1} [GeV]"; 
+  else if(  varName.Contains("_lep2Pt")) outName = "p_{T}^{lep2} [GeV]"; 
+  else if(  varName.Contains("_jet1Pt")) outName = "p_{T}^{jet1} [GeV]"; 
+  else if(  varName.Contains("_jet2Pt")) outName = "p_{T}^{jet2} [GeV]"; 
+  else if(  varName.Contains("_jet3Pt")) outName = "p_{T}^{jet3} [GeV]"; 
+  else if(  varName.Contains("_jet4Pt")) outName = "p_{T}^{jet4} [GeV]"; 
+  else if(  varName.Contains("_jet7Pt")) outName = "p_{T}^{jet7} [GeV]";  
   return outName;
 }
 
