@@ -378,8 +378,12 @@ class HistoPrepare(PrepareHistosABC):
         if self.configMgr.hists[name] == None:
             try:
                 self.configMgr.hists[name] = self.cacheFile.Get(name)
-            except IOError:
-                raise Exception("Could not find histogram in "+self.cacheFileName)
+                testsum = self.configMgr.hists[name].GetSum()
+            except: # IOError:
+                print "WARNING: Could not find histogram <"+name+"> in "+self.cacheFileName+" ! "
+                self.configMgr.hists[name] = None
+                raise #Exception("Could not find histogram <"+name+"> in "+self.cacheFileName)
+
         self.name = name
         return self.configMgr.hists[name]
 
