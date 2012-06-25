@@ -200,6 +200,9 @@ class ConfigManager(object):
                             else:
                                 if not "h"+sam.name+"_"+regString+"_obs_"+replaceSymbols(chan.variableName) in self.hists.keys():
                                     self.hists["h"+sam.name+"_"+regString+"_obs_"+replaceSymbols(chan.variableName)] = None
+                        else:
+                            if not "h"+sam.name+"_"+regString+"_obs_"+replaceSymbols(chan.variableName) in self.hists.keys():
+                                self.hists["h"+sam.name+"_"+regString+"_obs_"+replaceSymbols(chan.variableName)] = None                            
                     elif sam.isQCD:
                         if not "h"+sam.name+"Nom_"+regString+"_obs_"+replaceSymbols(chan.variableName) in self.hists.keys():
                             self.hists["h"+sam.name+"Nom_"+regString+"_obs_"+replaceSymbols(chan.variableName)] = None
@@ -604,7 +607,9 @@ class ConfigManager(object):
                         else:
                             self.prepare.addHisto("h"+sam.name+"_"+regionString+"_obs_"+replaceSymbols(chan.variableName),useOverflow=chan.useOverflowBin,useUnderflow=chan.useUnderflowBin)
                             chan.addData("h"+sam.name+"_"+regionString+"_obs_"+replaceSymbols(chan.variableName))
-
+                    else:
+                        self.prepare.addHisto("h"+sam.name+"_"+regionString+"_obs_"+replaceSymbols(chan.variableName),useOverflow=chan.useOverflowBin,useUnderflow=chan.useUnderflowBin)
+                        chan.addData("h"+sam.name+"_"+regionString+"_obs_"+replaceSymbols(chan.variableName))                        
                 elif not sam.isQCD and not sam.isDiscovery:
                     if not len(sam.shapeFactorList):
                         tmpName="h"+sam.name+"Nom_"+regionString+"_obs_"+replaceSymbols(chan.variableName)
@@ -976,6 +981,9 @@ class ConfigManager(object):
                                 else:
                                     self.hists["h"+samName+"_"+regString+"_obs_"+replaceSymbols(chan.variableName)].SetLineColor(topLvl.getSample(samName).color)
                                     dataNameDict[(regString,replaceSymbols(chan.variableName))] = "h"+samName+"_"+regString+"_obs_"+replaceSymbols(chan.variableName)
+                            else:
+                                self.hists["h"+samName+"_"+regString+"_obs_"+replaceSymbols(chan.variableName)].SetLineColor(topLvl.getSample(samName).color)
+                                dataNameDict[(regString,replaceSymbols(chan.variableName))] = "h"+samName+"_"+regString+"_obs_"+replaceSymbols(chan.variableName)
 
                 for info in stackDict.keys():
                     canDict[info].cd()
