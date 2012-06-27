@@ -1,3 +1,7 @@
+2012-06-27 Max Baak <mbaak@cern.ch>
+        * Added setup file for using eos at cern: setupeos.sh
+        * HistFitter-00-00-12
+
 2012-06-21 Evgeny Khramov <evgeniy.khramov@cern.ch>
   * Some beautification tuning of plots: legend, log scale, ATLAS and lumi labels are set permanently
 
