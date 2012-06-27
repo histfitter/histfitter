@@ -2,7 +2,7 @@
 
 void makecontourhists(const TString& combo = "all" /*"0lepton"*/ /*"1lepton"*/) 
 {
-  const char* ehistfile = m0_vs_m12_nofloat("CombinedKFactorFit_5Channel_fixSigXSecNominal_hypotest__1_harvest_list");
+  const char* ehistfile = m0_vs_m12_nofloat("MySimpleChannelAnalysisOutput_hypotest__1_harvest_list");
 }
 
 
