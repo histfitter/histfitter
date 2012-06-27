@@ -103,6 +103,9 @@ svn co $SVNPHYS/Physics/SUSY/Analyses/HistFitter/trunk HistFitter
 export SVNPHYS="svn+ssh://CERNUSERNAME@svn.cern.ch/reps/atlasphys"
 svn co $SVNPHYS/Physics/SUSY/Analyses/HistFitter/trunk HistFitter
 
+svn up -r 14439 configManager.py
+
+
 ... where CERNUSERNAMEHERE is your CERN username.
 
 3. Tagging:

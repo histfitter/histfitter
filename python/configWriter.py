@@ -570,7 +570,7 @@ class Measurement(object):
         self.binLow = 0
         self.binHigh = 50
         self.mode = "comb"
-        self.exportOnly = "True"
+        self.exportOnly = "False" # "True"
         self.poiList = []
         self.constraintTermDict = {} 
         self.paramSettingDict = {}
