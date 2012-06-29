@@ -899,17 +899,17 @@ class ConfigManager(object):
                     if chan.channelName in topLvl.signalChannels:
                         if self.blindSR:
                             if not self.hists["h"+sam.name+"Blind_"+regString+"_obs_"+replaceSymbols(chan.variableName)]:
-                                self.hists["h"+sam.name+"Blind_"+regionString+"_obs_"+replaceSymbols(chan.variableName)] = TH1F("h"+sam.name+"Blind_"+regionString+"_obs_"+replaceSymbols(chan.variableName),"h"+sam.name+"Blind_"+regionString+"_obs_"+replaceSymbols(chan.variableName),chan.nBins,chan.binLow,chan.binHigh)
+                                self.hists["h"+sam.name+"Blind_"+regString+"_obs_"+replaceSymbols(chan.variableName)] = TH1F("h"+sam.name+"Blind_"+regString+"_obs_"+replaceSymbols(chan.variableName),"h"+sam.name+"Blind_"+regString+"_obs_"+replaceSymbols(chan.variableName),chan.nBins,chan.binLow,chan.binHigh)
                                 for s in chan.sampleList:
                                     if not s.isData and not s.name == topLvl.signalSample:
-                                        self.hists["h"+sam.name+"Blind_"+regionString+"_obs_"+replaceSymbols(chan.variableName)].Add(self.hists["h"+s.name+"Nom_"+regString+"_obs_"+replaceSymbols(chan.variableName)])
+                                        self.hists["h"+sam.name+"Blind_"+regString+"_obs_"+replaceSymbols(chan.variableName)].Add(self.hists["h"+s.name+"Nom_"+regString+"_obs_"+replaceSymbols(chan.variableName)])
                     elif chan.channelName in topLvl.bkgConstrainChannels:
                         if self.blindCR:
                             if not self.hists["h"+sam.name+"Blind_"+regString+"_obs_"+replaceSymbols(chan.variableName)]:
-                                self.hists["h"+sam.name+"Blind_"+regionString+"_obs_"+replaceSymbols(chan.variableName)] = TH1F("h"+sam.name+"Blind_"+regionString+"_obs_"+replaceSymbols(chan.variableName),"h"+sam.name+"Blind_"+regionString+"_obs_"+replaceSymbols(chan.variableName),chan.nBins,chan.binLow,chan.binHigh)
+                                self.hists["h"+sam.name+"Blind_"+regString+"_obs_"+replaceSymbols(chan.variableName)] = TH1F("h"+sam.name+"Blind_"+regString+"_obs_"+replaceSymbols(chan.variableName),"h"+sam.name+"Blind_"+regString+"_obs_"+replaceSymbols(chan.variableName),chan.nBins,chan.binLow,chan.binHigh)
                                 for s in chan.sampleList:
                                     if not s.isData and not s.name == topLvl.signalSample: 
-                                        self.hists["h"+sam.name+"Blind_"+regionString+"_obs_"+replaceSymbols(chan.variableName)].Add(self.hists["h"+s.name+"Nom_"+regString+"_obs_"+replaceSymbols(chan.variableName)])
+                                        self.hists["h"+sam.name+"Blind_"+regString+"_obs_"+replaceSymbols(chan.variableName)].Add(self.hists["h"+s.name+"Nom_"+regString+"_obs_"+replaceSymbols(chan.variableName)])
                 else:
                      pass   
                     
