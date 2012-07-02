@@ -1,4 +1,7 @@
 # setup ROOT
+
+. /users/staf/gbesjes/bin/root-v5-34-00-patches/bin/thisroot.sh 
+
 # check Root environment setup. Allow for external setup script.
 if [ ! $ROOTSYS ]; then
   export CWD=$PWD

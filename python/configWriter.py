@@ -21,7 +21,6 @@ class TopLevelXML(object):
         """
         self.ConstructorInit(name)
         #attributes to below are OK to deepcopy
-        self.mode = "comb"
         self.verbose=1
         self.statErrThreshold=None #None means to turn OFF mcStat error
         self.measurements = []
@@ -68,7 +67,7 @@ class TopLevelXML(object):
         Convert instance to XML string
         """
         self.writeString = "<!DOCTYPE Combination  SYSTEM 'HistFactorySchema.dtd'>\n\n"
-        self.writeString += "<Combination OutputFilePrefix=\"./results/"+self.prefix+"\" Mode=\""+self.mode+"\" >\n\n"
+        self.writeString += "<Combination OutputFilePrefix=\"./results/"+self.prefix+"\"  >\n\n"
         for chan in self.channels:
             self.writeString += "  <Input>"+chan.xmlFileName+"</Input>\n"
         self.writeString += "\n"     
@@ -569,7 +568,6 @@ class Measurement(object):
         self.lumiErr = lumiErr
         self.binLow = 0
         self.binHigh = 50
-        self.mode = "comb"
         self.exportOnly = "True"
         self.poiList = []
         self.constraintTermDict = {} 
@@ -604,7 +602,7 @@ class Measurement(object):
         """
         Convert instance to an XML string
         """
-        measurementString = "  <Measurement Name=\"%s\" Lumi=\"%g\" LumiRelErr=\"%g\" BinLow=\"%d\" BinHigh=\"%d\" Mode=\"%s\" ExportOnly=\"%s\">\n" % (self.name,self.lumi,self.lumiErr,self.binLow,self.binHigh,self.mode,self.exportOnly)
+        measurementString = "  <Measurement Name=\"%s\" Lumi=\"%g\" LumiRelErr=\"%g\" BinLow=\"%d\" BinHigh=\"%d\" ExportOnly=\"%s\">\n" % (self.name,self.lumi,self.lumiErr,self.binLow,self.binHigh,self.exportOnly)
         measurementString += "    <POI>"
         for (iPOI,poi) in enumerate(self.poiList):
             if not iPOI == len(self.poiList) - 1:
