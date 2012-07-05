@@ -2,7 +2,7 @@
 #include "contourmacros/CombinationGlob.C"
 
 
-TGraph* lep_chargino(double xmin=40, double xmax=1500., double ymin=100, double ymax=500., TString xlabel = TString("m_{0} / GeV"), TString ylabel = TString("m_{1/2} / GeV")){
+TGraph* lep_chargino2(double xmin=40, double xmax=1500., double ymin=100, double ymax=500., TString xlabel = TString("m_{0} / GeV"), TString ylabel = TString("m_{1/2} / GeV")){
 
   TGraph *g_exp_leps = new TGraph(48);
   g_exp_leps->SetName("g_exp_leps");
@@ -142,7 +142,7 @@ TGraph* ol1(double xmin=40, double xmax=840., double ymin=100, double ymax=340.,
   
   // Draw exclusion regions for previous experiments (mainly Tevatron)
   
-  return lep_chargino();
+  return lep_chargino2();
   
 /*
   TGraph* lepc_curv = lep_chargino();

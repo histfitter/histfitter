@@ -3,14 +3,19 @@
 #include <algorithm>
 
 //#include "../Tevatron/msugra_oldlim.C"
-#include "contourmacros/ol1.C"
+//#include "contourmacros/ol1.C"
+//#include "contourmacros/ol2.C"
+//#include "contourmacros/ol3.C"
 
 //#include "cmsoff.C" // cms alpha-T prl official contour (not yet used)
 //#include "contourmacros/cms.C"      // cms alpha-T prelim contour
 #include "contourmacros/cdftanb5.C"
 #include "contourmacros/d0tanb3muneg.C"
 //#include "contourmacros/stautanb3.C"
-//#include "contourmacros/ATLAS10_1lepton.C"
+//#include "contourmacros/1leptonOR_smooth_list_contour_obscls.C"
+//#include "contourmacros/ShapeSys_2.cxx"
+#include "contourmacros/ATLAS10_1lepton.C"
+#include "../../../HistFitterUser/common/ATLAS_EPS_contours2.C"
 
 void SUSY_m0_vs_m12_all_withBand_cls( TString fname0 = "mudat_list.root",// nominal
                                       TString fname1 = "",               // Up
@@ -30,7 +35,7 @@ void SUSY_m0_vs_m12_all_withBand_cls( TString fname0 = "mudat_list.root",// nomi
                                       TString hname3 = "sigclsu1s",
                                       TString hname5 = "sigclsd1s",
                                       TString hname6 = "sigp1ref",
-                                      TString fnameMass= "contourmacros/mSugraGridtanbeta10_gluinoSquarkMasses.root")
+                                      TString fnameMass= "../../../HistFitterUser/common/mSugraGridtanbeta10_gluinoSquarkMasses.root")
 {
    // set style and remove existing canvas'
    CombinationGlob::Initialize();
@@ -157,8 +162,10 @@ void SUSY_m0_vs_m12_all_withBand_cls( TString fname0 = "mudat_list.root",// nomi
   //c->SetGrayscale();
   
   // create and draw the frame
-  TH2F *frame = new TH2F("frame", "m_{0} vs m_{12} - ATLAS work in progress", 100, 100., 1400., 100, 115., 500. );
-
+  //TH2F *frame = new TH2F("frame", "m_{0} vs m_{12} - ATLAS work in progress", 100, 100., 1400., 100, 115., 500. );
+  TH2F *frame = new TH2F("frame", "m_{0} vs m_{12} - ATLAS work in progress", 100, 100., 3750., 100, 115., 700. );
+  //TH2F *frame = new TH2F("frame", "m_{0} vs m_{12} - ATLAS work in progress", 100, 100., 600., 100, 240., 500. );
+  
   // set common frame style
   CombinationGlob::SetFrameStyle2D( frame, 1.0 ); // the size (scale) is 1.0
   
@@ -178,7 +185,7 @@ void SUSY_m0_vs_m12_all_withBand_cls( TString fname0 = "mudat_list.root",// nomi
   frame->GetYaxis()->SetLabelSize( 0.04 );
 
   frame->Draw();
-
+    
   const int nsig(3);
   //TH2F *chist[3];
   // draw contours
@@ -190,14 +197,176 @@ void SUSY_m0_vs_m12_all_withBand_cls( TString fname0 = "mudat_list.root",// nomi
   Int_t nsigma=2;
 
   //  TLegend *leg = new TLegend(0.7,0.77,0.95,0.915);
-  TLegend *leg = new TLegend(0.59,0.47,0.87,0.915);
+  TLegend *leg = new TLegend(0.64,0.52,0.92,0.915);//(0.565,0.47,0.925,0.915);//(0.59,0.47,0.92,0.915);
 
   leg->SetTextSize( CombinationGlob::DescriptionTextSize );
   leg->SetTextSize( 0.03 );
   leg->SetTextFont( 42 );
   leg->SetFillColor( 0 );
   leg->SetFillStyle(1001);
+  
+  // add squark, gluino mass contour lines HERE (TILL)
+  TFile* f4 = TFile::Open( fnameMass, "READ" );
+  TH2F* histSq = (TH2F*)f4->Get( "mSugraGrid_squarkMasses" );
+  TH2F* histGl = (TH2F*)f4->Get( "mSugraGrid_gluinoMasses" );
+  histSq->SetDirectory(0);
+  histGl->SetDirectory(0);
+  f4->Close();
 
+  TH2F* histSquarkMass   = FixAndSetBorders( *histSq, "SquarkMass", "SquarkMass", 10000 );
+  TH2F* histGluinoMass   = FixAndSetBorders( *histGl, "GluinoMass", "GluinoMass", 10000 );
+  
+//  DrawContourMassLine( histSquarkMass, 400.0 );
+//  DrawContourMassLine( histSquarkMass, 500.0 );
+  DrawContourMassLine( histSquarkMass, 600.0 );
+//  DrawContourMassLine( histSquarkMass, 700.0 );
+  DrawContourMassLine( histSquarkMass, 800.0 , 17);
+//  DrawContourMassLine( histSquarkMass, 900.0 );
+  DrawContourMassLine( histSquarkMass, 1000.0 );  
+//  DrawContourMassLine( histSquarkMass, 1100.0 ); 
+  DrawContourMassLine( histSquarkMass, 1200.0 , 17);
+//  DrawContourMassLine( histSquarkMass, 1300.0 );    
+  DrawContourMassLine( histSquarkMass, 1400.0 );
+//  DrawContourMassLine( histSquarkMass, 1500.0 );
+  DrawContourMassLine( histSquarkMass, 1600.0 , 17);
+//  DrawContourMassLine( histSquarkMass, 1700.0 );
+  DrawContourMassLine( histSquarkMass, 1800.0 );
+//  DrawContourMassLine( histSquarkMass, 1900.0 );
+  DrawContourMassLine( histSquarkMass, 2000.0 , 17);  
+//  DrawContourMassLine( histSquarkMass, 2100.0 ); 
+  DrawContourMassLine( histSquarkMass, 2200.0 );  
+//  DrawContourMassLine( histSquarkMass, 2300.0 );     
+  DrawContourMassLine( histSquarkMass, 2400.0 , 17);
+//  DrawContourMassLine( histSquarkMass, 2500.0 );
+  DrawContourMassLine( histSquarkMass, 2600.0 );
+//  DrawContourMassLine( histSquarkMass, 2700.0 );
+  DrawContourMassLine( histSquarkMass, 2800.0 , 17);
+//  DrawContourMassLine( histSquarkMass, 2900.0 );
+  DrawContourMassLine( histSquarkMass, 3000.0 );   
+//  DrawContourMassLine( histSquarkMass, 3100.0 ); 
+  DrawContourMassLine( histSquarkMass, 3200.0 , 17);  
+//  DrawContourMassLine( histSquarkMass, 2300.0 );     
+  DrawContourMassLine( histSquarkMass, 3400.0 );
+//  DrawContourMassLine( histSquarkMass, 3500.0 );
+//  DrawContourMassLine( histSquarkMass, 3600.0 , 17);
+//  DrawContourMassLine( histSquarkMass, 3700.0 );
+//  DrawContourMassLine( histSquarkMass, 3800.0 );
+//  DrawContourMassLine( histSquarkMass, 3900.0 );
+//  DrawContourMassLine( histSquarkMass, 4000.0 );        
+
+  DrawContourMassLine( histGluinoMass, 400.0 );
+  DrawContourMassLine( histGluinoMass, 500.0 , 17);
+  DrawContourMassLine( histGluinoMass, 600.0 );
+  DrawContourMassLine( histGluinoMass, 700.0 , 17);
+  DrawContourMassLine( histGluinoMass, 800.0 );
+  DrawContourMassLine( histGluinoMass, 900.0 , 17);
+  DrawContourMassLine( histGluinoMass, 1000.0 );  
+  DrawContourMassLine( histGluinoMass, 1100.0 , 17);  
+  DrawContourMassLine( histGluinoMass, 1200.0 );  
+  DrawContourMassLine( histGluinoMass, 1300.0 , 17);      
+  DrawContourMassLine( histGluinoMass, 1400.0 );
+  DrawContourMassLine( histGluinoMass, 1500.0 , 17);
+  DrawContourMassLine( histGluinoMass, 1600.0 );
+//  DrawContourMassLine( histGluinoMass, 1700.0 );
+//  DrawContourMassLine( histGluinoMass, 1800.0 );
+//  DrawContourMassLine( histGluinoMass, 1900.0 );
+//  DrawContourMassLine( histGluinoMass, 2000.0 );  
+//  DrawContourMassLine( histGluinoMass, 2100.0 ); 
+
+  // find gluino ~ squark mass exclusion limit
+  //DrawContourMassLine( histSquarkMass, 820.0 );
+  //DrawContourMassLine( histGluinoMass, 820.0 );
+
+/*  TLatex * s400 = new TLatex( 140, 167 , "#tilde{q} (400 GeV)" );
+  s400->SetTextAlign( 11 );
+  s400->SetTextSize( 0.025 );
+  s400->SetTextColor( TColor::GetColor("#dddddd") );
+  s400->Draw();*/
+/*  TLatex * s500 = new TLatex( 150, 220, "#tilde{q} (500 GeV)" );
+  s500->SetTextAlign( 11 );
+  s500->SetTextSize( 0.025 );
+  s500->SetTextColor( TColor::GetColor("#dddddd") );
+  s500->Draw();*/
+  TLatex * s600 = new TLatex( 340, 230, "#tilde{q} (600 GeV)" );
+  s600->SetTextAlign( 11 );
+  s600->SetTextAngle(-60);
+  s600->SetTextSize( 0.025 );
+  s600->SetTextColor( 16 ); //12
+  s600->Draw();
+  /*TLatex * s700 = new TLatex( 545, 315, "#tilde{q} (700 GeV)" );
+  s700->SetTextAlign( 11 );
+  s700->SetTextSize( 0.025 );
+  s700->SetTextColor( TColor::GetColor("#dddddd") );
+  s700->Draw();*/
+  /*TLatex * s800 = new TLatex( 250, 270, "#tilde{q} (800 GeV)" );
+  s800->SetTextAlign( 11 );
+  s800->SetTextSize( 0.025 );
+  s800->SetTextColor( 203 );
+  s800->Draw();*/
+  /*
+  TLatex * s900 = new TLatex( 330, 400, "#tilde{q} (900 GeV)" );
+  s900->SetTextAlign( 11 );
+  s900->SetTextSize( 0.025 );
+  s900->SetTextColor( TColor::GetColor("#dddddd") );
+  s900->Draw();*/
+   TLatex * s1000 = new TLatex( 550, 408, "#tilde{q} (1000 GeV)" );
+  s1000->SetTextAlign( 11 );
+  s1000->SetTextAngle(-60);
+  s1000->SetTextSize( 0.025 );
+  s1000->SetTextColor( 16 );
+  s1000->Draw(); 
+   TLatex * s1400 = new TLatex( 790, 580, "#tilde{q} (1400 GeV)" );
+  s1400->SetTextAlign( 11 );
+  s1400->SetTextAngle(-60);
+  s1400->SetTextSize( 0.025 );
+  s1400->SetTextColor( 16 );
+  s1400->Draw();   
+
+  /*TLatex * g400 = new TLatex( 1100, 140, "#tilde{g} (400 GeV)" );
+  g400->SetTextAlign( 11 );
+  g400->SetTextSize( 0.025 );
+  g400->SetTextColor( 203 );
+  g400->Draw();*/
+  /*TLatex * g500 = new TLatex( 1000, 185, "#tilde{g} (500 GeV)" );
+  g500->SetTextAlign( 11 );
+  g500->SetTextSize( 0.025 );
+  g500->SetTextColor( TColor::GetColor("#dddddd") );
+  g500->Draw();*/
+  TLatex * g600 = new TLatex( 1100, 225, "#tilde{g} (600 GeV)" );
+  g600->SetTextAlign( 11 );
+  g600->SetTextAngle(-4);
+  g600->SetTextSize( 0.025 );
+  g600->SetTextColor( 16 );
+  g600->Draw();
+  /*TLatex * g900 = new TLatex( 550, 380, "#tilde{g} (900 GeV)" );
+  g900->SetTextAlign( 11 );
+  g900->SetTextSize( 0.025 );
+  g900->SetTextColor( TColor::GetColor("#dddddd") );
+  g900->Draw();*/
+  TLatex * g800 = new TLatex( 690, 330, "#tilde{g} (800 GeV)" );
+  g800->SetTextAlign( 11 );
+  g800->SetTextSize( 0.025 );
+  g800->SetTextColor( 16 );
+  //g800->Draw();
+  TLatex * g1000 = new TLatex( 1400, 399, "#tilde{g} (1000 GeV)" );
+  g1000->SetTextAlign( 11 );
+  g1000->SetTextAngle(-5); 
+  g1000->SetTextSize( 0.025 );
+  g1000->SetTextColor( 16 );
+  g1000->Draw();
+  TLatex * g1200 = new TLatex( 1550, 489, "#tilde{g} (1200 GeV)" );
+  g1200->SetTextAlign( 11 );
+  g1200->SetTextAngle(-6); 
+  g1200->SetTextSize( 0.025 );
+  g1200->SetTextColor( 16 );
+  //g1200->Draw();  
+  TLatex * g1400 = new TLatex( 1650, 582, "#tilde{g} (1400 GeV)" );
+  g1400->SetTextAlign( 11 );
+  g1400->SetTextAngle(-6); 
+  g1400->SetTextSize( 0.025 );
+  g1400->SetTextColor( 16 );
+  g1400->Draw();
+  
   // island hacks
   if (true && channel==4) { // muon fixes 
     cout << "removing islands in muon channel ..." << endl;
@@ -287,6 +456,7 @@ void SUSY_m0_vs_m12_all_withBand_cls( TString fname0 = "mudat_list.root",// nomi
         }
      }
   }
+  
 
   // plot tevatron limits
   TGraph* lep2slep(0);
@@ -298,109 +468,41 @@ void SUSY_m0_vs_m12_all_withBand_cls( TString fname0 = "mudat_list.root",// nomi
   TGraph* atlasexp(0);
 
   if (showtevatron==1 && discexcl==1) {
-    lep2char = ol1();
-    d0graph = d0tanb3muneg();
-    cdfgraph = cdftanb5();
+    //lep2char = ol1();
+    lep2char = msugra_lepchrg("../../../HistFitterUser/common/mSugraGridtanbeta10_charginoMasses.root"); //ol1();
+    //lep2char->Print();
+    c->cd();    
+    lep2char->Draw("FSAME");
+    lep2char->Draw("LSAME");
+    //d0graph = d0tanb3muneg();
+    //cdfgraph = cdftanb5();
     //atlas = ATLAS10_1lepton();
     //atlasexp = ATLAS10_1leptonexp();
   }
-
-  //:w(void) stautanb3();
 
   TGraph* cmscurve(0);
   if (showcms==1) { 
     //cmscurve = cmsoff();
     cmscurve = cms();
   }
+
+  TGraph* msugra_noEWSB_curve(0);
+  msugra_noEWSB_curve = msugra_noEWSB("../../../HistFitterUser/common/noEWSB.txt");
+  c->cd();
+  //msugra_noEWSB_curve->Print();
+  msugra_noEWSB_curve->Draw("FSAME");
+  msugra_noEWSB_curve->Draw("LSAME");
   
-  // add squark, gluino mass contour lines HERE (TILL)
-  TFile* f4 = TFile::Open( fnameMass, "READ" );
-  TH2F* histSq = (TH2F*)f4->Get( "mSugraGrid_squarkMasses" );
-  TH2F* histGl = (TH2F*)f4->Get( "mSugraGrid_gluinoMasses" );
-  histSq->SetDirectory(0);
-  histGl->SetDirectory(0);
-  f4->Close();
+  TGraph* msugra_stauLSP_curve(0);
+  msugra_stauLSP_curve = msugra_stauLSP();
+  //msugra_stauLSP_curve->Print();
+  msugra_stauLSP_curve->Draw("FSAME");
+  msugra_stauLSP_curve->Draw("LSAME");
 
-  TH2F* histSquarkMass   = FixAndSetBorders( *histSq, "SquarkMass", "SquarkMass", 10000 );
-  TH2F* histGluinoMass   = FixAndSetBorders( *histGl, "GluinoMass", "GluinoMass", 10000 );
-
-  DrawContourMassLine( histSquarkMass, 400.0 );
-  DrawContourMassLine( histSquarkMass, 500.0 );
-  DrawContourMassLine( histSquarkMass, 600.0 );
-  DrawContourMassLine( histSquarkMass, 700.0 );
-  DrawContourMassLine( histSquarkMass, 800.0 );
-  DrawContourMassLine( histSquarkMass, 900.0 );
-
-  DrawContourMassLine( histGluinoMass, 400.0 );
-  DrawContourMassLine( histGluinoMass, 500.0 );
-  DrawContourMassLine( histGluinoMass, 600.0 );
-  DrawContourMassLine( histGluinoMass, 700.0 );
-  DrawContourMassLine( histGluinoMass, 800.0 );
-  DrawContourMassLine( histGluinoMass, 900.0 );
-
-  // find gluino ~ squark mass exclusion limit
-  //DrawContourMassLine( histSquarkMass, 820.0 );
-  //DrawContourMassLine( histGluinoMass, 820.0 );
-
-  if (false) {
-  } else {
-  TLatex * s400 = new TLatex( 140, 167 /*290, 125*/, "#tilde{q} (400 GeV)" );
-  s400->SetTextAlign( 11 );
-  s400->SetTextSize( 0.025 );
-  s400->SetTextColor( 12 );
-  s400->Draw();
-  TLatex * s500 = new TLatex( 150, 220, "#tilde{q} (500 GeV)" );
-  s500->SetTextAlign( 11 );
-  s500->SetTextSize( 0.025 );
-  s500->SetTextColor( 12 );
-  s500->Draw();
-  TLatex * s600 = new TLatex( 545, 125, "#tilde{q} (600 GeV)" );
-  s600->SetTextAlign( 11 );
-  s600->SetTextSize( 0.025 );
-  s600->SetTextColor( 12 );
-  s600->Draw();
-  TLatex * s700 = new TLatex( 190, 315, "#tilde{q} (700 GeV)" );
-  s700->SetTextAlign( 11 );
-  s700->SetTextSize( 0.025 );
-  s700->SetTextColor( 12 );
-  //s700->Draw();
-  TLatex * s800 = new TLatex( 310, 350, "#tilde{q} (800 GeV)" );
-  s800->SetTextAlign( 11 );
-  s800->SetTextSize( 0.025 );
-  s800->SetTextColor( 12 );
-  s800->Draw();
-  TLatex * s900 = new TLatex( 330, 400, "#tilde{q} (900 GeV)" );
-  s900->SetTextAlign( 11 );
-  s900->SetTextSize( 0.025 );
-  s900->SetTextColor( 12 );
-  s900->Draw();
-  }
-
-  TLatex * g400 = new TLatex( 1100, 140, "#tilde{g} (400 GeV)" );
-  g400->SetTextAlign( 11 );
-  g400->SetTextSize( 0.025 );
-  g400->SetTextColor( 12 );
-  g400->Draw();
-  TLatex * g500 = new TLatex( 1000, 185, "#tilde{g} (500 GeV)" );
-  g500->SetTextAlign( 11 );
-  g500->SetTextSize( 0.025 );
-  g500->SetTextColor( 12 );
-  g500->Draw();
-  TLatex * g600 = new TLatex( 830, 235, "#tilde{g} (600 GeV)" );
-  g600->SetTextAlign( 11 );
-  g600->SetTextSize( 0.025 );
-  g600->SetTextColor( 12 );
-  g600->Draw();
-  TLatex * g900 = new TLatex( 550, 380, "#tilde{g} (900 GeV)" );
-  g900->SetTextAlign( 11 );
-  g900->SetTextSize( 0.025 );
-  g900->SetTextColor( 12 );
-  g900->Draw();
-  TLatex * g800 = new TLatex( 690, 330, "#tilde{g} (800 GeV)" );
-  g800->SetTextAlign( 11 );
-  g800->SetTextSize( 0.025 );
-  g800->SetTextColor( 12 );
-  g800->Draw();
+  //:w(void) stautanb3();
+      
+  c->Update();  
+    
     
   if (showcms==1 && discexcl==1) {
      leg->AddEntry(cmscurve,"CMS jets (#alpha_{T}), 35 pb^{-1}","l");
@@ -409,10 +511,12 @@ void SUSY_m0_vs_m12_all_withBand_cls( TString fname0 = "mudat_list.root",// nomi
   // re-draw TLegend for old exclusions
   if (showtevatron==1 && discexcl==1) {
      leg->AddEntry( lep2char, "LEP2 #tilde{#chi}^{#pm}_{1}","F");
-     leg->AddEntry( d0graph,  "D0 #tilde{g}, #tilde{q}, tan#beta=3, #mu<0, 2.1 fb^{-1}","F" );
-     leg->AddEntry( cdfgraph, "CDF #tilde{g}, #tilde{q}, tan#beta=5, #mu<0, 2 fb^{-1}","F" );
+     //leg->AddEntry( d0graph,  "D0 #tilde{g}, #tilde{q}, tan#beta=3, #mu<0, 2.1 fb^{-1}","F" );
+     //leg->AddEntry( cdfgraph, "CDF #tilde{g}, #tilde{q}, tan#beta=5, #mu<0, 2 fb^{-1}","F" );
   }
   
+  leg->AddEntry( msugra_stauLSP_curve, "Stau LSP","F" );
+  leg->AddEntry( msugra_noEWSB_curve, "Theoretically excluded","F" );
   
   // legend
   Float_t textSizeOffset = +0.000;
@@ -461,7 +565,7 @@ void SUSY_m0_vs_m12_all_withBand_cls( TString fname0 = "mudat_list.root",// nomi
   Leg1->SetTextFont( 42 );
   Leg1->SetTextSize( CombinationGlob::DescriptionTextSize );
   Leg1->SetTextColor( 1 );
-  Leg1->DrawLatex(0.33,0.87, Form("L^{int} = %1.2f fb^{-1},  #sqrt{s}=7 TeV",lumi));  // 0.32,0.87
+  Leg1->DrawLatex(0.33,0.87, Form("L^{int} = %1.2f fb^{-1},  #sqrt{s}=8 TeV",lumi));  // 0.32,0.87
   Leg1->AppendPad();
   
   TLatex *Leg2 = new TLatex();
@@ -526,18 +630,18 @@ void SUSY_m0_vs_m12_all_withBand_cls( TString fname0 = "mudat_list.root",// nomi
   // store histograms to output file
   TObjArray* arr = fname0.Tokenize("/");
   TObjString* objstring = (TObjString*)arr->At( arr->GetEntries()-1 );
-  TString outfile = TString(Form("%dinvfb_",lumi)) + TString(Form("wband%d_",showOneSigmaExpBand)) + TString(Form("wfixSigXSecband%d_",showfixSigXSecBand)) + TString(Form("showcms%d_",showcms)) + objstring->GetString().ReplaceAll(".root","");
+  TString outfile = TString(Form("wband%d_",showOneSigmaExpBand)) + TString(Form("wfixSigXSecband%d_",showfixSigXSecBand)) + TString(Form("showcms%d_",showcms)) + objstring->GetString().ReplaceAll(".root","");
   delete arr;
 
-  TString prefixsave = TString(prefix).ReplaceAll(" ","_") + Form("%dinvfb_",lumi) + Form("wband%d_",showOneSigmaExpBand);
+  TString prefixsave = TString(prefix).ReplaceAll(" ","_")+ Form("wband%d_",showOneSigmaExpBand);
   CombinationGlob::imgconv( c, Form("plots/atlascls_m0m12_%s",outfile.Data()) );   
 
   TLatex *prel = new TLatex();
   prel->SetNDC();
   prel->SetTextFont( 42 );
   prel->SetTextColor( 1 );
-  prel->SetTextSize( 0.05 );
-  prel->DrawLatex(0.15, 0.81, "Preliminary");   // 0.27,0.87
+  prel->SetTextSize( 0.04 );  
+  prel->DrawLatex(0.13, 0.81, "work in progress");   // 0.27,0.87
   prel->AppendPad();
 
   TString prefixsave = TString(prefix).ReplaceAll(" ","_") + Form("%dinvfb_",lumi) + Form("wband%d_",showOneSigmaExpBand);
@@ -892,6 +996,8 @@ ContourGraph( TH2F* hist)
 {
    TGraph* gr0 = new TGraph();
    TH2F* h = (TH2F*)hist->Clone();
+   h->GetYaxis()->SetRangeUser(250,700);
+   h->GetXaxis()->SetRangeUser(50,4000);
    gr = (TGraph*)gr0->Clone(h->GetName());
    //  cout << "==> Will dumb histogram: " << h->GetName() << " into a graph" <<endl;
    h->SetContour( 1 );
@@ -919,10 +1025,11 @@ ContourGraph( TH2F* hist)
    int N = gr->GetN();
    double x0, y0;
 
-   //  for(int j=0; j<N; j++) {
+   // for(int j=0; j<N; j++) {
    //    gr->GetPoint(j,x0,y0);
    //    cout << j << " : " << x0 << " : "<<y0 << endl;
-   //  }
+   // }
+     
    //  //  gr->SetMarkerSize(2.0);
    //  gr->SetMarkerSize(2.0);
    //  gr->SetMarkerStyle(21);
@@ -976,10 +1083,12 @@ DrawExpectedBand( TGraph* gr1,  TGraph* gr2, Int_t fillColor, Int_t fillStyle, I
 
    TGraph *grshade = new TGraphAsymmErrors(2*N);
    for (int i=0;i<N;i++) {
-      if (x1[i] > cut)
+      if (x1[i] > cut){
          grshade->SetPoint(i,x1[i],y1[i]);
-      if (x2[N-i-1] > cut)
+         }
+      if (x2[N-i-1] > cut){
          grshade->SetPoint(N+i,x2[N-i-1],y2[N-i-1]);
+         }
    }
    
    // Apply the cut in the shade plot if there is something that doesn't look good...
