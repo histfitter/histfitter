@@ -1,7 +1,7 @@
 #include "ValidationUtils.h"
 
 
-void ValidationUtils::Horizontal( TH1 *h, Int_t nbin, Bool_t kLINE, Int_t color, float yWidthScale )
+void ValidationUtils::Horizontal( TH1 *h, Int_t nbin, Bool_t kLINE, Int_t color, float yWidthScaleUp, float yWidthScaleDown)
 {
    // Draw histogram h horizontaly with bars
    TAxis *axis   = h->GetXaxis();
@@ -11,9 +11,9 @@ void ValidationUtils::Horizontal( TH1 *h, Int_t nbin, Bool_t kLINE, Int_t color,
    Int_t i = nbin;
    dy = axis->GetBinWidth(i);
    x1 = 0;
-   y1 = axis->GetBinCenter(i)-yWidthScale*dy+1;
+   y1 = axis->GetBinCenter(i)-yWidthScaleDown*dy+1;
    x2 = h->GetBinContent(i);
-   y2 = axis->GetBinCenter(i)+yWidthScale*dy+1;
+   y2 = axis->GetBinCenter(i)+yWidthScaleUp*dy+1;
 
    Double_t x[5] = { x1, x1, x2, x2, x1 };
    Double_t y[5] = { y1, y2, y2, y1, y1 };
@@ -167,10 +167,21 @@ void ValidationUtils::PullPlot3(XtraValues* inValsEl, XtraValues* inValsMu, cons
    static Int_t c_LightBlue     = TColor::GetColor( "#66aaff" );
    static Int_t c_DarkBlue      = TColor::GetColor( "#0000bb" );
 
+   //static Int_t c_LightRed      = TColor::GetColor( "#ff3333" );
+   //static Int_t c_DarkRed       = TColor::GetColor( "#800000" );
+   static Int_t c_LightYellow   = TColor::GetColor( "#ffff00" );
+   //static Int_t c_VLightYellow  = TColor::GetColor( "#ffffe0" );
+   //static Int_t c_DarkYellow    = TColor::GetColor( "#ffd700" );
+   static Int_t c_VDarkYellow   = TColor::GetColor( "#ffa500" );
+
+
    Int_t    colEl = c_VDarkGreen;
    Int_t    colElL = c_DarkGreen;
    Int_t    colMu = c_DarkBlue;
    Int_t    colMuL = c_LightBlue;
+   Int_t    colEMu = c_VDarkYellow;
+   Int_t    colEMuL = c_LightYellow;
+   
 
    // ----------- now we can start the plotting -----------------------------
 
@@ -198,9 +209,9 @@ void ValidationUtils::PullPlot3(XtraValues* inValsEl, XtraValues* inValsMu, cons
      c->SetLeftMargin  ( 0.26 ); 
      XTitleSpaces="                  ";
    }
-   c->SetTopMargin   ( 0.1 );
+   c->SetTopMargin   ( 0.12 );
    c->SetRightMargin ( 0.05 );
-   c->SetBottomMargin( 0.1 );
+   c->SetBottomMargin( 0.08 );
    c->SetGridx();
      
    // reduce size of title box
@@ -222,7 +233,7 @@ void ValidationUtils::PullPlot3(XtraValues* inValsEl, XtraValues* inValsMu, cons
 
    frame->Draw();   
 
-   Float_t xLeft=0.38;
+   Float_t xLeft=0.4;
    TLatex *atlasLabel = new TLatex();
    atlasLabel->SetNDC();
    atlasLabel->SetTextFont( 72 );
@@ -237,7 +248,7 @@ void ValidationUtils::PullPlot3(XtraValues* inValsEl, XtraValues* inValsMu, cons
    prel->SetTextColor( 1 );
    prel->SetTextSize( 0.05 );
    //prel->DrawLatex(xLeft+0.17, 0.97, "Preliminary");
-   prel->DrawLatex(xLeft+0.17, 0.97, "Internal");
+   prel->DrawLatex(xLeft+0.17, 0.97, "internal");
    prel->AppendPad();
 
    TLine* line = new TLine;
@@ -269,6 +280,9 @@ void ValidationUtils::PullPlot3(XtraValues* inValsEl, XtraValues* inValsMu, cons
    TH1F *hPullMu = new TH1F( "hPullMu"+outFileNamePrefix, "hPullMu", Npar, -1, Npar-1 );
    hPullMu->SetLineColor(colMu);
    hPullMu->SetFillColor(colMuL);
+   TH1F *hPullElMu = new TH1F( "hPullElMu"+outFileNamePrefix, "hPullElMu", Npar, -1, Npar-1 );
+   hPullElMu->SetLineColor(colEMu);
+   hPullElMu->SetFillColor(colEMuL);
    //Fill values - electron channel
    for (Int_t i=0; i<Npar; i++) {
       Float_t delta = inValsEl->m_nObs.at(i) - inValsEl->m_nPred.at(i);
@@ -288,19 +302,18 @@ void ValidationUtils::PullPlot3(XtraValues* inValsEl, XtraValues* inValsMu, cons
    //Draw boxes
    for (Int_t i=0; i<Npar; i++) {
      if(inValsEl->m_reg_names.at(i).Contains("em")){
-       HorizontalElMu( hPullEl, Npar-i, kFALSE, hPullEl->GetFillColor(), hPullMu->GetFillColor(), 0.2 );
-       Horizontal( hPullEl, Npar-i, kTRUE, hPullEl->GetLineColor(), 0.2);
-
+       Horizontal( hPullEl, Npar-i, kFALSE, colEMuL, 0.14, 0.14);
+       Horizontal( hPullEl, Npar-i, kTRUE, colEMu, 0.14, 0.14);
      }
      else{
-       Horizontal( hPullEl, Npar-i, kFALSE, hPullEl->GetFillColor() );
-       Horizontal( hPullEl, Npar-i, kTRUE, hPullEl->GetLineColor() );
-       Horizontal( hPullMu, Npar-i, kFALSE, hPullMu->GetFillColor(), 0.16 );
-       Horizontal( hPullMu, Npar-i, kTRUE, hPullMu->GetLineColor(), 0.16 );
+       Horizontal( hPullEl, Npar-i, kFALSE, hPullEl->GetFillColor(), 0.28, 0.0);
+       Horizontal( hPullEl, Npar-i, kTRUE, hPullEl->GetLineColor(), 0.28, 0.0);
+       Horizontal( hPullMu, Npar-i, kFALSE, hPullMu->GetFillColor(), 0.0, 0.28);
+       Horizontal( hPullMu, Npar-i, kTRUE, hPullMu->GetLineColor(), 0.0, 0.28);
      }
    }
 
-   TLegend* leg = new TLegend(xLeft,0.9,xLeft+0.5,0.96,"");
+   TLegend* leg = new TLegend(xLeft-0.07,0.885,xLeft+0.43,0.96,"");
    leg->SetFillStyle(0);
    leg->SetBorderSize(0);
    leg->SetTextFont( 42 );
@@ -308,6 +321,7 @@ void ValidationUtils::PullPlot3(XtraValues* inValsEl, XtraValues* inValsMu, cons
 
    leg->AddEntry(hPullEl, "Electron Channel", "f");
    leg->AddEntry(hPullMu, "Muon Channel", "f");
+   leg->AddEntry(hPullElMu, "Electron-Muon Channel", "f");
    leg->Draw();
    
    // final update of canvas
