@@ -11,7 +11,7 @@
 
 from configManager import configMgr
 from ROOT import kBlack,kWhite,kGray,kRed,kPink,kMagenta,kViolet,kBlue,kAzure,kCyan,kTeal,kGreen,kSpring,kYellow,kOrange
-from configWriter import TopLevelXML,Measurement,ChannelXML,Sample
+from workspaceWriter import FitWorkspace,Measurement,Channel,Sample
 from systematic import Systematic
 from math import sqrt
 
@@ -101,7 +101,7 @@ dataSample.setData()
 #**************
 
 #Fit config instance
-exclusionFitConfig = configMgr.addTopLevelXML("Exclusion")
+exclusionFitConfig = configMgr.addFitWorkspace("Exclusion")
 meas=exclusionFitConfig.addMeasurement(name="NormalMeasurement",lumi=1.0,lumiErr=0.039)
 meas.addPOI("mu_SIG")
 
@@ -127,5 +127,5 @@ exclusionFitConfig.addSamples(sigSample)
 exclusionFitConfig.setSignalSample(sigSample)
 
 #2nd cloned-copy just to accomodate -l option...
-exclusionFitClone = configMgr.addTopLevelXMLClone(exclusionFitConfig,"ExclusionFitClone")
+exclusionFitClone = configMgr.addFitWorkspaceClone(exclusionFitConfig,"ExclusionFitClone")
 

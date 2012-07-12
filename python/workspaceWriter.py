@@ -3,6 +3,7 @@ from ROOT import kBlack,kWhite,kGray,kRed,kPink,kMagenta,kViolet,kBlue,kAzure,kC
 from os import system
 from math import fabs
 import generateToys
+import sys
 
 TH1.SetDefaultSumw2(True)
 
@@ -119,8 +120,8 @@ class FitWorkspace(object):
         """
         Write instance to file and close
         """
-        print "TO BE IMPLEMENTED"
-        sys.exit()
+        print "Channel.close(): TO BE IMPLEMENTED"
+        #sys.exit()
 
         return
         #print "Writing file: '%s'"%self.xmlFileName
@@ -135,6 +136,9 @@ class FitWorkspace(object):
             #if self.verbose > 2:
                 #print str(chan)
         #return
+
+    def execute(self):
+        print "FitWorkspace.execute(): should do nothing. Here for compatbility"
 
     def addMeasurement(self,name,lumi,lumiErr):
         #verify that this name is not already used
@@ -173,10 +177,8 @@ class FitWorkspace(object):
         """
         Build a channel object from this TopLevel
         """
-        print "TO BE IMPLEMENTED"
-        sys.exit()
-
-        chanObj = ChannelXML(variableName,regions,self.prefix,nBins,binLow,binHigh,self.statErrThreshold)
+        
+        chanObj = Channel(variableName,regions,self.prefix,nBins,binLow,binHigh,self.statErrThreshold)
 
         # Verify that this name is not already used
         for chan in self.channels:
@@ -204,7 +206,7 @@ class FitWorkspace(object):
         """
         Add channel as a pre-built object
         """
-        if not isinstance(obj,ChannelXML):
+        if not isinstance(obj,Channel):
             raise RuntimeError("addChannel does not support input of type '%s'."%(type(obj)))
 
         # Verify that this name is not already used
@@ -391,7 +393,7 @@ class FitWorkspace(object):
             raise RuntimeError("setSignalSample does not support type %s"%(type(sig)))
         return
 
-    # TODO REWRITE: should not rely on ChannelXML
+    # TODO REWRITE: should not rely on Channel
     def appendStrChanOrListToList(self,input,targetList):
         #little utility function
         if isinstance(input,list):
@@ -400,7 +402,7 @@ class FitWorkspace(object):
             inList=[input]
             pass
         for i in inList:
-            if isinstance(i,ChannelXML):
+            if isinstance(i,Channel):
                 chanName=i.channelName
             else:
                 chanName=i
@@ -608,7 +610,7 @@ class Measurement(object):
 
 
 
-class ChannelXML(object):
+class Channel(object):
     """
     Defines the content of a channel HistFactory workspace
     """
@@ -893,6 +895,8 @@ class ChannelXML(object):
         """
         Write and close file
         """
+        print "Channel.close(): needs to do stuff"
+        
         #print "Writing file: '%s'"%self.xmlFileName
         #self.xmlFile = open(self.xmlFileName,"w")
         #self.xmlFile.write(str(self))
