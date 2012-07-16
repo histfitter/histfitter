@@ -285,7 +285,8 @@ RooFitResult* Util::FitPdf( RooWorkspace* w, TString fitRegions, bool lumiConst,
     
     std::cout << "Util::FitPdf()  ........ using " << minimizer << " / " << algorithm 
 	      << " with strategy  " << strategy << " and tolerance " << tol << std::endl;
-    
+    	
+
     bool kickApplied(false);
     for (int tries = 1, maxtries = 5; tries <= maxtries; ++tries) {
       //	 status = minim.minimize(fMinimizer, ROOT::Math::MinimizerOptions::DefaultMinimizerAlgo().c_str());
@@ -408,6 +409,28 @@ RooFitResult* Util::FitPdf( RooWorkspace* w, TString fitRegions, bool lumiConst,
 	}
       }
     }
+
+  
+  //   RooRealVar* alpha_MC = w->var("alpha_MC");
+//     RooRealVar* alpha_MP = w->var("alpha_MP");
+//     RooRealVar* alpha_JHigh = w->var("alpha_JHigh");
+//     RooRealVar* alpha_JMedium = w->var("alpha_JMedium");
+//     RooRealVar* alpha_JLow = w->var("alpha_JLow");
+
+//     RooArgSet nuisPars;
+//     if(alpha_MC) nuisPars.add(*alpha_MC);
+//     if(alpha_MP) nuisPars.add(*alpha_MP);
+//     if(alpha_JHigh) nuisPars.add(*alpha_JHigh);
+//     if(alpha_JMedium) nuisPars.add(*alpha_JMedium);
+//     if(alpha_JLow) nuisPars.add(*alpha_JLow);
+
+//     //  minim.setVerbose(kTRUE);
+
+//     if(nuisPars.getSize() > 0) {
+//       std::cout << endl << endl << "XXX running minos with" << endl;
+//       nuisPars.Print("v");
+//       minim.minos(nuisPars);
+//     }
     
     //RooFitResult * result = 0; 
     double val(0);
@@ -1058,8 +1081,21 @@ void Util::PlotNLL(RooWorkspace* w, RooFitResult* rFit, Bool_t plotPLL, TString 
       RooPlot* frame = par->frame();
       nll->plotOn(frame, ShiftToZero());
       frame->SetMinimum(0.);
-      frame->SetMaximum(10000.);
 
+      // curveName = 0 means take the last curve from the plot
+      const char* curvename = 0;
+      RooCurve* curve = (RooCurve*) frame->findObject(curvename,RooCurve::Class()) ;
+      Double_t curveMax = curve->getYAxisMax();
+      //   cout << endl << " curveMax = " << curveMax << endl;
+      frame->SetMaximum(curveMax * 2.);
+      
+      frame->GetYaxis()->SetTitleSize(0.05);
+      frame->GetXaxis()->SetTitleSize(0.05);
+      
+      frame->GetYaxis()->SetLabelSize(0.075);
+      frame->GetXaxis()->SetLabelSize(0.075);
+      //   frame->SetMaximum(10000.);
+  
       if(plotPLL)   pll->plotOn(frame,LineColor(kRed),LineStyle(kDashed),NumCPU(4)) ;
       
       can->cd(iPar+1);
@@ -1586,8 +1622,8 @@ RooAbsReal* Util::GetComponent(RooWorkspace* w, TString component, TString regio
   } 
 
   if (compFuncList.getSize()==0 || compCoefList.getSize()==0 || compCoefList.getSize()!=compFuncList.getSize()){
-    cout << " Something wrong with compFuncList or compCoefList in Util::GetComponent() "
-	 << " compFuncList.getSize() = " << compFuncList.getSize() << " compCoefList.getSize() = " << compCoefList.getSize() << endl;
+    cout << " Something wrong with compFuncList or compCoefList in Util::GetComponent(w," << component << "," << region 
+	 << ") " << endl << "         compFuncList.getSize() = " << compFuncList.getSize() << " compCoefList.getSize() = " << compCoefList.getSize() << endl;
     return NULL;
   }
 
