@@ -4,6 +4,7 @@ from os import system
 from math import fabs
 import generateToys
 import sys
+import ROOT
 
 TH1.SetDefaultSumw2(True)
 
@@ -64,11 +65,80 @@ class FitWorkspace(object):
 
     def __str__(self):
         print "FitWorkspace.__str__: not necessary, Measurement creates the top-level file automagically"
-        
-        #TODO remove below, this is the structure of the old for-loop
+        return " "
+
+    def writeWorkspaces(self):
+        print "FitWorkspace.write hello"
+
+        channelObjects = []
+        for chan in self.channels:
+                
+                c = ROOT.RooStats.HistFactory.Channel( chan.channelName )
+                for d in chan.dataList:
+                        # d[2] is optional HistoPath
+                        if len(d[2]):
+                                c.SetData(d[1], d[0], d[2])
+                        else:
+                                c.SetData(d[1], d[0])
+
+                if chan.hasStatConfig:
+                        c.SetStatErrorConfig(chan.statErrorThreshold, chan.statErrorType)
+                
+                # Note that our internal order is high/low, but the functions expect low/high
+                for (iSample, sample) in enumerate(chan.sampleList):
+                        if not sample.write:
+                                continue
+
+                        s = ROOT.RooStats.HistFactory.Sample(sample.name, sample.histoName, configMgr.histCacheFile)
+                        s.SetNormalizeByTheory(sample.normByTheory)
+                        if sample.statConfig:
+                                s.SetStatError(sample.statConfig)
+                        for histoSys in sample.histoSystList:
+                                s.AddHistoSys(histoSys[0], histoSys[1], configMgr.histCacheFile, "/", 
+                                                           histoSys[2], configMgr.histCacheFile, "/")
+
+                        for shapeSys in sample.shapeSystList:
+                                s.AddShapeSys(shapeSys[0], shapeSys[2], shapeSys[1], configMgr.histCacheFile)
+
+                        for overallSys in sample.overallSystList:
+                                s.AddOverallSys(overallSys[0], overallSys[2], overallSys[1])
+
+                        for shapeFact in sample.shapeFactorList:
+                                s.AddShapeFactor(shapeFact)
+
+                        if len(sample.normFactor) > 0:
+                                for normFactor in sample.normFactor:
+                                        print normFactor
+                                        s.AddNormFactor(normFactor[0], normFactor[1], normFactor[3], normFactor[2], normFactor[4])
+
+                        c.AddSample(s)
+                #add channel to some array to use below
+                channelObjects.append(c)
+
         for meas in self.measurements:
                 print str(meas)
-        return " "
+                print "meas.name="+meas.name
+                m = ROOT.RooStats.HistFactory.Measurement(meas.name, meas.name)
+                m.SetOutputFilePrefix( "./results/"+self.prefix )
+                m.SetPOI( (meas.poiList)[0] )
+                
+                m.SetLumi(meas.lumi)
+                m.SetLumiRelErr(meas.lumiErr)
+                m.SetExportOnly(meas.exportOnly)
+
+                m.SetBinLow(meas.binLow)
+                m.SetBinHigh(meas.binHigh)
+
+                #TODO add paramsettings and constraintterm here
+                #for (param, setting) in meas.paramSettingDict.iteritems():
+
+                for chan in channelObjects:
+                        m.AddChannel(chan)
+
+                m.PrintXML( "xmlFromPy/"+self.prefix, m.GetOutputFilePrefix() )
+
+        return
+
 
     def initialize(self):
         #Note: wsFileName is an educated guess of the workspace file name externally decided by HistFactory.
@@ -129,7 +199,7 @@ class FitWorkspace(object):
         Write instance to file and close
         """
         print "FitWorkspace.close(): TO BE IMPLEMENTED"
-        print str(self)
+        self.writeWorkspaces()
 
         #sys.exit()
 
@@ -554,7 +624,7 @@ class Measurement(object):
         self.lumiErr = lumiErr
         self.binLow = 0
         self.binHigh = 50
-        self.exportOnly = "True"
+        self.exportOnly = True
         self.poiList = []
         self.constraintTermDict = {} 
         self.paramSettingDict = {}
@@ -586,7 +656,7 @@ class Measurement(object):
 
     #TODO needs method to write out to workspace
     def __str__(self):
-        print "Measurement.__str__ hello"
+        print "Measurement.__str__ hello; name="+self.name
         return " "
 
     #def __str__(self):
@@ -1329,7 +1399,7 @@ class Sample(object):
         """
         Add a normlization factor
         """
-        self.normFactor.append( (name,val,high,low,str(const)) )
+        self.normFactor.append( (name,val,high,low,const ) )
         if not name in configMgr.normList:
             configMgr.normList.append(name)
         return
@@ -1339,7 +1409,7 @@ class Sample(object):
         Set normalization factor
         """
         self.normFactor = []
-        self.normFactor.append( (name,val,high,low,str(const)) )
+        self.normFactor.append( (name,val,high,low,const) )
         if not name in configMgr.normList:
             configMgr.normList.append(name)
         return
@@ -1415,6 +1485,7 @@ class Sample(object):
     # TODO rewrite to write directly to workspace   
     def __str__(self):
         print "Sample.__str__ hello"
+        print self.histoName
         return " "
     
     #def __str__(self):
