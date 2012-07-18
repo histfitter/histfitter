@@ -379,7 +379,7 @@ RooStats::HypoTestTool::SetupHypoTestCalculator(RooWorkspace * w, bool doUL,
    // get the modelConfig out of the file
    ModelConfig* bModel = (ModelConfig*) w->obj(modelBName);
    ModelConfig* sbModel = (ModelConfig*) w->obj(modelSBName);
-   
+
    if (!sbModel) {
       Error("HypoTestTool","Not existing ModelConfig %s",modelSBName);
       return false;
@@ -401,7 +401,6 @@ RooStats::HypoTestTool::SetupHypoTestCalculator(RooWorkspace * w, bool doUL,
       Info("HypoTestTool","Model %s has no snapshot  - make one using model poi",modelSBName);
       sbModel->SetSnapshot( *sbModel->GetParametersOfInterest() );
    }
-  
 
    // case of no systematics
    // remove nuisance parameters from model
@@ -415,7 +414,7 @@ RooStats::HypoTestTool::SetupHypoTestCalculator(RooWorkspace * w, bool doUL,
       if (bnuisPar) 
          RooStats::SetAllConstant(*bnuisPar);
    }
-  
+
    if (!bModel || bModel == sbModel) {
       Info("HypoTestTool","The background model %s does not exist",modelBName);
       Info("HypoTestTool","Copy it from ModelConfig %s and set POI to zero",modelSBName);
@@ -429,7 +428,8 @@ RooStats::HypoTestTool::SetupHypoTestCalculator(RooWorkspace * w, bool doUL,
       var->setVal(oldval);
    }
    else { 
-      if (!bModel->GetSnapshot() ) { 
+      if (!bModel->GetSnapshot() ) { // MB : note, this resets all parameters! 
+
          Info("HypoTestTool","Model %s has no snapshot  - make one using model poi and 0 values ",modelBName);
          RooRealVar * var = dynamic_cast<RooRealVar*>(bModel->GetParametersOfInterest()->first());
          if (var) { 
@@ -437,14 +437,15 @@ RooStats::HypoTestTool::SetupHypoTestCalculator(RooWorkspace * w, bool doUL,
             var->setVal(0);
             bModel->SetSnapshot( RooArgSet(*var)  );
             var->setVal(oldval);
-         }
-         else { 
+
             Error("HypoTestTool","Model %s has no valid poi",modelBName);
             return false;
          }         
+      } else { // reset
+        sbModel->GetSnapshot();
       }
    }
-  
+
    // check model  has global observables when there are nuisance pdf
    // for the hybrid case the globobs are not needed
    if (type != 1 ) { 
@@ -461,7 +462,6 @@ RooStats::HypoTestTool::SetupHypoTestCalculator(RooWorkspace * w, bool doUL,
    }
 
    // run first a data fit 
-  
    const RooArgSet * poiSet = sbModel->GetParametersOfInterest();
    RooRealVar *poi = (RooRealVar*)poiSet->first();
   
@@ -495,6 +495,8 @@ RooStats::HypoTestTool::SetupHypoTestCalculator(RooWorkspace * w, bool doUL,
      // do the fit : By doing a fit the POI snapshot (for S+B)  is set to the fit value
      // and the nuisance parameters nominal values will be set to the fit value. 
      // This is relevant when using LEP test statistics
+     const RooArgSet* prevSnapSet = sbModel->GetSnapshot();
+     const RooArgSet* tPoiSet = sbModel->GetParametersOfInterest();
      
      Info( "StandardHypoTestInvDemo"," Doing a first fit to the observed data ");
      if (mMinimizerType.size()==0) mMinimizerType = ROOT::Math::MinimizerOptions::DefaultMinimizerType();
@@ -518,18 +520,34 @@ RooStats::HypoTestTool::SetupHypoTestCalculator(RooWorkspace * w, bool doUL,
      if (fitres->status() != 0) 
        Warning("StandardHypoTestInvDemo"," Fit still failed - continue anyway.....");
      
-     
      poihat  = poi->getVal();
      std::cout << "StandardHypoTestInvDemo - Best Fit value : " << poi->GetName() << " = "  
 	       << poihat << " +/- " << poi->getError() << std::endl;
      std::cout << "Time for fitting : "; tw.Print(); 
-     
+
+     RooArgSet newSnapSet;
+     if (tPoiSet!=0) newSnapSet.add(*tPoiSet); // make sure this is the full poi set.
+
+     if ((prevSnapSet!=0)) {
+       // add all remaining parameters from old snapshot
+       TIterator* vrItr = prevSnapSet->createIterator();
+       RooRealVar* vr(0);
+       for (Int_t i=0; (vr = (RooRealVar*)vrItr->Next()); ++i) {
+	 if ((vr==0)) continue;
+	 TString vrName = vr->GetName();
+	 RooRealVar* par = (RooRealVar*)newSnapSet.find(vrName.Data());
+	 if ((par==0)) { newSnapSet.add(*vr); } // add if not yet present 
+       }
+       delete vrItr;
+     }
+
      //save best fit value in the poi snapshot 
-     sbModel->SetSnapshot(*sbModel->GetParametersOfInterest());
+     //sbModel->SetSnapshot(*sbModel->GetParametersOfInterest());
+     sbModel->SetSnapshot(newSnapSet);
      std::cout << "StandardHypoTestInvo: snapshot of S+B Model " << sbModel->GetName() 
 	       << " is set to the best fit value" << std::endl;  
    }
-   
+
    /*
      TStopwatch tw; 
      tw.Start(); 
@@ -661,7 +679,7 @@ RooStats::HypoTestTool::SetupHypoTestCalculator(RooWorkspace * w, bool doUL,
       Error("HypoTestTool","Invalid - calculator type = %d supported values are only :\n\t\t\t 0 (Frequentist) , 1 (Hybrid) , 2 (Asymptotic) ",type);
       return false;
    }
-  
+
    // set the test statistic 
    TestStatistic * testStat = 0;
    if (testStatType == 0) {

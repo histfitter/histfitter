@@ -222,7 +222,12 @@ ConfigMgr::doHypoTest(FitConfig* fc, TString outdir, double SigXSecSysnsigma)
 									  useCLs,npoints,poimin,poimax,doAnalyze,useNumberCounting,
 									  modelSBName.Data(),modelBName.Data(),dataName,nuisPriorName); 
    
-   if(hypo){	
+   /// store ul as nice plot ..
+   if ( hypo!=0 ) {
+      RooStats::AnalyzeHypoTestInverterResult( hypo,m_calcType,m_testStatType,useCLs,npoints, fc->m_signalSampleName.Data(), ".eps") ;
+   }
+
+   if ( hypo!=0 ) {	
       outfile->cd();
       TString hypName="hypo_"+fc->m_signalSampleName;
       hypo->SetName(hypName);
@@ -253,6 +258,9 @@ ConfigMgr::makeCorrectedBkgModelConfig( RooWorkspace* w, const char* modelSBName
   RooAbsPdf* pdf = sbModel->GetPdf();
   if (pdf==NULL) { cout << "No pdf found. Return." << endl; return bModelStr; }
 
+  const RooArgSet* tPoiSet = sbModel->GetParametersOfInterest();
+  const RooArgSet* prevSnapSet = sbModel->GetSnapshot();
+
   RooRealVar * var = dynamic_cast<RooRealVar*>(sbModel->GetParametersOfInterest()->first());
   if (!var) { cout << "No signal strength parameter found. Return." << endl; return bModelStr; }
   RooRealVar *totbk = w->var(m_bkgParName.Data());
@@ -267,18 +275,39 @@ ConfigMgr::makeCorrectedBkgModelConfig( RooWorkspace* w, const char* modelSBName
 
   double oldval = var->getVal();
   var->setVal(0); /// MB : turn off the signal component
-  double oldtotbk = totbk->getVal(); /// MB: get total bkg in bin
-  oldtotbk = pdf->getVal(); /// MB:  assuming RooRealSumPdf with one bin
+  double myoldtotbk = totbk->getVal(); /// MB: get total bkg in bin
+  double oldtotbk = pdf->getVal(); /// MB:  assuming RooRealSumPdf with one bin
 
   /// MB : do the bkg reset here
   totbk->setVal( m_bkgCorrVal / oldtotbk );
-  bModel->SetSnapshot( RooArgSet(*var,*totbk)  );
+
+  RooArgSet newSnapSet;
+  if (tPoiSet!=0) newSnapSet.add(*tPoiSet); // make sure this is the full poi set.
+  newSnapSet.add(*totbk);  // new bkg parameter should also be included
+
+  if ((prevSnapSet!=0)) {
+    // add all remaining parameters from old snapshot
+    TIterator* vrItr = prevSnapSet->createIterator();
+    RooRealVar* vr(0);
+    for (Int_t i=0; (vr = (RooRealVar*)vrItr->Next()); ++i) {
+      if ((vr==0)) continue;
+      TString vrName = vr->GetName();
+      RooRealVar* par = (RooRealVar*)newSnapSet.find(vrName.Data());
+      if ((par==0)) { newSnapSet.add(*vr); } // add if not yet present 
+    }
+    delete vrItr;
+  }
+
+  bModel->SetSnapshot( newSnapSet );
   /// MB : and reimport the configuration into the WS
   w->import( *bModel );
 
   /// reset
   var->setVal(oldval);
-  totbk->setVal(oldtotbk);
+  totbk->setVal(myoldtotbk);
+
+  /// Important: this resets both mu_sig and mu_bkg !
+  sbModel->SetSnapshot( newSnapSet );
 
   // pass on the name of the bkg model config
   return bModelStr;
