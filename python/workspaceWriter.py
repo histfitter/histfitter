@@ -73,13 +73,13 @@ class FitWorkspace(object):
         channelObjects = []
         for chan in self.channels:
                 
-                c = ROOT.RooStats.HistFactory.Channel( chan.channelName )
+                c = ROOT.RooStats.HistFactory.Channel( chan.channelName, configMgr.histCacheFile )
                 for d in chan.dataList:
                         # d[2] is optional HistoPath
+                        histoPath = "" #paths never start with /
                         if len(d[2]):
-                                c.SetData(d[1], d[0], d[2])
-                        else:
-                                c.SetData(d[1], d[0])
+                                histoPath = d[2]
+                        c.SetData(d[1], d[0], histoPath)
 
                 if chan.hasStatConfig:
                         c.SetStatErrorConfig(chan.statErrorThreshold, chan.statErrorType)
@@ -94,8 +94,8 @@ class FitWorkspace(object):
                         if sample.statConfig:
                                 s.SetStatError(sample.statConfig)
                         for histoSys in sample.histoSystList:
-                                s.AddHistoSys(histoSys[0], histoSys[1], configMgr.histCacheFile, "/", 
-                                                           histoSys[2], configMgr.histCacheFile, "/")
+                                s.AddHistoSys(histoSys[0], histoSys[1], configMgr.histCacheFile, "", 
+                                                           histoSys[2], configMgr.histCacheFile, "")
 
                         for shapeSys in sample.shapeSystList:
                                 s.AddShapeSys(shapeSys[0], shapeSys[2], shapeSys[1], configMgr.histCacheFile)
