@@ -27,7 +27,7 @@
 <!-- BinHigh: the highest bin number used for the measurement (exclusive) -->
 <!-- Mode: type of the measurement (a closed list of ...) -->
 <!-- ExportOnly: if "True" skip fit, only export model -->
-<!ELEMENT Measurement (POI,ParamSetting*,ConstraintTerm*) >
+<!ELEMENT Measurement (POI*,ParamSetting*,ConstraintTerm*) >
 <!ATTLIST Measurement 
         Name              CDATA            #REQUIRED
         Lumi              CDATA            #REQUIRED
