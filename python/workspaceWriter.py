@@ -118,7 +118,7 @@ class FitWorkspace(object):
         for meas in self.measurements:
                 print str(meas)
                 print "meas.name="+meas.name
-                m = ROOT.RooStats.HistFactory.Measurement(meas.name, meas.name)
+                m = ROOT.RooStats.HistFactory.Measurement(self.prefix, self.prefix)
                 m.SetOutputFilePrefix( "./results/"+self.prefix )
                 m.SetPOI( (meas.poiList)[0] )
                 
