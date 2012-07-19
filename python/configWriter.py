@@ -605,12 +605,13 @@ class Measurement(object):
         Convert instance to an XML string
         """
         measurementString = "  <Measurement Name=\"%s\" Lumi=\"%g\" LumiRelErr=\"%g\" BinLow=\"%d\" BinHigh=\"%d\" Mode=\"%s\" ExportOnly=\"%s\">\n" % (self.name,self.lumi,self.lumiErr,self.binLow,self.binHigh,self.mode,self.exportOnly)
-        measurementString += "    <POI>"
+        #measurementString += "    <POI>"
         for (iPOI,poi) in enumerate(self.poiList):
-            if not iPOI == len(self.poiList) - 1:
-                measurementString += "%s " % (poi)
-            else:
-                measurementString += "%s</POI>\n" % (poi)
+            measurementString += "    <POI>%s</POI>\n" % (poi)
+            #if not iPOI == len(self.poiList) - 1:
+            #    measurementString += "%s " % (poi)
+            #else:
+            #    measurementString += "%s</POI>\n" % (poi)
         for (param,setting) in self.paramSettingDict.iteritems():
             if setting[0]:
                 if not setting[1] == None:
