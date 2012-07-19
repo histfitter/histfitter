@@ -68,7 +68,7 @@ class FitWorkspace(object):
         return " "
 
     def writeWorkspaces(self):
-        print "FitWorkspace.write hello"
+        print "FitWorkspace.write: DOES NOT WRITE ParamSetting or ConstraintTerm yet!"
 
         channelObjects = []
         for chan in self.channels:
@@ -108,7 +108,6 @@ class FitWorkspace(object):
 
                         if len(sample.normFactor) > 0:
                                 for normFactor in sample.normFactor:
-                                        print normFactor
                                         s.AddNormFactor(normFactor[0], normFactor[1], normFactor[3], normFactor[2], normFactor[4])
 
                         c.AddSample(s)
@@ -116,8 +115,6 @@ class FitWorkspace(object):
                 channelObjects.append(c)
 
         for meas in self.measurements:
-                print str(meas)
-                print "meas.name="+meas.name
                 m = ROOT.RooStats.HistFactory.Measurement(self.prefix, self.prefix)
                 m.SetOutputFilePrefix( "./results/"+self.prefix )
                 m.SetPOI( (meas.poiList)[0] )
@@ -198,26 +195,12 @@ class FitWorkspace(object):
         """
         Write instance to file and close
         """
-        print "FitWorkspace.close(): TO BE IMPLEMENTED"
         self.writeWorkspaces()
-
-        #sys.exit()
-
-        print "Writing file: '%s'" % self.wsFileName
-        #if self.verbose > 2:
-            #print str(self)
-            #pass
-        #self.xmlFile = open(self.xmlFileName,"w")
-        #self.xmlFile.write(str(self))
-        #self.xmlFile.close()
-        for chan in self.channels: 
-            chan.close()
-            if self.verbose > 2:
-                print str(chan)
         return
 
     def execute(self):
-        print "FitWorkspace.execute(): should do nothing. Here for compatbility"
+        # print "FitWorkspace.execute(): should do nothing. Here for compatbility"
+        return
 
     def addMeasurement(self,name,lumi,lumiErr):
         #verify that this name is not already used
@@ -654,11 +637,6 @@ class Measurement(object):
         """
         self.constraintTermDict[paramName] = (type,relUnc)
 
-    #TODO needs method to write out to workspace
-    def __str__(self):
-        print "Measurement.__str__ hello; name="+self.name
-        return " "
-
     #def __str__(self):
         #"""
         #Convert instance to an XML string
@@ -950,16 +928,6 @@ class Channel(object):
             return self.systDict[systName]
         except KeyError:
             raise KeyError("Could not find systematic %s in FitWorkspace %s" % (systName,self.name))
-
-    # TODO rewrite to use main workspace
-    def __str__(self):
-        print "Channel.__str__ hello"
-
-        #for-loop only here to see if it works
-        for (iSample,sample) in enumerate(self.sampleList):
-            if sample.write:
-                print str(sample)
-        return " "
 
     #def __str__(self):
         #"""
@@ -1482,12 +1450,6 @@ class Sample(object):
         self.systDict.clear()
        
 
-    # TODO rewrite to write directly to workspace   
-    def __str__(self):
-        print "Sample.__str__ hello"
-        print self.histoName
-        return " "
-    
     #def __str__(self):
         #"""
         #Convert instance to XML string
