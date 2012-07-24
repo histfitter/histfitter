@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 from ROOT import gROOT,gSystem,gDirectory,RooAbsData,RooRandom,RooWorkspace
 gSystem.Load("libSusyFitter.so")
+from ROOT import ConfigMgr
 gROOT.Reset()
 
 def GenerateFitAndPlot(tl,drawBeforeAfterFit):
@@ -135,6 +136,9 @@ def GetLimits():
 if __name__ == "__main__":
     from configManager import configMgr
     from prepareHistos import TreePrepare,HistoPrepare
+
+    configMgr = ConfigMgr.getInstance()
+
     configMgr.readFromTree = False
     configMgr.executeHistFactory=False
     runInterpreter = False
@@ -210,8 +214,17 @@ if __name__ == "__main__":
             pickedSRs = arg.split(',')
         elif opt == '-b':
             bkgArgs = arg.split(',')
-            configMgr.bkgParName = bkgArgs[0]
-            configMgr.bkgCorrVal = float(bkgArgs[1])
+            if len(bkgArgs)==2:
+                configMgr.SetBkgParName( bkgArgs[0] )
+                configMgr.SetBkgCorrVal( float(bkgArgs[1]) )
+                configMgr.SetBkgChlName( '' )
+            elif len(bkgArgs)>=3 and len(bkgArgs)%3==0:
+                for iChan in xrange(len(bkgArgs)/3):
+                    iCx = iChan*3
+                    configMgr.AddBkgChlName(bkgArgs[iCx])
+                    configMgr.AddBkgParName(bkgArgs[iCx+1])
+                    configMgr.AddBkgCorrVal(float(bkgArgs[iCx+2]))
+                    continue
         pass
     gROOT.SetBatch(not runInterpreter)
     
