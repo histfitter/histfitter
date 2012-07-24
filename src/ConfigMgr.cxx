@@ -17,7 +17,7 @@
 #include "RooFitResult.h"
 #include "RooStats/HypoTestInverterResult.h"
 #include "RooRandom.h"
-
+#include "RooRealIntegral.h"
 
 using namespace std;
 
@@ -35,7 +35,6 @@ ConfigMgr::ConfigMgr()
   m_seed=0;
   m_nPoints=10;
   m_muValGen=0.0;
-  m_bkgCorrVal=-1.0;
 }
 
 FitConfig* ConfigMgr::addFitConfig(const TString& name){
@@ -188,19 +187,6 @@ ConfigMgr::doHypoTest(FitConfig* fc, TString outdir, double SigXSecSysnsigma)
       w->var("alpha_SigXSec")->setVal(SigXSecSysnsigma);
       w->var("alpha_SigXSec")->setConstant(true);
    }
-  
-   //Do first fit and save fit result in order to control fit quality
-   
-   RooFitResult* fitresult = Util::doFreeFit( w, 0, false, true ); // reset fit paremeters after the fit ...
-   
-   if(fitresult) {	
-      outfile->cd();
-      TString hypName="fitTo_"+fc->m_signalSampleName;
-      fitresult->SetName(hypName);
-      fitresult->Print();
-      fitresult->Write();
-      cout << ">>> Now storing RooFitResult <" << hypName << ">" << endl;
-   }
 
    bool useCLs = true;  
    int npoints = 1;   
@@ -213,9 +199,22 @@ ConfigMgr::doHypoTest(FitConfig* fc, TString outdir, double SigXSecSysnsigma)
    const char * dataName = "obsData";                 
    const char * nuisPriorName = 0;
 
-   if (m_bkgCorrVal>0. && !m_bkgParName.IsNull()) {
-     cout << "Performing bkg correction for bkg-only toys: " << m_bkgParName << " " << m_bkgCorrVal << endl;
+   if ( !m_bkgParNameVec.empty()) {
+     cout << "INFO: Performing bkg correction for bkg-only toys." << endl;
      modelBName = makeCorrectedBkgModelConfig(w,modelSBName);
+   }
+  
+   //Do first fit and save fit result in order to control fit quality
+   
+   RooFitResult* fitresult = Util::doFreeFit( w, 0, false, true ); // reset fit paremeters after the fit ...
+   
+   if(fitresult) {	
+      outfile->cd();
+      TString hypName="fitTo_"+fc->m_signalSampleName;
+      fitresult->SetName(hypName);
+      fitresult->Print();
+      fitresult->Write();
+      cout << ">>> Now storing RooFitResult <" << hypName << ">" << endl;
    }
 
    RooStats::HypoTestInverterResult* hypo = RooStats::DoHypoTestInversion(w,m_nToys,m_calcType,m_testStatType,
@@ -250,40 +249,46 @@ ConfigMgr::makeCorrectedBkgModelConfig( RooWorkspace* w, const char* modelSBName
 {
   TString bModelStr;
 
-  if (m_bkgCorrVal<0.) { cout << "Bkg correction value undefined." << endl; return bModelStr; }
+  if ( m_bkgCorrValVec.size()!=m_bkgParNameVec.size() || 
+       m_bkgCorrValVec.size()!=m_chnNameVec.size() || 
+       m_chnNameVec.size()!=m_bkgParNameVec.size() ) {
+    cout << "ERROR : Incorrect vector sizes for bkg correction value(s)." << endl; 
+    return bModelStr; 
+  }
 
   RooStats::ModelConfig* sbModel = Util::GetModelConfig( w, modelSBName );
   if (sbModel==NULL) { cout << "No signal model config found. Return." << endl; return bModelStr; }
-
-  RooAbsPdf* pdf = sbModel->GetPdf();
-  if (pdf==NULL) { cout << "No pdf found. Return." << endl; return bModelStr; }
+  
+  RooRealVar * poi = dynamic_cast<RooRealVar*>(sbModel->GetParametersOfInterest()->first());
+  if (!poi) { cout << "No signal strength parameter found. Return." << endl; return bModelStr; }
+  double oldpoi = poi->getVal();
+  poi->setVal(0); /// MB : turn off the signal component
 
   const RooArgSet* tPoiSet = sbModel->GetParametersOfInterest();
   const RooArgSet* prevSnapSet = sbModel->GetSnapshot();
 
-  RooRealVar * var = dynamic_cast<RooRealVar*>(sbModel->GetParametersOfInterest()->first());
-  if (!var) { cout << "No signal strength parameter found. Return." << endl; return bModelStr; }
-  RooRealVar *totbk = w->var(m_bkgParName.Data());
-  if (!totbk) { cout << "No bkg strength parameter found. Return." << endl; return bModelStr; }
-
-  bModelStr = TString(modelSBName)+TString("_with_poi_0");
-  RooStats::ModelConfig* bModel = Util::GetModelConfig( w, bModelStr.Data(), false );
-  if (bModel!=NULL) { cout << "Bkg model config already defined. Return." << endl; return bModelStr; }
-
-  bModel = (RooStats::ModelConfig*) sbModel->Clone();
-  bModel->SetName(bModelStr.Data());      
-
-  double oldval = var->getVal();
-  var->setVal(0); /// MB : turn off the signal component
-  double myoldtotbk = totbk->getVal(); /// MB: get total bkg in bin
-  double oldtotbk = pdf->getVal(); /// MB:  assuming RooRealSumPdf with one bin
-
-  /// MB : do the bkg reset here
-  totbk->setVal( m_bkgCorrVal / oldtotbk );
-
   RooArgSet newSnapSet;
   if (tPoiSet!=0) newSnapSet.add(*tPoiSet); // make sure this is the full poi set.
-  newSnapSet.add(*totbk);  // new bkg parameter should also be included
+
+  std::vector<double> prevbknorm;
+
+  for (unsigned int i=0; i<m_bkgParNameVec.size(); ++i) {
+    RooRealVar *totbk = w->var( m_bkgParNameVec[i].c_str() );
+    if (!totbk) { cout << "No bkg strength parameter found. Return." << endl; return bModelStr; }
+
+    prevbknorm.push_back( totbk->getVal() );
+    
+    RooAbsPdf* bkpdf  = Util::GetRegionPdf( w, m_chnNameVec[i] ); 
+    RooRealVar* bkvar = Util::GetRegionVar( w, m_chnNameVec[i] );
+    RooRealIntegral* bkint = (RooRealIntegral *)bkpdf->createIntegral( RooArgSet(*bkvar) );
+
+    double oldtotbk = bkint->getVal(); 
+
+    /// MB : do the bkg reset here
+    totbk->setVal( m_bkgCorrValVec[i] / oldtotbk );
+
+    newSnapSet.add(*totbk);  // new bkg parameter should also be included
+  }
 
   if ((prevSnapSet!=0)) {
     // add all remaining parameters from old snapshot
@@ -293,18 +298,28 @@ ConfigMgr::makeCorrectedBkgModelConfig( RooWorkspace* w, const char* modelSBName
       if ((vr==0)) continue;
       TString vrName = vr->GetName();
       RooRealVar* par = (RooRealVar*)newSnapSet.find(vrName.Data());
-      if ((par==0)) { newSnapSet.add(*vr); } // add if not yet present 
+      if ((par==0)) { newSnapSet.add(*vr); } // add back if not already present 
     }
     delete vrItr;
   }
+
+  bModelStr = TString(modelSBName)+TString("_with_poi_0");
+  RooStats::ModelConfig* bModel = Util::GetModelConfig( w, bModelStr.Data(), false );
+  if (bModel!=NULL) { cout << "Bkg model config already defined. Return." << endl; return bModelStr; }
+  
+  bModel = (RooStats::ModelConfig*) sbModel->Clone();
+  bModel->SetName(bModelStr.Data());      
 
   bModel->SetSnapshot( newSnapSet );
   /// MB : and reimport the configuration into the WS
   w->import( *bModel );
 
   /// reset
-  var->setVal(oldval);
-  totbk->setVal(myoldtotbk);
+  poi->setVal(oldpoi);
+  for (unsigned int i=0; i<m_bkgParNameVec.size(); ++i) {
+    RooRealVar *totbk = w->var( m_bkgParNameVec[i].c_str() );
+    totbk->setVal( prevbknorm[i] );
+  }
 
   /// Important: this resets both mu_sig and mu_bkg !
   sbModel->SetSnapshot( newSnapSet );

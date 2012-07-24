@@ -10,6 +10,7 @@
 
 #include <iostream>
 #include <vector>
+#include <string>
 #include "TString.h"
 
 #include "FitConfig.h"
@@ -92,11 +93,14 @@ public:
   void setMuValGen(const double& val) { m_muValGen = val; }
   double getMuValGen() { return m_muValGen; }
 
-  void setBkgCorrVal(const double& val) { m_bkgCorrVal = val; }
-  double getBkgCorrVal() { return m_bkgCorrVal; }
+  void SetBkgCorrVal(const double& val) { m_bkgCorrValVec.clear(); m_bkgCorrValVec.push_back(val); }
+  void SetBkgParName(const char* par)   { m_bkgParNameVec.clear(); m_bkgParNameVec.push_back(par); }
+  void SetBkgChlName(const char* par)   { m_chnNameVec.clear();    m_chnNameVec.push_back(par); }
 
-  void setBkgParName(const char* parName) { m_bkgParName=parName; }
-  TString getBkgParName() { return m_bkgParName; }
+  void AddBkgCorrVal(const double& val) { m_bkgCorrValVec.push_back(val); }
+  void AddBkgParName(const char* par)   { m_bkgParNameVec.push_back(par); }
+  void AddBkgChlName(const char* par)   { m_chnNameVec.push_back(par); }
+
 
   //class data members
  public:
@@ -120,8 +124,9 @@ public:
   int  m_seed;
   double m_muValGen;
 
-  double m_bkgCorrVal;
-  TString m_bkgParName;
+  std::vector<std::string> m_chnNameVec; 
+  std::vector<std::string> m_bkgParNameVec;
+  std::vector<double> m_bkgCorrValVec;
 
   static ConfigMgr *_singleton;
 };
