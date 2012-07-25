@@ -1309,13 +1309,13 @@ class Sample(object):
             low = 2.0 - high
             print "    WARNING addOverallSys: low=%f in %s. Taking symmetric value from high %f %f"%(lowOld,systName,low,high)
 
-        if low<0.0:
-            print "    WARNING addOverallSys: low=%f is < 0.0 in %s. Setting to low=0.0. High=%f."%(low,systName,high)
-            low = 0.0
+        if low<0.01:
+            print "    WARNING addOverallSys: low=%f is < 0.01 in %s. Setting to low=0.01. High=%f."%(low,systName,high)
+            low = 0.01
 
-        if high<0.0:
-            print "    WARNING addOverallSys: high=%f is < 0.0 in %s. Setting to high=0.0. Low=%f."%(high,systName,low)
-            high = 0.0
+        if high<0.01:
+            print "    WARNING addOverallSys: high=%f is < 0.01 in %s. Setting to high=0.01. Low=%f."%(high,systName,low)
+            high = 0.01
 
         self.overallSystList.append((systName,high,low))
         if not systName in configMgr.systDict.keys():
