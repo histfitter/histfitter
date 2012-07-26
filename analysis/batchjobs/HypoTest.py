@@ -3,6 +3,7 @@
 import sys, commands
 import os, os.path
 import shutil
+import glob
 
 from ROOT import gROOT,gSystem,gDirectory,RooAbsData,RooRandom,RooWorkspace,TFile,RooFitResult
 ## batch mode
@@ -30,7 +31,13 @@ def doHypoTest(fixSigXSec, SigXSecSysnsigma,sigSamples):
         #return
 
     #inFile = "results/MyOneLeptonKtScaleFitR17_Sig_"+sigSamples[0]+"_combined_NormalMeasurement_model.root"
-    inFileName = commands.getstatusoutput("ls results/*"+sigSamples[0]+"*_model.root")[1]
+    infile_list=glob.glob("results/*"+sigSamples[0]+"_combined_BasicMeasurement_model.root")
+    if len(infile_list)!=1:
+        print "ERROR: More than one file given - please give only one file."
+        sys.exit(1)
+    #inFileName = commands.getstatusoutput("ls results/*"+sigSamples[0]+"_combined_BasicMeasurement_model.root")[1]
+    
+    inFileName = infile_list[0]
     inFile = TFile.Open(inFileName)
     if not inFile:
         print "ERROR TFile could not be opened"
@@ -204,7 +211,7 @@ if __name__ == "__main__":
 #        inFile = TFile.Open("results/MyOneLeptonKtScaleFitR17_Sig_"+sigSamples[0]+"_combined_NormalMeasurement_model.root")
 ##        inFile = TFile.Open("results/Combined_KFactorFit_5Channel_Final_dilepton_"+sigSamples[0]+"_combined_BasicMeasurement_model.root")
 #        inFile = TFile.Open("results/Combined_KFactorFit_5Channel_Sig_"+sigSamples[0]+"_combined_BasicMeasurement_model.root")
-        inFileName = commands.getstatusoutput("ls results/*"+sigSamples[0]+"*_model.root")[1]
+        inFileName = commands.getstatusoutput("ls results/*"+sigSamples[0]+"_combined_BasicMeasurement_model.root")[1]
         inFile = TFile.Open(inFileName)
         if not inFile:
            print "ERROR TFile could not be opened"
