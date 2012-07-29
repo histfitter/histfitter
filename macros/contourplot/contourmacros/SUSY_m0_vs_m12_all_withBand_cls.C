@@ -15,7 +15,7 @@
 //#include "contourmacros/1leptonOR_smooth_list_contour_obscls.C"
 //#include "contourmacros/ShapeSys_2.cxx"
 #include "contourmacros/ATLAS10_1lepton.C"
-#include "../../../HistFitterUser/common/ATLAS_EPS_contours2.C"
+#include "../../../HistFitterUser/common/ATLAS_EPS_contours.C"
 
 void SUSY_m0_vs_m12_all_withBand_cls( TString fname0 = "mudat_list.root",// nominal
                                       TString fname1 = "",               // Up
@@ -197,7 +197,7 @@ void SUSY_m0_vs_m12_all_withBand_cls( TString fname0 = "mudat_list.root",// nomi
   Int_t nsigma=2;
 
   //  TLegend *leg = new TLegend(0.7,0.77,0.95,0.915);
-  TLegend *leg = new TLegend(0.64,0.52,0.92,0.915);//(0.565,0.47,0.925,0.915);//(0.59,0.47,0.92,0.915);
+  TLegend *leg = new TLegend(0.57,0.52,0.85,0.915);//(0.565,0.47,0.925,0.915);//(0.59,0.47,0.92,0.915);
 
   leg->SetTextSize( CombinationGlob::DescriptionTextSize );
   leg->SetTextSize( 0.03 );
@@ -466,12 +466,20 @@ void SUSY_m0_vs_m12_all_withBand_cls( TString fname0 = "mudat_list.root",// nomi
   TGraph* cdfgraph(0);
   TGraph* atlas(0);
   TGraph* atlasexp(0);
+  
+  TGraph * staulsp = new TGraph();
+  TGraph * noRGE = new TGraph();  
+  TGraph * noEWSB = new TGraph(); 
+  TGraph * tachyon = new TGraph();   
+  TGraph * negmasssq = new TGraph(); 
+
 
   if (showtevatron==1 && discexcl==1) {
     //lep2char = ol1();
     lep2char = msugra_lepchrg("../../../HistFitterUser/common/mSugraGridtanbeta10_charginoMasses.root"); //ol1();
     //lep2char->Print();
-    c->cd();    
+    c->cd();  
+    lep2char->SetFillColor(CombinationGlob::c_BlueT3);  
     lep2char->Draw("FSAME");
     lep2char->Draw("LSAME");
     //d0graph = d0tanb3muneg();
@@ -479,7 +487,10 @@ void SUSY_m0_vs_m12_all_withBand_cls( TString fname0 = "mudat_list.root",// nomi
     //atlas = ATLAS10_1lepton();
     //atlasexp = ATLAS10_1leptonexp();
   }
-
+  
+  msugraThExcl("../../../HistFitterUser/common/msugra_status.txt", staulsp, negmasssq, noRGE, noEWSB, tachyon);  
+  
+/*
   TGraph* cmscurve(0);
   if (showcms==1) { 
     //cmscurve = cmsoff();
@@ -499,8 +510,32 @@ void SUSY_m0_vs_m12_all_withBand_cls( TString fname0 = "mudat_list.root",// nomi
   msugra_stauLSP_curve->Draw("FSAME");
   msugra_stauLSP_curve->Draw("LSAME");
 
-  //:w(void) stautanb3();
-      
+  //:w(void) stautanb3();*/
+  
+  c->cd();  
+  
+  
+   
+  staulsp->SetFillColor(CombinationGlob::c_LightGreen);
+  staulsp->Draw("FSAME");
+  staulsp->Draw("LSAME"); 
+  
+  //negmasssq->SetFillColor(kAzure+2);
+  negmasssq->Draw("FSAME");
+  negmasssq->Draw("LSAME");  
+  
+  noRGE->SetFillColor(CombinationGlob::c_DarkBlueT5);
+  noRGE->Draw("FSAME");
+  noRGE->Draw("LSAME"); 
+  
+  //noEWSB->SetFillColor(CombinationGlob::c_DarkGreen)
+  noEWSB->Draw("FSAME");
+  noEWSB->Draw("LSAME");   
+  
+  tachyon->Draw("FSAME");
+  tachyon->Draw("LSAME");     
+  
+  c->cd();      
   c->Update();  
     
     
@@ -515,8 +550,10 @@ void SUSY_m0_vs_m12_all_withBand_cls( TString fname0 = "mudat_list.root",// nomi
      //leg->AddEntry( cdfgraph, "CDF #tilde{g}, #tilde{q}, tan#beta=5, #mu<0, 2 fb^{-1}","F" );
   }
   
-  leg->AddEntry( msugra_stauLSP_curve, "Stau LSP","F" );
-  leg->AddEntry( msugra_noEWSB_curve, "Theoretically excluded","F" );
+  leg->AddEntry( staulsp, "Stau LSP","F" );
+  leg->AddEntry( noEWSB, "No EW SB","F" );
+  leg->AddEntry( noRGE, "Non-convergent RGE","F" );  
+  leg->AddEntry( negmasssq, "negmasssq","F" ); 
   
   // legend
   Float_t textSizeOffset = +0.000;
@@ -641,7 +678,7 @@ void SUSY_m0_vs_m12_all_withBand_cls( TString fname0 = "mudat_list.root",// nomi
   prel->SetTextFont( 42 );
   prel->SetTextColor( 1 );
   prel->SetTextSize( 0.04 );  
-  prel->DrawLatex(0.13, 0.81, "work in progress");   // 0.27,0.87
+  prel->DrawLatex(0.15, 0.81, "Internal");   // 0.27,0.87
   prel->AppendPad();
 
   TString prefixsave = TString(prefix).ReplaceAll(" ","_") + Form("%dinvfb_",lumi) + Form("wband%d_",showOneSigmaExpBand);
