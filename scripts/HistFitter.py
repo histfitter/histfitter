@@ -137,8 +137,6 @@ if __name__ == "__main__":
     from configManager import configMgr
     from prepareHistos import TreePrepare,HistoPrepare
 
-    configMgr = ConfigMgr.getInstance()
-
     configMgr.readFromTree = False
     configMgr.executeHistFactory=False
     runInterpreter = False
