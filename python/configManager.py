@@ -73,6 +73,7 @@ class ConfigManager(object):
         self.includeOverallSys = True # Boolean to chose if HistoSys should also have OverallSys
         self.readFromTree = False # Boolean to chose if reading histograms from tree will also write to file
         self.plotHistos = None # Boolean to chose to plot out the histograms
+        self.removeEmptyBins = False # Boolean to chose to remove empty bins from data histogram on plot
         self.executeHistFactory = True # Boolean to chose to execute HistFactory
         self.printHistoNames = False # Print out the names of generated histograms
         self.doHypoTest = False
@@ -123,6 +124,7 @@ class ConfigManager(object):
             pass
         newTLX.verbose=self.verbose
         newTLX.setWeights(self.weights)
+        newTLX.removeEmptyBins=self.removeEmptyBins
         self.topLvls.append(newTLX)
         print "Created Fit Config: %s"%(newName)
         return self.topLvls[len(self.topLvls)-1]
@@ -300,6 +302,7 @@ class ConfigManager(object):
             cppTl.m_errorFillStyle = tl.errorFillStyle
             if not tl.tLegend == None:
                 cppTl.m_legend = tl.tLegend
+            cppTl.m_removeEmptyBins = self.removeEmptyBins
 
             # Plot cosmetics per channel
             for c in tl.channels:

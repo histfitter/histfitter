@@ -44,7 +44,8 @@ class TopLevelXML(object):
         self.errorFillStyle=3004
         self.setLogy = False
         self.tLegend = None
-        
+        self.removeEmptyBins=False
+
     def Clone(self,newName=""):
         if newName=="":
             newName=self.name
