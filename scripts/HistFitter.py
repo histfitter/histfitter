@@ -40,6 +40,7 @@ def GenerateFitAndPlot(tl,drawBeforeAfterFit):
     #fitChannels = "ALL"
 
     lumiConst = not tl.signalSample
+    #    print " \n\n lumiConst = ", lumiConst, " tl.signalSample = ",  tl.signalSample
     
     # fit toy MC if specified. When left None, data is fit by default
     toyMC = None
@@ -101,8 +102,9 @@ def GenerateFitAndPlot(tl,drawBeforeAfterFit):
 
         # plot correlation matrix for result
         Util.PlotCorrelationMatrix(result)    
-        #plotPLL = False
-        #Util.PlotNLL(w, result, plotPLL, "", toyMC)
+        # plot likelihood
+        # plotPLL = False
+        #Util.PlotNLL(w, expResultAfter, plotPLL, "", toyMC)
     
     if toyMC:
         Util.WriteWorkspace(w, tl.wsFileName,toyMC.GetName())
@@ -177,11 +179,12 @@ if __name__ == "__main__":
         sys.exit(0)        
     
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "dtwfinals:v:r:b:g:p")
+        opts, args = getopt.getopt(sys.argv[1:], "d0twfinals:v:r:b:g:p")
         configFile = str(args[0])
     except:
         usage()
 
+      
     for opt,arg in opts:
         if opt == '-t':
             configMgr.readFromTree=True
@@ -201,6 +204,8 @@ if __name__ == "__main__":
             doHypoTests = True
         elif opt == '-d':
             drawBeforeAfterFit = True
+        elif opt == '-0':
+            configMgr.removeEmptyBins = True
         elif opt == '-s':
             configMgr.toySeedSet = True
             configMgr.toySeed = int(arg)
@@ -240,6 +245,8 @@ if __name__ == "__main__":
     if runFit:
         if len(configMgr.topLvls)>0:
             r=GenerateFitAndPlot(configMgr.topLvls[0],drawBeforeAfterFit)
+            #r=GenerateFitAndPlot(configMgr.topLvls[1],drawBeforeAfterFit)
+            #r=GenerateFitAndPlot(configMgr.topLvls[2],drawBeforeAfterFit)
             #for idx in range(len(configMgr.topLvls)):
             #    r=GenerateFitAndPlot(configMgr.topLvls[idx],drawBeforeAfterFit) 
             pass
