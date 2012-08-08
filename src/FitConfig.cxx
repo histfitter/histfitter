@@ -20,6 +20,7 @@ FitConfig::FitConfig(const TString& name){
   m_errorFillColor = kBlue - 5;
   m_errorFillStyle = 3004;
   m_legend = NULL;
+  m_removeEmptyBins = false;   
 }
 
 Int_t FitConfig::getSampleColor(const TString& sample){

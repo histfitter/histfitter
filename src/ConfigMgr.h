@@ -123,6 +123,7 @@ public:
   int  m_nPoints;
   int  m_seed;
   double m_muValGen;
+  bool m_removeEmptyBins;
 
   std::vector<std::string> m_chnNameVec; 
   std::vector<std::string> m_bkgParNameVec;

@@ -34,7 +34,9 @@ ConfigMgr::ConfigMgr()
   m_doUL=true;
   m_seed=0;
   m_nPoints=10;
-  m_muValGen=0.0;
+  m_muValGen=0.0;  
+  m_removeEmptyBins=false;
+
 }
 
 FitConfig* ConfigMgr::addFitConfig(const TString& name){

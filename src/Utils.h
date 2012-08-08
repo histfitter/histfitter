@@ -63,10 +63,12 @@ namespace Util
 
   RooFitResult* FitPdf(RooWorkspace* w,  TString fitRegions="ALL", bool lumiConst=false, RooAbsData* inputData=0, TString suffix ="");
   double GetPropagatedError(RooAbsReal* var, const RooFitResult& fr); //, RooArgList varlist=RooArgList() ) ; 
+  void RemoveEmptyDataBins(RooWorkspace* w, RooPlot* frame);
 
   RooAbsReal* GetComponent(RooWorkspace* w, TString component, TString region);
   RooAbsPdf* GetRegionPdf(RooWorkspace* w, TString region);
   RooRealVar* GetRegionVar(RooWorkspace* w, TString region);
+  //  RooAbsReal* GetRegionPdfIntegral(RooWorkspace* w, TString region);
 
   Double_t GetComponentFrac(RooWorkspace* w, const char* Component, const char* RRSPdf, RooRealVar* observable, RooRealVar* binWidth);
   Double_t GetComponentFracInRegion(RooWorkspace* w, TString component, TString region);
