@@ -777,7 +777,7 @@ RooStats::HypoTestTool::SetupHypoTestCalculator(RooWorkspace * w, bool doUL,
       if (testStatType == 3) ((AsymptoticCalculator*) m_hc)->SetOneSided(true);  
       if (testStatType != 2 && testStatType != 3)  
 	Warning("StandardHypoTestInvDemo","Only the PL test statistic can be used with AsymptoticCalculator - use by default a two-sided PL");
-      // ((AsymptoticCalculator*) m_hc)->SetQTilde(true); // not needed should be done automatically now
+      ((AsymptoticCalculator*) m_hc)->SetQTilde(true); // bug in roostats. Need to turn on explicitly.
       ((AsymptoticCalculator*) m_hc)->SetPrintLevel(mPrintLevel+1); 
    }
    else if (type == 0 || type == 1) 
