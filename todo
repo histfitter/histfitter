@@ -1,0 +1,107 @@
+2012-08-29 HistFitter Todo list
+
+https://indico.cern.ch/conferenceDisplay.py?confId=204995
+
+
+
+
+Zach:
+- Better rejection of bad fits that make it into grid list file (Zach had some tricks for this - discuss)
+- Correct statistical treatment of fits to prescaled data.
+- Treatment of negative QCD weights: can lead to crash in signal region. 
+- Hard-coded names, e.g. sig_xsection. Needs to be documented, or made flexible.
+- Scripts for plotting the new theoretical error. Properly available and documented?
+- Sharing of common scripts: e.g. p0 calculation, making pull plots, drawing pdf, contour plots.
+- Directory driven results structure
+- FAQ on failed fits and how to handle them. 
+- Guideline of when a fit / grid-of-fits is okay.
+
+
+Michael:
+- the choice of nuisance parameters in blind analyses 
+- and expected limits (from some mails I saw that this is currently implemented/ investigated)
+- one sided uncertainties or in general propagation of uncertainties from performance groups
+
+Sophie & Marcello:
+- Absolute errors in case of nominal prediction with 0.0 events. Empty nominal, non-empty systematic
+- When using histogram inputs, specify the range of the input histograms to be used (used to be supported by RooStats?)
+- Cleanup of python code: propose derived classes for various available systematics
+- More debugging output 
+- Sharing of analysis scripts. 
+   Eg. batch submission scripts.
+   Systematics table with each individual systematic turned off (iterate)
+- UL derived with toys. RooFit crash.
+- better support for histogram based running
+
+Jeanette:
+- For optimization studies, possibility to propagate cut-values to output files/dir
+- Make contour plot as a HistFitter option? I.e. combine all steps into one?
+
+Sigve:
+- RooFit Toys generation/fitting crash
+- Memory leak for running toys (?)
+- FAQ would be useful to have.
+- Analysis script sharing?
+- General remark: ROOT plotting scripts can be difficult
+
+Geert-Jan:
+- Merge 0-lepton fitter changes into HistFitter trunk
+- Mem-leak for running over many grid-points? (Jeanette says no.)
+- Update to Root v5.34
+- Implement HistFitter xml-python hooks -- apparently need input from George Lewis
+
+Jovan:
+- Encourage more support for using histograms directly instead of trees, 
+  such as having a standard way to configure histogram files and names.
+
+Alex:
+- Histogram recycle option with running with -t.
+   (Do per channel?)
+- How to deal with bin with 0 bkg-prediction content, include it in the fit or not?
+- Verbose: _correct_ list of input histograms to be used by histfactory
+- Quoting ofr correct MC stat errors in tables -> constact RooStats. 
+- Asymmetric error propagation
+- VisualizeERror bug for single bin, still to be fixed by Wouter
+
+David:
+- magic words for cmd line option. python -c "foo=True"
+- automated histogram fix (zero entries) --> configurable, logging info
+- swapping of one-sided up/down-systematics fixed? 
+- Blinding -> put in again.
+- Support for absolute errors. 
+- histograms as input: name specifiable, and -v2 option needs to be exact.
+- batch system support
+- 0-lepton: switching between multiple signal regions.
+- Generalized script for visible x-section limits (by Alex)
+- Finish polymorphism for systematics ("methods")
+- Merge measurement class with TopLevelXML
+- asymmetric binning
+
+Max:
+- Documentation needs cleanup.
+- Documentation of various available systematics.
+- Tutorial uptodate? Do all tutorial examples work? Need to check (I believe they do.)
+- Cleanup of python code
+- Request for FAQ
+- Upgrade to ROOT v5.34; xml files okay?
+- New histogram interpolation default in latest root version.
+- Divergence of code:
+- Blinding  currently only in configMananger.py_blinding
+
+- Merge 0-lepton code into HistFitter
+   Cmd line options: choose between exclusion/discovery/bkg-only fits
+   Cmd line options: Choose which signal region to run on.
+   Renormalization of systematics over control regions 
+   Useful scripts for merging latex tables
+
+- Readdition of symmetrization of systematic errors.
+
+- Correct statistical treatment of weighted (pre-scaled) datasets
+   Razor analysis.
+
+- Recommit logicalOR.py script.
+- Presentation of MC stat errors in Tables.
+- Commit HistFitter code in ROOT
+- Lets share our table/plot/submission scripts. Eg. Pull plots
+- Manpower situation. Rotation schedule for Histfitter support and mailing list
+
