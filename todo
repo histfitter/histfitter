@@ -13,8 +13,6 @@ Top priority: Crashes & fixes & documentation:
 - one-sided uncertainties
 - Treatment of negative QCD weights: can lead to crash in signal region. 
 - Absolute errors in case of nominal prediction with 0.0 events. Empty nominal, non-empty systematic
-- Documentation needs cleanup. E.g Documentation of various available systematics.
-- Make tutorial uptodate.
 - Hard-coded names, e.g. sig_xsection. Needs to be documented, or made flexible.
 - Scripts for plotting the new theoretical error. Properly available and documented?
 - Directory driven results structure
@@ -22,6 +20,8 @@ Top priority: Crashes & fixes & documentation:
 - better support for histogram-based running
   o More debugging output. E.g. _correct_ list of input histograms to be used by histfactory
 - Memory leak for running toys (?) Need reproducable example.
+- Documentation needs cleanup. E.g Documentation of various available systematics.
+- Make tutorial uptodate with trunk.
 
 Next: Useful additions & Extra documentation:
 
