@@ -719,7 +719,7 @@ class ConfigManager(object):
             raise Exception("Incorrect systematic method specified for QCD: %s"%getSample(sam.name).qcdSyst)
 
     def setWeightsCutsVariable(self,chan,sam,regionString):
-        if not sam.isData and not sam.isQCD:
+        if not sam.isData and not sam.isQCD and not sam.isDiscovery:
             self.prepare.weights = str(self.lumiUnits*self.outputLumi/self.inputLumi)
             self.prepare.weights += " * " + " * ".join(sam.weights)
             if self.readFromTree and not sam.isDiscovery:
@@ -804,8 +804,10 @@ class ConfigManager(object):
                 #add Histos for all the other method-types
                 self.addHistoSysforNoQCD(regionString,normString,normCuts,chan,sam,syst)
         elif sam.isQCD:
-                #Add Histos for Sample-type QCD
-                self.addHistoSysForQCD(regionString,normString,normCuts,chan,sam)
+            #Add Histos for Sample-type QCD
+            self.addHistoSysForQCD(regionString,normString,normCuts,chan,sam)
+        return
+
     def normHists(self,syst,sam):
         highIntegral = 0.
         lowIntegral = 0.
