@@ -32,7 +32,6 @@ Next: Useful additions & Extra documentation:
   o Generalized scripts? E.g. for visible x-section limits (by Alex)
   o e.g. p0 calculation, making pull plots, drawing pdf, contour plots.
 - Correct statistical treatment of fits to prescaled data.
-- Histogram recycle option with running with -t. (Do per channel?)
 - review and improve consistency and configurability of automatic error handling 
 - Merging of configManager code (0-lepton)
   o 0-lepton: switching between multiple signal regions. (python magic words)
@@ -42,6 +41,9 @@ External: RooFit/RooStats bugs we are affected by:
 - RooFit toys crash
 - VisualizeError() bug for single bin
 
+On slightly longer time-scale:
+- Histogram recycle option with running with -t. (Do per channel?)
+- Python code cleanup: implement polymorphic design for Systematic and Sample python config objects
 
 =================================================================================================
 
