@@ -9,44 +9,45 @@ Prioritized todo-list:
 >>> Top priority: Crashes & fixes & documentation: 
 >>> (At a minimum, let's try to do this before the post-mortem)
 
-- Upgrade to ROOT v5.34. xml-files okay?
-- blinding
-- one-sided uncertainties
-- Treatment of negative QCD weights: can lead to crash in signal region. 
-- Absolute errors in case of nominal prediction with 0.0 events. Empty nominal, non-empty systematic
-- Hard-coded names, e.g. sig_xsection. Needs to be documented, or made flexible.
-- Contour scripts for plotting the new theoretical error. Properly available and documented?
-- Directory driven results structure
-  o possibility to propagate cut-values to output files/dir
-- better support for histogram-based running
+- Upgrade to ROOT v5.34. xml-files okay? (Geert-Jan)
+- blinding (Tobias, David -- done?)
+- one-sided uncertainties (Max)
+- Treatment of negative QCD weights: can lead to crash in signal region. (Zach,Max)
+- Absolute errors in case of nominal prediction with 0.0 events. Empty nominal, non-empty systematic (Marcello)
+- Hard-coded names, e.g. sig_xsection. Needs to be documented, or made flexible. (Jeanette?)
+- Contour scripts for plotting the new theoretical error. Properly available and documented? (Yu?)
+- Directory driven results structure (Zach)
+  o possibility to propagate cut-values to output files/dir (Jeanette)
+- better support for histogram-based running (Marcello)
   o More debugging output. E.g. _correct_ list of input histograms to be used by histfactory
-- Memory leak for running toys (?) Need reproducable example.
-- Documentation needs cleanup. E.g Documentation of various available systematics.
-- Make tutorial uptodate with trunk.
+- Memory leak for running toys (?) Need reproducable example. (Sigve)
+- Documentation needs cleanup. E.g Documentation of various available systematics. (David,Alex,Max)
+- Make tutorial uptodate with trunk. (David,Alex,Max)
+- Generalized scripts (Alex)
 
 >>> Next: Useful additions & Extra documentation:
 
 - FAQ
-  o FAQ on failed fits and how to handle them. Guideline on when a fit / grid-of-fits is okay.
-  o Better rejection of bad fits that make it into grid list file (Zach had some tricks for this - discuss)
-- Analysis script sharing
+  o FAQ on failed fits and how to handle them. Guideline on when a fit / grid-of-fits is okay. (All, Zach, Max)
+  o Better rejection of bad fits that make it into grid list file (Zach had some tricks for this - discuss) (Zach, Max)
+- Analysis script sharing (--> first: get overview: Jeanette, Sophie?)
   o Generalized scripts? E.g. for visible x-section limits (by Alex)
-  o e.g. p0 calculation, making pull plots, drawing pdf, contour plots.
-- review and improve consistency and configurability of automatic error handling 
-- Merging of configManager code (0-lepton)
+  o e.g. p0 calculation, making pull plots, drawing pdf, contour plots. (Alex)
+- review and improve consistency and configurability of automatic error handling (David) 
+- Merging of configManager code (0-lepton) (G-J, Max, Yu)
   o 0-lepton: switching between multiple signal regions. (python magic words)
-- Correct statistical treatment of fits to prescaled data. 
+- Correct statistical treatment of fits to prescaled data. (Max)
 
 >>> External: RooFit/RooStats bugs we are affected by:
 
-- RooFit toys crash
-- VisualizeError() bug for single bin
+- RooFit toys crash (Wouter Verkerke)
+- VisualizeError() bug for single bin (Wouter Verkerke)
 
 >>> On slightly longer time-scale:
 
-- Manpower situation. Rotation of mailing-list help.
-- Histogram recycle option with running with -t. (Do per channel?)
-- Python code cleanup: implement polymorphic design for Systematic and Sample python config objects
+- Manpower situation. Rotation of mailing-list help. (All)
+- Histogram recycle option with running with -t. (Do per channel?) (Who?)
+- Python code cleanup: implement polymorphic design for Systematic and Sample python config objects (Marcello)
 
 =================================================================================================
 
