@@ -6,7 +6,8 @@ https://indico.cern.ch/conferenceDisplay.py?confId=204995
 Prioritized todo-list:
 ======================
 
-Crashes & fixes:
+Top priority: Crashes & fixes:
+
 - Upgrade to ROOT v5.34. xml-files okay?
 - blinding
 - one-sided uncertainties
@@ -22,7 +23,8 @@ Crashes & fixes:
   o More debugging output. E.g. _correct_ list of input histograms to be used by histfactory
 - Memory leak for running toys (?) Need reproducable example.
 
-Documentation & useful additions:
+Next: Useful additions & Extra documentation:
+
 - FAQ
   o FAQ on failed fits and how to handle them. Guideline of when a fit / grid-of-fits is okay.
   o Better rejection of bad fits that make it into grid list file (Zach had some tricks for this - discuss)
@@ -35,8 +37,8 @@ Documentation & useful additions:
 - Merging of configManager code (0-lepton)
   o 0-lepton: switching between multiple signal regions. (python magic words)
 
+External: RooFit/RooStats bugs we are affected by:
 
-RooFit/RooStats bugs we are affected by:
 - RooFit toys crash
 - VisualizeError() bug for single bin
 
