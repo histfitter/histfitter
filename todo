@@ -6,7 +6,7 @@ https://indico.cern.ch/conferenceDisplay.py?confId=204995
 Prioritized todo-list:
 ======================
 
-Top priority: Crashes & fixes:
+Top priority: Crashes & fixes & documentation:
 
 - Upgrade to ROOT v5.34. xml-files okay?
 - blinding
