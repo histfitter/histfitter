@@ -27,7 +27,7 @@ Prioritized todo-list:
 >>> Next: Useful additions & Extra documentation:
 
 - FAQ
-  o FAQ on failed fits and how to handle them. Guideline of when a fit / grid-of-fits is okay.
+  o FAQ on failed fits and how to handle them. Guideline on when a fit / grid-of-fits is okay.
   o Better rejection of bad fits that make it into grid list file (Zach had some tricks for this - discuss)
 - Analysis script sharing
   o Generalized scripts? E.g. for visible x-section limits (by Alex)
@@ -44,6 +44,7 @@ Prioritized todo-list:
 
 >>> On slightly longer time-scale:
 
+- Manpower situation. Rotation of mailing-list help.
 - Histogram recycle option with running with -t. (Do per channel?)
 - Python code cleanup: implement polymorphic design for Systematic and Sample python config objects
 
