@@ -115,7 +115,7 @@ discoveryFitConfig.addSystematic(jes)
 #Channel
 srBin = discoveryFitConfig.addChannel("cuts",["SR"],1,0.5,1.5)
 discoveryFitConfig.setSignalChannels([srBin])
-srBin.addDiscoverySamples(["SIG"],[1.],[0.],[100.],[kMagenta])
+#srBin.addDiscoverySamples(["SIG"],[1.],[0.],[100.],[kMagenta])
 
 
 #**************
