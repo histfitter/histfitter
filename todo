@@ -3,7 +3,49 @@
 https://indico.cern.ch/conferenceDisplay.py?confId=204995
 
 
+Prioritized todo-list:
+======================
 
+Crashes & fixes:
+- Upgrade to ROOT v5.34. xml-files okay?
+- blinding
+- one-sided uncertainties
+- Treatment of negative QCD weights: can lead to crash in signal region. 
+- Absolute errors in case of nominal prediction with 0.0 events. Empty nominal, non-empty systematic
+- Documentation needs cleanup. E.g Documentation of various available systematics.
+- Make tutorial uptodate.
+- Hard-coded names, e.g. sig_xsection. Needs to be documented, or made flexible.
+- Scripts for plotting the new theoretical error. Properly available and documented?
+- Directory driven results structure
+  o possibility to propagate cut-values to output files/dir
+- better support for histogram-based running
+  o More debugging output. E.g. _correct_ list of input histograms to be used by histfactory
+- Memory leak for running toys (?) Need reproducable example.
+
+Documentation & useful additions:
+- FAQ
+  o FAQ on failed fits and how to handle them. Guideline of when a fit / grid-of-fits is okay.
+  o Better rejection of bad fits that make it into grid list file (Zach had some tricks for this - discuss)
+- Analysis script sharing
+  o Generalized scripts? E.g. for visible x-section limits (by Alex)
+  o e.g. p0 calculation, making pull plots, drawing pdf, contour plots.
+- Correct statistical treatment of fits to prescaled data.
+- Histogram recycle option with running with -t. (Do per channel?)
+- review and improve consistency and configurability of automatic error handling 
+- Merging of configManager code (0-lepton)
+  o 0-lepton: switching between multiple signal regions. (python magic words)
+
+
+RooFit/RooStats bugs we are affected by:
+- RooFit toys crash
+- VisualizeError() bug for single bin
+
+
+=================================================================================================
+
+
+Full list of open items:
+========================
 
 Zach:
 - Better rejection of bad fits that make it into grid list file (Zach had some tricks for this - discuss)
@@ -76,6 +118,30 @@ David:
 - Finish polymorphism for systematics ("methods")
 - Merge measurement class with TopLevelXML
 - asymmetric binning
+
+Alex & David:
+- replace XML by direct python calls to histfactory
+- implement polymorphic design for Systematic and Sample python config objects
+- generalize Yields, Systematics, Pulls and visible cross-section scripts
+  o Almost done on all the generalized scripts, last one/still in progress Systematics table.
+  o Are other any other scripts/tables that we/people generally want to produce? Separate stat error + syst error?
+  o Error before the fit? What should be the default? None, only MC stat, everything? Easy to trick oneself, 
+    if before fit is 4 +/-2 and after fit 3 +/- 1.5. Reduction of error from 2 -> 1.5 (25%). 
+    NO, error is relative in HistFitter/HistFactory.
+  o Old VisualizeError bug (for single bin histograms, but maybe also for all extended pdf histograms(?)) without fix yet from Wouter.
+  o How to visualize Systematic Error inputs? I have a script, but it needs to be generalized. 
+    Important for understanding the fit result, specifically in case of large profiling.
+- review and improve consistency and configurability of automatic error handling 
+  (also eventually discuss this with HistFactory guys as well)--> by this i mean negative or empty histograms and so on.
+- Discuss with HistFactory people about MC stat error nuisance parameters, and validity for showing the error per sample.
+- What about zero-bins for MC stat error (bRPV signal MC example)? Talking 
+  to Sven Kreiss, he was originally surprised that it wasn't used, 
+  but after discussing with George Lewis was not sure how to move forward. The problem has to do with setting the right scale for it.
+- Possible to not rerun -t every time, but if changing only the binning of one region, maybe copy all histograms, except for this one.
+- Make sure that HistFitter runs with -t, or -t -w, or just -w. Not always the case anymore.
+- Non-symmetric error propagation
+- Large systematics for small backgrounds (BG in 1lepton PRD), WARNINGS?
+
 
 Max:
 - Documentation needs cleanup.
