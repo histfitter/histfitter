@@ -44,6 +44,8 @@ configMgr.outputFileName = "results/"+configMgr.analysisName+"_Output.root"
 configMgr.inputLumi = 0.001 # Luminosity of input TTree after weighting
 configMgr.outputLumi = 4.713 # Luminosity required for output histograms
 configMgr.setLumiUnits("fb-1")
+configMgr.blindSR=False
+configMgr.useSignalInBlindedData=False 
 
 # Set the files to read from
 bgdFiles = []

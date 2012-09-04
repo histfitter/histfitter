@@ -47,6 +47,7 @@ class ChannelXML(object):
             self.statErrorType = "Poisson"
         self.files = []
         self.treeName = ''
+        self.parentTopLvl=None
         # Plot cosmetics
         self.minY = None
         self.maxY = None
@@ -203,10 +204,12 @@ class ChannelXML(object):
             sigSample.setDiscovery()
             sigSample.clearSystematics()
             self.addSample(sigSample)
+            self.parentTopLvl.setSignalSample(sigSample)
             histoName = "h"+sigSample.name+"Nom_"+sr+"_obs_"+self.variableName.replace("/","")
             self.getSample("DiscoveryMode_%s"%(sr)).setHistoName(histoName)
             configMgr.hists[histoName] = TH1F(histoName,histoName,len(srList),0.,float(len(srList)))
             configMgr.hists[histoName].SetBinContent(iSR+1,startValList[iSR])
+        return
 
     def addData(self,dataName):
         """

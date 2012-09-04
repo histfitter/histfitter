@@ -1,3 +1,8 @@
+2012-09-04 David Cote <david.cote@cern.ch>
+	* large bunch of code from Tobias Binder to simplify configManager.execute()
+	* re-implemented blinding with configManager options 
+	  blindSR=True/False, blindCR=True/False and useSignalInBlindedData=True/False
+
 2012-08-28 Max Baak <mbaak@cern.ch>
         * RooStats BUG Fix to _always_ use QTilde in AsymptoticCalculator.
         * HistFitter-00-00-13

@@ -207,12 +207,20 @@ class TopLevelXML(object):
         """
         Build a channel object from this TopLevel
         """
+        if variableName=="cuts":
+            nBins=len(regions)
+            binLow=0
+            binHigh=nBins
+            pass
         chanObj = ChannelXML(variableName,regions,self.prefix,nBins,binLow,binHigh,self.statErrThreshold)
 
         # Verify that this name is not already used
         for chan in self.channels:
             if chan.name == chanObj.name:
                 raise RuntimeError("Channel %s already exists in TopLevelXML %s. Please use a different name."%(chanObj.name,self.name))
+
+        #set channel parent
+        chanObj.parentTopLvl=self
 
         # Channel doesn't have weights so add them
         chanObj.setWeights(self.weights)
@@ -244,6 +252,9 @@ class TopLevelXML(object):
 
         # Create a copy
         newObj = deepcopy(obj)
+
+        #reset channel parent
+        newObj.parentTopLvl=self
 
         # If the channel doesn't have any weights then add them
         if len(newObj.weights) == 0:
