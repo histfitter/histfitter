@@ -63,6 +63,7 @@ class Sample(object):
         configMgr.hists[self.histoName] = TH1F(self.histoName,self.histoName,len(self.binValues[(region,var)]),0.,float(len(self.binValues[(region,var)])))
         for (iBin,val) in enumerate(self.binValues[(region,var)]):
             configMgr.hists[self.histoName].SetBinContent(iBin+1,val)
+        return
 
     def buildStatErrors(self,binStatErrors,region,var):
         """

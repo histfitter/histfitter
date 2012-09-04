@@ -35,7 +35,7 @@ class ConfigManager(object):
         Configuration variables
         """
         self.analysisName = None # Name to give the analysis
-        self.nomName = None # Name of nominal tree
+        self.nomName = "" # suffix of nominal trees names
         self.cppMgr = ConfigMgr.getInstance() #C++ alter ego of this configManager
 
         self.inputLumi = None # Luminosity of input histograms
