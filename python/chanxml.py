@@ -196,6 +196,7 @@ class ChannelXML(object):
         Add a sample to be used for discovery fits
         """
         self.hasDiscovery = True
+        self.parentTopLvl.hasDiscovery = True
         if not self.variableName == "cuts":
             raise TypeError("Discovery sample can only be added to a cuts channel")
         for (iSR,sr) in enumerate(srList):

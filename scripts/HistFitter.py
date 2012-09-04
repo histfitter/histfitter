@@ -39,8 +39,10 @@ def GenerateFitAndPlot(tl,drawBeforeAfterFit):
         fitChannels+=reg
     #fitChannels = "ALL"
 
-    lumiConst = not tl.signalSample
-    #    print " \n\n lumiConst = ", lumiConst, " tl.signalSample = ",  tl.signalSample
+    #hack to be fixed at HistFactory level (check again with ROOT 5.34)
+    lumiConst = True
+    if tl.signalSample and not tl.hasDiscovery:
+        lumiConst = False
     
     # fit toy MC if specified. When left None, data is fit by default
     toyMC = None

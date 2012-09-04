@@ -38,6 +38,7 @@ class TopLevelXML(object):
         self.files = []
         self.weights = []
         self.treeName = ''
+        self.hasDiscovery=False
         # Plot cosmetics
         self.dataColor=kBlack
         self.totalPdfColor=kBlue
