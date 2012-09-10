@@ -1,8 +1,8 @@
-from ROOT import gROOT,TFile,TH1F
+from ROOT import gROOT, TFile, TH1F
 
 gROOT.Reset()
 
-rootFile = TFile("./data/MTvsMET.root","READ")
+rootFile = TFile("./data/MTvsMET.root", "READ")
 
 getNames = ["hDATA",
             "hSIG",
@@ -18,17 +18,17 @@ getNames = ["hDATA",
             "hQCD_SR_low",
             "hQCD_SR_high"]
 
-outFile = TFile("./data/MTvsMET_2CR1SR.root","RECREATE")
+outFile = TFile("./data/MTvsMET_2CR1SR.root", "RECREATE")
 
 
 newHists = []
 
 for histName in getNames:
     hist = rootFile.Get(histName)
-    newHist = TH1F(hist.GetName(),hist.GetTitle(),3,0.,3.)
-    newHist.SetBinContent(1,hist.GetBinContent(1))
-    newHist.SetBinContent(2,hist.GetBinContent(2))
-    newHist.SetBinContent(3,hist.GetBinContent(10))
+    newHist = TH1F(hist.GetName(), hist.GetTitle(), 3, 0.0, 3.0)
+    newHist.SetBinContent(1, hist.GetBinContent(1))
+    newHist.SetBinContent(2, hist.GetBinContent(2))
+    newHist.SetBinContent(3, hist.GetBinContent(10))
     newHists.append(newHist)
 
 outFile.cd()
