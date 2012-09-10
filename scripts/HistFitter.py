@@ -1,7 +1,6 @@
 #!/usr/bin/env python
-from ROOT import gROOT,gSystem,gDirectory,RooAbsData,RooRandom,RooWorkspace
+from ROOT import gROOT, gSystem, gDirectory, RooRandom
 gSystem.Load("libSusyFitter.so")
-from ROOT import ConfigMgr
 gROOT.Reset()
 
 
@@ -126,7 +125,7 @@ def GenerateFitAndPlot(tl, drawBeforeAfterFit):
         Util.WriteWorkspace(w, tl.wsFileName)
 
     try:
-        if not result == None:
+        if result is not None:
             result.Print()
             return result
     except:
@@ -135,7 +134,6 @@ def GenerateFitAndPlot(tl, drawBeforeAfterFit):
 
 
 def GetLimits():
-    from ROOT import RooStats,Util
     w = gDirectory.Get("w")
     #RooStats.DoHypoTestInversion(w,"ModelConfig" ,"","obsData",2,3)
     r = RooStats.DoHypoTest(w, "ModelConfig", "", "obsData", 2, 3)
@@ -150,7 +148,6 @@ def GetLimits():
 
 if __name__ == "__main__":
     from configManager import configMgr
-    from prepareHistos import TreePrepare, HistoPrepare
 
     configMgr.readFromTree = False
     configMgr.executeHistFactory = False
@@ -163,7 +160,7 @@ if __name__ == "__main__":
 
     print "\n * * * Welcome to HistFitter * * *\n"
 
-    import os, sys
+    import sys
     import getopt
     def usage():
         print "HistFitter.py [-i] [-t] [-w] [-f] [-l] [-p] [-d] [-n nTOYs] [-s seed] [-r SRs] [-g gridPoint] [-b bkgParName,value] <configuration_file>\n"
@@ -270,7 +267,8 @@ if __name__ == "__main__":
     if printLimits:
         for tl in configMgr.topLvls:
             if len(tl.validationChannels) > 0:
-                raise(Exception, "Validation regions should be turned off for setting an upper limit!")
+                raise(Exception, "Validation regions should be turned off "
+                                 "for setting an upper limit!")
             pass
         configMgr.cppMgr.doUpperLimitAll()
         #GetLimits()
@@ -279,7 +277,8 @@ if __name__ == "__main__":
     if doHypoTests:
         for tl in configMgr.topLvls:
             if len(tl.validationChannels) > 0:
-                raise(Exception,"Validation regions should be turned off for doing hypothesis test!")
+                raise(Exception,"Validation regions should be turned off "
+                                "for doing hypothesis test!")
             pass
         configMgr.cppMgr.doHypoTestAll()
         pass
@@ -293,7 +292,6 @@ if __name__ == "__main__":
 
     if runInterpreter:
         from code import InteractiveConsole
-        from ROOT import Util
         cons = InteractiveConsole(locals())
         cons.interact("Continuing interactive session... press Ctrl+d to exit")
         pass
