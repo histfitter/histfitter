@@ -53,17 +53,19 @@ class Measurement(object):
         """
         self.paramSettingDict[paramName] = (const, val)
 
-    def addConstraintTerm(self,paramName,type,relUnc=None):
+    def addConstraintTerm(self, paramName, type, relUnc=None):
         """
         Define the constraint term for a parameter
         """
-        self.constraintTermDict[paramName] = (type,relUnc)
+        self.constraintTermDict[paramName] = (type, relUnc)
 
     def __str__(self):
         """
         Convert instance to an XML string
         """
-        measurementString = "  <Measurement Name=\"%s\" Lumi=\"%g\" LumiRelErr=\"%g\" BinLow=\"%d\" BinHigh=\"%d\" Mode=\"%s\" ExportOnly=\"%s\">\n" % (self.name,self.lumi,self.lumiErr,self.binLow,self.binHigh,self.mode,self.exportOnly)
+        measurementString = "  <Measurement Name=\"%s\" Lumi=\"%g\" LumiRelErr=\"%g\" BinLow=\"%d\" BinHigh=\"%d\" ExportOnly=\"%s\">\n" \
+                            % (self.name, self.lumi, self.lumiErr, self.binLow,
+                               self.binHigh, self.exportOnly)
         measurementString += "    <POI>"
         for (iPOI, poi) in enumerate(self. poiList):
             if not iPOI == len(self.poiList) - 1:
