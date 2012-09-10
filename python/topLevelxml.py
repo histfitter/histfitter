@@ -177,7 +177,7 @@ class TopLevelXML(object):
         #verify that this name is not already used
         for meas in self.measurements:
             if meas.name == name:
-                raise RuntimeError("Measurement %s already exists in TopLevelXML %s. Please use a different name." % (measObj.name, self.name))
+                raise RuntimeError("Measurement %s already exists in TopLevelXML %s. Please use a different name." % (name, self.name))
             pass
         #add measurement to the list
         self.measurements.append(Measurement(name, lumi, lumiErr))
@@ -189,7 +189,7 @@ class TopLevelXML(object):
         #verify that this name is not already used
         for meas in self.measurements:
             if meas.name == obj.name:
-                raise RuntimeError("Measurement %s already exists in TopLevelXML %s. Please use a different name." % (measObj.name, self.name))
+                raise RuntimeError("Measurement %s already exists in TopLevelXML %s. Please use a different name." % (obj.name, self.name))
             pass
         #add measurement clone to the list
         self.measurements.append(obj.Clone())
@@ -251,7 +251,7 @@ class TopLevelXML(object):
         # Verify that this name is not already used
         for chan in self.channels:
             if chan.name == obj.name:
-                raise RuntimeError("Channel %s already exists in TopLevelXML %s. Please use a different name." % (chanObj.name, self.name))
+                raise RuntimeError("Channel %s already exists in TopLevelXML %s. Please use a different name." % (obj.name, self.name))
 
         # Create a copy
         newObj = deepcopy(obj)
