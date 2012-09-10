@@ -1,5 +1,5 @@
 from ROOT import THStack,TLegend,TCanvas,TFile,std,TH1F
-from ROOT import ConfigMgr,FitConfig #this module comes from gSystem.Load("libSusyFitter.so")
+from ROOT import ConfigMgr,FitConfig  #from gSystem.Load("libSusyFitter.so")
 from prepareHistos import TreePrepare,HistoPrepare
 from copy import deepcopy
 import os
@@ -7,11 +7,14 @@ import os
 from ROOT import gROOT
 
 ###############################################
-#Systematic is a function which returns an object. This object can be a TreeWeightSystematic or a UserSystematic.
-#These classes are derived classes and the Baseclass for both of them is the SystematicBase.
-#In TreeWeightSystematic the set of the weights differs for the systematic type tree and weight.
-#Therefore there exist the function PrepareWAHforWeight or PrepareWAHforTree.
-# All three types of systematics share the "FillUpDownHist" (for the methods "userNormHistoSys" or "normHistoSys") and "tryAddHistos" function in the Baseclass SystematicBase.
+# Systematic is a function which returns an object. This object can be a
+# TreeWeightSystematic or a UserSystematic. These classes are derived classes
+# and the Baseclass for both of them is the SystematicBase. In
+# TreeWeightSystematic the set of the weights differs for the systematic type
+# tree and weight. Therefore, there exist the functions PrepareWAHforWeight
+# or PrepareWAHforTree. All three types of systematics share the
+# "FillUpDownHist" (for the methods "userNormHistoSys" or "normHistoSys") and
+# "tryAddHistos" function in the Baseclass SystematicBase.
 ###############################################
 
 def replaceSymbols(s):
@@ -37,14 +40,15 @@ class SystematicBase:
         self.treeHiName = {}
 
         if not constraint == "Gaussian" and not method == "shapeSys":
-                raise ValueError("Constraints can only be specified for shapeSys")
+            raise ValueError("Constraints can only be specified for shapeSys")
         self.constraint = constraint
         allowedSys = ["histoSys", "overallSys", "userOverallSys",
                       "overallHistoSys", "normHistoSys", "shapeSys",
                       "histoSysOneSide", "normHistoSysOneSide", "userHistoSys",
                       "userNormHistoSys"]
         if not self.method in allowedSys:
-            raise Exception("Given method %s is not known... use one of %s" % (self.method, allowedSys))
+            raise Exception("Given method %s is not known; use one of %s"
+                             % (self.method, allowedSys))
 
     def Clone(self, name=""):
         newSyst = deepcopy(self)
@@ -117,22 +121,28 @@ class SystematicBase:
     def FillUpDownHist(self, lowhigh="", regionString="", normString="",
                        normCuts="", abstract=None, chan=None, sam=None):
         if self.method == "userNormHistoSys" or self.method == "normHistoSys":
-            if not "h" + sam.name + self.name + lowhigh + normString + "Norm" in abstract.hists.keys():
+            histName = "h" + sam.name + self.name + lowhigh + normString + "Norm"
+            if not histName in abstract.hists.keys():
                 if abstract.readFromTree:
-                    abstract.hists["h" + sam.name + self.name + lowhigh + normString + "Norm"] = TH1F("h" + sam.name + self.name + lowhigh + normString + "Norm", "h" + sam.name + self.name + lowhigh + normString + "Norm", 1, 0.5, 1.5)
-                    abstract.chains[abstract.prepare.currentChainName].Project("h" + sam.name + self.name + lowhigh + normString + "Norm", normCuts, abstract.prepare.weights + " * (" + normCuts + ")")
+                    abstract.hists[histName] = TH1F(histName, histName,
+                                                    1, 0.5, 1.5)
+                    abstract.chains[abstract.prepare.currentChainName].Project(histName, normCuts, abstract.prepare.weights + " * (" + normCuts + ")")
 
                 else:
-                    abstract.hists["h" + sam.name + self.name + lowhigh + normString + "Norm"] = None
-                    abstract.prepare.addHisto("h" + sam.name + self.name + lowhigh + normString + "Norm")
+                    abstract.hists[histName] = None
+                    abstract.prepare.addHisto(histName)
         return
 
     def tryAddHistos(self, highorlow="", regionString="", normString="",
                      normCuts="", abstract=None, chan=None, sam=None):
+        histName = "h" + sam.name + self.name + highorlow + regionString +\
+                   "_obs_" + replaceSymbols(chan.variableName)
         if abstract.verbose > 1:
-            print "!!!!!! adding histo", "h" + sam.name + self.name + highorlow + regionString + "_obs_" + replaceSymbols(chan.variableName)
+            print "!!!!!! adding histo", histName
         try:
-            abstract.prepare.addHisto("h" + sam.name + self.name + highorlow + regionString + "_obs_" + replaceSymbols(chan.variableName), useOverflow=chan.useOverflowBin, useUnderflow=chan.useUnderflowBin)
+            abstract.prepare.addHisto(histName,
+                                      useOverflow=chan.useOverflowBin,
+                                      useUnderflow=chan.useUnderflowBin)
         except:
             pass
 
@@ -269,7 +279,8 @@ class UserSystematic(SystematicBase):
         return
 
 
-## This is the control function. The function ensures the backward compability. It returns an object
+## This is the control function. The function ensures the backward compability.
+## It returns an object
 def Systematic(name="", nominal=None, high=None, low=None,
                type="", method="", constraint="Gaussian"):
     if type == "weight" or type == "tree" or type == "user":

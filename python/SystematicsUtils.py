@@ -96,7 +96,7 @@ def hadroSys(CRval, SRval, sample, observable):
         a = 0.2263
     elif sample == "WZ" and observable == "meff":
         #f(x)= 1.075 - 0.000177*x
-        a =- 0.000177
+        a = -0.000177
         #b=1.075
     elif sample == "WZ" and observable == "met":
         #f(x) = 9.918109e-01+1.109077e-04 * x

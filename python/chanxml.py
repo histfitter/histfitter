@@ -47,7 +47,7 @@ class ChannelXML(object):
         self.useUnderflowBin = False
         self.hasStatConfig = False
         self.hasDiscovery = False
-        if not statErrorThreshold == None:
+        if statErrorThreshold is not None:
             self.hasStatConfig = True
             self.statErrorThreshold = statErrorThreshold
             self.statErrorType = "Poisson"
@@ -114,7 +114,8 @@ class ChannelXML(object):
             if s.name == name:
                 return s
 
-        raise Exception("Could not find sample with name %s in %s" % (name, self.sampleList))
+        raise Exception("Could not find sample with name %s in %s"
+                        % (name, self.sampleList))
 
     def setFileList(self, filelist):
         """
@@ -164,7 +165,8 @@ class ChannelXML(object):
         if not weight in self.weights:
             self.weights.append(weight)
         else:
-            raise RuntimeError("Weight %s already defined in channel %s" % (weight, self.name))
+            raise RuntimeError("Weight %s already defined in channel %s"
+                               % (weight, self.name))
 
         for s in self.sampleList:
             if not s.isData and not s.isQCD and not s.isDiscovery:
@@ -207,10 +209,11 @@ class ChannelXML(object):
         self.hasDiscovery = True
         self.parentTopLvl.hasDiscovery = True
         if not self.variableName == "cuts":
-            raise TypeError("Discovery sample can only be added to a cuts channel")
+            raise TypeError("Discovery sample can only be added "
+                            "to a cuts channel")
         for (iSR, sr) in enumerate(srList):
             sigSample = Sample("DiscoveryMode_%s" % (sr), colorList[iSR])
-            sigSample.setNormFactor("mu_%s"%(sr), startValList[iSR],
+            sigSample.setNormFactor("mu_%s" % (sr), startValList[iSR],
                                     minValList[iSR], maxValList[iSR])
             sigSample.setDiscovery()
             sigSample.clearSystematics()
@@ -219,9 +222,10 @@ class ChannelXML(object):
             histoName = "h" + sigSample.name + "Nom_" + sr + \
                         "_obs_" + self.variableName.replace("/", "")
             self.getSample("DiscoveryMode_%s" % (sr)).setHistoName(histoName)
-            configMgr.hists[histoName] = TH1F(histoName, histoName,len(srList),
-                                              0.0, float(len(srList)))
-            configMgr.hists[histoName].SetBinContent(iSR+1,startValList[iSR])
+            configMgr.hists[histoName] = TH1F(histoName, histoName,
+                                              len(srList), 0.0,
+                                              float(len(srList)))
+            configMgr.hists[histoName].SetBinContent(iSR+1, startValList[iSR])
         return
 
     def addData(self, dataName):
@@ -239,7 +243,7 @@ class ChannelXML(object):
 
         !!! DEPRECATED, MAY NOT WORK !!!
         """
-        if not seed == None:
+        if seed is not None:
             RooRandom.randomGenerator().SetSeed(seed)
         if len(self.dataList):
             raise IndexError("Channel already has data " + str(self.dataList))
@@ -276,7 +280,7 @@ class ChannelXML(object):
             return self.systDict[systName]
         except KeyError:
             raise KeyError("Could not find systematic %s "
-                           "in topLevel %s" % (systName,self.name))
+                           "in topLevel %s" % (systName, self.name))
 
     def __str__(self):
         """

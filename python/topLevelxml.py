@@ -18,7 +18,7 @@ class TopLevelXML(object):
     Defines the content of a top-level HistFactory xml file
     """
 
-    def __init__(self,name):
+    def __init__(self, name):
         """
         Set the combination mode, store the configuration and open output file
         """
@@ -26,7 +26,7 @@ class TopLevelXML(object):
         #attributes to below are OK to deepcopy
         self.mode = "comb"
         self.verbose = 1
-        self.statErrThreshold = None #None means to turn OFF mcStat error
+        self.statErrThreshold = None  # None means to turn OFF mcStat error
         self.measurements = []
         self.channels = []
         self.sampleList = []
@@ -42,9 +42,9 @@ class TopLevelXML(object):
         # Plot cosmetics
         self.dataColor = kBlack
         self.totalPdfColor = kBlue
-        self.errorLineColor = kBlue-5
+        self.errorLineColor = kBlue - 5
         self.errorLineStyle = kSolid
-        self.errorFillColor = kBlue-5
+        self.errorFillColor = kBlue - 5
         self.errorFillStyle = 3004
         self.setLogy = False
         self.tLegend = None
@@ -81,19 +81,20 @@ class TopLevelXML(object):
         self.writeString += "</Combination>\n"
         return self.writeString
 
-
     def initialize(self):
-        self.xmlFileName = "config/"+self.prefix+".xml"
+        self.xmlFileName = "config/" + self.prefix + ".xml"
         #Note: wsFileName is an educated guess of the workspace
         # file name externally decided by HistFactory.
-        self.wsFileName = "results/" + self.prefix + "_combined_" + self.measurements[0].name + "_model.root"
+        self.wsFileName = "results/" + self.prefix + "_combined_" + \
+                          self.measurements[0].name + "_model.root"
         for sam in self.sampleList:
-            if sam.isData: # FIXME (works but ugly)
-                self.sampleList.remove(sam)       #Just making sure that Data is the last element of the list
+            if sam.isData:  # FIXME (works but ugly)
+                #Just making sure that Data is the last element of the list
+                self.sampleList.remove(sam)
                 self.sampleList.append(sam)
                 break
         #Consistency checks
-        if not self.signalSample == None:
+        if self.signalSample is not None:
             found = False
             for s in self.sampleList:
                 if s.name == self.signalSample:
@@ -104,7 +105,9 @@ class TopLevelXML(object):
                         if s.name == self.signalSample:
                             found = True
                 if not found:
-                    print "WARNING signal sample %s is not contained in sampleList of TopLvlXML %s or its daughter channels" % (self.signalSample, self.name)
+                    print "WARNING signal sample %s is not contained in " \
+                          "sampleList of TopLvlXML %s or its daughter " \
+                          "channels" % (self.signalSample, self.name)
 
         for chan in self.channels:
             chanName = chan.channelName
@@ -122,9 +125,12 @@ class TopLevelXML(object):
                 isVR = True
                 nFound += 1
             if nFound == 0:
-                print "WARNING TopLvlXML: %s, Channel: %s --> SR/CR/VR undefined" % (self.name, chanName)
+                print "WARNING TopLvlXML: %s, Channel: %s " \
+                      "--> SR/CR/VR undefined" % (self.name, chanName)
             if nFound > 1:
-                print "WARNING TopLvlXML: %s, Channel: %s --> SR=%s CR=%s VR=%s is ambiguous" % (self.name, chanName, isSR, isCR, isVR)
+                print "WARNING TopLvlXML: %s, Channel: %s " \
+                      "--> SR=%s CR=%s VR=%s is ambiguous" \
+                      % (self.name, chanName, isSR, isCR, isVR)
             #for sample in self.sampleList:
             #    try:
             #        chan.getSample(sample.name)
@@ -177,7 +183,9 @@ class TopLevelXML(object):
         #verify that this name is not already used
         for meas in self.measurements:
             if meas.name == name:
-                raise RuntimeError("Measurement %s already exists in TopLevelXML %s. Please use a different name." % (name, self.name))
+                raise RuntimeError("Measurement %s already exists in "
+                                   "TopLevelXML %s. Please use a different "
+                                   "name." % (name, self.name))
             pass
         #add measurement to the list
         self.measurements.append(Measurement(name, lumi, lumiErr))
@@ -185,11 +193,14 @@ class TopLevelXML(object):
 
     def addMeasurementObj(self, obj):
         if not isinstance(obj, Measurement):
-            raise RuntimeError("addMeasurement does not support input of type '%s'." % (type(obj)))
+            raise RuntimeError("addMeasurement does not support input "
+                               "of type '%s'." % (type(obj)))
         #verify that this name is not already used
         for meas in self.measurements:
             if meas.name == obj.name:
-                raise RuntimeError("Measurement %s already exists in TopLevelXML %s. Please use a different name." % (obj.name, self.name))
+                raise RuntimeError("Measurement %s already exists in "
+                                   "TopLevelXML %s. Please use a different "
+                                   "name." % (obj.name, self.name))
             pass
         #add measurement clone to the list
         self.measurements.append(obj.Clone())
@@ -203,9 +214,10 @@ class TopLevelXML(object):
             if m.name == name:
                 return m
 
-        raise RuntimeError("Measurement %s does not exist in %s" % (name, self.name))
+        raise RuntimeError("Measurement %s does not exist in %s"
+                           % (name, self.name))
 
-    def addChannel(self, variableName, regions ,nBins, binLow, binHigh):
+    def addChannel(self, variableName, regions, nBins, binLow, binHigh):
         """
         Build a channel object from this TopLevel
         """
@@ -220,7 +232,9 @@ class TopLevelXML(object):
         # Verify that this name is not already used
         for chan in self.channels:
             if chan.name == chanObj.name:
-                raise RuntimeError("Channel %s already exists in TopLevelXML %s. Please use a different name." % (chanObj.name, self.name))
+                raise RuntimeError("Channel %s already exists in TopLevelXML "
+                                   "%s. Please use a different name."
+                                   % (chanObj.name, self.name))
 
         #set channel parent
         chanObj.parentTopLvl = self
@@ -246,12 +260,15 @@ class TopLevelXML(object):
         Add channel as a pre-built object
         """
         if not isinstance(obj, ChannelXML):
-            raise RuntimeError("addChannel does not support input of type '%s'." % (type(obj)))
+            raise RuntimeError("addChannel does not support input of type "
+                               "'%s'." % (type(obj)))
 
         # Verify that this name is not already used
         for chan in self.channels:
             if chan.name == obj.name:
-                raise RuntimeError("Channel %s already exists in TopLevelXML %s. Please use a different name." % (obj.name, self.name))
+                raise RuntimeError("Channel %s already exists in TopLevelXML "
+                                   "%s. Please use a different name."
+                                   % (obj.name, self.name))
 
         # Create a copy
         newObj = deepcopy(obj)
@@ -294,7 +311,8 @@ class TopLevelXML(object):
             if chan.variableName == variableName and chan.regions == regions:
                 return chan
 
-        raise RuntimeError("No channel with variable name %s and regions %s found" % (variableName, regions))
+        raise RuntimeError("No channel with variable name %s and regions %s "
+                           "found" % (variableName, regions))
 
     def addSamples(self, input):
         """
@@ -326,7 +344,8 @@ class TopLevelXML(object):
                             self.sampleList[-1].addSystematic(syst)
 
             else:
-                raise RuntimeError("Sample %s already defined in TopLevel %s" % (s.name, self.name))
+                raise RuntimeError("Sample %s already defined in TopLevel "
+                                   "%s" % (s.name, self.name))
 
             # Propagate to channels that are already owned as well
             for c in self.channels:
@@ -342,7 +361,8 @@ class TopLevelXML(object):
         for s in self.sampleList:
             if s.name == name:
                 return s
-        raise Exception("Sample with name %s not found in TopLevel %s" % (name, self.name))
+        raise Exception("Sample with name %s not found in TopLevel %s"
+                        % (name, self.name))
 
     def setWeights(self, weights):
         """
@@ -371,7 +391,8 @@ class TopLevelXML(object):
         if not weight in self.weights:
             self.weights.append(weight)
         else:
-            raise RuntimeError("Weight %s already defined in TopLevel" % (weight, self.name))
+            raise RuntimeError("Weight %s already defined in TopLevel"
+                               % (weight, self.name))
 
         # Propagate to owned channels that do not already have this weight
         for c in self.channels:
@@ -401,7 +422,8 @@ class TopLevelXML(object):
         if weight in self.weights:
             self.weights.remove(weight)
         else:
-            raise RuntimeError("Weight %s does not exist in TopLevel %s" % (weight, self.name))
+            raise RuntimeError("Weight %s does not exist in TopLevel %s"
+                               % (weight, self.name))
 
         # Propagate to owned channels
         for c in self.channels:
@@ -432,7 +454,8 @@ class TopLevelXML(object):
         elif isinstance(sig, str):
             self.signalSample = sig
         else:
-            raise RuntimeError("setSignalSample does not support type %s" % (type(sig)))
+            raise RuntimeError("setSignalSample does not support type %s"
+                               % (type(sig)))
         return
 
     def appendStrChanOrListToList(self, input, targetList):
@@ -512,7 +535,8 @@ class TopLevelXML(object):
         This will be propagated to all owned samples
         """
         if syst.name in self.systDict.keys():
-            raise RuntimeError("Attempt to overwrite systematic %s in TopLevel %s" % (syst.name, self.name))
+            raise RuntimeError("Attempt to overwrite systematic %s in "
+                               "TopLevel %s" % (syst.name, self.name))
         else:
             self.systDict[syst.name] = syst.Clone()
             for chan in self.channels:
@@ -529,7 +553,8 @@ class TopLevelXML(object):
         try:
             return self.systDict[systName]
         except KeyError:
-            raise KeyError("Could not find systematic %s in topLevel %s" % (systName, self.name))
+            raise KeyError("Could not find systematic %s in topLevel %s"
+                           % (systName, self.name))
 
     def clearSystematics(self):
         """

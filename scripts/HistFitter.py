@@ -284,7 +284,9 @@ if __name__ == "__main__":
         configMgr.cppMgr.doHypoTestAll()
         pass
 
-    if configMgr.nTOYs > 0 and doHypoTests == False and printLimits == False and runFit == False:
+    if (configMgr.nTOYs > 0 and doHypoTests is False and
+        printLimits is False and runFit is False):
+
         RooRandom.randomGenerator().SetSeed(configMgr.toySeed)
         configMgr.cppMgr.runToysAll()
         pass
