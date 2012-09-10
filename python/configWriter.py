@@ -1,7 +1,4 @@
-from topLevelxml import TopLevelXML
-from measurmt import Measurement
-from chanxml import ChannelXML
-from smpl import Sample
-
-
-
+from topLevelXML import TopLevelXML
+from measurement import Measurement
+from channel import ChannelXML
+from sample import Sample

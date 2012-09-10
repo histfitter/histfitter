@@ -3,7 +3,6 @@ from ROOT import kBlack,kWhite,kGray,kRed,kPink,kMagenta,kViolet,kBlue,kAzure,kC
 from os import system
 from math import fabs
 
-
 import generateToys
 
 TH1.SetDefaultSumw2(True)

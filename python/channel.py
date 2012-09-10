@@ -3,7 +3,7 @@ from ROOT import kBlack,kWhite,kGray,kRed,kPink,kMagenta,kViolet,kBlue,kAzure,kC
 from os import system
 from math import fabs
 
-from smpl import Sample
+from sample import Sample
 
 import generateToys
 
