@@ -13,14 +13,16 @@ TH1.SetDefaultSumw2(True)
 from copy import deepcopy,copy
 from configManager import configMgr
 
+
 class Measurement(object):
     """
     Class to define measurements in the top-level xml
     """
 
-    def __init__(self,name,lumi,lumiErr):
+    def __init__(self, name, lumi, lumiErr):
         """
-        Store configuration, add to top level list of measurements, specify lumi parameters and if run in exportOnly mode
+        Store configuration, add to top level list of measurements,
+        specify lumi parameters and if run in exportOnly mode
         """
         self.name = name
         self.lumi = lumi
@@ -30,27 +32,27 @@ class Measurement(object):
         self.mode = "comb"
         self.exportOnly = "True"
         self.poiList = []
-        self.constraintTermDict = {} 
+        self.constraintTermDict = {}
         self.paramSettingDict = {}
 
-    def Clone(self,newName=""):
-        if newName=="":
-            newName=self.name
-        newMeas=deepcopy(self)
-        newMeas.name=newName
+    def Clone(self, newName=""):
+        if newName == "":
+            newName = self.name
+        newMeas = deepcopy(self)
+        newMeas.name = newName
         return newMeas
 
-    def addPOI(self,poi):
+    def addPOI(self, poi):
         """
         Add a parameter of interest
         """
         self.poiList.append(poi)
-        
-    def addParamSetting(self,paramName,const,val=None):
+
+    def addParamSetting(self, paramName, const, val=None):
         """
         Define the settings for a parameter
         """
-        self.paramSettingDict[paramName] = (const,val)
+        self.paramSettingDict[paramName] = (const, val)
 
     def addConstraintTerm(self,paramName,type,relUnc=None):
         """
@@ -64,26 +66,26 @@ class Measurement(object):
         """
         measurementString = "  <Measurement Name=\"%s\" Lumi=\"%g\" LumiRelErr=\"%g\" BinLow=\"%d\" BinHigh=\"%d\" Mode=\"%s\" ExportOnly=\"%s\">\n" % (self.name,self.lumi,self.lumiErr,self.binLow,self.binHigh,self.mode,self.exportOnly)
         measurementString += "    <POI>"
-        for (iPOI,poi) in enumerate(self.poiList):
+        for (iPOI, poi) in enumerate(self. poiList):
             if not iPOI == len(self.poiList) - 1:
                 measurementString += "%s " % (poi)
             else:
                 measurementString += "%s</POI>\n" % (poi)
-        for (param,setting) in self.paramSettingDict.iteritems():
+        for (param, setting) in self.paramSettingDict. iteritems():
             if setting[0]:
                 if not setting[1] == None:
-                    measurementString += "    <ParamSetting Const=\"True\" Val=\"%g\">%s</ParamSetting>\n" % (setting[1],param)
+                    measurementString += "    <ParamSetting Const=\"True\" Val=\"%g\">%s</ParamSetting>\n" % (setting[1], param)
                 else:
                     measurementString += "    <ParamSetting Const=\"True\">%s</ParamSetting>\n" % (param)
             else:
-                if not setting[1] == None: 
-                    measurementString += "    <ParamSetting Const=\"False\" Val=\"%g\">%s</ParamSetting>\n" % (setting[1],param)
+                if not setting[1] == None:
+                    measurementString += "    <ParamSetting Const=\"False\" Val=\"%g\">%s</ParamSetting>\n" % (setting[1], param)
                 else:
                     measurementString += "    <ParamSetting Const=\"False\">%s</ParamSetting>\n" % (param)
-        for (param,constraint) in self.constraintTermDict.iteritems():
+        for (param, constraint) in self.constraintTermDict.iteritems():
             if not constraint[1] == None:
-                measurementString += "    <ConstraintTerm Type=\"%s\" RelativeUncertainty=\"%g\">%s</ConstraintTerm>\n" % (constraint[0],constraint[1],param)
+                measurementString += "    <ConstraintTerm Type=\"%s\" RelativeUncertainty=\"%g\">%s</ConstraintTerm>\n" % (constraint[0], constraint[1], param)
             else:
-                measurementString += "    <ConstraintTerm Type=\"%s\">%s</ConstraintTerm>\n" % (constraint[0],param)
+                measurementString += "    <ConstraintTerm Type=\"%s\">%s</ConstraintTerm>\n" % (constraint[0], param)
         measurementString += "  </Measurement>\n\n"
         return measurementString
