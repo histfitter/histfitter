@@ -17,6 +17,8 @@ from ROOT import gROOT
 # "tryAddHistos" function in the Baseclass SystematicBase.
 ###############################################
 
+
+
 def replaceSymbols(s):
     s = s.replace("/", "").replace("*", "").replace("(", "").replace(")", "")
     return s
@@ -120,17 +122,98 @@ class SystematicBase:
 
     def FillUpDownHist(self, lowhigh="", regionString="", normString="",
                        normCuts="", abstract=None, chan=None, sam=None):
-        if self.method == "userNormHistoSys" or self.method == "normHistoSys":
+        if self.method == "userNormHistoSys" or self.method == "normHistoSys" \
+           or self.method == "normHistoSysOneSide" \
+           or self.method == "normHistoSysOneSideSym" \
+           or self.method == "overallNormHistoSys" \
+           or self.method == "overallNormHistoSysOneSide" \
+           or self.method == "overallNormHistoSysOneSideSym":
+
             histName = "h" + sam.name + self.name + lowhigh + normString + "Norm"
             if not histName in abstract.hists.keys():
-                if abstract.readFromTree:
-                    abstract.hists[histName] = TH1F(histName, histName,
-                                                    1, 0.5, 1.5)
-                    abstract.chains[abstract.prepare.currentChainName].Project(histName, normCuts, abstract.prepare.weights + " * (" + normCuts + ")")
+                if sam.normRegions:
+                    normString = ""
+                    for normReg in sam.normRegions:
+                        if not type(normReg[0]) == "list":
+                            normList = []
+                            normList.append(normReg[0])
+                            c = topLvl.getChannel(normReg[1],normList)
+                        else:
+                            c = topLvl.getChannel(normReg[1],normReg[0])
+                        normString += c.regionString
 
-                else:
-                    abstract.hists[histName] = None
-                    abstract.prepare.addHisto(histName)
+                    if abstract.readFromTree:
+                        abstract.hists[histName] = TH1F(histName, histName,
+                                                         1, 0.5, 1.5)
+
+                        for normReg in sam.normRegions:
+                            if not type(normReg[0]) == "list":
+                                normList = []
+                                normList.append(normReg[0])
+                                c = topLvl.getChannel(normReg[1],normList)
+                            else:
+                                c = topLvl.getChannel(normReg[1],normReg[0])
+
+                            try:
+                                s = c.getSample(sam.name)
+                            except:
+                                # assume that if no histogram is made,
+                                # then it is not needed
+                                continue
+
+                            systNorm = s.getSystematic(self.name)
+
+                            # if the systematic has a dedicated file
+                            # list, use it
+                            if s.name in systNorm.filesHi:
+                                filelist = systNorm.filesHi[s.name]
+                            else:
+                                # otherwise - take the sample file list
+                                filelist = s.files
+                            if s.name in systNorm.treeHiName:
+                                treeName = systNorm.treeHiName[s.name]
+                            else:
+                                # otherwise - take the default tree name
+                                # for the sample
+                                if self.type == "tree":
+                                    treeName = s.treeName + systNorm.high  # NM
+                                else:
+                                    treeName = s.treeName
+                            if treeName == '' or treeName == systNorm.high:
+                                treeName = s.name + systNorm.high
+
+                            if abstract.verbose > 2:
+                                print "s.name", s.name
+                                print "sam.name", sam.name
+                                print "systNorm high", systNorm.high
+                                print "treeName", treeName
+
+                            abstract.prepare.read(treeName, filelist)
+
+                            tempHist = TH1F("temp", "temp", 1, 0.5, 1.5)
+
+                            if systNorm.type == "tree":
+                                if abstract.verbose > 2:
+                                    print "normalization region", "". join(normReg[0])
+                                    print "normalization cuts", abstract.cutsDict["".join(normReg[0])]
+                                    print "current chain",abstract. prepare.currentChainName
+                                    print "projecting string",str(abstract. lumiUnits*abstract.outputLumi/abstract.inputLumi) + " * " + "*". join(s.weights) + " * (" + abstract.cutsDict["".join(normReg[0])] + ")"
+
+                                abstract.chains[abstract.prepare.currentChainName].Project("temp",abstract.cutsDict["".join(normReg[0])],str(abstract.lumiUnits*abstract.outputLumi/abstract.inputLumi)+" * "+"*".join(s.weights)+" * ("+abstract.cutsDict["".join(normReg[0])]+")")
+                                abstract.hists["h"+sam.name+systNorm.name+lowhigh+normString+"Norm"].SetBinContent(1,abstract.hists["h"+sam.name+systNorm.name+lowhigh+normString+"Norm"].GetSum()+tempHist.GetSumOfWeights())
+                            elif systNorm.type == "weight":
+                                if abstract.verbose > 2:
+                                    print "normalization region","".join(normReg[0])
+                                    print "normalization cuts",abstract.cutsDict["".join(normReg[0])]
+                                    print "current chain",abstract.prepare.currentChainName
+                                    print "projecting string",str(abstract.lumiUnits*abstract.outputLumi/abstract.inputLumi)+" * "+"*".join(s.weights)+" * ("+abstract.cutsDict["".join(normReg[0])]+")"
+                                abstract.chains[abstract.prepare.currentChainName].Project("temp",abstract.cutsDict["".join(normReg[0])],str(abstract.lumiUnits*abstract.outputLumi/abstract.inputLumi)+" * "+"*".join(s.systDict[systNorm.name].high)+" * ("+abstract.cutsDict["".join(normReg[0])]+")")
+                                abstract.hists["h"+s.name+systNorm.name+lowhigh+normString+"Norm"].SetBinContent(1,abstract.hists["h"+s.name+systNorm.name+lowhigh+normString+"Norm"].GetSum()+tempHist.GetSumOfWeights())
+                            del tempHist
+                    else:
+                        abstract.hists[histName] = None
+                        abstract.prepare.addHisto(histName)
+
         return
 
     def tryAddHistos(self, highorlow="", regionString="", normString="",
@@ -148,6 +231,7 @@ class SystematicBase:
 
 
 class TreeWeightSystematic(SystematicBase):
+
     def __init__(self, name="", nominal=None, high=None, low=None,
                  type="", method="", constraint="Gaussian"):
         SystematicBase.__init__(self, name, nominal, high, low,
@@ -159,11 +243,11 @@ class TreeWeightSystematic(SystematicBase):
         weightstemp = abstract.prepare.weights
         for highorlow in highandlow:
             abstract.prepare.weights = weightstemp
-
             if highorlow == "High_":
                 for myw in self.high:
                     if abstract.prepare.weights.find(myw) == -1:
                         abstract.prepare.weights += " * " + myw
+
             else:
                 for myw in self.low:
                     if abstract.prepare.weights.find(myw) == -1:
@@ -174,7 +258,6 @@ class TreeWeightSystematic(SystematicBase):
                 if treeName == '':
                     treeName = sam.name + abstract.nomName
                 abstract.prepare.read(treeName, sam.files)
-
             TreeWeightSystematic.tryAddHistos(self, highorlow, regionString,
                                               normString, normCuts, abstract,
                                               chan, sam)
@@ -200,12 +283,10 @@ class TreeWeightSystematic(SystematicBase):
                         filelist = self.filesHi[sam.name]
                     else:
                         filelist = sam.files
-
                     if sam.name in self.treeHiName:
                         treeName = self.treeHiName[sam.name]
                     else:
                         treeName = sam.treeName + self.high
-
                     if treeName == '' or treeName == self.high:
                         treeName = sam.name + self.high
 
@@ -215,12 +296,10 @@ class TreeWeightSystematic(SystematicBase):
                         filelist = self.filesLo[sam.name]
                     else:
                         filelist = sam.files
-
                     if sam.name in self.treeLoName:
                         treeName = self.treeLoName[sam.name]
                     else:
                         treeName = sam.treeName + self.low
-
                     if treeName == '' or treeName == self.low:
                         treeName = sam.name + self.low
                     abstract.prepare.read(treeName, filelist)
@@ -262,7 +341,6 @@ class UserSystematic(SystematicBase):
         for highorlow in highandlow:
             abstract.prepare.weights = weightstemp
             abstract.prepare.weights += " * " + " * ".join(sam.weights)
-
             if abstract.readFromTree:
                 treeName = sam.treeName
                 if treeName == '':
