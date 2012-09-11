@@ -118,8 +118,8 @@ class SystematicBase:
 
     def FillUpDownHist(self,lowhigh="",regionString="",normString="",normCuts="",abstract= None,chan=None,sam=None):
 
-        if syst.method == "userNormHistoSys" or syst.method == "normHistoSys" or syst.method == "normHistoSysOneSide" or syst.method == "normHistoSysOneSideSym" or syst.method == "overallNormHistoSys" or syst.method == "overallNormHistoSysOneSide" or syst.method == "overallNormHistoSysOneSideSym":
-            if not "h"+sam.name+syst.name+lowhigh+normString+"Norm" in abstract.hists.keys():
+        if self.method == "userNormHistoSys" or self.method == "normHistoSys" or self.method == "normHistoSysOneSide" or self.method == "normHistoSysOneSideSym" or self.method == "overallNormHistoSys" or self.method == "overallNormHistoSysOneSide" or self.method == "overallNormHistoSysOneSideSym":
+            if not "h"+sam.name+self.name+lowhigh+normString+"Norm" in abstract.hists.keys():
                 if sam.normRegions:
                     normString = ""
                     for normReg in sam.normRegions:
@@ -132,7 +132,7 @@ class SystematicBase:
                         normString += c.regionString
 
                     if abstract.readFromTree:
-                        abstract.hists["h"+sam.name+syst.name+lowhigh+normString+"Norm"] = TH1F("h"+sam.name+syst.name+lowhigh+normString+"Norm","h"+sam.name+syst.name+lowhigh+normString+"Norm",1,0.5,1.5)
+                        abstract.hists["h"+sam.name+self.name+lowhigh+normString+"Norm"] = TH1F("h"+sam.name+self.name+lowhigh+normString+"Norm","h"+sam.name+self.name+lowhigh+normString+"Norm",1,0.5,1.5)
 
                         for normReg in sam.normRegions:
                             if not type(normReg[0]) == "list":
@@ -148,7 +148,7 @@ class SystematicBase:
                                 # assume that if no histogram is made, then it is not needed  
                                 continue
                                         
-                            systNorm = s.getSystematic(syst.name)
+                            systNorm = s.getSystematic(self.name)
 
                             # if the systematic has a dedicated file list - use it
                             if s.name in systNorm.filesHi:
@@ -160,7 +160,7 @@ class SystematicBase:
                                 treeName = systNorm.treeHiName[s.name]
                             else:
                                 # otherwise - take the default tree name for the sample
-                                if syst.type == "tree":
+                                if self.type == "tree":
                                     treeName = s.treeName + systNorm.high # NM
                                 else:
                                     treeName = s.treeName
@@ -195,8 +195,8 @@ class SystematicBase:
                                 abstract.hists["h"+s.name+systNorm.name+lowhigh+normString+"Norm"].SetBinContent(1,abstract.hists["h"+s.name+systNorm.name+lowhigh+normString+"Norm"].GetSum()+tempHist.GetSumOfWeights())
                             del tempHist
                     else:
-                        abstract.hists["h"+sam.name+syst.name+lowhigh+normString+"Norm"] = None
-                        abstract.prepare.addHisto("h"+sam.name+syst.name+lowhigh+normString+"Norm")
+                        abstract.hists["h"+sam.name+self.name+lowhigh+normString+"Norm"] = None
+                        abstract.prepare.addHisto("h"+sam.name+self.name+lowhigh+normString+"Norm")
         return
 
     def tryAddHistos(self, highorlow="", regionString="", normString="",
