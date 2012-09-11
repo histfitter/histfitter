@@ -1,17 +1,21 @@
-from ROOT import THStack,TLegend,TCanvas,TFile,std,TH1F
-from ROOT import ConfigMgr,FitConfig #this module comes from gSystem.Load("libSusyFitter.so")
-from prepareHistos import TreePrepare,HistoPrepare
+from ROOT import THStack, TLegend, TCanvas, TFile, TH1F
+from ROOT import ConfigMgr,FitConfig # from gSystem.Load("libSusyFitter.so")
+from prepareHistos import TreePrepare, HistoPrepare
 from copy import deepcopy
-from systematic import Systematic
 import os
 
 from ROOT import gROOT
 
 gROOT.SetBatch(True)
 
+# TODO: the executeHistFactory name needs to be changed to writeWorkspaces
+# TODO: all the topLvl names need to be changed to fitWS or something
+
+
 def replaceSymbols(s):
-    s = s.replace("/","").replace("*","").replace("(","").replace(")","")
+    s = s.replace("/", "").replace("*", "").replace("(", "").replace(")", "")
     return s
+
 
 class ConfigManager(object):
     """
@@ -19,12 +23,12 @@ class ConfigManager(object):
     """
     _instance = None
 
-    def __new__(cls,*args,**kwargs):
+    def __new__(cls, *args, **kwargs):
         """
         Make singleton by only instanciating once
         """
         if not cls._instance:
-            cls._instance = super(ConfigManager,cls).__new__(cls,*args,**kwargs)
+            cls._instance = super(ConfigManager, cls).__new__(cls, *args, **kwargs)
         else:
             raise Exception("Only one instance allowed")
 
@@ -34,28 +38,28 @@ class ConfigManager(object):
         """
         Configuration variables
         """
-        self.analysisName = None # Name to give the analysis
-        self.nomName = "" # suffix of nominal trees names
-        self.cppMgr = ConfigMgr.getInstance() #C++ alter ego of this configManager
+        self.analysisName = None  # Name to give the analysis
+        self.nomName = ""  # suffix of nominal trees names
+        self.cppMgr = ConfigMgr.getInstance()  #C++ alter ego of this configManager
 
-        self.inputLumi = None # Luminosity of input histograms
-        self.outputLumi = None # Output luminosity
-        self.lumiUnits = 1.0 # 1=fb-1, 1000=pb-1, etc.
-        self.nTOYs=-1 #<=0 means to use real data
-        self.calculatorType=0 # frequentist calculator
-        self.testStatType=3   # one-sided test statistic
-        self.useCLs=True # use CLs for upper limits, or not
-        self.doExclusion=True # true = exclusion, false = discovery test
-        self.fixSigXSec=False # true = fix SigXSec by nominal, +/-1sigma
-        self.nPoints=20 # number of points in upper limit evaluation
-        self.seed=0 # seed for random generator. default is clock
-        self.muValGen = 0.0 # mu_sig used for toy generation
-        self.toySeedSet = False # Set the seed for toys
-        self.toySeed = 0 # CPU clock, default
-        self.useAsimovSet = False # Use the Asimov dataset
-        self.blindSR = False # Blind the SRs only
-        self.blindCR = False # Blind the CRs only
-        self.useSignalInBlindedData=False 
+        self.inputLumi = None  # Luminosity of input histograms
+        self.outputLumi = None  # Output luminosity
+        self.lumiUnits = 1.0  # 1=fb-1, 1000=pb-1, etc.
+        self.nTOYs = -1  # <=0 means to use real data
+        self.calculatorType = 0  # frequentist calculator
+        self.testStatType = 3  # one-sided test statistic
+        self.useCLs = True  # use CLs for upper limits, or not
+        self.doExclusion = True  # true = exclusion, false = discovery test
+        self.fixSigXSec = False  # true = fix SigXSec by nominal, +/-1sigma
+        self.nPoints = 20  # number of points in upper limit evaluation
+        self.seed = 0  # seed for random generator. default is clock
+        self.muValGen = 0.0  # mu_sig used for toy generation
+        self.toySeedSet = False  # Set the seed for toys
+        self.toySeed = 0  # CPU clock, default
+        self.useAsimovSet = False  # Use the Asimov dataset
+        self.blindSR = False  # Blind the SRs only
+        self.blindCR = False  # Blind the CRs only
+        self.useSignalInBlindedData = False
 
         self.normList = [] # List of normalization factors
         self.outputFileName = None # Output file name used to store fit results
@@ -194,7 +198,7 @@ class ConfigManager(object):
                                 self.hists[sam.blindedHistName] = None
                         else:
                             if not "h"+sam.name+"_"+regString+"_obs_"+replaceSymbols(chan.variableName) in self.hists.keys():
-                                self.hists["h"+sam.name+"_"+regString+"_obs_"+replaceSymbols(chan.variableName)] = None                            
+                                self.hists["h"+sam.name+"_"+regString+"_obs_"+replaceSymbols(chan.variableName)] = None
                     elif sam.isQCD:
                         if not "h"+sam.name+"Nom_"+regString+"_obs_"+replaceSymbols(chan.variableName) in self.hists.keys():
                             self.hists["h"+sam.name+"Nom_"+regString+"_obs_"+replaceSymbols(chan.variableName)] = None
@@ -797,8 +801,8 @@ class ConfigManager(object):
                             for r in c.regions:
                                 try:
                                     s = c.getSample(sam.name)
-                                except:    
-                                    # assume that if no histogram is made, then it is not needed  
+                                except:
+                                    # assume that if no histogram is made, then it is not needed
                                     continue
 
                                 treeName = s.treeName
@@ -816,14 +820,14 @@ class ConfigManager(object):
                                     self.hists["h"+s.name+"Nom_"+normString+"Norm"].SetBinContent(1, self.hists["h"+s.name+"Nom_"+normString+"Norm"].GetBinContent(1) + tempHist.GetSumOfWeights())
 
                                 del tempHist
-                        if configMgr.verbose > 2:        
-                            print "nom =",self.hists["h"+s.name+"Nom_"+normString+"Norm"].GetSumOfWeights()        
+                        if configMgr.verbose > 2:
+                            print "nom =",self.hists["h"+s.name+"Nom_"+normString+"Norm"].GetSumOfWeights()
                     else:
                         self.hists["h"+sam.name+"Nom_"+normString+"Norm"] = None
                         try:
                             self.prepare.addHisto("h"+sam.name+"Nom_"+normString+"Norm")
-                        except:    
-                            # assume that if no histogram is made, then it is not needed  
+                        except:
+                            # assume that if no histogram is made, then it is not needed
                             pass
 
             for (systName,syst) in chan.getSample(sam.name).systDict.items():
@@ -858,7 +862,7 @@ class ConfigManager(object):
             except ZeroDivisionError:
                 print "ERROR: generating HistoSys for %s syst=%s nom=%g high=%g low=%g remove from fit." % (nom,syst,nomIntegral,highIntegral,lowIntegral)
         return
-    
+
     def buildBlindedHistos(self,topLvl,chan,sam):
         regString = ""
         for reg in chan.regions:
@@ -870,7 +874,7 @@ class ConfigManager(object):
                     if (not s.isData) and (self.useSignalInBlindedData or s.name!=topLvl.signalSample):
                         self.hists[sam.blindedHistName].Add(self.hists[s.histoName])
         return
-    
+
     def makeDicts(self,chan):
         regString = ""
         for reg in chan.regions:
