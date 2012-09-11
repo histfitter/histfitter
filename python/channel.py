@@ -12,7 +12,6 @@ TH1.SetDefaultSumw2(True)
 from copy import deepcopy, copy
 from configManager import configMgr
 
-#TODO put removeSample back
 
 class Channel(object):
     """
