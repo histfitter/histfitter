@@ -146,7 +146,7 @@ class workspaceWriter(object):
         """
         Write workspace to file and close
         """
-        writeWorkspaces()
+        self.writeWorkspaces()
         return
 
     def execute(self, option=""):
