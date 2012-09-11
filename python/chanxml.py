@@ -116,6 +116,21 @@ class ChannelXML(object):
 
         raise Exception("Could not find sample with name %s in %s"
                         % (name, self.sampleList))
+    
+    def removeSample(self, sample):
+        if isinstance(sample, Sample):
+            aSam = sample
+        elif isinstance(sample,str):
+            aSam = self.getSample(sample)
+        else:
+            raise ValueError("Channel: sample type %s not supported" % (type(sample)))
+        
+        try:
+            self.sampleList.remove(aSam)
+        except:
+            print "WARNING unable to remove sample %s from channel %s" % (aSam.name, self.name)
+        
+        return
 
     def setFileList(self, filelist):
         """
