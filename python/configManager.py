@@ -85,7 +85,7 @@ class ConfigManager(object):
         self.printHistoNames = False # Print out the names of generated histograms
         self.doHypoTest = False
 
-        self.topLvls = [] # TopLevelXML object
+        self.topLvls = [] # workspaceWriter object
         self.prepare = None # PrepareHistos object
 
         self.histCacheFile = ""
@@ -105,53 +105,55 @@ class ConfigManager(object):
             raise TypeError("lumi unit '%s' is not supported."%unit)
         return
 
-    def addTopLevelXML(self,input,name=""):
-        from configWriter import TopLevelXML
+    def addWorkspaceWriter(self,input,name=""):
+        from workspaceWriter import workspaceWriter
         if len(name)>0:
             newName=name
         elif isinstance(input,str):
             newName=input
-        elif isinstance(input,TopLevelXML):
+        elif isinstance(input,workspaceWriter):
             newName=input.name
         else:
-            raise RuntimeError("Logic error in addTopLevelXML")
+            raise RuntimeError("Logic error in addWorkspaceWriter")
 
         #check that newName is not already used
         for tl in self.topLvls:
             if tl.name==newName:
-                raise RuntimeError("TopLevelXML %s already exists in configManager. Please use a different name."%(newName))
+                raise RuntimeError("workspaceWriter %s already exists in configManager. Please use a different name."%(newName))
             pass
 
-        #create new TopLevelXML object and return pointer
-        if isinstance(input,TopLevelXML):
-            newTLX = input.Clone(newName)
+        #create new workspaceWriter object and return pointer
+        if isinstance(input, workspaceWriter):
+            newWorkspaceWriter = input.Clone(newName)
         else:
-            newTLX = TopLevelXML(newName)
+            newWorkspaceWriter = workspaceWriter(newName)
             pass
-        newTLX.verbose=self.verbose
-        newTLX.setWeights(self.weights)
-        newTLX.removeEmptyBins=self.removeEmptyBins
-        self.topLvls.append(newTLX)
-        print "Created Fit Config: %s"%(newName)
+
+        newWorkspaceWriter.verbose=self.verbose
+        newWorkspaceWriter.setWeights(self.weights)
+        newWorkspaceWriter.removeEmptyBins=self.removeEmptyBins
+        self.topLvls.append(newWorkspaceWriter)
+        
+        print "Created Fit Config: %s" % (newName)
         return self.topLvls[len(self.topLvls)-1]
 
-    def addTopLevelXMLClone(self,obj,name):
-        return self.addTopLevelXML(obj,name)
+    def addWorkspaceWriterClone(self, obj, name):
+        return self.addWorkspaceWriter(obj, name)
 
-    def removeTopLevelXML(self,name):
+    def removeWorkspaceWriter(self, name):
         for i in xrange(0,len(self.topLvls)):
             tl=self.topLvls[i]
             if tl.name==name:
                 self.topLvls.pop(i)
                 return
-        print "WARNING TopLevelXML named '%s' does not exist. Cannot be removed."%(name)
+        print "WARNING workspaceWriter named '%s' does not exist. Cannot be removed." % (name)
         return
 
-    def getTopLevelXML(self,name):
+    def getWorkspaceWriter(self, name):
         for tl in self.topLvls:
-            if tl.name==name:
+            if tl.name == name:
                 return tl
-        print "WARNING TopLevelXML named '%s' does not exist. Cannot be returned."%(name)
+        print "WARNING workspaceWriter named '%s' does not exist. Cannot be returned." % (name)
         return 0
 
     def initialize(self):
@@ -276,7 +278,7 @@ class ConfigManager(object):
         if self.outputFileName:
             self.cppMgr.m_outputFileName = self.outputFileName
             self.cppMgr.m_saveTree=True
-        #Fill FitConfigs from TopLevelXMLs
+        #Fill FitConfigs from workspaceWriter
         for tl in self.topLvls:
             cppTl = self.cppMgr.addFitConfig(tl.name)
             cppTl.m_inputWorkspaceFileName = tl.wsFileName
@@ -303,7 +305,7 @@ class ConfigManager(object):
                 cppTl.m_validationChannels.push_back(cName)
             for cName in tl.bkgConstrainChannels:
                 cppTl.m_bkgConstrainChannels.push_back(cName)
-            # Plot cosmetics per TopLevelXML (FitConfig in C++)
+            # Plot cosmetics per workspaceWriter (FitConfig in C++)
             cppTl.m_dataColor = tl.dataColor
             cppTl.m_totalPdfColor = tl.totalPdfColor
             cppTl.m_errorLineColor = tl.errorLineColor
@@ -360,7 +362,7 @@ class ConfigManager(object):
         print "readFromTree: %s"%self.readFromTree
         print "plotHistos: %s"%self.plotHistos
         print "executeHistFactory: %s"%self.executeHistFactory
-        print "TopLevelXML objects:"
+        print "workspaceWriter objects:"
         for tl in self.topLvls:
             print "  %s"%tl.name
             for c in tl.channels:
@@ -399,7 +401,7 @@ class ConfigManager(object):
         print "ConfigManager:"
         print str(self.fileList)
         for topLvl in self.topLvls:
-            print "                TopLvlXML: " + topLvl.name
+            print "                workspaceWriter: " + topLvl.name
             print "                " + str(topLvl.files)
             for channel in topLvl.channels:
                 print "                ---------> Channel: " + channel.name
@@ -417,7 +419,7 @@ class ConfigManager(object):
         print "ConfigManager:"
         print str(self.treeName)
         for topLvl in self.topLvls:
-            print "                TopLvlXML: " + topLvl.name
+            print "                workspaceWriter: " + topLvl.name
             print "                " + str(topLvl.treeName)
             for channel in topLvl.channels:
                 print "                ---------> Channel: " + channel.name
@@ -440,7 +442,7 @@ class ConfigManager(object):
     def setFileList(self,filelist):
         """
         Set file list for config manager.
-        This will be used as default for top level xmls that don't specify
+        This will be used as default for any workspaceWriter that doesn't specify
         their own file list.
         """
         self.fileList = filelist
@@ -448,7 +450,7 @@ class ConfigManager(object):
     def setFile(self,file):
         """
         Set file list for config manager.
-        This will be used as default for top level xmls that don't specify
+        This will be used as default for any workspaceWriter that doesn't specify
         their own file list.
         """
         self.fileList = [file]
@@ -479,9 +481,9 @@ class ConfigManager(object):
 
     def execute(self,topLvl):
         """
-        Make or get the histograms and generate the XML
+        Make or get the histograms and generate the workspaces
         """
-        print "Preparing histograms and/or workspace for TopLevelXML %s\n"%topLvl.name
+        print "Preparing histograms and/or workspace for workspaceWriter %s\n"%topLvl.name
 
         if self.plotHistos:
             cutHistoDict = {}
@@ -498,7 +500,7 @@ class ConfigManager(object):
             if not name in systDict.keys():
                 systDict[name] = syst
             else:
-                raise(Exception,"Syst name %s already defined at global level. Rename for top level %s",(name,topLvl.name))
+                raise(Exception,"Systematic name %s already defined at global level. Rename it for workspaceWriter %s",(name,topLvl.name))
 
         # Build channel string and cuts for normalization
         normRegions = []

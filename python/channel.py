@@ -13,7 +13,7 @@ from copy import deepcopy, copy
 from configManager import configMgr
 
 
-class ChannelXML(object):
+class Channel(object):
     """
     Defines the content of a channel HistFactory xml file
     """

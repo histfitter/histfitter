@@ -11,15 +11,15 @@
 
 from configManager import configMgr
 from ROOT import kBlack,kWhite,kGray,kRed,kPink,kMagenta,kViolet,kBlue,kAzure,kCyan,kTeal,kGreen,kSpring,kYellow,kOrange
-from configWriter import TopLevelXML,Measurement,ChannelXML,Sample
 from systematic import Systematic
 from math import sqrt
+
+from configWriter import workspaceWriter, Sample, Channel
 
 from ROOT import gROOT
 gROOT.LoadMacro("./macros/AtlasStyle.C")
 import ROOT
 ROOT.SetAtlasStyle()
-
 
 #-------------------------------
 # Parameters for hypothesis test
@@ -102,7 +102,7 @@ dataSample.setData()
 #**************
 
 #Fit config instance
-discoveryFitConfig = configMgr.addTopLevelXML("Discovery")
+discoveryFitConfig = configMgr.addWorkspaceWriter("Discovery")
 meas=discoveryFitConfig.addMeasurement(name="NormalMeasurement",lumi=1.0,lumiErr=0.039)
 meas.addPOI("mu_SIG")
 
@@ -125,7 +125,7 @@ srBin.addDiscoverySamples(["BLAH"],[1.],[0.],[100.],[kMagenta])
 #**************
 
 #Fit config instance
-exclusionFitConfig = configMgr.addTopLevelXML("Exclusion")
+exclusionFitConfig = configMgr.addWorkspaceWriter("Exclusion")
 meas=exclusionFitConfig.addMeasurement(name="NormalMeasurement",lumi=1.0,lumiErr=0.039)
 meas.addPOI("mu_SIG")
 

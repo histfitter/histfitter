@@ -3,7 +3,7 @@ from ROOT import kBlack, kWhite, kGray, kRed, kPink, kMagenta, kViolet, kBlue, k
 from os import system
 from math import fabs
 from measurement import Measurement
-from channel import ChannelXML
+from channel import Channel
 from sample import Sample
 
 import generateToys
@@ -200,7 +200,7 @@ class workspaceWriter(object):
             binLow = 0
             binHigh = nBins
             pass
-        chanObj = ChannelXML(variableName, regions, self.prefix, nBins,
+        chanObj = Channel(variableName, regions, self.prefix, nBins,
                              binLow, binHigh, self.statErrThreshold)
 
         # Verify that this name is not already used
@@ -233,7 +233,7 @@ class workspaceWriter(object):
         """
         Add channel as a pre-built object
         """
-        if not isinstance(obj, ChannelXML):
+        if not isinstance(obj, Channel):
             raise RuntimeError("addChannel does not support input of type "
                                "'%s'." % (type(obj)))
 
@@ -440,7 +440,7 @@ class workspaceWriter(object):
             inList = [input]
             pass
         for i in inList:
-            if isinstance(i, ChannelXML):
+            if isinstance(i, Channel):
                 chanName = i.channelName
             else:
                 chanName = i
