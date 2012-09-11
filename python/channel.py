@@ -26,7 +26,7 @@ class ChannelXML(object):
         self.variableName = variableName
         self.name = self.variableName.replace("/", "") + "_" + self.regionString
         self.channelName = self.regionString + "_" + variableName.replace("/", "")
-        self.ConstructorInit(prefix) # shared method with Clone or deepcopy
+        self.ConstructorInit(prefix)  # shared method with Clone or deepcopy
         self.regions = regions
         self.nBins = nBins
         self.binHigh = binHigh
@@ -37,7 +37,7 @@ class ChannelXML(object):
         self.systDict = {}
         self.infoDict = {}
         self.hasBQCD = False
-        self.useOverflowBin=False
+        self.useOverflowBin = False
         self.useUnderflowBin = False
         self.hasStatConfig = False
         self.hasDiscovery = False
@@ -47,7 +47,7 @@ class ChannelXML(object):
             self.statErrorType = "Poisson"
         self.files = []
         self.treeName = ''
-        self.parentTopLvl=None
+        self.parentTopLvl = None
         #  Plot cosmetics
         self.minY = None
         self.maxY = None
@@ -129,7 +129,7 @@ class ChannelXML(object):
         """
         self.files = [file]
 
-    def propagateFileList(self,  fileList):
+    def propagateFileList(self, fileList):
         """
         Propagate the file list downwards.
         """
