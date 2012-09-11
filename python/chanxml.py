@@ -1,5 +1,5 @@
-from ROOT import TMath, RooRandom, TH1, TH1F
-from ROOT import kBlack,kWhite,kGray,kRed,kPink,kMagenta,kViolet,kBlue,kAzure,kCyan,kTeal,kGreen,kSpring,kYellow,kOrange,kDashed,kSolid,kDotted
+from ROOT import TFile, TMath, RooRandom, TH1, TH1F
+from ROOT import kBlack, kWhite, kGray, kRed, kPink, kMagenta, kViolet, kBlue, kAzure, kCyan, kTeal, kGreen, kSpring, kYellow, kOrange, kDashed, kSolid, kDotted
 from os import system
 from math import fabs
 
@@ -12,27 +12,21 @@ TH1.SetDefaultSumw2(True)
 from copy import deepcopy, copy
 from configManager import configMgr
 
-
 class ChannelXML(object):
     """
     Defines the content of a channel HistFactory xml file
     """
 
-    def __init__(self, variableName, regions, prefix, nBins,
-                 binLow, binHigh, statErrorThreshold=None, hasB=False):
+    def __init__(self, variableName, regions, prefix, nBins, binLow, binHigh, statErrorThreshold=None, hasB=False):
         """
-        Store configuration, set unique channel name from variable,
-        define cut region, binning and open file
+        Store configuration,  set unique channel name from variable,  define cut region,  binning and open file
         """
-
         regions.sort()
         self.regionString = "".join(regions)
         self.variableName = variableName
-        self.name = self.variableName.replace("/", "") + "_" + \
-                    self.regionString
-        self.channelName = self.regionString + "_" + \
-                           variableName.replace("/", "")
-        self.ConstructorInit(prefix)   # shared method with Clone or deepcopy
+        self.name = self.variableName.replace("/", "") + "_" + self.regionString
+        self.channelName = self.regionString + "_" + variableName.replace("/", "")
+        self.ConstructorInit(prefix) # shared method with Clone or deepcopy
         self.regions = regions
         self.nBins = nBins
         self.binHigh = binHigh
@@ -43,7 +37,7 @@ class ChannelXML(object):
         self.systDict = {}
         self.infoDict = {}
         self.hasBQCD = False
-        self.useOverflowBin = False
+        self.useOverflowBin=False
         self.useUnderflowBin = False
         self.hasStatConfig = False
         self.hasDiscovery = False
@@ -53,8 +47,8 @@ class ChannelXML(object):
             self.statErrorType = "Poisson"
         self.files = []
         self.treeName = ''
-        self.parentTopLvl = None
-        # Plot cosmetics
+        self.parentTopLvl=None
+        #  Plot cosmetics
         self.minY = None
         self.maxY = None
         self.titleX = None
@@ -69,41 +63,43 @@ class ChannelXML(object):
     def initialize(self):
         for sample in self.sampleList:
             pass
-            #if not sample.isData and not sample.isQCD and not sample.isDiscovery:
-            #    for (systName,syst) in self.systDict.items():
-            #        try:
-            #            sample.getSystematic(systName)
-            #        except:
-            #            sample.addSystematic(syst)
+            # if not sample.isData and not sample.isQCD and not sample.isDiscovery:
+            #     for (systName, syst) in self.systDict.items():
+            #         try:
+            #             sample.getSystematic(systName)
+            #         except:
+            #             sample.addSystematic(syst)
 
     def Clone(self, prefix=""):
-        if prefix == "":
-            prefix = self.prefix
-        #copies all properties prior to initialize
+        if prefix=="":
+            prefix=self.prefix
+        # copies all properties prior to initialize
         newChan = deepcopy(self)
         newChan.ConstructorInit(prefix)
         return newChan
 
     def ConstructorInit(self, prefix):
         self.prefix = prefix
-        self.xmlFileName = "config/" + self.prefix + \
-                           "_" + self.channelName + ".xml"
+        self.xmlFileName = "config/" + self.prefix + "_" + self.channelName + ".xml"
         return
 
-    def addSample(self, sample):
+    def addSample(self, sample, index=-1):
         """
         Add Sample object to this channel
         """
-        self.sampleList.append(sample.Clone())
+        if index==-1: index=len(self.sampleList) #  = end of list
+
+        self.sampleList.insert(index, sample.Clone())
+
         if sample.isData or sample.isDiscovery or sample.isQCD:
             return
 
-        if len(self.sampleList[-1].weights) == 0:
-            self.sampleList[-1].weights = deepcopy(self.weights)
+        if len(self.sampleList[index].weights) == 0:
+            self.sampleList[index].weights = deepcopy(self.weights)
 
         for (systName, syst) in self.systDict.items():
             if not systName in self.sampleList[-1].systDict.keys():
-                self.sampleList[-1].addSystematic(syst)
+                self.sampleList[index].addSystematic(syst)
         return
 
     def getSample(self, name):
@@ -113,7 +109,7 @@ class ChannelXML(object):
         for s in self.sampleList:
             if s.name == name:
                 return s
-        raise Exception("Could not find sample with name %s in %s" % (name, self sampleList))
+        raise Exception("Could not find sample with name %s in %s" % (name, self.sampleList))
 
     def setFileList(self, filelist):
         """
@@ -131,14 +127,14 @@ class ChannelXML(object):
         """
         self.files = [file]
 
-    def propagateFileList(self, fileList):
+    def propagateFileList(self,  fileList):
         """
         Propagate the file list downwards.
         """
-        # if we don't have our own file list, use the one given to us
+        #  if we don't have our own file list,  use the one given to us
         if self.files == []:
                 self.files = fileList
-        # propagate our file list downwards
+        #  propagate our file list downwards
         for sam in self.sampleList:
                 sam.propagateFileList(self.files)
 
@@ -163,7 +159,7 @@ class ChannelXML(object):
         if not weight in self.weights:
             self.weights.append(weight)
         else:
-            raise RuntimeError("Weight %s already defined in channel %s" % (weight, self.name))
+            raise RuntimeError("Weight %s already defined in channel %s"  %  (weight, self.name))
 
         for s in self.sampleList:
             if not s.isData and not s.isQCD and not s.isDiscovery:
@@ -198,8 +194,7 @@ class ChannelXML(object):
                     syst.low.remove(weight)
         return
 
-    def addDiscoverySamples(self, srList, startValList,
-                            minValList, maxValList, colorList):
+    def addDiscoverySamples(self, srList, startValList, minValList, maxValList, colorList):
         """
         Add a sample to be used for discovery fits
         """
@@ -209,18 +204,15 @@ class ChannelXML(object):
             raise TypeError("Discovery sample can only be added to a cuts channel")
         for (iSR, sr) in enumerate(srList):
             sigSample = Sample("DiscoveryMode_%s" % (sr), colorList[iSR])
-            sigSample.setNormFactor("mu_%s"%(sr), startValList[iSR],
-                                    minValList[iSR], maxValList[iSR])
+            sigSample.setNormFactor("mu_%s" % (sr), startValList[iSR], minValList[iSR], maxValList[iSR])
             sigSample.setDiscovery()
             sigSample.clearSystematics()
             self.addSample(sigSample)
             self.parentTopLvl.setSignalSample(sigSample)
-            histoName = "h" + sigSample.name + "Nom_" + sr + \
-                        "_obs_" + self.variableName.replace("/", "")
+            histoName = "h" + sigSample.name + "Nom_" + sr + "_obs_" + self.variableName.replace("/", "")
             self.getSample("DiscoveryMode_%s" % (sr)).setHistoName(histoName)
-            configMgr.hists[histoName] = TH1F(histoName, histoName,len(srList),
-                                              0.0, float(len(srList)))
-            configMgr.hists[histoName].SetBinContent(iSR+1,startValList[iSR])
+            configMgr.hists[histoName] = TH1F(histoName, histoName, len(srList), 0., float(len(srList)))
+            configMgr.hists[histoName].SetBinContent(iSR + 1, startValList[iSR])
         return
 
     def addData(self, dataName):
@@ -231,36 +223,32 @@ class ChannelXML(object):
             raise IndexError("Channel already has data " + str(self.dataList))
         self.dataList.append((configMgr.histCacheFile, dataName, ""))
 
-    def addPseudoData(self, toyInputHistoList, varName, varLow, varHigh,
-                      addInputHistoList, histoPath="", seed=None):
+    def addPseudoData(self, toyInputHistoList, varName, varLow, varHigh, addInputHistoList, histoPath="", seed=None):
         """
         Add a pseudo data distribution to this channel
 
-        !!! DEPRECATED, MAY NOT WORK !!!
+        !!! DEPRECATED,  MAY NOT WORK !!!
         """
         if not seed == None:
             RooRandom.randomGenerator().SetSeed(seed)
         if len(self.dataList):
             raise IndexError("Channel already has data " + str(self.dataList))
-        histo = generateToys.generate(toyInputHistoList, varName,
-                                      varLow, varHigh)
+        histo = generateToys.generate(toyInputHistoList, varName, varLow, varHigh)
         for iBin in xrange(histo.GetNbinsX() + 1):
             for inputHisto in addInputHistoList:
-                histo.SetBinContent(iBin+1, TMath.Nint(histo.GetBinContent(iBin+1)) + TMath.Nint(inputHisto.GetBinContent(iBin+1)))
+                histo.SetBinContent(iBin + 1, TMath.Nint(histo.GetBinContent(iBin + 1)) + TMath.Nint(inputHisto.GetBinContent(iBin + 1)))
         for iBin in xrange(histo.GetNbinsX() + 1):
-            histo.SetBinError(iBin+1, TMath.Sqrt(histo.GetBinContent(iBin+1)))
+            histo.SetBinError(iBin + 1, TMath.Sqrt(histo.GetBinContent(iBin + 1)))
 
         self.dataList.append((configMgr.histCacheFile, histo.GetName(), ""))
         return
 
     def addSystematic(self, syst):
         """
-        Add a systematic to this channel.
-        This will be propagated to all owned samples
+        Add a systematic to this channel. This will be propagated to all owned samples
         """
         if syst.name in self.systDict.keys():
-            raise Exception("Attempt to overwrite systematic %s "
-                            " in Channel %s" % (syst.name, self.name))
+            raise Exception("Attempt to overwrite systematic %s in Channel %s" % (syst.name, self.name))
         else:
             self.systDict[syst.name] = syst.Clone()
             for sam in self.sampleList:
@@ -274,14 +262,13 @@ class ChannelXML(object):
         try:
             return self.systDict[systName]
         except KeyError:
-            raise KeyError("Could not find systematic %s "
-                           "in topLevel %s" % (systName,self.name))
+            raise KeyError("Could not find systematic %s in topLevel %s" % (systName, self.name))
 
     def __str__(self):
         """
         Convert instance to XML string
         """
-        self.writeString = "<!DOCTYPE Channel SYSTEM 'HistFactorySchema.dtd'>\n\n"
+        self.writeString = "<!DOCTYPE Channel  SYSTEM 'HistFactorySchema.dtd'>\n\n"
         self.writeString += "<Channel Name=\"%s\">\n\n" % (self.channelName)
         for data in self.dataList:
             if len(data[2]):
@@ -290,7 +277,7 @@ class ChannelXML(object):
                 self.writeString += "  <Data HistoName=\"%s\" InputFile=\"%s\" />\n\n" % (data[1], data[0])
         if self.hasStatConfig:
             self.writeString += "  <StatErrorConfig RelErrorThreshold=\"%g\" ConstraintType=\"%s\"/>\n\n" % (self.statErrorThreshold, self.statErrorType)
-        for (iSample, sample) in enumerate(self. sampleList):
+        for (iSample, sample) in enumerate(self.sampleList):
             if sample.write:
                 self.writeString += str(sample)
         self.writeString += "</Channel>\n"
@@ -313,7 +300,7 @@ class ChannelXML(object):
     def propagateTreeName(self, treeName):
         if self.treeName == '':
             self.treeName = treeName
-        ## MAB : Propagate down to samples
+        ##  MAB : Propagate down to samples
         for sam in self.sampleList:
             sam.propagateTreeName(self.treeName)
             pass
