@@ -1,5 +1,5 @@
-from ROOT import TFile,TMath,RooRandom,TH1,TH1F
-from ROOT import kBlack,kWhite,kGray,kRed,kPink,kMagenta,kViolet,kBlue,kAzure,kCyan,kTeal,kGreen,kSpring,kYellow,kOrange,kDashed,kSolid,kDotted
+from ROOT import TFile, TMath, RooRandom, TH1, TH1F
+from ROOT import kBlack, kWhite, kGray, kRed, kPink, kMagenta, kViolet, kBlue, kAzure, kCyan, kTeal, kGreen, kSpring, kYellow, kOrange, kDashed, kSolid, kDotted
 from os import system
 from math import fabs
 from measurmt import Measurement
@@ -18,7 +18,7 @@ class TopLevelXML(object):
     Defines the content of a top-level HistFactory xml file
     """
 
-    def __init__(self,name):
+    def __init__(self, name):
         """
         Set the combination mode, store the configuration and open output file
         """
@@ -130,7 +130,7 @@ class TopLevelXML(object):
             #        chan.getSample(sample.name)
             #    except:
             #        chan.addSample(sample)
-            #    for (systName,syst) in sample.systDict.items():
+            #    for (systName, syst) in sample.systDict.items():
             #        try:
             #            chan.getSample(sample.name).getSystematic(systName)
             #        except:

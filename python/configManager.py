@@ -768,24 +768,63 @@ class ConfigManager(object):
                     del self.hists[tmpName]
                     self.hists[tmpName]=None
                     return
-
             else:
                 self.hists["h"+sam.name+"Nom_"+regionString+"_obs_"+replaceSymbols(chan.variableName)] = TH1F("h"+sam.name+"Nom_"+regionString+"_obs_"+replaceSymbols(chan.variableName),"h"+sam.name+"Nom_"+regionString+"_obs_"+replaceSymbols(chan.variableName),chan.nBins,chan.binLow,chan.binHigh)
                 for iBin in xrange(self.hists["h"+sam.name+"Nom_"+regionString+"_obs_"+replaceSymbols(chan.variableName)].GetNbinsX()+1):
                     self.hists["h"+sam.name+"Nom_"+regionString+"_obs_"+replaceSymbols(chan.variableName)].SetBinContent(iBin+1,1.)
             chan.getSample(sam.name).setHistoName("h"+sam.name+"Nom_"+regionString+"_obs_"+replaceSymbols(chan.variableName))
 
-            if not "h"+sam.name+"Nom_"+normString+"Norm" in self.hists.keys():
-                if self.readFromTree:
-                    self.hists["h"+sam.name+"Nom_"+normString+"Norm"] = TH1F("h"+sam.name+"Nom_"+normString+"Norm","h"+sam.name+"Nom_"+normString+"Norm",1,0.5,1.5)
-                    self.chains[self.prepare.currentChainName].Project("h"+sam.name+"Nom_"+normString+"Norm",normCuts,self.prepare.weights+" * ("+normCuts+")")
-                else:
-                    self.hists["h"+sam.name+"Nom_"+normString+"Norm"] = None
-                    try:
-                        self.prepare.addHisto("h"+sam.name+"Nom_"+normString+"Norm")
-                    except:
-                        # assume that if no histogram is made, then it is not needed
-                        pass
+            if sam.normRegions:
+                normString = ""
+                for normReg in sam.normRegions:
+                    if not type(normReg[0]) == "list":
+                        normList = []
+                        normList.append(normReg[0])
+                        c = topLvl.getChannel(normReg[1],normList)
+                    else:
+                        c = topLvl.getChannel(normReg[1],normReg[0])
+                    normString += c.regionString
+                if not "h"+sam.name+"Nom_"+normString+"Norm" in self.hists.keys():
+                    if self.readFromTree:
+                        self.hists["h"+sam.name+"Nom_"+normString+"Norm"] = TH1F("h"+sam.name+"Nom_"+normString+"Norm","h"+sam.name+"Nom_"+normString+"Norm",1,0.5,1.5)
+                        for normReg in sam.normRegions:
+                            if not type(normReg[0]) == "list":
+                                normList = []
+                                normList.append(normReg[0])
+                                c = topLvl.getChannel(normReg[1],normList)
+                            else:
+                                c = topLvl.getChannel(normReg[1],normReg[0])
+                            for r in c.regions:
+                                try:
+                                    s = c.getSample(sam.name)
+                                except:    
+                                    # assume that if no histogram is made, then it is not needed  
+                                    continue
+
+                                treeName = s.treeName
+                                if treeName=='': treeName = s.name+self.nomName
+                                self.prepare.read(treeName, s.files)
+
+                                tempHist = TH1F("temp","temp",1,0.5,1.5)
+
+                                self.chains[self.prepare.currentChainName].Project("temp",self.cutsDict[r],str(self.lumiUnits*self.outputLumi/self.inputLumi)+" * "+"*".join(s.weights)+" * ("+self.cutsDict[r]+")")
+
+                                # if the overflow bin is used for this channel, make sure the normalization takes it into account
+                                if c.useOverflowBin:
+                                    self.hists["h"+s.name+"Nom_"+normString+"Norm"].SetBinContent(1, self.hists["h"+s.name+"Nom_"+normString+"Norm"].GetBinContent(1) + tempHist.GetIntegral())
+                                else:
+                                    self.hists["h"+s.name+"Nom_"+normString+"Norm"].SetBinContent(1, self.hists["h"+s.name+"Nom_"+normString+"Norm"].GetBinContent(1) + tempHist.GetSumOfWeights())
+
+                                del tempHist
+                        if configMgr.verbose > 2:        
+                            print "nom =",self.hists["h"+s.name+"Nom_"+normString+"Norm"].GetSumOfWeights()        
+                    else:
+                        self.hists["h"+sam.name+"Nom_"+normString+"Norm"] = None
+                        try:
+                            self.prepare.addHisto("h"+sam.name+"Nom_"+normString+"Norm")
+                        except:    
+                            # assume that if no histogram is made, then it is not needed  
+                            pass
 
             for (systName,syst) in chan.getSample(sam.name).systDict.items():
                 print "    Systematic: %s"%(systName)
