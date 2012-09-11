@@ -12,14 +12,17 @@ TH1.SetDefaultSumw2(True)
 from copy import deepcopy, copy
 from configManager import configMgr
 
+
 class ChannelXML(object):
     """
     Defines the content of a channel HistFactory xml file
     """
 
-    def __init__(self, variableName, regions, prefix, nBins, binLow, binHigh, statErrorThreshold=None, hasB=False):
+    def __init__(self, variableName, regions, prefix, nBins,
+                binLow, binHigh, statErrorThreshold=None, hasB=False):
         """
-        Store configuration,  set unique channel name from variable,  define cut region,  binning and open file
+        Store configuration,  set unique channel name from variable,
+        define cut region,  binning and open file
         """
         regions.sort()
         self.regionString = "".join(regions)
@@ -71,8 +74,8 @@ class ChannelXML(object):
             #             sample.addSystematic(syst)
 
     def Clone(self, prefix=""):
-        if prefix=="":
-            prefix=self.prefix
+        if prefix == "":
+            prefix = self.prefix
         # copies all properties prior to initialize
         newChan = deepcopy(self)
         newChan.ConstructorInit(prefix)
@@ -87,7 +90,8 @@ class ChannelXML(object):
         """
         Add Sample object to this channel
         """
-        if index==-1: index=len(self.sampleList) #  = end of list
+        if index == -1:
+            index = len(self.sampleList)  # = end of list
 
         self.sampleList.insert(index, sample.Clone())
 
@@ -197,7 +201,8 @@ class ChannelXML(object):
                     syst.low.remove(weight)
         return
 
-    def addDiscoverySamples(self, srList, startValList, minValList, maxValList, colorList):
+    def addDiscoverySamples(self, srList, startValList, minValList,
+                            maxValList, colorList):
         """
         Add a sample to be used for discovery fits
         """
