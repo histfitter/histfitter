@@ -90,13 +90,18 @@ class TreePrepare(PrepareHistosABC):
         for fileName in fileList: chainID += '_' +fileName
         self.currentChainName = chainID
         
-        #print 'GREPME chain ID = ', chainID
-
         ## MB : no need to recreate chain if it already exists
         if not self.configMgr.chains.has_key(chainID):
             self.configMgr.chains[chainID] = TChain(treeName)
             for fileName in fileList:
                 self.configMgr.chains[self.currentChainName].Add(fileName)
+
+            ## MB : hack to add non-existent branches ...
+            if not self.configMgr.chains[self.currentChainName].GetBranch("phQuality"):
+                self.configMgr.chains[self.currentChainName].SetAlias("phQuality","(1>0)")
+            if not self.configMgr.chains[self.currentChainName].GetBranch("phIso"):
+                self.configMgr.chains[self.currentChainName].SetAlias("phIso","(1>0)")
+
             if not self.configMgr.chains[self.currentChainName].GetBranch("truthZpt0GeVWeight"):
                 self.configMgr.chains[self.currentChainName].SetAlias("truthZpt0GeVWeight","(1>0)")
             if not self.configMgr.chains[self.currentChainName].GetBranch("truthZpt50GeVWeight"):
