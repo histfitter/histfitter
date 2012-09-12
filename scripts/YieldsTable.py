@@ -18,6 +18,7 @@ import sys
 
 def latexfitresults(filename,regionList,sampleList,dataname='obsData',showSum=False):
 
+  workspacename = 'w'
   w = Util.GetWorkspaceFromFile(filename,'w')
 
   if w==None:

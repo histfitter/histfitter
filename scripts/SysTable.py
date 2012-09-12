@@ -103,8 +103,8 @@ def latexfitresults( filename, region='3jL', sample='', resultName="RooExpandedF
   #namemap = getnamemap()
 
   ############################################
-
-  w = Util.GetWorkspaceFromFile(filename,'w')
+  workspacename = 'w'
+  w = Util.GetWorkspaceFromFile(filename,workspacename)
 
   if w==None:
     print "ERROR : Cannot open workspace : ", workspacename
