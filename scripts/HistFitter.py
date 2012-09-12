@@ -182,6 +182,8 @@ if __name__ == "__main__":
         print "-r signal region to be processed - give as comma separated list (default = all)"
         print "-d Draw before/after fit plots of all channels (default: %s)" % drawBeforeAfterFit
         print "-b when doing hypotest, correct bkg-level to: bkg strength parameter, bkg value"
+        print "-0 removes empty bins when drawing the data histograms with (complimentary to -d)"
+
         print "\nAlso see the README file.\n"
         print "Command examples:"
         print "HistFitter.py -i python/MySusyFitterConfig.py           #only runs initialization in interactive mode (try e.g.: configMgr.<tab>)"
