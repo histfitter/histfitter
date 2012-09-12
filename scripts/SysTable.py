@@ -378,11 +378,14 @@ if __name__ == "__main__":
     print "-%: also show the individual errors as percentage of the total systematic error (off by default)"
 
     print "\nFor example:"
-    print "./SysTable.py -w /afs/cern.ch/user/k/koutsman/HistFitterUser/MET_jets_leptons/results/Combined_KFactorFit_5Channel_Validation_combined_BasicMeasurement_model_afterFit.root  -c SR7jTEl_meffInc,SR7jTMu_meffInc"
-    print "./SysTable.py -w  /afs/cern.ch/user/c/cote/susy0/users/cote/HistFitter5/results/Combined_KFactorFit_5Channel_bkgonly_combined_BasicMeasurement_model_afterFit.root  -c SR7jTEl_meffInc,SR7jTMu_meffInc -o SystematicsMultiJetsSR.tex"
-    print "./SysTable.py -w  /afs/cern.ch/user/k/koutsman/HistFitterUser/MET_jets_leptons/results/Combined_KFactorFit_5Channel_Validation_combined_BasicMeasurement_model_afterFit.root  -c SR7jTEl,SR7jTMu -m 2 -f WREl,WRMu,TREl,TRMu"
-    print "./SysTable.py -w  /afs/cern.ch/user/k/koutsman/HistFitterUser/MET_jets_leptons/results/Combined_KFactorFit_5Channel_Validation_combined_BasicMeasurement_model_afterFit.root  -c SR7jTEl,SR7jTMu -s Top,WZ"
-    print "./SysTable.py -w ~/Combined_KFactorFit_5Channel_Validation_combined_BasicMeasurement_model_afterFit.root -c SR7jTEl -m 2 -f TRee_nJet,TRem_nJet,TRmm_nJet,TREl_nJet,TRMu_nJet,ZRee_nJet,ZRmm_nJet,WREl_nJet,WRMu_nJet"
+    print "SysTable.py -w /afs/cern.ch/user/k/koutsman/HistFitterUser/MET_jets_leptons/results/Combined_KFactorFit_5Channel_Validation_combined_BasicMeasurement_model_afterFit.root  -c SR7jTEl_meffInc,SR7jTMu_meffInc"
+    print "SysTable.py -w  /afs/cern.ch/user/c/cote/susy0/users/cote/HistFitter5/results/Combined_KFactorFit_5Channel_bkgonly_combined_BasicMeasurement_model_afterFit.root  -c SR7jTEl_meffInc,SR7jTMu_meffInc -o SystematicsMultiJetsSR.tex"
+    print "SysTable.py -w  /afs/cern.ch/user/k/koutsman/HistFitterUser/MET_jets_leptons/results/Combined_KFactorFit_5Channel_Validation_combined_BasicMeasurement_model_afterFit.root  -c SR7jTEl,SR7jTMu -m 2 -f WREl,WRMu,TREl,TRMu"
+    print "SysTable.py -w  /afs/cern.ch/user/k/koutsman/HistFitterUser/MET_jets_leptons/results/Combined_KFactorFit_5Channel_Validation_combined_BasicMeasurement_model_afterFit.root  -c SR7jTEl,SR7jTMu -s Top,WZ"
+    print "SysTable.py -w ~/Combined_KFactorFit_5Channel_Validation_combined_BasicMeasurement_model_afterFit.root -c SR7jTEl -m 2 -f TRee_nJet,TRem_nJet,TRmm_nJet,TREl_nJet,TRMu_nJet,ZRee_nJet,ZRmm_nJet,WREl_nJet,WRMu_nJet"
+
+    print "\n  Method-1: set all parameters constant, except for the one you're interested in, calculate the error propagated due to that parameter"
+    print "  Method-2: set the parameter you're interested in constant, redo the fit with all other parameters floating, calculate the quadratic difference between default fit and your new model with parameter fixed"
     sys.exit(0)        
 
   wsFileName='/results/MyOneLeptonKtScaleFit_HardLepR17_BkgOnlyKt_combined_NormalMeasurement_model_afterFit.root'

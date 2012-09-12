@@ -152,12 +152,12 @@ if __name__ == "__main__":
     print "-i stays in interactive session after executing the script (default off)"
     
     print "\nFor example:"
-    print "./UpperLimitTable.py -c SR4jTEl -w /afs/cern.ch/user/k/koutsman/HistFitterUser/MET_jets_leptons/results/MyDiscoveryAnalysis_Lumi_SR4jTEl_SPlusB_combined_NormalMeasurement_model.root -l 4.713"
-    print "./UpperLimitTable.py -c SR4jTEl,SR4jTMu -w /afs/cern.ch/user/k/koutsman/HistFitterUser/MET_jets_leptons/results/MyDiscoveryAnalysis_Lumi_SR4jTEl_SPlusB_combined_NormalMeasurement_model.root -l 4.713 -p mu_SR4jTEl,mu_SR4jTMu"
-    print "./UpperLimitTable.py -c SR4jTEl,SR4jTMu -w /afs/cern.ch/user/k/koutsman/HistFitterUser/MET_jets_leptons/results/MyDiscoveryAnalysis_Lumi_SR4jTEl_SPlusB_combined_NormalMeasurement_model.root -l 4.713 -p mu_SR4jTEl,mu_SR4jTMu -i"
-    print "./UpperLimitTable.py -c SR4jTEl -w /afs/cern.ch/user/k/koutsman/HistFitterUser/MET_jets_leptons/results/MyDiscoveryAnalysis_Lumi_SR4jTEl_SPlusB_combined_NormalMeasurement_model.root -l 4.713 -o MyUpperLimit_SR4jTEl.tex"
-    print "./UpperLimitTable.py -c SR4jTEl -w /afs/cern.ch/user/k/koutsman/HistFitterUser/MET_jets_leptons/results/MyDiscoveryAnalysis_Lumi_SR4jTEl_SPlusB_combined_NormalMeasurement_model.root -l 4.713 -n 5000"
-    print "./UpperLimitTable.py -c SR4jTEl -w /afs/cern.ch/user/k/koutsman/HistFitterUser/MET_jets_leptons/results/MyDiscoveryAnalysis_Lumi_SR4jTEl_SPlusB_combined_NormalMeasurement_model.root -l 4.713 -a"
+    print "UpperLimitTable.py -c SR4jTEl -w /afs/cern.ch/user/k/koutsman/HistFitterUser/MET_jets_leptons/results/MyDiscoveryAnalysis_Lumi_SR4jTEl_SPlusB_combined_NormalMeasurement_model.root -l 4.713"
+    print "UpperLimitTable.py -c SR4jTEl,SR4jTMu -w /afs/cern.ch/user/k/koutsman/HistFitterUser/MET_jets_leptons/results/MyDiscoveryAnalysis_Lumi_SR4jTEl_SPlusB_combined_NormalMeasurement_model.root -l 4.713 -p mu_SR4jTEl,mu_SR4jTMu"
+    print "UpperLimitTable.py -c SR4jTEl,SR4jTMu -w /afs/cern.ch/user/k/koutsman/HistFitterUser/MET_jets_leptons/results/MyDiscoveryAnalysis_Lumi_SR4jTEl_SPlusB_combined_NormalMeasurement_model.root -l 4.713 -p mu_SR4jTEl,mu_SR4jTMu -i"
+    print "UpperLimitTable.py -c SR4jTEl -w /afs/cern.ch/user/k/koutsman/HistFitterUser/MET_jets_leptons/results/MyDiscoveryAnalysis_Lumi_SR4jTEl_SPlusB_combined_NormalMeasurement_model.root -l 4.713 -o MyUpperLimit_SR4jTEl.tex"
+    print "UpperLimitTable.py -c SR4jTEl -w /afs/cern.ch/user/k/koutsman/HistFitterUser/MET_jets_leptons/results/MyDiscoveryAnalysis_Lumi_SR4jTEl_SPlusB_combined_NormalMeasurement_model.root -l 4.713 -n 5000"
+    print "UpperLimitTable.py -c SR4jTEl -w /afs/cern.ch/user/k/koutsman/HistFitterUser/MET_jets_leptons/results/MyDiscoveryAnalysis_Lumi_SR4jTEl_SPlusB_combined_NormalMeasurement_model.root -l 4.713 -a"
     sys.exit(0)        
 
   wsFileName='/results/MyOneLeptonKtScaleFit_HardLepR17_BkgOnlyKt_combined_NormalMeasurement_model_afterFit.root'

@@ -1,0 +1,118 @@
+######################
+## Tables of Yields ##
+######################
+Run YieldsTable.py without arguments for the following usage information:
+
+Usage:
+YieldsTable.py [-o outputFileName] [-c channels] [-w workspace_afterFit] [-s samples] [-b]
+
+Minimal set of inputs [-c channels] [-w workspace_afterFit] [-s samples] 
+*** Options are: 
+-c <channels>: single channel (region) string or comma separated list accepted (OBLIGATORY)
+-w <workspaceFileName>: single name accepted only (OBLIGATORY) ;   if multiple channels/regions given in -c, assumes the workspace file contains all channels/regions
+-s <sample>: single unique sample name or comma separated list accepted (OBLIGATORY)
+-o <outputFileName>: sets the output table file name
+-a: use Asimov dataset (off by default)
+-b: shows also the error on samples Before the fit (off by default)
+-S: also show the sum of all regions (off by default)
+
+For example:
+YieldsTable.py -c SR7jTEl,SR7jTMu -s WZ,Top -w /afs/cern.ch/user/k/koutsman/HistFitterUser/MET_jets_leptons/results/Combined_KFactorFit_5Channel_Validation_combined_BasicMeasurement_model_afterFit.root
+YieldsTable.py -c SR7jTEl,SR7jTMu -w  /afs/cern.ch/user/k/koutsman/HistFitterUser/MET_jets_leptons/results/Combined_KFactorFit_5Channel_Validation_combined_BasicMeasurement_model_afterFit.root  -o MyTableMultiJetsSR.tex
+YieldsTable.py -c SR3jTEl,SR3jTMu,SR4jTEl,SR4jTMu -s WZ,Top -w /afs/cern.ch/user/c/cote/susy0/users/cote/HistFitter5/results/Combined_KFactorFit_5Channel_bkgonly_combined_BasicMeasurement_model_afterFit.root -o MyTableSR.tex
+YieldsTable.py -c S2eeT,S2mmT,S2emT,S4eeT,S4mmT,S4emT -w /afs/cern.ch/user/c/cote/susy0/users/cote/HistFitter5/results/Combined_KFactorFit_5Channel_bkgonly_combined_BasicMeasurement_model_afterFit.root -o MyTableDilep.tex
+YieldsTable.py -c S2eeT,S2mmT,S2emT,S4eeT,S4mmT,S4emT -w /afs/cern.ch/user/c/cote/susy0/users/cote/HistFitter5/results/Combined_KFactorFit_5Channel_bkgonly_combined_BasicMeasurement_model_afterFit.root -o MyTableDilep.tex -b
+YieldsTable.py -c S2eeT,S2mmT,S2emT,S4eeT,S4mmT,S4emT -w /afs/cern.ch/user/c/cote/susy0/users/cote/HistFitter5/results/Combined_KFactorFit_5Channel_bkgonly_combined_BasicMeasurement_model_afterFit.root -o MyTableDilep.tex -b -S
+YieldsTable.py -c S2eeT,S2mmT,S2emT,S4eeT,S4mmT,S4emT -w /afs/cern.ch/user/c/cote/susy0/users/cote/HistFitter5/results/Combined_KFactorFit_5Channel_bkgonly_combined_BasicMeasurement_model_afterFit.root -o MyTableDilep.tex -a
+
+
+#SR
+YieldsTable.py -w results/Combined_KFactorFit_5Channel_Validation_combined_BasicMeasurement_model_afterFit.root -c SR7jTEl,SR7jTMu -o MyTableMultiJetsSR.tex
+
+#CR
+YieldsTable.py -w results/Combined_KFactorFit_5Channel_Validation_combined_BasicMeasurement_model_afterFit.root -c TRee,TRmm,TRem -o MyTableDiLepTR.tex
+
+#VR (1lep)
+YieldsTable.py -w results/Combined_KFactorFit_5Channel_Validation_combined_BasicMeasurement_model_afterFit.root -c HMTVL1El,WVL1El,TVL1El -o MyTable1LepVREl.tex
+
+#VR (2lep)
+YieldsTable.py -w results/Combined_KFactorFit_5Channel_Validation_combined_BasicMeasurement_model_afterFit.root -c TVJ2ee,TVJ2mm,TVJ2em,ZVJ2ee,ZVJ2mm,ZVJ2em -o MyTable2Lep2JetsVR.tex
+
+
+
+###########################
+## Tables of Systematics ##
+###########################
+Run SysTable.py without arguments for the following usage information:
+
+Usage:
+SysTable.py [-c channels] [-w workspace_afterFit] [-o outputFileName] [-o outputFileName] [-s sample] [-m method] [-f fitregions] [-%] [-b]
+
+Minimal set of inputs [-c channels] [-w workspace_afterFit]
+*** Options are: 
+-c <channels>: single channel (region) string or comma separated list accepted (OBLIGATORY)
+-w <workspaceFileName>: single name accepted only (OBLIGATORY) ;   if multiple channels/regions given in -c, assumes the workspace file contains all channels/regions
+-s <sample>: single unique sample name or comma separated list accepted (sample systematics will be calculated for every region given)
+-o <outputFileName>: sets the output table file name, name defined by regions if none provided
+-b: shows the error on samples Before the fit (by default After fit is shown)
+-%: also show the individual errors as percentage of the total systematic error (off by default)
+
+For example:
+SysTable.py -w /afs/cern.ch/user/k/koutsman/HistFitterUser/MET_jets_leptons/results/Combined_KFactorFit_5Channel_Validation_combined_BasicMeasurement_model_afterFit.root  -c SR7jTEl_meffInc,SR7jTMu_meffInc
+SysTable.py -w  /afs/cern.ch/user/c/cote/susy0/users/cote/HistFitter5/results/Combined_KFactorFit_5Channel_bkgonly_combined_BasicMeasurement_model_afterFit.root  -c SR7jTEl_meffInc,SR7jTMu_meffInc -o SystematicsMultiJetsSR.tex
+SysTable.py -w  /afs/cern.ch/user/k/koutsman/HistFitterUser/MET_jets_leptons/results/Combined_KFactorFit_5Channel_Validation_combined_BasicMeasurement_model_afterFit.root  -c SR7jTEl,SR7jTMu -m 2 -f WREl,WRMu,TREl,TRMu
+SysTable.py -w  /afs/cern.ch/user/k/koutsman/HistFitterUser/MET_jets_leptons/results/Combined_KFactorFit_5Channel_Validation_combined_BasicMeasurement_model_afterFit.root  -c SR7jTEl,SR7jTMu -s Top,WZ
+SysTable.py -w ~/Combined_KFactorFit_5Channel_Validation_combined_BasicMeasurement_model_afterFit.root -c SR7jTEl -m 2 -f TRee_nJet,TRem_nJet,TRmm_nJet,TREl_nJet,TRMu_nJet,ZRee_nJet,ZRmm_nJet,WREl_nJet,WRMu_nJet
+
+Method-1: set all parameters constant, except for the one you're interested in, calculate the error propagated due to that parameter
+Method-2: set the parameter you're interested in constant, redo the fit with all other parameters floating, 
+                 calculate the quadratic difference between default fit and your new model with parameter fixed
+
+
+###############
+## Pull plot ##   NOT IN SVN YET !!!!!!!!!!!!
+###############
+
+#SRs - 7jets
+scripts/MakePullPlot.py -i -w results/Combined_KFactorFit_5Channel_Validation_combined_BasicMeasurement_model_afterFit.root -c SSElT,SSMuT,SR3jTEl,SR3jTMu,SR4jTEl,SR4jTMu,S2eeT,S2mmT,S2emT,S4eeT,S4mmT,S4emT,SR7jTEl,SR7jTMu
+
+#SRs
+scripts/MakePullPlot.py -w results/Combined_KFactorFit_5Channel_Validation_combined_BasicMeasurement_model_afterFit.root -c SSElT,SSMuT,SR3jTEl,SR3jTMu,SR4jTEl,SR4jTMu,S2eeT,S2mmT,S2emT,S4eeT,S4mmT,S4emT
+
+#CRs
+scripts/MakePullPlot.py -i -s -w results/Combined_KFactorFit_5Channel_Validation_combined_BasicMeasurement_model_afterFit.root -c TRee,TRmm,TRem,ZRee,ZRmm,TREl,TRMu,WREl,WRMu,SVTEl,SVTMu,SVWEl,SVWMu
+
+#VRs
+scripts/MakePullPlot.py -i -w results/Combined_KFactorFit_5Channel_Validation_combined_BasicMeasurement_model_afterFit.root -c SVEl,SVMu,HMTVL1El,HMTVL1Mu,WVL1El,WVL1Mu,TVL1El,TVL1Mu,TVJ2ee,TVJ2mm,TVJ2em,ZVJ2ee,ZVJ2mm,ZVJ2em,TVJ4ee,TVJ4mm,TVJ4em,ZVJ4ee,ZVJ4mm,ZVJ4em
+
+
+
+###########################
+##  Generalized Upper Limit Table  ##
+###########################
+Run UpperLimitTable.py without arguments for the following usage information:
+
+Usage:
+
+UpperLimitTable.py [-c channels] [-w workspace] [-l lumi] [-n nTOYS] [-a asymptotic/Asimov] [-o outputFileName] [-p poiName] [-i]
+Minimal set of inputs [-c channels] [-w workspace] [-l lumi] 
+UpperLimitTable.py needs the workspace file _before_ the fit, so not XXX_afterFit.root
+Every channel (=SR) needs to have its own workspace file, with the same naming scheme only replacing the channel name in the workspace file name
+*** Options are: 
+-c <channels>: single channel string (=SR) or comma separated list accepted (OBLIGATORY)
+-w <workspaceFileName>: single name accepted only (OBLIGATORY) ;   if multiple channels given in -c, assumes the workspace filename is general only changing the SR name is enough
+-l <lumi>: same unit as used for creating the workspace by HistFitter (OBLIGATORY)
+-n <nTOYS>: sets number of TOYs (default = 3000)
+-a : use asimov dataset, ie asymptotic calculation insted of toys (default is toys)
+-p <poiNames>: single POI name string (mu_<SRname>) or comma separated list accepted, only needed if your workspace contains a different POI then mu_<SRname>
+-o <outputFileName>: sets the output table file name
+-i stays in interactive session after executing the script (default off)
+
+For example:
+./UpperLimitTable.py -c SR4jTEl -w /afs/cern.ch/user/k/koutsman/HistFitterUser/MET_jets_leptons/results/MyDiscoveryAnalysis_Lumi_SR4jTEl_SPlusB_combined_NormalMeasurement_model.root -l 4.713
+./UpperLimitTable.py -c SR4jTEl,SR4jTMu -w /afs/cern.ch/user/k/koutsman/HistFitterUser/MET_jets_leptons/results/MyDiscoveryAnalysis_Lumi_SR4jTEl_SPlusB_combined_NormalMeasurement_model.root -l 4.713 -p mu_SR4jTEl,mu_SR4jTMu
+./UpperLimitTable.py -c SR4jTEl,SR4jTMu -w /afs/cern.ch/user/k/koutsman/HistFitterUser/MET_jets_leptons/results/MyDiscoveryAnalysis_Lumi_SR4jTEl_SPlusB_combined_NormalMeasurement_model.root -l 4.713 -p mu_SR4jTEl,mu_SR4jTMu -i
+./UpperLimitTable.py -c SR4jTEl -w /afs/cern.ch/user/k/koutsman/HistFitterUser/MET_jets_leptons/results/MyDiscoveryAnalysis_Lumi_SR4jTEl_SPlusB_combined_NormalMeasurement_model.root -l 4.713 -o MyUpperLimit_SR4jTEl.tex
+./UpperLimitTable.py -c SR4jTEl -w /afs/cern.ch/user/k/koutsman/HistFitterUser/MET_jets_leptons/results/MyDiscoveryAnalysis_Lumi_SR4jTEl_SPlusB_combined_NormalMeasurement_model.root -l 4.713 -n 5000
+./UpperLimitTable.py -c SR4jTEl -w /afs/cern.ch/user/k/koutsman/HistFitterUser/MET_jets_leptons/results/MyDiscoveryAnalysis_Lumi_SR4jTEl_SPlusB_combined_NormalMeasurement_model.root -l 4.713 -a
+
