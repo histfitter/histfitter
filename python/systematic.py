@@ -351,7 +351,7 @@ class UserSystematic(SystematicBase):
                                             normString, normCuts, abstract,
                                             chan, sam)
 
-            UserSystematic.FillUpDownHist(self, highandlow, regionString,
+            UserSystematic.FillUpDownHist(self, highorlow, regionString,
                                           normString, normCuts, abstract,
                                           chan, sam)
         return

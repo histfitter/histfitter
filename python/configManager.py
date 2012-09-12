@@ -535,7 +535,7 @@ class ConfigManager(object):
 
         for (syst,sam) in userNormDict.keys():
 	    #norm the Histos
-            self.normHists(syst,sam)
+            self.normHists(syst,sam,userNormDict)
         # Build blinded histograms here
         for (iChan,chan) in enumerate(topLvl.channels):
             for sam in chan.sampleList:
@@ -576,7 +576,7 @@ class ConfigManager(object):
         else:
             chan.infoDict[sam.name].append((systName,syst.high,syst.low,syst.method))
         return
-    def addHistoSysforNoQCD(self,regionString,normString,normCuts,chan,sam,syst):
+    def addHistoSysforNoQCD(self,regionString,normString,normCuts,chan,sam,syst,userNormDict):
         nomName = "h"+sam.name+"Nom_"+regionString+"_obs_"+replaceSymbols(chan.variableName)
         highName = "h"+sam.name+syst.name+"High_"+regionString+"_obs_"+replaceSymbols(chan.variableName)
         lowName = "h"+sam.name+syst.name+"Low_"+regionString+"_obs_"+replaceSymbols(chan.variableName)
@@ -717,26 +717,27 @@ class ConfigManager(object):
                     treeName = sam.treeName
                     if treeName=='': treeName = sam.name+self.nomName
                     self.prepare.read(treeName, sam.files)
-            else:
-                self.prepare.weights = "1."
-                if self.readFromTree:
-                    treeName = sam.treeName
-                    if treeName=='': treeName = sam.name
-                    self.prepare.read(treeName, sam.files)
+        else:
+            self.prepare.weights = "1."
+            if self.readFromTree:
+                treeName = sam.treeName
+                if treeName=='': treeName = sam.name
+                self.prepare.read(treeName, sam.files)
 
 
-            if len(sam.cutsDict.keys()) == 0:
-                if not chan.variableName == "cuts":
-                    self.prepare.cuts = self.cutsDict[regionString]
-            else:
-                if not chan.variableName == "cuts":
-                    self.prepare.cuts = sam.cutsDict[regionString]
+        if len(sam.cutsDict.keys()) == 0:
+            if not chan.variableName == "cuts":
+                self.prepare.cuts = self.cutsDict[regionString]
+        else:
+            if not chan.variableName == "cuts":
+                self.prepare.cuts = sam.cutsDict[regionString]
 
 
-            if sam.unit == "GeV":
-                self.prepare.var = chan.variableName
-            elif sam.unit == "MeV" and chan.variableName.find("/") < 0 and not chan.variableName.startswith("n"):
-                self.prepare.var = chan.variableName+"/1000."
+        if sam.unit == "GeV":
+            self.prepare.var = chan.variableName
+        elif sam.unit == "MeV" and chan.variableName.find("/") < 0 and not chan.variableName.startswith("n"):
+            self.prepare.var = chan.variableName+"/1000."
+        return
 
     def addSampleSpecificHists(self,topLvl,chan,sam,regionString,normRegions,normString,normCuts,userNormDict):
         if sam.isData:
@@ -832,13 +833,13 @@ class ConfigManager(object):
                     #depending on the systematic type: first the weights for up and down and secondly the Histos (just for the methods "userNormHistoSys" or "normHistoSys") are added
                     syst.PrepareWeightsAndHistos(regionString,normString,normCuts,self,chan,sam)
                 #add Histos for all the other method-types
-                self.addHistoSysforNoQCD(regionString,normString,normCuts,chan,sam,syst)
+                self.addHistoSysforNoQCD(regionString,normString,normCuts,chan,sam,syst,userNormDict)
         elif sam.isQCD:
             #Add Histos for Sample-type QCD
             self.addHistoSysForQCD(regionString,normString,normCuts,chan,sam)
         return
 
-    def normHists(self,syst,sam):
+    def normHists(self,syst,sam,userNormDict):
         highIntegral = 0.
         lowIntegral = 0.
         nomIntegral = 0.
