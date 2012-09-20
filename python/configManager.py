@@ -614,6 +614,7 @@ class ConfigManager(object):
                 configMgr.hists[highName] = TH1F(highName,highName,configMgr.hists[nomName].GetNbinsX(),configMgr.hists[nomName].GetXaxis().GetXmin(),configMgr.hists[nomName].GetXaxis().GetXmax())
                 for iBin in xrange(configMgr.hists[nomName].GetNbinsX()):
                     configMgr.hists[highName].SetBinContent(iBin+1,configMgr.hists[nomName].GetBinContent(iBin+1)*syst.high[iBin])
+                    pass
             if configMgr.hists[lowName] == None:
                 configMgr.hists[lowName] = TH1F(lowName,lowName,configMgr.hists[nomName].GetNbinsX(),configMgr.hists[nomName].GetXaxis().GetXmin(),configMgr.hists[nomName].GetXaxis().GetXmax())
                 for iBin in xrange(configMgr.hists[nomName].GetNbinsX()):
@@ -626,10 +627,14 @@ class ConfigManager(object):
                 configMgr.hists[highName] = TH1F(highName,highName,configMgr.hists[nomName].GetNbinsX(),configMgr.hists[nomName].GetXaxis().GetXmin(),configMgr.hists[nomName].GetXaxis().GetXmax())
                 for iBin in xrange(configMgr.hists[nomName].GetNbinsX()):
                     configMgr.hists[highName].SetBinContent(iBin+1,configMgr.hists[nomName].GetBinContent(iBin+1)*syst.high[iBin])
+                    pass
+                configMgr.hists[highName+"Norm"] = configMgr.hists[highName].Clone()
             if configMgr.hists[lowName] == None:
                 configMgr.hists[lowName] = TH1F(lowName,lowName,configMgr.hists[nomName].GetNbinsX(),configMgr.hists[nomName].GetXaxis().GetXmin(),configMgr.hists[nomName].GetXaxis().GetXmax())
                 for iBin in xrange(configMgr.hists[nomName].GetNbinsX()):
                     configMgr.hists[lowName].SetBinContent(iBin+1,configMgr.hists[nomName].GetBinContent(iBin+1)*syst.low[iBin])
+                    pass
+                configMgr.hists[lowName+"Norm"] = configMgr.hists[lowName].Clone()
             if not (syst.name,sam.name) in userNormDict.keys():
                 userNormDict[(syst.name,sam.name)] = []
                 userNormDict[(syst.name,sam.name)].append((regionString,highName,lowName,nomName))
