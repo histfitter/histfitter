@@ -337,10 +337,7 @@ class UserSystematic(SystematicBase):
                                 normCuts="", abstract=None,
                                 chan=None, sam=None):
         highandlow = ["High_", "Low_"]
-        weightstemp = abstract.prepare.weights
         for highorlow in highandlow:
-            abstract.prepare.weights = weightstemp
-            abstract.prepare.weights += " * " + " * ".join(sam.weights)
             if abstract.readFromTree:
                 treeName = sam.treeName
                 if treeName == '':
