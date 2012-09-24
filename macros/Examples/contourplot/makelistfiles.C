@@ -8,7 +8,7 @@ void makelistfiles()
   // input root file with HypoTestInverterResults, 
   // as obtained from running: 
   // SusyFitter.py -f python/MySimpleChannelConfig.py
-  const char* inputfile  = "../../results/MySimpleChannelAnalysisOutput_hypotest.root" ;
+  const char* inputfile  = "../../../results/MySimpleChannelAnalysisOutput_fixSigXSecNominal_hypotest.root" ;
   // search for objects labelled
   const char* format     = "hypo_SU_%f_%f_0_10";
   // interpret %f's above respectively as (seperated by ':')
