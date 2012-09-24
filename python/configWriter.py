@@ -21,6 +21,7 @@ class TopLevelXML(object):
         """
         self.ConstructorInit(name)
         #attributes to below are OK to deepcopy
+        self.mode = "comb"
         self.verbose=1
         self.statErrThreshold=None #None means to turn OFF mcStat error
         self.measurements = []
@@ -43,7 +44,8 @@ class TopLevelXML(object):
         self.errorFillStyle=3004
         self.setLogy = False
         self.tLegend = None
-        
+        self.removeEmptyBins=False
+
     def Clone(self,newName=""):
         if newName=="":
             newName=self.name
@@ -67,7 +69,7 @@ class TopLevelXML(object):
         Convert instance to XML string
         """
         self.writeString = "<!DOCTYPE Combination  SYSTEM 'HistFactorySchema.dtd'>\n\n"
-        self.writeString += "<Combination OutputFilePrefix=\"./results/"+self.prefix+"\"  >\n\n"
+        self.writeString += "<Combination OutputFilePrefix=\"./results/"+self.prefix+"\" Mode=\""+self.mode+"\" >\n\n"
         for chan in self.channels:
             self.writeString += "  <Input>"+chan.xmlFileName+"</Input>\n"
         self.writeString += "\n"     
@@ -568,6 +570,7 @@ class Measurement(object):
         self.lumiErr = lumiErr
         self.binLow = 0
         self.binHigh = 50
+        self.mode = "comb"
         self.exportOnly = "True"
         self.poiList = []
         self.constraintTermDict = {} 
@@ -602,13 +605,14 @@ class Measurement(object):
         """
         Convert instance to an XML string
         """
-        measurementString = "  <Measurement Name=\"%s\" Lumi=\"%g\" LumiRelErr=\"%g\" BinLow=\"%d\" BinHigh=\"%d\" ExportOnly=\"%s\">\n" % (self.name,self.lumi,self.lumiErr,self.binLow,self.binHigh,self.exportOnly)
-        measurementString += "    <POI>"
+        measurementString = "  <Measurement Name=\"%s\" Lumi=\"%g\" LumiRelErr=\"%g\" BinLow=\"%d\" BinHigh=\"%d\" Mode=\"%s\" ExportOnly=\"%s\">\n" % (self.name,self.lumi,self.lumiErr,self.binLow,self.binHigh,self.mode,self.exportOnly)
+        #measurementString += "    <POI>"
         for (iPOI,poi) in enumerate(self.poiList):
-            if not iPOI == len(self.poiList) - 1:
-                measurementString += "%s " % (poi)
-            else:
-                measurementString += "%s</POI>\n" % (poi)
+            measurementString += "    <POI>%s</POI>\n" % (poi)
+            #if not iPOI == len(self.poiList) - 1:
+            #    measurementString += "%s " % (poi)
+            #else:
+            #    measurementString += "%s</POI>\n" % (poi)
         for (param,setting) in self.paramSettingDict.iteritems():
             if setting[0]:
                 if not setting[1] == None:
@@ -1306,13 +1310,13 @@ class Sample(object):
             low = 2.0 - high
             print "    WARNING addOverallSys: low=%f in %s. Taking symmetric value from high %f %f"%(lowOld,systName,low,high)
 
-        if low<0.0:
-            print "    WARNING addOverallSys: low=%f is < 0.0 in %s. Setting to low=0.0. High=%f."%(low,systName,high)
-            low = 0.0
+        if low<0.01:
+            print "    WARNING addOverallSys: low=%f is < 0.01 in %s. Setting to low=0.01. High=%f."%(low,systName,high)
+            low = 0.01
 
-        if high<0.0:
-            print "    WARNING addOverallSys: high=%f is < 0.0 in %s. Setting to high=0.0. Low=%f."%(high,systName,low)
-            high = 0.0
+        if high<0.01:
+            print "    WARNING addOverallSys: high=%f is < 0.01 in %s. Setting to high=0.01. Low=%f."%(high,systName,low)
+            high = 0.01
 
         self.overallSystList.append((systName,high,low))
         if not systName in configMgr.systDict.keys():

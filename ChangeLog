@@ -1,3 +1,7 @@
+2012-08-28 Max Baak <mbaak@cern.ch>
+        * RooStats BUG Fix to _always_ use QTilde in AsymptoticCalculator.
+        * HistFitter-00-00-13
+
 2012-06-27 Max Baak <mbaak@cern.ch>
         * Added setup file for using eos at cern: setupeos.sh
         * HistFitter-00-00-12

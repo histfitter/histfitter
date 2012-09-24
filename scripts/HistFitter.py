@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 from ROOT import gROOT,gSystem,gDirectory,RooAbsData,RooRandom,RooWorkspace
 gSystem.Load("libSusyFitter.so")
+from ROOT import ConfigMgr
 gROOT.Reset()
 
 def GenerateFitAndPlot(tl,drawBeforeAfterFit):
@@ -39,6 +40,7 @@ def GenerateFitAndPlot(tl,drawBeforeAfterFit):
     #fitChannels = "ALL"
 
     lumiConst = not tl.signalSample
+    #    print " \n\n lumiConst = ", lumiConst, " tl.signalSample = ",  tl.signalSample
     
     # fit toy MC if specified. When left None, data is fit by default
     toyMC = None
@@ -100,8 +102,9 @@ def GenerateFitAndPlot(tl,drawBeforeAfterFit):
 
         # plot correlation matrix for result
         Util.PlotCorrelationMatrix(result)    
-        #plotPLL = False
-        #Util.PlotNLL(w, result, plotPLL, "", toyMC)
+        # plot likelihood
+        # plotPLL = False
+        #Util.PlotNLL(w, expResultAfter, plotPLL, "", toyMC)
     
     if toyMC:
         Util.WriteWorkspace(w, tl.wsFileName,toyMC.GetName())
@@ -135,6 +138,7 @@ def GetLimits():
 if __name__ == "__main__":
     from configManager import configMgr
     from prepareHistos import TreePrepare,HistoPrepare
+
     configMgr.readFromTree = False
     configMgr.executeHistFactory=False
     runInterpreter = False
@@ -175,11 +179,12 @@ if __name__ == "__main__":
         sys.exit(0)        
     
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "dtwfinals:v:r:b:g:p")
+        opts, args = getopt.getopt(sys.argv[1:], "d0twfinals:v:r:b:g:p")
         configFile = str(args[0])
     except:
         usage()
 
+      
     for opt,arg in opts:
         if opt == '-t':
             configMgr.readFromTree=True
@@ -199,6 +204,8 @@ if __name__ == "__main__":
             doHypoTests = True
         elif opt == '-d':
             drawBeforeAfterFit = True
+        elif opt == '-0':
+            configMgr.removeEmptyBins = True
         elif opt == '-s':
             configMgr.toySeedSet = True
             configMgr.toySeed = int(arg)
@@ -210,8 +217,17 @@ if __name__ == "__main__":
             pickedSRs = arg.split(',')
         elif opt == '-b':
             bkgArgs = arg.split(',')
-            configMgr.bkgParName = bkgArgs[0]
-            configMgr.bkgCorrVal = float(bkgArgs[1])
+            if len(bkgArgs)==2:
+                configMgr.SetBkgParName( bkgArgs[0] )
+                configMgr.SetBkgCorrVal( float(bkgArgs[1]) )
+                configMgr.SetBkgChlName( '' )
+            elif len(bkgArgs)>=3 and len(bkgArgs)%3==0:
+                for iChan in xrange(len(bkgArgs)/3):
+                    iCx = iChan*3
+                    configMgr.AddBkgChlName(bkgArgs[iCx])
+                    configMgr.AddBkgParName(bkgArgs[iCx+1])
+                    configMgr.AddBkgCorrVal(float(bkgArgs[iCx+2]))
+                    continue
         pass
     gROOT.SetBatch(not runInterpreter)
     
@@ -229,6 +245,8 @@ if __name__ == "__main__":
     if runFit:
         if len(configMgr.topLvls)>0:
             r=GenerateFitAndPlot(configMgr.topLvls[0],drawBeforeAfterFit)
+            #r=GenerateFitAndPlot(configMgr.topLvls[1],drawBeforeAfterFit)
+            #r=GenerateFitAndPlot(configMgr.topLvls[2],drawBeforeAfterFit)
             #for idx in range(len(configMgr.topLvls)):
             #    r=GenerateFitAndPlot(configMgr.topLvls[idx],drawBeforeAfterFit) 
             pass

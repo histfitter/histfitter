@@ -35,9 +35,10 @@ public:
   Int_t m_errorLineColor;
   Int_t m_errorLineStyle;
   Int_t m_errorFillColor;
-  Int_t m_errorFillStyle;    
+  Int_t m_errorFillStyle;      
   TLegend* m_legend;
-
+  Bool_t m_removeEmptyBins;    
+  
   // per channel options
   std::vector<TString> m_channels;
   std::vector<Double_t> m_channelsMinY;
@@ -116,9 +117,8 @@ public:
   Bool_t getChannelShowLumi(const TString& channel);
   void setChannelShowLumi(Bool_t showLumi = kFALSE) { m_channelsShowLumi.push_back(showLumi); }
 
- void findChannel(const TString& channel, Int_t& idx, Bool_t& channelFound);
+  void findChannel(const TString& channel, Int_t& idx, Bool_t& channelFound);
   void Print();
-
 
 };
 

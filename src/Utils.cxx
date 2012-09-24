@@ -285,7 +285,8 @@ RooFitResult* Util::FitPdf( RooWorkspace* w, TString fitRegions, bool lumiConst,
     
     std::cout << "Util::FitPdf()  ........ using " << minimizer << " / " << algorithm 
 	      << " with strategy  " << strategy << " and tolerance " << tol << std::endl;
-    
+    	
+
     bool kickApplied(false);
     for (int tries = 1, maxtries = 5; tries <= maxtries; ++tries) {
       //	 status = minim.minimize(fMinimizer, ROOT::Math::MinimizerOptions::DefaultMinimizerAlgo().c_str());
@@ -408,6 +409,28 @@ RooFitResult* Util::FitPdf( RooWorkspace* w, TString fitRegions, bool lumiConst,
 	}
       }
     }
+
+  
+  //   RooRealVar* alpha_MC = w->var("alpha_MC");
+//     RooRealVar* alpha_MP = w->var("alpha_MP");
+//     RooRealVar* alpha_JHigh = w->var("alpha_JHigh");
+//     RooRealVar* alpha_JMedium = w->var("alpha_JMedium");
+//     RooRealVar* alpha_JLow = w->var("alpha_JLow");
+
+//     RooArgSet nuisPars;
+//     if(alpha_MC) nuisPars.add(*alpha_MC);
+//     if(alpha_MP) nuisPars.add(*alpha_MP);
+//     if(alpha_JHigh) nuisPars.add(*alpha_JHigh);
+//     if(alpha_JMedium) nuisPars.add(*alpha_JMedium);
+//     if(alpha_JLow) nuisPars.add(*alpha_JLow);
+
+//     //  minim.setVerbose(kTRUE);
+
+//     if(nuisPars.getSize() > 0) {
+//       std::cout << endl << endl << "XXX running minos with" << endl;
+//       nuisPars.Print("v");
+//       minim.minos(nuisPars);
+//     }
     
     //RooFitResult * result = 0; 
     double val(0);
@@ -564,7 +587,12 @@ void Util::PlotPdfWithComponents(RooWorkspace* w, TString fcName, TString plotRe
       //create plot
       RooPlot* frame =  regionVar->frame(); 
       frame->SetName(Form("frame_%s_%s",regionCatLabel.Data(),outputPrefix.Data()));
-      data->plotOn(frame,Cut(dataCatLabel),RooFit::DataError(RooAbsData::Poisson),MarkerColor(fc->getDataColor()),LineColor(fc->getDataColor()));
+      //  data->plotOn(frame,Cut(dataCatLabel),RooFit::DataError(RooAbsData::Poisson),MarkerColor(fc->getDataColor()),LineColor(fc->getDataColor()));
+      regionData->plotOn(frame,RooFit::DataError(RooAbsData::Poisson),MarkerColor(fc->getDataColor()),LineColor(fc->getDataColor()));
+      if(fc->m_removeEmptyBins){
+	cout << endl << "RemoveEmptyDataBins() removing empty bin points from data histogram on plot " << frame->GetName() << endl;
+	RemoveEmptyDataBins(w, frame);
+      }
       
       // normalize pdf to number of expected events, not to number of events in dataset
       double normCount = regionPdf->expectedEvents(*regionVar);
@@ -578,7 +606,8 @@ void Util::PlotPdfWithComponents(RooWorkspace* w, TString fcName, TString plotRe
       // re-plot data and pdf, so they are on top of error and components
       regionPdf->plotOn(frame,Normalization(normCount,RooAbsReal::NumEvent),Precision(1e-5),LineColor(fc->getTotalPdfColor()));
       regionData->plotOn(frame,RooFit::DataError(RooAbsData::Poisson),MarkerColor(fc->getDataColor()),LineColor(fc->getDataColor()));
-      
+      if(fc->m_removeEmptyBins) RemoveEmptyDataBins(w, frame);
+
       TString canName=Form("can_%s_%s",regionCatLabel.Data(),outputPrefix.Data());
       canVec[iVec] = new TCanvas(canName,canName, 700, 600);
       
@@ -1058,8 +1087,21 @@ void Util::PlotNLL(RooWorkspace* w, RooFitResult* rFit, Bool_t plotPLL, TString 
       RooPlot* frame = par->frame();
       nll->plotOn(frame, ShiftToZero());
       frame->SetMinimum(0.);
-      frame->SetMaximum(10000.);
 
+      // curveName = 0 means take the last curve from the plot
+      const char* curvename = 0;
+      RooCurve* curve = (RooCurve*) frame->findObject(curvename,RooCurve::Class()) ;
+      Double_t curveMax = curve->getYAxisMax();
+      //   cout << endl << " curveMax = " << curveMax << endl;
+      frame->SetMaximum(curveMax * 2.);
+      
+      frame->GetYaxis()->SetTitleSize(0.05);
+      frame->GetXaxis()->SetTitleSize(0.05);
+      
+      frame->GetYaxis()->SetLabelSize(0.075);
+      frame->GetXaxis()->SetLabelSize(0.075);
+      //   frame->SetMaximum(10000.);
+  
       if(plotPLL)   pll->plotOn(frame,LineColor(kRed),LineStyle(kDashed),NumCPU(4)) ;
       
       can->cd(iPar+1);
@@ -1113,7 +1155,8 @@ TH2D* Util::PlotCorrelationMatrix(RooFitResult* rFit){
   if(numPars<5)    gStyle->SetMarkerSize(1.4);
   else if(numPars<10)    gStyle->SetMarkerSize(1.1);
   else if(numPars<20)    gStyle->SetMarkerSize(0.85);
-  else     gStyle->SetMarkerSize(0.5);
+  else if(numPars<40)    gStyle->SetMarkerSize(0.5);
+  else     gStyle->SetMarkerSize(0.25);
 
  
   TH2D* h_corr = (TH2D*) rFit->correlationHist(Form("h_corr_%s",rFit->GetName())); 
@@ -1122,7 +1165,8 @@ TH2D* Util::PlotCorrelationMatrix(RooFitResult* rFit){
   if(numPars<5) labelSize = 0.05;
   else if(numPars<10)   labelSize = 0.04;
   else if(numPars<20)   labelSize = 0.025;
-  else labelSize = 0.02;
+  else if(numPars<40)   labelSize = 0.02;
+  else labelSize = 0.015;
 
   h_corr->GetXaxis()->SetLabelSize(labelSize);
   h_corr->GetYaxis()->SetLabelSize(labelSize);
@@ -1586,8 +1630,8 @@ RooAbsReal* Util::GetComponent(RooWorkspace* w, TString component, TString regio
   } 
 
   if (compFuncList.getSize()==0 || compCoefList.getSize()==0 || compCoefList.getSize()!=compFuncList.getSize()){
-    cout << " Something wrong with compFuncList or compCoefList in Util::GetComponent() "
-	 << " compFuncList.getSize() = " << compFuncList.getSize() << " compCoefList.getSize() = " << compCoefList.getSize() << endl;
+    cout << " Something wrong with compFuncList or compCoefList in Util::GetComponent(w," << component << "," << region 
+	 << ") " << endl << "         compFuncList.getSize() = " << compFuncList.getSize() << " compCoefList.getSize() = " << compCoefList.getSize() << endl;
     return NULL;
   }
 
@@ -1724,6 +1768,45 @@ RooAbsPdf* Util::GetRegionPdf(RooWorkspace* w, TString region){  //, unsigned in
 
 
 
+
+// //_____________________________________________________________________________
+// RooAbsReal* Util::GetRegionPdfIntegral(RooWorkspace* w, TString region){  //, unsigned int bin){
+ 
+//   if(w==NULL){ cout << endl << " Workspace not found, no GetRegionPdf performed" << endl << endl; return NULL; }
+  
+//   RooCategory* regionCat = (RooCategory*) w->cat("channelCat");
+//   TString regionFullName = GetFullRegionName(regionCat, region);
+  
+//   RooSimultaneous* pdf = (RooSimultaneous*) w->pdf("simPdf");
+//   RooAbsPdf* regionPdf = (RooAbsPdf*) pdf->getPdf(regionFullName.Data());
+  
+//   RooAbsData* data = (RooAbsData*)w->data("obsData"); 
+//   TString dataCatLabel = Form("channelCat==channelCat::%s",regionFullName.Data());
+//   RooAbsData* regionData = (RooAbsData*) data->reduce(dataCatLabel.Data());
+  
+//   if(regionPdf==NULL || regionData==NULL){ 
+//     cout << " Either the Pdf or the Dataset do not have an appropriate state for the region = " << region << ", check the Workspace file" << endl;
+//     cout << " regionPdf = " << regionPdf << "   regionData = " << regionData << endl;  
+//     return NULL; 
+//   }
+//   RooRealVar* regionVar =(RooRealVar*) ((RooArgSet*) regionPdf->getObservables(*regionData))->find(Form("obs_x_%s",regionFullName.Data()));
+  
+//   RooAbsReal* regionPdfInt = regionPdf->createIntegral(RooArgSet(*regionVar));
+  
+//   if(regionPdfInt == NULL){
+//     cout << " region pdf integral not found in region(" << regionFullName << ")   RETURNING COMPONENTS WILL BE WRONG " << endl ;
+//     return NULL;
+//   }
+
+//   cout << " Adding " << regionPdfInt->GetName() << " to workspace" << endl;
+//   w->import( *regionPdfInt,kTRUE);
+//   gDirectory->Add(regionPdfInt);
+
+//   return regionPdfInt;
+
+// }
+
+
 //_____________________________________________________________________________
 RooRealVar* Util::GetRegionVar(RooWorkspace* w, TString region){ 
   
@@ -1843,6 +1926,9 @@ double Util::GetPropagatedError(RooAbsReal* var, const RooFitResult& fr)
   // where     F_a(x) = [ f(x,a+da) - f(x,a-da) ] / 2, with f(x) this function and 'da' taken from the fit result
   //       Corr(a,a') = the correlation matrix from the fit result
   //
+  
+  Bool_t debug  = false;
+  if (debug) std::cout << endl << " GPP for variable = " << var->GetName() << endl;
 
   // Clone self for internal use
   RooAbsReal* cloneFunc = var; //(RooAbsReal*) var->cloneTree();
@@ -1876,6 +1962,8 @@ double Util::GetPropagatedError(RooAbsReal* var, const RooFitResult& fr)
     Double_t cenVal = rrv.getVal() ;
     Double_t errVal = sqrt(V(newI,newI)) ;
 
+    if (debug)  std::cout << " GPP:  par = " << rrv.GetName() << " cenVal = " << cenVal << " errVal = " << errVal << std::endl;
+
     // Make Plus variation
     ((RooRealVar*)paramList.at(ivar))->setVal(cenVal+errVal) ;
     plusVar.push_back(cloneFunc->getVal(nset)) ;
@@ -1885,6 +1973,7 @@ double Util::GetPropagatedError(RooAbsReal* var, const RooFitResult& fr)
     minusVar.push_back(cloneFunc->getVal(nset)) ;
 	   
     ((RooRealVar*)paramList.at(ivar))->setVal(cenVal) ;
+
   }
 	 
   TMatrixDSym C(paramList.getSize()) ;     
@@ -1905,10 +1994,15 @@ double Util::GetPropagatedError(RooAbsReal* var, const RooFitResult& fr)
   for (unsigned int j=0 ; j<plusVar.size() ; j++) {
     F[j] = (plusVar[j]-minusVar[j])/2 ;
   }
+
+  if (debug)   F.Print();
+  if (debug)  C.Print();
 	
   // Calculate error in linear approximation from variations and correlation coefficient
   Double_t sum = F*(C*F) ;
- 
+
+  if (debug) std::cout << " GPP : sum = " << sqrt(sum) << endl; 
+
   return sqrt(sum) ;
 }
 
@@ -2110,6 +2204,42 @@ void Util::ImportInWorkspace( RooWorkspace* wspace, TObject* obj, TString name) 
 
   wspace->saveSnapshot(Form("snapshot_paramsVals_%s",name.Data()),*params);
 
+}
+
+
+
+
+
+//________________________________________________________________________________________________________________________________________
+void Util::RemoveEmptyDataBins(RooWorkspace* w, RooPlot* frame){
+  
+  // histname=0 means that the last RooHist is taken from the RooPlot
+  const char* histname = 0;
+  
+  // Find histogram object
+  RooHist* hist = (RooHist*) frame->findObject(histname,RooHist::Class()) ;
+  if (!hist) {
+    cout << " Util::RemoveEmptyDataBins(" << frame->GetName() << ") cannot find histogram" << endl ;
+    return ;
+  }
+  
+  for(Int_t i=0; i<hist->GetN(); i++){
+    Double_t x,y;
+    hist->GetPoint(i,x,y) ;
+
+    // cout << " i = " << i << "   x= " << x << " y = " << y << endl;
+
+    if( fabs(y)< 0.0000001 && hist->GetErrorYhigh(i) > 0.){
+      //      hist->SetPointError(i,hist->GetErrorXlow(i),hist->GetErrorXhigh(i),hist->GetErrorYlow(i),0.) ;
+      //  cout << " removing point i = " << i << endl;
+      hist->RemovePoint(i);
+      // RemovePoint makes GetN() one less, hence to loop over all points, "i" has to become one lower (only not for the last bin to protect against infinite loop)
+      if(i != hist->GetN()) --i;
+    }
+  }
+  
+  return;
+  
 }
 
 

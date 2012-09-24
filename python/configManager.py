@@ -73,11 +73,12 @@ class ConfigManager(object):
         self.includeOverallSys = True # Boolean to chose if HistoSys should also have OverallSys
         self.readFromTree = False # Boolean to chose if reading histograms from tree will also write to file
         self.plotHistos = None # Boolean to chose to plot out the histograms
+        self.removeEmptyBins = False # Boolean to chose to remove empty bins from data histogram on plot
         self.executeHistFactory = True # Boolean to chose to execute HistFactory
         self.printHistoNames = False # Print out the names of generated histograms
         self.doHypoTest = False
 
-        self.topLvls = [] # FitWorkspace object
+        self.topLvls = [] # TopLevelXML object
         self.prepare = None # PrepareHistos object
 
         self.histCacheFile = ""
@@ -98,53 +99,53 @@ class ConfigManager(object):
             raise TypeError("lumi unit '%s' is not supported."%unit)
         return
 
-    def addFitWorkspace(self,input,name=""):
-        #from configWriter import TopLevelXML
-        from workspaceWriter import FitWorkspace
+    def addTopLevelXML(self,input,name=""):
+        from configWriter import TopLevelXML
         if len(name)>0:
             newName=name
         elif isinstance(input,str):
             newName=input
-        elif isinstance(input,FitWorkspace):
+        elif isinstance(input,TopLevelXML):
             newName=input.name
         else:
-            raise RuntimeError("Logic error in addFitWorkspace")
+            raise RuntimeError("Logic error in addTopLevelXML")
 
         #check that newName is not already used
         for tl in self.topLvls:
             if tl.name==newName:
-                raise RuntimeError("FitWorkspace %s already exists in configManager. Please use a different name."%(newName))
+                raise RuntimeError("TopLevelXML %s already exists in configManager. Please use a different name."%(newName))
             pass
 
-        #create new FitWorkspace object and return pointer
-        if isinstance(input,FitWorkspace):
-            newFitWorkspace = input.Clone(newName)
+        #create new TopLevelXML object and return pointer
+        if isinstance(input,TopLevelXML):
+            newTLX = input.Clone(newName)
         else:
-            newFitWorkspace = FitWorkspace(newName)
+            newTLX = TopLevelXML(newName)
             pass
-        newFitWorkspace.verbose=self.verbose
-        newFitWorkspace.setWeights(self.weights)
-        self.topLvls.append(newFitWorkspace)
-        print "Created FitWorkspace: %s"%(newName)
+        newTLX.verbose=self.verbose
+        newTLX.setWeights(self.weights)
+        newTLX.removeEmptyBins=self.removeEmptyBins
+        self.topLvls.append(newTLX)
+        print "Created Fit Config: %s"%(newName)
         return self.topLvls[len(self.topLvls)-1]
 
-    def addFitWorkspaceClone(self,obj,name): 
-        return self.addFitWorkspace(obj,name)
+    def addTopLevelXMLClone(self,obj,name): 
+        return self.addTopLevelXML(obj,name)
 
-    def removeFitWorkspace(self,name):
+    def removeTopLevelXML(self,name):
         for i in xrange(0,len(self.topLvls)):
             tl=self.topLvls[i]
             if tl.name==name:
                 self.topLvls.pop(i)
                 return
-        print "WARNING FitWorkspace named '%s' does not exist. Cannot be removed."%(name)
+        print "WARNING TopLevelXML named '%s' does not exist. Cannot be removed."%(name)
         return
 
-    def getFitWorkspace(self,name):
+    def getTopLevelXML(self,name):
         for tl in self.topLvls:
             if tl.name==name:
                 return tl
-        print "WARNING FitWorkspace named '%s' does not exist. Cannot be returned."%(name)
+        print "WARNING TopLevelXML named '%s' does not exist. Cannot be returned."%(name)
         return 0
 
     def initialize(self):        
@@ -260,13 +261,11 @@ class ConfigManager(object):
         self.cppMgr.setNPoints( self.nPoints )
         self.cppMgr.setSeed( self.seed )
         self.cppMgr.setMuValGen( self.muValGen )
-        self.cppMgr.setBkgCorrVal( self.bkgCorrVal )
-        self.cppMgr.setBkgParName( self.bkgParName ) 
 
         if self.outputFileName:
             self.cppMgr.m_outputFileName = self.outputFileName
             self.cppMgr.m_saveTree=True            
-        #Fill FitConfigs from FitWorkspaces
+        #Fill FitConfigs from TopLevelXMLs
         for tl in self.topLvls:
             cppTl = self.cppMgr.addFitConfig(tl.name)
             cppTl.m_inputWorkspaceFileName = tl.wsFileName
@@ -294,7 +293,7 @@ class ConfigManager(object):
             for cName in tl.bkgConstrainChannels:
                 cppTl.m_bkgConstrainChannels.push_back(cName)
            
-            # Plot cosmetics per FitWorkspace (FitConfig in C++)
+            # Plot cosmetics per TopLevelXML (FitConfig in C++)
             cppTl.m_dataColor = tl.dataColor
             cppTl.m_totalPdfColor = tl.totalPdfColor
             cppTl.m_errorLineColor = tl.errorLineColor
@@ -303,6 +302,7 @@ class ConfigManager(object):
             cppTl.m_errorFillStyle = tl.errorFillStyle
             if not tl.tLegend == None:
                 cppTl.m_legend = tl.tLegend
+            cppTl.m_removeEmptyBins = self.removeEmptyBins
 
             # Plot cosmetics per channel
             for c in tl.channels:
@@ -352,7 +352,7 @@ class ConfigManager(object):
         print "readFromTree: %s"%self.readFromTree
         print "plotHistos: %s"%self.plotHistos
         print "executeHistFactory: %s"%self.executeHistFactory
-        print "FitWorkspace objects:"
+        print "TopLevelXML objects:"
         for tl in self.topLvls:
             print "  %s"%tl.name
             for c in tl.channels:
@@ -391,7 +391,7 @@ class ConfigManager(object):
         print "ConfigManager:"
         print str(self.fileList)
         for topLvl in self.topLvls:
-            print "                FitWorkspace: " + topLvl.name
+            print "                TopLvlXML: " + topLvl.name
             print "                " + str(topLvl.files)
             for channel in topLvl.channels:
                 print "                ---------> Channel: " + channel.name
@@ -409,7 +409,7 @@ class ConfigManager(object):
         print "ConfigManager:"
         print str(self.treeName)
         for topLvl in self.topLvls:
-            print "                FitWorkspace: " + topLvl.name
+            print "                TopLvlXML: " + topLvl.name
             print "                " + str(topLvl.treeName)
             for channel in topLvl.channels:
                 print "                ---------> Channel: " + channel.name
@@ -432,7 +432,7 @@ class ConfigManager(object):
     def setFileList(self,filelist):
         """
         Set file list for config manager.
-        This will be used as default for fit workspaces that don't specify
+        This will be used as default for top level xmls that don't specify
         their own file list.
         """
         self.fileList = filelist
@@ -440,7 +440,7 @@ class ConfigManager(object):
     def setFile(self,file):
         """
         Set file list for config manager.
-        This will be used as default for fit workspaces that don't specify
+        This will be used as default for top level xmls that don't specify
         their own file list.
         """
         self.fileList = [file]
@@ -451,17 +451,17 @@ class ConfigManager(object):
         """
         # propagate our file list downwards (if we don't have one,
         # this will result in the propagation of the files belonging
-        # to our fit workspaces)
-        for fitworkspace in self.topLvls:
-            fitworkspace.propagateFileList(self.fileList)
+        # to our top level xml)
+        for toplvlxml in self.topLvls:
+            toplvlxml.propagateFileList(self.fileList)
 
     def setTreeName(self,treeName):
         self.treeName = treeName
         return
 
     def propagateTreeName(self):
-        for fitworkspace in self.topLvls:
-            fitworkspace.propagateTreeName(self.treeName)
+        for toplvlxml in self.topLvls:
+            toplvlxml.propagateTreeName(self.treeName)
             pass
         return
         
@@ -472,9 +472,9 @@ class ConfigManager(object):
 
     def execute(self,topLvl):
         """
-        Make or get the histograms and generate the workspace
+        Make or get the histograms and generate the XML
         """
-        print "Preparing histograms and/or workspace for FitWorkspace %s\n"%topLvl.name
+        print "Preparing histograms and/or workspace for TopLevelXML %s\n"%topLvl.name
 
         if self.plotHistos:
             cutHistoDict = {}
