@@ -223,10 +223,10 @@ ConfigMgr::doHypoTest(FitConfig* fc, TString outdir, double SigXSecSysnsigma)
 									  useCLs,npoints,poimin,poimax,doAnalyze,useNumberCounting,
 									  modelSBName.Data(),modelBName.Data(),dataName,nuisPriorName); 
    
-   /// store ul as nice plot ..
-   if ( hypo!=0 ) {
-      RooStats::AnalyzeHypoTestInverterResult( hypo,m_calcType,m_testStatType,useCLs,npoints, fc->m_signalSampleName.Data(), ".eps") ;
-   }
+   ///// store ul as nice plot ..
+   //if ( hypo!=0 ) {
+   //   RooStats::AnalyzeHypoTestInverterResult( hypo,m_calcType,m_testStatType,useCLs,npoints, fc->m_signalSampleName.Data(), ".eps") ;
+   //}
 
    if ( hypo!=0 ) {	
       outfile->cd();
