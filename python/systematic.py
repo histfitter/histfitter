@@ -240,18 +240,14 @@ class TreeWeightSystematic(SystematicBase):
     def PrepareWAHforWeight(self, regionString="", normString="", normCuts="",
                             abstract=None, chan=None, sam=None):
         highandlow = ["High_", "Low_"]
-        weightstemp = abstract.prepare.weights
         for highorlow in highandlow:
-            abstract.prepare.weights = weightstemp
+            abstract.prepare.weights = str(abstract.lumiUnits*abstract.outputLumi/abstract.inputLumi)
             if highorlow == "High_":
                 for myw in self.high:
-                    if abstract.prepare.weights.find(myw) == -1:
-                        abstract.prepare.weights += " * " + myw
-
+                    abstract.prepare.weights += " * " + myw
             else:
                 for myw in self.low:
-                    if abstract.prepare.weights.find(myw) == -1:
-                        abstract.prepare.weights += " * " + myw
+                    abstract.prepare.weights += " * " + myw
 
             if abstract.readFromTree:
                 treeName = sam.treeName
@@ -264,7 +260,6 @@ class TreeWeightSystematic(SystematicBase):
             TreeWeightSystematic.FillUpDownHist(self, highorlow, regionString,
                                                 normString, normCuts, abstract,
                                                 chan, sam)
-            abstract.prepare.weights = weightstemp
         return
 
     def PrepareWAHforTree(self, regionString="", normString="", normCuts="",
