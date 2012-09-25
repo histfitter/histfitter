@@ -19,17 +19,17 @@ ROOT.SetAtlasStyle()
 ndata     =  7. 	# Number of events observed in data
 nbkg      =  5.	 	# Number of predicted bkg events
 nsig      =  5.  	# Number of predicted signal events
-nbkgErr   =  1.  	# (Absolute) Statistical error on bkg estimate
-nsigErr   =  2.  	# (Absolute) Statistical error on signal estimate
+nbkgErr   =  1.  	# (Absolute) Statistical error on bkg estimate *from limited MC statistics*
+nsigErr   =  2.  	# (Absolute) Statistical error on signal estimate *from limited MC statistics*
 lumiError = 0.039 	# Relative luminosity uncertainty
 
 # Set uncorrelated systematics for bkg and signal (1 +- relative uncertainties)
-ucb = Systematic("ucb", configMgr.weights, 1.2,0.8, "user","userOverallSys")  # 20% error up and down
-ucs = Systematic("ucs", configMgr.weights, 1.15,0.9, "user","userOverallSys") # 15% error up, and 10% down
+ucb = Systematic("uncorrl_bkg", configMgr.weights, 1.2,0.8, "user","userOverallSys")  # 20% error up and down
+ucs = Systematic("uncorrl_sig", configMgr.weights, 1.15,0.9, "user","userOverallSys") # 15% error up, and 10% down
 
 # correlated systematic between background and signal (1 +- relative uncertainties)
-corb = Systematic("cor",configMgr.weights, [1.1],[0.9], "user","userHistoSys")
-cors = Systematic("cor",configMgr.weights, [1.15],[0.85], "user","userHistoSys")
+corb = Systematic("corrl_sigbkg",configMgr.weights, [1.1],[0.9], "user","userHistoSys")
+cors = Systematic("corrl_sigbkg",configMgr.weights, [1.15],[0.85], "user","userHistoSys")
 
 ##########################
 
