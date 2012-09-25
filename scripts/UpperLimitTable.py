@@ -104,7 +104,7 @@ def latexfitresults(filename, poiname='mu_SIG', lumiFB=1.0, nTOYS=3000, asimov=F
   #print " CLB = " , CLB
 
   print "\n\n\n\n  ***---  now doing p-value calculation ---*** \n\n\n\n"
-  pval = RooStats.get_Presult(w,False,1000,2)
+  pval = RooStats.get_Presult(w,False,ntoys,calctype)
   # get_Presult(  RooWorkspace* w,
   #           		bool doUL, // = true, // true = exclusion, false = discovery
   #             		int ntoys, //=1000,
@@ -116,8 +116,36 @@ def latexfitresults(filename, poiname='mu_SIG', lumiFB=1.0, nTOYS=3000, asimov=F
   #             		bool useCLs, // = true ,   
   #             		bool useNumberCounting, // = false,
   #             		const char * nuisPriorName) // = 0 
+
+  #  print "\n\n\n\n XXX  p0 = ", pval
   
   ulList = [uL_visXsec, uL_nobsinSR, uL_nexpinSR, uL_nexpinSRerrP, uL_nexpinSRerrM, CLB, pval ]
+
+  print "\n\n\n"
+  print " observed upper limit visible cross section:   ", uL_visXsec
+  print " observed upper limit N events:   ", uL_nobsinSR
+  print " expected upper limit N events:   ", uL_nexpinSR, " +", uL_nexpinSRerrP, " - ", uL_nexpinSRerrM
+  print " CLb:   ", CLB
+  print " p0-value (p(s = 0)):   ", pval
+  
+## {\bf Signal channel}                        & $\langle\epsilon{\rm \sigma}\rangle_{\rm obs}^{95}$[fb]  &  $S_{\rm obs}^{95}$  & $S_{\rm exp}^{95}$ & $CL_{B}$ & $p(s=0)$  \\
+## \noalign{\smallskip}\hline\noalign{\smallskip}
+## %%
+## SS   & $1.72$ &  $8.1$  & ${6.1}^{+3.2}_{-2.0}$ & $0.75$ &  $0.50$  \\ 
+##   %
+## \noalign{\smallskip}\hline\noalign{\smallskip}
+## \end{tabular*}
+## \end{center}
+## \caption[Breakdown of upper limits.]{
+## Left to right: 95\% CL upper limits on the visible cross section
+## ($\langle\epsilon\sigma\rangle_{\rm obs}^{95}$) and on the number of
+## signal events ($S_{\rm obs}^{95}$ ).  The third column
+## ($S_{\rm exp}^{95}$) shows the 95\% CL upper limit on the number of
+## signal events, given the expected number (and $\pm 1\sigma$
+## excursions on the expectation) of background events.
+## The last two columns
+## indicate the $CL_B$ value, i.e. the confidence level observed for
+## the background-only hypothesis, and the discovery $p$-value ($p(s = 0)$).
 
   return ulList
 
@@ -218,10 +246,15 @@ if __name__ == "__main__":
   for chan in chanList:
     if chan in wsFileName:
       origwsChan = chan
-    if origwsChan == None:
+    else:
+      origwsChan = "dummy"
+    try:
+      origwsChan
+    except NameError:
       print " \n Warning:  none of the given regions/channels(", chanList, ") correspond to the given workspace file(", wsFileName,") \n   always at least the original channel needs to be given;  \n ie -c SR4jTEl -w MyDiscoveryAnalysis_SR4jTEl_SPlusB_combined_NormalMeasurement_model.root"
       sys.exit(0)
-
+      
+      
   for chan in chanList:
     tmp_wsFileName = wsFileName.replace(origwsChan,chan)
     if os.path.isfile(tmp_wsFileName):
