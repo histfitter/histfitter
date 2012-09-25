@@ -61,7 +61,7 @@ bkgSample.addSystematic(ucb)
 
 sigSample = Sample("Sig",kPink)
 sigSample.setNormFactor("mu_SS",1.,0.,10.)
-sigSample.setStatConfig(True)
+#sigSample.setStatConfig(True)
 sigSample.setNormByTheory()
 sigSample.buildHisto([nsig],"UserRegion","cuts")
 
