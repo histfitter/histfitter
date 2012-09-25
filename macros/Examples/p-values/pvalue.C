@@ -15,9 +15,13 @@ pvalue()
 
   // open the workspace
   gSystem->Load("libSusyFitter.so");
-  TFile *file = TFile::Open("example_channel1_GaussExample_model.root");
-  RooWorkspace* w = (RooWorkspace *)file->Get("channel1"); 
-  
+
+  //TFile *file = TFile::Open("example_channel1_GaussExample_model.root");
+  //RooWorkspace* w = (RooWorkspace *)file->Get("channel1"); 
+ 
+  TFile *file = TFile::Open("MyUserAnalysis_SPlusB_combined_NormalMeasurement_model.root");
+  RooWorkspace* w = (RooWorkspace *)file->Get("combined");
+ 
   // set random seed for toy generation
   RooRandom::randomGenerator()->SetSeed(seed);
 
