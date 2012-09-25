@@ -80,6 +80,7 @@ ana.setSignalSample(sigSample)
 # Define measurement
 meas = ana.addMeasurement(name="NormalMeasurement",lumi=1.0,lumiErr=lumiError)
 meas.addPOI("mu_Sig")
+#meas.addParamSetting("Lumi",True)
 
 # Add the channel
 chan = ana.addChannel("cuts",["UserRegion"],1,0.,1.)
