@@ -757,7 +757,7 @@ RooStats::get_Pvalue(     RooWorkspace* w,
 									     ntoys, calculatorType, testStatType, 
 									     useCLs, 
 									     1, muVal, muVal, // test of single point only
-									     true, //false, // no plots 
+									     false, // no plots 
 									     useNumberCounting, 
 									     modelSBName, modelBName,
 									     dataName, 
