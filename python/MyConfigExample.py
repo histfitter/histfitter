@@ -300,7 +300,6 @@ if doDiscovery:
     # s1l2jT = signal region/channel
     ssChannel = discovery.addChannel("cuts",["SS"],srNBins,srBinLow,srBinHigh)
     ssChannel.addSystematic(jes)
-    [s.mergeSamples([topSample.name,wzSample.name,bgSample.name]) for s in ssChannel.getSystematic(jes.name)]
     ssChannel.addDiscoverySamples(["SS"],[1.],[0.],[100.],[kMagenta])
     discovery.setSignalChannels([ssChannel])
 
