@@ -741,6 +741,7 @@ class ConfigManager(object):
             self.prepare.var = chan.variableName
         elif sam.unit == "MeV" and chan.variableName.find("/") < 0 and not chan.variableName.startswith("n"):
             self.prepare.var = chan.variableName+"/1000."
+
         return
 
     def addSampleSpecificHists(self,topLvl,chan,sam,regionString,normRegions,normString,normCuts,userNormDict):
@@ -833,6 +834,9 @@ class ConfigManager(object):
 
             for (systName,syst) in chan.getSample(sam.name).systDict.items():
                 print "    Systematic: %s"%(systName)
+                #first reset weight to nominal value
+                self.setWeightsCutsVariable(chan,sam,regionString)
+                #print "TEST",self.prepare.weights
                 if syst.type == "weight" or syst.type == "tree" or syst.type == "user":
                     #depending on the systematic type: first the weights for up and down and secondly the Histos (just for the methods "userNormHistoSys" or "normHistoSys") are added
                     syst.PrepareWeightsAndHistos(regionString,normString,normCuts,self,chan,sam)
