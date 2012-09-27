@@ -576,6 +576,7 @@ class ConfigManager(object):
         else:
             chan.infoDict[sam.name].append((systName,syst.high,syst.low,syst.method))
         return
+
     def addHistoSysforNoQCD(self,regionString,normString,normCuts,chan,sam,syst,userNormDict):
         nomName = "h"+sam.name+"Nom_"+regionString+"_obs_"+replaceSymbols(chan.variableName)
         highName = "h"+sam.name+syst.name+"High_"+regionString+"_obs_"+replaceSymbols(chan.variableName)
@@ -666,10 +667,10 @@ class ConfigManager(object):
                     if syst.isMerged():
                         chan.getSample(sam.name).addShapeSys(syst.name,nomMergedName,highMergedName,lowMergedName,syst.constraint)
                         syst.Reset()
-                    chan.getSample(sam.name).shapeSystList.append((systName,nomMergedName+"Norm",syst.constraint,"","","",""))
+                    chan.getSample(sam.name).shapeSystList.append((systName, nomMergedName+"Norm", syst.constraint, "", "", "", ""))
             else:
-                chan.getSample(sam.name).addShapeSys(syst.name,nomName,highName,lowName)
-                chan.getSample(sam.name).shapeSystList.append((systName,nomName+"Norm",configMgr.histCacheFile,"","","",""))
+                chan.getSample(sam.name).addShapeSys(syst.name, nomName, highName, lowName)
+                chan.getSample(sam.name).shapeSystList.append((syst.name, nomName+"Norm", syst.constraint, "", "", "", ""))
 
     def addHistoSysForQCD(self,regionString,normString,normCuts,chan,sam):
         self.prepare.addQCDHistos(sam,chan.useOverflowBin,chan.useUnderflowBin)
