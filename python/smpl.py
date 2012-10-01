@@ -196,7 +196,7 @@ class Sample(object):
         """
 
         if normalizeSys and not self.normRegions: 
-            #raise RuntimeError("You are using the Zero lepton modified version of HistFitter. Please specify normalization regions!")
+            raise RuntimeError("You are using the Zero lepton modified version of HistFitter. Please specify normalization regions!")
             normalizeSys = False
         if self.noRenormSys:
             normalizeSys = False
@@ -204,10 +204,6 @@ class Sample(object):
 
         if normalizeSys:
             if not self.normRegions: raise RuntimeError("You are using the Zero lepton modified version of HistFitter. Please specify normalization regions!")
-
-            normString = ""
-            for r in self.normRegions:
-                normString += r[0]
 
             if oneSide and symmetrize:
                 # symmetrize
@@ -611,7 +607,8 @@ class Sample(object):
         try:
             return self.systDict[systName]
         except KeyError:
-            raise KeyError("Could not find systematic %s in topLevel %s" % (systName, self.name))
+            print "WARNING could not find systematic %s in sample %s" % (systName, self.name)
+        return
 
     def removeSystematic(self, name):
         """
