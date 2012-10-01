@@ -11,9 +11,9 @@ class HistogramsManager:
     def generateHistoName(self):
         return
 
-    def buildUserHisto(self, hName, binValues):
+    def buildUserHisto(self, hName, xmin, binValues):
         
-        h = TH1F(hName, hName, len(binValues), 0., float(len(binValues)))
+        h = TH1F(hName, hName, len(binValues), xmin, xmin+float(len(binValues)))
         for val in binValues:
             h.SetBinContent(iBin+1, val)
             pass
@@ -24,7 +24,8 @@ class HistogramsManager:
             raise ValueError("hNom and binErr must have same length in buildUserHistoSysFromHist()")
         
         #binErr is the relative errors
-        h = TH1F(hName, hName, len(binErr), 0., float(len(binErr)))
+        xmin = hNom.GetXaxis().GetXmin()
+        h = TH1F(hName, hName, len(binErr), xmin, xmin+float(len(binErr)))
         for iBin in xrange(hNom.GetNbinsX()):
             val=hNom.GetBinContent(iBin+1)*binErr[iBin]
             h.SetBinContent(iBin+1, val)
