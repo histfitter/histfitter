@@ -581,6 +581,10 @@ class ConfigManager(object):
         nomName = "h"+sam.name+"Nom_"+regionString+"_obs_"+replaceSymbols(chan.variableName)
         highName = "h"+sam.name+syst.name+"High_"+regionString+"_obs_"+replaceSymbols(chan.variableName)
         lowName = "h"+sam.name+syst.name+"Low_"+regionString+"_obs_"+replaceSymbols(chan.variableName)
+        highNameNorm = "h" + sam.name + syst.name + "High_" + normString + "Norm"
+        lowNameNorm = "h" + sam.name + syst.name + "Low_" + normString + "Norm"
+        #print highNameNorm
+
         if syst.method == "histoSys":
             chan.getSample(sam.name).addHistoSys(syst.name,nomName,highName,lowName,False,False)
         elif syst.method == "histoSysOneSide":
@@ -629,13 +633,13 @@ class ConfigManager(object):
                 for iBin in xrange(configMgr.hists[nomName].GetNbinsX()):
                     configMgr.hists[highName].SetBinContent(iBin+1,configMgr.hists[nomName].GetBinContent(iBin+1)*syst.high[iBin])
                     pass
-                configMgr.hists[highName+"Norm"] = configMgr.hists[highName].Clone()
+            configMgr.hists[highNameNorm] = configMgr.hists[highName].Clone()
             if configMgr.hists[lowName] == None:
                 configMgr.hists[lowName] = TH1F(lowName,lowName,configMgr.hists[nomName].GetNbinsX(),configMgr.hists[nomName].GetXaxis().GetXmin(),configMgr.hists[nomName].GetXaxis().GetXmax())
                 for iBin in xrange(configMgr.hists[nomName].GetNbinsX()):
                     configMgr.hists[lowName].SetBinContent(iBin+1,configMgr.hists[nomName].GetBinContent(iBin+1)*syst.low[iBin])
                     pass
-                configMgr.hists[lowName+"Norm"] = configMgr.hists[lowName].Clone()
+            configMgr.hists[lowNameNorm] = configMgr.hists[lowName].Clone()
             if not (syst.name,sam.name) in userNormDict.keys():
                 userNormDict[(syst.name,sam.name)] = []
                 userNormDict[(syst.name,sam.name)].append((regionString,highName,lowName,nomName))
@@ -821,8 +825,8 @@ class ConfigManager(object):
                                     self.hists["h"+s.name+"Nom_"+normString+"Norm"].SetBinContent(1, self.hists["h"+s.name+"Nom_"+normString+"Norm"].GetBinContent(1) + tempHist.GetIntegral())
                                 else:
                                     self.hists["h"+s.name+"Nom_"+normString+"Norm"].SetBinContent(1, self.hists["h"+s.name+"Nom_"+normString+"Norm"].GetBinContent(1) + tempHist.GetSumOfWeights())
-
                                 del tempHist
+
                         if configMgr.verbose > 2:        
                             print "nom =",self.hists["h"+s.name+"Nom_"+normString+"Norm"].GetSumOfWeights()        
                     else:
@@ -840,7 +844,7 @@ class ConfigManager(object):
                 #print "TEST",self.prepare.weights
                 if syst.type == "weight" or syst.type == "tree" or syst.type == "user":
                     #depending on the systematic type: first the weights for up and down and secondly the Histos (just for the methods "userNormHistoSys" or "normHistoSys") are added
-                    syst.PrepareWeightsAndHistos(regionString,normString,normCuts,self,chan,sam)
+                    syst.PrepareWeightsAndHistos(regionString,normString,normCuts,self,topLvl,chan,sam)
                 #add Histos for all the other method-types
                 self.addHistoSysforNoQCD(regionString,normString,normCuts,chan,sam,syst,userNormDict)
         elif sam.isQCD:

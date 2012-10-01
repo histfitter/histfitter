@@ -121,7 +121,7 @@ class SystematicBase:
         return
 
     def FillUpDownHist(self, lowhigh="", regionString="", normString="",
-                       normCuts="", abstract=None, chan=None, sam=None):
+                       normCuts="", abstract=None, topLvl=None, chan=None, sam=None):
         if self.method == "userNormHistoSys" or self.method == "normHistoSys" \
            or self.method == "normHistoSysOneSide" \
            or self.method == "normHistoSysOneSideSym" \
@@ -238,7 +238,7 @@ class TreeWeightSystematic(SystematicBase):
                                 type, method, constraint)
 
     def PrepareWAHforWeight(self, regionString="", normString="", normCuts="",
-                            abstract=None, chan=None, sam=None):
+                            abstract=None, topLvl=None, chan=None, sam=None):
         highandlow = ["High_", "Low_"]
         for highorlow in highandlow:
             abstract.prepare.weights = str(abstract.lumiUnits*abstract.outputLumi/abstract.inputLumi)
@@ -259,11 +259,11 @@ class TreeWeightSystematic(SystematicBase):
                                               chan, sam)
             TreeWeightSystematic.FillUpDownHist(self, highorlow, regionString,
                                                 normString, normCuts, abstract,
-                                                chan, sam)
+                                                topLvl, chan, sam)
         return
 
     def PrepareWAHforTree(self, regionString="", normString="", normCuts="",
-                          abstract=None, chan=None, sam=None):
+                          abstract=None, topLvl=None, chan=None, sam=None):
         highandlow = ["High_", "Low_"]
         weightstemp = abstract.prepare.weights
         for highorlow in highandlow:
@@ -304,21 +304,21 @@ class TreeWeightSystematic(SystematicBase):
                                               chan, sam)
             TreeWeightSystematic.FillUpDownHist(self, highorlow, regionString,
                                                 normString, normCuts, abstract,
-                                                chan, sam)
+                                                topLvl, chan, sam)
             abstract.prepare.weights = weightstemp
         return
 
     def PrepareWeightsAndHistos(self, regionString="", normString="",
                                 normCuts="", abstract=None,
-                                chan=None, sam=None):
+                                topLvl=None, chan=None, sam=None):
         if self.type == "weight":
             TreeWeightSystematic.PrepareWAHforWeight(self, regionString,
                                                      normString, normCuts,
-                                                     abstract, chan, sam)
+                                                     abstract, topLvl, chan, sam)
         if self.type == "tree":
             TreeWeightSystematic.PrepareWAHforTree(self, regionString,
                                                    normString, normCuts,
-                                                   abstract, chan, sam)
+                                                   abstract, topLvl, chan, sam)
         return
 
 
@@ -330,7 +330,7 @@ class UserSystematic(SystematicBase):
 
     def PrepareWeightsAndHistos(self, regionString="", normString="",
                                 normCuts="", abstract=None,
-                                chan=None, sam=None):
+                                topLvl=None, chan=None, sam=None):
         highandlow = ["High_", "Low_"]
         for highorlow in highandlow:
             if abstract.readFromTree:
@@ -338,14 +338,15 @@ class UserSystematic(SystematicBase):
                 if treeName == '':
                     treeName = sam.name + abstract.nomName
                 abstract.prepare.read(treeName, sam.files)
-            else:
-                UserSystematic.tryAddHistos(self, highorlow, regionString,
+                pass
+
+            UserSystematic.tryAddHistos(self, highorlow, regionString,
                                             normString, normCuts, abstract,
                                             chan, sam)
 
             UserSystematic.FillUpDownHist(self, highorlow, regionString,
                                           normString, normCuts, abstract,
-                                          chan, sam)
+                                          topLvl, chan, sam)
         return
 
 
