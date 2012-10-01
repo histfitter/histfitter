@@ -1,3 +1,9 @@
+2012-09-20 David Cote <david.cote@cern.ch>
+	* Work in progress tag to request feedback about recent commits
+	* The code runs without known crashes, but gives different results w.r.t.
+	  HistFitter-00-00-13 which are not yet understood
+	* Tagging: HistFitter-00-00-15
+
 2012-09-04 Max Baak <mbaak@cern.ch>
         * Development tag - *before* migrating in the 0-lepton changes.
         * HistFitter-00-00-14

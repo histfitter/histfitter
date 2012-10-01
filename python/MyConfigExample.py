@@ -185,7 +185,8 @@ nJetWS.hasB = True
 nJetWS.hasBQCD = False
 nJetWS.useOverflowBin = False
 nJetWS.addSystematic(jes)
-[s.mergeSamples([topSample.name,wzSample.name,bgSample.name]) for s in nJetWS.getSystematic(jes.name)]
+#[s.mergeSamples([topSample.name,wzSample.name,bgSample.name]) for s in nJetWS.getSystematic(jes.name)]
+nJetWS.getSystematic(jes.name).mergeSamples([topSample.name,wzSample.name,bgSample.name])
 
 # TR using nJet
 nJetTS = bkt.addChannel("nJet",["SLTR"],nJetBinHighTR-nJetBinLowSoft,nJetBinLowSoft,nJetBinHighTR)
@@ -193,7 +194,8 @@ nJetTS.hasB = True
 nJetTS.hasBQCD = True
 nJetTS.useOverflowBin = False    
 nJetTS.addSystematic(jes)
-[s.mergeSamples([topSample.name,wzSample.name,bgSample.name]) for s in nJetTS.getSystematic(jes.name)]
+#[s.mergeSamples([topSample.name,wzSample.name,bgSample.name]) for s in nJetTS.getSystematic(jes.name)]
+nJetTS.getSystematic(jes.name).mergeSamples([topSample.name,wzSample.name,bgSample.name])
 
 bkt.setBkgConstrainChannels([nJetWS,nJetTS])
 
@@ -276,13 +278,15 @@ if doValidation:
     # s1l2jT
     srs1l2jTChannel = bkt.addChannel("cuts",["SR1sl2j"],srNBins,srBinLow,srBinHigh)
     srs1l2jTChannel.addSystematic(jes)
-    [s.mergeSamples([topSample.name,wzSample.name,bgSample.name]) for s in srs1l2jTChannel.getSystematic(jes.name)]
-    
+    #[s.mergeSamples([topSample.name,wzSample.name,bgSample.name]) for s in srs1l2jTChannel.getSystematic(jes.name)]
+    srs1l2jTChannel.getSystematic(jes.name).mergeSamples([topSample.name,wzSample.name,bgSample.name])
+
     # additional VRs if using soft lep CRs
     nJetSLVR2 = bkt.addChannel("nJet",["SLVR2"],nJetBinHighTR-nJetBinLowSoft,nJetBinLowSoft,nJetBinHighTR)
     nJetSLVR2.addSystematic(jes)
-    [s.mergeSamples([topSample.name,wzSample.name,bgSample.name]) for s in nJetSLVR2.getSystematic(jes.name)]
-    
+    #[s.mergeSamples([topSample.name,wzSample.name,bgSample.name]) for s in nJetSLVR2.getSystematic(jes.name)]
+    nJetSLVR2.getSystematic(jes.name).mergeSamples([topSample.name,wzSample.name,bgSample.name])
+
 ##    nBJetSLVR2 = bkt.addChannel("nBJet",["SLVR2"],nBJetBinHigh-nBJetBinLow,nBJetBinLow,nBJetBinHigh)
 ##     nBJetSLVR2.addSystematic(jes)
 ##     [s.mergeSamples([topSample.name,wzSample.name,bgSample.name]) for s in nBJetSLVR2.getSystematic(jes.name)]
@@ -303,8 +307,9 @@ if doValidation:
     mm2J = bkt.addChannel("met/meff2Jet",["SS"],6,0.1,0.7)
     mm2J.useOverflowBin=True
     mm2J.addSystematic(jes)
-    [s.mergeSamples([topSample.name,wzSample.name,bgSample.name]) for s in mm2J.getSystematic(jes.name)]
-    
+    #[s.mergeSamples([topSample.name,wzSample.name,bgSample.name]) for s in mm2J.getSystematic(jes.name)]
+    mm2J.getSystematic(jes.name).mergeSamples([topSample.name,wzSample.name,bgSample.name])
+
     #    bkt.setValidationChannels([nJetSLVR2,metSLVR2,meffSLVR2,nBJetSLVR2,metmeffSLVR2,mm2J,srs1l2jTChannel])
     bkt.setValidationChannels([nJetSLVR2,srs1l2jTChannel,mm2J])
    
