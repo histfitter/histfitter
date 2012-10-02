@@ -1,6 +1,7 @@
 from ROOT import THStack,TLegend,TCanvas,TFile,std,TH1F
 from ROOT import ConfigMgr,FitConfig  #from gSystem.Load("libSusyFitter.so")
 from prepareHistos import TreePrepare,HistoPrepare
+from histogramsManager import histMgr
 from copy import deepcopy
 import os
 
@@ -121,7 +122,7 @@ class SystematicBase:
         return
 
     def FillUpDownHist(self, lowhigh="", regionString="", normString="",
-                       normCuts="", abstract=None, chan=None, sam=None):
+                       normCuts="", abstract=None, topLvl=None, chan=None, sam=None):
         if self.method == "userNormHistoSys" or self.method == "normHistoSys" \
            or self.method == "normHistoSysOneSide" \
            or self.method == "normHistoSysOneSideSym" \
@@ -238,7 +239,7 @@ class TreeWeightSystematic(SystematicBase):
                                 type, method, constraint)
 
     def PrepareWAHforWeight(self, regionString="", normString="", normCuts="",
-                            abstract=None, chan=None, sam=None):
+                            abstract=None, topLvl=None, chan=None, sam=None):
         highandlow = ["High_", "Low_"]
         for highorlow in highandlow:
             abstract.prepare.weights = str(abstract.lumiUnits*abstract.outputLumi/abstract.inputLumi)
@@ -259,11 +260,11 @@ class TreeWeightSystematic(SystematicBase):
                                               chan, sam)
             TreeWeightSystematic.FillUpDownHist(self, highorlow, regionString,
                                                 normString, normCuts, abstract,
-                                                chan, sam)
+                                                topLvl, chan, sam)
         return
 
     def PrepareWAHforTree(self, regionString="", normString="", normCuts="",
-                          abstract=None, chan=None, sam=None):
+                          abstract=None, topLvl=None, chan=None, sam=None):
         highandlow = ["High_", "Low_"]
         weightstemp = abstract.prepare.weights
         for highorlow in highandlow:
@@ -304,21 +305,21 @@ class TreeWeightSystematic(SystematicBase):
                                               chan, sam)
             TreeWeightSystematic.FillUpDownHist(self, highorlow, regionString,
                                                 normString, normCuts, abstract,
-                                                chan, sam)
+                                                topLvl, chan, sam)
             abstract.prepare.weights = weightstemp
         return
 
     def PrepareWeightsAndHistos(self, regionString="", normString="",
                                 normCuts="", abstract=None,
-                                chan=None, sam=None):
+                                topLvl=None, chan=None, sam=None):
         if self.type == "weight":
             TreeWeightSystematic.PrepareWAHforWeight(self, regionString,
                                                      normString, normCuts,
-                                                     abstract, chan, sam)
+                                                     abstract, topLvl, chan, sam)
         if self.type == "tree":
             TreeWeightSystematic.PrepareWAHforTree(self, regionString,
                                                    normString, normCuts,
-                                                   abstract, chan, sam)
+                                                   abstract, topLvl, chan, sam)
         return
 
 
@@ -330,22 +331,38 @@ class UserSystematic(SystematicBase):
 
     def PrepareWeightsAndHistos(self, regionString="", normString="",
                                 normCuts="", abstract=None,
-                                chan=None, sam=None):
-        highandlow = ["High_", "Low_"]
-        for highorlow in highandlow:
-            if abstract.readFromTree:
-                treeName = sam.treeName
-                if treeName == '':
-                    treeName = sam.name + abstract.nomName
-                abstract.prepare.read(treeName, sam.files)
-            else:
-                UserSystematic.tryAddHistos(self, highorlow, regionString,
-                                            normString, normCuts, abstract,
-                                            chan, sam)
+                                topLvl=None, chan=None, sam=None):
 
-            UserSystematic.FillUpDownHist(self, highorlow, regionString,
-                                          normString, normCuts, abstract,
-                                          chan, sam)
+        nomName = "h"+sam.name+"Nom_"+regionString+"_obs_"+replaceSymbols(chan.variableName)
+        for lowhigh in ["High_","Low_"]:
+            lowhighName = "h" + sam.name + self.name + lowhigh + regionString + "_obs_" + replaceSymbols(chan.variableName)
+            if abstract.hists[lowhighName] == None:
+                if lowhigh=="High_":
+                    abstract.hists[lowhighName] = histMgr.buildUserHistoSysFromHist(lowhighName, self.high, abstract.hists[nomName])
+                elif lowhigh=="Low_":
+                    abstract.hists[lowhighName] = histMgr.buildUserHistoSysFromHist(lowhighName, self.low, abstract.hists[nomName])
+        return
+
+    def PrepareGlobalNormalization(self,normString,abstract,topLvl,chan,sam):
+
+        for lowhigh in ["Nom_",self.name+"High_",self.name+"Low_"]:
+            histName = "h" + sam.name + lowhigh + normString + "Norm"
+            if not histName in abstract.hists.keys():
+                if sam.normRegions:
+                    if not abstract.readFromTree:
+                        abstract.hists[histName] = None
+                        abstract.prepare.addHisto(histName)
+                    else:
+                        abstract.hists[histName] = TH1F(histName, histName, 1, 0.5, 1.5)
+                        totNorm=0.0
+                        for normReg in sam.normRegions:
+                            nameTmp = "h" + sam.name + lowhigh + normReg[0] + "_obs_" + replaceSymbols(chan.variableName)
+                            try:
+                                totNorm+=abstract.hists[nameTmp].GetSumOfWeights()
+                            except:
+                                print "WARNING could get histogram %s for normalization"%nameTmp
+                        
+                        abstract.hists[histName].SetBinContent(1,totNorm)
         return
 
 

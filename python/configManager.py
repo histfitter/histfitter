@@ -2,6 +2,8 @@ from ROOT import THStack, TLegend, TCanvas, TFile, TH1F
 from ROOT import ConfigMgr,FitConfig # from gSystem.Load("libSusyFitter.so")
 from prepareHistos import TreePrepare, HistoPrepare
 from copy import deepcopy
+from systematic import Systematic
+from histogramsManager import histMgr
 import os
 
 from ROOT import gROOT
@@ -535,13 +537,25 @@ class ConfigManager(object):
                 print "  Sample: %s"%sam.name
                 # Run over the nominal configuration first
                 # Set the weights,cuts,weights
-                self.setWeightsCutsVariable(chan,sam,regionString)
+                self.setWeightsCutsVariable(chan, sam, regionString)
                 #depending on the sample type, the Histos and up/down weights are added
-                self.addSampleSpecificHists(topLvl,chan,sam,regionString,normRegions,normString,normCuts,userNormDict)
+                self.addSampleSpecificHists(topLvl, chan, sam, regionString, normRegions, normString, normCuts)
 
-        for (syst,sam) in userNormDict.keys():
-	    #norm the Histos
-            self.normHists(syst,sam,userNormDict)
+        #post-processing loop for norm systematics
+        for chan in topLvl.channels:
+            regionString = ""
+            for reg in chan.regions:
+                regionString += reg
+                pass
+            for sam in chan.sampleList:
+                for syst in sam.systDict.values():
+                    if syst.method == "userNormHistoSys":
+                        nomName = "h"+sam.name+"Nom_"+regionString+"_obs_"+replaceSymbols(chan.variableName)
+                        highName = "h"+sam.name+syst.name+"High_"+regionString+"_obs_"+replaceSymbols(chan.variableName)
+                        lowName = "h"+sam.name+syst.name+"Low_"+regionString+"_obs_"+replaceSymbols(chan.variableName)
+                        syst.PrepareGlobalNormalization(normString, self, topLvl, chan, sam)
+                        sam.addHistoSys(syst.name, nomName, highName, lowName, False, True, False, False, sam.name, normString)
+
         # Build blinded histograms here
         for (iChan,chan) in enumerate(topLvl.channels):
             for sam in chan.sampleList:
@@ -583,10 +597,11 @@ class ConfigManager(object):
             chan.infoDict[sam.name].append((systName,syst.high,syst.low,syst.method))
         return
 
-    def addHistoSysforNoQCD(self,regionString,normString,normCuts,chan,sam,syst,userNormDict):
+    def addHistoSysforNoQCD(self,regionString,normString,normCuts,topLvl,chan,sam,syst):
         nomName = "h"+sam.name+"Nom_"+regionString+"_obs_"+replaceSymbols(chan.variableName)
         highName = "h"+sam.name+syst.name+"High_"+regionString+"_obs_"+replaceSymbols(chan.variableName)
         lowName = "h"+sam.name+syst.name+"Low_"+regionString+"_obs_"+replaceSymbols(chan.variableName)
+
         if syst.method == "histoSys":
             chan.getSample(sam.name).addHistoSys(syst.name,nomName,highName,lowName,False,False)
         elif syst.method == "histoSysOneSide":
@@ -614,40 +629,14 @@ class ConfigManager(object):
             chan.getSample(sam.name).addHistoSys(syst.name,nomName,highName,lowName,False,True,False,False,sam.name,normString)
         elif syst.method == "normHistoSysOneSide":
             chan.getSample(sam.name).addHistoSys(syst.name,nomName,highName,lowName,False,True,False,True)
-        elif syst.method == "userHistoSys":
-            if not len(syst.high) == configMgr.hists[nomName].GetNbinsX() or not len(syst.low) == configMgr.hists[nomName].GetNbinsX():
-                raise ValueError("High and low must both be the same as the binning in nominal for userHistoSys %s"%(syst.name))
+        elif syst.method == "userHistoSys" or syst.method == "userNormHistoSys":
             if configMgr.hists[highName] == None:
-                configMgr.hists[highName] = TH1F(highName,highName,configMgr.hists[nomName].GetNbinsX(),configMgr.hists[nomName].GetXaxis().GetXmin(),configMgr.hists[nomName].GetXaxis().GetXmax())
-                for iBin in xrange(configMgr.hists[nomName].GetNbinsX()):
-                    configMgr.hists[highName].SetBinContent(iBin+1,configMgr.hists[nomName].GetBinContent(iBin+1)*syst.high[iBin])
-                    pass
+                configMgr.hists[highName] = histMgr.buildUserHistoSysFromHist(highName, syst.high, configMgr.hists[nomName])
             if configMgr.hists[lowName] == None:
-                configMgr.hists[lowName] = TH1F(lowName,lowName,configMgr.hists[nomName].GetNbinsX(),configMgr.hists[nomName].GetXaxis().GetXmin(),configMgr.hists[nomName].GetXaxis().GetXmax())
-                for iBin in xrange(configMgr.hists[nomName].GetNbinsX()):
-                    configMgr.hists[lowName].SetBinContent(iBin+1,configMgr.hists[nomName].GetBinContent(iBin+1)*syst.low[iBin])
-            chan.getSample(sam.name).addHistoSys(syst.name,nomName,highName,lowName,False,False)
-        elif syst.method == "userNormHistoSys":
-            if not len(syst.high) == configMgr.hists[nomName].GetNbinsX() or not len(syst.low) == configMgr.hists[nomName].GetNbinsX():
-                raise ValueError("High and low must both be the same as the binning in nominal for userHistoSys")
-            if configMgr.hists[highName] == None:
-                configMgr.hists[highName] = TH1F(highName,highName,configMgr.hists[nomName].GetNbinsX(),configMgr.hists[nomName].GetXaxis().GetXmin(),configMgr.hists[nomName].GetXaxis().GetXmax())
-                for iBin in xrange(configMgr.hists[nomName].GetNbinsX()):
-                    configMgr.hists[highName].SetBinContent(iBin+1,configMgr.hists[nomName].GetBinContent(iBin+1)*syst.high[iBin])
-                    pass
-                configMgr.hists[highName+"Norm"] = configMgr.hists[highName].Clone()
-            if configMgr.hists[lowName] == None:
-                configMgr.hists[lowName] = TH1F(lowName,lowName,configMgr.hists[nomName].GetNbinsX(),configMgr.hists[nomName].GetXaxis().GetXmin(),configMgr.hists[nomName].GetXaxis().GetXmax())
-                for iBin in xrange(configMgr.hists[nomName].GetNbinsX()):
-                    configMgr.hists[lowName].SetBinContent(iBin+1,configMgr.hists[nomName].GetBinContent(iBin+1)*syst.low[iBin])
-                    pass
-                configMgr.hists[lowName+"Norm"] = configMgr.hists[lowName].Clone()
-            if not (syst.name,sam.name) in userNormDict.keys():
-                userNormDict[(syst.name,sam.name)] = []
-                userNormDict[(syst.name,sam.name)].append((regionString,highName,lowName,nomName))
-            else:
-                userNormDict[(syst.name,sam.name)].append((regionString,highName,lowName,nomName))
-            chan.getSample(sam.name).addHistoSys(syst.name,nomName,highName,lowName,False,True,False,False,sam.name,normString)
+                configMgr.hists[lowName] = histMgr.buildUserHistoSysFromHist(lowName, syst.low, configMgr.hists[nomName])
+            if syst.method == "userHistoSys":
+                chan.getSample(sam.name).addHistoSys(syst.name,nomName,highName,lowName,False,False)
+            pass
         elif syst.method == "shapeSys":
             if syst.merged:
                 mergedName = ""
@@ -751,7 +740,7 @@ class ConfigManager(object):
 
         return
 
-    def addSampleSpecificHists(self,topLvl,chan,sam,regionString,normRegions,normString,normCuts,userNormDict):
+    def addSampleSpecificHists(self,topLvl,chan,sam,regionString,normRegions,normString,normCuts):
         if sam.isData:
             if chan.channelName in topLvl.signalChannels:
                 if self.blindSR:
@@ -843,12 +832,8 @@ class ConfigManager(object):
                 print "    Systematic: %s"%(systName)
                 #first reset weight to nominal value
                 self.setWeightsCutsVariable(chan,sam,regionString)
-                #print "TEST",self.prepare.weights
-                if syst.type == "weight" or syst.type == "tree" or syst.type == "user":
-                    #depending on the systematic type: first the weights for up and down and secondly the Histos (just for the methods "userNormHistoSys" or "normHistoSys") are added
-                    syst.PrepareWeightsAndHistos(regionString,normString,normCuts,self,chan,sam)
-                #add Histos for all the other method-types
-                self.addHistoSysforNoQCD(regionString,normString,normCuts,chan,sam,syst,userNormDict)
+                syst.PrepareWeightsAndHistos(regionString, normString, normCuts, self, topLvl, chan, sam)
+                self.addHistoSysforNoQCD(regionString, normString, normCuts, topLvl, chan, sam, syst)
         elif sam.isQCD:
             #Add Histos for Sample-type QCD
             self.addHistoSysForQCD(regionString,normString,normCuts,chan,sam)
@@ -858,22 +843,23 @@ class ConfigManager(object):
         highIntegral = 0.
         lowIntegral = 0.
         nomIntegral = 0.
+
         for (reg,high,low,nom) in userNormDict[(syst,sam)]:
             highIntegral += self.hists[high].GetSumOfWeights()
             lowIntegral += self.hists[low].GetSumOfWeights()
             nomIntegral += self.hists[nom].GetSumOfWeights()
-
+ 
         for (reg,high,low,nom) in userNormDict[(syst,sam)]:
             try:
                 highWeight = highIntegral / nomIntegral
                 lowWeight = lowIntegral / nomIntegral
-
+                     
                 self.hists[high+"Norm"].Scale(1./highWeight)
                 self.hists[low+"Norm"].Scale(1./lowWeight)
-
+ 
             except ZeroDivisionError:
                 print "ERROR: generating HistoSys for %s syst=%s nom=%g high=%g low=%g remove from fit." % (nom,syst,nomIntegral,highIntegral,lowIntegral)
-        return
+    return
 
     def buildBlindedHistos(self,topLvl,chan,sam):
         regString = ""
