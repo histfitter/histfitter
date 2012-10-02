@@ -49,6 +49,7 @@ class Sample(object):
         self.normRegions = None
         self.normSampleRemap = ''
         self.noRenormSys = False
+        self.parentChannel = None
 
     def buildHisto(self, binValues, region, var):
         """
@@ -196,9 +197,15 @@ class Sample(object):
         """
 
         if normalizeSys and not self.normRegions: 
-            raise RuntimeError("You are using the Zero lepton modified version of HistFitter. Please specify normalization regions!")
-            normalizeSys = False
-        if self.noRenormSys:
+            print "    WARNING normalizeSys==True but no normalization regions specified. This is not safe, please fix."
+            for ch in self.parentChannel.parentTopLvl:
+                pass
+            print "            For now, using all non-validation channels by default: %s"%self.normRegions
+                
+
+        if self.noRenormSys and normalizeSys:
+            print "    WARNING smpl.noRenormSys==True and normalizeSys==True for %s %s. normalizeSys set to False."%(self.name,systName)
+            print "            Is this really what you want?"
             normalizeSys = False
 
 
@@ -228,13 +235,6 @@ class Sample(object):
             lowIntegral = configMgr.hists["h"+samNameRemap+systName+"Low_"+normString+"Norm"].Integral()
             nomIntegral = configMgr.hists["h"+samNameRemap+"Nom_"+normString+"Norm"].Integral()
 
-            if configMgr.verbose > 2:
-                print "nom hist", "h"+samNameRemap+"Nom_"+normString+"Norm"
-                print "nom integral", nomIntegral
-                print "high hist", "h"+samNameRemap+systName+"High_"+normString+"Norm"
-                print "high integral", highIntegral
-                print "low hist", "h"+samNameRemap+systName+"Low_"+normString+"Norm"
-                print "low integral", lowIntegral
             
             if oneSide and symmetrize:
                 lowIntegral = 2.*nomIntegral - highIntegral # note,  this is an approximation!
@@ -245,16 +245,9 @@ class Sample(object):
                     print "    WARNING: generating HistoSys for %s syst=%s low=0. Revert to non-symmetrize." % (nomName, systName)
                     symmetrize = False
 
-            if configMgr.verbose > 2:        
-                print "after sym"        
-                print "low hist", "h"+samNameRemap+systName+"Low_"+normString+"Norm"
-                print "low integral", lowIntegral
-
             try:
                 high = highIntegral / nomIntegral
                 low = lowIntegral / nomIntegral
-                if configMgr.verbose > 2:
-                    print "normalization factors",  high,  low
             except ZeroDivisionError:
                 print "    ERROR: generating HistoSys for %s syst=%s nom=%g high=%g low=%g remove from fit." % (nomName, systName, nomIntegral, highIntegral, lowIntegral)
                 return
@@ -262,27 +255,13 @@ class Sample(object):
             configMgr.hists[highName+"Norm"] = configMgr.hists[highName].Clone(highName+"Norm")
             configMgr.hists[lowName+"Norm"] = configMgr.hists[lowName].Clone(lowName+"Norm")
 
-            if configMgr.verbose > 2:
-                print "before norm"
-                print "high", configMgr.hists[highName+"Norm"].GetSumOfWeights()
-                print "low", configMgr.hists[lowName+"Norm"].GetSumOfWeights()
-                print "nom", configMgr.hists[nomName].GetSumOfWeights()
-
             try:
                 configMgr.hists[highName+"Norm"].Scale(1./high)
                 configMgr.hists[lowName+"Norm"].Scale(1./low)
-                if configMgr.verbose > 2:
-                    print "high integral",  configMgr.hists[highName+"Norm"].GetName(),  configMgr.hists[highName+"Norm"].GetSumOfWeights()
-                    print "low integral",  configMgr.hists[lowName+"Norm"].GetName(),  configMgr.hists[lowName+"Norm"].GetSumOfWeights()
             except ZeroDivisionError:
                 print "    ERROR: generating HistoSys for %s syst=%s nom=%g high=%g low=%g remove from fit." % (nomName, systName, nomIntegral, highIntegral, lowIntegral)
                 return
 
-            if configMgr.verbose > 2:
-                print "after norm"
-                print "high", configMgr.hists[highName+"Norm"].GetSumOfWeights()
-                print "low", configMgr.hists[lowName+"Norm"].GetSumOfWeights()
-                print "nom", configMgr.hists[nomName].GetSumOfWeights()
 
             if includeOverallSys and not (oneSide and not symmetrize):
                 nomIntegralN = configMgr.hists[nomName].Integral()
@@ -309,6 +288,7 @@ class Sample(object):
                     except ZeroDivisionError:
                         print "    ERROR: generating overallNormHistoSys for %s syst=%s nom=%g high=%g low=%g keeping in fit (offending histogram should be empty)." % (nomName, systName, nomIntegralN, highIntegralN, lowIntegralN)
                         return
+
 
             # add the systematic
             if oneSide and not symmetrize:

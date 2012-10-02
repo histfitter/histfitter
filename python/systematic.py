@@ -347,7 +347,6 @@ class UserSystematic(SystematicBase):
 
         for lowhigh in ["Nom_",self.name+"High_",self.name+"Low_"]:
             histName = "h" + sam.name + lowhigh + normString + "Norm"
-            print "TEST",histName
             if not histName in abstract.hists.keys():
                 if sam.normRegions:
                     if not abstract.readFromTree:
@@ -355,7 +354,7 @@ class UserSystematic(SystematicBase):
                         abstract.prepare.addHisto(histName)
                     else:
                         abstract.hists[histName] = TH1F(histName, histName, 1, 0.5, 1.5)
-                        totNorm=0
+                        totNorm=0.0
                         for normReg in sam.normRegions:
                             nameTmp = "h" + sam.name + lowhigh + normReg[0] + "_obs_" + replaceSymbols(chan.variableName)
                             try:

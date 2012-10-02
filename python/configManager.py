@@ -825,37 +825,13 @@ class ConfigManager(object):
                 print "    Systematic: %s"%(systName)
                 #first reset weight to nominal value
                 self.setWeightsCutsVariable(chan,sam,regionString)
-                #print "TEST",self.prepare.weights
-                if syst.type == "weight" or syst.type == "tree" or syst.type == "user":
-                    #depending on the systematic type: first the weights for up and down and secondly the Histos (just for the methods "userNormHistoSys" or "normHistoSys") are added
-                    syst.PrepareWeightsAndHistos(regionString,normString,normCuts,self,topLvl,chan,sam)
-                #add Histos for all the other method-types
+                syst.PrepareWeightsAndHistos(regionString,normString,normCuts,self,topLvl,chan,sam)
                 self.addHistoSysforNoQCD(regionString,normString,normCuts,topLvl,chan,sam,syst)
         elif sam.isQCD:
             #Add Histos for Sample-type QCD
             self.addHistoSysForQCD(regionString,normString,normCuts,chan,sam)
         return
 
-    def normHists(self,syst,sam,userNormDict):
-        highIntegral = 0.
-        lowIntegral = 0.
-        nomIntegral = 0.
-        for (reg,high,low,nom) in userNormDict[(syst,sam)]:
-            highIntegral += self.hists[high].GetSumOfWeights()
-            lowIntegral += self.hists[low].GetSumOfWeights()
-            nomIntegral += self.hists[nom].GetSumOfWeights()
-
-        for (reg,high,low,nom) in userNormDict[(syst,sam)]:
-            try:
-                highWeight = highIntegral / nomIntegral
-                lowWeight = lowIntegral / nomIntegral
-
-                self.hists[high+"Norm"].Scale(1./highWeight)
-                self.hists[low+"Norm"].Scale(1./lowWeight)
-
-            except ZeroDivisionError:
-                print "ERROR: generating HistoSys for %s syst=%s nom=%g high=%g low=%g remove from fit." % (nom,syst,nomIntegral,highIntegral,lowIntegral)
-        return
     
     def buildBlindedHistos(self,topLvl,chan,sam):
         regString = ""

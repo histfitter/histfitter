@@ -47,7 +47,7 @@ class ChannelXML(object):
         if statErrorThreshold is not None:
             self.hasStatConfig = True
             self.statErrorThreshold = statErrorThreshold
-            self.statErrorType = "Poisson"
+            self.statErrorType = "Gaussian" #"Gaussian" "Poisson"
         self.files = []
         self.treeName = ''
         self.parentTopLvl = None
@@ -94,6 +94,7 @@ class ChannelXML(object):
             index = len(self.sampleList)  # = end of list
 
         self.sampleList.insert(index, sample.Clone())
+        self.sampleList[index].parentChannel = self
 
         if sample.isData or sample.isDiscovery or sample.isQCD:
             return
