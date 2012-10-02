@@ -11,9 +11,13 @@
 
 from configManager import configMgr
 from ROOT import kBlack,kWhite,kGray,kRed,kPink,kMagenta,kViolet,kBlue,kAzure,kCyan,kTeal,kGreen,kSpring,kYellow,kOrange,kDashed,kSolid,kDotted
-from configWriter import TopLevelXML,Measurement,ChannelXML,Sample
 from systematic import Systematic
 from math import sqrt
+
+import workspaceWriter
+from sample import Sample
+from channel import Channel
+from measurement import Measurement
 
 from ROOT import gROOT, TLegend, TLegendEntry, TCanvas
 gROOT.LoadMacro("./macros/AtlasStyle.C")
@@ -160,7 +164,7 @@ srBinHigh = 1.5
 #Bkg only fit
 #************
 
-bkt = configMgr.addTopLevelXML("BkgOnly")
+bkt = configMgr.addWorkspaceWriter("BkgOnly")
 if useStat:
     bkt.statErrThreshold=0.05 
 else:

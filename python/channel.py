@@ -297,33 +297,7 @@ class Channel(object):
             raise KeyError("Could not find systematic %s "
                            "in topLevel %s" % (systName, self.name))
 
-    def __str__(self):
-        """
-        Convert instance to XML string
-        """
-        self.writeString = "<!DOCTYPE Channel SYSTEM 'HistFactorySchema.dtd'>\n\n"
-        self.writeString += "<Channel Name=\"%s\">\n\n" % (self.channelName)
-        for data in self.dataList:
-            if len(data[2]):
-                self.writeString += "  <Data HistoName=\"%s\" InputFile=\"%s\" HistoPath=\"%s\" />\n\n" % (data[1], data[0], data[2])
-            else:
-                self.writeString += "  <Data HistoName=\"%s\" InputFile=\"%s\" />\n\n" % (data[1], data[0])
-        if self.hasStatConfig:
-            self.writeString += "  <StatErrorConfig RelErrorThreshold=\"%g\" ConstraintType=\"%s\"/>\n\n" % (self.statErrorThreshold, self.statErrorType)
-        for (iSample, sample) in enumerate(self.sampleList):
-            if sample.write:
-                self.writeString += str(sample)
-        self.writeString += "</Channel>\n"
-        return self.writeString
-
     def close(self):
-        """
-        Write and close file
-        """
-        print "Writing file: '%s'" % self.xmlFileName
-        self.xmlFile = open(self.xmlFileName, "w")
-        self.xmlFile.write(str(self))
-        self.xmlFile.close()
         return
 
     def setTreeName(self, treeName):

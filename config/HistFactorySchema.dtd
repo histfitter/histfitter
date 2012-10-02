@@ -5,7 +5,7 @@
 <!ELEMENT Combination (Function*,Input+,Measurement*)>
 <!ATTLIST Combination
         OutputFilePrefix         CDATA            #REQUIRED
-        Mode               CDATA            #REQUIRED
+        Mode                     CDATA            #IMPLIED
 > 
 
 <!-- Input files detailing the channels. One channel per file -->
@@ -27,7 +27,7 @@
 <!-- BinHigh: the highest bin number used for the measurement (exclusive) -->
 <!-- Mode: type of the measurement (a closed list of ...) -->
 <!-- ExportOnly: if "True" skip fit, only export model -->
-<!ELEMENT Measurement (POI*,ParamSetting*,ConstraintTerm*) >
+<!ELEMENT Measurement (POI,ParamSetting*,ConstraintTerm*) >
 <!ATTLIST Measurement 
         Name              CDATA            #REQUIRED
         Lumi              CDATA            #REQUIRED
@@ -100,7 +100,6 @@ For this element there is no sublemenents so the setting will only have local ef
         HistoName         CDATA            #IMPLIED
         HistoPath         CDATA            #IMPLIED
         NormalizeByTheory      CDATA       #IMPLIED
-        IncludeStatErrors      CDATA       #IMPLIED
 > 
 
 <!-- Systematics for which the variation is provided by histograms -->

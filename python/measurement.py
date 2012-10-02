@@ -29,7 +29,7 @@ class Measurement(object):
         self.binLow = 0
         self.binHigh = 50
         self.mode = "comb"
-        self.exportOnly = "True"
+        self.exportOnly = True
         self.poiList = []
         self.constraintTermDict = {}
         self.paramSettingDict = {}
@@ -58,32 +58,3 @@ class Measurement(object):
         Define the constraint term for a parameter
         """
         self.constraintTermDict[paramName] = (type, relUnc)
-
-    def __str__(self):
-        """
-        Convert instance to an XML string
-        """
-        measurementString = "  <Measurement Name=\"%s\" Lumi=\"%g\" LumiRelErr=\"%g\" BinLow=\"%d\" BinHigh=\"%d\" ExportOnly=\"%s\">\n" \
-                            % (self.name, self.lumi, self.lumiErr, self.binLow,
-                               self.binHigh, self.exportOnly)
-        for (iPOI, poi) in enumerate(self. poiList):
-            measurementString += " <POI>%s</POI>\n" % (poi)
-
-        for (param, setting) in self.paramSettingDict. iteritems():
-            if setting[0]:
-                if not setting[1] == None:
-                    measurementString += "    <ParamSetting Const=\"True\" Val=\"%g\">%s</ParamSetting>\n" % (setting[1], param)
-                else:
-                    measurementString += "    <ParamSetting Const=\"True\">%s</ParamSetting>\n" % (param)
-            else:
-                if not setting[1] == None:
-                    measurementString += "    <ParamSetting Const=\"False\" Val=\"%g\">%s</ParamSetting>\n" % (setting[1], param)
-                else:
-                    measurementString += "    <ParamSetting Const=\"False\">%s</ParamSetting>\n" % (param)
-        for (param, constraint) in self.constraintTermDict.iteritems():
-            if not constraint[1] == None:
-                measurementString += "    <ConstraintTerm Type=\"%s\" RelativeUncertainty=\"%g\">%s</ConstraintTerm>\n" % (constraint[0], constraint[1], param)
-            else:
-                measurementString += "    <ConstraintTerm Type=\"%s\">%s</ConstraintTerm>\n" % (constraint[0], param)
-        measurementString += "  </Measurement>\n\n"
-        return measurementString

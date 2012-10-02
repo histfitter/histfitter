@@ -1,7 +1,10 @@
 from ROOT import TFile, TMath, RooRandom, TH1, TH1F
 from ROOT import kBlack, kWhite, kGray, kRed, kPink, kMagenta, kViolet, kBlue, kAzure, kCyan, kTeal, kGreen, kSpring, kYellow, kOrange, kDashed, kSolid, kDotted
-from os import system
+import os
+import sys
 from math import fabs
+import ROOT
+
 from measurement import Measurement
 from channel import Channel
 from sample import Sample
@@ -71,18 +74,18 @@ class workspaceWriter(object):
         return
 
     def initialize(self):
-        #self.xmlFileName = "config/" + self.prefix + ".xml"
-
         #Note: wsFileName is an educated guess of the workspace
         # file name externally decided by HistFactory.
         self.wsFileName = "results/" + self.prefix + "_combined_" + \
                           self.measurements[0].name + "_model.root"
+        
         for sam in self.sampleList:
             if sam.isData:  # FIXME (works but ugly)
                 #Just making sure that Data is the last element of the list
                 self.sampleList.remove(sam)
                 self.sampleList.append(sam)
                 break
+        
         #Consistency checks
         if self.signalSample is not None:
             found = False
@@ -138,8 +141,109 @@ class workspaceWriter(object):
         """
         TODO implement
         """
-        print "workspaceWriter.writeWorkspaces()"
+        print "workspaceWriter.writeWorkspaces(): DOES NOT WRITE ParamSetting or ConstraintTerm yet!"
 
+        channelObjects = []
+        for chan in self.channels:
+                
+            c = ROOT.RooStats.HistFactory.Channel( chan.channelName, configMgr.histCacheFile )
+            for d in chan.dataList:
+                #d should be array of form [inputFile, histoName, histoPath]
+                
+                histoPath = "" #paths never start with /
+                if len(d[2]) > 0:
+                    histoPath = d[2]
+                c.SetData(d[1], d[0], histoPath)
+
+            if chan.hasStatConfig:
+               c.SetStatErrorConfig(chan.statErrorThreshold, chan.statErrorType)
+            
+            # Note that our internal array order is high/low, but the functions expect low/high
+            for (iSample, sample) in enumerate(chan.sampleList):
+                if not sample.write:
+                    continue
+
+                s = ROOT.RooStats.HistFactory.Sample(sample.name, sample.histoName, configMgr.histCacheFile)
+                s.SetNormalizeByTheory(sample.normByTheory)
+                if sample.statConfig:
+                    s.ActivateStatError()
+                
+                for histoSys in sample.histoSystList:
+                    s.AddHistoSys(histoSys[0], histoSys[1], configMgr.histCacheFile, "", 
+                                               histoSys[2], configMgr.histCacheFile, "")
+
+                for shapeSys in sample.shapeSystList:
+                    constraintType = ROOT.RooStats.HistFactory.Constraint.GetType(shapeSys[2])
+                    s.AddShapeSys(shapeSys[0], constraintType, shapeSys[1], configMgr.histCacheFile)
+
+                for overallSys in sample.overallSystList:
+                    s.AddOverallSys(overallSys[0], overallSys[2], overallSys[1])
+
+                for shapeFact in sample.shapeFactorList:
+                    s.AddShapeFactor(shapeFact)
+
+                if len(sample.normFactor) > 0:
+                    for normFactor in sample.normFactor:
+                        s.AddNormFactor(normFactor[0], normFactor[1], normFactor[3], normFactor[2], normFactor[4])
+
+                c.AddSample(s)
+            
+            #add channel to some array to use below
+            channelObjects.append(c)
+
+        if not os.path.exists("xmlFromPy"):
+            os.makedirs("xmlFromPy")
+        
+        for meas in self.measurements:
+            
+            #m = ROOT.RooStats.HistFactory.Measurement(self.prefix, self.prefix)
+            m = ROOT.RooStats.HistFactory.Measurement("NormalMeasurement")
+            m.SetOutputFilePrefix( "./results/"+self.prefix )
+            m.SetPOI( (meas.poiList)[0] )
+            
+            m.SetLumi(meas.lumi)
+            m.SetLumiRelErr(meas.lumiErr)
+            m.SetExportOnly(meas.exportOnly)
+
+            m.SetBinLow(meas.binLow)
+            m.SetBinHigh(meas.binHigh)
+
+            for (param, setting) in meas.paramSettingDict.iteritems():
+                #setting is array [const, value]
+                if not setting[0]: 
+                    continue #means this param is not const
+                    
+                m.AddConstantParam(param)
+                if setting[1]:
+                    m.SetParamValue(param, setting[1])
+
+            for (syst, constraint) in meas.constraintTermDict.iteritems():
+                #constraint is array [type, relUnc]; latter only allowed for Gamma and LogNormal
+                if constraint[0] == "Gamma":
+                    if constraint[1] is not None:
+                        m.AddGammaSyst(syst, constraint[1])
+                    else:
+                        m.AddGammaSyst(syst)
+                elif constraint[0] == "LogNormal":
+                    if constraint[1] is not None:
+                        m.AddLogNormSyst(syst, constraint[1])
+                    else:
+                        m.AddLogNormSyst(syst)
+                elif constraint[0] == "Uniform":
+                    m.AddUniformSyst(syst)    
+                elif constraint[0] == "NoConstraint":
+                    m.AddNoSyst(syst)
+
+            for chan in channelObjects:
+                m.AddChannel(chan)
+
+            m.CollectHistograms()
+            #m.PrintTree()
+            #m.PrintXML("xmlFromPy/"+self.prefix, m.GetOutputFilePrefix())
+            
+            #NB this function's name is deceiving - does not run fits unless m.exportOnly=False
+            ROOT.RooStats.HistFactory.MakeModelAndMeasurementFast(m);
+        
         return
 
     def close(self):
@@ -150,7 +254,7 @@ class workspaceWriter(object):
         return
 
     def execute(self, option=""):
-        print "workspaceWriter.execute(): does nothing; for compatibility"
+        #print "workspaceWriter.execute(): does nothing; for compatibility"
         return
 
     def addMeasurement(self, name, lumi, lumiErr):
