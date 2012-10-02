@@ -10,6 +10,10 @@ Prioritized todo-list:
 
 - Move tutorial examples to HFUser?
 - Commit HF patches for tutorial into trunk.
+- There is no script/method for merging toys from discovery mode.
+- script/option for p0 for discovery.
+
+
 - Upgrade to ROOT v5.34. xml-files okay? (Geert-Jan)
 - one-sided uncertainties (Max)
 - Treatment of negative QCD weights: can lead to crash in signal region. (Zach,Max)
