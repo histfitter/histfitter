@@ -1,3 +1,8 @@
+2012-10-02 David Cote <david.cote@cern.ch>
+	* Multiple bug fixes. Achieves numerically identical results w.r.t. HistFitter-00-00-13-03
+	  for normFactor + stat + userNormHistSys. Similar but not identical results for HistoSys and OverallSys.
+	* Tagging: HistFitter-00-00-16
+
 2012-09-20 David Cote <david.cote@cern.ch>
 	* Work in progress tag to request feedback about recent commits
 	* The code runs without known crashes, but gives different results w.r.t.
