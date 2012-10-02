@@ -853,9 +853,21 @@ class ConfigManager(object):
                 nomIntegral += self.hists[nom].GetSumOfWeights()
 
             for (reg,high,low,nom) in userNormDict[(syst,sam)]:
-                try:
-                    highWeight = highIntegral / nomIntegral
-                    lowWeight = lowIntegral / nomIntegral
+                try: 
+                    #highWeight = highIntegral / nomIntegral
+                    #lowWeight = lowIntegral / nomIntegral
+
+                    #artificial complication here in order to achieve numerical equivalence with Histfitter-00-00-16
+                    self.hists["hH"]=TH1F("hH","",1, 0.5, 1.5)
+                    self.hists["hH"].SetBinContent(1,highIntegral)
+                    self.hists["hL"]=TH1F("hL","",1, 0.5, 1.5)
+                    self.hists["hL"].SetBinContent(1,lowIntegral)
+                    self.hists["hN"]=TH1F("hN","",1, 0.5, 1.5)
+                    self.hists["hN"].SetBinContent(1,nomIntegral)
+
+                    highWeight = self.hists["hH"].Integral() / self.hists["hN"].Integral()
+                    lowWeight = self.hists["hL"].Integral() / self.hists["hN"].Integral()
+                    ####
 
                     self.hists[high+"Norm"].Scale(1./highWeight)
                     self.hists[low+"Norm"].Scale(1./lowWeight)

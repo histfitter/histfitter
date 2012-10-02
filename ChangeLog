@@ -1,3 +1,13 @@
+2012-10-02 David Cote <david.cote@cern.ch>
+	* Artificial modifications in order to ease the transition to HistFitter-00-00-16 by achieving numerically identical results:
+	  ->change in floating point precision for normalization (userNormHistoSys)
+	  ->addHistoSys(symmetrize = True-->False) by default	  
+        * HistFitter-00-00-13-03
+
+2012-09-26 David Cote <david.cote@cern.ch>
+	* Harmless bug fix found during tutorial
+        * HistFitter-00-00-13-02
+
 2012-09-25 David Cote <david.cote@cern.ch>
 	* Tag for tutorial
         * HistFitter-00-00-13-01
