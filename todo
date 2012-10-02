@@ -2,13 +2,14 @@
 
 https://indico.cern.ch/conferenceDisplay.py?confId=204995
 
-
 Prioritized todo-list:
 ======================
 
 >>> Top priority: Crashes & fixes & documentation: 
 >>> (At a minimum, let's try to do this before the post-mortem)
 
+- Move tutorial examples to HFUser?
+- Commit HF patches for tutorial into trunk.
 - Upgrade to ROOT v5.34. xml-files okay? (Geert-Jan)
 - one-sided uncertainties (Max)
 - Treatment of negative QCD weights: can lead to crash in signal region. (Zach,Max)
