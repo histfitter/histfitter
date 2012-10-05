@@ -620,8 +620,7 @@ void Util::PlotPdfWithComponents(RooWorkspace* w, TString fcName, TString plotRe
       pad2->SetBottomMargin(0.3);
       pad2->SetFillColor(kWhite);
       
-      //if(fc->getChannelLogY(regionCatLabel)) pad1->SetLogy();
-      pad1->SetLogy();
+      if(fc->getChannelLogY(regionCatLabel)) pad1->SetLogy();
       pad1->Draw();
       pad2->Draw();
 
@@ -636,7 +635,6 @@ void Util::PlotPdfWithComponents(RooWorkspace* w, TString fcName, TString plotRe
       if( fabs(fc->getChannelMaxY(regionCatLabel) + 999.) > 0.000001){
 	      frame->SetMaximum(fc->getChannelMaxY(regionCatLabel));
       }
-      else frame->SetMaximum(frame->GetMaximum()*10000);
 
       // draw frame
       frame->SetTitle(""); 
@@ -647,15 +645,10 @@ void Util::PlotPdfWithComponents(RooWorkspace* w, TString fcName, TString plotRe
       if( (fabs(fc->getChannelATLASLabelX(regionCatLabel) + 1.) > 0.000001) &&  (fabs(fc->getChannelATLASLabelY(regionCatLabel) + 1.) > 0.000001) ){
 	      ATLASLabel(fc->getChannelATLASLabelX(regionCatLabel),fc->getChannelATLASLabelY(regionCatLabel),fc->getChannelATLASLabelText(regionCatLabel)) ; //"for approval");
       }
-      else ATLASLabel(0.195,0.8,"for approval");
 
       if( fc->getChannelShowLumi(regionCatLabel) ){
 	      Float_t lumi =  fc->getLumi(); 
 	      AddText(0.175,0.775,Form("#int Ldt = %.1f fb^{-1}",lumi));
-      }
-      else {
-        Float_t lumi =  fc->getLumi();
-        AddText(0.05,0.7,Form("#int Ldt = %.1f fb^{-1}",lumi));
       }
 
       // uncomments to label the channel
