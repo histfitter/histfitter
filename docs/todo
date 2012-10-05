@@ -116,6 +116,7 @@ Alex:
 - Quoting ofr correct MC stat errors in tables -> constact RooStats. 
 - Asymmetric error propagation
 - VisualizeERror bug for single bin, still to be fixed by Wouter
+- Plotting multiple channels together (TR+WR or TREl+TRMu), already tried with PlotPdfSumWithComponents, but unsuccesfull so far
 
 David:
 - magic words for cmd line option. python -c "foo=True"
