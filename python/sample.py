@@ -1,3 +1,4 @@
+import ROOT
 from ROOT import TFile, TMath, RooRandom, TH1, TH1F
 from ROOT import kBlack, kWhite, kGray, kRed, kPink, kMagenta, kViolet, kBlue, kAzure, kCyan, kTeal, kGreen, kSpring, kYellow, kOrange, kDashed, kSolid, kDotted
 from os import system
@@ -197,7 +198,8 @@ class Sample(object):
 
         if normalizeSys and not self.normRegions: 
             print "    WARNING normalizeSys==True but no normalization regions specified. This is not safe, please fix."
-            for ch in self.parentChannel.parentTopLvl:
+            print type(self.parentChannel)
+            for ch in self.parentChannel.parentTopLvl.channels:
                 pass
             print "            For now, using all non-validation channels by default: %s"%self.normRegions
                 

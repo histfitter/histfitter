@@ -140,7 +140,7 @@ class ConfigManager(object):
         return self.topLvls[len(self.topLvls)-1]
 
     def addFitConfigClone(self, obj, name):
-        return self.addFitConfigWriter(obj, name)
+        return self.addFitConfig(obj, name)
 
     def removeFitConfig(self, name):
         for i in xrange(0,len(self.topLvls)):
@@ -859,7 +859,7 @@ class ConfigManager(object):
  
             except ZeroDivisionError:
                 print "ERROR: generating HistoSys for %s syst=%s nom=%g high=%g low=%g remove from fit." % (nom,syst,nomIntegral,highIntegral,lowIntegral)
-    return
+        return
 
     def buildBlindedHistos(self,topLvl,chan,sam):
         regString = ""
