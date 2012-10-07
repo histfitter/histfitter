@@ -313,3 +313,25 @@ class Channel(object):
             sam.propagateTreeName(self.treeName)
             pass
         return
+
+    def createHistFactoryObject(self):
+        c = ROOT.RooStats.HistFactory.Channel( self.channelName, configMgr.histCacheFile )
+        for d in self.dataList:
+            #d should be array of form [inputFile, histoName, histoPath]
+            
+            histoPath = "" #paths never start with /
+            if len(d[2]) > 0:
+                histoPath = d[2]
+            c.SetData(d[1], d[0], histoPath)
+
+        if self.hasStatConfig:
+           c.SetStatErrorConfig(self.statErrorThreshold, self.statErrorType)
+        
+        for (iSample, sample) in enumerate(self.sampleList):
+            if not sample.write:
+                continue
+
+            s = sample.createHistFactoryObject()
+            c.AddSample(s)
+
+        return c

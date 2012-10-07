@@ -147,49 +147,7 @@ class fitConfig(object):
     def writeWorkspaces(self):
         channelObjects = []
         for chan in self.channels:
-                
-            c = ROOT.RooStats.HistFactory.Channel( chan.channelName, configMgr.histCacheFile )
-            for d in chan.dataList:
-                #d should be array of form [inputFile, histoName, histoPath]
-                
-                histoPath = "" #paths never start with /
-                if len(d[2]) > 0:
-                    histoPath = d[2]
-                c.SetData(d[1], d[0], histoPath)
-
-            if chan.hasStatConfig:
-               c.SetStatErrorConfig(chan.statErrorThreshold, chan.statErrorType)
-            
-            # Note that our internal array order is high/low, but the functions expect low/high
-            for (iSample, sample) in enumerate(chan.sampleList):
-                if not sample.write:
-                    continue
-
-                s = ROOT.RooStats.HistFactory.Sample(sample.name, sample.histoName, configMgr.histCacheFile)
-                s.SetNormalizeByTheory(sample.normByTheory)
-                if sample.statConfig:
-                    s.ActivateStatError()
-                
-                for histoSys in sample.histoSystList:
-                    s.AddHistoSys(histoSys[0], histoSys[1], configMgr.histCacheFile, "", 
-                                               histoSys[2], configMgr.histCacheFile, "")
-
-                for shapeSys in sample.shapeSystList:
-                    constraintType = ROOT.RooStats.HistFactory.Constraint.GetType(shapeSys[2])
-                    s.AddShapeSys(shapeSys[0], constraintType, shapeSys[1], configMgr.histCacheFile)
-
-                for overallSys in sample.overallSystList:
-                    s.AddOverallSys(overallSys[0], overallSys[2], overallSys[1])
-
-                for shapeFact in sample.shapeFactorList:
-                    s.AddShapeFactor(shapeFact)
-
-                if len(sample.normFactor) > 0:
-                    for normFactor in sample.normFactor:
-                        s.AddNormFactor(normFactor[0], normFactor[1], normFactor[3], normFactor[2], normFactor[4])
-
-                c.AddSample(s)
-            
+            c = chan.createHistFactoryObject()
             #add channel to some array to use below
             channelObjects.append(c)
 

@@ -600,3 +600,29 @@ class Sample(object):
         Remove a systematic
         """
         self.systDict.clear()
+
+    def createHistFactoryObject(self):
+        s = ROOT.RooStats.HistFactory.Sample(self.name, self.histoName, configMgr.histCacheFile)
+        s.SetNormalizeByTheory(self.normByTheory)
+        if self.statConfig:
+            s.ActivateStatError()
+        
+        for histoSys in self.histoSystList:
+            s.AddHistoSys(histoSys[0], histoSys[1], configMgr.histCacheFile, "", 
+                                       histoSys[2], configMgr.histCacheFile, "")
+
+        for shapeSys in self.shapeSystList:
+            constraintType = ROOT.RooStats.HistFactory.Constraint.GetType(shapeSys[2])
+            s.AddShapeSys(shapeSys[0], constraintType, shapeSys[1], configMgr.histCacheFile)
+
+        for overallSys in self.overallSystList:
+            s.AddOverallSys(overallSys[0], overallSys[2], overallSys[1])
+
+        for shapeFact in self.shapeFactorList:
+            s.AddShapeFactor(shapeFact)
+
+        if len(self.normFactor) > 0:
+            for normFactor in self.normFactor:
+                s.AddNormFactor(normFactor[0], normFactor[1], normFactor[3], normFactor[2], normFactor[4])
+
+        return s
