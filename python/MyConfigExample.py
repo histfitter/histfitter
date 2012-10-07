@@ -14,7 +14,7 @@ from ROOT import kBlack,kWhite,kGray,kRed,kPink,kMagenta,kViolet,kBlue,kAzure,kC
 from systematic import Systematic
 from math import sqrt
 
-import workspaceWriter
+import fitConfig
 from sample import Sample
 from channel import Channel
 from measurement import Measurement
@@ -164,7 +164,7 @@ srBinHigh = 1.5
 #Bkg only fit
 #************
 
-bkt = configMgr.addWorkspaceWriter("BkgOnly")
+bkt = configMgr.addFitConfig("BkgOnly")
 if useStat:
     bkt.statErrThreshold=0.05 
 else:

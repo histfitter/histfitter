@@ -87,7 +87,7 @@ class ConfigManager(object):
         self.printHistoNames = False # Print out the names of generated histograms
         self.doHypoTest = False
 
-        self.topLvls = [] # workspaceWriter object
+        self.topLvls = [] # fitConfig object
         self.prepare = None # PrepareHistos object
 
         self.histCacheFile = ""
@@ -107,55 +107,55 @@ class ConfigManager(object):
             raise TypeError("lumi unit '%s' is not supported."%unit)
         return
 
-    def addWorkspaceWriter(self,input,name=""):
-        from workspaceWriter import workspaceWriter
+    def addFitConfig(self,input,name=""):
+        from fitConfig import fitConfig
         if len(name)>0:
             newName=name
         elif isinstance(input,str):
             newName=input
-        elif isinstance(input,workspaceWriter):
+        elif isinstance(input,fitConfig):
             newName=input.name
         else:
-            raise RuntimeError("Logic error in addWorkspaceWriter")
+            raise RuntimeError("Logic error in addFitConfig")
 
         #check that newName is not already used
         for tl in self.topLvls:
-            if tl.name==newName:
-                raise RuntimeError("workspaceWriter %s already exists in configManager. Please use a different name."%(newName))
+            if tl.name == newName:
+                raise RuntimeError("fitConfig %s already exists in configManager. Please use a different name."%(newName))
             pass
 
-        #create new workspaceWriter object and return pointer
-        if isinstance(input, workspaceWriter):
-            newWorkspaceWriter = input.Clone(newName)
+        #create new fitConfig object and return pointer
+        if isinstance(input, fitConfig):
+            newFitConfig = input.Clone(newName)
         else:
-            newWorkspaceWriter = workspaceWriter(newName)
+            newFitConfig = fitConfig(newName)
             pass
 
-        newWorkspaceWriter.verbose=self.verbose
-        newWorkspaceWriter.setWeights(self.weights)
-        newWorkspaceWriter.removeEmptyBins=self.removeEmptyBins
-        self.topLvls.append(newWorkspaceWriter)
+        newFitConfig.verbose=self.verbose
+        newFitConfig.setWeights(self.weights)
+        newFitConfig.removeEmptyBins=self.removeEmptyBins
+        self.topLvls.append(newFitConfig)
         
         print "Created Fit Config: %s" % (newName)
         return self.topLvls[len(self.topLvls)-1]
 
-    def addWorkspaceWriterClone(self, obj, name):
-        return self.addWorkspaceWriter(obj, name)
+    def addFitConfigClone(self, obj, name):
+        return self.addFitConfigWriter(obj, name)
 
-    def removeWorkspaceWriter(self, name):
+    def removeFitConfig(self, name):
         for i in xrange(0,len(self.topLvls)):
             tl=self.topLvls[i]
             if tl.name==name:
                 self.topLvls.pop(i)
                 return
-        print "WARNING workspaceWriter named '%s' does not exist. Cannot be removed." % (name)
+        print "WARNING fitConfig named '%s' does not exist. Cannot be removed." % (name)
         return
 
-    def getWorkspaceWriter(self, name):
+    def getFitConfig(self, name):
         for tl in self.topLvls:
             if tl.name == name:
                 return tl
-        print "WARNING workspaceWriter named '%s' does not exist. Cannot be returned." % (name)
+        print "WARNING fitConfig named '%s' does not exist. Cannot be returned." % (name)
         return 0
 
     def initialize(self):
@@ -280,7 +280,7 @@ class ConfigManager(object):
         if self.outputFileName:
             self.cppMgr.m_outputFileName = self.outputFileName
             self.cppMgr.m_saveTree=True
-        #Fill FitConfigs from workspaceWriter
+        #Fill FitConfigs from fitConfig
         for tl in self.topLvls:
             cppTl = self.cppMgr.addFitConfig(tl.name)
             cppTl.m_inputWorkspaceFileName = tl.wsFileName
@@ -307,7 +307,7 @@ class ConfigManager(object):
                 cppTl.m_validationChannels.push_back(cName)
             for cName in tl.bkgConstrainChannels:
                 cppTl.m_bkgConstrainChannels.push_back(cName)
-            # Plot cosmetics per workspaceWriter (FitConfig in C++)
+            # Plot cosmetics per fitConfig (FitConfig in C++)
             cppTl.m_dataColor = tl.dataColor
             cppTl.m_totalPdfColor = tl.totalPdfColor
             cppTl.m_errorLineColor = tl.errorLineColor
@@ -364,7 +364,7 @@ class ConfigManager(object):
         print "readFromTree: %s"%self.readFromTree
         print "plotHistos: %s"%self.plotHistos
         print "executeHistFactory: %s"%self.executeHistFactory
-        print "workspaceWriter objects:"
+        print "fitConfig objects:"
         for tl in self.topLvls:
             print "  %s"%tl.name
             for c in tl.channels:
@@ -403,7 +403,7 @@ class ConfigManager(object):
         print "ConfigManager:"
         print str(self.fileList)
         for topLvl in self.topLvls:
-            print "                workspaceWriter: " + topLvl.name
+            print "                fitConfig: " + topLvl.name
             print "                " + str(topLvl.files)
             for channel in topLvl.channels:
                 print "                ---------> Channel: " + channel.name
@@ -421,7 +421,7 @@ class ConfigManager(object):
         print "ConfigManager:"
         print str(self.treeName)
         for topLvl in self.topLvls:
-            print "                workspaceWriter: " + topLvl.name
+            print "                fitConfig: " + topLvl.name
             print "                " + str(topLvl.treeName)
             for channel in topLvl.channels:
                 print "                ---------> Channel: " + channel.name
@@ -444,7 +444,7 @@ class ConfigManager(object):
     def setFileList(self,filelist):
         """
         Set file list for config manager.
-        This will be used as default for any workspaceWriter that doesn't specify
+        This will be used as default for any fitConfig that doesn't specify
         their own file list.
         """
         self.fileList = filelist
@@ -452,7 +452,7 @@ class ConfigManager(object):
     def setFile(self,file):
         """
         Set file list for config manager.
-        This will be used as default for any workspaceWriter that doesn't specify
+        This will be used as default for any fitConfig that doesn't specify
         their own file list.
         """
         self.fileList = [file]
@@ -485,7 +485,7 @@ class ConfigManager(object):
         """
         Make or get the histograms and generate the workspaces
         """
-        print "Preparing histograms and/or workspace for workspaceWriter %s\n"%topLvl.name
+        print "Preparing histograms and/or workspace for fitConfig %s\n"%topLvl.name
 
         if self.plotHistos:
             cutHistoDict = {}
@@ -502,7 +502,7 @@ class ConfigManager(object):
             if not name in systDict.keys():
                 systDict[name] = syst
             else:
-                raise(Exception,"Systematic name %s already defined at global level. Rename it for workspaceWriter %s",(name,topLvl.name))
+                raise(Exception,"Systematic name %s already defined at global level. Rename it for fitConfig %s",(name,topLvl.name))
 
         # Build channel string and cuts for normalization
         normRegions = []

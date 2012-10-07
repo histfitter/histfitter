@@ -1,5 +1,4 @@
 #TODO:
-# - change class name to FitConfig
 # - move writeWorkspaces() parts to respective classes
 # - reinsert old print methods
 # - add switch to configMgr to choose between the two
@@ -23,7 +22,8 @@ TH1.SetDefaultSumw2(True)
 from copy import deepcopy,copy
 from configManager import configMgr
 
-class workspaceWriter(object):
+
+class fitConfig(object):
     """
     Defines the content of a RooFit workspace
     """
@@ -77,7 +77,7 @@ class workspaceWriter(object):
         return
 
     def __str__(self):
-        raise RuntimeError("workspaceWriter does not support __str__")
+        raise RuntimeError("fitConfig does not support __str__")
         return
 
     def initialize(self):
@@ -106,7 +106,7 @@ class workspaceWriter(object):
                             found = True
                 if not found:
                     print "WARNING signal sample %s is not contained in " \
-                          "sampleList of workspaceWriter %s or its daughter " \
+                          "sampleList of fitConfig %s or its daughter " \
                           "channels" % (self.signalSample, self.name)
 
         for chan in self.channels:
@@ -125,10 +125,10 @@ class workspaceWriter(object):
                 isVR = True
                 nFound += 1
             if nFound == 0:
-                print "WARNING workspaceWriter: %s, Channel: %s " \
+                print "WARNING fitConfig: %s, Channel: %s " \
                       "--> SR/CR/VR undefined" % (self.name, chanName)
             if nFound > 1:
-                print "WARNING workspaceWriter: %s, Channel: %s " \
+                print "WARNING fitConfig: %s, Channel: %s " \
                       "--> SR=%s CR=%s VR=%s is ambiguous" \
                       % (self.name, chanName, isSR, isCR, isVR)
             #for sample in self.sampleList:
@@ -256,7 +256,7 @@ class workspaceWriter(object):
         return
 
     def execute(self, option=""):
-        #print "workspaceWriter.execute(): does nothing; for compatibility"
+        #print "fitConfig.execute(): does nothing; for compatibility"
         return
 
     def addMeasurement(self, name, lumi, lumiErr):
@@ -264,7 +264,7 @@ class workspaceWriter(object):
         for meas in self.measurements:
             if meas.name == name:
                 raise RuntimeError("Measurement %s already exists in "
-                                   "workspaceWriter %s. Please use a different "
+                                   "fitConfig %s. Please use a different "
                                    "name." % (name, self.name))
             pass
         #add measurement to the list
@@ -279,7 +279,7 @@ class workspaceWriter(object):
         for meas in self.measurements:
             if meas.name == obj.name:
                 raise RuntimeError("Measurement %s already exists in "
-                                   "workspaceWriter %s. Please use a different "
+                                   "fitConfig %s. Please use a different "
                                    "name." % (obj.name, self.name))
             pass
         #add measurement clone to the list
@@ -299,7 +299,7 @@ class workspaceWriter(object):
 
     def addChannel(self, variableName, regions, nBins, binLow, binHigh):
         """
-        Build a channel object from this workspaceWriter
+        Build a channel object from this fitConfig
         """
         if variableName == "cuts":
             nBins = len(regions)
@@ -312,7 +312,7 @@ class workspaceWriter(object):
         # Verify that this name is not already used
         for chan in self.channels:
             if chan.name == chanObj.name:
-                raise RuntimeError("Channel %s already exists in workspaceWriter "
+                raise RuntimeError("Channel %s already exists in fitConfig "
                                    "%s. Please use a different name."
                                    % (chanObj.name, self.name))
 
@@ -326,7 +326,7 @@ class workspaceWriter(object):
         for (systName, syst) in self.systDict.items():
             chanObj.addSystematic(syst)
 
-        # Put samples owned by this workspaceWriter into the channel
+        # Put samples owned by this fitConfig into the channel
         for s in self.sampleList:
             chanObj.addSample(s.Clone())
 
@@ -346,7 +346,7 @@ class workspaceWriter(object):
         # Verify that this name is not already used
         for chan in self.channels:
             if chan.name == obj.name:
-                raise RuntimeError("Channel %s already exists in workspaceWriter "
+                raise RuntimeError("Channel %s already exists in fitConfig "
                                    "%s. Please use a different name."
                                    % (obj.name, self.name))
 
@@ -365,7 +365,7 @@ class workspaceWriter(object):
             if not systName in newObj.systDict.keys():
                 newObj.addSystematic(syst)
 
-        # Put samples owned by this workspaceWriter into the channel
+        # Put samples owned by this fitConfig into the channel
         for s in self.sampleList:
             if not s.name in [sam.name for sam in newObj.sampleList]:
                 newObj.addSample(s)
@@ -396,7 +396,7 @@ class workspaceWriter(object):
 
     def addSamples(self, input):
         """
-        Add list (or single object) of pre-built samples to this workspaceWriter
+        Add list (or single object) of pre-built samples to this fitConfig 
         """
         if isinstance(input, list):
             sampleList = input
@@ -405,7 +405,7 @@ class workspaceWriter(object):
             pass
 
         for s in sampleList:
-            # If the sample doesn't exist in workspaceWriter already then add it,
+            # If the sample doesn't exist in fitConfig already then add it,
             # else something has gone wrong
             if not s.name in [sam.name for sam in self.sampleList]:
 
@@ -424,7 +424,7 @@ class workspaceWriter(object):
                             self.sampleList[-1].addSystematic(syst)
 
             else:
-                raise RuntimeError("Sample %s already defined in workspaceWriter "
+                raise RuntimeError("Sample %s already defined in fitConfig "
                                    "%s" % (s.name, self.name))
 
             # Propagate to channels that are already owned as well
@@ -441,7 +441,7 @@ class workspaceWriter(object):
         for s in self.sampleList:
             if s.name == name:
                 return s
-        raise Exception("Sample with name %s not found in workspaceWriter %s"
+        raise Exception("Sample with name %s not found in fitConfig %s"
                         % (name, self.name))
 
     def setWeights(self, weights):
@@ -471,7 +471,7 @@ class workspaceWriter(object):
         if not weight in self.weights:
             self.weights.append(weight)
         else:
-            raise RuntimeError("Weight %s already defined in workspaceWriter"
+            raise RuntimeError("Weight %s already defined in fitConfig"
                                % (weight, self.name))
 
         # Propagate to owned channels that do not already have this weight
@@ -502,7 +502,7 @@ class workspaceWriter(object):
         if weight in self.weights:
             self.weights.remove(weight)
         else:
-            raise RuntimeError("Weight %s does not exist in workspaceWriter %s"
+            raise RuntimeError("Weight %s does not exist in fitConfig %s"
                                % (weight, self.name))
 
         # Propagate to owned channels
@@ -581,7 +581,7 @@ class workspaceWriter(object):
 
     def setFileList(self, filelist):
         """
-        Set file list for this workspaceWriter.
+        Set file list for this fitConfig.
         This will be used as default for channels that don't specify
         their own file list.
         """
@@ -590,7 +590,7 @@ class workspaceWriter(object):
 
     def setFile(self, file):
         """
-        Set file for this workspaceWriter.
+        Set file for this fitConfig.
         This will be used as default for channels that don't specify
         their own file list.
         """
@@ -616,7 +616,7 @@ class workspaceWriter(object):
         """
         if syst.name in self.systDict.keys():
             raise RuntimeError("Attempt to overwrite systematic %s in "
-                               "workspaceWriter %s" % (syst.name, self.name))
+                               "fitConfig %s" % (syst.name, self.name))
         else:
             self.systDict[syst.name] = syst.Clone()
             for chan in self.channels:
@@ -633,19 +633,19 @@ class workspaceWriter(object):
         try:
             return self.systDict[systName]
         except KeyError:
-            raise KeyError("Could not find systematic %s in workspaceWriter %s"
+            raise KeyError("Could not find systematic %s in fitConfig %s"
                            % (systName, self.name))
 
     def clearSystematics(self):
         """
-        Remove all systematics from this workspaceWriter
+        Remove all systematics from this fitConfig
         """
         self.systDict.clear()
         return
 
     def removeSystematic(self, name):
         """
-        Remove a single systematic from this workspaceWriter
+        Remove a single systematic from this fitConfig
         """
         del self.systDict[name]
         return

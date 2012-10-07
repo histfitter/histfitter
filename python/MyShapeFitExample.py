@@ -14,7 +14,7 @@ from ROOT import kBlack,kWhite,kGray,kRed,kPink,kMagenta,kViolet,kBlue,kAzure,kC
 from systematic import Systematic
 from math import sqrt
 
-import workspaceWriter
+import fitConfig
 from measurement import Measurement
 from sample import Sample
 
@@ -104,7 +104,7 @@ dataSample.setData()
 #**************
 
 #Fit config instance
-exclusionFitConfig = configMgr.addWorkspaceWriter("Exclusion")
+exclusionFitConfig = configMgr.addFitConfig("Exclusion")
 meas=exclusionFitConfig.addMeasurement(name="NormalMeasurement",lumi=1.0,lumiErr=0.039)
 meas.addPOI("mu_SIG")
 
@@ -130,5 +130,5 @@ exclusionFitConfig.addSamples(sigSample)
 exclusionFitConfig.setSignalSample(sigSample)
 
 #2nd cloned-copy just to accomodate -l option...
-exclusionFitClone = configMgr.addWorkspaceWriterClone(exclusionFitConfig,"ExclusionFitClone")
+exclusionFitClone = configMgr.addFitConfigClone(exclusionFitConfig,"ExclusionFitClone")
 
