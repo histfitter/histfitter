@@ -198,7 +198,6 @@ class Sample(object):
 
         if normalizeSys and not self.normRegions: 
             print "    WARNING normalizeSys==True but no normalization regions specified. This is not safe, please fix."
-            print type(self.parentChannel)
             for ch in self.parentChannel.parentTopLvl.channels:
                 pass
             print "            For now, using all non-validation channels by default: %s"%self.normRegions
