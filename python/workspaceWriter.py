@@ -1,3 +1,10 @@
+#TODO:
+# - change class name to FitConfig
+# - move writeWorkspaces() parts to respective classes
+# - reinsert old print methods
+# - add switch to configMgr to choose between the two
+# - make sure that addTopLevelXML can be compatible with new class
+
 from ROOT import TFile, TMath, RooRandom, TH1, TH1F
 from ROOT import kBlack, kWhite, kGray, kRed, kPink, kMagenta, kViolet, kBlue, kAzure, kCyan, kTeal, kGreen, kSpring, kYellow, kOrange, kDashed, kSolid, kDotted
 import os
@@ -138,11 +145,6 @@ class workspaceWriter(object):
         return
 
     def writeWorkspaces(self):
-        """
-        TODO implement
-        """
-        print "workspaceWriter.writeWorkspaces(): DOES NOT WRITE ParamSetting or ConstraintTerm yet!"
-
         channelObjects = []
         for chan in self.channels:
                 
@@ -191,8 +193,8 @@ class workspaceWriter(object):
             #add channel to some array to use below
             channelObjects.append(c)
 
-        if not os.path.exists("xmlFromPy"):
-            os.makedirs("xmlFromPy")
+        #if not os.path.exists("xmlFromPy"):
+            #os.makedirs("xmlFromPy")
         
         for meas in self.measurements:
             
