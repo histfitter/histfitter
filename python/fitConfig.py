@@ -1,9 +1,3 @@
-#TODO:
-# - move writeWorkspaces() parts to respective classes
-# - reinsert old print methods
-# - add switch to configMgr to choose between the two
-# - make sure that addTopLevelXML can be compatible with new class
-
 from ROOT import TFile, TMath, RooRandom, TH1, TH1F
 from ROOT import kBlack, kWhite, kGray, kRed, kPink, kMagenta, kViolet, kBlue, kAzure, kCyan, kTeal, kGreen, kSpring, kYellow, kOrange, kDashed, kSolid, kDotted
 import os
@@ -49,6 +43,7 @@ class fitConfig(object):
         self.weights = []
         self.treeName = ''
         self.hasDiscovery = False
+        
         # Plot cosmetics
         self.dataColor = kBlack
         self.totalPdfColor = kBlue
@@ -74,14 +69,13 @@ class fitConfig(object):
         self.name = name
         self.prefix = configMgr.analysisName + "_" + self.name
         self.wsFileName = "N/A"
-        return
-
-    def __str__(self):
-        raise RuntimeError("fitConfig does not support __str__")
+        self.xmlFileName = "N/A"
         return
 
     def initialize(self):
-        #Note: wsFileName is an educated guess of the workspace
+        self.xmlFileName = "config/"+self.prefix+".xml"
+
+        #Note: when writing our own XML, wsFileName is an educated guess of the workspace
         # file name externally decided by HistFactory.
         self.wsFileName = "results/" + self.prefix + "_combined_" + \
                           self.measurements[0].name + "_model.root"
@@ -211,10 +205,6 @@ class fitConfig(object):
         Write workspace to file and close
         """
         self.writeWorkspaces()
-        return
-
-    def execute(self, option=""):
-        #print "fitConfig.execute(): does nothing; for compatibility"
         return
 
     def addMeasurement(self, name, lumi, lumiErr):
@@ -625,4 +615,63 @@ class fitConfig(object):
         for chan in self.channels:
             chan.propagateTreeName(self.treeName)
             pass
+        return
+
+    def __str__(self):
+        """
+        Convert instance to XML string
+        """
+        self.writeString = "<!DOCTYPE Combination  SYSTEM 'HistFactorySchema.dtd'>\n\n"
+        self.writeString += "<Combination OutputFilePrefix=\"./results/" + self.prefix + "\"  >\n\n"
+        
+        for chan in self.channels:
+            self.writeString += "  <Input>" + chan.xmlFileName + "</Input>\n"
+        
+        self.writeString += "\n"
+        
+        for meas in self.measurements:
+            self.writeString += str(meas)
+        
+        self.writeString += "</Combination>\n"
+        
+        return self.writeString
+
+    def writeXML(self):
+        """
+        Write instance to file and close
+        """
+        print "Writing file: '%s'" % self.xmlFileName
+        
+        if self.verbose > 2:
+            print str(self)
+            pass
+        
+        self.xmlFile = open(self.xmlFileName, "w")
+        self.xmlFile.write(str(self))
+        self.xmlFile.close()
+        
+        for chan in self.channels:
+            chan.writeXML()
+            if self.verbose > 2:
+                print str(chan)
+        
+        return
+
+    def executehist2workspace(self, option=""):
+        """
+        Run hist2workspace binary on this file
+        """
+        cmd = "hist2workspace "
+        
+        if len(option):
+            cmd += "-" + option
+
+        cmd += self.xmlFileName
+        if not (self.verbose > 2):
+            cmd += " 1> /dev/null "
+
+        print "\nExecuting: '%s'" % cmd
+        os.system(cmd)
+
+        print "Created workspace 'combined' in file '%s'\n" % self.wsFileName
         return

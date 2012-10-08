@@ -43,6 +43,8 @@ configMgr.analysisName = "MyShapeFitExample"
 configMgr.histCacheFile = "data/"+configMgr.analysisName+".root"
 configMgr.outputFileName = "results/"+configMgr.analysisName+"_Output.root"
 
+configMgr.writeXML = True #write our own XML files and execute hist2workspace
+
 # Scaling calculated by outputLumi / inputLumi
 configMgr.inputLumi = 0.001 # Luminosity of input TTree after weighting
 configMgr.outputLumi = 4.713 # Luminosity required for output histograms

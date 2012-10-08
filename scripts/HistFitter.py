@@ -4,19 +4,19 @@ gSystem.Load("libSusyFitter.so")
 gROOT.Reset()
 
 
-def GenerateFitAndPlot(tl, drawBeforeAfterFit):
+def GenerateFitAndPlot(fitConfig, drawBeforeAfterFit):
     from configManager import configMgr
 
     from ROOT import Util
     from ROOT import RooExpandedFitResult
-    print "\n***GenerateFitAndPlot for TopLevelXML %s***\n" % tl.name
+    print "\n***GenerateFitAndPlot for TopLevelXML %s***\n" % fitConfig.name
 
-    w = Util.GetWorkspaceFromFile(tl.wsFileName, "combined")
+    w = Util.GetWorkspaceFromFile(fitConfig.wsFileName, "combined")
     Util.SaveInitialSnapshot(w)
-    #   Util.ReadWorkspace(w, tl.wsFileName,"combined")
+    #   Util.ReadWorkspace(w, fitConfig.wsFileName,"combined")
 
     plotChannels = ""
-    for reg in tl.validationChannels:
+    for reg in fitConfig.validationChannels:
         if len(plotChannels) > 0:
             plotChannels += ","
             pass
@@ -24,7 +24,7 @@ def GenerateFitAndPlot(tl, drawBeforeAfterFit):
     plotChannels = "ALL"
 
     fitChannels = ""
-    for reg in tl.bkgConstrainChannels:
+    for reg in fitConfig.bkgConstrainChannels:
         if len(fitChannels) > 0:
             fitChannels += ","
             pass
@@ -32,7 +32,7 @@ def GenerateFitAndPlot(tl, drawBeforeAfterFit):
         pass
 
     fitChannelsCR = fitChannels
-    for reg in tl.signalChannels:
+    for reg in fitConfig.signalChannels:
         if len(fitChannels) > 0:
             fitChannels += ","
             pass
@@ -41,7 +41,7 @@ def GenerateFitAndPlot(tl, drawBeforeAfterFit):
 
     #hack to be fixed at HistFactory level (check again with ROOT 5.34)
     lumiConst = True
-    if tl.signalSample and not tl.hasDiscovery:
+    if fitConfig.signalSample and not fitConfig.hasDiscovery:
         lumiConst = False
 
     # fit toy MC if specified. When left None, data is fit by default
@@ -67,8 +67,8 @@ def GenerateFitAndPlot(tl, drawBeforeAfterFit):
     # to a small number for the before the fit plots
     normList = configMgr.normList
     for norm in normList:
-        if norm in tl.measurements[0].paramSettingDict.keys():
-            if tl.measurements[0].paramSettingDict[norm][0]:
+        if norm in fitConfig.measurements[0].paramSettingDict.keys():
+            if fitConfig.measurements[0].paramSettingDict[norm][0]:
                 continue
         normfac = w.var(norm)
         if normfac:
@@ -93,7 +93,7 @@ def GenerateFitAndPlot(tl, drawBeforeAfterFit):
 
     # plot before fit
     if drawBeforeAfterFit:
-        Util.PlotPdfWithComponents(w, tl.name, plotChannels, "beforeFit",
+        Util.PlotPdfWithComponents(w, fitConfig.name, plotChannels, "beforeFit",
                                    expResultBefore, toyMC, plotRatio)
 
     # fit of all regions
@@ -106,11 +106,11 @@ def GenerateFitAndPlot(tl, drawBeforeAfterFit):
 
     # plot after fit
     if drawBeforeAfterFit:
-        Util.PlotPdfWithComponents(w, tl.name, plotChannels, "afterFit",
+        Util.PlotPdfWithComponents(w, fitConfig.name, plotChannels, "afterFit",
                                    expResultAfter, toyMC, plotRatio)
         #plot each component of each region separately with propagated
         #error after fit  (interesting for debugging)
-        #Util.PlotSeparateComponents(tl.name, plotChannels,
+        #Util.PlotSeparateComponents(fitConfig.name, plotChannels,
         #                             "afterFit", result,toyMC)
 
         # plot correlation matrix for result
@@ -120,9 +120,9 @@ def GenerateFitAndPlot(tl, drawBeforeAfterFit):
         #Util.PlotNLL(w, expResultAfter, plotPLL, "", toyMC)
 
     if toyMC:
-        Util.WriteWorkspace(w, tl.wsFileName, toyMC.GetName())
+        Util.WriteWorkspace(w, fitConfig.wsFileName, toyMC.GetName())
     else:
-        Util.WriteWorkspace(w, tl.wsFileName)
+        Util.WriteWorkspace(w, fitConfig.wsFileName)
 
     try:
         if result is not None:
@@ -253,22 +253,22 @@ if __name__ == "__main__":
         configMgr.executeAll()
 
     if runFit:
-        if len(configMgr.topLvls) > 0:
-            r = GenerateFitAndPlot(configMgr.topLvls[0], drawBeforeAfterFit)
-            #r=GenerateFitAndPlot(configMgr.topLvls[1],drawBeforeAfterFit)
-            #r=GenerateFitAndPlot(configMgr.topLvls[2],drawBeforeAfterFit)
-            #for idx in range(len(configMgr.topLvls)):
-            #    r=GenerateFitAndPlot(configMgr.topLvls[idx],drawBeforeAfterFit)
+        if len(configMgr.fitConfigs) > 0:
+            r = GenerateFitAndPlot(configMgr.fitConfigs[0], drawBeforeAfterFit)
+            #r=GenerateFitAndPlot(configMgr.fitConfigs[1],drawBeforeAfterFit)
+            #r=GenerateFitAndPlot(configMgr.fitConfigs[2],drawBeforeAfterFit)
+            #for idx in range(len(configMgr.fitConfigs)):
+            #    r=GenerateFitAndPlot(configMgr.fitConfigs[idx],drawBeforeAfterFit)
             pass
         #configMgr.cppMgr.fitAll()
-        print "\nr0=GenerateFitAndPlot(configMgr.topLvls[0],False)"
-        print "r1=GenerateFitAndPlot(configMgr.topLvls[1],False)"
-        print "r2=GenerateFitAndPlot(configMgr.topLvls[2],False)"
+        print "\nr0=GenerateFitAndPlot(configMgr.fitConfigs[0],False)"
+        print "r1=GenerateFitAndPlot(configMgr.fitConfigs[1],False)"
+        print "r2=GenerateFitAndPlot(configMgr.fitConfigs[2],False)"
         pass
 
     if printLimits:
-        for tl in configMgr.topLvls:
-            if len(tl.validationChannels) > 0:
+        for fitConfig in configMgr.fitConfigs:
+            if len(fitConfig.validationChannels) > 0:
                 raise(Exception, "Validation regions should be turned off "
                                  "for setting an upper limit!")
             pass
@@ -277,8 +277,8 @@ if __name__ == "__main__":
         pass
 
     if doHypoTests:
-        for tl in configMgr.topLvls:
-            if len(tl.validationChannels) > 0:
+        for fitConfig in configMgr.fitConfigs:
+            if len(fitConfig.validationChannels) > 0:
                 raise(Exception,"Validation regions should be turned off "
                                 "for doing hypothesis test!")
             pass
