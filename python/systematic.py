@@ -45,10 +45,10 @@ class SystematicBase:
         if not constraint == "Gaussian" and not method == "shapeSys":
             raise ValueError("Constraints can only be specified for shapeSys")
         self.constraint = constraint
-        allowedSys = ["histoSys", "overallSys", "userOverallSys",
-                      "overallHistoSys", "normHistoSys", "shapeSys",
-                      "histoSysOneSide", "normHistoSysOneSide", "userHistoSys",
-                      "userNormHistoSys"]
+        allowedSys = ["histoSys","overallSys","userOverallSys","overallHistoSys","normHistoSys",
+                      "shapeSys","histoSysOneSide","normHistoSysOneSide","normHistoSysOneSideSym","userHistoSys","userNormHistoSys",
+                      "overallNormHistoSys","overallNormHistoSysOneSide","overallNormHistoSysOneSideSym" ]
+
         if not self.method in allowedSys:
             raise Exception("Given method %s is not known; use one of %s"
                              % (self.method, allowedSys))
