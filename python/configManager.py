@@ -621,7 +621,7 @@ class ConfigManager(object):
         elif syst.method == "normHistoSys":
             chan.getSample(sam.name).addHistoSys(syst.name,nomName,highName,lowName,False,True,False,False,sam.name,normString)
         elif syst.method == "normHistoSysOneSide":
-            chan.getSample(sam.name).addHistoSys(syst.name,nomName,highName,lowName,False,True,False,True)
+            chan.getSample(sam.name).addHistoSys(syst.name,nomName,highName,lowName,False,True,False,True,sam.name,normString)
         elif syst.method == "userHistoSys" or syst.method == "userNormHistoSys":
             if configMgr.hists[highName] == None:
                 configMgr.hists[highName] = histMgr.buildUserHistoSysFromHist(highName, syst.high, configMgr.hists[nomName])
