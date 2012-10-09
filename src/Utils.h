@@ -44,7 +44,6 @@ namespace Util
   double looseToTightErr(const TString& reg, TMap* map);
   double getNonQcdVal(const TString& proc, const TString& reg, TMap* map, const TString& opt);
 
-
   RooWorkspace* GetWorkspaceFromFile( const TString& infile, const TString& wsname );
   void WriteWorkspace(RooWorkspace* w, TString outFileName="./results/BkgForumTest_combined_ComHistoSysOverConst_model.root", TString suffix = "");
   void LoadSnapshotInWorkspace(RooWorkspace* w, TString snapshot= "");
@@ -53,8 +52,8 @@ namespace Util
 
   void PlotPdfWithComponents(RooWorkspace* w, TString setupName = "Example3b",TString plotRegions = "ALL", 
 			     TString outputPrefix = "", RooFitResult* rFit = NULL, RooAbsData* inputData=0, Bool_t plotRatio=kFALSE );
-  void PlotPdfSumWithComponents(RooWorkspace* w, TString setupName = "Example3b",TString plotRegions = "ALL",  
- 			        TString outputPrefix = "", RooFitResult* rFit = NULL, RooAbsData* inputData=0, Bool_t plotRatio=kFALSE ); 
+  //void PlotPdfSumWithComponents(RooWorkspace* w, TString setupName = "Example3b", TString plotRegions = "ALL",  
+  //		                  TString outputPrefix = "", RooFitResult* rFit = NULL, RooAbsData* inputData=0, Bool_t plotRatio=kFALSE ); 
   void AddComponentsToPlot(RooWorkspace* w,FitConfig* fc, RooPlot* frame, RooAbsPdf* regionPdf, RooAbsData* regionData, RooRealVar* obsRegion, TString regionCatLabel);
   void PlotSeparateComponents(RooWorkspace* w, TString setupName = "Example3b",TString plotRegions = "ALL", 
 			      TString outputPrefix = "", RooFitResult* rFit = NULL, RooAbsData* inputData=0 );
