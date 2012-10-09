@@ -67,9 +67,6 @@ Bool_t ConfigMgr::checkConsistency(){
 }
 
 
-
-
-
 void ConfigMgr::initialize(){  
   if(m_saveTree || m_doHypoTest){
     if(m_outputFileName.Length()>0){
@@ -124,8 +121,7 @@ ConfigMgr::fit(FitConfig* fc)
     cout << ">>> Now storing RooFitResult <" << hypName << ">" << endl;
   }
   
-  inFile->Close();
-  
+  inFile->Close();  
   outfile->Close();
   
   cout << ">>> Done. Stored fit result in file <" << outfileName << ">" << endl;
@@ -135,16 +131,16 @@ ConfigMgr::fit(FitConfig* fc)
 
 
 void 
-ConfigMgr::doHypoTestAll(TString outdir)
+ConfigMgr::doHypoTestAll(TString outdir, Bool_t doUL)
 {
    for(unsigned int i=0; i<m_fitConfigs.size(); i++) {
       if( m_fixSigXSec ){
-	doHypoTest( m_fitConfigs.at(i), outdir, 0. );
+	doHypoTest( m_fitConfigs.at(i), outdir, 0., doUL );
 	double SigXSecSysnsigma = 1.;
-	doHypoTest( m_fitConfigs.at(i), outdir, SigXSecSysnsigma);
-	doHypoTest( m_fitConfigs.at(i), outdir, SigXSecSysnsigma*(-1.));
+	doHypoTest( m_fitConfigs.at(i), outdir, SigXSecSysnsigma, doUL );
+	doHypoTest( m_fitConfigs.at(i), outdir, SigXSecSysnsigma*(-1.), doUL );
       } else {
-	doHypoTest( m_fitConfigs.at(i) , outdir, 0. );
+	doHypoTest( m_fitConfigs.at(i), outdir, 0., doUL );
       }
   }
 
@@ -153,13 +149,14 @@ ConfigMgr::doHypoTestAll(TString outdir)
 
 
 void 
-ConfigMgr::doHypoTest(int i , TString outdir, double SigXSecSysnsigma)
+ConfigMgr::doHypoTest(int i , TString outdir, double SigXSecSysnsigma, Bool_t doUL)
 {
-  return doHypoTest( m_fitConfigs.at(i), outdir, SigXSecSysnsigma );
+  return doHypoTest( m_fitConfigs.at(i), outdir, SigXSecSysnsigma, doUL );
 }
 
+
 void 
-ConfigMgr::doHypoTest(FitConfig* fc, TString outdir, double SigXSecSysnsigma)
+ConfigMgr::doHypoTest(FitConfig* fc, TString outdir, double SigXSecSysnsigma, Bool_t doUL)
 {
    TString outfileName = m_outputFileName;
    TString suffix = "_hypotest.root";
@@ -223,8 +220,7 @@ ConfigMgr::doHypoTest(FitConfig* fc, TString outdir, double SigXSecSysnsigma)
 
    RooStats::HypoTestInverterResult* hypo = RooStats::DoHypoTestInversion(w,m_nToys,m_calcType,m_testStatType,
 									  useCLs,npoints,poimin,poimax,doAnalyze,useNumberCounting,
-									  modelSBName.Data(),modelBName.Data(),dataName,nuisPriorName); 
-   
+									  modelSBName.Data(),modelBName.Data(),dataName,nuisPriorName);    
    //// store ul as nice plot ..
    //if ( hypo!=0 ) {
    //   RooStats::AnalyzeHypoTestInverterResult( hypo,m_calcType,m_testStatType,useCLs,npoints, fc->m_signalSampleName.Data(), ".eps") ;

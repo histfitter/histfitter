@@ -44,14 +44,14 @@ public:
   void initialize();
 
   void fitAll();
-  void doHypoTestAll(TString outdir="results/");
+  void doHypoTestAll(TString outdir="results/", Bool_t doUL=true);
   void doUpperLimitAll();
   void runToysAll();
 
   void fit(int i);
   void fit(FitConfig* fc);
-  void doHypoTest(int i, TString outdir="results/", double nsigma=0.);
-  void doHypoTest(FitConfig* fc, TString outdir="results/", double nsigma=0.);
+  void doHypoTest(int i, TString outdir="results/", double nsigma=0., Bool_t doUL=true);
+  void doHypoTest(FitConfig* fc, TString outdir="results/", double nsigma=0., Bool_t doUL=true);
   void doUpperLimit(int i);
   void doUpperLimit(FitConfig* fc);
   void runToys(int i);

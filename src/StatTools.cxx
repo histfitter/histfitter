@@ -844,6 +844,12 @@ RooStats::get_Presult(  RooWorkspace* w,
 {
    double pvalue(-1.);
 
+   if (!doUL && testStatType==3) {
+      // MB: Hack, needed for ProfileLikeliHoodTestStat to work properly.
+      cout << ">>> Warning: Discovery mode --> Changing test-statistic type from one-sided to two-sided for RooStats to work." << endl;
+      testStatType=2;
+    }
+
    RooStats::HypoTestResult* result = RooStats::DoHypoTest(w,doUL,ntoys,calculatorType,testStatType,modelSBName,modelBName,dataName,
                                                            useNumberCounting,nuisPriorName);
    if (result!=0) { result->Print(); }
