@@ -1,5 +1,8 @@
 # setup ROOT
 # check Root environment setup. Allow for external setup script.
+
+source ~/bin/root-v5-34-patches/bin/thisroot.sh
+
 if [ ! $ROOTSYS ]; then
   export CWD=$PWD
   # first, setup gcc to version 4.3

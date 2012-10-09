@@ -41,6 +41,7 @@ Prioritized todo-list:
 - Merging of configManager code (0-lepton) (G-J, Max, Yu)
   o 0-lepton: switching between multiple signal regions. (python magic words)
 - Correct statistical treatment of fits to prescaled data. (Max)
+- Make HistFtter use proper logging (GJ)
 
 >>> External: RooFit/RooStats bugs we are affected by:
 

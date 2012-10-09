@@ -140,9 +140,14 @@ Combination::CollectHypoTestResults( const TString& infile, const TString& forma
        }
     }
     
-    LimitResult result = RooStats::get_Pvalue( ht );
-    result.AddMetaData ( Combination::ParseWorkspaceID(itr->first) );
-    if (!failed_fit) limres.push_back(result); // store info from interpretation string (eg m0 and m12 value) 
+   if(ht->ArraySize() == 0){
+        cout << "WARNING: Fit result " << fitresultname.Data() << " has failed HypoTestInverterResult - do not use result" << endl;
+   } else {
+      LimitResult result = RooStats::get_Pvalue( ht );
+      result.AddMetaData ( Combination::ParseWorkspaceID(itr->first) );
+      if (!failed_fit) limres.push_back(result); // store info from interpretation string (eg m0 and m12 value) 
+   }
+
     delete ht;
   }
 
