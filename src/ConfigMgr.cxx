@@ -191,9 +191,9 @@ ConfigMgr::doHypoTest(FitConfig* fc, TString outdir, double SigXSecSysnsigma)
    }
 
    bool useCLs = true;  
-   int npoints = 20;   
-   double poimin = 0.1;  
-   double poimax = 5.0; 
+   int npoints = 1;   
+   double poimin = 1.0;  
+   double poimax = 1.0; 
    bool doAnalyze = false;
    bool useNumberCounting = false;
    TString modelSBName = "ModelConfig";
