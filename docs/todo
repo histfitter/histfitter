@@ -11,11 +11,9 @@ Prioritized todo-list:
 - Move tutorial examples to HFUser?
 - Commit HF patches for tutorial into trunk.
 - There is no script/method for merging toys from discovery mode.
-- script/option for p0 for discovery.
 
-
-- Upgrade to ROOT v5.34. xml-files okay? (Geert-Jan)
-- one-sided uncertainties (Max)
+- Upgrade to ROOT v5.34. Python-based objects (Geert-Jan)
+- document new systematic uncertainties (Max)
 - Treatment of negative QCD weights: can lead to crash in signal region. (Zach,Max)
 - Absolute errors in case of nominal prediction with 0.0 events. Empty nominal, non-empty systematic (Marcello)
 - Hard-coded names, e.g. sig_xsection. Needs to be documented, or made flexible. (Jeanette?)
@@ -36,7 +34,7 @@ Prioritized todo-list:
   o Better rejection of bad fits that make it into grid list file (Zach had some tricks for this - discuss) (Zach, Max)
 - Analysis script sharing (--> first: get overview: Jeanette, Sophie?)
   o Generalized scripts? E.g. for visible x-section limits (by Alex)
-  o e.g. p0 calculation, making pull plots, drawing pdf, contour plots. (Alex)
+  o e.g. script/option for p0 calculation, making pull plots, drawing pdf, contour plots. (Alex)
 - review and improve consistency and configurability of automatic error handling (David) 
 - Merging of configManager code (0-lepton) (G-J, Max, Yu)
   o 0-lepton: switching between multiple signal regions. (python magic words)
