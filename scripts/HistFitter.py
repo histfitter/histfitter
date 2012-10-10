@@ -158,6 +158,7 @@ if __name__ == "__main__":
     runFit = False
     printLimits = False
     doHypoTests = False
+    doUL = True           # default is exclusion. goes toegether with doHypoTests
     drawBeforeAfterFit = False
     pickedSRs = []
 
@@ -177,7 +178,8 @@ if __name__ == "__main__":
         print "-i stays in interactive session after executing the script (default %s)" % runInterpreter
         print "-v verbose level (1: minimal, 2: print histogram names, 3: print XML files, default: %i)" % configMgr.verbose
         print "-l make limit plot of workspace (default %s)" % printLimits
-        print "-p run hypothesis test on workspace (default %s)" % doHypoTests
+        print "-p run (exclusion) hypothesis test on workspace (default %s)" % doHypoTests
+        print "-z run the discovery hypothesis test instead. In combination with -p. (default %s)" % not doUL
         print "-g <grid points to be processed> - give as comma separated list"
         print "-r signal region to be processed - give as comma separated list (default = all)"
         print "-d Draw before/after fit plots of all channels (default: %s)" % drawBeforeAfterFit
@@ -216,6 +218,8 @@ if __name__ == "__main__":
             printLimits = True
         elif opt == '-p':
             doHypoTests = True
+        elif opt == '-z':
+            doUL = False
         elif opt == '-d':
             drawBeforeAfterFit = True
         elif opt == '-0':
@@ -283,7 +287,7 @@ if __name__ == "__main__":
             if len(tl.validationChannels) > 0:
                 raise(Exception,"Validation regions should be turned off for doing hypothesis test!")
             pass
-        configMgr.cppMgr.doHypoTestAll()
+        configMgr.cppMgr.doHypoTestAll('results/',doUL)
         pass
 
     if configMgr.nTOYs > 0 and doHypoTests == False and printLimits == False and runFit == False:
