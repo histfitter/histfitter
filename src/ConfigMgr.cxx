@@ -243,6 +243,7 @@ ConfigMgr::doHypoTest(FitConfig* fc, TString outdir, double SigXSecSysnsigma, Bo
      htr = RooStats::DoHypoTest(w,doUL,m_nToys,m_calcType,m_testStatType,modelSBName,modelBName,dataName,
 				useNumberCounting,nuisPriorName);
      if (htr!=0) {
+       htr->Print(); 
        result = new RooStats::HypoTestInverterResult();
        result->Add(0,*htr);
      }

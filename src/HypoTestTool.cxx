@@ -164,13 +164,13 @@ RooStats::HypoTestTool::SetParameter(const char * name, const char * value){
 
 void
 RooStats::HypoTestTool::AnalyzeResult( HypoTestInverterResult * r,
-                                          int calculatorType,
-                                          int testStatType, 
-                                          bool useCLs,  
-                                          int npoints,
-				          const char* outfilePrefix,
-					  const char* outfiletype
-				       ) 
+				       int calculatorType,
+				       int testStatType, 
+				       bool useCLs,  
+				       int npoints,
+				       const char* outfilePrefix,
+				       const char* outfiletype
+				     ) 
 { 
    if (r==0) {
      std::cerr << "ERROR : Input HypoTestInverterResult is empty. Exit." << std::endl;
@@ -795,12 +795,12 @@ RooStats::HypoTestTool::SetupHypoTestCalculator(RooWorkspace * w, bool doUL,
 
 bool
 RooStats::HypoTestTool::SetupHypoTestInverter(RooWorkspace * w,
-						 const char * modelSBName, const char * modelBName, 
-						 const char * dataName, int type,  int testStatType, 
-						 bool useCLs, int npoints, double poimin, double poimax, 
-						 int ntoys,
-						 bool useNumberCounting,
-						 const char * nuisPriorName ){
+					      const char * modelSBName, const char * modelBName, 
+					      const char * dataName, int type,  int testStatType, 
+					      bool useCLs, int npoints, double poimin, double poimax, 
+					      int ntoys,
+					      bool useNumberCounting,
+					      const char * nuisPriorName ){
 
    std::cout << ">>> Setting up HypoTestInverter on the workspace " << w->GetName() << std::endl;
 
