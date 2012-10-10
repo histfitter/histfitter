@@ -218,24 +218,65 @@ ConfigMgr::doHypoTest(FitConfig* fc, TString outdir, double SigXSecSysnsigma, Bo
       cout << ">>> Now storing RooFitResult <" << hypName << ">" << endl;
    }
 
-   RooStats::HypoTestInverterResult* hypo = RooStats::DoHypoTestInversion(w,m_nToys,m_calcType,m_testStatType,
-									  useCLs,npoints,poimin,poimax,doAnalyze,useNumberCounting,
-									  modelSBName.Data(),modelBName.Data(),dataName,nuisPriorName);    
+   RooStats::HypoTestResult* htr(0);
+   RooStats::HypoTestInverterResult* result(0);
+
+   if (doUL) { // exclusion
+     result = RooStats::DoHypoTestInversion(w, 
+					    m_nToys,m_calcType,m_testStatType,
+					    useCLs, 
+					    npoints,poimin,poimax,
+					    doAnalyze,
+					    useNumberCounting, 
+					    modelSBName.Data(), modelBName.Data(),
+					    dataName, 
+					    nuisPriorName ) ;
+   } else {  // discovery 
+     // MB: Hack, needed for ProfileLikeliHoodTestStat to work properly.
+     if (m_testStatType==3) { 
+       cout << ">>> Warning: Discovery mode --> Need to change test-statistic type from one-sided to two-sided for RooStats to work."  
+            << "                                (Note: test is still one-sided.)" 
+	    << endl; 
+       m_testStatType=2; 
+     } 
+     
+     htr = RooStats::DoHypoTest(w,doUL,m_nToys,m_calcType,m_testStatType,modelSBName,modelBName,dataName,
+				useNumberCounting,nuisPriorName);
+     if (htr!=0) {
+       result = new RooStats::HypoTestInverterResult();
+       result->Add(0,*htr);
+     }
+   }
+
+   //RooStats::HypoTestInverterResult* result = RooStats::DoHypoTestInversion(w,m_nToys,m_calcType,m_testStatType,
+   //									    useCLs,npoints,poimin,poimax,doAnalyze,useNumberCounting,
+   //								            modelSBName.Data(),modelBName.Data(),dataName,nuisPriorName);    
+
    //// store ul as nice plot ..
-   //if ( hypo!=0 ) {
-   //   RooStats::AnalyzeHypoTestInverterResult( hypo,m_calcType,m_testStatType,useCLs,npoints, fc->m_signalSampleName.Data(), ".eps") ;
+   //if ( result!=0 ) {
+   //   RooStats::AnalyzeHypoTestInverterResult( result,m_calcType,m_testStatType,useCLs,npoints, fc->m_signalSampleName.Data(), ".eps") ;
    //}
 
-   if ( hypo!=0 ) {	
+   //// Storage
+   if ( result!=0 ) {	
       outfile->cd();
       TString hypName="hypo_"+fc->m_signalSampleName;
-      hypo->SetName(hypName);
-      hypo->Write();
+      result->SetName(hypName);
+      result->Write();
       cout << ">>> Now storing HypoTestInverterResult <" << hypName << ">" << endl;
-      delete hypo;
+      delete result;
+   }
+
+   if ( htr!=0 ) {	
+      outfile->cd();
+      TString hypName="discovery_htr_"+fc->m_signalSampleName;
+      htr->SetName(hypName);
+      htr->Write();
+      cout << ">>> Now storing HypoTestResult <" << hypName << ">" << endl;
+      delete htr;
    }
    
-   cout << ">>> Done. Stored HypoTestInverterResult and fit result in file <" << outfileName << ">" << endl;
+   cout << ">>> Done. Stored HypoTest(Inverter)Result and fit result in file <" << outfileName << ">" << endl;
    
    inFile->Close();  
    outfile->Close();
