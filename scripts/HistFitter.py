@@ -179,7 +179,7 @@ if __name__ == "__main__":
         print "-v verbose level (1: minimal, 2: print histogram names, 3: print XML files, default: %i)" % configMgr.verbose
         print "-l make limit plot of workspace (default %s)" % printLimits
         print "-p run (exclusion) hypothesis test on workspace (default %s)" % doHypoTests
-        print "-z run the discovery hypothesis test instead. In combination with -p. (default %s)" % not doUL
+        print "-z run the discovery hypothesis test instead. In combination with -p. (default %s)" % (not doUL)
         print "-g <grid points to be processed> - give as comma separated list"
         print "-r signal region to be processed - give as comma separated list (default = all)"
         print "-d Draw before/after fit plots of all channels (default: %s)" % drawBeforeAfterFit
