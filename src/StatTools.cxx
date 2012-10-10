@@ -767,11 +767,15 @@ RooStats::get_Pvalue(     RooWorkspace* w,
 
   } else {  // discovery
 
-    if (testStatType==3) { 
+    if (testStatType==3) {
       // MB: Hack, needed for ProfileLikeliHoodTestStat to work properly.
-      cout << ">>> Warning: Discovery mode --> Changing test-statistic type from one-sided to two-sided for RooStats to work." << endl; 
-      testStatType=2; 
-    } 
+      if (testStatType==3) { 
+	cout << ">>> Warning: Discovery mode --> Need to change test-statistic type from one-sided to two-sided for RooStats to work."  
+	     << "                                (Note: test is still one-sided.)" 
+	     << endl; 
+	testStatType=2; 
+      } 
+    }
 
     RooStats::HypoTestResult* result = RooStats::DoHypoTest(w,doUL,ntoys,calculatorType,testStatType,modelSBName,modelBName,dataName,
 							    useNumberCounting,nuisPriorName);
@@ -844,14 +848,8 @@ RooStats::get_Presult(  RooWorkspace* w,
 {
    double pvalue(-1.);
 
-   if (!doUL && testStatType==3) {
-      // MB: Hack, needed for ProfileLikeliHoodTestStat to work properly.
-      cout << ">>> Warning: Discovery mode --> Changing test-statistic type from one-sided to two-sided for RooStats to work." << endl;
-      testStatType=2;
-    }
-
-   RooStats::HypoTestResult* result = RooStats::DoHypoTest(w,doUL,ntoys,calculatorType,testStatType,modelSBName,modelBName,dataName,
-                                                           useNumberCounting,nuisPriorName);
+   RooStats::HypoTestResult* result = RooStats::get_htr(w,doUL,ntoys,calculatorType,testStatType,modelSBName,modelBName,dataName,
+							useCLs,useNumberCounting,nuisPriorName);
    if (result!=0) { result->Print(); }
    else { return pvalue; }
 
@@ -869,3 +867,31 @@ RooStats::get_Presult(  RooWorkspace* w,
 }
 
 
+//________________________________________________________________________________________________
+RooStats::HypoTestResult*
+RooStats::get_htr(  RooWorkspace* w,
+		    bool doUL, // = true, // true = exclusion, false = discovery
+		    int ntoys, //=1000,
+		    int calculatorType, // = 0,
+		    int testStatType, // = 3,  
+		    const char * modelSBName, // = "ModelConfig",
+		    const char * modelBName, // = "",
+		    const char * dataName, // = "obsData",
+		    bool useCLs, // = true ,   
+		    bool useNumberCounting, // = false,
+		    const char * nuisPriorName) // = 0 
+{
+   if (!doUL && testStatType==3) {
+     // MB: Hack, needed for ProfileLikeliHoodTestStat to work properly.
+     if (testStatType==3) { 
+       cout << ">>> Warning: Discovery mode --> Need to change test-statistic type from one-sided to two-sided for RooStats to work."  
+            << "                                (Note: test is still one-sided.)" 
+	    << endl; 
+       testStatType=2; 
+     } 
+   }
+
+   RooStats::HypoTestResult* result = RooStats::DoHypoTest(w,doUL,ntoys,calculatorType,testStatType,modelSBName,modelBName,dataName,
+                                                           useNumberCounting,nuisPriorName);
+   return result;
+}

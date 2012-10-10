@@ -76,6 +76,19 @@ namespace RooStats
                bool useNumberCounting = false,
                const char * nuisPriorName = 0) ;
 
+  RooStats::HypoTestResult*
+  get_htr( RooWorkspace* w,
+	   bool doUL = true, // true = exclusion, false = discovery
+	   int ntoys=1000,
+	   int calculatorType = 0,
+	   int testStatType = 3,
+	   const char * modelSBName = "ModelConfig",
+	   const char * modelBName = "",
+	   const char * dataName = "obsData",
+	   bool useCLs = true ,
+	   bool useNumberCounting = false,
+	   const char * nuisPriorName = 0) ;
+
   LimitResult
   get_Pvalue(     RooWorkspace* w,
 		  bool doUL = true, // true = exclusion, false = discovery

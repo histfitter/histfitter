@@ -56,6 +56,7 @@
 #pragma link C++ function RooStats::AnalyzeHypoTestInverterResult;
 #pragma link C++ function RooStats::get_Pvalue;
 #pragma link C++ function RooStats::get_Presult;
+#pragma link C++ function RooStats::get_htr;
 
 #pragma link C++ class RooStats::HypoTestTool;
 
