@@ -51,7 +51,6 @@ def GenerateFitAndPlot(tl, drawBeforeAfterFit):
         # generate a toy dataset
         print "INFO : generating toy MC set for fitting and plotting." \
               " Seed = %i" % configMgr.toySeed
-        RooRandom.randomGenerator().SetSeed(configMgr.toySeed)
         toyMC = Util.GetToyMC()   # this generates one toy dataset
         pass
     elif configMgr.useAsimovSet and not configMgr.toySeedSet:
@@ -255,6 +254,9 @@ if __name__ == "__main__":
     #standard execution from now on.
     configMgr.initialize()
 
+    # initialize: set the toy seed
+    RooRandom.randomGenerator().SetSeed(configMgr.toySeed)
+
     #runs Trees->histos and/or histos->workspace according to specifications
     if configMgr.readFromTree or configMgr.executeHistFactory:
         configMgr.executeAll()
@@ -291,7 +293,6 @@ if __name__ == "__main__":
         pass
 
     if configMgr.nTOYs > 0 and doHypoTests == False and printLimits == False and runFit == False:
-        RooRandom.randomGenerator().SetSeed(configMgr.toySeed)
         configMgr.cppMgr.runToysAll()
         pass
 
