@@ -259,8 +259,6 @@ class ChannelXML(object):
 
         !!! DEPRECATED, MAY NOT WORK !!!
         """
-        if seed is not None:
-            RooRandom.randomGenerator().SetSeed(seed)
         if len(self.dataList):
             raise IndexError("Channel already has data " + str(self.dataList))
         histo = generateToys.generate(toyInputHistoList, varName,
