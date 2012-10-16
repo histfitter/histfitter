@@ -37,6 +37,12 @@ static const char* SUFFIX = ": ";
 #define SUFFIX ": "
 #endif
 
+//TODO add namespace
+//interface for python
+void writeLogMessage( TMsgLogger::TMsgLevel level, std::string message) { 
+    (*TMsgLogger::getInstance()) << level << message << GEndl;
+} 
+
 TMsgLogger::TMsgLevel TMsgLogger::m_minLevel = TMsgLogger::kINFO;
 
 TMsgLogger::TMsgLogger( const TObject* source, TMsgLevel minLevel )
@@ -161,16 +167,16 @@ void TMsgLogger::WriteMsg( TMsgLevel mlevel, const std::string& line ) const  {
         return;
 
 #ifdef USE_COLORED_CONSOLE
-    //// no text for INFO
-    //if (mlevel == kINFO) 
-        //cout << m_colorMap.find( mlevel )->second << m_prefix << line << "\033[0m" << endl;
-    //else
+    // no text for INFO
+    if (mlevel == kINFO) 
+        cout << m_colorMap.find( mlevel )->second << m_prefix << line << "\033[0m" << endl;
+    else
         cout << m_colorMap.find( mlevel )->second << m_prefix 
              << "<" << slevel->second << "> " << line  << "\033[0m" << endl;
 #else
-    //if (mlevel == kINFO) 
-        //cout << m_prefix << line << endl;
-    //else
+    if (mlevel == kINFO) 
+        cout << m_prefix << line << endl;
+    else
         cout << m_prefix << "<" << slevel->second << "> " << line << endl;
 #endif // USE_COLORED_CONSOLE
 

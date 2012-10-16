@@ -15,7 +15,6 @@
 #include "TString.h"
 
 #include "FitConfig.h"
-#include "TMsgLogger.h"
 
 class RooWorkspace;
 

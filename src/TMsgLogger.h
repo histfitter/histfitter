@@ -18,6 +18,7 @@
 //////////////////////////////////////////////////////////////////////////
 
 // STL include(s):
+#include <iostream>
 #include <string>
 #include <sstream>
 #include <map>
@@ -94,9 +95,6 @@ class TMsgLogger : public std::ostringstream, public TObject {
 
         std::map<TMsgLogger::TMsgLevel, std::string> GetLevelMap() const { return m_levelMap; }
 
-        void write( TMsgLogger::TMsgLevel level, std::string message) { 
-            WriteMsg(level, message);
-        } //for python
 
 
     private:
@@ -116,7 +114,7 @@ class TMsgLogger : public std::ostringstream, public TObject {
         std::string                      m_strSource;      // alternative string source
         const std::string                m_prefix;         // the prefix of the source name
         const std::string                m_suffix;         // suffix following source name
-        TMsgLogger::TMsgLevel                        m_activeLevel;    // active level
+        TMsgLogger::TMsgLevel            m_activeLevel;    // active level
         const std::string::size_type     m_maxSourceSize;  // maximum length of source name
 
         std::map<TMsgLogger::TMsgLevel, std::string> m_levelMap;       // matches output levels with strings
@@ -150,5 +148,7 @@ inline TMsgLogger& TMsgLogger::operator<< ( TMsgLogger::TMsgLevel level ) {
 // warnings so let's use the #define definition after all...
 // [ static TMsgLogger& ( *Endl )( TMsgLogger& ) = &TMsgLogger::endmsg; ]
 #define GEndl TMsgLogger::endmsg
+
+void writeLogMessage(TMsgLogger::TMsgLevel level, std::string message);
 
 #endif // Combination_TMsgLogger
