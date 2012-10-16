@@ -7,6 +7,7 @@
 ////////////////////////////////////////////////////////////////////////
 
 //SusyFitter includes
+#include "TMsgLogger.h"
 #include "ConfigMgr.h"
 #include "Utils.h"
 #include "StatTools.h"
@@ -22,7 +23,7 @@
 
 using namespace std;
 
-ConfigMgr::ConfigMgr() {
+ConfigMgr::ConfigMgr() : m_logger("HistFitter", kINFO) {
     m_nToys = 1000;
     m_calcType = 0;
     m_testStatType = 3;
@@ -36,7 +37,6 @@ ConfigMgr::ConfigMgr() {
     m_nPoints=10;
     m_muValGen=0.0;  
     m_removeEmptyBins=false;
-
 }
 
 FitConfig* ConfigMgr::addFitConfig(const TString& name){

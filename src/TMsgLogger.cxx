@@ -37,7 +37,7 @@ static const char* SUFFIX = ": ";
 
 TMsgLevel TMsgLogger::m_minLevel = kINFO;
 
-TMsgLogger::TMsgLogger( const TObject* source, TMsgLevel /* minLevel */ )
+TMsgLogger::TMsgLogger( const TObject* source, TMsgLevel minLevel )
    : m_objSource( source ), 
      m_strSource( "" ), 
      m_prefix( PREFIX ), 
@@ -48,7 +48,7 @@ TMsgLogger::TMsgLogger( const TObject* source, TMsgLevel /* minLevel */ )
     InitMaps();
 }
 
-TMsgLogger::TMsgLogger( const string& source, TMsgLevel /* minLevel */ )
+TMsgLogger::TMsgLogger( const string& source, TMsgLevel minLevel )
    : m_objSource( 0 ),
      m_strSource( source ), 
      m_prefix( PREFIX ), 
@@ -59,7 +59,7 @@ TMsgLogger::TMsgLogger( const string& source, TMsgLevel /* minLevel */ )
     InitMaps();
 }
 
-TMsgLogger::TMsgLogger( TMsgLevel /* minLevel */ )
+TMsgLogger::TMsgLogger( TMsgLevel minLevel )
    : m_objSource( 0 ), 
      m_strSource( "Unknown" ), 
      m_prefix( PREFIX ), 
@@ -156,16 +156,16 @@ void TMsgLogger::WriteMsg( TMsgLevel mlevel, const std::string& line ) const  {
         return;
 
 #ifdef USE_COLORED_CONSOLE
-    // no text for INFO
-    if (mlevel == kINFO) 
-        cout << m_colorMap.find( mlevel )->second << m_prefix << line << "\033[0m" << endl;
-    else
+    //// no text for INFO
+    //if (mlevel == kINFO) 
+        //cout << m_colorMap.find( mlevel )->second << m_prefix << line << "\033[0m" << endl;
+    //else
         cout << m_colorMap.find( mlevel )->second << m_prefix 
              << "<" << slevel->second << "> " << line  << "\033[0m" << endl;
 #else
-    if (mlevel == kINFO) 
-        cout << m_prefix << line << endl;
-    else
+    //if (mlevel == kINFO) 
+        //cout << m_prefix << line << endl;
+    //else
         cout << m_prefix << "<" << slevel->second << "> " << line << endl;
 #endif // USE_COLORED_CONSOLE
 
