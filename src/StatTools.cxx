@@ -1,3 +1,4 @@
+// vim: ts=4:sw=4
 #include "StatTools.h"
 #include "Utils.h"
 #include "CombineWorkSpaces.h"
@@ -58,84 +59,82 @@ using namespace RooStats;
 
 //________________________________________________________________________________________________
 // the caller owns the returned dataset.
-TTree*
-RooStats::toyMC_gen_fit( RooWorkspace* w, const int& nexp, const double& muVal, const bool& doDataFitFirst, const bool& storetoys, const TString& toyoutfile )
-{
-  // basic checks 
-  if (w==0) {
-    std::cerr << "ERROR : Input workspace is null. Return." << std::endl;
-    return NULL;
-  }
-
-  RooStats::ModelConfig* mc = Util::GetModelConfig(w);
-  if(mc==0){
-     std::cerr << "ERROR : ModelConfig is null!" << std::endl;
-     return NULL;
-  }
-  mc->Print();
-
-  // reset (bkg) parameters to values found in data
-  if (doDataFitFirst) {
-    RooFitResult* result = Util::doFreeFit(w,0,false) ;
-    delete result;
-  }
-
-  // silence the output
-  RooMsgService::instance().setGlobalKillBelow(ERROR); 
-
-  // to avoid effects from boundary and simplify asymptotic comparison, set min=-max
-  RooRealVar* poi = Util::GetPOI(w);
-  Bool_t allowNegativeMu=kTRUE;
-  if (allowNegativeMu && (muVal>=0)) poi->setMin(-1*poi->getMax());
-
-  // reset poi val to be used in toy generation
-  if (poi!=0 && muVal>=0) { poi->setVal(muVal); }
-
-  // setup roomcstudy. This is only used for storage of PE fit results.
-  RooMCStudy* mcstudy = Util::GetMCStudy(w); 
-
-  ///////////////////////////////////////////////////////////////////////////////////
-  // Now setup the toy mc sampler. This provides the datasets to be fitted.
-  ///////////////////////////////////////////////////////////////////////////////////
-
-  int nPOI = mc->GetParametersOfInterest()->getSize();
-  if(nPOI>1){
-    cout <<"WARNING : not sure what to do with other parameters of interest, but here are their values"<<endl;
-    mc->GetParametersOfInterest()->Print("v");
-  }
-
-  // create the test stat sampler
-  ProfileLikelihoodTestStat ts(*mc->GetPdf());
-  
-  // create and configure the ToyMCSampler
-  ToyMCSampler sampler(ts,nexp);
-  sampler.SetPdf(*mc->GetPdf());
-  sampler.SetObservables(*mc->GetObservables());
-  sampler.SetGlobalObservables(*mc->GetGlobalObservables());
-  //sampler.SetGenerateAutoBinned(false); // MB: temporary fix. Zero weights not working for simpdf-data set
-  //sampler.SetGenerateBinned(false); // dito
-  sampler.SetParametersForTestStat(*mc->GetParametersOfInterest()); // set POI value for evaluation
-  
-  RooArgSet poiAndNuisance;
-  poiAndNuisance.add(*mc->GetParametersOfInterest());
-  poiAndNuisance.add(*mc->GetNuisanceParameters());
-  RooArgSet* nullParams = (RooArgSet*) poiAndNuisance.snapshot(); 
-
-  // will be used as start values of fit
-  w->saveSnapshot("paramsToFitPE",poiAndNuisance);
-
-  cout << "INFO : Parameter values used for generation " << endl;
-  nullParams->Print("v");
-
-  /////////////////////////////////////////////////////////////////////////////////////////////////////
-  // Start the toy loop 
-
-  /*
-  for (int i=0; i<nexp; ++i) {
-
-    if ((i%10)==0) {
-      cout << "INFO: Now processing : " << i << "/" << nexp << endl;
+TTree* RooStats::toyMC_gen_fit( RooWorkspace* w, const int& nexp, const double& muVal, const bool& doDataFitFirst, const bool& storetoys, const TString& toyoutfile ) {
+    // basic checks 
+    if (w==0) {
+        std::cerr << "ERROR : Input workspace is null. Return." << std::endl;
+        return NULL;
     }
+
+    RooStats::ModelConfig* mc = Util::GetModelConfig(w);
+    if(mc==0){
+        std::cerr << "ERROR : ModelConfig is null!" << std::endl;
+        return NULL;
+    }
+    mc->Print();
+
+    // reset (bkg) parameters to values found in data
+    if (doDataFitFirst) {
+        RooFitResult* result = Util::doFreeFit(w,0,false) ;
+        delete result;
+    }
+
+    // silence the output
+    RooMsgService::instance().setGlobalKillBelow(ERROR); 
+
+    // to avoid effects from boundary and simplify asymptotic comparison, set min=-max
+    RooRealVar* poi = Util::GetPOI(w);
+    Bool_t allowNegativeMu=kTRUE;
+    if (allowNegativeMu && (muVal>=0)) poi->setMin(-1*poi->getMax());
+
+    // reset poi val to be used in toy generation
+    if (poi!=0 && muVal>=0) { poi->setVal(muVal); }
+
+    // setup roomcstudy. This is only used for storage of PE fit results.
+    RooMCStudy* mcstudy = Util::GetMCStudy(w); 
+
+    ///////////////////////////////////////////////////////////////////////////////////
+    // Now setup the toy mc sampler. This provides the datasets to be fitted.
+    ///////////////////////////////////////////////////////////////////////////////////
+
+    int nPOI = mc->GetParametersOfInterest()->getSize();
+    if(nPOI>1){
+        cout <<"WARNING : not sure what to do with other parameters of interest, but here are their values"<<endl;
+        mc->GetParametersOfInterest()->Print("v");
+    }
+
+    // create the test stat sampler
+    ProfileLikelihoodTestStat ts(*mc->GetPdf());
+
+    // create and configure the ToyMCSampler
+    ToyMCSampler sampler(ts,nexp);
+    sampler.SetPdf(*mc->GetPdf());
+    sampler.SetObservables(*mc->GetObservables());
+    sampler.SetGlobalObservables(*mc->GetGlobalObservables());
+    //sampler.SetGenerateAutoBinned(false); // MB: temporary fix. Zero weights not working for simpdf-data set
+    //sampler.SetGenerateBinned(false); // dito
+    sampler.SetParametersForTestStat(*mc->GetParametersOfInterest()); // set POI value for evaluation
+
+    RooArgSet poiAndNuisance;
+    poiAndNuisance.add(*mc->GetParametersOfInterest());
+    poiAndNuisance.add(*mc->GetNuisanceParameters());
+    RooArgSet* nullParams = (RooArgSet*) poiAndNuisance.snapshot(); 
+
+    // will be used as start values of fit
+    w->saveSnapshot("paramsToFitPE",poiAndNuisance);
+
+    cout << "INFO : Parameter values used for generation " << endl;
+    nullParams->Print("v");
+
+    /////////////////////////////////////////////////////////////////////////////////////////////////////
+    // Start the toy loop 
+
+    /*
+       for (int i=0; i<nexp; ++i) {
+
+       if ((i%10)==0) {
+       cout << "INFO: Now processing : " << i << "/" << nexp << endl;
+       }
 
     // reset starting values of fit
     w->loadSnapshot("paramsToFitPE");
@@ -146,752 +145,738 @@ RooStats::toyMC_gen_fit( RooWorkspace* w, const int& nexp, const double& muVal, 
     if (mcstudy!=0) { mcstudy->addFitResult(*rfresult); }
     //delete rfresult; // RooMCStudy keeps pointer to roofitresult
     delete toyMC;
-  }
-  */
-  
-
-  RooNLLVar * fNLL = NULL;
-  for (int i=0; i<nexp; ++i) {
-    
-    if ((i%10)==0) {
-      cerr << "INFO: Now processing : " << i << "/" << nexp << endl;
     }
-        
-    // reset starting values of fit
-    w->loadSnapshot("paramsToFitPE");
-    
-    RooAbsData* toyMC = sampler.GenerateToyData( *nullParams ); // note: this generates and *sets* the global measurements of the pdf 
+    */
 
-    //cout << "num entries = " << toyMC->numEntries() << " sum entries = " << toyMC->sumEntries() << endl; 
-    //toyMC->Print("v");
-    //RooAbsData* subset = toyMC->reduce("channelCat==channelCat::S3_meffInc");
-    //subset->Print("v");
-    //cout << "S3 = " << subset->sumEntries() << endl;
 
-    if (fNLL == NULL) {
-      fNLL = (RooNLLVar*) mc->GetPdf()->createNLL( *toyMC, RooFit::Extended(), RooFit::CloneData(kFALSE), RooFit::Constrain(*mc->GetPdf()->getParameters(*toyMC)) );
-    } else {
-      fNLL->setData( *toyMC );
+    RooNLLVar * fNLL = NULL;
+    for (int i=0; i<nexp; ++i) {
+
+        if ((i%10)==0) {
+            cerr << "INFO: Now processing : " << i << "/" << nexp << endl;
+        }
+
+        // reset starting values of fit
+        w->loadSnapshot("paramsToFitPE");
+
+        RooAbsData* toyMC = sampler.GenerateToyData( *nullParams ); // note: this generates and *sets* the global measurements of the pdf 
+
+        //cout << "num entries = " << toyMC->numEntries() << " sum entries = " << toyMC->sumEntries() << endl; 
+        //toyMC->Print("v");
+        //RooAbsData* subset = toyMC->reduce("channelCat==channelCat::S3_meffInc");
+        //subset->Print("v");
+        //cout << "S3 = " << subset->sumEntries() << endl;
+
+        if (fNLL == NULL) {
+            fNLL = (RooNLLVar*) mc->GetPdf()->createNLL( *toyMC, RooFit::Extended(), RooFit::CloneData(kFALSE), RooFit::Constrain(*mc->GetPdf()->getParameters(*toyMC)) );
+        } else {
+            fNLL->setData( *toyMC );
+        }
+
+        RooMinimizer minim(*fNLL);
+        minim.setMinimizerType("Minuit2");
+        minim.setStrategy(0);
+        minim.setEps(max(1., ::ROOT::Math::MinimizerOptions::DefaultTolerance()));
+        minim.optimizeConst(true);
+        minim.setVerbose(false);
+        minim.setPrintLevel(-1);
+
+        for(int counter = 0;counter<4;counter++) {
+            int status = minim.minimize("Minuit", "Minimize");
+            //int status = minim.minos();
+            if (status == 0) {
+                break;
+            }
+            else {
+                if (counter > 1) {
+                    cerr << "Scanning" << endl;
+                    minim.minimize("Minuit2", "Scan");
+                }
+                if (counter > 2) {
+                    cerr << "Trying with strategy = 1" << endl;
+                    minim.setStrategy(1);
+                }
+            }
+        }
+
+        RooFitResult *rfresult = minim.save();
+        if (mcstudy!=0) { mcstudy->addFitResult(*rfresult); }
+
+        delete toyMC;
     }
 
-    RooMinimizer minim(*fNLL);
-    minim.setMinimizerType("Minuit2");
-    minim.setStrategy(0);
-    minim.setEps(max(1., ::ROOT::Math::MinimizerOptions::DefaultTolerance()));
-    minim.optimizeConst(true);
-    minim.setVerbose(false);
-    minim.setPrintLevel(-1);
-
-    for(int counter = 0;counter<4;counter++) {
-      int status = minim.minimize("Minuit", "Minimize");
-      //int status = minim.minos();
-      if (status == 0) {
-	break;
-      }
-      else {
-	if (counter > 1) {
-	  cerr << "Scanning" << endl;
-	  minim.minimize("Minuit2", "Scan");
-	}
-	if (counter > 2) {
-	  cerr << "Trying with strategy = 1" << endl;
-	  minim.setStrategy(1);
-	}
-      }
+    if (fNLL != NULL) { 
+        delete fNLL; 
     }
-    
-    RooFitResult *rfresult = minim.save();
-    if (mcstudy!=0) { mcstudy->addFitResult(*rfresult); }
 
-    delete toyMC;
-  }
+    /////////////////////////////////////////////////////////////////////////////////////////////////////
+    // End the toy loop 
 
-  if (fNLL != NULL) { delete fNLL; }
-    
+    // reset the silencer
+    RooMsgService::instance().reset();
 
-  /////////////////////////////////////////////////////////////////////////////////////////////////////
-  // End the toy loop 
+    /// convert results into ttree
+    TTree* mcstree = RooStats::ConvertMCStudyResults( mcstudy );
 
-  // reset the silencer
-  RooMsgService::instance().reset();
+    // store toy study results?
+    if (storetoys) {
+        cout << "INFO: Storing MC study under : " << toyoutfile << endl;
+        TFile* outfile = TFile::Open(toyoutfile.Data(),"RECREATE");
+        outfile->cd();
+        if (mcstudy!=0) { mcstree->Write(); }
+        outfile->Close();
+    }
 
-  /// convert results into ttree
-  TTree* mcstree = RooStats::ConvertMCStudyResults( mcstudy );
-  
-  // store toy study results?
-  if (storetoys) {
-    cout << "INFO: Storing MC study under : " << toyoutfile << endl;
-    TFile* outfile = TFile::Open(toyoutfile.Data(),"RECREATE");
-    outfile->cd();
-    if (mcstudy!=0) { mcstree->Write(); }
-    outfile->Close();
-  }
-
-  delete mcstudy; // cleanup
-  return mcstree; // note: owned by caller!
+    delete mcstudy; // cleanup
+    return mcstree; // note: owned by caller!
 }
 
-
-
 //________________________________________________________________________________________________
-TTree* 
-RooStats::ConvertMCStudyResults( RooMCStudy* mcstudy )
-{
-  const RooDataSet& toymc = mcstudy->fitParDataSet();
+TTree* RooStats::ConvertMCStudyResults( RooMCStudy* mcstudy ){
+    const RooDataSet& toymc = mcstudy->fitParDataSet();
 
-  /// initialize the ttree
-  TTree* myTree = new TTree("mcstree","mcstree");
+    /// initialize the ttree
+    TTree* myTree = new TTree("mcstree","mcstree");
 
-  Int_t covQual=0, status=0;
-  Float_t minNll=0;
-  myTree->Branch( "covQual", &covQual, "covQual/I" );
-  myTree->Branch( "status",  &status,  "status/I" );
-  myTree->Branch( "minNll",  &minNll,  "minNll/F" );
+    Int_t covQual=0, status=0;
+    Float_t minNll=0;
+    myTree->Branch( "covQual", &covQual, "covQual/I" );
+    myTree->Branch( "status",  &status,  "status/I" );
+    myTree->Branch( "minNll",  &minNll,  "minNll/F" );
 
-  std::vector<Float_t> varVals;
-  const RooArgSet* args = toymc.get();
-  varVals.resize( args->getSize(), -999. );
+    std::vector<Float_t> varVals;
+    const RooArgSet* args = toymc.get();
+    varVals.resize( args->getSize(), -999. );
 
-  RooRealVar* var(0);
-  TIterator* varItr = args->createIterator();
-  for (Int_t i=0; (var = (RooRealVar*)varItr->Next()); ++i) {
-    TString varName = var->GetName();
-    TString varNameF = TString(var->GetName()) + "/F";
-    myTree->Branch( varName.Data(), &varVals[i], varName.Data() ); 
-  }
-  delete varItr;
-
-  /// and fill the tree by looping over mcstudy
-  for(int iToy=0; iToy<toymc.numEntries(); iToy++) {
-    covQual = mcstudy->fitResult(iToy)->covQual();
-    status  = mcstudy->fitResult(iToy)->status();
-    minNll  = mcstudy->fitResult(iToy)->minNll();
-
-    toymc.get(iToy); // this resets args to new value
-    varItr = args->createIterator();
-    for (Int_t i=0; (var=(RooRealVar*)varItr->Next()); ++i) { varVals[i] = var->getVal(); }
+    RooRealVar* var(0);
+    TIterator* varItr = args->createIterator();
+    for (Int_t i=0; (var = (RooRealVar*)varItr->Next()); ++i) {
+        TString varName = var->GetName();
+        TString varNameF = TString(var->GetName()) + "/F";
+        myTree->Branch( varName.Data(), &varVals[i], varName.Data() ); 
+    }
     delete varItr;
-    
-    myTree->Fill();  
-  }
 
-  return myTree;
-}
+    /// and fill the tree by looping over mcstudy
+    for(int iToy=0; iToy<toymc.numEntries(); iToy++) {
+        covQual = mcstudy->fitResult(iToy)->covQual();
+        status  = mcstudy->fitResult(iToy)->status();
+        minNll  = mcstudy->fitResult(iToy)->minNll();
 
+        toymc.get(iToy); // this resets args to new value
+        varItr = args->createIterator();
+        for (Int_t i=0; (var=(RooRealVar*)varItr->Next()); ++i) { varVals[i] = var->getVal(); }
+        delete varItr;
 
-//________________________________________________________________________________________________
-RooStats::HypoTestInverterResult* 
-RooStats::DoHypoTestInversion(RooWorkspace* w,
-			      int ntoys,
-			      int calculatorType ,
-			      int testStatType , 
-			      bool useCLs ,  
-			      int npoints ,   
-			      double poimin ,  
-			      double poimax , 
-                              bool doAnalyze,
-			      bool useNumberCounting ,
-			      const char * modelSBName ,
-			      const char * modelBName,
-			      const char * dataName ,                 
-			      const char * nuisPriorName )
-{
-/*
-  Other Parameter to pass in tutorial
-  apart from standard for filename, ws, modelconfig and data
-
-  type = 0 Freq calculator 
-  type = 1 Hybrid calculator
-  type = 2 Asymptotic calculator  
-  type = 3 Asymptotic calculator using nominal Asimov data sets (not using fitted parameter values but nominal ones)
-
-  testStatType = 0 LEP
-  = 1 Tevatron 
-  = 2 Profile Likelihood
-  = 3 Profile Likelihood one sided (i.e. = 0 if mu < mu_hat)
-
-  useCLs          scan for CLs (otherwise for CLs+b)    
-
-  npoints:        number of points to scan , for autoscan set npoints = -1 
-
-  poimin,poimax:  min/max value to scan in case of fixed scans 
-  (if min > max, try to find automatically)                           
-
-  ntoys:         number of toys to use 
-
-  useNumberCounting:  set to true when using number counting events 
-
-  nuisPriorName:   name of prior for the nnuisance. This is often expressed as constraint term in the global model
-  It is needed only when using the HybridCalculator (type=1)
-  If not given by default the prior pdf from ModelConfig is used. 
-
-  extra options are available as global paramwters of the macro. They major ones are: 
-
-  plotHypoTestResult   plot result of tests at each point (TS distributions) (defauly is true)
-  useProof             use Proof   (default is true) 
-  writeResult          write result of scan (default is true)
-  rebuild              rebuild scan for expected limits (require extra toys) (default is false)
-  generateBinned       generate binned data sets for toys (default is false) - be careful not to activate with 
-  a too large (>=3) number of observables 
-  nToyRatio            ratio of S+B/B toys (default is 2)
-*/
-
-   if (w == NULL) {
-     std::cerr << "ERROR : input workspace is NULL - Exit." << std::endl;
-     return 0;
-   }
-
-   HypoTestTool calc;
-
-   // set parameters
-   /*
-   calc.SetParameter("PlotHypoTestResult", plotHypoTestResult);
-   calc.SetParameter("WriteResult", writeResult);
-   calc.SetParameter("Optimize", optimize);
-   calc.SetParameter("UseVectorStore", useVectorStore);
-   calc.SetParameter("GenerateBinned", generateBinned);
-   calc.SetParameter("NToysRatio", nToysRatio);
-   calc.SetParameter("MaxPOI", maxPOI);
-   calc.SetParameter("UseProof", useProof);
-   calc.SetParameter("NWorkers", nworkers);
-   calc.SetParameter("Rebuild", rebuild);
-   calc.SetParameter("NToyToRebuild", nToyToRebuild);
-   calc.SetParameter("MassValue", massValue.c_str());
-   calc.SetParameter("MinimizerType", minimizerType.c_str());
-   calc.SetParameter("PrintLevel", printLevel);
-   calc.SetParameter("InitialFit",initialFit);
-   calc.SetParameter("ResultFileName",resultFileName);
-   calc.SetParameter("RandomSeed",randomSeed);
-   */
-
-   HypoTestInverterResult * r = 0;  
-   r = calc.RunHypoTestInverter( w, modelSBName, modelBName,
-			         dataName, calculatorType, testStatType, useCLs,
-			         npoints, poimin, poimax,  
-			         ntoys, useNumberCounting, nuisPriorName );    
-   if (!r) { 
-     std::cerr << ">>> Error running the HypoTestInverter - Exit " << std::endl;
-     return 0;          
-   }
-  
-   if (doAnalyze) calc.AnalyzeResult( r, calculatorType, testStatType, useCLs, npoints, w->GetName() );
-  
-   return r;
-}
-
-
-
-//________________________________________________________________________________________________
-RooStats::HypoTestResult*
-RooStats::DoHypoTest(RooWorkspace* w, 
-		     bool doUL,
-		     int ntoys,
-		     int calculatorType,
-		     int testStatType, 
-		     const char * modelSBName ,
-		     const char * modelBName ,
-		     const char * dataName ,                 
-		     bool useNumberCounting ,
-		     const char * nuisPriorName )
-{
-/*
-  Other Parameter to pass in tutorial
-  apart from standard for filename, ws, modelconfig and data
-
-  type = 0 Freq calculator 
-  type = 1 Hybrid calculator
-  type = 2 Asymptotic calculator  
-
-  testStatType = 0 LEP
-  = 1 Tevatron 
-  = 2 Profile Likelihood
-  = 3 Profile Likelihood one sided (i.e. = 0 if mu < mu_hat)
-
-  useCLs          scan for CLs (otherwise for CLs+b)    
-
-  ntoys:         number of toys to use 
-
-  useNumberCounting:  set to true when using number counting events 
-
-  nuisPriorName:   name of prior for the nnuisance. This is often expressed as constraint term in the global model
-  It is needed only when using the HybridCalculator (type=1)
-  If not given by default the prior pdf from ModelConfig is used. 
-
-  extra options are available as global paramwters of the macro. They major ones are: 
-
-  plotHypoTestResult   plot result of tests at each point (TS distributions) (defauly is true)
-  useProof             use Proof   (default is true) 
-  writeResult          write result of scan (default is true)
-  rebuild              rebuild scan for expected limits (require extra toys) (default is false)
-  generateBinned       generate binned data sets for toys (default is false) - be careful not to activate with 
-  a too large (>=3) number of observables 
-  nToyRatio            ratio of S+B/B toys (default is 2)
-    
-
-*/
-
-   if (w == NULL) {
-     std::cerr << "ERROR : input workspace is NULL - Exit." << std::endl;
-     return 0;
-   }
-
-   HypoTestTool calc;
-
-   // set parameters
-   /*
-   calc.SetParameter("PlotHypoTestResult", plotHypoTestResult);
-   calc.SetParameter("WriteResult", writeResult);
-   calc.SetParameter("Optimize", optimize);
-   calc.SetParameter("UseVectorStore", useVectorStore);
-   calc.SetParameter("GenerateBinned", generateBinned);
-   calc.SetParameter("NToysRatio", nToysRatio);
-   calc.SetParameter("MaxPOI", maxPOI);
-   calc.SetParameter("UseProof", useProof);
-   calc.SetParameter("Nworkers", nworkers);
-   calc.SetParameter("Rebuild", rebuild);
-   calc.SetParameter("NToyToRebuild", nToyToRebuild);
-   calc.SetParameter("MassValue", massValue.c_str());
-   calc.SetParameter("MinimizerType", minimizerType.c_str());
-   calc.SetParameter("PrintLevel", printLevel);
-   */
-
-   HypoTestResult * r = 0;  
-   r = calc.RunHypoTest(w, doUL, modelSBName, modelBName,
-			dataName, calculatorType, testStatType, 
-			ntoys, useNumberCounting, nuisPriorName );    
-   if (!r) { 
-     std::cerr << "Error running the HypoTestCalculator - Exit " << std::endl;
-     return 0;          
-   }
-
-   if (doUL) { r->SetBackgroundAsAlt(); }
-
-   // set p-value and sensitivity
-  
-   return r;
-}
-
-
-//________________________________________________________________________________________________
-void 
-RooStats::AnalyzeHypoTestInverterResult(const char* infile , 
-					const char* resultName ,
-					int calculatorType ,
-					int testStatType , 
-					bool useCLs ,  
-					int npoints,
-					const char* outfilePrefix,
-					const char* plotType
-					)
-{
-
-   TString fileName(infile);
-   if (fileName.IsNull()) { 
-      std::cerr << "ERROR : Input filename is empty. Exit." << std::endl;
-      return;
-   }
-  
-   // open file and check if input file exists
-   TFile * file = TFile::Open(fileName); 
-  
-   // if input file was specified but not found, quit
-   if(!file && !TString(infile).IsNull()){
-      cout <<"file " << fileName << " not found" << endl;
-      return;
-   } 
-  
-   if(!file){
-      // if it is still not there, then we can't continue
-      cout << "Not able to run hist2workspace to create example input" <<endl;
-      return;
-   }
-  
-   HypoTestInverterResult * r = 0;  
-   // case workspace is not present look for the inverter result
-   std::cout << "Reading an HypoTestInverterResult with name " << resultName << " from file " << fileName << std::endl;
-   r = dynamic_cast<HypoTestInverterResult*>( file->Get(resultName) ); //
-   if (!r) { 
-     std::cerr << "File " << fileName << " does not contain a workspace or an HypoTestInverterResult - Exit " 
-	       << std::endl;
-     file->ls();
-     return; 
-   }
-
-   return RooStats::AnalyzeHypoTestInverterResult( r, calculatorType, testStatType, useCLs, npoints, outfilePrefix, plotType );
-}
-
-
-//________________________________________________________________________________________________
-void 
-RooStats::AnalyzeHypoTestInverterResult(RooStats::HypoTestInverterResult* r, 
-					int calculatorType,
-					int testStatType , 
-					bool useCLs ,  
-					int npoints,
-					const char* outfilePrefix,
-					const char* plotType
-					) 
-{
-   if (!r) { 
-     std::cerr << "No valid HypoTestInverterResult provided - Exit " << std::endl;
-     return; 
-   }
-
-   //////////////////////////////////////////////////////////////////////////////////////////
-
-   HypoTestTool calc;
-
-   // set parameters
-   /*
-   calc.SetParameter("PlotHypoTestResult", plotHypoTestResult);
-   calc.SetParameter("WriteResult", writeResult);
-   calc.SetParameter("Optimize", optimize);
-   calc.SetParameter("UseVectorStore", useVectorStore);
-   calc.SetParameter("GenerateBinned", generateBinned);
-   calc.SetParameter("NToysRatio", nToysRatio);
-   calc.SetParameter("MaxPOI", maxPOI);
-   calc.SetParameter("UseProof", useProof);
-   calc.SetParameter("Nworkers", nworkers);
-   calc.SetParameter("Rebuild", rebuild);
-   calc.SetParameter("NToyToRebuild", nToyToRebuild);
-   calc.SetParameter("MassValue", massValue.c_str());
-   calc.SetParameter("MinimizerType", minimizerType.c_str());
-   calc.SetParameter("PrintLevel", printLevel);
-   */
-
-   calc.AnalyzeResult( r, calculatorType, testStatType, useCLs, npoints, outfilePrefix, plotType );
-  
-   return;
-}
-
-
-//________________________________________________________________________________________________
-RooStats::HypoTestInverterResult* 
-RooStats::MakeUpperLimitPlot(const char* fileprefix,
-			     RooWorkspace* w,
-			     int calculatorType ,
-			     int testStatType , 
-			     int ntoys,
-			     bool useCLs ,  
-			     int npoints )
-{
-  /// first asumptotic limit, to get a quick but reliable estimate for the upper limit
-  /// dynamic evaluation of ranges
-  RooStats::HypoTestInverterResult* hypo = RooStats::DoHypoTestInversion(w,1,2,testStatType,useCLs,20,0,-1);  
-  
-  /// then reevaluate with proper settings
-  if ( hypo!=0 ) { 
-    double eul2 = 1.10 * hypo->GetExpectedUpperLimit(2);
-    delete hypo; hypo=0;
-    //cout << "INFO grepme : " << m_nToys << " " << m_calcType << " " << m_testStatType << " " << m_useCLs << " " << m_nPoints << endl;
-    hypo = RooStats::DoHypoTestInversion(w,ntoys,calculatorType,testStatType,useCLs,npoints,0,eul2); 
-  }
-  
-  /// store ul as nice plot ..
-  if ( hypo!=0 ) { 
-    RooStats::AnalyzeHypoTestInverterResult( hypo,calculatorType,testStatType,useCLs,npoints,fileprefix,".eps") ;
-  }
-
-  return hypo;
-}
-
-
-
-//________________________________________________________________________________________________
-LimitResult 
-RooStats::get_Pvalue( const RooStats::HypoTestInverterResult* fResults )
-{
-  // MB : code taken from HypoTestInverterPlot::MakeExpectedPlot()
-
-  double nsig1(1.0);
-  double nsig2(2.0);
-  
-  const int nEntries = fResults->ArraySize();
-
-  //std::cout << "---------------------------------> nEntries " << nEntries << std::endl;
-  
-  nsig1 = std::abs(nsig1);
-  nsig2 = std::abs(nsig2);
-  //bool doFirstBand = (nsig1 > 0);
-  //bool doSecondBand = (nsig2 > nsig1);
-  
-  // sort the arrays based on the x values
-  std::vector<unsigned int> index(nEntries);
-  //TMath::SortItr(fResults->fXValues.begin(), fResults->fXValues.end(), index.begin(), false);
-  index[0] = 0; // MB : assume only one entry - HACK
-   
-  double p[5]; 
-  double q[5];
-  std::vector<double> qv;
-  qv.resize(11,-1.0);
-
-  LimitResult upperLimitResult;
-
-  if (nEntries>1){
-
-    RooStats::HypoTestInverterResult* myfResults = const_cast<RooStats::HypoTestInverterResult*>(fResults);
-    double upperLimit = myfResults->UpperLimit();
-    double ulError = myfResults->UpperLimitEstimatedError();
-    
-    std::cout << "The computed upper limit is: " << upperLimit << " +/- " << ulError << std::endl;
-    std::cout << " expected limit (median) " << myfResults->GetExpectedUpperLimit(0) << std::endl;
-    std::cout << " expected limit (-1 sig) " << myfResults->GetExpectedUpperLimit(-1) << std::endl;
-    std::cout << " expected limit (+1 sig) " << myfResults->GetExpectedUpperLimit(1) << std::endl;
-    std::cout << " expected limit (-2 sig) " << myfResults->GetExpectedUpperLimit(-2) << std::endl;
-    std::cout << " expected limit (+2 sig) " << myfResults->GetExpectedUpperLimit(2) << std::endl;
-    
-    upperLimitResult.SetUpperLimit(myfResults->UpperLimit());
-    upperLimitResult.SetUpperLimitEstimatedError(myfResults->UpperLimitEstimatedError());
-    upperLimitResult.SetExpectedUpperLimit(myfResults->GetExpectedUpperLimit(0));
-    upperLimitResult.SetExpectedUpperLimitPlus1Sig(myfResults->GetExpectedUpperLimit(1));
-    upperLimitResult.SetExpectedUpperLimitPlus2Sig(myfResults->GetExpectedUpperLimit(2));
-    upperLimitResult.SetExpectedUpperLimitMinus1Sig(myfResults->GetExpectedUpperLimit(-1));
-    upperLimitResult.SetExpectedUpperLimitMinus2Sig(myfResults->GetExpectedUpperLimit(-2));
-  }
-  else{
-    //std::cout << "StatTools::get_pValue INFO: No upper limit is calcuated" << std::endl;
-  }
-
-  if (nEntries!=1) { 
-    return upperLimitResult;   // MPB: this is called after running HistFitter with -l option --> attached upper limit results or returm call to default constructor
-  }
-
-  ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-  // Only 1 HypoTestResult from now on ...
-  ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-  RooStats::HypoTestResult* oneresult = fResults->GetResult(0) ;
-
-  p[0] = ROOT::Math::normal_cdf(-nsig2);
-  p[1] = ROOT::Math::normal_cdf(-nsig1);
-  p[2] = 0.5;
-  p[3] = ROOT::Math::normal_cdf(nsig1);
-  p[4] = ROOT::Math::normal_cdf(nsig2);
-  
-  bool resultIsAsymptotic = ( !fResults->GetNullTestStatDist(0) && !fResults->GetAltTestStatDist(0) ); 
-  
-  for (int j=0; j<nEntries; ++j) 
-  {
-    int i = index[j]; // i is the order index 
-    SamplingDistribution * s = fResults->GetExpectedPValueDist(i);
-    if (!s)  break; 
-    const std::vector<double> & values = s->GetSamplingDistribution();
-
-    /// expected p-values
-    // special case for asymptotic results (cannot use TMath::quantile in that case)
-    if (resultIsAsymptotic) { 
-      double maxSigma = 5; // == HypoTestInverterResult::fgAsymptoticMaxSigma; // MB: HACK
-      double dsig = 2.*maxSigma / (values.size() -1) ;         
-      int  i0 = (int) TMath::Floor ( ( -nsig2 + maxSigma )/dsig + 0.5 );
-      int  i1 = (int) TMath::Floor ( ( -nsig1 + maxSigma )/dsig + 0.5 );
-      int  i2 = (int) TMath::Floor ( ( maxSigma )/dsig + 0.5 );
-      int  i3 = (int) TMath::Floor ( ( nsig1 + maxSigma )/dsig + 0.5 );
-      int  i4 = (int) TMath::Floor ( ( nsig2 + maxSigma )/dsig + 0.5 );
-      q[0] = values[i0];
-      q[1] = values[i1];
-      q[2] = values[i2];
-      q[3] = values[i3];
-      q[4] = values[i4];
-    } else { 
-      double * x = const_cast<double *>( &values[0] ); // need to change TMath::Quantiles
-      TMath::Quantiles(values.size(), 5, x, q, p, false);
+        myTree->Fill();  
     }
 
-    /// store useful quantities for reuse later ...
-    /// http://root.cern.ch/root/html532/src/RooStats__HypoTestInverterPlot.cxx.html#197
-    for (int j=0; j<5; ++j) { qv[j]=q[j]; }
+    return myTree;
+}
 
-    delete s;
-  }
+//________________________________________________________________________________________________
+RooStats::HypoTestInverterResult* RooStats::DoHypoTestInversion(RooWorkspace* w,
+        int ntoys,
+        int calculatorType ,
+        int testStatType , 
+        bool useCLs ,  
+        int npoints ,   
+        double poimin ,  
+        double poimax , 
+        bool doAnalyze,
+        bool useNumberCounting ,
+        const char * modelSBName ,
+        const char * modelBName,
+        const char * dataName ,                 
+        const char * nuisPriorName )
+{
+    /*
+       Other Parameter to pass in tutorial
+       apart from standard for filename, ws, modelconfig and data
 
-  oneresult->Print();
+       type = 0 Freq calculator 
+       type = 1 Hybrid calculator
+       type = 2 Asymptotic calculator  
+       type = 3 Asymptotic calculator using nominal Asimov data sets (not using fitted parameter values but nominal ones)
 
-  /// observed p-values
-  qv[5]  = fResults->CLs(0) ; //
-  qv[6]  = fResults->CLsError(0) ; //
-  qv[7]  = fResults->CLb(0) ; //
-  qv[8]  = fResults->CLbError(0) ; //
-  qv[9]  = fResults->CLsplusb(0) ; //
-  qv[10] = fResults->CLsplusbError(0) ; //
-  double p0 = oneresult->NullPValue();
-    
-  //jlorenz: dirty hack in order to avoid 0.000000 values
-  for (int k=0; k<=10; k++) { if (qv[k] < 0.000001) { qv[k] = 0.000001; } }
-  
-  /// And pass on to limitresult object
-  LimitResult result;
-  result.SetP0(     p0 );
-  result.SetP1(     qv[9] );
-  result.SetCLs(    qv[5] );
-  result.SetCLsexp( qv[2] );
-  result.SetCLsu1S( qv[3] );
-  result.SetCLsd1S( qv[1] );
-  result.SetCLsu2S( qv[4] );
-  result.SetCLsd2S( qv[0] );  
+       testStatType = 0 LEP
+       = 1 Tevatron 
+       = 2 Profile Likelihood
+       = 3 Profile Likelihood one sided (i.e. = 0 if mu < mu_hat)
 
-  return result;
+       useCLs          scan for CLs (otherwise for CLs+b)    
+
+npoints:        number of points to scan , for autoscan set npoints = -1 
+
+poimin,poimax:  min/max value to scan in case of fixed scans 
+(if min > max, try to find automatically)                           
+
+ntoys:         number of toys to use 
+
+useNumberCounting:  set to true when using number counting events 
+
+nuisPriorName:   name of prior for the nnuisance. This is often expressed as constraint term in the global model
+It is needed only when using the HybridCalculator (type=1)
+If not given by default the prior pdf from ModelConfig is used. 
+
+extra options are available as global paramwters of the macro. They major ones are: 
+
+plotHypoTestResult   plot result of tests at each point (TS distributions) (defauly is true)
+useProof             use Proof   (default is true) 
+writeResult          write result of scan (default is true)
+rebuild              rebuild scan for expected limits (require extra toys) (default is false)
+generateBinned       generate binned data sets for toys (default is false) - be careful not to activate with 
+a too large (>=3) number of observables 
+nToyRatio            ratio of S+B/B toys (default is 2)
+*/
+
+    if (w == NULL) {
+        std::cerr << "ERROR : input workspace is NULL - Exit." << std::endl;
+        return 0;
+    }
+
+    HypoTestTool calc;
+
+    // set parameters
+    /*
+       calc.SetParameter("PlotHypoTestResult", plotHypoTestResult);
+       calc.SetParameter("WriteResult", writeResult);
+       calc.SetParameter("Optimize", optimize);
+       calc.SetParameter("UseVectorStore", useVectorStore);
+       calc.SetParameter("GenerateBinned", generateBinned);
+       calc.SetParameter("NToysRatio", nToysRatio);
+       calc.SetParameter("MaxPOI", maxPOI);
+       calc.SetParameter("UseProof", useProof);
+       calc.SetParameter("NWorkers", nworkers);
+       calc.SetParameter("Rebuild", rebuild);
+       calc.SetParameter("NToyToRebuild", nToyToRebuild);
+       calc.SetParameter("MassValue", massValue.c_str());
+       calc.SetParameter("MinimizerType", minimizerType.c_str());
+       calc.SetParameter("PrintLevel", printLevel);
+       calc.SetParameter("InitialFit",initialFit);
+       calc.SetParameter("ResultFileName",resultFileName);
+       calc.SetParameter("RandomSeed",randomSeed);
+       */
+
+    HypoTestInverterResult* r = 0;  
+    r = calc.RunHypoTestInverter( w, modelSBName, modelBName,
+            dataName, calculatorType, testStatType, useCLs,
+            npoints, poimin, poimax,  
+            ntoys, useNumberCounting, nuisPriorName );    
+    if (!r) { 
+        std::cerr << ">>> Error running the HypoTestInverter - Exit " << std::endl;
+        return 0;          
+    }
+
+    if (doAnalyze) 
+        calc.AnalyzeResult( r, calculatorType, testStatType, useCLs, npoints, w->GetName() );
+
+    return r;
+}
+
+//________________________________________________________________________________________________
+RooStats::HypoTestResult* RooStats::DoHypoTest(RooWorkspace* w, 
+        bool doUL,
+        int ntoys,
+        int calculatorType,
+        int testStatType, 
+        const char * modelSBName ,
+        const char * modelBName ,
+        const char * dataName ,                 
+        bool useNumberCounting ,
+        const char * nuisPriorName ) {
+    /*
+       Other Parameter to pass in tutorial
+       apart from standard for filename, ws, modelconfig and data
+
+       type = 0 Freq calculator 
+       type = 1 Hybrid calculator
+       type = 2 Asymptotic calculator  
+
+       testStatType = 0 LEP
+       = 1 Tevatron 
+       = 2 Profile Likelihood
+       = 3 Profile Likelihood one sided (i.e. = 0 if mu < mu_hat)
+
+       useCLs          scan for CLs (otherwise for CLs+b)    
+
+ntoys:         number of toys to use 
+
+useNumberCounting:  set to true when using number counting events 
+
+nuisPriorName:   name of prior for the nnuisance. This is often expressed as constraint term in the global model
+It is needed only when using the HybridCalculator (type=1)
+If not given by default the prior pdf from ModelConfig is used. 
+
+extra options are available as global paramwters of the macro. They major ones are: 
+
+plotHypoTestResult   plot result of tests at each point (TS distributions) (defauly is true)
+useProof             use Proof   (default is true) 
+writeResult          write result of scan (default is true)
+rebuild              rebuild scan for expected limits (require extra toys) (default is false)
+generateBinned       generate binned data sets for toys (default is false) - be careful not to activate with 
+a too large (>=3) number of observables 
+nToyRatio            ratio of S+B/B toys (default is 2)
+
+
+*/
+
+    if (w == NULL) {
+        std::cerr << "ERROR : input workspace is NULL - Exit." << std::endl;
+        return 0;
+    }
+
+    HypoTestTool calc;
+
+    // set parameters
+    /*
+       calc.SetParameter("PlotHypoTestResult", plotHypoTestResult);
+       calc.SetParameter("WriteResult", writeResult);
+       calc.SetParameter("Optimize", optimize);
+       calc.SetParameter("UseVectorStore", useVectorStore);
+       calc.SetParameter("GenerateBinned", generateBinned);
+       calc.SetParameter("NToysRatio", nToysRatio);
+       calc.SetParameter("MaxPOI", maxPOI);
+       calc.SetParameter("UseProof", useProof);
+       calc.SetParameter("Nworkers", nworkers);
+       calc.SetParameter("Rebuild", rebuild);
+       calc.SetParameter("NToyToRebuild", nToyToRebuild);
+       calc.SetParameter("MassValue", massValue.c_str());
+       calc.SetParameter("MinimizerType", minimizerType.c_str());
+       calc.SetParameter("PrintLevel", printLevel);
+       */
+
+    HypoTestResult * r = 0;  
+    r = calc.RunHypoTest(w, doUL, modelSBName, modelBName,
+            dataName, calculatorType, testStatType, 
+            ntoys, useNumberCounting, nuisPriorName );    
+    if (!r) { 
+        std::cerr << "Error running the HypoTestCalculator - Exit " << std::endl;
+        return 0;          
+    }
+
+    if (doUL) { 
+        r->SetBackgroundAsAlt(); 
+    }
+
+    // set p-value and sensitivity
+
+    return r;
+}
+
+//________________________________________________________________________________________________
+void RooStats::AnalyzeHypoTestInverterResult(const char* infile , 
+        const char* resultName ,
+        int calculatorType ,
+        int testStatType , 
+        bool useCLs ,  
+        int npoints,
+        const char* outfilePrefix,
+        const char* plotType
+        ) {
+
+    TString fileName(infile);
+    if (fileName.IsNull()) { 
+        std::cerr << "ERROR : Input filename is empty. Exit." << std::endl;
+        return;
+    }
+
+    // open file and check if input file exists
+    TFile * file = TFile::Open(fileName); 
+
+    // if input file was specified but not found, quit
+    if(!file && !TString(infile).IsNull()){
+        cout << "ERROR: file " << fileName << " not found" << endl;
+        return;
+    } 
+
+    if(!file){
+        // if it is still not there, then we can't continue
+        cout << "ERROR: Not able to run hist2workspace to create example input" <<endl;
+        return;
+    }
+
+    HypoTestInverterResult * r = 0;  
+    // case workspace is not present look for the inverter result
+    std::cout << "INFO: Reading an HypoTestInverterResult with name " << resultName << " from file " << fileName << std::endl;
+    r = dynamic_cast<HypoTestInverterResult*>( file->Get(resultName) ); //
+    if (!r) { 
+        std::cerr << "ERROR: File " << fileName << " does not contain a workspace or an HypoTestInverterResult - Exit " 
+            << std::endl;
+        file->ls();
+        return; 
+    }
+
+    return RooStats::AnalyzeHypoTestInverterResult( r, calculatorType, testStatType, useCLs, npoints, outfilePrefix, plotType );
 }
 
 
 //________________________________________________________________________________________________
-LimitResult
-RooStats::get_Pvalue(     RooWorkspace* w,
-			  bool doUL, // = true, // true = exclusion, false = discovery
-			  int ntoys, //=1000,
-                          int calculatorType, // = 0,
-                          int testStatType, // = 3,  
-                          const char * modelSBName, // = "ModelConfig",
-                          const char * modelBName, // = "",
-                          const char * dataName, // = "obsData",
-                          bool useCLs, // = true ,   
-                          bool useNumberCounting, // = false,
-                          const char * nuisPriorName) // = 0 
+void RooStats::AnalyzeHypoTestInverterResult(RooStats::HypoTestInverterResult* r, 
+        int calculatorType,
+        int testStatType , 
+        bool useCLs ,  
+        int npoints,
+        const char* outfilePrefix,
+        const char* plotType
+        ) {
+    if (!r) { 
+        std::cerr << "ERROR: No valid HypoTestInverterResult provided - Exit " << std::endl;
+        return; 
+    }
+
+    //////////////////////////////////////////////////////////////////////////////////////////
+
+    HypoTestTool calc;
+
+    // set parameters
+    /*
+       calc.SetParameter("PlotHypoTestResult", plotHypoTestResult);
+       calc.SetParameter("WriteResult", writeResult);
+       calc.SetParameter("Optimize", optimize);
+       calc.SetParameter("UseVectorStore", useVectorStore);
+       calc.SetParameter("GenerateBinned", generateBinned);
+       calc.SetParameter("NToysRatio", nToysRatio);
+       calc.SetParameter("MaxPOI", maxPOI);
+       calc.SetParameter("UseProof", useProof);
+       calc.SetParameter("Nworkers", nworkers);
+       calc.SetParameter("Rebuild", rebuild);
+       calc.SetParameter("NToyToRebuild", nToyToRebuild);
+       calc.SetParameter("MassValue", massValue.c_str());
+       calc.SetParameter("MinimizerType", minimizerType.c_str());
+       calc.SetParameter("PrintLevel", printLevel);
+       */
+
+    calc.AnalyzeResult( r, calculatorType, testStatType, useCLs, npoints, outfilePrefix, plotType );
+
+    return;
+}
+
+//________________________________________________________________________________________________
+RooStats::HypoTestInverterResult* RooStats::MakeUpperLimitPlot(const char* fileprefix,
+        RooWorkspace* w,
+        int calculatorType ,
+        int testStatType , 
+        int ntoys,
+        bool useCLs ,  
+        int npoints ) {
+    /// first asumptotic limit, to get a quick but reliable estimate for the upper limit
+    /// dynamic evaluation of ranges
+    RooStats::HypoTestInverterResult* hypo = RooStats::DoHypoTestInversion(w,1,2,testStatType,useCLs,20,0,-1);  
+
+    /// then reevaluate with proper settings
+    if ( hypo!=0 ) { 
+        double eul2 = 1.10 * hypo->GetExpectedUpperLimit(2);
+        delete hypo; hypo=0;
+        //cout << "INFO grepme : " << m_nToys << " " << m_calcType << " " << m_testStatType << " " << m_useCLs << " " << m_nPoints << endl;
+        hypo = RooStats::DoHypoTestInversion(w,ntoys,calculatorType,testStatType,useCLs,npoints,0,eul2); 
+    }
+
+    /// store ul as nice plot ..
+    if ( hypo!=0 ) { 
+        RooStats::AnalyzeHypoTestInverterResult( hypo,calculatorType,testStatType,useCLs,npoints,fileprefix,".eps") ;
+    }
+
+    return hypo;
+}
+
+//________________________________________________________________________________________________
+LimitResult RooStats::get_Pvalue( const RooStats::HypoTestInverterResult* fResults ) {
+    // MB : code taken from HypoTestInverterPlot::MakeExpectedPlot()
+
+    double nsig1(1.0);
+    double nsig2(2.0);
+
+    const int nEntries = fResults->ArraySize();
+
+    //std::cout << "---------------------------------> nEntries " << nEntries << std::endl;
+
+    nsig1 = std::abs(nsig1);
+    nsig2 = std::abs(nsig2);
+    //bool doFirstBand = (nsig1 > 0);
+    //bool doSecondBand = (nsig2 > nsig1);
+
+    // sort the arrays based on the x values
+    std::vector<unsigned int> index(nEntries);
+    //TMath::SortItr(fResults->fXValues.begin(), fResults->fXValues.end(), index.begin(), false);
+    index[0] = 0; // MB : assume only one entry - HACK
+
+    double p[5]; 
+    double q[5];
+    std::vector<double> qv;
+    qv.resize(11,-1.0);
+
+    LimitResult upperLimitResult;
+
+    if (nEntries>1){
+
+        RooStats::HypoTestInverterResult* myfResults = const_cast<RooStats::HypoTestInverterResult*>(fResults);
+        double upperLimit = myfResults->UpperLimit();
+        double ulError = myfResults->UpperLimitEstimatedError();
+
+        std::cout << "The computed upper limit is: " << upperLimit << " +/- " << ulError << std::endl;
+        std::cout << " expected limit (median) " << myfResults->GetExpectedUpperLimit(0) << std::endl;
+        std::cout << " expected limit (-1 sig) " << myfResults->GetExpectedUpperLimit(-1) << std::endl;
+        std::cout << " expected limit (+1 sig) " << myfResults->GetExpectedUpperLimit(1) << std::endl;
+        std::cout << " expected limit (-2 sig) " << myfResults->GetExpectedUpperLimit(-2) << std::endl;
+        std::cout << " expected limit (+2 sig) " << myfResults->GetExpectedUpperLimit(2) << std::endl;
+
+        upperLimitResult.SetUpperLimit(myfResults->UpperLimit());
+        upperLimitResult.SetUpperLimitEstimatedError(myfResults->UpperLimitEstimatedError());
+        upperLimitResult.SetExpectedUpperLimit(myfResults->GetExpectedUpperLimit(0));
+        upperLimitResult.SetExpectedUpperLimitPlus1Sig(myfResults->GetExpectedUpperLimit(1));
+        upperLimitResult.SetExpectedUpperLimitPlus2Sig(myfResults->GetExpectedUpperLimit(2));
+        upperLimitResult.SetExpectedUpperLimitMinus1Sig(myfResults->GetExpectedUpperLimit(-1));
+        upperLimitResult.SetExpectedUpperLimitMinus2Sig(myfResults->GetExpectedUpperLimit(-2));
+    }
+    else{
+        //std::cout << "StatTools::get_pValue INFO: No upper limit is calcuated" << std::endl;
+    }
+
+    if (nEntries!=1) { 
+        return upperLimitResult;   // MPB: this is called after running HistFitter with -l option --> attached upper limit results or returm call to default constructor
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // Only 1 HypoTestResult from now on ...
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    RooStats::HypoTestResult* oneresult = fResults->GetResult(0) ;
+
+    p[0] = ROOT::Math::normal_cdf(-nsig2);
+    p[1] = ROOT::Math::normal_cdf(-nsig1);
+    p[2] = 0.5;
+    p[3] = ROOT::Math::normal_cdf(nsig1);
+    p[4] = ROOT::Math::normal_cdf(nsig2);
+
+    bool resultIsAsymptotic = ( !fResults->GetNullTestStatDist(0) && !fResults->GetAltTestStatDist(0) ); 
+
+    for (int j=0; j<nEntries; ++j) {
+        int i = index[j]; // i is the order index 
+        SamplingDistribution * s = fResults->GetExpectedPValueDist(i);
+        if (!s)  
+            break; 
+        const std::vector<double> & values = s->GetSamplingDistribution();
+
+        /// expected p-values
+        // special case for asymptotic results (cannot use TMath::quantile in that case)
+        if (resultIsAsymptotic) { 
+            double maxSigma = 5; // == HypoTestInverterResult::fgAsymptoticMaxSigma; // MB: HACK
+            double dsig = 2.*maxSigma / (values.size() -1) ;         
+            int  i0 = (int) TMath::Floor ( ( -nsig2 + maxSigma )/dsig + 0.5 );
+            int  i1 = (int) TMath::Floor ( ( -nsig1 + maxSigma )/dsig + 0.5 );
+            int  i2 = (int) TMath::Floor ( ( maxSigma )/dsig + 0.5 );
+            int  i3 = (int) TMath::Floor ( ( nsig1 + maxSigma )/dsig + 0.5 );
+            int  i4 = (int) TMath::Floor ( ( nsig2 + maxSigma )/dsig + 0.5 );
+            q[0] = values[i0];
+            q[1] = values[i1];
+            q[2] = values[i2];
+            q[3] = values[i3];
+            q[4] = values[i4];
+        } else { 
+            double * x = const_cast<double *>( &values[0] ); // need to change TMath::Quantiles
+            TMath::Quantiles(values.size(), 5, x, q, p, false);
+        }
+
+        /// store useful quantities for reuse later ...
+        /// http://root.cern.ch/root/html532/src/RooStats__HypoTestInverterPlot.cxx.html#197
+        for (int j=0; j<5; ++j) { 
+            qv[j]=q[j]; 
+        }
+
+        delete s;
+    }
+
+    oneresult->Print();
+
+    /// observed p-values
+    qv[5]  = fResults->CLs(0) ; //
+    qv[6]  = fResults->CLsError(0) ; //
+    qv[7]  = fResults->CLb(0) ; //
+    qv[8]  = fResults->CLbError(0) ; //
+    qv[9]  = fResults->CLsplusb(0) ; //
+    qv[10] = fResults->CLsplusbError(0) ; //
+    double p0 = oneresult->NullPValue();
+
+    //jlorenz: dirty hack in order to avoid 0.000000 values
+    for (int k=0; k<=10; k++) { 
+        if (qv[k] < 0.000001) { 
+            qv[k] = 0.000001; 
+        } 
+    }
+
+    /// And pass on to limitresult object
+    LimitResult result;
+    result.SetP0(     p0 );
+    result.SetP1(     qv[9] );
+    result.SetCLs(    qv[5] );
+    result.SetCLsexp( qv[2] );
+    result.SetCLsu1S( qv[3] );
+    result.SetCLsd1S( qv[1] );
+    result.SetCLsu2S( qv[4] );
+    result.SetCLsd2S( qv[0] );  
+
+    return result;
+}
+
+//________________________________________________________________________________________________
+LimitResult RooStats::get_Pvalue(     RooWorkspace* w,
+        bool doUL, // = true, // true = exclusion, false = discovery
+        int ntoys, //=1000,
+        int calculatorType, // = 0,
+        int testStatType, // = 3,  
+        const char * modelSBName, // = "ModelConfig",
+        const char * modelBName, // = "",
+        const char * dataName, // = "obsData",
+        bool useCLs, // = true ,   
+        bool useNumberCounting, // = false,
+        const char * nuisPriorName) // = 0  
 {
-  LimitResult lres;
+    LimitResult lres;
 
-  double muVal = ( doUL ? 1.0 : 0.0 );
-  
-  if (doUL) { // exclusion
+    double muVal = ( doUL ? 1.0 : 0.0 );
 
-    RooStats::HypoTestInverterResult* result = RooStats::DoHypoTestInversion(w, 
-									     ntoys, calculatorType, testStatType, 
-									     useCLs, 
-									     1, muVal, muVal, // test of single point only
-									     true, //false, // no plots 
-									     useNumberCounting, 
-									     modelSBName, modelBName,
-									     dataName, 
-									     nuisPriorName ) ;
-    if (result==0) { return lres; }    
-    lres = RooStats::get_Pvalue( result );
+    if (doUL) { // exclusion
+        RooStats::HypoTestInverterResult* result = RooStats::DoHypoTestInversion(w, 
+                ntoys, calculatorType, testStatType, 
+                useCLs, 
+                1, muVal, muVal, // test of single point only
+                true, //false, // no plots 
+                useNumberCounting, 
+                modelSBName, modelBName,
+                dataName, 
+                nuisPriorName ) ;
+        if (result==0) { return lres; }    
+        lres = RooStats::get_Pvalue( result );
 
-  } else {  // discovery
+    } else {  // discovery
+        if (testStatType==3) {
+            // MB: Hack, needed for ProfileLikeliHoodTestStat to work properly.
+            if (testStatType==3) { 
+                cout << ">>> WARNING: Discovery mode --> Need to change test-statistic type from one-sided to two-sided for RooStats to work."  
+                    << "                                (Note: test is still one-sided.)" 
+                    << endl; 
+                testStatType=2; 
+            } 
+        }
 
-    if (testStatType==3) {
-      // MB: Hack, needed for ProfileLikeliHoodTestStat to work properly.
-      if (testStatType==3) { 
-	cout << ">>> Warning: Discovery mode --> Need to change test-statistic type from one-sided to two-sided for RooStats to work."  
-	     << "                                (Note: test is still one-sided.)" 
-	     << endl; 
-	testStatType=2; 
-      } 
+        RooStats::HypoTestResult* result = RooStats::DoHypoTest(w,doUL,ntoys,calculatorType,testStatType,modelSBName,modelBName,dataName,
+                useNumberCounting,nuisPriorName);
+        if (result == 0) { 
+            return lres; 
+        }
+
+        lres = RooStats::get_Pvalue( result );
+    }
+
+    return lres;
+}
+
+//________________________________________________________________________________________________
+LimitResult RooStats::get_Pvalue( const RooStats::HypoTestResult* fResult ){
+    // MB : code taken from HypoTestInverterPlot::MakeExpectedPlot()
+
+    double nsig1(1.0);
+    double nsig2(2.0);
+
+    nsig1 = std::abs(nsig1);
+    nsig2 = std::abs(nsig2);
+
+    std::vector<double> qv;
+    qv.resize(11,-1.0);
+
+    LimitResult upperLimitResult;
+
+    /// observed p-values
+    qv[2]  = 0.5; // cls expected
+    qv[5]  = fResult->CLs() ; //
+    qv[6]  = fResult->CLsError() ; //
+    qv[7]  = fResult->CLb() ; //
+    qv[8]  = fResult->CLbError() ; //
+    qv[9]  = fResult->CLsplusb() ; //
+    qv[10] = fResult->CLsplusbError() ; //
+    double p0 = fResult->NullPValue(); //
+
+    //jlorenz: dirty hack in order to avoid 0.000000 values
+    for (int k=0; k<=10; k++) { 
+        if (qv[k] < 0.000001) {
+            qv[k] = 0.000001; 
+        } 
+    }
+
+    /// And pass on to limitresult object
+    LimitResult result;
+    result.SetP0(     p0 );
+    result.SetP1(     qv[9] );
+    result.SetCLs(    qv[5] );
+    result.SetCLsexp( qv[2] );
+    result.SetCLsu1S( qv[3] );
+    result.SetCLsd1S( qv[1] );
+    result.SetCLsu2S( qv[4] );
+    result.SetCLsd2S( qv[0] );  
+
+    return result;
+}
+
+//________________________________________________________________________________________________
+double RooStats::get_Presult(  RooWorkspace* w,
+        bool doUL, // = true, // true = exclusion, false = discovery
+        int ntoys, //=1000,
+        int calculatorType, // = 0,
+        int testStatType, // = 3,  
+        const char * modelSBName, // = "ModelConfig",
+        const char * modelBName, // = "",
+        const char * dataName, // = "obsData",
+        bool useCLs, // = true ,   
+        bool useNumberCounting, // = false,
+        const char * nuisPriorName) // = 0 
+{
+    double pvalue(-1.);
+
+    RooStats::HypoTestResult* result = RooStats::get_htr(w,doUL,ntoys,calculatorType,testStatType,modelSBName,modelBName,dataName,
+            useCLs,useNumberCounting,nuisPriorName);
+    if (result!=0) { result->Print(); }
+    else { return pvalue; }
+
+    // set relevant p-value
+    if (!doUL) { 
+        pvalue = result->NullPValue(); 
+    } else {
+        result->SetBackgroundAsAlt(); 
+        if (useCLs) { pvalue = result->CLs(); }
+        else        { pvalue = result->CLsplusb(); }
+    }
+
+    delete result;
+
+    return pvalue;
+}
+
+
+//________________________________________________________________________________________________
+RooStats::HypoTestResult* RooStats::get_htr(  RooWorkspace* w,
+        bool doUL, // = true, // true = exclusion, false = discovery
+        int ntoys, //=1000,
+        int calculatorType, // = 0,
+        int testStatType, // = 3,  
+        const char * modelSBName, // = "ModelConfig",
+        const char * modelBName, // = "",
+        const char * dataName, // = "obsData",
+        bool useCLs, // = true ,   
+        bool useNumberCounting, // = false,
+        const char * nuisPriorName) // = 0 
+{
+    if (!doUL && testStatType==3) {
+        // MB: Hack, needed for ProfileLikeliHoodTestStat to work properly.
+        if (testStatType==3) { 
+            cout << ">>> WARNING: Discovery mode --> Need to change test-statistic type from one-sided to two-sided for RooStats to work."  
+                << "                                (Note: test is still one-sided.)" 
+                << endl; 
+            testStatType=2; 
+        } 
     }
 
     RooStats::HypoTestResult* result = RooStats::DoHypoTest(w,doUL,ntoys,calculatorType,testStatType,modelSBName,modelBName,dataName,
-							    useNumberCounting,nuisPriorName);
-    if (result==0) { return lres; }
-    lres = RooStats::get_Pvalue( result );
-  }
-  
-  return lres;
-}
-
-
-//________________________________________________________________________________________________
-LimitResult 
-RooStats::get_Pvalue( const RooStats::HypoTestResult* fResult )
-{
-  // MB : code taken from HypoTestInverterPlot::MakeExpectedPlot()
-
-  double nsig1(1.0);
-  double nsig2(2.0);
-  
-  nsig1 = std::abs(nsig1);
-  nsig2 = std::abs(nsig2);
-  
-  std::vector<double> qv;
-  qv.resize(11,-1.0);
-
-  LimitResult upperLimitResult;
-
-  /// observed p-values
-  qv[2]  = 0.5; // cls expected
-  qv[5]  = fResult->CLs() ; //
-  qv[6]  = fResult->CLsError() ; //
-  qv[7]  = fResult->CLb() ; //
-  qv[8]  = fResult->CLbError() ; //
-  qv[9]  = fResult->CLsplusb() ; //
-  qv[10] = fResult->CLsplusbError() ; //
-  double p0 = fResult->NullPValue(); //
-    
-  //jlorenz: dirty hack in order to avoid 0.000000 values
-  for (int k=0; k<=10; k++) { if (qv[k] < 0.000001) { qv[k] = 0.000001; } }
-  
-  /// And pass on to limitresult object
-  LimitResult result;
-  result.SetP0(     p0 );
-  result.SetP1(     qv[9] );
-  result.SetCLs(    qv[5] );
-  result.SetCLsexp( qv[2] );
-  result.SetCLsu1S( qv[3] );
-  result.SetCLsd1S( qv[1] );
-  result.SetCLsu2S( qv[4] );
-  result.SetCLsd2S( qv[0] );  
-
-  return result;
-}
-
-
-//________________________________________________________________________________________________
-double 
-RooStats::get_Presult(  RooWorkspace* w,
-          		bool doUL, // = true, // true = exclusion, false = discovery
-            		int ntoys, //=1000,
-            		int calculatorType, // = 0,
-            		int testStatType, // = 3,  
-            		const char * modelSBName, // = "ModelConfig",
-            		const char * modelBName, // = "",
-            		const char * dataName, // = "obsData",
-            		bool useCLs, // = true ,   
-            		bool useNumberCounting, // = false,
-            		const char * nuisPriorName) // = 0 
-{
-   double pvalue(-1.);
-
-   RooStats::HypoTestResult* result = RooStats::get_htr(w,doUL,ntoys,calculatorType,testStatType,modelSBName,modelBName,dataName,
-							useCLs,useNumberCounting,nuisPriorName);
-   if (result!=0) { result->Print(); }
-   else { return pvalue; }
-
-   // set relevant p-value
-   if (!doUL)    { pvalue = result->NullPValue(); }
-   else {
-     result->SetBackgroundAsAlt(); 
-     if (useCLs) { pvalue = result->CLs(); }
-     else        { pvalue = result->CLsplusb(); }
-   }
-
-   delete result;
-   
-   return pvalue;
-}
-
-
-//________________________________________________________________________________________________
-RooStats::HypoTestResult*
-RooStats::get_htr(  RooWorkspace* w,
-		    bool doUL, // = true, // true = exclusion, false = discovery
-		    int ntoys, //=1000,
-		    int calculatorType, // = 0,
-		    int testStatType, // = 3,  
-		    const char * modelSBName, // = "ModelConfig",
-		    const char * modelBName, // = "",
-		    const char * dataName, // = "obsData",
-		    bool useCLs, // = true ,   
-		    bool useNumberCounting, // = false,
-		    const char * nuisPriorName) // = 0 
-{
-   if (!doUL && testStatType==3) {
-     // MB: Hack, needed for ProfileLikeliHoodTestStat to work properly.
-     if (testStatType==3) { 
-       cout << ">>> Warning: Discovery mode --> Need to change test-statistic type from one-sided to two-sided for RooStats to work."  
-            << "                                (Note: test is still one-sided.)" 
-	    << endl; 
-       testStatType=2; 
-     } 
-   }
-
-   RooStats::HypoTestResult* result = RooStats::DoHypoTest(w,doUL,ntoys,calculatorType,testStatType,modelSBName,modelBName,dataName,
-                                                           useNumberCounting,nuisPriorName);
-   return result;
+            useNumberCounting,nuisPriorName);
+    return result;
 }

@@ -50,7 +50,7 @@ namespace StatTools {
       Double_t (*fGetRootVal)( Double_t );
 
       // logger
-      mutable Combination::TMsgLogger m_logger;
+      mutable TMsgLogger m_logger;
 
       ClassDef(SRootFinder,0) // Root finding using Brents algorithm
    };

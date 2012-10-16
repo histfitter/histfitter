@@ -17,11 +17,7 @@ class RooWorkspace;
 class TTree;
 
 //________________________________________________________________________________________________
-namespace Combination 
-{
-   void resetFloatPars( const RooWorkspace* w, const RooFitResult* result );
-}
-
+void resetFloatPars( const RooWorkspace* w, const RooFitResult* result );
 
 //________________________________________________________________________________________________
 namespace Util 

@@ -1,3 +1,4 @@
+// vim: ts=4:sw=4
 /**********************************************************************************
  * Class  : TMsgLogger                                                            *
  *                                                                                *
@@ -5,8 +6,8 @@
  *      Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch> - CERN, Switzerland   *
  **********************************************************************************/
 
-#ifndef ROOT_Combination_TMsgLogger
-#define ROOT_Combination_TMsgLogger
+#ifndef ROOT_TMsgLogger
+#define ROOT_TMsgLogger
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -27,22 +28,19 @@
 
 // Local include(s):
 
-namespace Combination {
+// define outside of class to facilite access
+enum TMsgLevel { 
+  kVERBOSE = 1, 
+  kDEBUG   = 2,
+  kINFO    = 3,
+  kWARNING = 4,
+  kERROR   = 5,
+  kFATAL   = 6,
+  kALWAYS  = 7
+};
 
-   // define outside of class to facilite access
-   enum TMsgLevel { 
-      kVERBOSE = 1, 
-      kDEBUG   = 2,
-      kINFO    = 3,
-      kWARNING = 4,
-      kERROR   = 5,
-      kFATAL   = 6,
-      kALWAYS  = 7
-   };
-
-   class TMsgLogger : public std::ostringstream, public TObject {
-
-   public:
+class TMsgLogger : public std::ostringstream, public TObject {
+    public:
 
       TMsgLogger( const TObject* source, TMsgLevel minLevel = kINFO );
       TMsgLogger( const std::string& source, TMsgLevel minLevel = kINFO );
@@ -111,35 +109,29 @@ namespace Combination {
 
    }; // class TMsgLogger
 
-   inline TMsgLogger& TMsgLogger::operator<< ( TMsgLogger& (*_f)( TMsgLogger& ) ) 
-   {
-      return (_f)(*this);
-   }
+inline TMsgLogger& TMsgLogger::operator<< ( TMsgLogger& (*_f)( TMsgLogger& ) ) {
+    return (_f)(*this);
+}
 
-   inline TMsgLogger& TMsgLogger::operator<< ( std::ostream& (*_f)( std::ostream& ) ) 
-   {
-      (_f)(*this);
-      return *this;
-   }
+inline TMsgLogger& TMsgLogger::operator<< ( std::ostream& (*_f)( std::ostream& ) ) {
+    (_f)(*this);
+    return *this;
+}
 
-   inline TMsgLogger& TMsgLogger::operator<< ( std::ios& ( *_f )( std::ios& ) ) 
-   {
-      (_f)(*this);
-      return *this;
-   }
+inline TMsgLogger& TMsgLogger::operator<< ( std::ios& ( *_f )( std::ios& ) ) {
+    (_f)(*this);
+    return *this;
+}
 
-   inline TMsgLogger& TMsgLogger::operator<< ( TMsgLevel level ) 
-   {
-      m_activeLevel = level;
-      return *this;
-   }
+inline TMsgLogger& TMsgLogger::operator<< ( TMsgLevel level ) {
+    m_activeLevel = level;
+    return *this;
+}
 
    // Although the proper definition of "Endl" as a function pointer
    // would be nicer C++-wise, it introduces some "unused variable"
    // warnings so let's use the #define definition after all...
    // [ static TMsgLogger& ( *Endl )( TMsgLogger& ) = &TMsgLogger::endmsg; ]
 #define GEndl TMsgLogger::endmsg
-
-}
 
 #endif // Combination_TMsgLogger

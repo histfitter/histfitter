@@ -13,8 +13,6 @@
 #include "Riostream.h"
 #include "TMath.h"
 
-using namespace Combination;
-
 ClassImp(StatTools::SRootFinder)
 
 //_______________________________________________________________________

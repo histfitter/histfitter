@@ -1,3 +1,4 @@
+// vim: ts=4:sw=4
 /***************************************************************************** 
  * Project: RooFit                                                           * 
  *                                                                           * 
@@ -16,23 +17,23 @@
 
 ClassImp(Heaviside) 
 
-Heaviside::Heaviside(const char *name, const char *title, 
-                     RooAbsReal& _x,
-                     RooAbsReal& _f,
-                     RooAbsReal& _x0) :
-  RooAbsReal(name,title), 
-  x("x","x",this,_x),
-  f("f","f",this,_f),
-  x0("x0","x0",this,_x0)
+    Heaviside::Heaviside(const char *name, const char *title, 
+            RooAbsReal& _x,
+            RooAbsReal& _f,
+            RooAbsReal& _x0) :
+        RooAbsReal(name,title), 
+        x("x","x",this,_x),
+        f("f","f",this,_f),
+        x0("x0","x0",this,_x0)
 { 
 } 
 
 
 Heaviside::Heaviside(const Heaviside& other, const char* name) :  
-  RooAbsReal(other,name), 
-  x("x",this,other.x),
-  f("f",this,other.f),
-  x0("x0",this,other.x0)
+    RooAbsReal(other,name), 
+    x("x",this,other.x),
+    f("f",this,other.f),
+    x0("x0",this,other.x0)
 { 
 } 
 
@@ -40,8 +41,8 @@ Heaviside::Heaviside(const Heaviside& other, const char* name) :
 
 Double_t Heaviside::evaluate() const 
 { 
-  // ENTER EXPRESSION IN TERMS OF VARIABLE ARGUMENTS HERE 
-  return x < x0 ? 0 : f ; 
+    // ENTER EXPRESSION IN TERMS OF VARIABLE ARGUMENTS HERE 
+    return x < x0 ? 0 : f ; 
 } 
 
 

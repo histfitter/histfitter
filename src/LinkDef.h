@@ -23,13 +23,11 @@
 //////////////////////////////////////
 /// Functions from combination package
 
-#pragma link C++ namespace Combination;
+#pragma link C++ class TEasyFormula ;
 
-#pragma link C++ class Combination::TEasyFormula ;
-
-#pragma link C++ function Combination::GetMCStudy;
-#pragma link C++ function Combination::GetWorkspaceFromFile;
-#pragma link C++ function Combination::CollectAndWriteResultSet;
+#pragma link C++ function GetMCStudy;
+#pragma link C++ function GetWorkspaceFromFile;
+#pragma link C++ function CollectAndWriteResultSet;
 
 #pragma link C++ namespace StatTools;
 #pragma link C++ class StatTools::SRootFinder;
