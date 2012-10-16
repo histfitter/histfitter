@@ -1,4 +1,4 @@
-from ROOT import THStack,TLegend,TCanvas,TFile,std,TH1F
+from ROOT import THStack,TLegend,TCanvas,TFile,std,TH1F,TMsgLevel
 from ROOT import ConfigMgr,FitConfig #this module comes from gSystem.Load("libSusyFitter.so")
 from prepareHistos import TreePrepare,HistoPrepare
 from copy import deepcopy
@@ -428,6 +428,12 @@ class ConfigManager(object):
                         print "                                                 High: " + str(syst.treeHiName)
         return
 
+    def setLogLevel(self, lvl):
+        self.cppMgr.setLogLevel(lvl)
+
+    def writeLogMessage(self, lvl, message):
+        self.cppMgr.writeLogMessage(lvl, message)
+
     def setVerbose(self,lvl):
         self.verbose=lvl
         for tl in self.topLvls:
@@ -562,7 +568,7 @@ class ConfigManager(object):
             for (iChan,chan) in enumerate(topLvl.channels):
                 if chan.hasDiscovery:
                     continue
-                self.makeDicts(chan)
+                self.makeDicts(topLvl, chan)
         self.outputRoot()
         if self.executeHistFactory:
             topLvl.close()   #<--- this internally calls channel.close()
@@ -845,7 +851,7 @@ class ConfigManager(object):
                         self.hists[sam.blindedHistName].Add(self.hists[s.histoName])
         return
     
-    def makeDicts(self,chan):
+    def makeDicts(self,topLvl, chan):
         regString = ""
         for reg in chan.regions:
             regString += reg
@@ -944,6 +950,7 @@ class ConfigManager(object):
 
             self.canvasList.append(canDict[info])
             self.stackList.append(stackDict[info])
+    
     def outputRoot(self):
         outputRootFile=None
         if self.readFromTree:

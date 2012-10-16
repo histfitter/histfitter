@@ -8,8 +8,8 @@
 ##   -Alpgen Kt scale (weight-based)
 ##
 
-
 from configManager import configMgr
+from ROOT import TMsgLevel, TMsgLogger
 from ROOT import kBlack,kWhite,kGray,kRed,kPink,kMagenta,kViolet,kBlue,kAzure,kCyan,kTeal,kGreen,kSpring,kYellow,kOrange
 from configWriter import TopLevelXML,Measurement,ChannelXML,Sample
 from systematic import Systematic
@@ -20,6 +20,27 @@ gROOT.LoadMacro("./macros/AtlasStyle.C")
 import ROOT
 ROOT.SetAtlasStyle()
 
+# temporarily done here to match C++ - will be fixed in next iteration
+#// define outside of class to facilite access
+#enum TMsgLevel { 
+    #kVERBOSE = 1, 
+    #kDEBUG   = 2,
+    #kINFO    = 3,
+    #kWARNING = 4,
+    #kERROR   = 5,
+    #kFATAL   = 6,
+    #kALWAYS  = 7
+#};
+kVERBOSE=1
+kDEBUG=2
+kINFO=3
+kWARNING=4
+kERROR=5
+kFATAL=6
+kALWAYS=7
+
+configMgr.setLogLevel(1)
+configMgr.writeLogMessage(kWARNING, "warning from python")
 
 #-------------------------------
 # Parameters for hypothesis test
