@@ -37,7 +37,7 @@ static const char* SUFFIX = ": ";
 #define SUFFIX ": "
 #endif
 
-TMsgLevel TMsgLogger::m_minLevel = kINFO;
+TMsgLogger::TMsgLevel TMsgLogger::m_minLevel = TMsgLogger::kINFO;
 
 TMsgLogger::TMsgLogger( const TObject* source, TMsgLevel minLevel )
    : m_objSource( source ), 
@@ -187,7 +187,7 @@ TMsgLogger& TMsgLogger::endmsg( TMsgLogger& logger ) {
     return logger;
 }
 
-TMsgLevel TMsgLogger::MapLevel( const TString& instr ) const {
+TMsgLogger::TMsgLevel TMsgLogger::MapLevel( const TString& instr ) const {
     TString ins = instr; // need to copy
     ins.ToUpper();
 

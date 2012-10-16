@@ -47,7 +47,7 @@ Double_t StatTools::SRootFinder::Root( Double_t refValue  )
    Double_t fa = (*fGetRootVal)( a ) - refValue;
    Double_t fb = (*fGetRootVal)( b ) - refValue;
    if (fb*fa > 0) {
-      (*TMsgLogger::getInstance()) << kWARNING << "<Root> initial interval w/o root: "
+      (*TMsgLogger::getInstance()) << TMsgLogger::kWARNING << "<Root> initial interval w/o root: "
                << "(a=" << a << ", b=" << b << "),"
                << " (F(a) = " << (*fGetRootVal)( a ) 
                << ", F(b) = " << (*fGetRootVal)( b ) << "), "
@@ -114,7 +114,7 @@ Double_t StatTools::SRootFinder::Root( Double_t refValue  )
    }
 
    // Return our best guess if we run out of iterations
-   (*TMsgLogger::getInstance()) << kWARNING << "<Root> maximum iterations (" << fMaxIter 
+   (*TMsgLogger::getInstance()) << TMsgLogger::kWARNING << "<Root> maximum iterations (" << fMaxIter 
             << ") reached before convergence" << GEndl;
 
    return b;

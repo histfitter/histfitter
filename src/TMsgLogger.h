@@ -26,24 +26,25 @@
 #include "TObject.h"
 #include "TString.h"
 
-// Local include(s):
-
-// define outside of class to facilite access
-enum TMsgLevel { 
-    kVERBOSE = 1, 
-    kDEBUG   = 2,
-    kINFO    = 3,
-    kWARNING = 4,
-    kERROR   = 5,
-    kFATAL   = 6,
-    kALWAYS  = 7
-};
+//We use the full TMsgLogger::TMsgLevel syntax everywhere - the SusyFitter_Dict.C fails on template compilation otherwise
 
 class TMsgLogger : public std::ostringstream, public TObject {
+    public:
+        // this has to be here for python access, global enums confuse the dict 
+        enum TMsgLevel { 
+            kVERBOSE = 1, 
+            kDEBUG   = 2,
+            kINFO    = 3,
+            kWARNING = 4,
+            kERROR   = 5,
+            kFATAL   = 6,
+            kALWAYS  = 7
+        };
+
     private:
-        TMsgLogger( const TObject* source, TMsgLevel minLevel = kINFO );
-        TMsgLogger( const std::string& source, TMsgLevel minLevel = kINFO );
-        TMsgLogger( TMsgLevel minLevel = kINFO );
+        TMsgLogger( const TObject* source, TMsgLogger::TMsgLevel minLevel = kINFO );
+        TMsgLogger( const std::string& source, TMsgLogger::TMsgLevel minLevel = kINFO );
+        TMsgLogger( TMsgLogger::TMsgLevel minLevel = kINFO );
         TMsgLogger( const TMsgLogger& parent );
         virtual ~TMsgLogger();
 
@@ -65,10 +66,10 @@ class TMsgLogger : public std::ostringstream, public TObject {
         std::string GetPrintedSource() const;
         std::string GetFormattedSource() const;
 
-        TMsgLevel          GetMinLevel() const     { return m_minLevel; }
+        TMsgLogger::TMsgLevel          GetMinLevel() const     { return m_minLevel; }
         const std::string& GetMinLevelStr() const  { return m_levelMap.find( m_minLevel )->second; }
 
-        TMsgLevel   MapLevel( const TString& instr ) const;
+        TMsgLogger::TMsgLevel   MapLevel( const TString& instr ) const;
 
         // Needed for copying
         TMsgLogger& operator= ( const TMsgLogger& parent );
@@ -82,20 +83,21 @@ class TMsgLogger : public std::ostringstream, public TObject {
         TMsgLogger& operator<< ( std::ios& ( *_f )( std::ios& ) );
 
         // Accept message level specification
-        TMsgLogger& operator<< ( TMsgLevel level );
+        TMsgLogger& operator<< ( TMsgLogger::TMsgLevel level );
 
         // For all the "conventional" inputs
         template <class T> TMsgLogger& operator<< ( T arg ) {
             *(std::ostringstream*)this << arg; return *this;
         }
 
-        static void SetMinLevel( TMsgLevel minLevel ) { m_minLevel = minLevel; }
+        static void SetMinLevel( TMsgLogger::TMsgLevel minLevel ) { m_minLevel = minLevel; }
 
-        std::map<TMsgLevel, std::string> GetLevelMap() const { return m_levelMap; }
+        std::map<TMsgLogger::TMsgLevel, std::string> GetLevelMap() const { return m_levelMap; }
 
-        void write( TMsgLevel level, std::string message) { 
+        void write( TMsgLogger::TMsgLevel level, std::string message) { 
             WriteMsg(level, message);
         } //for python
+
 
     private:
 
@@ -103,22 +105,22 @@ class TMsgLogger : public std::ostringstream, public TObject {
 
         // the current minimum level is global for the whole Combination
         // it can only be changed by the central storage singleton object
-        static TMsgLevel                 m_minLevel;       // minimum level for logging output
+        static TMsgLogger::TMsgLevel                 m_minLevel;       // minimum level for logging output
 
         // private utility routines
         void Send();
         void InitMaps();
-        void WriteMsg( TMsgLevel level, const std::string& line ) const;
+        void WriteMsg( TMsgLogger::TMsgLevel level, const std::string& line ) const;
 
         const TObject*                   m_objSource;      // the source TObject (used for name)
         std::string                      m_strSource;      // alternative string source
         const std::string                m_prefix;         // the prefix of the source name
         const std::string                m_suffix;         // suffix following source name
-        TMsgLevel                        m_activeLevel;    // active level
+        TMsgLogger::TMsgLevel                        m_activeLevel;    // active level
         const std::string::size_type     m_maxSourceSize;  // maximum length of source name
 
-        std::map<TMsgLevel, std::string> m_levelMap;       // matches output levels with strings
-        std::map<TMsgLevel, std::string> m_colorMap;       // matches output levels with terminal colors
+        std::map<TMsgLogger::TMsgLevel, std::string> m_levelMap;       // matches output levels with strings
+        std::map<TMsgLogger::TMsgLevel, std::string> m_colorMap;       // matches output levels with terminal colors
 
         ClassDef(TMsgLogger,0)
 
@@ -138,7 +140,7 @@ inline TMsgLogger& TMsgLogger::operator<< ( std::ios& ( *_f )( std::ios& ) ) {
     return *this;
 }
 
-inline TMsgLogger& TMsgLogger::operator<< ( TMsgLevel level ) {
+inline TMsgLogger& TMsgLogger::operator<< ( TMsgLogger::TMsgLevel level ) {
     m_activeLevel = level;
     return *this;
 }
