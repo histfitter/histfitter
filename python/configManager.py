@@ -1,5 +1,5 @@
 from ROOT import THStack,TLegend,TCanvas,TFile,std,TH1F
-from ROOT import ConfigMgr,FitConfig,TMsgLogger #this module comes from gSystem.Load("libSusyFitter.so")
+from ROOT import ConfigMgr,FitConfig #this module comes from gSystem.Load("libSusyFitter.so")
 from prepareHistos import TreePrepare,HistoPrepare
 from copy import deepcopy
 from systematic import Systematic
@@ -38,8 +38,6 @@ class ConfigManager(object):
         self.analysisName = None # Name to give the analysis
         self.nomName = "" # suffix of nominal trees names
         self.cppMgr = ConfigMgr.getInstance() #C++ alter ego of this configManager
-        self.logger = TMsgLogger.getInstance() #C++ singleton logger
-        TMsgLogger.getInstance().SetSource("HistFitter")
 
         self.inputLumi = None # Luminosity of input histograms
         self.outputLumi = None # Output luminosity

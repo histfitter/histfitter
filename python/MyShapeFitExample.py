@@ -13,15 +13,18 @@ from ROOT import kBlack,kWhite,kGray,kRed,kPink,kMagenta,kViolet,kBlue,kAzure,kC
 from configWriter import TopLevelXML,Measurement,ChannelXML,Sample
 from systematic import Systematic
 from math import sqrt
-from ROOT import TMsgLogger
+
+import logger
+from logger import log
 
 from ROOT import gROOT
 gROOT.LoadMacro("./macros/AtlasStyle.C")
 import ROOT
 ROOT.SetAtlasStyle()
 
-configMgr.logger.SetMinLevel(TMsgLogger.kDEBUG)
-configMgr.logger.write(TMsgLogger.kWARNING, "warning from python")
+
+log.setLevel(logger.DEBUG)
+log.warning("warning from python")
 
 #-------------------------------
 # Parameters for hypothesis test
