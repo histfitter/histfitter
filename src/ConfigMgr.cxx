@@ -23,7 +23,7 @@
 
 using namespace std;
 
-ConfigMgr::ConfigMgr() : m_logger("HistFitter", kINFO) {
+ConfigMgr::ConfigMgr() { 
     m_nToys = 1000;
     m_calcType = 0;
     m_testStatType = 3;

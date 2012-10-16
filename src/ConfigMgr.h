@@ -99,10 +99,13 @@ class ConfigMgr {
         void AddBkgParName(const char* par)   { m_bkgParNameVec.push_back(par); }
         void AddBkgChlName(const char* par)   { m_chnNameVec.push_back(par); }
 
-        void setLogLevel( TMsgLevel minLevel) { m_logger.SetMinLevel(minLevel); m_logger << minLevel << "log level set to " << m_logger.GetMinLevelStr() << GEndl; }
-        std::map<TMsgLevel, std::string> getLogLevels() { return m_logger.GetLevelMap(); }
+        //void setLogLevel( TMsgLevel minLevel) { m_logger.SetMinLevel(minLevel); m_logger << minLevel << "log level set to " << m_logger.GetMinLevelStr() << GEndl; }
+        //const std::map<TMsgLevel, std::string> getLogLevels() const { 
+            //std::map<TMsgLevel, std::string> myMap(m_logger.GetLevelMap());
+            //return myMap;
+        //}
 
-        void writeLogMessage( TMsgLevel level, std::string message) { m_logger << level << message << GEndl; } //for python
+        //void writeLogMessage( TMsgLevel level, std::string message) { m_logger << level << message << GEndl; } //for python
     
         //class data members
     public:
@@ -130,8 +133,6 @@ class ConfigMgr {
         std::vector<std::string> m_chnNameVec; 
         std::vector<std::string> m_bkgParNameVec;
         std::vector<double> m_bkgCorrValVec;
-
-        TMsgLogger m_logger;
 
         static ConfigMgr *_singleton;
 };

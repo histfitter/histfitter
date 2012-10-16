@@ -18,6 +18,8 @@
 // Local include(s):
 #include "TMsgLogger.h"
 
+ClassImp(TMsgLogger);
+
 using namespace std;
 
 // uncomment this line to inhibit colored output
@@ -81,7 +83,10 @@ TMsgLogger::TMsgLogger( const TMsgLogger& parent )
     *this = parent;
 }
 
-TMsgLogger::~TMsgLogger() {}
+TMsgLogger::~TMsgLogger() {
+    if(m_singleton)
+        delete m_singleton;
+}
 
 TMsgLogger& TMsgLogger::operator= ( const TMsgLogger& parent )  {
     m_objSource   = parent.m_objSource;
@@ -218,3 +223,5 @@ void TMsgLogger::InitMaps() {
     m_colorMap[kFATAL]   = "\033[37;41;1m";
     m_colorMap[kALWAYS]  = "\033[30m";   
 }
+
+TMsgLogger* TMsgLogger::m_singleton = NULL; 

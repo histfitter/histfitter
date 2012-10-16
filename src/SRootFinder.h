@@ -49,9 +49,6 @@ namespace StatTools {
       // function pointer
       Double_t (*fGetRootVal)( Double_t );
 
-      // logger
-      mutable TMsgLogger m_logger;
-
       ClassDef(SRootFinder,0) // Root finding using Brents algorithm
    };
 

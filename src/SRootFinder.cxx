@@ -25,13 +25,12 @@ StatTools::SRootFinder::SRootFinder( Double_t (*rootVal)( Double_t ),
      fRootMin( rootMin ),
      fRootMax( rootMax ),
      fMaxIter( maxIterations ),
-     fAbsTol ( absTolerance  ),
-     m_logger( kINFO )
+     fAbsTol ( absTolerance  )
 {
    // constructor
    fGetRootVal = rootVal;
 
-   m_logger.SetSource( "SRootFinder" );
+   TMsgLogger::getInstance()->SetSource( "SRootFinder" );
 }
 
 //_______________________________________________________________________
@@ -48,7 +47,7 @@ Double_t StatTools::SRootFinder::Root( Double_t refValue  )
    Double_t fa = (*fGetRootVal)( a ) - refValue;
    Double_t fb = (*fGetRootVal)( b ) - refValue;
    if (fb*fa > 0) {
-      m_logger << kWARNING << "<Root> initial interval w/o root: "
+      (*TMsgLogger::getInstance()) << kWARNING << "<Root> initial interval w/o root: "
                << "(a=" << a << ", b=" << b << "),"
                << " (F(a) = " << (*fGetRootVal)( a ) 
                << ", F(b) = " << (*fGetRootVal)( b ) << "), "
@@ -115,7 +114,7 @@ Double_t StatTools::SRootFinder::Root( Double_t refValue  )
    }
 
    // Return our best guess if we run out of iterations
-   m_logger << kWARNING << "<Root> maximum iterations (" << fMaxIter 
+   (*TMsgLogger::getInstance()) << kWARNING << "<Root> maximum iterations (" << fMaxIter 
             << ") reached before convergence" << GEndl;
 
    return b;

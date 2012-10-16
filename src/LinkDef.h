@@ -12,6 +12,8 @@
 #pragma link C++ class FitConfig;
 #pragma link C++ class RooExpandedFitResult;
 #pragma link C++ class XtraValues;
+#pragma link C++ class TMsgLogger;
+#pragma link C++ enum TMsgLevel;
 
 #pragma link C++ namespace Util;
 #pragma link C++ function Util::GetToyMC;
