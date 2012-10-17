@@ -227,7 +227,7 @@ class Sample(object):
             # use different renormalization region
             if len(self.normSampleRemap)>0: 
                 samNameRemap = self.normSampleRemap
-                log.debug("remapping normalization of <",  samName,  "> to sample: ",  samNameRemap)
+                log.debug("remapping normalization of <%s> to sample:  %s"%(samName,samNameRemap))
             else:
                 samNameRemap = samName
 
