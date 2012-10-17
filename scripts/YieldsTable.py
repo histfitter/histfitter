@@ -159,6 +159,7 @@ def latexfitresults(filename,regionList,sampleList,dataname='obsData',showSum=Fa
     tablenumbers['Fitted_events_'+sample]   = nSampleInRegionVal
     tablenumbers['Fitted_err_'+sample]   = nSampleInRegionError
 
+  print tablenumbers
 
   ######
   ######

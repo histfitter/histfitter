@@ -4,6 +4,8 @@ gSystem.Load("libSusyFitter.so")
 from ROOT import ConfigMgr
 gROOT.Reset()
 
+import logger
+from logger import log
 
 def GenerateFitAndPlot(tl, drawBeforeAfterFit):
     from configManager import configMgr
@@ -175,7 +177,7 @@ if __name__ == "__main__":
         print "-s <number> set the random seed for toy generation (default is CPU clock: %i)" % configMgr.toySeed
         print "-a use Asimov dataset for fitting and plotting (default: %i)" % configMgr.useAsimovSet
         print "-i stays in interactive session after executing the script (default %s)" % runInterpreter
-        print "-v verbose level (1: minimal, 2: print histogram names, 3: print XML files, default: %i)" % configMgr.verbose
+        print "-v verbose level (1: DEBUG, 2: VERBOSE)" % configMgr.verbose #TODO should interface to log level directly
         print "-l make limit plot of workspace (default %s)" % printLimits
         print "-p run (exclusion) hypothesis test on workspace (default %s)" % doHypoTests
         print "-z run the discovery hypothesis test instead. In combination with -p. (default %s)" % (not doUL)
@@ -212,7 +214,10 @@ if __name__ == "__main__":
         elif opt == '-i':
             runInterpreter = True
         elif opt == '-v':
-            configMgr.setVerbose(int(arg))
+            if(int(arg) == 1):
+                log.setLevel(logger.DEBUG)
+            elif(int(arg) == 2):
+                log.setLevel(logger.VERBOSE)
         elif opt == '-l':
             printLimits = True
         elif opt == '-p':
