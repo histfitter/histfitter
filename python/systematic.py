@@ -184,28 +184,28 @@ class SystematicBase:
                             if treeName == '' or treeName == systNorm.high:
                                 treeName = s.name + systNorm.high
 
-                            log.verbose("s.name", s.name)
-                            log.verbose("sam.name", sam.name)
-                            log.verbose("systNorm high", systNorm.high)
-                            log.verbose("treeName", treeName)
+                            log.verbose("s.name %s"%s.name)
+                            log.verbose("sam.name %s"%sam.name)
+                            log.verbose("systNorm high %s"%systNorm.high)
+                            log.verbose("treeName %s"%treeName)
 
                             abstract.prepare.read(treeName, filelist)
 
                             tempHist = TH1F("temp", "temp", 1, 0.5, 1.5)
 
                             if systNorm.type == "tree":
-                                log.verbose("normalization region", "". join(normReg[0]))
-                                log.verbose("normalization cuts", abstract.cutsDict["".join(normReg[0])])
-                                log.verbose("current chain",abstract. prepare.currentChainName)
-                                log.verbose("projecting string",str(abstract. lumiUnits*abstract.outputLumi/abstract.inputLumi) + " * " + "*". join(s.weights) + " * (" + abstract.cutsDict["".join(normReg[0])] + ")")
+                                log.verbose("normalization region %s"%("".join(normReg[0])))
+                                log.verbose("normalization cuts %s"%(abstract.cutsDict["".join(normReg[0])]))
+                                log.verbose("current chain %s"%(abstract.prepare.currentChainName))
+                                log.verbose("projecting string %s"%(str(abstract. lumiUnits*abstract.outputLumi/abstract.inputLumi) + " * " + "*". join(s.weights) + " * (" + abstract.cutsDict["".join(normReg[0])] + ")"))
 
                                 abstract.chains[abstract.prepare.currentChainName].Project("temp",abstract.cutsDict["".join(normReg[0])],str(abstract.lumiUnits*abstract.outputLumi/abstract.inputLumi)+" * "+"*".join(s.weights)+" * ("+abstract.cutsDict["".join(normReg[0])]+")")
                                 abstract.hists["h"+sam.name+systNorm.name+lowhigh+normString+"Norm"].SetBinContent(1,abstract.hists["h"+sam.name+systNorm.name+lowhigh+normString+"Norm"].GetSum()+tempHist.GetSumOfWeights())
                             elif systNorm.type == "weight":
-                                log.verbose("normalization region","".join(normReg[0]))
-                                log.verbose("normalization cuts",abstract.cutsDict["".join(normReg[0])])
-                                log.verbose("current chain",abstract.prepare.currentChainName)
-                                log.verbose("projecting string",str(abstract.lumiUnits*abstract.outputLumi/abstract.inputLumi)+" * "+"*".join(s.weights)+" * ("+abstract.cutsDict["".join(normReg[0])]+")")
+                                log.verbose("normalization region %s"%("".join(normReg[0])))
+                                log.verbose("normalization cuts %s"%(abstract.cutsDict["".join(normReg[0])]))
+                                log.verbose("current chain %s"%(abstract.prepare.currentChainName))
+                                log.verbose("projecting string %s"%(str(abstract.lumiUnits*abstract.outputLumi/abstract.inputLumi)+" * "+"*".join(s.weights)+" * ("+abstract.cutsDict["".join(normReg[0])]+")"))
                                 abstract.chains[abstract.prepare.currentChainName].Project("temp",abstract.cutsDict["".join(normReg[0])],str(abstract.lumiUnits*abstract.outputLumi/abstract.inputLumi)+" * "+"*".join(s.systDict[systNorm.name].high)+" * ("+abstract.cutsDict["".join(normReg[0])]+")")
                                 abstract.hists["h"+s.name+systNorm.name+lowhigh+normString+"Norm"].SetBinContent(1,abstract.hists["h"+s.name+systNorm.name+lowhigh+normString+"Norm"].GetSum()+tempHist.GetSumOfWeights())
                             del tempHist
