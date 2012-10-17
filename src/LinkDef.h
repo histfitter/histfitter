@@ -13,7 +13,6 @@
 #pragma link C++ class RooExpandedFitResult;
 #pragma link C++ class XtraValues;
 #pragma link C++ class TMsgLogger;
-#pragma link C++ function writeLogMessage;
 
 #pragma link C++ namespace Util;
 #pragma link C++ function Util::GetToyMC;

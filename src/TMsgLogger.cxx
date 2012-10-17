@@ -10,6 +10,7 @@
 #include <iomanip>
 #include <iostream>
 #include <stdlib.h>
+#include <ctime>
 
 // ROOT include(s):
 #include "TObject.h"
@@ -27,6 +28,7 @@ using namespace std;
 
 // this is the hard-coded maximum length of the source names
 static const string::size_type MAXIMUM_SOURCE_NAME_LENGTH = 20;
+
 #ifndef __APPLE__
 // this is the hardcoded prefix
 static const char* PREFIX = "--- ";
@@ -37,13 +39,7 @@ static const char* SUFFIX = ": ";
 #define SUFFIX ": "
 #endif
 
-//TODO add namespace
-//interface for python
-void writeLogMessage( TMsgLogger::TMsgLevel level, std::string message) { 
-    (*TMsgLogger::getInstance()) << level << message << GEndl;
-} 
-
-TMsgLogger::TMsgLevel TMsgLogger::m_minLevel = TMsgLogger::kINFO;
+TMsgLevel TMsgLogger::m_minLevel = kINFO;
 
 TMsgLogger::TMsgLogger( const TObject* source, TMsgLevel minLevel )
    : m_objSource( source ), 
@@ -119,10 +115,12 @@ string TMsgLogger::GetFormattedSource() const {
 string TMsgLogger::GetPrintedSource() const { 
     // the full logger prefix
     string source_name = GetFormattedSource();
-    if (source_name.size() < m_maxSourceSize) { 
-        for (string::size_type i=source_name.size(); i<m_maxSourceSize; i++) 
-            source_name.push_back( ' ' );
-    }
+
+    // we don't append extra whitespace; gbesjes 17/10/12
+    //if (source_name.size() < m_maxSourceSize) { 
+        //for (string::size_type i=source_name.size(); i<m_maxSourceSize; i++) 
+            //source_name.push_back( ' ' );
+    //}
 
     return m_prefix + source_name + m_suffix; 
 }
@@ -144,7 +142,7 @@ void TMsgLogger::Send() {
         ostringstream message_to_send;
         // must call the modifiers like this, otherwise g++ get's confused with the operators...
         message_to_send.setf( ios::adjustfield, ios::left );
-        message_to_send.width( m_maxSourceSize );
+        message_to_send.width( source_name.size() );
         message_to_send << source_name << m_suffix << line;
         this->WriteMsg( m_activeLevel, message_to_send.str() );
 
@@ -166,17 +164,18 @@ void TMsgLogger::WriteMsg( TMsgLevel mlevel, const std::string& line ) const  {
     if ((slevel = m_levelMap.find( mlevel )) == m_levelMap.end()) 
         return;
 
+    //we do print names for kINFO - gbesjes 17/10/12
 #ifdef USE_COLORED_CONSOLE
-    // no text for INFO
-    if (mlevel == kINFO) 
-        cout << m_colorMap.find( mlevel )->second << m_prefix << line << "\033[0m" << endl;
-    else
+    //// no text for INFO
+    //if (mlevel == kINFO) 
+        //cout << m_colorMap.find( mlevel )->second << m_prefix << line << "\033[0m" << endl;
+    //else
         cout << m_colorMap.find( mlevel )->second << m_prefix 
              << "<" << slevel->second << "> " << line  << "\033[0m" << endl;
 #else
-    if (mlevel == kINFO) 
-        cout << m_prefix << line << endl;
-    else
+    //if (mlevel == kINFO) 
+        //cout << m_prefix << line << endl;
+    //else
         cout << m_prefix << "<" << slevel->second << "> " << line << endl;
 #endif // USE_COLORED_CONSOLE
 
@@ -193,7 +192,7 @@ TMsgLogger& TMsgLogger::endmsg( TMsgLogger& logger ) {
     return logger;
 }
 
-TMsgLogger::TMsgLevel TMsgLogger::MapLevel( const TString& instr ) const {
+TMsgLevel TMsgLogger::MapLevel( const TString& instr ) const {
     TString ins = instr; // need to copy
     ins.ToUpper();
 

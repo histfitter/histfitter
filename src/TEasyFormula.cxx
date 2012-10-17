@@ -137,7 +137,7 @@ Int_t TEasyFormula::DefinedVariable(TString &name) {
 //_____________________________________________________________________________
 void TEasyFormula::Summary() const {
     TMsgLogger::getInstance()->SetSource("TEasyFormula");
-    (*TMsgLogger::getInstance()) << TMsgLogger::kINFO << "Formula : " << m_expr << GEndl;
+    (*TMsgLogger::getInstance()) << kINFO << "Formula : " << m_expr << GEndl;
 }
 
 
