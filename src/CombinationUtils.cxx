@@ -7,6 +7,7 @@
 #include "RooFitResult.h"
 #include "RooWorkspace.h"
 #include "TTree.h"
+#include "TMsgLogger.h"
 
 using namespace std;
 
@@ -54,7 +55,7 @@ float Util::getValueFromTree( TTree* tree, const std::string& searchpar, const s
     bool matchfound = Util::findValueFromTree( tree,searchpar,searchval,pnVec,vVec );
 
     if (!matchfound) 
-        cerr << "ERROR : no value found for search parameter : " << searchpar << endl;
+        (*TMsgLogger::getInstance()) << kERROR << "no value found for search parameter : " << searchpar << GEndl;
 
     return searchval;
 }
@@ -100,7 +101,7 @@ bool Util::findValueFromTree( TTree* tree, const std::string& searchpar, float& 
     for (Int_t i=0; i<nidpar; ++i) { 
         tree->SetBranchAddress( pnVec[i].c_str(), &val[i], &branch[i] );
         if (branch[i]==0) { 
-            cerr << "ERROR : no branch found with name : " << pnVec[i] << ". Return false." << endl;
+            (*TMsgLogger::getInstance()) << kERROR << "no branch found with name : " << pnVec[i] << ". Return false." << GEndl;
             return false;
         }
     }  
@@ -108,7 +109,7 @@ bool Util::findValueFromTree( TTree* tree, const std::string& searchpar, float& 
     // search par
     tree->SetBranchAddress( searchpar.c_str(), &sval, &sbranch );
     if (sbranch==0) {
-        cerr << "ERROR : no branch found with name : " << searchpar << ". Return false." << endl;
+        (*TMsgLogger::getInstance()) << kERROR << "no branch found with name : " << searchpar << ". Return false." << GEndl;
         return false;
     }
 

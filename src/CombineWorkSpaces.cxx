@@ -25,6 +25,7 @@
 #include "TEasyFormula.h"
 #include "RooMCStudy.h"
 #include "RooFitResult.h"
+#include "TMsgLogger.h"
 
 using namespace std;
 using namespace RooFit ;
@@ -38,7 +39,11 @@ using namespace RooStats ;
 //________________________________________________________________________________________________
 void clearVec( std::vector<RooWorkspace*>& wsVec ) {
     std::vector<RooWorkspace*>::iterator wItr=wsVec.begin(), wEnd=wsVec.end();
-    for (; wItr!=wEnd; ++wItr) { if ((*wItr)!=0) { delete (*wItr); } }
+    for (; wItr!=wEnd; ++wItr) { 
+        if ((*wItr)!=0) { 
+            delete (*wItr); 
+        } 
+    }
     wsVec.clear();
 }
 
@@ -55,11 +60,10 @@ std::vector<RooWorkspace*> CollectWorkspaces( const std::map< TString,TString >&
     for (int i=0; wfItr!=wfEnd; ++wfItr, ++i) {
         RooWorkspace* w = GetWorkspaceFromFile( wfItr->first.Data(), wfItr->second );
         if ( w==0 ) {
-            cout << "ERROR : Cannot open workspace <" << wfItr->second << "> in file <" << wfItr->second << ">" << endl;
-            exit(-1);
+            (*TMsgLogger::getInstance()) << kFATAL << "Cannot open workspace <" << wfItr->second << "> in file <" << wfItr->second << ">" << GEndl;
         }
 
-        cout << "INFO: Now collecting <" << wfItr->first << "> <" << wfItr->second << ">" << endl;
+        (*TMsgLogger::getInstance()) << kINFO << "Now collecting <" << wfItr->first << "> <" << wfItr->second << ">" << GEndl;
 
         //// Dataset names not properly copied!
         //RooWorkspace* ws = new RooWorkspace( *w );
@@ -83,8 +87,7 @@ std::map< TString,TString > GetMatchingWorkspaces( const TString& infile, const 
 
     TFile* file = TFile::Open(infile.Data(), "READ");
     if (file->IsZombie()) {
-        cout << "ERROR : Cannot open file: " << infile << endl;
-        exit(-1);
+        (*TMsgLogger::getInstance()) << kFATAL << "Cannot open file: " << infile << GEndl;
     }
 
     TObjString* objString = NULL;
@@ -96,8 +99,8 @@ std::map< TString,TString > GetMatchingWorkspaces( const TString& infile, const 
     TObjArray* iArr = interpretation.Tokenize(":");
     int narg3 = iArr->GetEntries();
     if (narg1!=narg3) {
-        cout << "ERROR : No valid interpretation string <" << interpretation << "> with format <" << format << ">, for file <" << infile << ">" << endl;
         delete iArr;
+        (*TMsgLogger::getInstance()) << kFATAL << "No valid interpretation string <" << interpretation << "> with format <" << format << ">, for file <" << infile << ">" << GEndl;
         exit(-1);
     }
 
@@ -144,15 +147,17 @@ std::map< TString,TString > GetMatchingWorkspaces( const TString& infile, const 
         if ((ORTree!=0) && fID>=0) { // logical orring
             float searchVal(-1);
             bool found = Util::findValueFromTree(ORTree,"fID",searchVal,wsidvec,wsarg);
-            if (!found) continue;
-            if ( fID!=static_cast<int>(searchVal) ) continue; 
+            if (!found) 
+                continue;
+            if ( fID!=static_cast<int>(searchVal) ) 
+                continue; 
         }
 
         // NOTE: wsid always connects to highest key-index found in file!
         wsidMap[wsid] = wsname;
     }
 
-    cout << "INFO: Found : " << wsidMap.size() << " matching workspaces in file : " << infile << endl;
+    (*TMsgLogger::getInstance()) << kINFO << "Found : " << wsidMap.size() << " matching workspaces in file : " << infile << GEndl;
 
     file->Close();
     delete iArr;
@@ -164,27 +169,27 @@ std::map< TString,TString > GetMatchingWorkspaces( const TString& infile, const 
 RooWorkspace* GetWorkspaceFromFile( const TString& infile, const TString& wsname ) {
     TFile* file = TFile::Open(infile.Data(), "READ");
     if (file->IsZombie()) {
-        cout << "ERROR : Cannot open file: " << infile << endl;
+        (*TMsgLogger::getInstance()) << kERROR << "Cannot open file: " << infile << GEndl;
         return NULL;
     }
     file->cd();
 
     TObject* obj = file->Get( wsname.Data() ) ;
     if (obj==0) {
-        cout << "ERROR : Cannot open workspace <" << wsname << "> in file <" << infile << ">" << endl;
+        (*TMsgLogger::getInstance()) << kERROR << "Cannot open workspace <" << wsname << "> in file <" << infile << ">" << GEndl;
         file->Close();
         return NULL;
     }
 
     if (obj->ClassName()!=TString("RooWorkspace")) {
-        cout << "ERROR : Cannot open workspace <" << wsname << "> in file <" << infile << ">" << endl;
+        (*TMsgLogger::getInstance()) << kERROR << "Cannot open workspace <" << wsname << "> in file <" << infile << ">" << GEndl;
         file->Close();
         return NULL;
     }
 
     RooWorkspace* w = (RooWorkspace*)( obj );
     if ( w==0 ) {
-        cout << "ERROR : Cannot open workspace <" << wsname << "> in file <" << infile << ">" << endl;
+        (*TMsgLogger::getInstance()) << kERROR << "Cannot open workspace <" << wsname << "> in file <" << infile << ">" << GEndl;
         file->Close();
         return NULL;
     }
@@ -197,27 +202,27 @@ RooWorkspace* GetWorkspaceFromFile( const TString& infile, const TString& wsname
 RooStats::HypoTestInverterResult* GetHypoTestResultFromFile( const TString& infile, const TString& wsname ) {
     TFile* file = TFile::Open(infile.Data(), "READ");
     if (file->IsZombie()) {
-        cout << "ERROR : Cannot open file: " << infile << endl;
+        (*TMsgLogger::getInstance()) << kERROR << "Cannot open file: " << infile << GEndl;
         return NULL;
     }
     file->cd();
 
     TObject* obj = file->Get( wsname.Data() ) ;
     if (obj==0) {
-        cout << "ERROR : Cannot open HypoTestInverterResult <" << wsname << "> in file <" << infile << ">" << endl;
+        (*TMsgLogger::getInstance()) << kERROR << "Cannot open HypoTestInverterResult <" << wsname << "> in file <" << infile << ">" << GEndl;
         file->Close();
         return NULL;
     }
 
     if ( obj->ClassName()!=TString("RooStats::HypoTestInverterResult") ) {
-        cout << "ERROR : Cannot open HypoTestInverterResult <" << wsname << "> in file <" << infile << ">" << endl;
+        (*TMsgLogger::getInstance()) << kERROR << "Cannot open HypoTestInverterResult <" << wsname << "> in file <" << infile << ">" << GEndl;
         file->Close();
         return NULL;
     }
 
     RooStats::HypoTestInverterResult* w = (RooStats::HypoTestInverterResult*)( obj );
     if ( w==0 ) {
-        cout << "ERROR : Cannot open HypoTestInverterResult <" << wsname << "> in file <" << infile << ">" << endl;
+        (*TMsgLogger::getInstance()) << kERROR << "Cannot open HypoTestInverterResult <" << wsname << "> in file <" << infile << ">" << GEndl;
         file->Close();
         return NULL;
     }
@@ -234,28 +239,28 @@ RooStats::HypoTestInverterResult* GetHypoTestResultFromFile( const TString& infi
 RooFitResult* GetFitResultFromFile( const TString& infile, const TString& fitname ) {
     TFile* file = TFile::Open(infile.Data(), "READ");
     if (file->IsZombie()) {
-        cout << "ERROR : Cannot open file: " << infile << endl;
+        (*TMsgLogger::getInstance()) << kERROR << "Cannot open file: " << infile << GEndl;
         return NULL;
     }
     file->cd();
 
     TObject* obj = file->Get( fitname.Data() ) ;
     if (obj==0) {
-        cout << "ERROR : Cannot open RooFitResult<" << fitname << "> in file <" << infile << ">" << endl;
+        (*TMsgLogger::getInstance()) << kERROR << "Cannot open RooFitResult<" << fitname << "> in file <" << infile << ">" << GEndl;
         file->Close();
 
         return NULL;
     }
 
     if ( obj->ClassName()!=TString("RooFitResult") ) {
-        cout << "ERROR : Cannot open RooFitResult <" << fitname << "> in file <" << infile << ">" << endl;
+        (*TMsgLogger::getInstance()) << kERROR << "Cannot open RooFitResult <" << fitname << "> in file <" << infile << ">" << GEndl;
         file->Close();
         return NULL;
     }
 
     RooFitResult* w = (RooFitResult*)( obj );
     if ( w==0 ) {
-        cout << "ERROR : Cannot open RooFitResult <" << fitname << "> in file <" << infile << ">" << endl;
+        (*TMsgLogger::getInstance()) << kERROR << "Cannot open RooFitResult <" << fitname << "> in file <" << infile << ">" << GEndl;
         file->Close();
         return NULL;
     }
@@ -270,15 +275,15 @@ RooFitResult* GetFitResultFromFile( const TString& infile, const TString& fitnam
 //________________________________________________________________________________________________
 RooMCStudy* GetMCStudy( const RooWorkspace* w ) {
     if (w==0) {
-        std::cerr << "Input workspace is null. Return." << std::endl;
+        (*TMsgLogger::getInstance()) << kERROR << "Input workspace is null. Return." << GEndl;
         return 0;
     }
 
     // suffix for workspace
     if( !w->obj("text_suffix") ) {
-        std::cerr << "No suffix found, this workspace can not be automatically combined using this function.\n"
+        (*TMsgLogger::getInstance()) << kERROR << "No suffix found, this workspace can not be automatically combined using this function.\n"
             << "If possible recreate your single workspaces with newer code."
-            << std::endl;
+            << GEndl;
         return 0; //theresult;
     }
     TString suffix = w->obj("text_suffix")->GetTitle();
@@ -288,9 +293,9 @@ RooMCStudy* GetMCStudy( const RooWorkspace* w ) {
     RooAbsPdf* full_model_thispdf = w->pdf("full_model"+suffix);
 
     if((!data_set)||(!full_model_thispdf)){
-        std::cerr << "Error: data set or pdf not found" <<std::endl;
-        std::cerr << "     :   pdfname    =" <<"full_model"+suffix<<std::endl;
-        std::cerr << "     :   datasetname=" <<"data_set"+suffix<<std::endl;
+        (*TMsgLogger::getInstance()) << kERROR << "data set or pdf not found" << GEndl;
+        (*TMsgLogger::getInstance()) << kERROR << "     pdfname    =" << "full_model"+suffix << GEndl;
+        (*TMsgLogger::getInstance()) << kERROR << "     datasetname=" << "data_set"+suffix << GEndl;
         return 0;
     }
 

@@ -2,6 +2,7 @@
 #include "StatTools.h"
 #include "Utils.h"
 #include "CombineWorkSpaces.h"
+#include "TMsgLogger.h"
 
 #include "HypoTestTool.h"
 
@@ -62,13 +63,13 @@ using namespace RooStats;
 TTree* RooStats::toyMC_gen_fit( RooWorkspace* w, const int& nexp, const double& muVal, const bool& doDataFitFirst, const bool& storetoys, const TString& toyoutfile ) {
     // basic checks 
     if (w==0) {
-        std::cerr << "ERROR : Input workspace is null. Return." << std::endl;
+        (*TMsgLogger::getInstance()) << kERROR << "Input workspace is null. Return." << GEndl;
         return NULL;
     }
 
     RooStats::ModelConfig* mc = Util::GetModelConfig(w);
     if(mc==0){
-        std::cerr << "ERROR : ModelConfig is null!" << std::endl;
+        (*TMsgLogger::getInstance()) << kERROR << "ModelConfig is null!" << GEndl;
         return NULL;
     }
     mc->Print();
@@ -99,7 +100,7 @@ TTree* RooStats::toyMC_gen_fit( RooWorkspace* w, const int& nexp, const double& 
 
     int nPOI = mc->GetParametersOfInterest()->getSize();
     if(nPOI>1){
-        cout <<"WARNING : not sure what to do with other parameters of interest, but here are their values"<<endl;
+        (*TMsgLogger::getInstance()) << kWARNING << "not sure what to do with other parameters of interest, but here are their values" << GEndl;
         mc->GetParametersOfInterest()->Print("v");
     }
 
@@ -123,7 +124,7 @@ TTree* RooStats::toyMC_gen_fit( RooWorkspace* w, const int& nexp, const double& 
     // will be used as start values of fit
     w->saveSnapshot("paramsToFitPE",poiAndNuisance);
 
-    cout << "INFO : Parameter values used for generation " << endl;
+    (*TMsgLogger::getInstance()) << kINFO << "Parameter values used for generation " << GEndl;
     nullParams->Print("v");
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -133,7 +134,7 @@ TTree* RooStats::toyMC_gen_fit( RooWorkspace* w, const int& nexp, const double& 
        for (int i=0; i<nexp; ++i) {
 
        if ((i%10)==0) {
-       cout << "INFO: Now processing : " << i << "/" << nexp << endl;
+       (*TMsgLogger::getInstance()) << kINFO << "Now processing : " << i << "/" << nexp << GEndl;
        }
 
     // reset starting values of fit
@@ -153,7 +154,7 @@ TTree* RooStats::toyMC_gen_fit( RooWorkspace* w, const int& nexp, const double& 
     for (int i=0; i<nexp; ++i) {
 
         if ((i%10)==0) {
-            cerr << "INFO: Now processing : " << i << "/" << nexp << endl;
+            (*TMsgLogger::getInstance()) << kINFO << "Now processing : " << i << "/" << nexp << GEndl;
         }
 
         // reset starting values of fit
@@ -161,11 +162,11 @@ TTree* RooStats::toyMC_gen_fit( RooWorkspace* w, const int& nexp, const double& 
 
         RooAbsData* toyMC = sampler.GenerateToyData( *nullParams ); // note: this generates and *sets* the global measurements of the pdf 
 
-        //cout << "num entries = " << toyMC->numEntries() << " sum entries = " << toyMC->sumEntries() << endl; 
+        //cout << "num entries = " << toyMC->numEntries() << " sum entries = " << toyMC->sumEntries() << GEndl; 
         //toyMC->Print("v");
         //RooAbsData* subset = toyMC->reduce("channelCat==channelCat::S3_meffInc");
         //subset->Print("v");
-        //cout << "S3 = " << subset->sumEntries() << endl;
+        //cout << "S3 = " << subset->sumEntries() << GEndl;
 
         if (fNLL == NULL) {
             fNLL = (RooNLLVar*) mc->GetPdf()->createNLL( *toyMC, RooFit::Extended(), RooFit::CloneData(kFALSE), RooFit::Constrain(*mc->GetPdf()->getParameters(*toyMC)) );
@@ -189,11 +190,11 @@ TTree* RooStats::toyMC_gen_fit( RooWorkspace* w, const int& nexp, const double& 
             }
             else {
                 if (counter > 1) {
-                    cerr << "Scanning" << endl;
+                    (*TMsgLogger::getInstance()) << kINFO << "Scanning" << GEndl;
                     minim.minimize("Minuit2", "Scan");
                 }
                 if (counter > 2) {
-                    cerr << "Trying with strategy = 1" << endl;
+                    (*TMsgLogger::getInstance()) << kINFO << "Trying with strategy = 1" << GEndl;
                     minim.setStrategy(1);
                 }
             }
@@ -220,7 +221,7 @@ TTree* RooStats::toyMC_gen_fit( RooWorkspace* w, const int& nexp, const double& 
 
     // store toy study results?
     if (storetoys) {
-        cout << "INFO: Storing MC study under : " << toyoutfile << endl;
+        (*TMsgLogger::getInstance()) << kINFO << "Storing MC study under : " << toyoutfile << GEndl;
         TFile* outfile = TFile::Open(toyoutfile.Data(),"RECREATE");
         outfile->cd();
         if (mcstudy!=0) { mcstree->Write(); }
@@ -331,7 +332,7 @@ nToyRatio            ratio of S+B/B toys (default is 2)
 */
 
     if (w == NULL) {
-        std::cerr << "ERROR : input workspace is NULL - Exit." << std::endl;
+        (*TMsgLogger::getInstance()) << kERROR << "input workspace is NULL - Exit." << GEndl;
         return 0;
     }
 
@@ -364,7 +365,7 @@ nToyRatio            ratio of S+B/B toys (default is 2)
             npoints, poimin, poimax,  
             ntoys, useNumberCounting, nuisPriorName );    
     if (!r) { 
-        std::cerr << ">>> Error running the HypoTestInverter - Exit " << std::endl;
+        (*TMsgLogger::getInstance()) << kERROR << "Error running the HypoTestInverter - Exit " << GEndl;
         return 0;          
     }
 
@@ -422,7 +423,7 @@ nToyRatio            ratio of S+B/B toys (default is 2)
 */
 
     if (w == NULL) {
-        std::cerr << "ERROR : input workspace is NULL - Exit." << std::endl;
+        (*TMsgLogger::getInstance()) << kERROR << "input workspace is NULL - Exit." << GEndl;
         return 0;
     }
 
@@ -451,7 +452,7 @@ nToyRatio            ratio of S+B/B toys (default is 2)
             dataName, calculatorType, testStatType, 
             ntoys, useNumberCounting, nuisPriorName );    
     if (!r) { 
-        std::cerr << "Error running the HypoTestCalculator - Exit " << std::endl;
+        (*TMsgLogger::getInstance()) << kERROR << "Error running the HypoTestCalculator - Exit " << GEndl;
         return 0;          
     }
 
@@ -477,7 +478,7 @@ void RooStats::AnalyzeHypoTestInverterResult(const char* infile ,
 
     TString fileName(infile);
     if (fileName.IsNull()) { 
-        std::cerr << "ERROR : Input filename is empty. Exit." << std::endl;
+        (*TMsgLogger::getInstance()) << kERROR << "Input filename is empty. Exit." << GEndl;
         return;
     }
 
@@ -486,23 +487,23 @@ void RooStats::AnalyzeHypoTestInverterResult(const char* infile ,
 
     // if input file was specified but not found, quit
     if(!file && !TString(infile).IsNull()){
-        cout << "ERROR: file " << fileName << " not found" << endl;
+        (*TMsgLogger::getInstance()) << kERROR << "file " << fileName << " not found" << GEndl;
         return;
     } 
 
     if(!file){
         // if it is still not there, then we can't continue
-        cout << "ERROR: Not able to run hist2workspace to create example input" <<endl;
+        (*TMsgLogger::getInstance()) << kERROR << "Not able to run hist2workspace to create example input" <<GEndl;
         return;
     }
 
     HypoTestInverterResult * r = 0;  
     // case workspace is not present look for the inverter result
-    std::cout << "INFO: Reading an HypoTestInverterResult with name " << resultName << " from file " << fileName << std::endl;
+    (*TMsgLogger::getInstance()) << kINFO << "Reading an HypoTestInverterResult with name " << resultName << " from file " << fileName << GEndl;
     r = dynamic_cast<HypoTestInverterResult*>( file->Get(resultName) ); //
     if (!r) { 
-        std::cerr << "ERROR: File " << fileName << " does not contain a workspace or an HypoTestInverterResult - Exit " 
-            << std::endl;
+        (*TMsgLogger::getInstance()) << kERROR << "File " << fileName << " does not contain a workspace or an HypoTestInverterResult - Exit " 
+            << GEndl;
         file->ls();
         return; 
     }
@@ -521,7 +522,7 @@ void RooStats::AnalyzeHypoTestInverterResult(RooStats::HypoTestInverterResult* r
         const char* plotType
         ) {
     if (!r) { 
-        std::cerr << "ERROR: No valid HypoTestInverterResult provided - Exit " << std::endl;
+        (*TMsgLogger::getInstance()) << kERROR << "No valid HypoTestInverterResult provided - Exit " << GEndl;
         return; 
     }
 
@@ -568,7 +569,7 @@ RooStats::HypoTestInverterResult* RooStats::MakeUpperLimitPlot(const char* filep
     if ( hypo!=0 ) { 
         double eul2 = 1.10 * hypo->GetExpectedUpperLimit(2);
         delete hypo; hypo=0;
-        //cout << "INFO grepme : " << m_nToys << " " << m_calcType << " " << m_testStatType << " " << m_useCLs << " " << m_nPoints << endl;
+        //cout << "INFO grepme : " << m_nToys << " " << m_calcType << " " << m_testStatType << " " << m_useCLs << " " << m_nPoints << GEndl;
         hypo = RooStats::DoHypoTestInversion(w,ntoys,calculatorType,testStatType,useCLs,npoints,0,eul2); 
     }
 
@@ -589,7 +590,7 @@ LimitResult RooStats::get_Pvalue( const RooStats::HypoTestInverterResult* fResul
 
     const int nEntries = fResults->ArraySize();
 
-    //std::cout << "---------------------------------> nEntries " << nEntries << std::endl;
+    //cout << "---------------------------------> nEntries " << nEntries << GEndl;
 
     nsig1 = std::abs(nsig1);
     nsig2 = std::abs(nsig2);
@@ -614,12 +615,12 @@ LimitResult RooStats::get_Pvalue( const RooStats::HypoTestInverterResult* fResul
         double upperLimit = myfResults->UpperLimit();
         double ulError = myfResults->UpperLimitEstimatedError();
 
-        std::cout << "The computed upper limit is: " << upperLimit << " +/- " << ulError << std::endl;
-        std::cout << " expected limit (median) " << myfResults->GetExpectedUpperLimit(0) << std::endl;
-        std::cout << " expected limit (-1 sig) " << myfResults->GetExpectedUpperLimit(-1) << std::endl;
-        std::cout << " expected limit (+1 sig) " << myfResults->GetExpectedUpperLimit(1) << std::endl;
-        std::cout << " expected limit (-2 sig) " << myfResults->GetExpectedUpperLimit(-2) << std::endl;
-        std::cout << " expected limit (+2 sig) " << myfResults->GetExpectedUpperLimit(2) << std::endl;
+        (*TMsgLogger::getInstance()) << "The computed upper limit is: " << upperLimit << " +/- " << ulError << GEndl;
+        (*TMsgLogger::getInstance()) << " expected limit (median) " << myfResults->GetExpectedUpperLimit(0) << GEndl;
+        (*TMsgLogger::getInstance()) << " expected limit (-1 sig) " << myfResults->GetExpectedUpperLimit(-1) << GEndl;
+        (*TMsgLogger::getInstance()) << " expected limit (+1 sig) " << myfResults->GetExpectedUpperLimit(1) << GEndl;
+        (*TMsgLogger::getInstance()) << " expected limit (-2 sig) " << myfResults->GetExpectedUpperLimit(-2) << GEndl;
+        (*TMsgLogger::getInstance()) << " expected limit (+2 sig) " << myfResults->GetExpectedUpperLimit(2) << GEndl;
 
         upperLimitResult.SetUpperLimit(myfResults->UpperLimit());
         upperLimitResult.SetUpperLimitEstimatedError(myfResults->UpperLimitEstimatedError());
@@ -630,7 +631,7 @@ LimitResult RooStats::get_Pvalue( const RooStats::HypoTestInverterResult* fResul
         upperLimitResult.SetExpectedUpperLimitMinus2Sig(myfResults->GetExpectedUpperLimit(-2));
     }
     else{
-        //std::cout << "StatTools::get_pValue INFO: No upper limit is calcuated" << std::endl;
+        //cout << "StatTools::get_pValue INFO: No upper limit is calcuated" << GEndl;
     }
 
     if (nEntries!=1) { 
@@ -753,9 +754,8 @@ LimitResult RooStats::get_Pvalue(     RooWorkspace* w,
         if (testStatType==3) {
             // MB: Hack, needed for ProfileLikeliHoodTestStat to work properly.
             if (testStatType==3) { 
-                cout << ">>> WARNING: Discovery mode --> Need to change test-statistic type from one-sided to two-sided for RooStats to work."  
-                    << "                                (Note: test is still one-sided.)" 
-                    << endl; 
+                (*TMsgLogger::getInstance()) << kWARNING << "Discovery mode --> Need to change test-statistic type from one-sided to two-sided for RooStats to work." << GEndl; 
+                (*TMsgLogger::getInstance()) << kWARNING << "(Note: test is still one-sided.)" << GEndl; 
                 testStatType=2; 
             } 
         }
@@ -869,9 +869,8 @@ RooStats::HypoTestResult* RooStats::get_htr(  RooWorkspace* w,
     if (!doUL && testStatType==3) {
         // MB: Hack, needed for ProfileLikeliHoodTestStat to work properly.
         if (testStatType==3) { 
-            cout << ">>> WARNING: Discovery mode --> Need to change test-statistic type from one-sided to two-sided for RooStats to work."  
-                << "                                (Note: test is still one-sided.)" 
-                << endl; 
+            (*TMsgLogger::getInstance()) << kWARNING << "Discovery mode --> Need to change test-statistic type from one-sided to two-sided for RooStats to work." << GEndl; 
+            (*TMsgLogger::getInstance()) << kWARNING << "(Note: test is still one-sided.)" << GEndl; 
             testStatType=2; 
         } 
     }
