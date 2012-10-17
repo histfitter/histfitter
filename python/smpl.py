@@ -197,14 +197,16 @@ class Sample(object):
         """
 
         if normalizeSys and not self.normRegions: 
-            log.warning("    normalizeSys==True but no normalization regions specified. This is not safe, please fix.")
+            log.warning("    normalizeSys==True but no normalization regions specified. This should never happen!")
             normChannels=[]
-            for ch in self.parentChannel.parentTopLvl.bkgConstrainChannels:
-                normChannels.append((ch.name,ch.variableName))
-            for ch in self.parentChannel.parentTopLvl.signalChannels:
-                normChannels.append((ch.name,ch.variableName))
+            tl=self.parentChannel.parentTopLvl
+            for ch in tl.channels:
+                if (ch.channelName in tl.bkgConstrainChannels) or (ch.channelName in tl.signalChannels):
+                    normChannels.append((ch.regionString,ch.variableName))
+                    pass
+                pass
             self.setNormRegions(normChannels)
-            log.info("            For now, using all non-validation channels by default: %s"%self.normRegions)
+            log.warning("            For now, using all non-validation channels by default: %s"%self.normRegions)
 
         if self.noRenormSys and normalizeSys:
             log.warning("    smpl.noRenormSys==True and normalizeSys==True for %s %s. normalizeSys set to False."%(self.name,systName))

@@ -133,8 +133,32 @@ class SystematicBase:
 
             histName = "h" + sam.name + self.name + lowhigh + normString + "Norm"
             if not histName in abstract.hists.keys():
-                if sam.normRegions:
-                    normString = ""
+
+                if not sam.normRegions: 
+                    log.warning("    %s but no normalization regions specified. This is not safe, please fix."%self.method)
+                    normChannels=[]
+                    tl=sam.parentChannel.parentTopLvl
+                    for ch in tl.channels:
+                        if (ch.channelName in tl.bkgConstrainChannels) or (ch.channelName in tl.signalChannels):
+                            normChannels.append((ch.regionString,ch.variableName))
+                            pass
+                        pass
+                    sam.setNormRegions(normChannels)
+                    log.warning("            For now, using all non-validation channels by default: %s"%sam.normRegions)
+
+                normString = ""
+                for normReg in sam.normRegions:
+                    if not type(normReg[0]) == "list":
+                        normList = []
+                        normList.append(normReg[0])
+                        c = topLvl.getChannel(normReg[1],normList)
+                    else:
+                        c = topLvl.getChannel(normReg[1],normReg[0])
+                    normString += c.regionString
+
+                if abstract.readFromTree:
+                    abstract.hists[histName] = TH1F(histName, histName, 1, 0.5, 1.5)
+
                     for normReg in sam.normRegions:
                         if not type(normReg[0]) == "list":
                             normList = []
@@ -142,76 +166,63 @@ class SystematicBase:
                             c = topLvl.getChannel(normReg[1],normList)
                         else:
                             c = topLvl.getChannel(normReg[1],normReg[0])
-                        normString += c.regionString
 
-                    if abstract.readFromTree:
-                        abstract.hists[histName] = TH1F(histName, histName,
-                                                         1, 0.5, 1.5)
+                        try:
+                            s = c.getSample(sam.name)
+                        except:
+                            # assume that if no histogram is made,
+                            # then it is not needed
+                            continue
 
-                        for normReg in sam.normRegions:
-                            if not type(normReg[0]) == "list":
-                                normList = []
-                                normList.append(normReg[0])
-                                c = topLvl.getChannel(normReg[1],normList)
+                        systNorm = s.getSystematic(self.name)
+
+                        # if the systematic has a dedicated file
+                        # list, use it
+                        if s.name in systNorm.filesHi:
+                            filelist = systNorm.filesHi[s.name]
+                        else:
+                            # otherwise - take the sample file list
+                            filelist = s.files
+                        if s.name in systNorm.treeHiName:
+                            treeName = systNorm.treeHiName[s.name]
+                        else:
+                            # otherwise - take the default tree name
+                            # for the sample
+                            if self.type == "tree":
+                                treeName = s.treeName + systNorm.high  # NM
                             else:
-                                c = topLvl.getChannel(normReg[1],normReg[0])
+                                treeName = s.treeName
+                        if treeName == '' or treeName == systNorm.high:
+                            treeName = s.name + systNorm.high
 
-                            try:
-                                s = c.getSample(sam.name)
-                            except:
-                                # assume that if no histogram is made,
-                                # then it is not needed
-                                continue
+                        log.verbose("s.name %s"%s.name)
+                        log.verbose("sam.name %s"%sam.name)
+                        log.verbose("systNorm high %s"%systNorm.high)
+                        log.verbose("treeName %s"%treeName)
 
-                            systNorm = s.getSystematic(self.name)
+                        abstract.prepare.read(treeName, filelist)
 
-                            # if the systematic has a dedicated file
-                            # list, use it
-                            if s.name in systNorm.filesHi:
-                                filelist = systNorm.filesHi[s.name]
-                            else:
-                                # otherwise - take the sample file list
-                                filelist = s.files
-                            if s.name in systNorm.treeHiName:
-                                treeName = systNorm.treeHiName[s.name]
-                            else:
-                                # otherwise - take the default tree name
-                                # for the sample
-                                if self.type == "tree":
-                                    treeName = s.treeName + systNorm.high  # NM
-                                else:
-                                    treeName = s.treeName
-                            if treeName == '' or treeName == systNorm.high:
-                                treeName = s.name + systNorm.high
+                        tempHist = TH1F("temp", "temp", 1, 0.5, 1.5)
 
-                            log.verbose("s.name %s"%s.name)
-                            log.verbose("sam.name %s"%sam.name)
-                            log.verbose("systNorm high %s"%systNorm.high)
-                            log.verbose("treeName %s"%treeName)
+                        if systNorm.type == "tree":
+                            log.verbose("normalization region %s"%("".join(normReg[0])))
+                            log.verbose("normalization cuts %s"%(abstract.cutsDict["".join(normReg[0])]))
+                            log.verbose("current chain %s"%(abstract.prepare.currentChainName))
+                            log.verbose("projecting string %s"%(str(abstract. lumiUnits*abstract.outputLumi/abstract.inputLumi) + " * " + "*". join(s.weights) + " * (" + abstract.cutsDict["".join(normReg[0])] + ")"))
 
-                            abstract.prepare.read(treeName, filelist)
-
-                            tempHist = TH1F("temp", "temp", 1, 0.5, 1.5)
-
-                            if systNorm.type == "tree":
-                                log.verbose("normalization region %s"%("".join(normReg[0])))
-                                log.verbose("normalization cuts %s"%(abstract.cutsDict["".join(normReg[0])]))
-                                log.verbose("current chain %s"%(abstract.prepare.currentChainName))
-                                log.verbose("projecting string %s"%(str(abstract. lumiUnits*abstract.outputLumi/abstract.inputLumi) + " * " + "*". join(s.weights) + " * (" + abstract.cutsDict["".join(normReg[0])] + ")"))
-
-                                abstract.chains[abstract.prepare.currentChainName].Project("temp",abstract.cutsDict["".join(normReg[0])],str(abstract.lumiUnits*abstract.outputLumi/abstract.inputLumi)+" * "+"*".join(s.weights)+" * ("+abstract.cutsDict["".join(normReg[0])]+")")
-                                abstract.hists["h"+sam.name+systNorm.name+lowhigh+normString+"Norm"].SetBinContent(1,abstract.hists["h"+sam.name+systNorm.name+lowhigh+normString+"Norm"].GetSum()+tempHist.GetSumOfWeights())
-                            elif systNorm.type == "weight":
-                                log.verbose("normalization region %s"%("".join(normReg[0])))
-                                log.verbose("normalization cuts %s"%(abstract.cutsDict["".join(normReg[0])]))
-                                log.verbose("current chain %s"%(abstract.prepare.currentChainName))
-                                log.verbose("projecting string %s"%(str(abstract.lumiUnits*abstract.outputLumi/abstract.inputLumi)+" * "+"*".join(s.weights)+" * ("+abstract.cutsDict["".join(normReg[0])]+")"))
-                                abstract.chains[abstract.prepare.currentChainName].Project("temp",abstract.cutsDict["".join(normReg[0])],str(abstract.lumiUnits*abstract.outputLumi/abstract.inputLumi)+" * "+"*".join(s.systDict[systNorm.name].high)+" * ("+abstract.cutsDict["".join(normReg[0])]+")")
-                                abstract.hists["h"+s.name+systNorm.name+lowhigh+normString+"Norm"].SetBinContent(1,abstract.hists["h"+s.name+systNorm.name+lowhigh+normString+"Norm"].GetSum()+tempHist.GetSumOfWeights())
-                            del tempHist
-                    else:
-                        abstract.hists[histName] = None
-                        abstract.prepare.addHisto(histName)
+                            abstract.chains[abstract.prepare.currentChainName].Project("temp",abstract.cutsDict["".join(normReg[0])],str(abstract.lumiUnits*abstract.outputLumi/abstract.inputLumi)+" * "+"*".join(s.weights)+" * ("+abstract.cutsDict["".join(normReg[0])]+")")
+                            abstract.hists[histName].SetBinContent(1,abstract.hists[histName].GetSum()+tempHist.GetSumOfWeights())
+                        elif systNorm.type == "weight":
+                            log.verbose("normalization region %s"%("".join(normReg[0])))
+                            log.verbose("normalization cuts %s"%(abstract.cutsDict["".join(normReg[0])]))
+                            log.verbose("current chain %s"%(abstract.prepare.currentChainName))
+                            log.verbose("projecting string %s"%(str(abstract.lumiUnits*abstract.outputLumi/abstract.inputLumi)+" * "+"*".join(s.weights)+" * ("+abstract.cutsDict["".join(normReg[0])]+")"))
+                            abstract.chains[abstract.prepare.currentChainName].Project("temp",abstract.cutsDict["".join(normReg[0])],str(abstract.lumiUnits*abstract.outputLumi/abstract.inputLumi)+" * "+"*".join(s.systDict[systNorm.name].high)+" * ("+abstract.cutsDict["".join(normReg[0])]+")")
+                            abstract.hists[histName].SetBinContent(1,abstract.hists[histName].GetSum()+tempHist.GetSumOfWeights())
+                        del tempHist
+                else:
+                    abstract.hists[histName] = None
+                    abstract.prepare.addHisto(histName)
 
         return
 
