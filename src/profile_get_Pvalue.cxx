@@ -2,6 +2,8 @@
 #include "profile_get_Pvalue.h"
 #include "toy_utils.h"
 #include "CombinationUtils.h"
+#include "TMsgLogger.h"
+
 #include "TObjString.h"
 #include "TTree.h"
 #include <sstream>
@@ -38,12 +40,12 @@ RooFitResult* doFreeFitSave( const RooWorkspace* fullwspace, RooDataSet* inputda
     // fit to reset the workspace
 
     if(!fullwspace){
-        std::cerr << "ERROR: Input workspace is null!" << std::endl;
+        (*TMsgLogger::getInstance()) << kERROR << "Input workspace is null!" << GEndl;
         return 0;
     }
 
     if(!fullwspace->obj("text_suffix")){
-        std::cerr << "ERROR: No suffix found, this workspace can not be automatically combined using this function. If possible recreate your single workspaces with newer code" << std::endl;
+        (*TMsgLogger::getInstance()) << kERROR << "No suffix found, this workspace can not be automatically combined using this function. If possible recreate your single workspaces with newer code" << GEndl;
         return 0;
     }
 
@@ -59,9 +61,9 @@ RooFitResult* doFreeFitSave( const RooWorkspace* fullwspace, RooDataSet* inputda
     if (verbose) data_set->Print();
 
     if((!data_set)||(!full_model_thispdf)){
-        std::cerr << "ERROR: data set or pdf not found" <<std::endl;
-        std::cerr << "     :   pdfname    =" <<"full_model"+suffix<<std::endl;
-        std::cerr << "     :   datasetname=" <<"data_set"+suffix<<std::endl;
+        (*TMsgLogger::getInstance()) << kERROR << "data set or pdf not found" << GEndl;
+        (*TMsgLogger::getInstance()) << kERROR << "     :   pdfname    =" <<"full_model"+suffix<< GEndl;
+        (*TMsgLogger::getInstance()) << kERROR << "     :   datasetname=" <<"data_set"+suffix<< GEndl;
         return 0;
     }
 

@@ -4,8 +4,10 @@
 // Simple C++ mirror of python TopLevelXML objects.                   //
 ////////////////////////////////////////////////////////////////////////
 
-#include "FitConfig.h"
 #include <iostream>
+#include "FitConfig.h"
+#include "TMsgLogger.h"
+
 using namespace std;
 
 FitConfig::FitConfig(){
@@ -30,7 +32,7 @@ Int_t FitConfig::getSampleColor(const TString& sample){
             return m_sampleColors[i];
         }
     }
-    cout<<"WARNING getSampleColor unknown sample name: "<<sample<<endl;
+    (*TMsgLogger::getInstance()) << kWARNING << "getSampleColor unknown sample name: "<<sample << GEndl;
     return 0;
 }
 
@@ -46,44 +48,38 @@ TString FitConfig::getSampleName(const TString& sample){
             return m_sampleNames[i];
         }
     }
-    cout<<"WARNING getSampleName unknown sample name: "<<sample<<endl;
+    (*TMsgLogger::getInstance()) << kWARNING << "getSampleName unknown sample name: "<<sample << GEndl;
     return "";
 }
 
 void FitConfig::Print(){
-    cout << "*** Fit Config: " << m_Name << " ***"<<endl;
-    cout << " inputWorkspaceFileName: " << m_inputWorkspaceFileName<<endl;
-    cout << " signalSampleName: " << m_signalSampleName<<endl;
+    (*TMsgLogger::getInstance()) << kINFO << "*** Fit Config: " << m_Name << " ***" << GEndl;
+    (*TMsgLogger::getInstance()) << kINFO << " inputWorkspaceFileName: " << m_inputWorkspaceFileName << GEndl;
+    (*TMsgLogger::getInstance()) << kINFO << " signalSampleName: " << m_signalSampleName << GEndl;
     
-    cout << " sampleNames: ";
+    (*TMsgLogger::getInstance()) << kINFO << " sampleNames: ";
     for(unsigned int i = 0; i< m_sampleNames.size(); i++){ 
-        cout << m_sampleNames.at(i) << " "; 
+        (*TMsgLogger::getInstance()) << kINFO << m_sampleNames.at(i) << " "; 
     }
-    cout << endl;
-    
-    cout << " sampleColors: ";
+    (*TMsgLogger::getInstance()) << kINFO << " sampleColors: ";
     for(unsigned int i = 0; i< m_sampleColors.size(); i++){ 
-        cout << m_sampleColors.at(i) << " "; 
+        (*TMsgLogger::getInstance()) << kINFO << m_sampleColors.at(i) << " "; 
     }
-    cout << endl;
     
-    cout << " signalChannels: ";
+    (*TMsgLogger::getInstance()) << kINFO << " signalChannels: ";
     for(unsigned int i = 0; i< m_signalChannels.size(); i++){ 
-        cout << m_signalChannels.at(i) << " "; 
+        (*TMsgLogger::getInstance()) << kINFO << m_signalChannels.at(i) << " "; 
     }
-    cout << endl;
     
-    cout << " validationChannels: ";
+    (*TMsgLogger::getInstance()) << kINFO << " validationChannels: ";
     for(unsigned int i = 0; i< m_validationChannels.size(); i++){ 
-        cout << m_validationChannels.at(i) << " "; 
+        (*TMsgLogger::getInstance()) << kINFO << m_validationChannels.at(i) << " "; 
     }
-    cout << endl;
     
-    cout << " bkgConstrainChannels: ";
+    (*TMsgLogger::getInstance()) << kINFO << " bkgConstrainChannels: ";
     for(unsigned int i = 0; i< m_bkgConstrainChannels.size(); i++){ 
-        cout << m_bkgConstrainChannels.at(i) << " ";
+        (*TMsgLogger::getInstance()) << kINFO << m_bkgConstrainChannels.at(i) << " ";
     }
-    cout << endl;
     
     return;
 }
@@ -210,9 +206,9 @@ void FitConfig::findChannel(const TString& channel, Int_t& idx, Bool_t& channelF
             idx = i;
             channelFound = kTRUE;
         } else if(m_channels[i].EqualTo(channel) && channelFound){
-            cout << endl << " *** WARNING: FitConfig has found more then one channel with the name = " << channel << " check your code" << endl;
+            (*TMsgLogger::getInstance()) << kWARNING << "FitConfig has found more then one channel with the name = " << channel << " check your code" << GEndl;
             for(unsigned int j=0; j < m_channels.size(); j++){
-                cout << " *** INFO: FitConfig m_channels[" << j << "] = " << m_channels[j] << endl;
+                (*TMsgLogger::getInstance()) << kINFO << "FitConfig m_channels[" << j << "] = " << m_channels[j] << GEndl;
             }
         }
     }

@@ -2559,12 +2559,12 @@ Util::resetError( RooWorkspace* wspace, const RooArgList& parList, const RooArgL
             std::string ConstraintType ="";
             if(constraint != 0){ ConstraintType=constraint->IsA()->GetName(); }
             /*
-               cout << string(UncertaintyName) << GEndl;
-               cout << "here1" << GEndl;
-               cout << "constraint " << constraint << GEndl;
-               cout << "constraint->IsA() " << constraint->IsA() << GEndl;
-               cout << constraint->IsA()->GetName() << GEndl;
-               cout << "here2" << GEndl;
+               cout << string(UncertaintyName) << endl;
+               cout << "here1" << endl;
+               cout << "constraint " << constraint << endl;
+               cout << "constraint->IsA() " << constraint->IsA() << endl;
+               cout << constraint->IsA()->GetName() << endl;
+               cout << "here2" << endl;
                */
             if( ConstraintType == "" ) {
                 //cout << "Error: Strange constraint type for Stat Uncertainties " << ConstraintType << GEndl;

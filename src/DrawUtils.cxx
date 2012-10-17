@@ -1,5 +1,7 @@
 // vim: ts=4:sw=4
 #include "DrawUtils.h"
+#include "TMsgLogger.h"
+
 #include <iostream>
 #include "TH2D.h"
 #include "TTree.h"
@@ -16,8 +18,8 @@ TH2D* DrawUtil::triwsmooth( TTree* tree, const char* varstr, const char* name, c
     int ntotal = tree->GetEntries("1");
     int nselect = tree->GetEntries(cutstr);
 
-    cout << "INFO: Plotting " << varstr << " with selection " << cutstr << "." << endl; 
-    cout << "INFO: Selected " << nselect << " out of " << ntotal << " entries. Fraction = " << double(nselect)/ntotal << endl;
+    (*TMsgLogger::getInstance()) << kINFO << "Plotting " << varstr << " with selection " << cutstr << "." << GEndl; 
+    (*TMsgLogger::getInstance()) << kINFO << "Selected " << nselect << " out of " << ntotal << " entries. Fraction = " << double(nselect)/ntotal << GEndl;
 
     // Wacky workaround to prevent segfault in tree->Draw() below.
     TString buh("");
@@ -94,13 +96,13 @@ TH2F* DrawUtil::makesignificancehistos( TTree* tree, int mode,TString id1,TStrin
     // then: fill histograms
     for( Int_t i = 0; i < tree->GetEntries(); i++ ){
         tree->GetEntry( i );
-        //cout << " m0=" << m0 << " m12=" << m12 << " p1=" << p1 << endl;
+        //cout << " m0=" << m0 << " m12=" << m12 << " p1=" << p1 << GEndl;
         if (mode==0) { hclPmin->Fill( m0, m12, p1 ); }
         if (mode==1) { hsigPmin->Fill( m0, m12, sig ); }
         if (mode==2) { hbkgPmin->Fill( m0, m12, bkg ); }
     }
 
-    cout << "INFO: done filling bkg" << endl;
+    (*TMsgLogger::getInstance()) << kINFO << "done filling bkg" << GEndl;
 
     if (mode==0)  return hclPmin;
     if (mode==1)  return hsigPmin;

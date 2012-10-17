@@ -36,7 +36,7 @@ LimitResult::LimitResult(const TString &name, const TString &title) :
 };
 
 void LimitResult::Summary() {
-    std::cout << " Printing data for object: " <<this << std::endl ;
+    std::cout << " Printing data for object: " << this << std::endl ;
     std::cout << " | p0:               "<<    GetP0() << "      sigma: " << StatTools::GetSigma(   GetP0())<<std::endl ;
     std::cout << " | p1:               "<<    GetP1() << "      sigma: " << StatTools::GetSigma(   GetP1())<<std::endl ;
 
