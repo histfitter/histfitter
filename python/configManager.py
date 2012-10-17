@@ -518,7 +518,7 @@ class ConfigManager(object):
             sampleListRun = deepcopy(chan.sampleList)
             #for (iSam,sam) in enumerate(topLvl.sampleList):
             for (iSam,sam) in enumerate(sampleListRun):
-                log.info("  Sample: %s" % sam.name)
+                log.info("  Sample: %s" % sam.name)                
                 # Run over the nominal configuration first
                 # Set the weights,cuts,weights
                 self.setWeightsCutsVariable(chan,sam,regionString)
@@ -618,6 +618,8 @@ class ConfigManager(object):
             chan.getSample(sam.name).addHistoSys(syst.name,nomName,highName,lowName,False,True,False,False,sam.name,normString)
         elif syst.method == "normHistoSysOneSide":
             chan.getSample(sam.name).addHistoSys(syst.name,nomName,highName,lowName,False,True,False,True,sam.name,normString)
+        elif syst.method == "normHistoSysOneSideSym":
+            chan.getSample(sam.name).addHistoSys(syst.name,nomName,highName,lowName,False,True,True,True,sam.name,normString)
         elif syst.method == "userHistoSys" or syst.method == "userNormHistoSys":
             if configMgr.hists[highName] == None:
                 configMgr.hists[highName] = histMgr.buildUserHistoSysFromHist(highName, syst.high, configMgr.hists[nomName])
@@ -770,6 +772,31 @@ class ConfigManager(object):
                     self.hists["h"+sam.name+"Nom_"+regionString+"_obs_"+replaceSymbols(chan.variableName)].SetBinContent(iBin+1,1.)
             chan.getSample(sam.name).setHistoName("h"+sam.name+"Nom_"+regionString+"_obs_"+replaceSymbols(chan.variableName))
 
+
+            #HACK FIX ME
+            if not sam.normRegions:
+                needsNorm=False
+                for sys in sam.systDict.values():
+                    if sys.method == "userNormHistoSys" or sys.method == "normHistoSys" \
+                           or sys.method == "normHistoSysOneSide" \
+                           or sys.method == "normHistoSysOneSideSym" \
+                           or sys.method == "overallNormHistoSys" \
+                           or sys.method == "overallNormHistoSysOneSide" \
+                           or sys.method == "overallNormHistoSysOneSideSym":
+                        log.warning("    %s needs normRegions because of %s of type %s but no normalization regions specified. This is not safe, please fix."%(sam.name,sys.name,sys.method))
+                        needsNorm=True
+                        break
+                if needsNorm:
+                    normChannels=[]
+                    tl=sam.parentChannel.parentTopLvl
+                    for ch in tl.channels:
+                        if (ch.channelName in tl.bkgConstrainChannels) or (ch.channelName in tl.signalChannels):
+                            normChannels.append((ch.regionString,ch.variableName))
+                            pass
+                        pass
+                    sam.setNormRegions(normChannels)
+                    log.warning("            For now, using all non-validation channels by default: %s"%sam.normRegions)
+                    
             if sam.normRegions:
                 normString = ""
                 for normReg in sam.normRegions:
