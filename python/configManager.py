@@ -74,7 +74,6 @@ class ConfigManager(object):
         self.hists = {} # Instances of all histograms in memory
         self.chains = {} # Instances of all trees in memory
 
-        self.verbose=1
         self.includeOverallSys = True # Boolean to chose if HistoSys should also have OverallSys
         self.readFromTree = False # Boolean to chose if reading histograms from tree will also write to file
         self.plotHistos = None # Boolean to chose to plot out the histograms
@@ -126,7 +125,6 @@ class ConfigManager(object):
         else:
             newTLX = TopLevelXML(newName)
             pass
-        newTLX.verbose=self.verbose
         newTLX.setWeights(self.weights)
         newTLX.removeEmptyBins=self.removeEmptyBins
         self.topLvls.append(newTLX)
@@ -338,10 +336,7 @@ class ConfigManager(object):
         self.cppMgr.initialize()
         return
 
-    def Print(self, verbose=None):
-        if verbose == None:
-            verbose = self.verbose
-        
+    def Print(self):
         log.info("*-------------------------------------------------*")
         log.info("              Summary of ConfigMgr\n")
         log.info("analysisName: %s"%self.analysisName)
@@ -354,8 +349,7 @@ class ConfigManager(object):
         log.info("doHypoTest: %s"%self.doHypoTest)
         log.info("fixSigXSec: %s"%self.fixSigXSec)
         log.info("Systematics: %s"%self.systDict.keys())
-        if verbose > 1:
-            log.debug("Cuts Dictionary: %s"%self.cutsDict)
+        log.debug("Cuts Dictionary: %s"%self.cutsDict)
         log.info("readFromTree: %s"%self.readFromTree)
         log.info("plotHistos: %s"%self.plotHistos)
         log.info("executeHistFactory: %s"%self.executeHistFactory)
@@ -365,18 +359,14 @@ class ConfigManager(object):
             for c in tl.channels:
                 log.info("    %s: %s"%(c.name,c.systDict.keys()))
         log.info("C++ ConfigMgr status: %s"%(self.cppMgr.m_status))
-        log.info("Histogram names: (requires verbose > 1)")
-        if verbose > 1:
-            configMgr.printHists()
-        log.info("Chain names: (requires verbose > 1 & note chains are only generated with -t)")
-        if verbose > 1:
-            configMgr.printChains()
-        log.info("File names: (requires verbose > 1)")
-        if verbose > 1:
-            configMgr.printFiles()
-        log.info("Input tree names: (requires verbose > 1)")
-        if verbose > 1:
-            configMgr.printTreeNames()
+        log.info("Histogram names: (set log level DEBUG)")
+        configMgr.printHists()
+        log.info("Chain names: (set log level DEBUG & note chains are only generated with -t)")
+        configMgr.printChains()
+        log.info("File names: (set log level DEBUG)")
+        configMgr.printFiles()
+        log.info("Input tree names: (set log level DEBUG)")
+        configMgr.printTreeNames()
         log.info("*-------------------------------------------------*\n")
         return
 
@@ -384,56 +374,54 @@ class ConfigManager(object):
         histList = self.hists.keys()
         histList.sort()
         for hist in histList:
-            print " ",hist
+            log.debug(hist)
         return
 
     def printChains(self):
         chainList = self.chains.keys()
         chainList.sort()
         for chain in chainList:
-            print " ",chain
+            log.debug(chain)
         return
 
     def printFiles(self):
-        print "ConfigManager:"
-        print str(self.fileList)
+        log.debug("ConfigManager:")
+        log.debug(str(self.fileList))
         for topLvl in self.topLvls:
-            print "                TopLvlXML: " + topLvl.name
-            print "                " + str(topLvl.files)
+            log.debug("  TopLvlXML: %s " % topLvl.name)
+            log.debug("             %s " % str(topLvl.files))
             for channel in topLvl.channels:
-                print "                ---------> Channel: " + channel.name
-                print "                           " + str(channel.files)
+                log.debug("             Channel: " + channel.name)
+                log.debug("             " + str(channel.files))
                 for sample in channel.sampleList:
-                    print "                           ---------> Sample: " + sample.name
-                    print "                                      "+str(sample.files)
+                    log.debug("             ---> Sample: " + sample.name)
+                    log.debug("                          " + str(sample.files))
                     for (systName,syst) in sample.systDict.items():
-                        print "                                      ---------> Systematic: " + syst.name
-                        print "                                                 Low : " + str(syst.filesLo)
-                        print "                                                 High: " + str(syst.filesHi)
+                        log.debug("                            ---> Systematic: " + syst.name)
+                        log.debug("                                       Low : " + str(syst.filesLo))
+                        log.debug("                                       High: " + str(syst.filesHi))
         return
 
     def printTreeNames(self):
-        print "ConfigManager:"
-        print str(self.treeName)
-        for topLvl in self.topLvls:
-            print "                TopLvlXML: " + topLvl.name
-            print "                " + str(topLvl.treeName)
-            for channel in topLvl.channels:
-                print "                ---------> Channel: " + channel.name
-                print "                           " + str(channel.treeName)
-                for sample in channel.sampleList:
-                    print "                           ---------> Sample: " + sample.name
-                    print "                                      "+str(sample.treeName)
-                    for (systName,syst) in sample.systDict.items():
-                        print "                                      ---------> Systematic: " + syst.name
-                        print "                                                 Low : " + str(syst.treeLoName)
-                        print "                                                 High: " + str(syst.treeHiName)
-        return
+        if str(self.treeName).strip() == "":
+            log.debug("No tree used")
+            return
 
-    def setVerbose(self,lvl):
-        self.verbose=lvl
-        for tl in self.topLvls:
-            tl.verbose=lvl
+        log.debug("ConfigManager:")
+        log.debug(str(self.treeName).strip())
+        for topLvl in self.topLvls:
+            log.debug("  TopLvlXML: %s" % topLvl.name)
+            log.debug("             %s" % str(topLvl.treeName))
+            for channel in topLvl.channels:
+                log.debug("    ---> Channel: " + channel.name)
+                log.debug("                  " + str(channel.treeName))
+                for sample in channel.sampleList:
+                    log.debug("           ---> Sample: " + sample.name)
+                    log.debug("                        "+str(sample.treeName))
+                    for (systName,syst) in sample.systDict.items():
+                        log.debug("                   ---> Systematic: " + syst.name)
+                        log.debug("                        Low : " + str(syst.treeLoName))
+                        log.debug("                        High: " + str(syst.treeHiName))
         return
 
     def setFileList(self,filelist):
@@ -572,16 +560,15 @@ class ConfigManager(object):
 # Shouldn't have multiple imports... doesn't matter as singleton but good to check user isn't doing something strange
 
     def appendSystinChanInfoDict(self,chan,sam,systName,syst):
-        if self.verbose > 1:
-            print "!!!!!!!!!!!!!!"
-            print "CHAN",chan.name
-            print "SAM",sam.name
-            print "SYST",systName
-            print "TYPE",syst.type
-            print "METHOD",syst.method
-            print "LOW",syst.low
-            print "HIGH",syst.high
-            pass
+        log.debug("appendSystinChanInfoDict: appending info:")
+        log.debug("  CHAN %s" % chan.name)
+        log.debug("  SAM %s" % sam.name)
+        log.debug("  SYST %s" % systName)
+        log.debug("  TYPE %s" % syst.type)
+        log.debug("  METHOD %s" % syst.method)
+        log.debug("  LOW %s" % str(syst.low))
+        log.debug("  HIGH %s" % str(syst.high))
+        
         if syst.type == "tree":
             chan.infoDict[sam.name].append((systName+"High",syst.high,sam.weights,syst.method))
             chan.infoDict[sam.name].append((systName+"Low",syst.low,sam.weights,syst.method))
@@ -815,8 +802,7 @@ class ConfigManager(object):
                                     self.hists["h"+s.name+"Nom_"+normString+"Norm"].SetBinContent(1, self.hists["h"+s.name+"Nom_"+normString+"Norm"].GetBinContent(1) + tempHist.GetSumOfWeights())
                                 del tempHist
 
-                        if configMgr.verbose > 2:        
-                            print "nom =",self.hists["h"+s.name+"Nom_"+normString+"Norm"].GetSumOfWeights()        
+                        log.verbose("nom =",self.hists["h"+s.name+"Nom_"+normString+"Norm"].GetSumOfWeights()) 
                     else:
                         self.hists["h"+sam.name+"Nom_"+normString+"Norm"] = None
                         try:

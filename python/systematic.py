@@ -3,6 +3,7 @@ from ROOT import ConfigMgr,FitConfig  #from gSystem.Load("libSusyFitter.so")
 from prepareHistos import TreePrepare,HistoPrepare
 from histogramsManager import histMgr
 from copy import deepcopy
+from logger import log
 import os
 
 from ROOT import gROOT
@@ -183,31 +184,28 @@ class SystematicBase:
                             if treeName == '' or treeName == systNorm.high:
                                 treeName = s.name + systNorm.high
 
-                            if abstract.verbose > 2:
-                                print "s.name", s.name
-                                print "sam.name", sam.name
-                                print "systNorm high", systNorm.high
-                                print "treeName", treeName
+                            log.verbose("s.name", s.name)
+                            log.verbose("sam.name", sam.name)
+                            log.verbose("systNorm high", systNorm.high)
+                            log.verbose("treeName", treeName)
 
                             abstract.prepare.read(treeName, filelist)
 
                             tempHist = TH1F("temp", "temp", 1, 0.5, 1.5)
 
                             if systNorm.type == "tree":
-                                if abstract.verbose > 2:
-                                    print "normalization region", "". join(normReg[0])
-                                    print "normalization cuts", abstract.cutsDict["".join(normReg[0])]
-                                    print "current chain",abstract. prepare.currentChainName
-                                    print "projecting string",str(abstract. lumiUnits*abstract.outputLumi/abstract.inputLumi) + " * " + "*". join(s.weights) + " * (" + abstract.cutsDict["".join(normReg[0])] + ")"
+                                log.verbose("normalization region", "". join(normReg[0]))
+                                log.verbose("normalization cuts", abstract.cutsDict["".join(normReg[0])])
+                                log.verbose("current chain",abstract. prepare.currentChainName)
+                                log.verbose("projecting string",str(abstract. lumiUnits*abstract.outputLumi/abstract.inputLumi) + " * " + "*". join(s.weights) + " * (" + abstract.cutsDict["".join(normReg[0])] + ")")
 
                                 abstract.chains[abstract.prepare.currentChainName].Project("temp",abstract.cutsDict["".join(normReg[0])],str(abstract.lumiUnits*abstract.outputLumi/abstract.inputLumi)+" * "+"*".join(s.weights)+" * ("+abstract.cutsDict["".join(normReg[0])]+")")
                                 abstract.hists["h"+sam.name+systNorm.name+lowhigh+normString+"Norm"].SetBinContent(1,abstract.hists["h"+sam.name+systNorm.name+lowhigh+normString+"Norm"].GetSum()+tempHist.GetSumOfWeights())
                             elif systNorm.type == "weight":
-                                if abstract.verbose > 2:
-                                    print "normalization region","".join(normReg[0])
-                                    print "normalization cuts",abstract.cutsDict["".join(normReg[0])]
-                                    print "current chain",abstract.prepare.currentChainName
-                                    print "projecting string",str(abstract.lumiUnits*abstract.outputLumi/abstract.inputLumi)+" * "+"*".join(s.weights)+" * ("+abstract.cutsDict["".join(normReg[0])]+")"
+                                log.verbose("normalization region","".join(normReg[0]))
+                                log.verbose("normalization cuts",abstract.cutsDict["".join(normReg[0])])
+                                log.verbose("current chain",abstract.prepare.currentChainName)
+                                log.verbose("projecting string",str(abstract.lumiUnits*abstract.outputLumi/abstract.inputLumi)+" * "+"*".join(s.weights)+" * ("+abstract.cutsDict["".join(normReg[0])]+")")
                                 abstract.chains[abstract.prepare.currentChainName].Project("temp",abstract.cutsDict["".join(normReg[0])],str(abstract.lumiUnits*abstract.outputLumi/abstract.inputLumi)+" * "+"*".join(s.systDict[systNorm.name].high)+" * ("+abstract.cutsDict["".join(normReg[0])]+")")
                                 abstract.hists["h"+s.name+systNorm.name+lowhigh+normString+"Norm"].SetBinContent(1,abstract.hists["h"+s.name+systNorm.name+lowhigh+normString+"Norm"].GetSum()+tempHist.GetSumOfWeights())
                             del tempHist
@@ -221,8 +219,7 @@ class SystematicBase:
                      normCuts="", abstract=None, chan=None, sam=None):
         histName = "h" + sam.name + self.name + highorlow + regionString +\
                    "_obs_" + replaceSymbols(chan.variableName)
-        if abstract.verbose > 1:
-            print "!!!!!! adding histo", histName
+        log.debug("       adding histo %s" % histName)
         try:
             abstract.prepare.addHisto(histName,
                                       useOverflow=chan.useOverflowBin,
@@ -360,7 +357,7 @@ class UserSystematic(SystematicBase):
                             try:
                                 totNorm+=abstract.hists[nameTmp].GetSumOfWeights()
                             except:
-                                print "WARNING could get histogram %s for normalization"%nameTmp
+                                log.warning("could get histogram %s for normalization" % nameTmp)
                         
                         abstract.hists[histName].SetBinContent(1,totNorm)
         return

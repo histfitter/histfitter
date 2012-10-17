@@ -2,8 +2,8 @@ from ROOT import TFile, TMath, RooRandom, TH1, TH1F
 from ROOT import kBlack, kWhite, kGray, kRed, kPink, kMagenta, kViolet, kBlue, kAzure, kCyan, kTeal, kGreen, kSpring, kYellow, kOrange, kDashed, kSolid, kDotted
 from os import system
 from math import fabs
-
 from smpl import Sample
+from logger import log
 
 import generateToys
 
@@ -129,7 +129,7 @@ class ChannelXML(object):
         try:
             self.sampleList.remove(aSam)
         except:
-            print "WARNING unable to remove sample %s from channel %s" % (aSam.name, self.name)
+            log.warning("unable to remove sample %s from channel %s" % (aSam.name, self.name))
         
         return
 
@@ -319,7 +319,7 @@ class ChannelXML(object):
         """
         Write and close file
         """
-        print "Writing file: '%s'" % self.xmlFileName
+        log.info("Writing file: '%s'" % self.xmlFileName)
         self.xmlFile = open(self.xmlFileName, "w")
         self.xmlFile.write(str(self))
         self.xmlFile.close()

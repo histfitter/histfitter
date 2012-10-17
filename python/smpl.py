@@ -2,7 +2,7 @@ from ROOT import TFile, TMath, RooRandom, TH1, TH1F
 from ROOT import kBlack, kWhite, kGray, kRed, kPink, kMagenta, kViolet, kBlue, kAzure, kCyan, kTeal, kGreen, kSpring, kYellow, kOrange, kDashed, kSolid, kDotted
 from os import system
 from math import fabs
-
+from logger import log
 
 import generateToys
 
@@ -197,20 +197,21 @@ class Sample(object):
         """
 
         if normalizeSys and not self.normRegions: 
-            print "    WARNING normalizeSys==True but no normalization regions specified. This is not safe, please fix."
+            log.warning("    normalizeSys==True but no normalization regions specified. This is not safe, please fix.")
             for ch in self.parentChannel.parentTopLvl:
                 pass
-            print "            For now, using all non-validation channels by default: %s"%self.normRegions
+            log.info("            For now, using all non-validation channels by default: %s"%self.normRegions)
                 
 
         if self.noRenormSys and normalizeSys:
-            print "    WARNING smpl.noRenormSys==True and normalizeSys==True for %s %s. normalizeSys set to False."%(self.name,systName)
-            print "            Is this really what you want?"
+            log.warning("    smpl.noRenormSys==True and normalizeSys==True for %s %s. normalizeSys set to False."%(self.name,systName))
+            log.warning("    Is this really what you want?")
             normalizeSys = False
 
 
         if normalizeSys:
-            if not self.normRegions: raise RuntimeError("You are using the Zero lepton modified version of HistFitter. Please specify normalization regions!")
+            if not self.normRegions: 
+                raise RuntimeError("You are using the Zero lepton modified version of HistFitter. Please specify normalization regions!")
 
             if oneSide and symmetrize:
                 # symmetrize
@@ -226,15 +227,13 @@ class Sample(object):
             # use different renormalization region
             if len(self.normSampleRemap)>0: 
                 samNameRemap = self.normSampleRemap
-                if configMgr.verbose >= 2:
-                    print "INFO : remapping normalization of <",  samName,  "> to sample: ",  samNameRemap
+                log.debug("remapping normalization of <",  samName,  "> to sample: ",  samNameRemap)
             else:
                 samNameRemap = samName
 
             highIntegral = configMgr.hists["h"+samNameRemap+systName+"High_"+normString+"Norm"].Integral()
             lowIntegral = configMgr.hists["h"+samNameRemap+systName+"Low_"+normString+"Norm"].Integral()
             nomIntegral = configMgr.hists["h"+samNameRemap+"Nom_"+normString+"Norm"].Integral()
-
             
             if oneSide and symmetrize:
                 lowIntegral = 2.*nomIntegral - highIntegral # note,  this is an approximation!
@@ -242,14 +241,14 @@ class Sample(object):
                     lowIntegral = configMgr.hists["h"+samNameRemap+systName+"Low_"+normString+"Norm"].Integral()
                     if lowIntegral==0: lowIntegral=nomIntegral
                     # clearly a problem. Revert to unsymmetrize
-                    print "    WARNING: generating HistoSys for %s syst=%s low=0. Revert to non-symmetrize." % (nomName, systName)
+                    log.warning("    generating HistoSys for %s syst=%s low=0. Revert to non-symmetrize." % (nomName, systName))
                     symmetrize = False
 
             try:
                 high = highIntegral / nomIntegral
                 low = lowIntegral / nomIntegral
             except ZeroDivisionError:
-                print "    ERROR: generating HistoSys for %s syst=%s nom=%g high=%g low=%g remove from fit." % (nomName, systName, nomIntegral, highIntegral, lowIntegral)
+                log.error("    generating HistoSys for %s syst=%s nom=%g high=%g low=%g remove from fit." % (nomName, systName, nomIntegral, highIntegral, lowIntegral))
                 return
 
             configMgr.hists[highName+"Norm"] = configMgr.hists[highName].Clone(highName+"Norm")
@@ -259,9 +258,8 @@ class Sample(object):
                 configMgr.hists[highName+"Norm"].Scale(1./high)
                 configMgr.hists[lowName+"Norm"].Scale(1./low)
             except ZeroDivisionError:
-                print "    ERROR: generating HistoSys for %s syst=%s nom=%g high=%g low=%g remove from fit." % (nomName, systName, nomIntegral, highIntegral, lowIntegral)
+                log.error("    generating HistoSys for %s syst=%s nom=%g high=%g low=%g remove from fit." % (nomName, systName, nomIntegral, highIntegral, lowIntegral))
                 return
-
 
             if includeOverallSys and not (oneSide and not symmetrize):
                 nomIntegralN = configMgr.hists[nomName].Integral()
@@ -270,7 +268,7 @@ class Sample(object):
 
                 if nomIntegralN==0 or highIntegralN==0 or lowIntegralN==0:
                     # MB : cannot renormalize,  so don't after all
-                    print "    WARNING: will not generate overallNormHistoSys for %s syst=%s nom=%g high=%g low=%g. Revert to NormHistoSys." % (nomName, systName, nomIntegralN, highIntegralN, lowIntegralN)
+                    log.warning("    will not generate overallNormHistoSys for %s syst=%s nom=%g high=%g low=%g. Revert to NormHistoSys." % (nomName, systName, nomIntegralN, highIntegralN, lowIntegralN))
                     includeOverallSys = False
                     pass
                 else:
@@ -279,14 +277,14 @@ class Sample(object):
                         highN = highIntegralN / nomIntegralN
                         lowN = lowIntegralN / nomIntegralN
                     except ZeroDivisionError:
-                        print "    ERROR: generating overallNormHistoSys for %s syst=%s nom=%g high=%g low=%g remove from fit." % (nomName, systName, nomIntegralN, highIntegralN, lowIntegralN)
+                        log.error("    generating overallNormHistoSys for %s syst=%s nom=%g high=%g low=%g remove from fit." % (nomName, systName, nomIntegralN, highIntegralN, lowIntegralN))
                         return
                 
                     try:
                         configMgr.hists[highName+"Norm"].Scale(1./highN)
                         configMgr.hists[lowName+"Norm"].Scale(1./lowN)
                     except ZeroDivisionError:
-                        print "    ERROR: generating overallNormHistoSys for %s syst=%s nom=%g high=%g low=%g keeping in fit (offending histogram should be empty)." % (nomName, systName, nomIntegralN, highIntegralN, lowIntegralN)
+                        log.error("    generating overallNormHistoSys for %s syst=%s nom=%g high=%g low=%g keeping in fit (offending histogram should be empty)." % (nomName, systName, nomIntegralN, highIntegralN, lowIntegralN))
                         return
 
 
@@ -327,7 +325,7 @@ class Sample(object):
                     high = highIntegral / nomIntegral
                     low = lowIntegral / nomIntegral
                 except ZeroDivisionError:
-                    print "    ERROR: generating HistoSys for %s syst=%s nom=%g high=%g low=%g remove from fit." % (nomName, systName, nomIntegral, highIntegral, lowIntegral)
+                    log.error("    generating HistoSys for %s syst=%s nom=%g high=%g low=%g remove from fit." % (nomName, systName, nomIntegral, highIntegral, lowIntegral))
                     return
                 
                 configMgr.hists[highName+"Norm"] = configMgr.hists[highName].Clone(highName+"Norm")
@@ -336,7 +334,7 @@ class Sample(object):
                     configMgr.hists[highName+"Norm"].Scale(1./high)
                     configMgr.hists[lowName+"Norm"].Scale(1./low)
                 except ZeroDivisionError:
-                    print "    ERROR: generating HistoSys for %s syst=%s nom=%g high=%g low=%g keeping in fit (offending histogram should be empty)." % (nomName, systName, nomIntegral, highIntegral, lowIntegral)
+                    log.error("    generating HistoSys for %s syst=%s nom=%g high=%g low=%g keeping in fit (offending histogram should be empty)." % (nomName, systName, nomIntegral, highIntegral, lowIntegral))
                     return
 
                 self.histoSystList.append((systName, highName+"Norm", lowName+"Norm", configMgr.histCacheFile, "", "", "", ""))
@@ -354,35 +352,35 @@ class Sample(object):
                     high = highIntegral / nomIntegral
                     low = lowIntegral / nomIntegral
                 except ZeroDivisionError:
-                    print "    ERROR: generating HistoSys for %s syst=%s nom=%g high=%g low=%g remove from fit." % (nomName, systName, nomIntegral, highIntegral, lowIntegral)
+                    log.error("    generating HistoSys for %s syst=%s nom=%g high=%g low=%g remove from fit." % (nomName, systName, nomIntegral, highIntegral, lowIntegral))
                     return
 
                 if high<1.0 and low<1.0:
-                    print "    WARNING addHistoSys: high=%f is < 1.0 in %s. Taking symmetric value from low %f %f"% (high, systName, low, 2.-low)
+                    log.warning("    addHistoSys: high=%f is < 1.0 in %s. Taking symmetric value from low %f %f"% (high, systName, low, 2.-low))
                     configMgr.hists[highName+"Norm"] = configMgr.hists[highName].Clone(highName+"Norm")
                     try:
                         configMgr.hists[highName+"Norm"].Scale((2.-low)/high)
                     except ZeroDivisionError:
-                        print "    ERROR: generating HistoSys for %s syst=%s nom=%g high=%g low=%g remove from fit." % (nomName, systName, nomIntegral, highIntegral, lowIntegral)
+                        log.error("    generating HistoSys for %s syst=%s nom=%g high=%g low=%g remove from fit." % (nomName, systName, nomIntegral, highIntegral, lowIntegral))
                         return
                     self.histoSystList.append((systName, highName+"Norm", lowName, configMgr.histCacheFile, "", "", "", ""))
                     if not systName in configMgr.systDict.keys():
                         self.systList.append(systName)
                     return
                 if low>1.0 and high>1.0:
-                    print "    WARNING addHistoSys: low=%f is > 1.0 in %s. Taking symmetric value from high %f %f"% (low, systName, high, 2.-high)
+                    log.warning("    addHistoSys: low=%f is > 1.0 in %s. Taking symmetric value from high %f %f"% (low, systName, high, 2.-high))
                     configMgr.hists[lowName+"Norm"] = configMgr.hists[lowName].Clone(lowName+"Norm")
                     try:
                         configMgr.hists[lowName+"Norm"].Scale((2.-high)/low)
                     except ZeroDivisionError:
-                        print "    ERROR: generating HistoSys for %s syst=%s nom=%g high=%g low=%g remove from fit." % (nomName, systName, nomIntegral, highIntegral, lowIntegral)
+                        log.error("    generating HistoSys for %s syst=%s nom=%g high=%g low=%g remove from fit." % (nomName, systName, nomIntegral, highIntegral, lowIntegral))
                         return
                     self.histoSystList.append((systName, highName, lowName+"Norm", configMgr.histCacheFile, "", "", "", ""))
                     if not systName in configMgr.systDict.keys():
                         self.systList.append(systName)
                     return
                 if low<0.:
-                    print "    WARNING addHistoSys: low=%f is < 0.0 in %s. Setting negative bins to 0.0."% (low, systName)
+                    log.warning("    addHistoSys: low=%f is < 0.0 in %s. Setting negative bins to 0.0."% (low, systName))
                     configMgr.hists[lowName+"Norm"] = configMgr.hists[lowName].Clone(lowName+"Norm")
                     for iBin in xrange(1, configMgr.hists[lowName+"Norm"].GetNbinsX()+1):
                         if configMgr.hists[lowName+"Norm"].GetBinContent(iBin) < 0.:
@@ -419,7 +417,7 @@ class Sample(object):
                         high = highIntegral / nomIntegral
                         low = lowIntegral / nomIntegral
                     except ZeroDivisionError:
-                        print "    ERROR: generating HistoSys for %s syst=%s nom=%g high=%g low=%g remove from fit." % (nomName, systName, nomIntegral, highIntegral, lowIntegral)
+                        log.error("    generating HistoSys for %s syst=%s nom=%g high=%g low=%g remove from fit." % (nomName, systName, nomIntegral, highIntegral, lowIntegral))
                         return
                     
                     configMgr.hists[highName+"Norm"] = configMgr.hists[highName].Clone(highName+"Norm")
@@ -428,7 +426,7 @@ class Sample(object):
                         configMgr.hists[highName+"Norm"].Scale(1./high)
                         configMgr.hists[lowName+"Norm"].Scale(1./low)
                     except ZeroDivisionError:
-                        print "    ERROR: generating HistoSys for %s syst=%s nom=%g high=%g low=%g keeping in fit (offending histogram should be empty)." % (nomName, systName, nomIntegral, highIntegral, lowIntegral)
+                        log.error("    generating HistoSys for %s syst=%s nom=%g high=%g low=%g keeping in fit (offending histogram should be empty)." % (nomName, systName, nomIntegral, highIntegral, lowIntegral))
                         return
 
                     # overall histosys
@@ -480,8 +478,7 @@ class Sample(object):
         for iBin in xrange(configMgr.hists[nomName+"Norm"].GetNbinsX()+1):
             try:
                 configMgr.hists[nomName+"Norm"].SetBinContent(iBin,  max( configMgr.hists[highName+"Norm"].GetBinContent(iBin),  configMgr.hists[lowName+"Norm"].GetBinContent(iBin) )   )
-                if configMgr.verbose > 1:
-                    print "!!!!!! shapeSys %s bin %g value %g" % (systName, iBin, configMgr.hists[nomName+"Norm"].GetBinContent(iBin))
+                log.debug("!!!!!! shapeSys %s bin %g value %g" % (systName, iBin, configMgr.hists[nomName+"Norm"].GetBinContent(iBin)))
                 configMgr.hists[nomName+"Norm"].SetBinError(iBin, 0.)
             except ZeroDivisionError:
                 configMgr.hists[nomName+"Norm"].SetBinContent(iBin, 0.)
@@ -496,29 +493,29 @@ class Sample(object):
         Add an OverallSys entry using the high and low values
         """
         if high==1.0 and low==1.0:
-            print "    WARNING: addOverallSys for %s high==1.0 and low==1.0 remove from fit" % (systName)
+            log.warning("    addOverallSys for %s high==1.0 and low==1.0 remove from fit" % (systName))
             return
 
         if high==0.0 and low==0.0:
-            print "    WARNING: addOverallSys for %s high=%g low=%g remove from fit." % (systName, systName, high, low)
+            log.warning("    addOverallSys for %s high=%g low=%g remove from fit." % (systName, systName, high, low))
             return
 
         if high==1.0 and low>0.0 and low!=1.0:
             highOld=high
             high = 2.0 - low
-            print "    WARNING addOverallSys: high=%f in %s. Taking symmetric value from low %f %f" % (highOld, systName, low, high)
+            log.warning("    addOverallSys: high=%f in %s. Taking symmetric value from low %f %f" % (highOld, systName, low, high))
 
         if low==1.0 and high>0.0 and high!=1.0:
             lowOld=low
             low = 2.0 - high
-            print "    WARNING addOverallSys: low=%f in %s. Taking symmetric value from high %f %f" % (lowOld, systName, low, high)
+            log.warning("    addOverallSys: low=%f in %s. Taking symmetric value from high %f %f" % (lowOld, systName, low, high))
 
         if low<0.01:
-            print "    WARNING addOverallSys: low=%f is < 0.01 in %s. Setting to low=0.01. High=%f." % (low, systName, high)
+            log.warning("    addOverallSys: low=%f is < 0.01 in %s. Setting to low=0.01. High=%f." % (low, systName, high))
             low = 0.01
 
         if high<0.01:
-            print "    WARNING addOverallSys: high=%f is < 0.01 in %s. Setting to high=0.01. Low=%f." % (high, systName, low)
+            log.warning("    addOverallSys: high=%f is < 0.01 in %s. Setting to high=0.01. Low=%f." % (high, systName, low))
             high = 0.01
 
         self.overallSystList.append((systName, high, low))
@@ -587,7 +584,7 @@ class Sample(object):
         try:
             return self.systDict[systName]
         except KeyError:
-            print "WARNING could not find systematic %s in sample %s" % (systName, self.name)
+            log.warning("could not find systematic %s in sample %s" % (systName, self.name))
         return
 
     def removeSystematic(self, name):

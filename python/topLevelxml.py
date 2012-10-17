@@ -5,8 +5,10 @@ from math import fabs
 from measurmt import Measurement
 from chanxml import ChannelXML
 from smpl import Sample
+from logger import log
 
 import generateToys
+import os
 
 TH1.SetDefaultSumw2(True)
 
@@ -25,7 +27,6 @@ class TopLevelXML(object):
         self.ConstructorInit(name)
         #attributes to below are OK to deepcopy
         self.mode = "comb"
-        self.verbose = 1
         self.statErrThreshold = None #None means to turn OFF mcStat error
         self.measurements = []
         self.channels = []
@@ -104,7 +105,7 @@ class TopLevelXML(object):
                         if s.name == self.signalSample:
                             found = True
                 if not found:
-                    print "WARNING signal sample %s is not contained in sampleList of TopLvlXML %s or its daughter channels" % (self.signalSample, self.name)
+                    log.warning("signal sample %s is not contained in sampleList of TopLvlXML %s or its daughter channels" % (self.signalSample, self.name))
 
         for chan in self.channels:
             chanName = chan.channelName
@@ -122,9 +123,9 @@ class TopLevelXML(object):
                 isVR = True
                 nFound += 1
             if nFound == 0:
-                print "WARNING TopLvlXML: %s, Channel: %s --> SR/CR/VR undefined" % (self.name, chanName)
+                log.warning("TopLvlXML: %s, Channel: %s --> SR/CR/VR undefined" % (self.name, chanName))
             if nFound > 1:
-                print "WARNING TopLvlXML: %s, Channel: %s --> SR=%s CR=%s VR=%s is ambiguous" % (self.name, chanName, isSR, isCR, isVR)
+                log.warning("TopLvlXML: %s, Channel: %s --> SR=%s CR=%s VR=%s is ambiguous" % (self.name, chanName, isSR, isCR, isVR))
             #for sample in self.sampleList:
             #    try:
             #        chan.getSample(sample.name)
@@ -142,17 +143,17 @@ class TopLevelXML(object):
         """
         Write instance to file and close
         """
-        print "Writing file: '%s'" % self.xmlFileName
-        if self.verbose > 2:
-            print str(self)
-            pass
+        log.info("Writing file: '%s'" % self.xmlFileName)
+        log.verbose("Following will be written:")
+        log.verbose(str(self))
+        
         self.xmlFile = open(self.xmlFileName, "w")
         self.xmlFile.write(str(self))
         self.xmlFile.close()
         for chan in self.channels:
+            log.verbose("Following channel XML will be written:")    
+            log.verbose(str(chan))
             chan.close()
-            if self.verbose > 2:
-                print str(chan)
         return
 
     def execute(self, option=""):
@@ -164,13 +165,18 @@ class TopLevelXML(object):
             cmd += "-" + option
 
         cmd += self.xmlFileName
-        if not (self.verbose > 2):
-            cmd += " 1> /dev/null "
 
-        print "\nExecuting: '%s'" % cmd
-        system(cmd)
+        log.info("Executing: '%s'" % cmd)
+        p = os.popen(cmd)
+        output = p.readline()
+        while 1:
+            line = p.readline()
+            if not line: break
+            log.debug(line.strip())
 
-        print "Created workspace 'combined' in file '%s'\n" % self.wsFileName
+        p.close()
+
+        log.info("Created workspace 'combined' in file '%s'\n" % self.wsFileName)
         return
 
     def addMeasurement(self, name, lumi, lumiErr):

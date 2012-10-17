@@ -1,6 +1,7 @@
 from ROOT import gROOT,TFile,TH1F,Double,gDirectory,TChain
 from copy import deepcopy,copy
 from math import sqrt
+from logger import log
 
 class PrepareHistosABC(object):
     """
@@ -369,7 +370,7 @@ class HistoPrepare(PrepareHistosABC):
         return
 
     def read(self,name,fileList):
-        print "HistoPrepare " + str(fileList)
+        log.info("HistoPrepare " + str(fileList))
         """
         Get the histogram from the file
         """
@@ -385,7 +386,7 @@ class HistoPrepare(PrepareHistosABC):
                 self.configMgr.hists[name] = self.cacheFile.Get(name)
                 testsum = self.configMgr.hists[name].GetSum()
             except: # IOError:
-                print "WARNING: Could not find histogram <"+name+"> in "+self.cacheFileName+" ! "
+                log.warning("Could not find histogram <"+name+"> in "+self.cacheFileName+" ! ")
                 self.configMgr.hists[name] = None
                 raise #Exception("Could not find histogram <"+name+"> in "+self.cacheFileName)
 

@@ -22,8 +22,6 @@ gROOT.LoadMacro("./macros/AtlasStyle.C")
 import ROOT
 ROOT.SetAtlasStyle()
 
-
-log.setLevel(logger.DEBUG)
 log.warning("example warning from python")
 
 #-------------------------------
