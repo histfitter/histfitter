@@ -459,6 +459,7 @@ class ConfigManager(object):
             toplvlxml.propagateTreeName(self.treeName)
             pass
         return
+
     def executeAll(self):
         for tl in self.topLvls:
             self.execute(tl)
@@ -607,6 +608,12 @@ class ConfigManager(object):
             chan.getSample(sam.name).addOverallSys(syst.name,syst.high,syst.low)
         elif syst.method == "overallHistoSys":
             chan.getSample(sam.name).addHistoSys(syst.name,nomName,highName,lowName,True,False)
+        elif syst.method == "overallNormHistoSys":
+            chan.getSample(sam.name).addHistoSys(syst.name,nomName,highName,lowName,True,True,False,False,sam.name,normString)
+        elif syst.method == "overallNormHistoSysOneSide":
+            chan.getSample(sam.name).addHistoSys(syst.name,nomName,highName,lowName,True,True,False,True,sam.name,normString)
+        elif syst.method == "overallNormHistoSysOneSideSym":
+            chan.getSample(sam.name).addHistoSys(syst.name,nomName,highName,lowName,True,True,True,True,sam.name,normString)
         elif syst.method == "normHistoSys":
             chan.getSample(sam.name).addHistoSys(syst.name,nomName,highName,lowName,False,True,False,False,sam.name,normString)
         elif syst.method == "normHistoSysOneSide":
@@ -648,6 +655,9 @@ class ConfigManager(object):
             else:
                 chan.getSample(sam.name).addShapeSys(syst.name, nomName, highName, lowName)
                 chan.getSample(sam.name).shapeSystList.append((syst.name, nomName+"Norm", syst.constraint, "", "", "", ""))
+        else:
+            log.error("ERROR don't know what to do with %s %s"%(syst.name,syst.method))
+        return
 
     def addHistoSysForQCD(self,regionString,normString,normCuts,chan,sam):
         self.prepare.addQCDHistos(sam,chan.useOverflowBin,chan.useUnderflowBin)
@@ -802,7 +812,7 @@ class ConfigManager(object):
                                     self.hists["h"+s.name+"Nom_"+normString+"Norm"].SetBinContent(1, self.hists["h"+s.name+"Nom_"+normString+"Norm"].GetBinContent(1) + tempHist.GetSumOfWeights())
                                 del tempHist
 
-                        log.verbose("nom =",self.hists["h"+s.name+"Nom_"+normString+"Norm"].GetSumOfWeights()) 
+                        log.verbose("nom =%f"%self.hists["h"+s.name+"Nom_"+normString+"Norm"].GetSumOfWeights()) 
                     else:
                         self.hists["h"+sam.name+"Nom_"+normString+"Norm"] = None
                         try:
