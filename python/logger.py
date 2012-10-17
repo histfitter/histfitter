@@ -1,5 +1,4 @@
 from ROOT import TMsgLogger
-from ROOT import writeLogMessage
 
 # maps 1-on-1 to names used in TMsgLogger.h
 VERBOSE = 1
@@ -44,25 +43,25 @@ class Logger(object):
         self.always("Log level set to %s " % getLevelName(level) )
 
     def verbose(self, msg):
-        writeLogMessage(VERBOSE, msg)
+        TMsgLogger.writeLogMessage(VERBOSE, msg)
     
     def debug(self, msg):
-        writeLogMessage(DEBUG, msg)
+        TMsgLogger.writeLogMessage(DEBUG, msg)
     
     def info(self, msg):
-        writeLogMessage(INFO, msg)
+        TMsgLogger.writeLogMessage(INFO, msg)
     
     def warning(self, msg):
-        writeLogMessage(WARNING, msg)
+        TMsgLogger.writeLogMessage(WARNING, msg)
     
     def error(self, msg):
-        writeLogMessage(ERROR, msg)
+        TMsgLogger.writeLogMessage(ERROR, msg)
     
     def fatal(self, msg):
-        writeLogMessage(FATAL, msg)
+        TMsgLogger.writeLogMessage(FATAL, msg)
     
     def always(self, msg):
-        writeLogMessage(ALWAYS, msg)
+        TMsgLogger.writeLogMessage(ALWAYS, msg)
         #self.TMsgLogger.write(ALWAYS, msg)
 
 #initialize singleton

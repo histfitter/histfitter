@@ -24,7 +24,7 @@ ROOT.SetAtlasStyle()
 
 
 log.setLevel(logger.DEBUG)
-log.warning("warning from python")
+log.warning("example warning from python")
 
 #-------------------------------
 # Parameters for hypothesis test

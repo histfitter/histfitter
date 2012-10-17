@@ -4,6 +4,7 @@ from prepareHistos import TreePrepare,HistoPrepare
 from copy import deepcopy
 from systematic import Systematic
 from histogramsManager import histMgr
+from logger import log
 import os
 
 from ROOT import gROOT
@@ -129,7 +130,7 @@ class ConfigManager(object):
         newTLX.setWeights(self.weights)
         newTLX.removeEmptyBins=self.removeEmptyBins
         self.topLvls.append(newTLX)
-        print "Created Fit Config: %s"%(newName)
+        log.info("Created Fit Config: %s" % (newName))
         return self.topLvls[len(self.topLvls)-1]
 
     def addTopLevelXMLClone(self,obj,name):
@@ -141,21 +142,21 @@ class ConfigManager(object):
             if tl.name==name:
                 self.topLvls.pop(i)
                 return
-        print "WARNING TopLevelXML named '%s' does not exist. Cannot be removed."%(name)
+        log.warning("TopLevelXML named '%s' does not exist. Cannot be removed."%(name))
         return
 
     def getTopLevelXML(self,name):
         for tl in self.topLvls:
             if tl.name==name:
                 return tl
-        print "WARNING TopLevelXML named '%s' does not exist. Cannot be returned."%(name)
+        log.warning("TopLevelXML named '%s' does not exist. Cannot be returned."%(name))
         return 0
 
     def initialize(self):
-        print "Initializing..."
+        log.info("Initializing...")
         if self.histCacheFile=='':
             tmpName="data/"+self.analysisName+".root"
-            print "Giving default name histCacheFile: %s"%(tmpName)
+            log.info("Giving default name histCacheFile: %s"%(tmpName))
             self.histCacheFile=tmpName
             pass
         if self.inputLumi==None and self.outputLumi==None:
@@ -164,7 +165,7 @@ class ConfigManager(object):
             pass
 
         # Propagate stuff down from config manager
-        print "  -initialize python objects..."
+        log.info("  -initialize python objects...")
         for tl in self.topLvls:
             tl.initialize()
             for chan in tl.channels:
@@ -178,7 +179,7 @@ class ConfigManager(object):
                     elif sam.isQCD or sam.isData:
                         chan.getSample(sam.name).setWrite(False)
 
-        print "  -initialize global histogram dictionary..."
+        log.info("  -initialize global histogram dictionary...")
         for tl in self.topLvls:
             for chan in tl.channels:
                 for sam in chan.sampleList:
@@ -238,23 +239,23 @@ class ConfigManager(object):
                                     self.hists["h"+mergedName+syst.name+"Low_"+regString+"_obs_"+replaceSymbols(chan.variableName)] = None
 
         if self.readFromTree:
-            print "  -build TreePrepare()..."
+            log.info("  -build TreePrepare()...")
             self.prepare = TreePrepare()
             if self.plotHistos==None:    #set plotHistos if not already set by user
                 self.plotHistos = False  #this is essentially for debugging
                 pass
         else:
-            print "  -build HistoPrepare()..."
+            log.info("  -build HistoPrepare()...")
             self.prepare = HistoPrepare(self.histCacheFile)
         #C++ alter-ego
-        print "  -initialize C++ mgr..."
+        log.info("  -initialize C++ mgr...")
         self.initializeCppMgr()
-        print "  -propagate file list and tree names..."
+        log.info("  -propagate file list and tree names...")
         self.propagateFileList() # propagate file lists down the tree
         ## Assume that all tree names have been set
         self.propagateTreeName()
         #Summary
-        self.Print()
+        self.Print() 
         return
 
     def initializeCppMgr(self):
@@ -337,45 +338,46 @@ class ConfigManager(object):
         self.cppMgr.initialize()
         return
 
-    def Print(self,verbose=None):
+    def Print(self, verbose=None):
         if verbose == None:
             verbose = self.verbose
-        print "*-------------------------------------------------*"
-        print "              Summary of ConfigMgr\n"
-        print "analysisName: %s"%self.analysisName
-        print "cache file: %s"%self.histCacheFile
-        print "output file: %s"%self.outputFileName
-        print "nomName: %s"%self.nomName
-        print "inputLumi: %.3f"%self.inputLumi
-        print "outputLumi: %.3f"%self.outputLumi
-        print "nTOYs: %i"%self.nTOYs
-        print "doHypoTest: %s"%self.doHypoTest
-        print "fixSigXSec: %s"%self.fixSigXSec
-        print "Systematics: %s"%self.systDict.keys()
+        
+        log.info("*-------------------------------------------------*")
+        log.info("              Summary of ConfigMgr\n")
+        log.info("analysisName: %s"%self.analysisName)
+        log.info("cache file: %s"%self.histCacheFile)
+        log.info("output file: %s"%self.outputFileName)
+        log.info("nomName: %s"%self.nomName)
+        log.info("inputLumi: %.3f"%self.inputLumi)
+        log.info("outputLumi: %.3f"%self.outputLumi)
+        log.info("nTOYs: %i"%self.nTOYs)
+        log.info("doHypoTest: %s"%self.doHypoTest)
+        log.info("fixSigXSec: %s"%self.fixSigXSec)
+        log.info("Systematics: %s"%self.systDict.keys())
         if verbose > 1:
-            print "Cuts Dictionnary: %s"%self.cutsDict
-        print "readFromTree: %s"%self.readFromTree
-        print "plotHistos: %s"%self.plotHistos
-        print "executeHistFactory: %s"%self.executeHistFactory
-        print "TopLevelXML objects:"
+            log.debug("Cuts Dictionary: %s"%self.cutsDict)
+        log.info("readFromTree: %s"%self.readFromTree)
+        log.info("plotHistos: %s"%self.plotHistos)
+        log.info("executeHistFactory: %s"%self.executeHistFactory)
+        log.info("TopLevelXML objects:")
         for tl in self.topLvls:
-            print "  %s"%tl.name
+            log.info("  %s"%tl.name)
             for c in tl.channels:
-                print "    %s: %s"%(c.name,c.systDict.keys())
-        print "C++ ConfigMgr status: %s"%(self.cppMgr.m_status)
-        print "Histogram names: (requires verbose > 1)"
+                log.info("    %s: %s"%(c.name,c.systDict.keys()))
+        log.info("C++ ConfigMgr status: %s"%(self.cppMgr.m_status))
+        log.info("Histogram names: (requires verbose > 1)")
         if verbose > 1:
             configMgr.printHists()
-        print "Chain names: (requires verbose > 1 & note chains are only generated with -t)"
+        log.info("Chain names: (requires verbose > 1 & note chains are only generated with -t)")
         if verbose > 1:
             configMgr.printChains()
-        print "File names: (requires verbose > 1)"
+        log.info("File names: (requires verbose > 1)")
         if verbose > 1:
             configMgr.printFiles()
-        print "Input tree names: (requires verbose > 1)"
+        log.info("Input tree names: (requires verbose > 1)")
         if verbose > 1:
             configMgr.printTreeNames()
-        print "*-------------------------------------------------*\n"
+        log.info("*-------------------------------------------------*\n")
         return
 
     def printHists(self):
@@ -478,7 +480,7 @@ class ConfigManager(object):
         """
         Make or get the histograms and generate the XML
         """
-        print "Preparing histograms and/or workspace for TopLevelXML %s\n"%topLvl.name
+        log.info("Preparing histograms and/or workspace for TopLevelXML %s\n"%topLvl.name)
 
         if self.plotHistos:
             cutHistoDict = {}
@@ -519,7 +521,7 @@ class ConfigManager(object):
                         self.appendSystinChanInfoDict(chan,sam,systName,syst)
 
         for (iChan,chan) in enumerate(topLvl.channels):
-            print "Channel: %s"%chan.name
+            log.info("Channel: %s" % chan.name)
             regionString = ""
             for reg in chan.regions:
                 regionString += reg
@@ -527,7 +529,7 @@ class ConfigManager(object):
             sampleListRun = deepcopy(chan.sampleList)
             #for (iSam,sam) in enumerate(topLvl.sampleList):
             for (iSam,sam) in enumerate(sampleListRun):
-                print "  Sample: %s"%sam.name
+                log.info("  Sample: %s" % sam.name)
                 # Run over the nominal configuration first
                 # Set the weights,cuts,weights
                 self.setWeightsCutsVariable(chan,sam,regionString)
@@ -606,12 +608,12 @@ class ConfigManager(object):
             try:
                 overallSystHigh = highIntegral / nomIntegral
             except ZeroDivisionError:
-                print "    WARNING generating High HistoSys for %s syst=%s nom=%g high=%g low=%g" % (nomName,syst.name,nomIntegral,highIntegral,lowIntegral)
+                log.warning("    generating High HistoSys for %s syst=%s nom=%g high=%g low=%g" % (nomName,syst.name,nomIntegral,highIntegral,lowIntegral))
                 overallSystHigh = 1.0
             try:
                 overallSystLow = lowIntegral / nomIntegral
             except ZeroDivisionError:
-                print "    WARNING generating Low HistoSys for %s syst=%s nom=%g high=%g low=%g" % (nomName,syst.name,nomIntegral,highIntegral,lowIntegral)
+                log.warning("    generating Low HistoSys for %s syst=%s nom=%g high=%g low=%g" % (nomName,syst.name,nomIntegral,highIntegral,lowIntegral))
                 overallSystLow = 1.0
             chan.getSample(sam.name).addOverallSys(syst.name,overallSystHigh,overallSystLow)
         elif syst.method == "userOverallSys":
@@ -677,11 +679,13 @@ class ConfigManager(object):
             highIntegral = configMgr.hists[prefixHigh].Integral()
             lowIntegral = configMgr.hists[prefixLow].Integral()
             nomIntegral = configMgr.hists[prefixNom].Integral()
+            
             try:
                 overallSystHigh = highIntegral / nomIntegral
                 overallSystLow = lowIntegral / nomIntegral
             except ZeroDivisionError:
-                print "Error generating HistoSys for %s syst=%s nom=%g high=%g low=%g" % (nomName,"QCDNorm_"+regionString+"_"+replaceSymbols(chan.variableName),nomIntegral,highIntegral,lowIntegral)
+                log.warning("Error generating HistoSys for %s syst=%s nom=%g high=%g low=%g" % (nomName,"QCDNorm_"+regionString+"_"+replaceSymbols(chan.variableName),nomIntegral,highIntegral,lowIntegral))
+            
             chan.getSample(sam.name).addOverallSys("QCDNorm_"+regionString+"_"+replaceSymbols(chan.variableName),overallSystHigh,overallSystLow)
         elif chan.getSample(sam.name).qcdSyst == "overallHistoSys":
             chan.getSample(sam.name).addHistoSys("QCDNorm_"+regionString+"_"+replaceSymbols(chan.variableName),prefixNom,prefixHigh,prefixLow,True,False)
@@ -758,7 +762,7 @@ class ConfigManager(object):
                 self.prepare.addHisto(tmpName,useOverflow=chan.useOverflowBin,useUnderflow=chan.useUnderflowBin)
                 #check that nominal sample is not empty for that channel
                 if self.hists[tmpName].GetSum() == 0.0:
-                    print "    ***WARNING nominal sample %s is empty for channel %s. Remove from PDF.***"%(sam.name,chan.name)
+                    log.warning("    ***nominal sample %s is empty for channel %s. Remove from PDF.***"%(sam.name,chan.name))
                     chan.removeSample(sam.name)
                     del self.hists[tmpName]
                     self.hists[tmpName]=None
@@ -822,7 +826,7 @@ class ConfigManager(object):
                             pass
 
             for (systName,syst) in chan.getSample(sam.name).systDict.items():
-                print "    Systematic: %s"%(systName)
+                log.info("    Systematic: %s"%(systName))
                 #first reset weight to nominal value
                 self.setWeightsCutsVariable(chan,sam,regionString)
                 syst.PrepareWeightsAndHistos(regionString,normString,normCuts,self,topLvl,chan,sam)
