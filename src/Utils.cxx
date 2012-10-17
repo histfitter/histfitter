@@ -1504,51 +1504,65 @@ void Util::PlotNLL(RooWorkspace* w, RooFitResult* rFit, Bool_t plotPLL, TString 
 
     // loop over all floating pars
     for(unsigned int iPar=0; iPar<numPars ; iPar++){
-        RooAbsArg* arg = fpf.at(iPar);
-        if(arg->InheritsFrom("RooRealVar")){
-            RooRealVar* par = (RooRealVar*) arg;
-            TString parName = par->GetName();
-            (*TMsgLogger::getInstance()) << kINFO << "Plotting NLL for par = " << parName << GEndl;
-            RooPlot* frame = par->frame();
-            nll->plotOn(frame, ShiftToZero());
-            frame->SetMinimum(0.);
-
-            // curveName = 0 means take the last curve from the plot
-            const char* curvename = 0;
-            RooCurve* curve = (RooCurve*) frame->findObject(curvename,RooCurve::Class()) ;
-            Double_t curveMax = curve->getYAxisMax();
-            //   cout << GEndl << " curveMax = " << curveMax << GEndl;
-            frame->SetMaximum(curveMax * 2.);
-
-            frame->GetYaxis()->SetTitleSize(0.05);
-            frame->GetXaxis()->SetTitleSize(0.05);
-
-            frame->GetYaxis()->SetLabelSize(0.075);
-            frame->GetXaxis()->SetLabelSize(0.075);
-            //   frame->SetMaximum(10000.);
-
-            if(plotPLL)   pll->plotOn(frame,LineColor(kRed),LineStyle(kDashed),NumCPU(4)) ;
-
-            can->cd(iPar+1);
-            frame->Draw();  
-
-            TLegend* leg = new TLegend(0.55,0.65,0.85,0.9,"");
-            leg->SetFillStyle(0);
-            leg->SetFillColor(0);
-            leg->SetBorderSize(0);
-            TLegendEntry* entry=leg->AddEntry("","NLL","l") ;
-            entry->SetLineColor(kBlue);
-            entry=leg->AddEntry("","PLL","l") ;
-            entry->SetLineColor(kRed);
-            entry->SetLineStyle(kDashed);
-            leg->Draw();
-
-        }
+      RooAbsArg* arg = fpf.at(iPar);
+      if(arg->InheritsFrom("RooRealVar")){
+	RooRealVar* par = (RooRealVar*) arg;
+	TString parName = par->GetName();
+	(*TMsgLogger::getInstance()) << kINFO << "Plotting NLL for par = " << parName << GEndl;
+	RooPlot* frame = par->frame();
+	nll->plotOn(frame, ShiftToZero());
+	frame->SetMinimum(0.);
+	
+	const char* curvename = 0;
+	RooCurve* curve = (RooCurve*) frame->findObject(curvename,RooCurve::Class()) ;
+	Double_t curveMax = curve->getYAxisMax();
+	// safety for weird RooPlots where curve goes to infinity in first/last bin(s)
+	if (curveMax > 0. && !std::isinf(curveMax) )   frame->SetMaximum(curveMax * 2.); 
+	else if(curveMax > 0. && std::isinf(curveMax) ){
+	  Int_t iBin = 1;
+	  Double_t xFirstBin = 0.;
+	  Double_t yFirstBin = -1.;	
+	  while ( (yFirstBin<0 || std::isinf(yFirstBin) )&& iBin < curve->GetN()-1){
+	    iBin++;
+	    curve->GetPoint(iBin,xFirstBin,yFirstBin) ;
+	  }
+	  iBin = curve->GetN()-1;
+	  Double_t xLastBin = 0.;
+	  Double_t yLastBin = -1.;	
+	  while ( (yLastBin < 0 || std::isinf(yLastBin)) && iBin >0){
+	    iBin--;
+	    curve->GetPoint(iBin,xLastBin,yLastBin) ;
+	  }
+	  curveMax = yLastBin>yFirstBin ? yLastBin : yFirstBin;      
+	  frame->SetMaximum(curveMax * 2. ); 
+	}
+	else frame->SetMaximum(1000.);
+	
+	
+	if(plotPLL)   pll->plotOn(frame,LineColor(kRed),LineStyle(kDashed),NumCPU(4)) ;
+	
+	can->cd(iPar+1);
+	frame->Draw();  
+	
+	TLegend* leg = new TLegend(0.55,0.65,0.85,0.9,"");
+	leg->SetFillStyle(0);
+	leg->SetFillColor(0);
+	leg->SetBorderSize(0);
+	TLegendEntry* entry=leg->AddEntry("","NLL","l") ;
+	entry->SetLineColor(kBlue);
+	if(plotPLL) {	
+	  entry=leg->AddEntry("","PLL","l") ;
+	  entry->SetLineColor(kRed);
+	  entry->SetLineStyle(kDashed);
+	}
+	leg->Draw();
+	
+      }
     }
-
+    
     can->SaveAs("results/"+canName+".pdf");
     can->SaveAs("results/"+canName+".eps");
-
+    
     delete nll ;
     delete pll;
 
