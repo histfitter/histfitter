@@ -168,8 +168,9 @@ if __name__ == "__main__":
     import os, sys
     import getopt
     def usage():
-        print "HistFitter.py [-i] [-t] [-w] [-f] [-l] [-p] [-d] [-n nTOYs] [-s seed] [-r SRs] [-g gridPoint] [-b bkgParName,value] <configuration_file>\n"
+        print "HistFitter.py [-L loglevel] [-i] [-t] [-w] [-f] [-l] [-p] [-d] [-n nTOYs] [-s seed] [-r SRs] [-g gridPoint] [-b bkgParName,value] <configuration_file>\n"
         print "(all OFF by default. Turn steps ON with options)"
+        print "-L set log level (VERBOSE, DEBUG, INFO, WARNING, ERROR, FATAL, ALWAYS; default INFO)"
         print "-t re-create histograms from TTrees (default: %s)" % (configMgr.readFromTree)
         print "-w re-create workspace from histograms (default: %s)" % (configMgr.executeHistFactory)
         print "-f fit the workspace (default: %s)" % (configMgr.executeHistFactory)
@@ -177,7 +178,6 @@ if __name__ == "__main__":
         print "-s <number> set the random seed for toy generation (default is CPU clock: %i)" % configMgr.toySeed
         print "-a use Asimov dataset for fitting and plotting (default: %i)" % configMgr.useAsimovSet
         print "-i stays in interactive session after executing the script (default %s)" % runInterpreter
-        print "-v verbose level (1: DEBUG, 2: VERBOSE)" % configMgr.verbose #TODO should interface to log level directly
         print "-l make limit plot of workspace (default %s)" % printLimits
         print "-p run (exclusion) hypothesis test on workspace (default %s)" % doHypoTests
         print "-z run the discovery hypothesis test instead. In combination with -p. (default %s)" % (not doUL)
@@ -197,7 +197,7 @@ if __name__ == "__main__":
         sys.exit(0)
 
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "zd0twfinals:v:r:b:g:p")
+        opts, args = getopt.getopt(sys.argv[1:], "zd0twfinals:r:b:g:L:p")
         configFile = str(args[0])
     except:
         usage()
@@ -213,11 +213,11 @@ if __name__ == "__main__":
             configMgr.nTOYs = int(arg)
         elif opt == '-i':
             runInterpreter = True
-        elif opt == '-v':
-            if(int(arg) == 1):
-                log.setLevel(logger.DEBUG)
-            elif(int(arg) == 2):
-                log.setLevel(logger.VERBOSE)
+        elif opt == '-L':
+            if len(arg) == 1: #assume this is an integer log level
+                log.setLevel(int(arg))
+            else:
+                log.setLevel(arg) #can take both strings and ints, does its own checking 
         elif opt == '-l':
             printLimits = True
         elif opt == '-p':
