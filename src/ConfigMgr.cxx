@@ -249,15 +249,6 @@ void ConfigMgr::doHypoTest(FitConfig* fc, TString outdir, double SigXSecSysnsigm
         }
     }
 
-    //RooStats::HypoTestInverterResult* result = RooStats::DoHypoTestInversion(w,m_nToys,m_calcType,m_testStatType,
-    //									    useCLs,npoints,poimin,poimax,doAnalyze,useNumberCounting,
-    //								            modelSBName.Data(),modelBName.Data(),dataName,nuisPriorName);    
-
-    //// store ul as nice plot ..
-    //if ( result!=0 ) {
-    //   RooStats::AnalyzeHypoTestInverterResult( result,m_calcType,m_testStatType,useCLs,npoints, fc->m_signalSampleName.Data(), ".eps") ;
-    //}
-
     //// Storage
     if ( result!=0 ) {	
         outfile->cd();
