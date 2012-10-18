@@ -9,10 +9,12 @@
 #ifndef __TEasyFormula__
 #define __TEasyFormula__
 
-#include "TFormula.h"
-#include "TString.h"
 #include <vector>
 #include <map>
+
+#include "TFormula.h"
+#include "TString.h"
+#include "TMsgLogger.h"
 
 class TEasyFormula : public TFormula {
 
@@ -44,7 +46,7 @@ class TEasyFormula : public TFormula {
 
         inline void   Reset()           { (void) this->SetFormula("1"); }
 
-        void Summary() const;
+        void Summary();
 
     protected:
 
@@ -59,6 +61,8 @@ class TEasyFormula : public TFormula {
         std::map<TString,double> m_stod;
         std::map<int,TString> m_itos;
         std::map<TString,int> m_stoi;
+
+        TMsgLogger m_logger;
 
         ClassDef(TEasyFormula,0)
 };

@@ -11,6 +11,10 @@
 
 using namespace std;
 
+namespace DrawUtil {
+    static TMsgLogger DrawUtilLogger("DrawUtil");
+}
+
 TH2D* DrawUtil::triwsmooth( TTree* tree, const char* varstr, const char* name, const char* title, const char* cutstr, TH2D* inputHist){
     if (tree==NULL) 
         return 0;
@@ -18,8 +22,8 @@ TH2D* DrawUtil::triwsmooth( TTree* tree, const char* varstr, const char* name, c
     int ntotal = tree->GetEntries("1");
     int nselect = tree->GetEntries(cutstr);
 
-    (*TMsgLogger::getInstance()) << kINFO << "Plotting " << varstr << " with selection " << cutstr << "." << GEndl; 
-    (*TMsgLogger::getInstance()) << kINFO << "Selected " << nselect << " out of " << ntotal << " entries. Fraction = " << double(nselect)/ntotal << GEndl;
+    DrawUtilLogger << kINFO << "Plotting " << varstr << " with selection " << cutstr << "." << GEndl; 
+    DrawUtilLogger << kINFO << "Selected " << nselect << " out of " << ntotal << " entries. Fraction = " << double(nselect)/ntotal << GEndl;
 
     // Wacky workaround to prevent segfault in tree->Draw() below.
     TString buh("");
@@ -102,7 +106,7 @@ TH2F* DrawUtil::makesignificancehistos( TTree* tree, int mode,TString id1,TStrin
         if (mode==2) { hbkgPmin->Fill( m0, m12, bkg ); }
     }
 
-    (*TMsgLogger::getInstance()) << kINFO << "done filling bkg" << GEndl;
+    DrawUtilLogger << kINFO << "done filling bkg" << GEndl;
 
     if (mode==0)  return hclPmin;
     if (mode==1)  return hsigPmin;

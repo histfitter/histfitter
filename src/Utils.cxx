@@ -66,8 +66,9 @@ using namespace std;
 using namespace RooFit;
 using namespace RooStats;
 
-
-
+namespace Util {
+    static TMsgLogger Logger("Util");
+}
 
 //_____________________________________________________________________________
 double Util::looseToTightVal(const TString& reg, TMap* map){
@@ -126,7 +127,7 @@ double Util::getNonQcdVal(const TString& proc, const TString& reg, TMap* map,con
 void Util::SaveInitialSnapshot(RooWorkspace* w){
 
     if(w==NULL){
-        (*TMsgLogger::getInstance()) << kINFO << "Util::SaveInitialSnapshot():   workspace does not exist" << GEndl;
+        Logger << kINFO << "Util::SaveInitialSnapshot():   workspace does not exist" << GEndl;
         return;
     }
 
@@ -140,7 +141,7 @@ void Util::SaveInitialSnapshot(RooWorkspace* w){
     if(!w->loadSnapshot("snapshot_paramsVals_initial")) {
         w->saveSnapshot("snapshot_paramsVals_initial",*params);
     } else {
-        (*TMsgLogger::getInstance()) << kWARNING << "Snapshot 'snapshot_paramsVals_initial' already exists in  workspace, will not overwrite it" << GEndl;
+        Logger << kWARNING << "Snapshot 'snapshot_paramsVals_initial' already exists in  workspace, will not overwrite it" << GEndl;
     }
 
     // Put workspace in the global directory
@@ -155,10 +156,10 @@ void Util::LoadSnapshotInWorkspace(RooWorkspace* w,TString snapshot){
     Bool_t loaded =  w->loadSnapshot(snapshot);
 
     if (loaded){ 
-        (*TMsgLogger::getInstance()) << kINFO << "workspace loaded" << GEndl; 
+        Logger << kINFO << "workspace loaded" << GEndl; 
         return; 
     } else { 
-        (*TMsgLogger::getInstance()) << kWARNING << "Util.LoadSnapshotInWorkspace() did not find snapshot named "  << snapshot << ", check your workspace file" << GEndl;
+        Logger << kWARNING << "Util.LoadSnapshotInWorkspace() did not find snapshot named "  << snapshot << ", check your workspace file" << GEndl;
     }
 
     return;  
@@ -170,7 +171,7 @@ void Util::LoadSnapshotInWorkspace(RooWorkspace* w,TString snapshot){
 void Util::WriteWorkspace(RooWorkspace* w, TString outFileName, TString suffix){
 
     if(w==NULL){ 
-        (*TMsgLogger::getInstance()) << kERROR << "Workspace not found, not writing workspace to file" << GEndl; 
+        Logger << kERROR << "Workspace not found, not writing workspace to file" << GEndl; 
         return; 
     }
 
@@ -186,7 +187,7 @@ void Util::WriteWorkspace(RooWorkspace* w, TString outFileName, TString suffix){
 
     w->writeToFile(outFileName.Data());
 
-    (*TMsgLogger::getInstance()) << kINFO << " Util::WriteWorkspace():   have written workspace to file " <<  outFileName << GEndl;
+    Logger << kINFO << " Util::WriteWorkspace():   have written workspace to file " <<  outFileName << GEndl;
 
     return;
 }
@@ -196,14 +197,14 @@ void Util::WriteWorkspace(RooWorkspace* w, TString outFileName, TString suffix){
 RooFitResult* Util::FitPdf( RooWorkspace* w, TString fitRegions, bool lumiConst, RooAbsData* inputData, TString suffix)
 {
 
-    (*TMsgLogger::getInstance()) << kINFO << " ------ Starting FitPdf with parameters:    fitRegions = " <<  fitRegions << GEndl;
-    (*TMsgLogger::getInstance()) << kINFO <<  "    inputData = " << inputData << "  suffix = " << suffix  << GEndl;
+    Logger << kINFO << " ------ Starting FitPdf with parameters:    fitRegions = " <<  fitRegions << GEndl;
+    Logger << kINFO <<  "    inputData = " << inputData << "  suffix = " << suffix  << GEndl;
 
     RooMsgService::instance().getStream(1).removeTopic(NumIntegration);
 
     //RooWorkspace* w = (RooWorkspace*) gDirectory->Get("w");
     if(w==NULL){ 
-        (*TMsgLogger::getInstance()) << kERROR << "Workspace not found, no fitting performed" << GEndl;
+        Logger << kERROR << "Workspace not found, no fitting performed" << GEndl;
         return NULL; 
     }
     RooSimultaneous* pdf = (RooSimultaneous*) w->pdf("simPdf");
@@ -229,7 +230,7 @@ RooFitResult* Util::FitPdf( RooWorkspace* w, TString fitRegions, bool lumiConst,
     for(unsigned int iVec=0; iVec<numFitRegions; iVec++){
         TString regionCatLabel = fitRegionsVec[iVec];
         if( regionCat->setLabel(regionCatLabel,kTRUE)){  
-            (*TMsgLogger::getInstance()) << kWARNING << " Label '" << regionCatLabel << "' is not a state of channelCat (see Table) " << GEndl; 
+            Logger << kWARNING << " Label '" << regionCatLabel << "' is not a state of channelCat (see Table) " << GEndl; 
         } else{
             // dataset for each channel/region/category
             TString dataCatLabel = Form("channelCat==channelCat::%s",regionCatLabel.Data());
@@ -243,11 +244,11 @@ RooFitResult* Util::FitPdf( RooWorkspace* w, TString fitRegions, bool lumiConst,
 
 
     if(dataVec.empty()){ 
-        (*TMsgLogger::getInstance()) << kERROR << "   NONE OF THE REGIONS ARE SPECIFIED IN DATASET, NO FIT WILL BE PERFORMED" << GEndl; 
+        Logger << kERROR << "   NONE OF THE REGIONS ARE SPECIFIED IN DATASET, NO FIT WILL BE PERFORMED" << GEndl; 
         return 0;
     }
     else if(pdfVec.empty()){ 
-        (*TMsgLogger::getInstance()) << kERROR << "   NONE OF THE REGIONS ARE SPECIFIED IN SIMULTANEOUS PDF, NO FIT WILL BE PERFORMED" << GEndl; 
+        Logger << kERROR << "   NONE OF THE REGIONS ARE SPECIFIED IN SIMULTANEOUS PDF, NO FIT WILL BE PERFORMED" << GEndl; 
         return 0;
     }
     else{
@@ -270,7 +271,7 @@ RooFitResult* Util::FitPdf( RooWorkspace* w, TString fitRegions, bool lumiConst,
     RooFitResult* r = 0;
 
     TString datasetname = data->GetName();
-    (*TMsgLogger::getInstance()) << kINFO << " datasetname = " << datasetname << GEndl;
+    Logger << kINFO << " datasetname = " << datasetname << GEndl;
     if( datasetname.Contains("asimov")){
         //r = simPdfFitRegions->fitTo(*dataFitRegions,Save(),SumW2Error(kFALSE)); //MB no verbose :) ,Verbose(kTRUE));
 
@@ -300,8 +301,8 @@ RooFitResult* Util::FitPdf( RooWorkspace* w, TString fitRegions, bool lumiConst,
         TString minimizer = ROOT::Math::MinimizerOptions::DefaultMinimizerType(); 
         TString algorithm = ROOT::Math::MinimizerOptions::DefaultMinimizerAlgo(); 
 
-        (*TMsgLogger::getInstance()) << kINFO << "Util::FitPdf()  ........ using " << minimizer << " / " << algorithm << GEndl; 
-        (*TMsgLogger::getInstance()) << kINFO << " with strategy  " << strategy << " and tolerance " << tol << GEndl;
+        Logger << kINFO << "Util::FitPdf()  ........ using " << minimizer << " / " << algorithm << GEndl; 
+        Logger << kINFO << " with strategy  " << strategy << " and tolerance " << tol << GEndl;
 
 
         bool kickApplied(false);
@@ -312,24 +313,24 @@ RooFitResult* Util::FitPdf( RooWorkspace* w, TString fitRegions, bool lumiConst,
                 break;
             } else { 
                 if (tries == 1) {
-                    (*TMsgLogger::getInstance()) << kINFO << "    ----> Doing a re-scan first" << GEndl;
+                    Logger << kINFO << "    ----> Doing a re-scan first" << GEndl;
                     minim.minimize(minimizer,"Scan");
                 }
                 if (tries == 2) {
                     if (ROOT::Math::MinimizerOptions::DefaultStrategy() == 0 ) { 
-                        (*TMsgLogger::getInstance()) << kINFO << "    ----> trying with strategy = 1" << GEndl;
+                        Logger << kINFO << "    ----> trying with strategy = 1" << GEndl;
                         minim.setStrategy(1);
                     }
                     else 
                         tries++; // skip this trial if stratehy is already 1 
                 }
                 if (tries == 3) {
-                    (*TMsgLogger::getInstance()) << kINFO << "    ----> trying with improve" << GEndl;
+                    Logger << kINFO << "    ----> trying with improve" << GEndl;
                     minimizer = "Minuit";
                     algorithm = "migradimproved";
                 }
                 if (tries == 4 && !kickApplied) {
-                    (*TMsgLogger::getInstance()) << kINFO << "    ----> trying fit with different starting values" << GEndl;
+                    Logger << kINFO << "    ----> trying fit with different starting values" << GEndl;
                     RooFitResult* tmpResult = minim.save();
                     const RooArgList& randList = tmpResult->randomizePars();
                     *allParams = randList;
@@ -348,7 +349,7 @@ RooFitResult* Util::FitPdf( RooWorkspace* w, TString fitRegions, bool lumiConst,
             val = r->minNll();
         }
         else { 
-            (*TMsgLogger::getInstance()) << kERROR << "FIT FAILED !- return a NaN NLL " << GEndl;
+            Logger << kERROR << "FIT FAILED !- return a NaN NLL " << GEndl;
             val =  TMath::QuietNaN();       
         }
 
@@ -388,8 +389,8 @@ RooFitResult* Util::FitPdf( RooWorkspace* w, TString fitRegions, bool lumiConst,
         TString minimizer = ROOT::Math::MinimizerOptions::DefaultMinimizerType(); 
         TString algorithm = ROOT::Math::MinimizerOptions::DefaultMinimizerAlgo(); 
 
-        (*TMsgLogger::getInstance()) << kINFO << "Util::FitPdf()  ........ using " << minimizer << " / " << algorithm << GEndl; 
-        (*TMsgLogger::getInstance()) << kINFO << " with strategy  " << strategy << " and tolerance " << tol << GEndl;
+        Logger << kINFO << "Util::FitPdf()  ........ using " << minimizer << " / " << algorithm << GEndl; 
+        Logger << kINFO << " with strategy  " << strategy << " and tolerance " << tol << GEndl;
 
         bool kickApplied(false);
         for (int tries = 1, maxtries = 5; tries <= maxtries; ++tries) {
@@ -399,24 +400,24 @@ RooFitResult* Util::FitPdf( RooWorkspace* w, TString fitRegions, bool lumiConst,
                 break;
             } else { 
                 if (tries == 1) {
-                    (*TMsgLogger::getInstance()) << kINFO << "    ----> Doing a re-scan first" << GEndl;
+                    Logger << kINFO << "    ----> Doing a re-scan first" << GEndl;
                     minim.minimize(minimizer,"Scan");
                 }
                 if (tries == 2) {
                     if (ROOT::Math::MinimizerOptions::DefaultStrategy() == 0 ) { 
-                        (*TMsgLogger::getInstance()) << kINFO << "    ----> trying with strategy = 1" << GEndl;
+                        Logger << kINFO << "    ----> trying with strategy = 1" << GEndl;
                         minim.setStrategy(1);
                     }
                     else 
                         tries++; // skip this trial if stratehy is already 1 
                 }
                 if (tries == 3) {
-                    (*TMsgLogger::getInstance()) << kINFO << "    ----> trying with improve" << GEndl;
+                    Logger << kINFO << "    ----> trying with improve" << GEndl;
                     minimizer = "Minuit";
                     algorithm = "migradimproved";
                 }
                 if (tries == 4 && !kickApplied) {
-                    (*TMsgLogger::getInstance()) << kINFO << "    ----> trying fit with different starting values" << GEndl;
+                    Logger << kINFO << "    ----> trying fit with different starting values" << GEndl;
                     RooFitResult* tmpResult = minim.save();
                     const RooArgList& randList = tmpResult->randomizePars();
                     *allParams = randList;
@@ -457,7 +458,7 @@ RooFitResult* Util::FitPdf( RooWorkspace* w, TString fitRegions, bool lumiConst,
             val = r->minNll();
         }
         else { 
-            (*TMsgLogger::getInstance()) << kERROR << "FIT FAILED !- return a NaN NLL " << GEndl;
+            Logger << kERROR << "FIT FAILED !- return a NaN NLL " << GEndl;
             val =  TMath::QuietNaN();       
         }
 
@@ -498,13 +499,13 @@ Util::GetAsimovSet( RooWorkspace* inputws  )
     else { w = (RooWorkspace*) gDirectory->Get("w"); }
 
     if(w==NULL){ 
-        (*TMsgLogger::getInstance()) << kERROR << "Workspace not found, no Asimov set found. Return." << GEndl; 
+        Logger << kERROR << "Workspace not found, no Asimov set found. Return." << GEndl; 
         return 0; 
     }
 
     RooAbsData* data = w->data("asimovData");
     if (data==NULL) { 
-        (*TMsgLogger::getInstance()) << kERROR << "No Asimov set found. Return." << GEndl; 
+        Logger << kERROR << "No Asimov set found. Return." << GEndl; 
         return 0; 
     }
 
@@ -520,35 +521,35 @@ Util::GetToyMC( RooWorkspace* inputws  )
     if (inputws!=NULL) { w = inputws; }
     else { w = (RooWorkspace*) gDirectory->Get("w"); }
     if(w==NULL){ 
-        (*TMsgLogger::getInstance()) << kERROR << "Workspace not found, no toy dataset generated." << GEndl; 
+        Logger << kERROR << "Workspace not found, no toy dataset generated." << GEndl; 
         return 0; 
     }
 
     RooStats::ModelConfig* mc = Util::GetModelConfig( w );
     if (mc==NULL) { 
-        (*TMsgLogger::getInstance()) << kERROR << "No model config found. Return." << GEndl; 
+        Logger << kERROR << "No model config found. Return." << GEndl; 
         return 0; 
     }
 
     RooAbsPdf* pdf = mc->GetPdf();
     if (pdf==NULL) { 
-        (*TMsgLogger::getInstance()) << kERROR << "No pdf found. Return." << GEndl; 
+        Logger << kERROR << "No pdf found. Return." << GEndl; 
         return 0; 
     }
 
     RooAbsData* data = w->data("obsData");
     if (data==NULL) { 
-        (*TMsgLogger::getInstance()) << kERROR << "No dataset found. Return." << GEndl; 
+        Logger << kERROR << "No dataset found. Return." << GEndl; 
         return 0; 
     }
 
     const RooArgSet* obsSet = mc->GetObservables();
     if (obsSet==NULL) { 
-        (*TMsgLogger::getInstance()) << kERROR << "No observables found. Return." << GEndl; 
+        Logger << kERROR << "No observables found. Return." << GEndl; 
         return 0; 
     }
 
-    (*TMsgLogger::getInstance()) << kINFO << "Util::GetToyMC() : now generating toy MC set with # events : " << data->sumEntries() << GEndl;
+    Logger << kINFO << "Util::GetToyMC() : now generating toy MC set with # events : " << data->sumEntries() << GEndl;
 
     RooAbsData* toymc = pdf->generate( *obsSet, RooFit::NumEvents(int(data->sumEntries())), RooFit::AutoBinned(false) );
 
@@ -953,15 +954,15 @@ void Util::PlotPdfWithComponents(RooWorkspace* w, TString fcName, TString plotRe
     ConfigMgr* mgr = ConfigMgr::getInstance();
     FitConfig* fc = mgr->getFitConfig(fcName);
 
-    (*TMsgLogger::getInstance()) << kINFO << " ------ Starting Plot with parameters:   analysisName = " << fcName << GEndl; 
-    (*TMsgLogger::getInstance()) << kINFO << "    plotRegions = " <<  plotRegions <<  "  plotComponents = " << plotComponents << "  outputPrefix = " << outputPrefix  << GEndl;
+    Logger << kINFO << " ------ Starting Plot with parameters:   analysisName = " << fcName << GEndl; 
+    Logger << kINFO << "    plotRegions = " <<  plotRegions <<  "  plotComponents = " << plotComponents << "  outputPrefix = " << outputPrefix  << GEndl;
 
     RooMsgService::instance().getStream(1).removeTopic(NumIntegration);
     RooMsgService::instance().getStream(1).removeTopic(Plotting);
 
 
     if(w==NULL){ 
-        (*TMsgLogger::getInstance()) << kERROR << "Workspace not found, no plotting performed" << GEndl; 
+        Logger << kERROR << "Workspace not found, no plotting performed" << GEndl; 
         return; 
     }
     RooSimultaneous* pdf = (RooSimultaneous*) w->pdf("simPdf");
@@ -984,15 +985,15 @@ void Util::PlotPdfWithComponents(RooWorkspace* w, TString fcName, TString plotRe
         TString regionCatLabel = regionsVec[iVec];
 
         if( regionCat->setLabel(regionCatLabel,kTRUE)){
-            (*TMsgLogger::getInstance()) << kINFO << " Label '" << regionCatLabel << "' is not a state of channelCat (see Table) " << GEndl; 
+            Logger << kINFO << " Label '" << regionCatLabel << "' is not a state of channelCat (see Table) " << GEndl; 
         } else {
             RooAbsPdf* regionPdf = (RooAbsPdf*) pdf->getPdf(regionCatLabel.Data());
             TString dataCatLabel = Form("channelCat==channelCat::%s",regionCatLabel.Data());
             RooAbsData* regionData = (RooAbsData*) data->reduce(dataCatLabel.Data());
 
             if(regionPdf==NULL || regionData==NULL){ 
-                (*TMsgLogger::getInstance()) << kWARNING << " Either the Pdf or the Dataset do not have an appropriate state for the region = " << regionCatLabel << ", check the Workspace file" << GEndl;
-                (*TMsgLogger::getInstance()) << kWARNING << " regionPdf = " << regionPdf << "   regionData = " << regionData << GEndl;  
+                Logger << kWARNING << " Either the Pdf or the Dataset do not have an appropriate state for the region = " << regionCatLabel << ", check the Workspace file" << GEndl;
+                Logger << kWARNING << " regionPdf = " << regionPdf << "   regionData = " << regionData << GEndl;  
                 continue; 
             }
             RooRealVar* regionVar =(RooRealVar*) ((RooArgSet*) regionPdf->getObservables(*regionData))->find(Form("obs_x_%s",regionCatLabel.Data()));
@@ -1004,7 +1005,7 @@ void Util::PlotPdfWithComponents(RooWorkspace* w, TString fcName, TString plotRe
 
             regionData->plotOn(frame,RooFit::DataError(RooAbsData::Poisson),MarkerColor(fc->getDataColor()),LineColor(fc->getDataColor()));
             if(fc->m_removeEmptyBins){
-                (*TMsgLogger::getInstance()) << kINFO << "RemoveEmptyDataBins() removing empty bin points from data histogram on plot " << frame->GetName() << GEndl;
+                Logger << kINFO << "RemoveEmptyDataBins() removing empty bin points from data histogram on plot " << frame->GetName() << GEndl;
                 RemoveEmptyDataBins(w, frame);
             }
 
@@ -1275,7 +1276,7 @@ void Util::AddComponentsToPlot(RooWorkspace* w, FitConfig* fc, RooPlot* frame, R
     // regionPdf->Print("t");
     TString RRSPdfName = Form("%s_model",regionCatLabel.Data()); 
     RooRealSumPdf* RRSPdf = (RooRealSumPdf*) regionPdf->getComponents()->find(RRSPdfName);
-    (*TMsgLogger::getInstance()) << kINFO << "Adding Components of Region-Model = " << RRSPdfName << " to plot" << GEndl;
+    Logger << kINFO << "Adding Components of Region-Model = " << RRSPdfName << " to plot" << GEndl;
 
     RooArgList RRSComponentsList =  RRSPdf->funcList();
     //RRSComponentsList.Print("v");
@@ -1297,7 +1298,7 @@ void Util::AddComponentsToPlot(RooWorkspace* w, FitConfig* fc, RooPlot* frame, R
     RooRealVar* regionBinWidth = ((RooRealVar*) RRSPdf->getVariables()->find(Form("binWidth_obs_x_%s_0",regionCatLabel.Data()))) ;
 
     if(regionBinWidth==NULL){
-        (*TMsgLogger::getInstance()) << kWARNING << " bindWidth variable not found for region(" << regionCatLabel << "),   PLOTTING COMPONENTS WILL BE WRONG " << GEndl ;
+        Logger << kWARNING << " bindWidth variable not found for region(" << regionCatLabel << "),   PLOTTING COMPONENTS WILL BE WRONG " << GEndl ;
     }
 
     while( (component = (RooProduct*) iter.Next())) { 
@@ -1333,7 +1334,7 @@ void Util::AddComponentsToPlot(RooWorkspace* w, FitConfig* fc, RooPlot* frame, R
 void Util::PlotSeparateComponents(RooWorkspace* w,TString fcName, TString plotRegions,TString outputPrefix, RooFitResult* rFit, RooAbsData* inputData)
 {
     if(rFit==NULL){ 
-        (*TMsgLogger::getInstance()) << kWARNING << " Running PlotSeparateComponents() without a RooFitResult is pointless, I'm done" << GEndl ; 
+        Logger << kWARNING << " Running PlotSeparateComponents() without a RooFitResult is pointless, I'm done" << GEndl ; 
         return; 
     }
 
@@ -1341,11 +1342,11 @@ void Util::PlotSeparateComponents(RooWorkspace* w,TString fcName, TString plotRe
     ConfigMgr* mgr = ConfigMgr::getInstance();
     FitConfig* fc = mgr->getFitConfig(fcName);
 
-    (*TMsgLogger::getInstance()) << kINFO << " ------ Starting Plot with parameters:   analysisName = " << fcName << GEndl; 
-    (*TMsgLogger::getInstance()) << kINFO << "    fitRegions = " <<  plotRegions <<  "  plotComponents = " << plotComponents << "  outputPrefix = " << outputPrefix  << GEndl;
+    Logger << kINFO << " ------ Starting Plot with parameters:   analysisName = " << fcName << GEndl; 
+    Logger << kINFO << "    fitRegions = " <<  plotRegions <<  "  plotComponents = " << plotComponents << "  outputPrefix = " << outputPrefix  << GEndl;
 
     if(w==NULL){ 
-        (*TMsgLogger::getInstance()) << kWARNING << " Workspace not found, no plotting performed" << GEndl; 
+        Logger << kWARNING << " Workspace not found, no plotting performed" << GEndl; 
         return; 
     }
     RooSimultaneous* pdf = (RooSimultaneous*) w->pdf("simPdf");
@@ -1366,14 +1367,14 @@ void Util::PlotSeparateComponents(RooWorkspace* w,TString fcName, TString plotRe
 
         TString regionCatLabel = regionsVec[iVec];
         if( regionCat->setLabel(regionCatLabel,kTRUE)){  
-            (*TMsgLogger::getInstance()) << kWARNING << " Label '" << regionCatLabel << "' is not a state of channelCat (see Table) " << GEndl;
+            Logger << kWARNING << " Label '" << regionCatLabel << "' is not a state of channelCat (see Table) " << GEndl;
         } else{
             RooAbsPdf* regionPdf = (RooAbsPdf*) pdf->getPdf(regionCatLabel.Data());
             TString dataCatLabel = Form("channelCat==channelCat::%s",regionCatLabel.Data());
             RooAbsData* regionData = (RooAbsData*) data->reduce(dataCatLabel.Data());
             if(regionPdf==NULL || regionData==NULL){ 
-                (*TMsgLogger::getInstance()) << kERROR << " Either the Pdf or the Dataset do not have an appropriate state for the region = " << regionCatLabel << ", check the Workspace file" << GEndl;
-                (*TMsgLogger::getInstance()) << kERROR << " regionPdf = " << regionPdf << "   regionData = " << regionData << GEndl;  
+                Logger << kERROR << " Either the Pdf or the Dataset do not have an appropriate state for the region = " << regionCatLabel << ", check the Workspace file" << GEndl;
+                Logger << kERROR << " regionPdf = " << regionPdf << "   regionData = " << regionData << GEndl;  
                 continue; 
             }
             RooRealVar* regionVar =(RooRealVar*) ((RooArgSet*) regionPdf->getObservables(*regionData))->find(Form("obs_x_%s",regionCatLabel.Data()));
@@ -1383,7 +1384,7 @@ void Util::PlotSeparateComponents(RooWorkspace* w,TString fcName, TString plotRe
             TString binWidthName =  Form("binWidth_obs_x_%s_0",regionCatLabel.Data());
             RooRealVar* regionBinWidth = ((RooRealVar*) RRSPdf->getVariables()->find(Form("binWidth_obs_x_%s_0",regionCatLabel.Data()))) ;
             if(regionBinWidth==NULL){
-                (*TMsgLogger::getInstance()) << kWARNING << " bindWidth variable not found for region(" << regionCatLabel << "),   PLOTTING COMPONENTS WILL BE WRONG " << GEndl ;
+                Logger << kWARNING << " bindWidth variable not found for region(" << regionCatLabel << "),   PLOTTING COMPONENTS WILL BE WRONG " << GEndl ;
             }
 
             vector<double> regionCompFracVec = GetAllComponentFracInRegion(w, regionCatLabel, regionPdf, regionVar,regionBinWidth);
@@ -1455,15 +1456,15 @@ void Util::PlotSeparateComponents(RooWorkspace* w,TString fcName, TString plotRe
 void Util::PlotNLL(RooWorkspace* w, RooFitResult* rFit, Bool_t plotPLL, TString outputPrefix, RooAbsData* inputData)
 {
     if(rFit==NULL){ 
-        (*TMsgLogger::getInstance()) << kWARNING << " Running PlotSeparateComponents() without a RooFitResult is pointless, I'm done" << GEndl ; 
+        Logger << kWARNING << " Running PlotSeparateComponents() without a RooFitResult is pointless, I'm done" << GEndl ; 
         return; 
     }
 
-    (*TMsgLogger::getInstance()) << kINFO << " ------ Starting PlotNLL with parameters: " << GEndl;
-    (*TMsgLogger::getInstance()) << kINFO << "  outputPrefix = " << outputPrefix  << GEndl;
+    Logger << kINFO << " ------ Starting PlotNLL with parameters: " << GEndl;
+    Logger << kINFO << "  outputPrefix = " << outputPrefix  << GEndl;
 
     if(w==NULL){ 
-        (*TMsgLogger::getInstance()) << kINFO << " Workspace not found, no plotting performed" << GEndl; 
+        Logger << kINFO << " Workspace not found, no plotting performed" << GEndl; 
         return; 
     }
     RooSimultaneous* pdf = (RooSimultaneous*) w->pdf("simPdf");
@@ -1484,7 +1485,7 @@ void Util::PlotNLL(RooWorkspace* w, RooFitResult* rFit, Bool_t plotPLL, TString 
 
     unsigned  int numPars = fpf.getSize();
     if(numPars<1){
-        (*TMsgLogger::getInstance()) << kWARNING << "Util::PlotNLL rFit contains no floating parameters" << GEndl;
+        Logger << kWARNING << "Util::PlotNLL rFit contains no floating parameters" << GEndl;
         return;
     }
 
@@ -1508,7 +1509,7 @@ void Util::PlotNLL(RooWorkspace* w, RooFitResult* rFit, Bool_t plotPLL, TString 
       if(arg->InheritsFrom("RooRealVar")){
 	RooRealVar* par = (RooRealVar*) arg;
 	TString parName = par->GetName();
-	(*TMsgLogger::getInstance()) << kINFO << "Plotting NLL for par = " << parName << GEndl;
+	Logger << kINFO << "Plotting NLL for par = " << parName << GEndl;
 	RooPlot* frame = par->frame();
 	nll->plotOn(frame, ShiftToZero());
 	frame->SetMinimum(0.);
@@ -1572,7 +1573,7 @@ void Util::PlotNLL(RooWorkspace* w, RooFitResult* rFit, Bool_t plotPLL, TString 
 TH2D* Util::PlotCorrelationMatrix(RooFitResult* rFit){
 
     if(rFit==NULL){ 
-        (*TMsgLogger::getInstance()) << kWARNING << "Running PlotCorrelationMatrix() without a RooFitResult is pointless, I'm done" << GEndl ; 
+        Logger << kWARNING << "Running PlotCorrelationMatrix() without a RooFitResult is pointless, I'm done" << GEndl ; 
         throw 1 ; 
     }
 
@@ -1638,7 +1639,7 @@ TH2D* Util::GetCorrelations(RooFitResult* rFit, double threshold) {
     for(unsigned int iBinY = 1; iBinY <= nBinsY; iBinY++){
         for(unsigned int iBinX = 1; iBinX <= nBinsX && iBinX <= (nBinsX-iBinY); iBinX++){
             if(fabs(h_corr->GetBinContent(iBinX,iBinY)) > threshold){
-                (*TMsgLogger::getInstance()) << kWARNING << " High correlation coefficient between:   par1 = " << h_corr->GetXaxis()->GetBinLabel(iBinX) << "  and par2 = "
+                Logger << kWARNING << " High correlation coefficient between:   par1 = " << h_corr->GetXaxis()->GetBinLabel(iBinX) << "  and par2 = "
                     << h_corr->GetYaxis()->GetBinLabel(iBinY) << " " 
                     << " val = " << h_corr->GetBinContent(iBinX,iBinY) << GEndl;
             }
@@ -1657,7 +1658,7 @@ TString Util::GetShortCompName(TString compName) {
     else if(compName.Contains("Top"))   shortCompName = "Top";
     else if(compName.Contains("SU")) shortCompName = "SUSY"; 
 
-    if(shortCompName == "empty"){ (*TMsgLogger::getInstance()) << kWARNING << " component(" << compName << ")  in GetCompName not recognized " << GEndl; }
+    if(shortCompName == "empty"){ Logger << kWARNING << " component(" << compName << ")  in GetCompName not recognized " << GEndl; }
 
     return shortCompName;
 }
@@ -1730,27 +1731,27 @@ Util::GetWorkspaceFromFile( const TString& infile, const TString& wsname )
 {
     TFile* file = TFile::Open(infile.Data(), "READ");
     if (file->IsZombie()) {
-        (*TMsgLogger::getInstance()) << kERROR << "Cannot open file: " << infile << GEndl;
+        Logger << kERROR << "Cannot open file: " << infile << GEndl;
         return NULL;
     }
     file->cd();
 
     TObject* obj = file->Get( wsname.Data() ) ;
     if (obj==0) {
-        (*TMsgLogger::getInstance()) << kERROR << "Cannot open workspace <" << wsname << "> in file <" << infile << ">" << GEndl;
+        Logger << kERROR << "Cannot open workspace <" << wsname << "> in file <" << infile << ">" << GEndl;
         file->Close();
         return NULL;
     }
 
     if (obj->ClassName()!=TString("RooWorkspace")) { // much faster than dynamic cast
-        (*TMsgLogger::getInstance()) << kERROR << "Cannot open workspace <" << wsname << "> in file <" << infile << ">" << GEndl;
+        Logger << kERROR << "Cannot open workspace <" << wsname << "> in file <" << infile << ">" << GEndl;
         file->Close();
         return NULL;
     }
 
     RooWorkspace* w = (RooWorkspace*)( obj );
     if ( w==0 ) {
-        (*TMsgLogger::getInstance()) << kERROR << "Cannot open workspace <" << wsname << "> in file <" << infile << ">" << GEndl;
+        Logger << kERROR << "Cannot open workspace <" << wsname << "> in file <" << infile << ">" << GEndl;
         file->Close();
         return NULL;
     }
@@ -1763,19 +1764,19 @@ Util::GetWorkspaceFromFile( const TString& infile, const TString& wsname )
 //________________________________________________________________________________________________
 RooStats::ModelConfig* Util::GetModelConfig( const RooWorkspace* w, const TString& mcName, const bool& verbose  ) {
     if (w==0) {
-        (*TMsgLogger::getInstance()) << kERROR << "Workspace is a null pointer." << GEndl;
+        Logger << kERROR << "Workspace is a null pointer." << GEndl;
         return NULL;
     }
 
     TObject* obj = w->obj( mcName.Data() ) ;
     if (obj==0) {
-        (*TMsgLogger::getInstance()) << kERROR << "Cannot open ModelConfig <" << mcName << "> from workspace." << GEndl;
+        Logger << kERROR << "Cannot open ModelConfig <" << mcName << "> from workspace." << GEndl;
         return NULL;
     }
 
     RooStats::ModelConfig* mc = (RooStats::ModelConfig *)(obj);
     if ( mc==0 ) {
-        (*TMsgLogger::getInstance()) << kERROR << "Cannot open ModelConfig <" << mcName << "> from workspace" << GEndl;
+        Logger << kERROR << "Cannot open ModelConfig <" << mcName << "> from workspace" << GEndl;
         return NULL;
     }
 
@@ -1788,13 +1789,13 @@ RooStats::ModelConfig* Util::GetModelConfig( const RooWorkspace* w, const TStrin
 Util::GetPOI( const RooWorkspace* w  )
 {
     if(w==0){
-        (*TMsgLogger::getInstance()) << kERROR << "Input workspace is null!" << GEndl;
+        Logger << kERROR << "Input workspace is null!" << GEndl;
         return NULL;
     }
 
     RooStats::ModelConfig* mc = Util::GetModelConfig(w);
     if(mc==0){
-        (*TMsgLogger::getInstance()) << kERROR << "ModelConfig is null!" << GEndl;
+        Logger << kERROR << "ModelConfig is null!" << GEndl;
         return NULL;
     }
 
@@ -1812,14 +1813,14 @@ Util::doFreeFit( RooWorkspace* w, RooDataSet* inputdata, const bool& verbose, co
     // fit to reset the workspace
 
     if(w==0){
-        (*TMsgLogger::getInstance()) << kERROR << "Input workspace is null!" << GEndl;
+        Logger << kERROR << "Input workspace is null!" << GEndl;
         return NULL;
     }
 
     RooStats::ModelConfig* mc = Util::GetModelConfig(w);
 
     if(mc==0){
-        (*TMsgLogger::getInstance()) << kERROR << "ModelConfig is null!" << GEndl;
+        Logger << kERROR << "ModelConfig is null!" << GEndl;
         return NULL;
     }
 
@@ -1835,7 +1836,7 @@ Util::doFreeFit( RooWorkspace* w, RooDataSet* inputdata, const bool& verbose, co
     RooAbsPdf* pdf = mc->GetPdf();
 
     if((data==0)||(pdf==0)){
-        (*TMsgLogger::getInstance()) << kERROR << "data set or pdf not found" <<GEndl;
+        Logger << kERROR << "data set or pdf not found" <<GEndl;
         return NULL;
     }
 
@@ -1845,7 +1846,7 @@ Util::doFreeFit( RooWorkspace* w, RooDataSet* inputdata, const bool& verbose, co
         if(!w->loadSnapshot("snapshot_paramsVals_initial")) { 
             w->saveSnapshot("snapshot_paramsVals_initial",*params);
         } else { 
-            (*TMsgLogger::getInstance()) << kWARNING << "Snapshot 'snapshot_paramsVals_initial' already exists in  workspace, will not overwrite it" << GEndl;
+            Logger << kWARNING << "Snapshot 'snapshot_paramsVals_initial' already exists in  workspace, will not overwrite it" << GEndl;
         }
     }
 
@@ -1878,7 +1879,7 @@ Util::doFreeFit( RooWorkspace* w, RooDataSet* inputdata, const bool& verbose, co
     TString minimizer = ROOT::Math::MinimizerOptions::DefaultMinimizerType(); 
     TString algorithm = ROOT::Math::MinimizerOptions::DefaultMinimizerAlgo(); 
 
-    (*TMsgLogger::getInstance()) << kINFO << "Util::doFreeFit()  ........ using " << minimizer << " / " << algorithm 
+    Logger << kINFO << "Util::doFreeFit()  ........ using " << minimizer << " / " << algorithm 
         << " with strategy  " << strategy << " and tolerance " << tol << GEndl;
 
     bool kickApplied(false);
@@ -1889,24 +1890,24 @@ Util::doFreeFit( RooWorkspace* w, RooDataSet* inputdata, const bool& verbose, co
             break;
         } else { 
             if (tries == 1) {
-                (*TMsgLogger::getInstance()) << kINFO << "    ----> Doing a re-scan first" << GEndl;
+                Logger << kINFO << "    ----> Doing a re-scan first" << GEndl;
                 minim.minimize(minimizer,"Scan");
             }
             if (tries == 2) {
                 if (ROOT::Math::MinimizerOptions::DefaultStrategy() == 0 ) { 
-                    (*TMsgLogger::getInstance()) << kINFO << "    ----> trying with strategy = 1" << GEndl;
+                    Logger << kINFO << "    ----> trying with strategy = 1" << GEndl;
                     minim.setStrategy(1);
                 }
                 else 
                     tries++; // skip this trial if stratehy is already 1 
             }
             if (tries == 3) {
-                (*TMsgLogger::getInstance()) << kINFO << "    ----> trying with improve" << GEndl;
+                Logger << kINFO << "    ----> trying with improve" << GEndl;
                 minimizer = "Minuit";
                 algorithm = "migradimproved";
             }
             if (tries == 4 && !kickApplied) {
-                (*TMsgLogger::getInstance()) << kINFO << "    ----> trying fit with different starting values" << GEndl;
+                Logger << kINFO << "    ----> trying fit with different starting values" << GEndl;
                 RooFitResult* tmpResult = minim.save();
                 const RooArgList& randList = tmpResult->randomizePars();
                 *allParams = randList;
@@ -1925,7 +1926,7 @@ Util::doFreeFit( RooWorkspace* w, RooDataSet* inputdata, const bool& verbose, co
         val = result->minNll();
     }
     else { 
-        (*TMsgLogger::getInstance()) << kERROR << "FIT FAILED !- return a NaN NLL " << GEndl;
+        Logger << kERROR << "FIT FAILED !- return a NaN NLL " << GEndl;
         val =  TMath::QuietNaN();       
     }
 
@@ -1949,14 +1950,14 @@ Util::doFreeFit( RooWorkspace* w, RooDataSet* inputdata, const bool& verbose, co
 Util::GetMCStudy( const RooWorkspace* w )
 {
     if (w==0) {
-        (*TMsgLogger::getInstance()) << kERROR << "Input workspace is null. Return." << GEndl;
+        Logger << kERROR << "Input workspace is null. Return." << GEndl;
         return NULL;
     }
 
     RooStats::ModelConfig* mc = Util::GetModelConfig(w);
 
     if(mc==0){
-        (*TMsgLogger::getInstance()) << kERROR << "ModelConfig is null!" << GEndl;
+        Logger << kERROR << "ModelConfig is null!" << GEndl;
         return NULL;
     }
 
@@ -1964,7 +1965,7 @@ Util::GetMCStudy( const RooWorkspace* w )
     const RooArgSet* obsset = mc->GetObservables();
 
     if((pdf==0)||(obsset==0)){
-        (*TMsgLogger::getInstance()) << kERROR << "pdf or observables not found" <<GEndl;
+        Logger << kERROR << "pdf or observables not found" <<GEndl;
         return NULL;
     }
 
@@ -2025,10 +2026,10 @@ void Util::AddText(Double_t x,Double_t y,char* text,Color_t color)
 RooAbsReal* Util::GetComponent(RooWorkspace* w, TString component, TString region){  //, unsigned int bin){
 
     std::vector<TString> componentVec = Tokens(component,",");
-    if(componentVec.size() <1) { (*TMsgLogger::getInstance()) << kWARNING << " componentVec.size() < 1, for components = " << component << GEndl; }
+    if(componentVec.size() <1) { Logger << kWARNING << " componentVec.size() < 1, for components = " << component << GEndl; }
 
     if(w==NULL){ 
-        (*TMsgLogger::getInstance()) << kERROR << " Workspace not found, no GetComponent performed" << GEndl; 
+        Logger << kERROR << " Workspace not found, no GetComponent performed" << GEndl; 
         return NULL; 
     }
 
@@ -2043,8 +2044,8 @@ RooAbsReal* Util::GetComponent(RooWorkspace* w, TString component, TString regio
     RooAbsData* regionData = (RooAbsData*) data->reduce(dataCatLabel.Data());
 
     if(regionPdf==NULL || regionData==NULL){ 
-        (*TMsgLogger::getInstance()) << kERROR << " Either the Pdf or the Dataset do not have an appropriate state for the region = " << region << ", check the Workspace file" << GEndl;
-        (*TMsgLogger::getInstance()) << kERROR << " regionPdf = " << regionPdf << "   regionData = " << regionData << GEndl;  
+        Logger << kERROR << " Either the Pdf or the Dataset do not have an appropriate state for the region = " << region << ", check the Workspace file" << GEndl;
+        Logger << kERROR << " regionPdf = " << regionPdf << "   regionData = " << regionData << GEndl;  
         return NULL; 
     }
     RooRealVar* regionVar =(RooRealVar*) ((RooArgSet*) regionPdf->getObservables(*regionData))->find(Form("obs_x_%s",regionFullName.Data()));
@@ -2054,7 +2055,7 @@ RooAbsReal* Util::GetComponent(RooWorkspace* w, TString component, TString regio
     RooRealVar* regionBinWidth = ((RooRealVar*) regionPdf->getVariables()->find(Form("binWidth_obs_x_%s_0",regionFullName.Data()))) ;
 
     if(regionBinWidth==NULL){
-        (*TMsgLogger::getInstance()) << kWARNING << " bindWidth variable not found for region(" << regionFullName << "),   RETURNING COMPONENTS WILL BE WRONG " << GEndl ;
+        Logger << kWARNING << " bindWidth variable not found for region(" << regionFullName << "),   RETURNING COMPONENTS WILL BE WRONG " << GEndl ;
         return NULL;
     }
 
@@ -2073,7 +2074,7 @@ RooAbsReal* Util::GetComponent(RooWorkspace* w, TString component, TString regio
     } 
 
     if (compFuncList.getSize()==0 || compCoefList.getSize()==0 || compCoefList.getSize()!=compFuncList.getSize()){
-        (*TMsgLogger::getInstance()) << kERROR << " Something wrong with compFuncList or compCoefList in Util::GetComponent(w," << component << "," << region 
+        Logger << kERROR << " Something wrong with compFuncList or compCoefList in Util::GetComponent(w," << component << "," << region 
             << ") " << GEndl << "         compFuncList.getSize() = " << compFuncList.getSize() << " compCoefList.getSize() = " << compCoefList.getSize() << GEndl;
         return NULL;
     }
@@ -2085,13 +2086,13 @@ RooAbsReal* Util::GetComponent(RooWorkspace* w, TString component, TString regio
 
     RooRealSumPdf* compRRS = new RooRealSumPdf(Form("RRS_region_%s_%s",region.Data(),compName.Data()),Form("RRS_region_%s_%s",region.Data(),compName.Data()),compFuncList,compCoefList);
     if(!compRRS){
-        (*TMsgLogger::getInstance()) << kERROR << " Cannot create a RooRealSumPdf in Util::GetComponent() "<< GEndl;
+        Logger << kERROR << " Cannot create a RooRealSumPdf in Util::GetComponent() "<< GEndl;
         return NULL;
     }
     RooAbsReal* compFunc = compRRS->createIntegral(RooArgSet(*regionVar));
 
     if(compFunc == NULL){
-        (*TMsgLogger::getInstance()) << kERROR << " compRooProduct not found for region(" << regionFullName << "), component(" << component << ")   RETURNING COMPONENTS WILL BE WRONG " << GEndl ;
+        Logger << kERROR << " compRooProduct not found for region(" << regionFullName << "), component(" << component << ")   RETURNING COMPONENTS WILL BE WRONG " << GEndl ;
         return NULL;
     }
 
@@ -2099,7 +2100,7 @@ RooAbsReal* Util::GetComponent(RooWorkspace* w, TString component, TString regio
     form_frac->SetName(Form("form_frac_region_%s_%s",region.Data(),compName.Data()));
     form_frac->SetTitle(Form("form_frac_region_%s_%s",region.Data(),compName.Data()));
 
-    (*TMsgLogger::getInstance()) << kINFO << " Adding " << form_frac->GetName() << " to workspace" << GEndl;
+    Logger << kINFO << " Adding " << form_frac->GetName() << " to workspace" << GEndl;
     w->import( *form_frac,kTRUE);
     gDirectory->Add(form_frac);
 
@@ -2116,11 +2117,11 @@ Double_t Util::GetComponentFracInRegion(RooWorkspace* w, TString component, TStr
 
     std::vector<TString> componentVec = Tokens(component,",");
     if(componentVec.size() <1) { 
-        (*TMsgLogger::getInstance()) << kWARNING << " componentVec.size() < 1, for components = " << component << GEndl; 
+        Logger << kWARNING << " componentVec.size() < 1, for components = " << component << GEndl; 
     }
 
     if(w==NULL){ 
-        (*TMsgLogger::getInstance()) << kERROR << " Workspace not found, no GetComponent performed" << GEndl; 
+        Logger << kERROR << " Workspace not found, no GetComponent performed" << GEndl; 
         return 0; 
     }
 
@@ -2135,8 +2136,8 @@ Double_t Util::GetComponentFracInRegion(RooWorkspace* w, TString component, TStr
     RooAbsData* regionData = (RooAbsData*) data->reduce(dataCatLabel.Data());
 
     if(regionPdf==NULL || regionData==NULL){ 
-        (*TMsgLogger::getInstance()) << kERROR << " Either the Pdf or the Dataset do not have an appropriate state for the region = " << region << ", check the Workspace file" << GEndl;
-        (*TMsgLogger::getInstance()) << kERROR << " regionPdf = " << regionPdf << "   regionData = " << regionData << GEndl;  
+        Logger << kERROR << " Either the Pdf or the Dataset do not have an appropriate state for the region = " << region << ", check the Workspace file" << GEndl;
+        Logger << kERROR << " regionPdf = " << regionPdf << "   regionData = " << regionData << GEndl;  
         return 0; 
     }
 
@@ -2147,7 +2148,7 @@ Double_t Util::GetComponentFracInRegion(RooWorkspace* w, TString component, TStr
     RooRealVar* regionBinWidth = ((RooRealVar*) regionPdf->getVariables()->find(Form("binWidth_obs_x_%s_0",regionFullName.Data()))) ;
 
     if(regionBinWidth==NULL){
-        (*TMsgLogger::getInstance()) << kWARNING << " bindWidth variable not found for region(" << regionFullName << "),   RETURNING COMPONENTS WILL BE WRONG " << GEndl ;
+        Logger << kWARNING << " bindWidth variable not found for region(" << regionFullName << "),   RETURNING COMPONENTS WILL BE WRONG " << GEndl ;
         return 0;
     }
 
@@ -2165,7 +2166,7 @@ Double_t Util::GetComponentFracInRegion(RooWorkspace* w, TString component, TStr
     } 
 
     if (compFuncList.getSize()==0 || compCoefList.getSize()==0 || compCoefList.getSize()!=compFuncList.getSize()){
-        (*TMsgLogger::getInstance()) << kERROR << " Something wrong with compFuncList or compCoefList in Util::GetComponent() "<< GEndl;
+        Logger << kERROR << " Something wrong with compFuncList or compCoefList in Util::GetComponent() "<< GEndl;
         return 0.;
     }
 
@@ -2197,7 +2198,7 @@ Double_t Util::GetComponentFracInRegion(RooWorkspace* w, TString component, TStr
 RooAbsPdf* Util::GetRegionPdf(RooWorkspace* w, TString region){  //, unsigned int bin){
 
     if(w==NULL){ 
-        (*TMsgLogger::getInstance()) << kERROR << " Workspace not found, no GetRegionPdf performed" << GEndl; 
+        Logger << kERROR << " Workspace not found, no GetRegionPdf performed" << GEndl; 
         return NULL; 
     }
 
@@ -2208,8 +2209,8 @@ RooAbsPdf* Util::GetRegionPdf(RooWorkspace* w, TString region){  //, unsigned in
     RooAbsPdf* regionPdf = (RooAbsPdf*) pdf->getPdf(regionFullName.Data());
 
     if(regionPdf==NULL){ 
-        (*TMsgLogger::getInstance()) << kERROR << " The Simultaneous Pdf  does not have an appropriate state for the region = " << region << ", check the Workspace file" << GEndl;
-        (*TMsgLogger::getInstance()) << kERROR << " regionPdf = " << regionPdf << GEndl;  
+        Logger << kERROR << " The Simultaneous Pdf  does not have an appropriate state for the region = " << region << ", check the Workspace file" << GEndl;
+        Logger << kERROR << " regionPdf = " << regionPdf << GEndl;  
         return NULL; 
     }
 
@@ -2262,7 +2263,7 @@ RooAbsPdf* Util::GetRegionPdf(RooWorkspace* w, TString region){  //, unsigned in
 RooRealVar* Util::GetRegionVar(RooWorkspace* w, TString region){ 
 
     if(w==NULL){ 
-        (*TMsgLogger::getInstance()) << kERROR << " Workspace not found, no GetComponent performed" << GEndl; 
+        Logger << kERROR << " Workspace not found, no GetComponent performed" << GEndl; 
         return NULL; 
     }
 
@@ -2277,8 +2278,8 @@ RooRealVar* Util::GetRegionVar(RooWorkspace* w, TString region){
     RooAbsData* regionData = (RooAbsData*) data->reduce(dataCatLabel.Data());
 
     if(regionPdf==NULL || regionData==NULL){ 
-        (*TMsgLogger::getInstance()) << kERROR << " Either the Pdf or the Dataset do not have an appropriate state for the region = " << region << ", check the Workspace file" << GEndl;
-        (*TMsgLogger::getInstance()) << kERROR << " regionPdf = " << regionPdf << "   regionData = " << regionData << GEndl;  
+        Logger << kERROR << " Either the Pdf or the Dataset do not have an appropriate state for the region = " << region << ", check the Workspace file" << GEndl;
+        Logger << kERROR << " regionPdf = " << regionPdf << "   regionData = " << regionData << GEndl;  
         return NULL; 
     }
     RooRealVar* regionVar =(RooRealVar*) ((RooArgSet*) regionPdf->getObservables(*regionData))->find(Form("obs_x_%s",regionFullName.Data()));
@@ -2306,7 +2307,7 @@ TString Util::GetFullRegionName(RooCategory* regionCat,  TString regionShortName
     }
 
     if(foundReg>1)
-        (*TMsgLogger::getInstance()) << kWARNING << "Util.GetFullRegionName() found more then one region in workspace with shortname = " << regionShortName << GEndl;
+        Logger << kWARNING << "Util.GetFullRegionName() found more then one region in workspace with shortname = " << regionShortName << GEndl;
 
     return regionFullName;
 }
@@ -2320,7 +2321,7 @@ vector<TString> Util::GetAllComponentNamesInRegion(TString region, RooAbsPdf* re
     RooRealSumPdf* RRSPdf = (RooRealSumPdf*) regionPdf->getComponents()->find(RRSPdfName);
 
     if(RRSPdf==NULL){
-        (*TMsgLogger::getInstance()) << kERROR << " Util::GetAllComponentNamesInRegion() cannot find a RooRealSumPdf named " <<  RRSPdfName << GEndl ;
+        Logger << kERROR << " Util::GetAllComponentNamesInRegion() cannot find a RooRealSumPdf named " <<  RRSPdfName << GEndl ;
         vector<TString> vec;
         return vec; 
     }
@@ -2382,7 +2383,7 @@ double Util::GetPropagatedError(RooAbsReal* var, const RooFitResult& fr)
     //       Corr(a,a') = the correlation matrix from the fit result
     //
 
-    (*TMsgLogger::getInstance()) << kDEBUG << " GPP for variable = " << var->GetName() << GEndl;
+    Logger << kDEBUG << " GPP for variable = " << var->GetName() << GEndl;
 
     // Clone self for internal use
     RooAbsReal* cloneFunc = var; //(RooAbsReal*) var->cloneTree();
@@ -2416,7 +2417,7 @@ double Util::GetPropagatedError(RooAbsReal* var, const RooFitResult& fr)
         Double_t cenVal = rrv.getVal() ;
         Double_t errVal = sqrt(V(newI,newI)) ;
 
-        (*TMsgLogger::getInstance()) << kDEBUG << " GPP:  par = " << rrv.GetName() << " cenVal = " << cenVal << " errVal = " << errVal << GEndl;
+        Logger << kDEBUG << " GPP:  par = " << rrv.GetName() << " cenVal = " << cenVal << " errVal = " << errVal << GEndl;
 
         // Make Plus variation
         ((RooRealVar*)paramList.at(ivar))->setVal(cenVal+errVal) ;
@@ -2449,7 +2450,7 @@ double Util::GetPropagatedError(RooAbsReal* var, const RooFitResult& fr)
         F[j] = (plusVar[j]-minusVar[j])/2 ;
     }
     
-    if(TMsgLogger::getInstance()->GetMinLevel() < kDEBUG) {
+    if(Logger.GetMinLevel() < kDEBUG) {
         F.Print();
         C.Print();
     }
@@ -2457,7 +2458,7 @@ double Util::GetPropagatedError(RooAbsReal* var, const RooFitResult& fr)
     // Calculate error in linear approximation from variations and correlation coefficient
     Double_t sum = F*(C*F) ;
 
-    (*TMsgLogger::getInstance()) << kDEBUG << " GPP : sum = " << sqrt(sum) << GEndl; 
+    Logger << kDEBUG << " GPP : sum = " << sqrt(sum) << GEndl; 
 
     return sqrt(sum) ;
 }
@@ -2530,7 +2531,7 @@ Util::resetError( RooWorkspace* wspace, const RooArgList& parList, const RooArgL
 
         RooRealVar* var = wspace->var( UncertaintyName.c_str() );
         if( ! var ) {
-            (*TMsgLogger::getInstance()) << kERROR << "Could not find variable: " << UncertaintyName
+            Logger << kERROR << "Could not find variable: " << UncertaintyName
                 << " in workspace: " << wspace->GetName() << ": " << wspace
                 << GEndl;
         }
@@ -2541,7 +2542,7 @@ Util::resetError( RooWorkspace* wspace, const RooArgList& parList, const RooArgL
         double sigma = 0.;
 
         if( UncertaintyName == "" ) {
-            (*TMsgLogger::getInstance()) << kERROR << "No Uncertainty Name provided" << GEndl;
+            Logger << kERROR << "No Uncertainty Name provided" << GEndl;
             throw -1;
         }
         // If it is a standard (gaussian) uncertainty
@@ -2582,7 +2583,7 @@ Util::resetError( RooWorkspace* wspace, const RooArgList& parList, const RooArgL
                */
             if( ConstraintType == "" ) {
                 //cout << "Error: Strange constraint type for Stat Uncertainties " << ConstraintType << GEndl;
-                (*TMsgLogger::getInstance()) << kINFO << "Assuming parameter is a ShapeFactor and so unconstrained" << GEndl;
+                Logger << kINFO << "Assuming parameter is a ShapeFactor and so unconstrained" << GEndl;
                 continue;
             }
             else if( ConstraintType == "RooGaussian" ){
@@ -2603,18 +2604,18 @@ Util::resetError( RooWorkspace* wspace, const RooArgList& parList, const RooArgL
                 val_low = 1 - sigma;
             } 
             else {
-                (*TMsgLogger::getInstance()) << kERROR << "Strange constraint type for Stat Uncertainties: " << ConstraintType << GEndl;
+                Logger << kERROR << "Strange constraint type for Stat Uncertainties: " << ConstraintType << GEndl;
                 throw -1;
             }
 
         } // End Stat Error
         else {
             // Some unknown uncertainty
-            (*TMsgLogger::getInstance()) << kWARNING << "Couldn't identify type of uncertainty for parameter: " << UncertaintyName << ". Skip." << GEndl;
+            Logger << kWARNING << "Couldn't identify type of uncertainty for parameter: " << UncertaintyName << ". Skip." << GEndl;
             continue;
         }
 
-        (*TMsgLogger::getInstance()) << kINFO << "Uncertainties on parameter: " << UncertaintyName 
+        Logger << kINFO << "Uncertainties on parameter: " << UncertaintyName 
             << " low: "  << val_low
             << " high: " << val_hi
             << " sigma: " << sigma
@@ -2649,7 +2650,7 @@ void Util::ImportInWorkspace( RooWorkspace* wspace, TObject* obj, TString name) 
         wspace->import(*obj,kTRUE) ;
     }
     else{
-        (*TMsgLogger::getInstance()) << kWARNING << "Util::Import called with a NULL pointer, nothing will be imported" << GEndl;
+        Logger << kWARNING << "Util::Import called with a NULL pointer, nothing will be imported" << GEndl;
     }
 
     // save snapshot
@@ -2674,7 +2675,7 @@ void Util::RemoveEmptyDataBins(RooWorkspace* w, RooPlot* frame){
     // Find histogram object
     RooHist* hist = (RooHist*) frame->findObject(histname,RooHist::Class()) ;
     if (!hist) {
-        (*TMsgLogger::getInstance()) << kERROR << " Util::RemoveEmptyDataBins(" << frame->GetName() << ") cannot find histogram" << GEndl ;
+        Logger << kERROR << " Util::RemoveEmptyDataBins(" << frame->GetName() << ") cannot find histogram" << GEndl ;
         return ;
     }
 
@@ -2713,7 +2714,7 @@ RooCurve* Util::MakePdfErrorRatioHist(RooWorkspace* w, RooAbsData* regionData, R
     regionPdf->plotOn(frame,Normalization(normCount,RooAbsReal::NumEvent),Precision(1e-5));
     RooCurve* curveNom = (RooCurve*) frame->findObject(curvename,RooCurve::Class()) ;
     if (!curveNom) {
-        (*TMsgLogger::getInstance()) << kERROR << "Util::MakePdfErrorRatioHist(" << frame->GetName() << ") cannot find curveNom" << curveNom->GetName() << GEndl ;
+        Logger << kERROR << "Util::MakePdfErrorRatioHist(" << frame->GetName() << ") cannot find curveNom" << curveNom->GetName() << GEndl ;
         return 0 ;
     }
 
@@ -2722,7 +2723,7 @@ RooCurve* Util::MakePdfErrorRatioHist(RooWorkspace* w, RooAbsData* regionData, R
     // Find curve object
     RooCurve* curveError = (RooCurve*) frame->findObject(curvename,RooCurve::Class()) ;
     if (!curveError) {
-        (*TMsgLogger::getInstance()) << kERROR << "Util::makePdfErrorRatioHist(" << frame->GetName() << ") cannot find curve" << GEndl ;
+        Logger << kERROR << "Util::makePdfErrorRatioHist(" << frame->GetName() << ") cannot find curve" << GEndl ;
         return 0 ;
     }
 

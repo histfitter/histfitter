@@ -42,14 +42,14 @@ using namespace RooStats;
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 /// Code to collect hypotest results and write to text files
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
-
+static TMsgLogger ToyUtilsLogger("toy_utils");
 
 //________________________________________________________________________________________________
 const char* CollectAndWriteHypoTestResults( const TString& infile, const TString& format, const TString& interpretation, const TString& cutStr, const TString& outDir, const TString& fileprefix  ){
     // outdir
     TString outdir = gSystem->pwd();
     if ( !gSystem->cd( outDir.Data() ) ) {
-        (*TMsgLogger::getInstance()) << kERROR << "output dir <" << outDir << "> does not exist. Return." << GEndl;
+        ToyUtilsLogger << kERROR << "output dir <" << outDir << "> does not exist. Return." << GEndl;
         return 0;
     } else {
         TString fulloutdir = gSystem->pwd();
@@ -121,20 +121,20 @@ std::list<LimitResult> CollectHypoTestResults( const TString& infile, const TStr
 
         if (fitresult){
             if (fitresult->status()!=0) {
-                (*TMsgLogger::getInstance()) << kWARNING << "Fit failed for point " << fitresultname.Data() << " - do not use hypo test result" << GEndl;
+                ToyUtilsLogger << kWARNING << "Fit failed for point " << fitresultname.Data() << " - do not use hypo test result" << GEndl;
                 counter_failed_fits++;
                 fitresult->Print();	
                 failed_fit = true;   
             }
             if (fitresult->covQual() < 2.1) {
-                (*TMsgLogger::getInstance()) << kWARNING << "Fit result " << fitresultname.Data() << " has bad covariance matrix quality! Check your fit setup!" << GEndl;
+                ToyUtilsLogger << kWARNING << "Fit result " << fitresultname.Data() << " has bad covariance matrix quality! Check your fit setup!" << GEndl;
                 counter_badcovquality++;
                 failed_fit = true;
             }
         }
 
         if(ht->ArraySize() == 0){
-            (*TMsgLogger::getInstance()) << kWARNING << "Fit result " << fitresultname.Data() << " has failed HypoTestInverterResult - do not use result" << GEndl;
+            ToyUtilsLogger << kWARNING << "Fit result " << fitresultname.Data() << " has failed HypoTestInverterResult - do not use result" << GEndl;
         } else {
             LimitResult result = RooStats::get_Pvalue( ht );
             result.AddMetaData ( ParseWorkspaceID(itr->first) );
@@ -144,7 +144,7 @@ std::list<LimitResult> CollectHypoTestResults( const TString& infile, const TStr
         delete ht;
     }
 
-    (*TMsgLogger::getInstance()) << kINFO << counter_failed_fits << " failed fit(s) and " << counter_badcovquality << " fit(s) with bad covariance matrix quality were counted" << GEndl;
+    ToyUtilsLogger << kINFO << counter_failed_fits << " failed fit(s) and " << counter_badcovquality << " fit(s) with bad covariance matrix quality were counted" << GEndl;
 
     return limres;
 }
@@ -155,11 +155,11 @@ const char* WriteResultSet( const std::list<LimitResult>& summary, const TString
     if (summary.empty()) 
         return 0;
 
-    (*TMsgLogger::getInstance()) << kINFO << "Storing results of " << summary.size() << " scan points." << GEndl;
+    ToyUtilsLogger << kINFO << "Storing results of " << summary.size() << " scan points." << GEndl;
 
     TString outdir = gSystem->pwd(); 
     if ( !gSystem->cd( outDir.Data() ) ) {
-        (*TMsgLogger::getInstance()) << kERROR << "output dir <" << outDir << "> does not exist. Return." << GEndl;
+        ToyUtilsLogger << kERROR << "output dir <" << outDir << "> does not exist. Return." << GEndl;
         return 0;
     } else {
         TString fulloutdir = gSystem->pwd();
@@ -242,7 +242,7 @@ const char* WriteResultSet( const std::list<LimitResult>& summary, const TString
     // tree description
     fout.open(outdesc);
     if (!fout.is_open()) {
-        (*TMsgLogger::getInstance()) << kERROR << "Error opening file <" << outdesc <<">" << GEndl;
+        ToyUtilsLogger << kERROR << "Error opening file <" << outdesc <<">" << GEndl;
         return 0;
     }
     fout << includes << "\n";
@@ -254,7 +254,7 @@ const char* WriteResultSet( const std::list<LimitResult>& summary, const TString
     // tree description python
     fout.open(outdescp);
     if (!fout.is_open()) {
-        (*TMsgLogger::getInstance()) << kERROR << "Error opening file <" << outdescp <<">" << GEndl;
+        ToyUtilsLogger << kERROR << "Error opening file <" << outdescp <<">" << GEndl;
         return 0;
     }
     fout << pythonstr << "\n";
@@ -263,13 +263,13 @@ const char* WriteResultSet( const std::list<LimitResult>& summary, const TString
     // data for tree
     fout.open(outfile.Data());
     if (!fout.is_open()) {
-        (*TMsgLogger::getInstance()) << kERROR << "Error opening file <" << outfile <<">" << GEndl;
+        ToyUtilsLogger << kERROR << "Error opening file <" << outfile <<">" << GEndl;
         return 0;
     }
     for(; itr!=end; ++itr) { fout << itr->GetSummaryString() << "\n"; }
     fout.close();
 
-    (*TMsgLogger::getInstance()) << kINFO << "list file stored as <" << outfile << ">" << GEndl;
+    ToyUtilsLogger << kINFO << "list file stored as <" << outfile << ">" << GEndl;
 
     return outfile.Data();
 }
@@ -287,7 +287,7 @@ const char* CollectAndWriteResultSet( const TString& infile, const TString& form
     // outdir
     TString outdir = gSystem->pwd();
     if ( !gSystem->cd( outDir.Data() ) ) {
-        (*TMsgLogger::getInstance()) << kERROR << "output dir <" << outDir << "> does not exist. Return." << GEndl;
+        ToyUtilsLogger << kERROR << "output dir <" << outDir << "> does not exist. Return." << GEndl;
         return 0;
     } else {
         TString fulloutdir = gSystem->pwd();

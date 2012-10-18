@@ -23,7 +23,7 @@
 
 using namespace std;
 
-ConfigMgr::ConfigMgr() { 
+ConfigMgr::ConfigMgr() : m_logger("ConfigMgr") { 
     m_nToys = 1000;
     m_calcType = 0;
     m_testStatType = 3;
@@ -51,7 +51,7 @@ FitConfig* ConfigMgr::getFitConfig(const TString& name){
             return m_fitConfigs.at(i);
         }
     }
-    (*TMsgLogger::getInstance()) << kWARNING << "unkown FitConfig object named '"<<name<<"'" << GEndl;
+    m_logger << kWARNING << "unkown FitConfig object named '"<<name<<"'" << GEndl;
     return 0;
 }
 
@@ -72,7 +72,7 @@ void ConfigMgr::initialize() {
             TFile fileOut(m_outputFileName,"RECREATE");
             fileOut.Close();
         } else {
-            (*TMsgLogger::getInstance()) << kERROR << "in ConfigMgr: no outputFileName specified." << GEndl;
+            m_logger << kERROR << "in ConfigMgr: no outputFileName specified." << GEndl;
         }
     }
     return;
@@ -95,19 +95,19 @@ void ConfigMgr::fit(FitConfig* fc) {
     outfileName.ReplaceAll(".root","_fitresult.root");
     TFile* outfile = TFile::Open(outfileName,"UPDATE");
     if(!outfile){ 
-        (*TMsgLogger::getInstance()) << kERROR << "TFile <" << outfileName << "> could not be opened" << GEndl; 
+        m_logger << kERROR << "TFile <" << outfileName << "> could not be opened" << GEndl; 
         return; 
     }
 
     TFile* inFile = TFile::Open(fc->m_inputWorkspaceFileName);
     if(!inFile) { 
-        (*TMsgLogger::getInstance()) << kERROR << "TFile could not be opened" << GEndl; 
+        m_logger << kERROR << "TFile could not be opened" << GEndl; 
         return; 
     }
 
     RooWorkspace* w = (RooWorkspace*)inFile->Get("combined");
     if(w == NULL) { 
-        (*TMsgLogger::getInstance()) << kERROR << "workspace 'combined' does not exist in file" << GEndl; 
+        m_logger << kERROR << "workspace 'combined' does not exist in file" << GEndl; 
         return; 
     }
 
@@ -118,13 +118,13 @@ void ConfigMgr::fit(FitConfig* fc) {
         TString hypName="fitTo_"+fc->m_signalSampleName;
         fitresult->SetName(hypName);
         fitresult->Write();
-        (*TMsgLogger::getInstance()) << kINFO << "Now storing RooFitResult <" << hypName << ">" << GEndl;
+        m_logger << kINFO << "Now storing RooFitResult <" << hypName << ">" << GEndl;
     }
 
     inFile->Close();  
     outfile->Close();
 
-    (*TMsgLogger::getInstance()) << kINFO << "Done. Stored fit result in file <" << outfileName << ">" << GEndl;
+    m_logger << kINFO << "Done. Stored fit result in file <" << outfileName << ">" << GEndl;
 
     return;
 }
@@ -159,27 +159,27 @@ void ConfigMgr::doHypoTest(FitConfig* fc, TString outdir, double SigXSecSysnsigm
     outfileName.ReplaceAll("results/",outdir);
     TFile* outfile = TFile::Open(outfileName,"UPDATE");
     if (!outfile) { 
-        (*TMsgLogger::getInstance()) << kERROR << "TFile <" << outfileName << "> could not be opened" << GEndl; 
+        m_logger << kERROR << "TFile <" << outfileName << "> could not be opened" << GEndl; 
         return; 
     }
 
     TFile* inFile = TFile::Open(fc->m_inputWorkspaceFileName);
     if (!inFile) { 
-        (*TMsgLogger::getInstance()) << kERROR << "TFile <" << fc->m_inputWorkspaceFileName << "> could not be opened" << GEndl; 
+        m_logger << kERROR << "TFile <" << fc->m_inputWorkspaceFileName << "> could not be opened" << GEndl; 
         return; 
     }
 
 
     RooWorkspace* w = (RooWorkspace*)inFile->Get("combined");
     if (w == NULL) { 
-        (*TMsgLogger::getInstance()) << kERROR << "workspace 'combined' does not exist in file" << GEndl; 
+        m_logger << kERROR << "workspace 'combined' does not exist in file" << GEndl; 
         return; 
     }
 
-    (*TMsgLogger::getInstance()) << kINFO << "Processing analysis " << fc->m_signalSampleName << GEndl;
+    m_logger << kINFO << "Processing analysis " << fc->m_signalSampleName << GEndl;
 
     if ((fc->m_signalSampleName).Contains("Bkg") || (fc->m_signalSampleName) == "") {
-        (*TMsgLogger::getInstance()) << kINFO << "No hypothesis test performed for background fits." << GEndl;
+        m_logger << kINFO << "No hypothesis test performed for background fits." << GEndl;
         inFile->Close();  
         outfile->Close(); 
         return;
@@ -202,7 +202,7 @@ void ConfigMgr::doHypoTest(FitConfig* fc, TString outdir, double SigXSecSysnsigm
     const char * nuisPriorName = 0;
 
     if ( !m_bkgParNameVec.empty()) {
-        (*TMsgLogger::getInstance()) << kINFO << "Performing bkg correction for bkg-only toys." << GEndl;
+        m_logger << kINFO << "Performing bkg correction for bkg-only toys." << GEndl;
         modelBName = makeCorrectedBkgModelConfig(w,modelSBName);
     }
 
@@ -216,7 +216,7 @@ void ConfigMgr::doHypoTest(FitConfig* fc, TString outdir, double SigXSecSysnsigm
         fitresult->SetName(hypName);
         fitresult->Print();
         fitresult->Write();
-        (*TMsgLogger::getInstance()) << kINFO << "Now storing RooFitResult <" << hypName << ">" << GEndl;
+        m_logger << kINFO << "Now storing RooFitResult <" << hypName << ">" << GEndl;
     }
 
     RooStats::HypoTestResult* htr(0);
@@ -235,8 +235,8 @@ void ConfigMgr::doHypoTest(FitConfig* fc, TString outdir, double SigXSecSysnsigm
     } else {  // discovery 
         // MB: Hack, needed for ProfileLikeliHoodTestStat to work properly.
         if (m_testStatType==3) { 
-            (*TMsgLogger::getInstance()) << kWARNING << "Discovery mode --> Need to change test-statistic type from one-sided to two-sided for RooStats to work." << GEndl; 
-            (*TMsgLogger::getInstance()) << kWARNING << "(Note: test is still one-sided.)" << GEndl; 
+            m_logger << kWARNING << "Discovery mode --> Need to change test-statistic type from one-sided to two-sided for RooStats to work." << GEndl; 
+            m_logger << kWARNING << "(Note: test is still one-sided.)" << GEndl; 
             m_testStatType=2; 
         } 
 
@@ -264,7 +264,7 @@ void ConfigMgr::doHypoTest(FitConfig* fc, TString outdir, double SigXSecSysnsigm
         TString hypName="hypo_"+fc->m_signalSampleName;
         result->SetName(hypName);
         result->Write();
-        (*TMsgLogger::getInstance()) << kINFO << "Now storing HypoTestInverterResult <" << hypName << ">" << GEndl;
+        m_logger << kINFO << "Now storing HypoTestInverterResult <" << hypName << ">" << GEndl;
         delete result;
     }
 
@@ -273,11 +273,11 @@ void ConfigMgr::doHypoTest(FitConfig* fc, TString outdir, double SigXSecSysnsigm
         TString hypName="discovery_htr_"+fc->m_signalSampleName;
         htr->SetName(hypName);
         htr->Write();
-        (*TMsgLogger::getInstance()) << kINFO << "Now storing HypoTestResult <" << hypName << ">" << GEndl;
+        m_logger << kINFO << "Now storing HypoTestResult <" << hypName << ">" << GEndl;
         delete htr;
     }
 
-    (*TMsgLogger::getInstance()) << kINFO << "Done. Stored HypoTest(Inverter)Result and fit result in file <" << outfileName << ">" << GEndl;
+    m_logger << kINFO << "Done. Stored HypoTest(Inverter)Result and fit result in file <" << outfileName << ">" << GEndl;
 
     inFile->Close();  
     outfile->Close();
@@ -291,19 +291,19 @@ TString ConfigMgr::makeCorrectedBkgModelConfig( RooWorkspace* w, const char* mod
     if ( m_bkgCorrValVec.size()!=m_bkgParNameVec.size() || 
             m_bkgCorrValVec.size()!=m_chnNameVec.size() || 
             m_chnNameVec.size()!=m_bkgParNameVec.size() ) {
-        (*TMsgLogger::getInstance()) << kERROR << "Incorrect vector sizes for bkg correction value(s)." << GEndl; 
+        m_logger << kERROR << "Incorrect vector sizes for bkg correction value(s)." << GEndl; 
         return bModelStr; 
     }
 
     RooStats::ModelConfig* sbModel = Util::GetModelConfig( w, modelSBName );
     if (sbModel == NULL) { 
-        (*TMsgLogger::getInstance()) << kERROR << "No signal model config found. Return." << GEndl;
+        m_logger << kERROR << "No signal model config found. Return." << GEndl;
         return bModelStr; 
     }
 
     RooRealVar * poi = dynamic_cast<RooRealVar*>(sbModel->GetParametersOfInterest()->first());
     if (!poi) { 
-        (*TMsgLogger::getInstance()) << kERROR << "No signal strength parameter found. Return." << GEndl; 
+        m_logger << kERROR << "No signal strength parameter found. Return." << GEndl; 
         return bModelStr; 
     }
     
@@ -322,7 +322,7 @@ TString ConfigMgr::makeCorrectedBkgModelConfig( RooWorkspace* w, const char* mod
     for (unsigned int i=0; i<m_bkgParNameVec.size(); ++i) {
         RooRealVar *totbk = w->var( m_bkgParNameVec[i].c_str() );
         if (!totbk) { 
-            (*TMsgLogger::getInstance()) << kERROR << "No bkg strength parameter found. Return." << GEndl; 
+            m_logger << kERROR << "No bkg strength parameter found. Return." << GEndl; 
             return bModelStr; 
         }
 
@@ -361,7 +361,7 @@ TString ConfigMgr::makeCorrectedBkgModelConfig( RooWorkspace* w, const char* mod
     bModelStr = TString(modelSBName)+TString("_with_poi_0");
     RooStats::ModelConfig* bModel = Util::GetModelConfig( w, bModelStr.Data(), false );
     if (bModel) { 
-        (*TMsgLogger::getInstance()) << kERROR << "Bkg model config already defined. Return." << GEndl; 
+        m_logger << kERROR << "Bkg model config already defined. Return." << GEndl; 
         return bModelStr; 
     }
 
@@ -403,19 +403,19 @@ void ConfigMgr::doUpperLimit(FitConfig* fc) {
     outfileName.ReplaceAll(".root","_upperlimit.root");
     TFile* outfile = TFile::Open(outfileName,"UPDATE");
     if(outfile->IsZombie()) { 
-        (*TMsgLogger::getInstance()) << kERROR << "TFile <" << outfileName << "> could not be opened" << GEndl; 
+        m_logger << kERROR << "TFile <" << outfileName << "> could not be opened" << GEndl; 
         return; 
     }
 
     TFile* inFile = TFile::Open(fc->m_inputWorkspaceFileName);
     if(!inFile){ 
-        (*TMsgLogger::getInstance()) << kERROR << "doUL : TFile <" << fc->m_inputWorkspaceFileName << "> could not be opened" << GEndl; 
+        m_logger << kERROR << "doUL : TFile <" << fc->m_inputWorkspaceFileName << "> could not be opened" << GEndl; 
         return; 
     }
 
     RooWorkspace* w = (RooWorkspace*)inFile->Get("combined");
     if(w == NULL){ 
-        (*TMsgLogger::getInstance()) << kERROR << "workspace 'combined' does not exist in file" << GEndl; 
+        m_logger << kERROR << "workspace 'combined' does not exist in file" << GEndl; 
         return; 
     }
 
@@ -445,7 +445,7 @@ void ConfigMgr::doUpperLimit(FitConfig* fc) {
         outfile->cd();
         TString hypName="hypo_"+fc->m_signalSampleName;
         hypo->SetName(hypName);
-        (*TMsgLogger::getInstance()) << kINFO << "Now storing HypoTestInverterResult <" << hypName << ">" << GEndl;
+        m_logger << kINFO << "Now storing HypoTestInverterResult <" << hypName << ">" << GEndl;
         hypo->Write();
     }
 
@@ -456,7 +456,7 @@ void ConfigMgr::doUpperLimit(FitConfig* fc) {
     inFile->Close();
     outfile->Close();
 
-    (*TMsgLogger::getInstance()) << kINFO << "Done. Stored upper limit in file <" << outfileName << ">" << GEndl;
+    m_logger << kINFO << "Done. Stored upper limit in file <" << outfileName << ">" << GEndl;
 
     return;
 }
@@ -475,13 +475,13 @@ void ConfigMgr::runToys(int i) {
 void ConfigMgr::runToys(FitConfig* fc) {
     TFile* inFile = TFile::Open(fc->m_inputWorkspaceFileName);
     if(!inFile){ 
-        (*TMsgLogger::getInstance()) << kERROR << "TFile could not be opened" << GEndl; 
+        m_logger << kERROR << "TFile could not be opened" << GEndl; 
         return; 
     }
 
     RooWorkspace* w = (RooWorkspace*)inFile->Get("combined");
     if(w == NULL){ 
-        (*TMsgLogger::getInstance()) << kERROR << "workspace 'combined' does not exist in file" << GEndl; 
+        m_logger << kERROR << "workspace 'combined' does not exist in file" << GEndl; 
         return; 
     }
 

@@ -25,6 +25,7 @@
 using namespace RooFit;
 using namespace RooStats;
 
+static TMsgLogger profileGetPValueLogger("profile_get_Pvalue");
 
 //________________________________________________________________________________________________
 void doFreeFit( const RooWorkspace* fullwspace, RooDataSet* inputdata, bool verbose ) {
@@ -40,12 +41,12 @@ RooFitResult* doFreeFitSave( const RooWorkspace* fullwspace, RooDataSet* inputda
     // fit to reset the workspace
 
     if(!fullwspace){
-        (*TMsgLogger::getInstance()) << kERROR << "Input workspace is null!" << GEndl;
+        profileGetPValueLogger << kERROR << "Input workspace is null!" << GEndl;
         return 0;
     }
 
     if(!fullwspace->obj("text_suffix")){
-        (*TMsgLogger::getInstance()) << kERROR << "No suffix found, this workspace can not be automatically combined using this function. If possible recreate your single workspaces with newer code" << GEndl;
+        profileGetPValueLogger << kERROR << "No suffix found, this workspace can not be automatically combined using this function. If possible recreate your single workspaces with newer code" << GEndl;
         return 0;
     }
 
@@ -61,9 +62,9 @@ RooFitResult* doFreeFitSave( const RooWorkspace* fullwspace, RooDataSet* inputda
     if (verbose) data_set->Print();
 
     if((!data_set)||(!full_model_thispdf)){
-        (*TMsgLogger::getInstance()) << kERROR << "data set or pdf not found" << GEndl;
-        (*TMsgLogger::getInstance()) << kERROR << "     :   pdfname    =" <<"full_model"+suffix<< GEndl;
-        (*TMsgLogger::getInstance()) << kERROR << "     :   datasetname=" <<"data_set"+suffix<< GEndl;
+        profileGetPValueLogger << kERROR << "data set or pdf not found" << GEndl;
+        profileGetPValueLogger << kERROR << "     :   pdfname    =" <<"full_model"+suffix<< GEndl;
+        profileGetPValueLogger << kERROR << "     :   datasetname=" <<"data_set"+suffix<< GEndl;
         return 0;
     }
 

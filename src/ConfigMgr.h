@@ -118,6 +118,8 @@ class ConfigMgr {
 
 
     private:
+        TMsgLogger m_logger;
+
         int  m_nToys;
         int  m_calcType;
         int  m_testStatType;

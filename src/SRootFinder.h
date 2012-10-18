@@ -1,3 +1,4 @@
+// vim: ts=4:sw=4
 /**********************************************************************************
  * Package: StatTools                                                             *
  * Class  : SRootFinder                                                           *
@@ -26,31 +27,32 @@
 
 namespace StatTools {
 
-   class SRootFinder : public TObject {
+    class SRootFinder : public TObject {
 
-   public:
+        public:
 
-      SRootFinder( Double_t (*rootVal)( Double_t ),
-                  Double_t rootMin, Double_t rootMax,
-                  Int_t    maxIterations = 100, 
-                  Double_t absTolerance  = 0.0 );
-      virtual ~SRootFinder( void );
-      
-      // returns the root of the function
-      Double_t Root( Double_t refValue );
+            SRootFinder( Double_t (*rootVal)( Double_t ),
+                    Double_t rootMin, Double_t rootMax,
+                    Int_t    maxIterations = 100, 
+                    Double_t absTolerance  = 0.0 );
+            virtual ~SRootFinder( void );
 
-   private:
+            // returns the root of the function
+            Double_t Root( Double_t refValue );
 
-      Double_t fRootMin;  // minimum root value
-      Double_t fRootMax;  // maximum root value
-      Int_t    fMaxIter;  // maximum number of iterations
-      Double_t fAbsTol;   // absolute tolerance deviation
+        private:
+            Double_t fRootMin;  // minimum root value
+            Double_t fRootMax;  // maximum root value
+            Int_t    fMaxIter;  // maximum number of iterations
+            Double_t fAbsTol;   // absolute tolerance deviation
 
-      // function pointer
-      Double_t (*fGetRootVal)( Double_t );
+            // function pointer
+            Double_t (*fGetRootVal)( Double_t );
+            
+            TMsgLogger m_logger;
 
-      ClassDef(SRootFinder,0) // Root finding using Brents algorithm
-   };
+            ClassDef(SRootFinder,0) // Root finding using Brents algorithm
+    };
 
 } // namespace StatTools
 

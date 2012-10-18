@@ -39,21 +39,11 @@ enum TMsgLevel {
 
 class TMsgLogger : public std::ostringstream, public TObject {
     public:
-
-    private:
         TMsgLogger( const TObject* source, TMsgLevel minLevel = kINFO );
         TMsgLogger( const std::string& source, TMsgLevel minLevel = kINFO );
         TMsgLogger( TMsgLevel minLevel = kINFO );
         TMsgLogger( const TMsgLogger& parent );
         virtual ~TMsgLogger();
-
-    public:
-        static TMsgLogger* getInstance() {
-            if( !m_singleton )
-                m_singleton = new TMsgLogger;
-
-            return m_singleton;
-        }
 
         // Accessors
         void               SetSource( const char*        source ) { m_strSource = source; }
@@ -93,13 +83,12 @@ class TMsgLogger : public std::ostringstream, public TObject {
 
         std::map<TMsgLevel, std::string> GetLevelMap() const { return m_levelMap; }
 
-        static void writeLogMessage( TMsgLevel level, std::string message) { 
-            (*TMsgLogger::getInstance()) << level << message << TMsgLogger::endmsg;
+        // for python
+        void writeLogMessage( TMsgLevel level, std::string message) { 
+            *(TMsgLogger*) this << level << message << TMsgLogger::endmsg; 
         }
 
     private:
-
-        static TMsgLogger* m_singleton;
 
         // the current minimum level is global for the whole Combination
         // it can only be changed by the central storage singleton object

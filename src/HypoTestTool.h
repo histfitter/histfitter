@@ -12,6 +12,7 @@
 
 #include "RooStats/HypoTestInverter.h"
 #include "RooStats/HypoTestCalculatorGeneric.h"
+#include "TMsgLogger.h"
 
 namespace RooStats {
     class HypoTestInverterResult;
@@ -106,6 +107,7 @@ namespace RooStats {
 
             bool mNoSystematics;
             double mConfLevel;
+            TMsgLogger m_logger;
 
     };
 

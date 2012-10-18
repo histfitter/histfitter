@@ -6,14 +6,13 @@
 
 #include <iostream>
 #include "FitConfig.h"
-#include "TMsgLogger.h"
 
 using namespace std;
 
-FitConfig::FitConfig(){
+FitConfig::FitConfig() : m_logger("FitConfig"){
 }
 
-FitConfig::FitConfig(const TString& name){
+FitConfig::FitConfig(const TString& name) : m_logger("FitConfig") {
     m_Name=name;
 
     m_dataColor = kBlack;	     
@@ -32,7 +31,7 @@ Int_t FitConfig::getSampleColor(const TString& sample){
             return m_sampleColors[i];
         }
     }
-    (*TMsgLogger::getInstance()) << kWARNING << "getSampleColor unknown sample name: "<<sample << GEndl;
+    m_logger << kWARNING << "getSampleColor unknown sample name: "<<sample << GEndl;
     return 0;
 }
 
@@ -48,37 +47,37 @@ TString FitConfig::getSampleName(const TString& sample){
             return m_sampleNames[i];
         }
     }
-    (*TMsgLogger::getInstance()) << kWARNING << "getSampleName unknown sample name: "<<sample << GEndl;
+    m_logger << kWARNING << "getSampleName unknown sample name: "<<sample << GEndl;
     return "";
 }
 
 void FitConfig::Print(){
-    (*TMsgLogger::getInstance()) << kINFO << "*** Fit Config: " << m_Name << " ***" << GEndl;
-    (*TMsgLogger::getInstance()) << kINFO << " inputWorkspaceFileName: " << m_inputWorkspaceFileName << GEndl;
-    (*TMsgLogger::getInstance()) << kINFO << " signalSampleName: " << m_signalSampleName << GEndl;
+    m_logger << kINFO << "*** Fit Config: " << m_Name << " ***" << GEndl;
+    m_logger << kINFO << " inputWorkspaceFileName: " << m_inputWorkspaceFileName << GEndl;
+    m_logger << kINFO << " signalSampleName: " << m_signalSampleName << GEndl;
     
-    (*TMsgLogger::getInstance()) << kINFO << " sampleNames: ";
+    m_logger << kINFO << " sampleNames: ";
     for(unsigned int i = 0; i< m_sampleNames.size(); i++){ 
-        (*TMsgLogger::getInstance()) << kINFO << m_sampleNames.at(i) << " "; 
+        m_logger << kINFO << m_sampleNames.at(i) << " "; 
     }
-    (*TMsgLogger::getInstance()) << kINFO << " sampleColors: ";
+    m_logger << kINFO << " sampleColors: ";
     for(unsigned int i = 0; i< m_sampleColors.size(); i++){ 
-        (*TMsgLogger::getInstance()) << kINFO << m_sampleColors.at(i) << " "; 
+        m_logger << kINFO << m_sampleColors.at(i) << " "; 
     }
     
-    (*TMsgLogger::getInstance()) << kINFO << " signalChannels: ";
+    m_logger << kINFO << " signalChannels: ";
     for(unsigned int i = 0; i< m_signalChannels.size(); i++){ 
-        (*TMsgLogger::getInstance()) << kINFO << m_signalChannels.at(i) << " "; 
+        m_logger << kINFO << m_signalChannels.at(i) << " "; 
     }
     
-    (*TMsgLogger::getInstance()) << kINFO << " validationChannels: ";
+    m_logger << kINFO << " validationChannels: ";
     for(unsigned int i = 0; i< m_validationChannels.size(); i++){ 
-        (*TMsgLogger::getInstance()) << kINFO << m_validationChannels.at(i) << " "; 
+        m_logger << kINFO << m_validationChannels.at(i) << " "; 
     }
     
-    (*TMsgLogger::getInstance()) << kINFO << " bkgConstrainChannels: ";
+    m_logger << kINFO << " bkgConstrainChannels: ";
     for(unsigned int i = 0; i< m_bkgConstrainChannels.size(); i++){ 
-        (*TMsgLogger::getInstance()) << kINFO << m_bkgConstrainChannels.at(i) << " ";
+        m_logger << kINFO << m_bkgConstrainChannels.at(i) << " ";
     }
     
     return;
@@ -206,9 +205,9 @@ void FitConfig::findChannel(const TString& channel, Int_t& idx, Bool_t& channelF
             idx = i;
             channelFound = kTRUE;
         } else if(m_channels[i].EqualTo(channel) && channelFound){
-            (*TMsgLogger::getInstance()) << kWARNING << "FitConfig has found more then one channel with the name = " << channel << " check your code" << GEndl;
+            m_logger << kWARNING << "FitConfig has found more then one channel with the name = " << channel << " check your code" << GEndl;
             for(unsigned int j=0; j < m_channels.size(); j++){
-                (*TMsgLogger::getInstance()) << kINFO << "FitConfig m_channels[" << j << "] = " << m_channels[j] << GEndl;
+                m_logger << kINFO << "FitConfig m_channels[" << j << "] = " << m_channels[j] << GEndl;
             }
         }
     }

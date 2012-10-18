@@ -11,7 +11,7 @@
 #include <vector>
 #include "TString.h"
 #include "TLegend.h"
-
+#include "TMsgLogger.h"
 
 class FitConfig {
     public:
@@ -118,7 +118,8 @@ class FitConfig {
 
         void findChannel(const TString& channel, Int_t& idx, Bool_t& channelFound);
         void Print();
-
+private:
+        TMsgLogger m_logger;
 };
 
 #endif

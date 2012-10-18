@@ -86,8 +86,6 @@ TMsgLogger::TMsgLogger( const TMsgLogger& parent )
 }
 
 TMsgLogger::~TMsgLogger() {
-    if(m_singleton)
-        delete m_singleton;
 }
 
 TMsgLogger& TMsgLogger::operator= ( const TMsgLogger& parent )  {
@@ -224,5 +222,3 @@ void TMsgLogger::InitMaps() {
     m_colorMap[kFATAL]   = "\033[37;41;1m";
     m_colorMap[kALWAYS]  = "\033[30m";   
 }
-
-TMsgLogger* TMsgLogger::m_singleton = NULL; 

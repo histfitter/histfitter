@@ -12,20 +12,20 @@ ClassImp(TEasyFormula)
 
 //_____________________________________________________________________________
 TEasyFormula::TEasyFormula()
-: TFormula() {
+: TFormula(), m_logger("TEasyFormula") {
 }
 
 
 //_____________________________________________________________________________
 TEasyFormula::TEasyFormula(const char* expression)
-    : TFormula() {
+    : TFormula(), m_logger("TEasyFormula") {
     (void) this->SetFormula(expression);
 }
 
 
 //_____________________________________________________________________________
 TEasyFormula::TEasyFormula(const char* name,const char* expression) 
-    : TFormula(name,"1")  {
+    : TFormula(name,"1"), m_logger("TEasyFormula")  {
     (void) this->SetFormula(expression);
 }
 
@@ -42,7 +42,7 @@ TEasyFormula::TEasyFormula(const TEasyFormula& other)
     , m_par(other.m_par)
     , m_stod(other.m_stod)
     , m_itos(other.m_itos)
-      , m_stoi(other.m_stoi) {
+      , m_stoi(other.m_stoi), m_logger("TEasyFormula") {
 }
 
 
@@ -135,9 +135,8 @@ Int_t TEasyFormula::DefinedVariable(TString &name) {
 
 
 //_____________________________________________________________________________
-void TEasyFormula::Summary() const {
-    TMsgLogger::getInstance()->SetSource("TEasyFormula");
-    (*TMsgLogger::getInstance()) << kINFO << "Formula : " << m_expr << GEndl;
+void TEasyFormula::Summary() {
+    m_logger << kINFO << "Formula : " << m_expr << GEndl;
 }
 
 

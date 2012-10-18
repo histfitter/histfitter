@@ -86,7 +86,8 @@ RooStats::HypoTestTool::HypoTestTool() : m_hc(0), m_calc(0),
     mMinimizerType(""),
     mResultFileName(),
     mNoSystematics(false),
-    mConfLevel(0.95)
+    mConfLevel(0.95),
+    m_logger("HypoTestTool")
 {
 }
 
@@ -175,7 +176,7 @@ RooStats::HypoTestTool::AnalyzeResult( HypoTestInverterResult * r,
         ) 
 { 
     if (r==0) {
-        (*TMsgLogger::getInstance()) << kERROR << "Input HypoTestInverterResult is empty. Exit." << GEndl;
+        m_logger << kERROR << "Input HypoTestInverterResult is empty. Exit." << GEndl;
         return;
     }
 
@@ -184,14 +185,14 @@ RooStats::HypoTestTool::AnalyzeResult( HypoTestInverterResult * r,
     double upperLimit = r->UpperLimit();
     double ulError = r->UpperLimitEstimatedError();
 
-    (*TMsgLogger::getInstance()) << kINFO << "The computed upper limit is: " << upperLimit << " +/- " << ulError << GEndl;
+    m_logger << kINFO << "The computed upper limit is: " << upperLimit << " +/- " << ulError << GEndl;
 
     // compute expected limit
-    (*TMsgLogger::getInstance()) << kINFO << " expected limit (median) " << r->GetExpectedUpperLimit(0) << GEndl;
-    (*TMsgLogger::getInstance()) << kINFO << " expected limit (-1 sig) " << r->GetExpectedUpperLimit(-1) << GEndl;
-    (*TMsgLogger::getInstance()) << kINFO << " expected limit (+1 sig) " << r->GetExpectedUpperLimit(1) << GEndl;
-    (*TMsgLogger::getInstance()) << kINFO << " expected limit (-2 sig) " << r->GetExpectedUpperLimit(-2) << GEndl;
-    (*TMsgLogger::getInstance()) << kINFO << " expected limit (+2 sig) " << r->GetExpectedUpperLimit(2) << GEndl;
+    m_logger << kINFO << " expected limit (median) " << r->GetExpectedUpperLimit(0) << GEndl;
+    m_logger << kINFO << " expected limit (-1 sig) " << r->GetExpectedUpperLimit(-1) << GEndl;
+    m_logger << kINFO << " expected limit (+1 sig) " << r->GetExpectedUpperLimit(1) << GEndl;
+    m_logger << kINFO << " expected limit (-2 sig) " << r->GetExpectedUpperLimit(-2) << GEndl;
+    m_logger << kINFO << " expected limit (+2 sig) " << r->GetExpectedUpperLimit(2) << GEndl;
 
     // write result in a file 
     // write to a file the results
@@ -276,7 +277,7 @@ RooStats::HypoTestTool::RunHypoTestInverter(RooWorkspace * w,
         bool useNumberCounting,
         const char * nuisPriorName )
 {
-    (*TMsgLogger::getInstance()) << kINFO << ">>> Running HypoTestInverter on the workspace " << w->GetName() << GEndl;
+    m_logger << kINFO << ">>> Running HypoTestInverter on the workspace " << w->GetName() << GEndl;
 
     bool ok = this->SetupHypoTestInverter(w, modelSBName, modelBName, dataName, type, testStatType, 
             useCLs, npoints, poimin, poimax, ntoys, useNumberCounting, nuisPriorName );
@@ -290,18 +291,18 @@ RooStats::HypoTestTool::RunHypoTestInverter(RooWorkspace * w,
     tw.Start();
     HypoTestInverterResult * r = m_calc->GetInterval();
 
-    (*TMsgLogger::getInstance()) << kINFO << "Time to perform limit scan \n";
+    m_logger << kINFO << "Time to perform limit scan \n";
     tw.Print();
 
     if (mRebuild) {
         m_calc->SetCloseProof(1);
         tw.Start();
         SamplingDistribution * limDist = m_calc->GetUpperLimitDistribution(true,mNToyToRebuild);
-        (*TMsgLogger::getInstance()) << kINFO << "Time to rebuild distributions " << GEndl;
+        m_logger << kINFO << "Time to rebuild distributions " << GEndl;
         tw.Print();
 
         if (limDist) { 
-            (*TMsgLogger::getInstance()) << kINFO << "expected up limit " << limDist->InverseCDF(0.5) << " +/- " 
+            m_logger << kINFO << "expected up limit " << limDist->InverseCDF(0.5) << " +/- " 
                 << limDist->InverseCDF(0.16) << "  " 
                 << limDist->InverseCDF(0.84) << "\n"; 
 
@@ -312,10 +313,10 @@ RooStats::HypoTestTool::RunHypoTestInverter(RooWorkspace * w,
 
         }
         else 
-            (*TMsgLogger::getInstance()) << kINFO << "ERROR : failed to re-build distributions " << GEndl; 
+            m_logger << kINFO << "ERROR : failed to re-build distributions " << GEndl; 
     }
 
-    (*TMsgLogger::getInstance()) << kINFO << ">>> Done running HypoTestInverter on the workspace " << w->GetName() << GEndl;
+    m_logger << kINFO << ">>> Done running HypoTestInverter on the workspace " << w->GetName() << GEndl;
 
     return r;
 }
@@ -338,14 +339,14 @@ RooStats::HypoTestTool::RunHypoTest(RooWorkspace * w, bool doUL,
 
     /// by now m_calc has been setup okay ...
 
-    (*TMsgLogger::getInstance()) << kINFO << ">>> Running HypoTestCalculator on the workspace " << w->GetName() << GEndl;
+    m_logger << kINFO << ">>> Running HypoTestCalculator on the workspace " << w->GetName() << GEndl;
 
     TStopwatch tw; 
     tw.Start();
     HypoTestResult * r = m_hc->GetHypoTest();
     tw.Print();
 
-    (*TMsgLogger::getInstance()) << kINFO << ">>> Done running HypoTestCalculator on the workspace " << w->GetName() << GEndl;
+    m_logger << kINFO << ">>> Done running HypoTestCalculator on the workspace " << w->GetName() << GEndl;
 
     if (doUL) { r->SetBackgroundAsAlt(); }
 
@@ -361,8 +362,8 @@ RooStats::HypoTestTool::SetupHypoTestCalculator(RooWorkspace * w, bool doUL,
         bool useNumberCounting,
         const char * nuisPriorName ) 
 {
-    (*TMsgLogger::getInstance()) << kINFO << ">>> Setting up HypoTestCalculator on the workspace <" << w->GetName() << ">" << GEndl;
-    (*TMsgLogger::getInstance()) << kINFO << ">>> Setting up HypoTest for : " << (doUL ? "exclusion" : "discovery") << GEndl;
+    m_logger << kINFO << ">>> Setting up HypoTestCalculator on the workspace <" << w->GetName() << ">" << GEndl;
+    m_logger << kINFO << ">>> Setting up HypoTest for : " << (doUL ? "exclusion" : "discovery") << GEndl;
 
     RooAbsData * data = w->data(dataName); 
     if (!data) { 
@@ -370,7 +371,7 @@ RooStats::HypoTestTool::SetupHypoTestCalculator(RooWorkspace * w, bool doUL,
         return false;
     }
     else 
-        (*TMsgLogger::getInstance()) << kINFO << "Using data set " << dataName << GEndl;
+        m_logger << kINFO << "Using data set " << dataName << GEndl;
 
     if (mUseVectorStore) { 
         RooAbsData::defaultStorageType = RooAbsData::Vector;
@@ -409,7 +410,7 @@ RooStats::HypoTestTool::SetupHypoTestCalculator(RooWorkspace * w, bool doUL,
     if (mNoSystematics) { 
         const RooArgSet * nuisPar = sbModel->GetNuisanceParameters();
         if (nuisPar && nuisPar->getSize() > 0) { 
-            (*TMsgLogger::getInstance()) << kINFO << "HypoTestTool" << "  -  Switch off all systematics by setting them constant to their initial values" << GEndl;
+            m_logger << kINFO << "HypoTestTool" << "  -  Switch off all systematics by setting them constant to their initial values" << GEndl;
             RooStats::SetAllConstant(*nuisPar);
         }
         const RooArgSet * bnuisPar = bModel->GetNuisanceParameters();
@@ -467,7 +468,7 @@ RooStats::HypoTestTool::SetupHypoTestCalculator(RooWorkspace * w, bool doUL,
     const RooArgSet * poiSet = sbModel->GetParametersOfInterest();
     RooRealVar *poi = (RooRealVar*)poiSet->first();
 
-    (*TMsgLogger::getInstance()) << kINFO << "HypoTestTool : POI initial value:   " << poi->GetName() << " = " << poi->getVal()   << GEndl;  
+    m_logger << kINFO << "HypoTestTool : POI initial value:   " << poi->GetName() << " = " << poi->getVal()   << GEndl;  
 
     //poi->setRange(0,100);
 
@@ -523,9 +524,9 @@ RooStats::HypoTestTool::SetupHypoTestCalculator(RooWorkspace * w, bool doUL,
             Warning("StandardHypoTestInvDemo"," Fit still failed - continue anyway.....");
 
         poihat  = poi->getVal();
-        (*TMsgLogger::getInstance()) << kINFO << "StandardHypoTestInvDemo - Best Fit value : " << poi->GetName() << " = "  
+        m_logger << kINFO << "StandardHypoTestInvDemo - Best Fit value : " << poi->GetName() << " = "  
             << poihat << " +/- " << poi->getError() << GEndl;
-        (*TMsgLogger::getInstance()) << kINFO << "Time for fitting : "; tw.Print(); 
+        m_logger << kINFO << "Time for fitting : "; tw.Print(); 
 
         RooArgSet newSnapSet;
         if (tPoiSet!=0) newSnapSet.add(*tPoiSet); // make sure this is the full poi set.
@@ -546,7 +547,7 @@ RooStats::HypoTestTool::SetupHypoTestCalculator(RooWorkspace * w, bool doUL,
         //save best fit value in the poi snapshot 
         //sbModel->SetSnapshot(*sbModel->GetParametersOfInterest());
         sbModel->SetSnapshot(newSnapSet);
-        (*TMsgLogger::getInstance()) << kINFO << "StandardHypoTestInvo: snapshot of S+B Model " << sbModel->GetName() 
+        m_logger << kINFO << "StandardHypoTestInvo: snapshot of S+B Model " << sbModel->GetName() 
             << " is set to the best fit value" << GEndl;  
     }
 
@@ -565,16 +566,16 @@ RooStats::HypoTestTool::SetupHypoTestCalculator(RooWorkspace * w, bool doUL,
 
 
        double poihat  = poi->getVal();
-       (*TMsgLogger::getInstance()) << kINFO << "HypoTestTool - Best Fit value : " << poi->GetName() << " = "  
+       m_logger << kINFO << "HypoTestTool - Best Fit value : " << poi->GetName() << " = "  
        << poihat << " +/- " << poi->getError() << GEndl;
-       (*TMsgLogger::getInstance()) << kINFO << "Time for fitting : "; tw.Print(); 
+       m_logger << kINFO << "Time for fitting : "; tw.Print(); 
        tw.Stop(); 
        */
 
     /*
        if (false) {
     /// original code  
-    (*TMsgLogger::getInstance()) << kINFO << "HypoTestTool: snapshot of S+B Model " << sbModel->GetName() 
+    m_logger << kINFO << "HypoTestTool: snapshot of S+B Model " << sbModel->GetName() 
     //<< " is set to the best fit value, and poi=1" << GEndl;
     << " is set to the best fit value." << GEndl;
     //save best fit value in the poi snapshot 
@@ -587,14 +588,14 @@ RooStats::HypoTestTool::SetupHypoTestCalculator(RooWorkspace * w, bool doUL,
     /*
     /// better approach? MB: old
     if (false) {
-    (*TMsgLogger::getInstance()) << kINFO << "HypoTestTool: snapshot of S+B Model " << sbModel->GetName() 
+    m_logger << kINFO << "HypoTestTool: snapshot of S+B Model " << sbModel->GetName() 
     //<< " is set to the best fit value, and poi=1" << GEndl;
     << " is set to the best fit value, with poi=1." << GEndl;
     //save best fit value in the poi snapshot 
     poi->setVal(1.0);
     sbModel->SetSnapshot(*sbModel->GetParametersOfInterest());
 
-    (*TMsgLogger::getInstance()) << kINFO << "HypoTestTool: snapshot of B Model " << bModel->GetName()
+    m_logger << kINFO << "HypoTestTool: snapshot of B Model " << bModel->GetName()
     //<< " is set to the best fit value, and poi=1" << GEndl;
     << " is set to the best fit value, with poi=0." << GEndl;
     //save best fit value in the poi snapshot 
@@ -788,7 +789,7 @@ RooStats::HypoTestTool::SetupHypoTestCalculator(RooWorkspace * w, bool doUL,
     // Get the result
     RooMsgService::instance().getStream(1).removeTopic(RooFit::NumIntegration);
 
-    (*TMsgLogger::getInstance()) << kINFO << ">>> Done setting up HypoTestCalculator on the workspace " << w->GetName() << GEndl;
+    m_logger << kINFO << ">>> Done setting up HypoTestCalculator on the workspace " << w->GetName() << GEndl;
 
     return true;
 }
@@ -804,7 +805,7 @@ RooStats::HypoTestTool::SetupHypoTestInverter(RooWorkspace * w,
         bool useNumberCounting,
         const char * nuisPriorName ){
 
-    (*TMsgLogger::getInstance()) << kINFO << ">>> Setting up HypoTestInverter on the workspace " << w->GetName() << GEndl;
+    m_logger << kINFO << ">>> Setting up HypoTestInverter on the workspace " << w->GetName() << GEndl;
 
     bool ok = this->SetupHypoTestCalculator(w, true, modelSBName, modelBName, dataName, type, testStatType,   
             ntoys, useNumberCounting, nuisPriorName ); /// MB : Note the true : always assuming exclusion here
@@ -870,17 +871,17 @@ RooStats::HypoTestTool::SetupHypoTestInverter(RooWorkspace * w,
             poimax = ( poihat +  20 * poi->getErrorHi() );
             /// MB: got rid of int rounding
         }
-        (*TMsgLogger::getInstance()) << kINFO << "Doing a fixed scan  in interval : " << poimin << " , " << poimax << GEndl;
+        m_logger << kINFO << "Doing a fixed scan  in interval : " << poimin << " , " << poimax << GEndl;
         if ( poimax > poi->getMax() ) { poi->setMax( poimax ); }
         m_calc->SetFixedScan(npoints,poimin,poimax);
     }
     else { 
         //poi->setMax(10*int( (poihat+ 10 *poi->getError() )/10 ) );
         //if ( poimax > poi->getMax() ) { poi->setMax( poimax ); }
-        (*TMsgLogger::getInstance()) << kINFO << "Doing an  automatic scan  in interval : " << poi->getMin() << " , " << poi->getMax() << GEndl;
+        m_logger << kINFO << "Doing an  automatic scan  in interval : " << poi->getMin() << " , " << poi->getMax() << GEndl;
     }
 
-    (*TMsgLogger::getInstance()) << kINFO << ">>> Done setting up HypoTestInverter on the workspace " << w->GetName() << GEndl;
+    m_logger << kINFO << ">>> Done setting up HypoTestInverter on the workspace " << w->GetName() << GEndl;
 
     return true;
 }
