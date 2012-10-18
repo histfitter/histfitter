@@ -4,12 +4,12 @@ from prepareHistos import TreePrepare,HistoPrepare
 from copy import deepcopy
 from systematic import Systematic
 from histogramsManager import histMgr
-from logger import log
+from logger import Logger
 import os
-
 from ROOT import gROOT
 
 gROOT.SetBatch(True)
+log = Logger('ConfigManager')
 
 def replaceSymbols(s):
     s = s.replace("/","").replace("*","").replace("(","").replace(")","")

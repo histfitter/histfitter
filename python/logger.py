@@ -41,45 +41,34 @@ def _checkLevel(level):
     return rv
 
 class Logger(object):
-    _instance = None
 
-    def __new__(cls, *args, **kwargs):
-        if not cls._instance:
-            cls._instance = super(Logger,cls).__new__(cls,*args,**kwargs)
-        else:
-            raise Exception("Class Logger allows only one instance")
-
-        return cls._instance
-
-    def __init__(self):
-        self.TMsgLogger = TMsgLogger.getInstance()
-        self.TMsgLogger.SetSource("HistFitter")
-        self.TMsgLogger.SetMinLevel(INFO)
+    def __init__(self,name):
+        self.mlogger = TMsgLogger()
+        self.mlogger.SetSource(name)
+        self.mlogger.SetMinLevel(INFO)
 
     def setLevel(self, level):
-        self.TMsgLogger.SetMinLevel(_checkLevel(level))
+        self.mlogger.SetMinLevel(_checkLevel(level))
         self.always("Log level set to %s " % getLevelName(level) )
 
     def verbose(self, msg):
-        TMsgLogger.writeLogMessage(VERBOSE, msg)
+        self.mlogger.writeLogMessage(VERBOSE, msg)
     
     def debug(self, msg):
-        TMsgLogger.writeLogMessage(DEBUG, msg)
+        self.mlogger.writeLogMessage(DEBUG, msg)
     
     def info(self, msg):
-        TMsgLogger.writeLogMessage(INFO, msg)
+        self.mlogger.writeLogMessage(INFO, msg)
     
     def warning(self, msg):
-        TMsgLogger.writeLogMessage(WARNING, msg)
+        self.mlogger.writeLogMessage(WARNING, msg)
     
     def error(self, msg):
-        TMsgLogger.writeLogMessage(ERROR, msg)
+        self.mlogger.writeLogMessage(ERROR, msg)
     
     def fatal(self, msg):
-        TMsgLogger.writeLogMessage(FATAL, msg)
+        self.mlogger.writeLogMessage(FATAL, msg)
     
     def always(self, msg):
-        TMsgLogger.writeLogMessage(ALWAYS, msg)
+        self.mlogger.writeLogMessage(ALWAYS, msg)
 
-#initialize singleton
-log = Logger()

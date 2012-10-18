@@ -5,7 +5,9 @@ from math import fabs
 from measurement import Measurement
 from channelxml import ChannelXML
 from sample import Sample
-from logger import log
+from logger import Logger
+
+log = Logger('TopLevelXML')
 
 import generateToys
 import os

@@ -3,10 +3,11 @@ from ROOT import ConfigMgr,FitConfig  #from gSystem.Load("libSusyFitter.so")
 from prepareHistos import TreePrepare,HistoPrepare
 from histogramsManager import histMgr
 from copy import deepcopy
-from logger import log
+from logger import Logger
 import os
-
 from ROOT import gROOT
+
+log = Logger('Systematic')
 
 ###############################################
 # Systematic is a function which returns an object. This object can be a

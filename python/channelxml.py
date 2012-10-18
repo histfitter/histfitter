@@ -3,7 +3,7 @@ from ROOT import kBlack, kWhite, kGray, kRed, kPink, kMagenta, kViolet, kBlue, k
 from os import system
 from math import fabs
 from sample import Sample
-from logger import log
+from logger import Logger
 
 import generateToys
 
@@ -12,6 +12,7 @@ TH1.SetDefaultSumw2(True)
 from copy import deepcopy, copy
 from configManager import configMgr
 
+log = Logger('ChannelXML')
 
 class ChannelXML(object):
     """

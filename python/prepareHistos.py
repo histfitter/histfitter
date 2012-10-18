@@ -1,7 +1,9 @@
 from ROOT import gROOT,TFile,TH1F,Double,gDirectory,TChain
 from copy import deepcopy,copy
 from math import sqrt
-from logger import log
+from logger import Logger
+
+log = Logger('PrepareHistos')
 
 class PrepareHistosABC(object):
     """
