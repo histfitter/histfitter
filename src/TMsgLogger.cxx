@@ -166,17 +166,13 @@ void TMsgLogger::WriteMsg( TMsgLevel mlevel, const std::string& line ) const  {
 
     //we do print names for kINFO - gbesjes 17/10/12
 #ifdef USE_COLORED_CONSOLE
-    //// no text for INFO
-    //if (mlevel == kINFO) 
-        //cout << m_colorMap.find( mlevel )->second << m_prefix << line << "\033[0m" << endl;
-    //else
-        cout << m_colorMap.find( mlevel )->second << m_prefix 
-             << "<" << slevel->second << "> " << line  << "\033[0m" << endl;
+    cout << m_colorMap.find( mlevel )->second << m_prefix << "<" << slevel->second << "> " << line;  // << "\033[0m" << endl;
+    if (mlevel == kINFO) 
+      cout << endl;
+    else
+      cout << "\033[0m" << endl;
 #else
-    //if (mlevel == kINFO) 
-        //cout << m_prefix << line << endl;
-    //else
-        cout << m_prefix << "<" << slevel->second << "> " << line << endl;
+    cout << m_prefix << "<" << slevel->second << "> " << line << endl;
 #endif // USE_COLORED_CONSOLE
 
     // take decision to stop if fatal error
