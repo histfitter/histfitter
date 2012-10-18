@@ -124,18 +124,20 @@ class SystematicBase:
 
     def FillUpDownHist(self, lowhigh="", regionString="", normString="",
                        normCuts="", abstract=None, topLvl=None, chan=None, sam=None):
-        if self.method == "userNormHistoSys" or self.method == "normHistoSys" \
-           or self.method == "normHistoSysOneSide" \
-           or self.method == "normHistoSysOneSideSym" \
-           or self.method == "overallNormHistoSys" \
-           or self.method == "overallNormHistoSysOneSide" \
-           or self.method == "overallNormHistoSysOneSideSym":
+        if (self.method == "userNormHistoSys" \
+               or self.method == "normHistoSys" \
+               or self.method == "normHistoSysOneSide" \
+               or self.method == "normHistoSysOneSideSym" \
+               or self.method == "overallNormHistoSys" \
+               or self.method == "overallNormHistoSysOneSide" \
+               or self.method == "overallNormHistoSysOneSideSym" ) \
+               and (not sam.noRenormSys):
 
             histName = "h" + sam.name + self.name + lowhigh + normString + "Norm"
             if not histName in abstract.hists.keys():
 
                 if not sam.normRegions: 
-                    log.warning("    %s but no normalization regions specified. This is not safe, please fix."%self.method)
+                    log.error("    %s but no normalization regions specified for sample %s, noRenormSys=%s. This is not safe, please fix." % (self.method,sam.name,sam.noRenormSys))
                     normChannels=[]
                     tl=sam.parentChannel.parentTopLvl
                     for ch in tl.channels:

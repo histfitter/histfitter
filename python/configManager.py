@@ -773,8 +773,7 @@ class ConfigManager(object):
             chan.getSample(sam.name).setHistoName("h"+sam.name+"Nom_"+regionString+"_obs_"+replaceSymbols(chan.variableName))
 
 
-            #HACK FIX ME
-            if not sam.normRegions:
+            if not sam.normRegions and (not sam.noRenormSys): 
                 needsNorm=False
                 for sys in sam.systDict.values():
                     if sys.method == "userNormHistoSys" or sys.method == "normHistoSys" \
@@ -783,7 +782,7 @@ class ConfigManager(object):
                            or sys.method == "overallNormHistoSys" \
                            or sys.method == "overallNormHistoSysOneSide" \
                            or sys.method == "overallNormHistoSysOneSideSym":
-                        log.warning("    %s needs normRegions because of %s of type %s but no normalization regions specified. This is not safe, please fix."%(sam.name,sys.name,sys.method))
+                        log.error("    %s needs normRegions because of %s of type %s but no normalization regions specified. This is not safe, please fix."%(sam.name,sys.name,sys.method))
                         needsNorm=True
                         break
                 if needsNorm:
@@ -797,7 +796,7 @@ class ConfigManager(object):
                     sam.setNormRegions(normChannels)
                     log.warning("            For now, using all non-validation channels by default: %s"%sam.normRegions)
                     
-            if sam.normRegions:
+            if sam.normRegions and (not sam.noRenormSys):
                 normString = ""
                 for normReg in sam.normRegions:
                     if not type(normReg[0]) == "list":

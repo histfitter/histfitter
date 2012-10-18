@@ -48,7 +48,7 @@ class Sample(object):
         self.xsecDown = None
         self.normRegions = None
         self.normSampleRemap = ''
-        self.noRenormSys = False
+        self.noRenormSys = True
         self.parentChannel = None
 
     def buildHisto(self, binValues, region, var):
@@ -175,6 +175,7 @@ class Sample(object):
 
     def setNormRegions(self, normRegions):
         self.normRegions = normRegions
+        self.noRenormSys = False
         return
 
     def propagateTreeName(self, treeName):
@@ -196,8 +197,12 @@ class Sample(object):
         If normalizeSys then normalize shapes to nominal
         """
 
+        if self.noRenormSys and normalizeSys:
+            log.warning("    smpl.noRenormSys==True and normalizeSys==True for sample <%s> and syst <%s>. normalizeSys set to False."%(self.name,systName))
+            normalizeSys = False
+
         if normalizeSys and not self.normRegions: 
-            log.warning("    normalizeSys==True but no normalization regions specified. This should never happen!")
+            log.error("    normalizeSys==True but no normalization regions specified. This should never happen!")
             normChannels=[]
             tl=self.parentChannel.parentTopLvl
             for ch in tl.channels:
@@ -207,12 +212,6 @@ class Sample(object):
                 pass
             self.setNormRegions(normChannels)
             log.warning("            For now, using all non-validation channels by default: %s"%self.normRegions)
-
-        if self.noRenormSys and normalizeSys:
-            log.warning("    smpl.noRenormSys==True and normalizeSys==True for %s %s. normalizeSys set to False."%(self.name,systName))
-            log.warning("    Is this really what you want?")
-            normalizeSys = False
-
 
         if normalizeSys:
             if not self.normRegions: 
@@ -232,7 +231,7 @@ class Sample(object):
             # use different renormalization region
             if len(self.normSampleRemap)>0: 
                 samNameRemap = self.normSampleRemap
-                log.debug("remapping normalization of <%s> to sample:  %s"%(samName,samNameRemap))
+                log.info("remapping normalization of <%s> to sample:  %s"%(samName,samNameRemap))
             else:
                 samNameRemap = samName
 
@@ -253,7 +252,7 @@ class Sample(object):
                 high = highIntegral / nomIntegral
                 low = lowIntegral / nomIntegral
             except ZeroDivisionError:
-                log.error("    generating HistoSys for %s syst=%s nom=%g high=%g low=%g remove from fit." % (nomName, systName, nomIntegral, highIntegral, lowIntegral))
+                log.error("    generating HistoSys for %s syst=%s nom=%g high=%g low=%g. Systematic is removed from fit." % (nomName, systName, nomIntegral, highIntegral, lowIntegral))
                 return
 
             configMgr.hists[highName+"Norm"] = configMgr.hists[highName].Clone(highName+"Norm")
@@ -263,7 +262,7 @@ class Sample(object):
                 configMgr.hists[highName+"Norm"].Scale(1./high)
                 configMgr.hists[lowName+"Norm"].Scale(1./low)
             except ZeroDivisionError:
-                log.error("    generating HistoSys for %s syst=%s nom=%g high=%g low=%g remove from fit." % (nomName, systName, nomIntegral, highIntegral, lowIntegral))
+                log.error("    generating HistoSys for %s syst=%s nom=%g high=%g low=%g. Systematic is removed from fit." % (nomName, systName, nomIntegral, highIntegral, lowIntegral))
                 return
 
             if includeOverallSys and not (oneSide and not symmetrize):
@@ -282,7 +281,7 @@ class Sample(object):
                         highN = highIntegralN / nomIntegralN
                         lowN = lowIntegralN / nomIntegralN
                     except ZeroDivisionError:
-                        log.error("    generating overallNormHistoSys for %s syst=%s nom=%g high=%g low=%g remove from fit." % (nomName, systName, nomIntegralN, highIntegralN, lowIntegralN))
+                        log.error("    generating overallNormHistoSys for %s syst=%s nom=%g high=%g low=%g. Systematic is removed from fit." % (nomName, systName, nomIntegralN, highIntegralN, lowIntegralN))
                         return
                 
                     try:
@@ -330,7 +329,7 @@ class Sample(object):
                     high = highIntegral / nomIntegral
                     low = lowIntegral / nomIntegral
                 except ZeroDivisionError:
-                    log.error("    generating HistoSys for %s syst=%s nom=%g high=%g low=%g remove from fit." % (nomName, systName, nomIntegral, highIntegral, lowIntegral))
+                    log.error("    generating HistoSys for %s syst=%s nom=%g high=%g low=%g. Systematic is removed from fit." % (nomName, systName, nomIntegral, highIntegral, lowIntegral))
                     return
                 
                 configMgr.hists[highName+"Norm"] = configMgr.hists[highName].Clone(highName+"Norm")
@@ -357,7 +356,7 @@ class Sample(object):
                     high = highIntegral / nomIntegral
                     low = lowIntegral / nomIntegral
                 except ZeroDivisionError:
-                    log.error("    generating HistoSys for %s syst=%s nom=%g high=%g low=%g remove from fit." % (nomName, systName, nomIntegral, highIntegral, lowIntegral))
+                    log.error("    generating HistoSys for %s syst=%s nom=%g high=%g low=%g. Systematic is removed from fit." % (nomName, systName, nomIntegral, highIntegral, lowIntegral))
                     return
 
                 if high<1.0 and low<1.0:
@@ -366,7 +365,7 @@ class Sample(object):
                     try:
                         configMgr.hists[highName+"Norm"].Scale((2.-low)/high)
                     except ZeroDivisionError:
-                        log.error("    generating HistoSys for %s syst=%s nom=%g high=%g low=%g remove from fit." % (nomName, systName, nomIntegral, highIntegral, lowIntegral))
+                        log.error("    generating HistoSys for %s syst=%s nom=%g high=%g low=%g. Systematic is removed from fit." % (nomName, systName, nomIntegral, highIntegral, lowIntegral))
                         return
                     self.histoSystList.append((systName, highName+"Norm", lowName, configMgr.histCacheFile, "", "", "", ""))
                     if not systName in configMgr.systDict.keys():
@@ -378,7 +377,7 @@ class Sample(object):
                     try:
                         configMgr.hists[lowName+"Norm"].Scale((2.-high)/low)
                     except ZeroDivisionError:
-                        log.error("    generating HistoSys for %s syst=%s nom=%g high=%g low=%g remove from fit." % (nomName, systName, nomIntegral, highIntegral, lowIntegral))
+                        log.error("    generating HistoSys for %s syst=%s nom=%g high=%g low=%g. Systematic is removed from fit." % (nomName, systName, nomIntegral, highIntegral, lowIntegral))
                         return
                     self.histoSystList.append((systName, highName, lowName+"Norm", configMgr.histCacheFile, "", "", "", ""))
                     if not systName in configMgr.systDict.keys():
@@ -422,7 +421,7 @@ class Sample(object):
                         high = highIntegral / nomIntegral
                         low = lowIntegral / nomIntegral
                     except ZeroDivisionError:
-                        log.error("    generating HistoSys for %s syst=%s nom=%g high=%g low=%g remove from fit." % (nomName, systName, nomIntegral, highIntegral, lowIntegral))
+                        log.error("    generating HistoSys for %s syst=%s nom=%g high=%g low=%g. Systematic is removed from fit." % (nomName, systName, nomIntegral, highIntegral, lowIntegral))
                         return
                     
                     configMgr.hists[highName+"Norm"] = configMgr.hists[highName].Clone(highName+"Norm")
@@ -498,11 +497,11 @@ class Sample(object):
         Add an OverallSys entry using the high and low values
         """
         if high==1.0 and low==1.0:
-            log.warning("    addOverallSys for %s high==1.0 and low==1.0 remove from fit" % (systName))
+            log.warning("    addOverallSys for %s high==1.0 and low==1.0. Systematic is removed from fit" % (systName))
             return
 
         if high==0.0 and low==0.0:
-            log.warning("    addOverallSys for %s high=%g low=%g remove from fit." % (systName, systName, high, low))
+            log.warning("    addOverallSys for %s high=%g low=%g. Systematic is removed from fit." % (systName, systName, high, low))
             return
 
         if high==1.0 and low>0.0 and low!=1.0:
