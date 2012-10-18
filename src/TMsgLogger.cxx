@@ -31,11 +31,11 @@ static const string::size_type MAXIMUM_SOURCE_NAME_LENGTH = 20;
 
 #ifndef __APPLE__
 // this is the hardcoded prefix
-static const char* PREFIX = "--- ";
+static const char* PREFIX = ""; //"--- ";
 // this is the hardcoded suffix
 static const char* SUFFIX = ": ";
 #else
-#define PREFIX "--- "
+#define PREFIX "" //"--- "
 #define SUFFIX ": "
 #endif
 
