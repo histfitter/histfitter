@@ -198,7 +198,7 @@ class Sample(object):
         """
 
         if self.noRenormSys and normalizeSys:
-            log.warning("    smpl.noRenormSys==True and normalizeSys==True for sample <%s> and syst <%s>. normalizeSys set to False."%(self.name,systName))
+            log.warning("    sample.noRenormSys==True and normalizeSys==True for sample <%s> and syst <%s>. normalizeSys set to False."%(self.name,systName))
             normalizeSys = False
 
         if normalizeSys and not self.normRegions: 

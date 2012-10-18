@@ -2,7 +2,7 @@ from ROOT import TFile, TMath, RooRandom, TH1, TH1F
 from ROOT import kBlack, kWhite, kGray, kRed, kPink, kMagenta, kViolet, kBlue, kAzure, kCyan, kTeal, kGreen, kSpring, kYellow, kOrange, kDashed, kSolid, kDotted
 from os import system
 from math import fabs
-from smpl import Sample
+from sample import Sample
 from logger import log
 
 import generateToys
