@@ -16,11 +16,29 @@ _levelNames = {
     WARNING: 'WARNING', 
     ERROR: 'ERROR', 
     FATAL: 'FATAL', 
-    ALWAYS: 'ALWAYS' 
+    ALWAYS: 'ALWAYS',
+    'VERBOSE': VERBOSE,
+    'DEBUG': DEBUG,
+    'INFO': INFO,
+    'WARNING': WARNING,
+    'ERROR': ERROR,
+    'FATAL': FATAL,
+    'ALWAYS': ALWAYS
 }
 
 def getLevelName(level):
     return _levelNames.get(level, ("%s" % level)) 
+
+def _checkLevel(level):
+    if isinstance(level, int):
+        rv = level
+    elif str(level) == level:
+        if level not in _levelNames:
+            raise ValueError("Unknown level: %r" % level)
+        rv = _levelNames[level]
+    else:
+        raise TypeError("Level not an integer or a valid string: %r" % level)
+    return rv
 
 class Logger(object):
     _instance = None
@@ -38,8 +56,8 @@ class Logger(object):
         self.TMsgLogger.SetSource("HistFitter")
         self.TMsgLogger.SetMinLevel(INFO)
 
-    def setLevel(self,level):
-        self.TMsgLogger.SetMinLevel(level)
+    def setLevel(self, level):
+        self.TMsgLogger.SetMinLevel(_checkLevel(level))
         self.always("Log level set to %s " % getLevelName(level) )
 
     def verbose(self, msg):
@@ -62,7 +80,6 @@ class Logger(object):
     
     def always(self, msg):
         TMsgLogger.writeLogMessage(ALWAYS, msg)
-        #self.TMsgLogger.write(ALWAYS, msg)
 
 #initialize singleton
 log = Logger()
