@@ -192,7 +192,7 @@ if __name__ == "__main__":
         print "-d   Draw before/after fit plots of all channels (default: %s)" % drawBeforeAfterFit
         print "-b   when doing hypotest, correct bkg-level to: bkg strength parameter, bkg value"
         print "-0   removes empty bins when drawing the data histograms with (complimentary to -d)"
-        print "-t   run toys (default with mu)."
+        print "--ty run toys (default with mu)."
 
         print "\nAlso see the README file.\n"
         print "Command examples:"
@@ -204,7 +204,7 @@ if __name__ == "__main__":
         sys.exit(0)
 
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "d0twfinals:r:b:g:L:p",["bkgfit","exclfit","discfit","vr","pz"])
+        opts, args = getopt.getopt(sys.argv[1:], "d0twfinals:r:b:g:L:p",["bkgfit","exclfit","discfit","vr","pz","ty"])
         configFile = str(args[0])
     except:
         usage()
@@ -256,7 +256,7 @@ if __name__ == "__main__":
             sigSamples = arg.split(',')
         elif opt == '-r':
             pickedSRs = arg.split(',')
-        elif opt == '-t':
+        elif opt == '--ty':
             runToys = True
         elif opt == '-b':
             bkgArgs = arg.split(',')
