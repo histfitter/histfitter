@@ -4,8 +4,8 @@ gSystem.Load("libSusyFitter.so")
 from ROOT import ConfigMgr
 gROOT.Reset()
 
-import logger
-from logger import log
+from logger import Logger
+log = Logger('HistFitter')
 
 def GenerateFitAndPlot(tl, drawBeforeAfterFit):
     from configManager import configMgr
@@ -134,19 +134,6 @@ def GenerateFitAndPlot(tl, drawBeforeAfterFit):
         pass
     return
 
-
-def GetLimits():
-    from ROOT import RooStats,Util
-    w = gDirectory.Get("w")
-    #RooStats.DoHypoTestInversion(w,"ModelConfig" ,"","obsData",2,3)
-    r = RooStats.DoHypoTest(w, "ModelConfig", "", "obsData", 2, 3)
-    print "\n Significance: "
-    print r.Significance()
-    print "\n p-value for null asumption: "
-    print r.NullPValue()
-    print " +- "
-    print r.NullPValueError()
-    print "\n"
 
 
 if __name__ == "__main__":
@@ -286,7 +273,6 @@ if __name__ == "__main__":
                 raise(Exception, "Validation regions should be turned off for setting an upper limit!")
             pass
         configMgr.cppMgr.doUpperLimitAll()
-        #GetLimits()
         pass
 
     if doHypoTests:
