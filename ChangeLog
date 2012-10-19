@@ -3,6 +3,7 @@
         * Now achieves numerically identical results wrt HF-13 for 0-lepton fit.
         * Introduction of dedicated logger to stream-line output on screen (by Geert-Jan)
         * Tagging: HistFitter-00-00-17
+        * This is the last tag supported for root 5.32
         * Official recommendation is to now use this tag instead of: HistFitter-00-00-13 
 
 2012-10-02 David Cote <david.cote@cern.ch>
