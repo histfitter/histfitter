@@ -737,6 +737,9 @@ class ConfigManager(object):
         return
 
     def addSampleSpecificHists(self,topLvl,chan,sam,regionString,normRegions,normString,normCuts):
+
+        log.debug('addSampleSpecificHists()')
+
         if sam.isData:
             if chan.channelName in topLvl.signalChannels:
                 if self.blindSR:
@@ -759,12 +762,12 @@ class ConfigManager(object):
             if not len(sam.shapeFactorList):
                 tmpName="h"+sam.name+"Nom_"+regionString+"_obs_"+replaceSymbols(chan.variableName)
                 self.prepare.addHisto(tmpName,useOverflow=chan.useOverflowBin,useUnderflow=chan.useUnderflowBin)
-                #check that nominal sample is not empty for that channel
+                ###check that nominal sample is not empty for that channel
                 if self.hists[tmpName].GetSum() == 0.0:
                     log.warning("    ***nominal sample %s is empty for channel %s. Remove from PDF.***"%(sam.name,chan.name))
                     chan.removeSample(sam.name)
-                    del self.hists[tmpName]
-                    self.hists[tmpName]=None
+                #    del self.hists[tmpName]
+                #    self.hists[tmpName]=None    ## MB : do not delete, else cannot rerun later with -w
                     return
             else:
                 self.hists["h"+sam.name+"Nom_"+regionString+"_obs_"+replaceSymbols(chan.variableName)] = TH1F("h"+sam.name+"Nom_"+regionString+"_obs_"+replaceSymbols(chan.variableName),"h"+sam.name+"Nom_"+regionString+"_obs_"+replaceSymbols(chan.variableName),chan.nBins,chan.binLow,chan.binHigh)
