@@ -1,4 +1,9 @@
 2012-10-19 Max Baak <mbaak@cern.ch>
+	* Updates for root 5.34, minor patches to get this to work.
+	* Migration to python 2.6.5
+	* Tagging as: HistFitter-00-00-18 
+
+2012-10-19 Max Baak <mbaak@cern.ch>
         * Multiple minor bug-fixes for normalized histograms b/n control and signal regions. 
         * Now achieves numerically identical results wrt HF-13 for 0-lepton fit.
         * Introduction of dedicated logger to stream-line output on screen (by Geert-Jan)
