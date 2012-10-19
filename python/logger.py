@@ -27,6 +27,8 @@ _levelNames = {
 }
 
 def getLevelName(level):
+    if isinstance(level, str):
+        return level
     return _levelNames.get(level, ("%s" % level)) 
 
 def _checkLevel(level):
@@ -43,32 +45,39 @@ def _checkLevel(level):
 class Logger(object):
 
     def __init__(self,name):
-        self.mlogger = TMsgLogger()
-        self.mlogger.SetSource(name)
-        self.mlogger.SetMinLevel(INFO)
+        self._log = TMsgLogger()
+        self._log.SetSource(name)
+        self._log.SetMinLevel(INFO)
+        self._levelLock = False
 
-    def setLevel(self, level):
-        self.mlogger.SetMinLevel(_checkLevel(level))
+    def setLevel(self, level, lock=False):
+        if(self._log.GetLevelLock() ):
+            self.warning("Cannot set log level again, current setting is %s" % self._log.GetMinLevelStr())
+            return
+
+        self._log.SetMinLevel(_checkLevel(level), lock)
         self.always("Log level set to %s " % getLevelName(level) )
+        if(lock):
+            self.always("This log level is the final setting") 
 
     def verbose(self, msg):
-        self.mlogger.writeLogMessage(VERBOSE, msg)
+        self._log.writeLogMessage(VERBOSE, msg)
     
     def debug(self, msg):
-        self.mlogger.writeLogMessage(DEBUG, msg)
+        self._log.writeLogMessage(DEBUG, msg)
     
     def info(self, msg):
-        self.mlogger.writeLogMessage(INFO, msg)
+        self._log.writeLogMessage(INFO, msg)
     
     def warning(self, msg):
-        self.mlogger.writeLogMessage(WARNING, msg)
+        self._log.writeLogMessage(WARNING, msg)
     
     def error(self, msg):
-        self.mlogger.writeLogMessage(ERROR, msg)
+        self._log.writeLogMessage(ERROR, msg)
     
     def fatal(self, msg):
-        self.mlogger.writeLogMessage(FATAL, msg)
+        self._log.writeLogMessage(FATAL, msg)
     
     def always(self, msg):
-        self.mlogger.writeLogMessage(ALWAYS, msg)
+        self._log.writeLogMessage(ALWAYS, msg)
 
