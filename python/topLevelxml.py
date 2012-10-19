@@ -75,7 +75,7 @@ class TopLevelXML(object):
         Convert instance to XML string
         """
         self.writeString = "<!DOCTYPE Combination  SYSTEM 'HistFactorySchema.dtd'>\n\n"
-        self.writeString += "<Combination OutputFilePrefix=\"./results/" + self.prefix + "\" Mode=\""+self.mode+"\" >\n\n"
+        self.writeString += "<Combination OutputFilePrefix=\"./results/" + self.prefix + "\" >\n\n"
         for chan in self.channels:
             self.writeString += "  <Input>" + chan.xmlFileName + "</Input>\n"
         self.writeString += "\n"

@@ -1,6 +1,6 @@
-SUSY Channel combination package:
----------------------------------
-Last update: 2012/06/12
+SUSY HistFitter package:
+------------------------
+Last update: 2012/10/19
 
 Main documentation:
 https://twiki.cern.ch/twiki/bin/viewauth/AtlasProtected/SusyFitter 
@@ -15,12 +15,12 @@ HistFitter Group <atlas-phys-susy-histfitter@cern.ch>
 Setup:
 ------
 source setup.sh     (from lxplus)
-source setupAFS.sh  (from non-lxplus machine)
 
 
 Recommended Root version:
 -------------------------
-The current recommended root version to use with the SusyFitter package is:
+--> The standard setup file points to the recommended root version at CERN.
+The current recommended root version to use with the HistFitter package is:
 root *v5.32-patches*. To check out the source, do:
 --> svn co http://root.cern.ch/svn/root/branches/v5-32-00-patches root
 To install, follow the instructions in README/INSTALL.
@@ -33,47 +33,11 @@ make
 cd ..
 
 
-Input data (optional, needed for tutorial):
--------------------------------------------
-cd data
-ln -s /afs/cern.ch/atlas/groups/susy/1lepton/samples/susyElectron.root susyElectron.root
-ln -s /afs/cern.ch/atlas/groups/susy/1lepton/samples/susyMuon.root susyMuon.root
-cd ..
-
-
 Running the examples:
 ---------------------
 
-0. To explore HistFitter usage:
-HistFitter.py -usage
-HistFitter.py python/MySusyFitterConfig.py
-
-# at CERN
-cd data
-ln -s /afs/cern.ch/atlas/groups/susy/1lepton/samples/susyElectronWithScale.root
-ln -s /afs/cern.ch/atlas/groups/susy/1lepton/samples/susyMuonWithScale.root
-cd -
-HistFitter.py -t -i python/MySusyFitterConfig.py
-
-1. To make root files containing pdfs (workspaces) for each grid point of a simple counting experiment, 
-take a look at the examples in: scripts/README
-
-2. To create contour plots based on these root files, take a look at the examples in:
-macros/Examples/contourplot/README
-
-3. Construct one simple counting experiment, where you set the signal expectation, errors, and error treatment yourself:
-analysis/simplechannel/README
-
-4. To fit the simple counting experiment created under 3, look at:
-macros/Examples/fittest/README
-
-5. To make a nice upper limit (and get the upper limit value) of the counting experiment 
-created under 3, look at:
-macros/Examples/upperlimit/README
-
-6. To get discovery or exclusion p-values, with various limit setting methods, see:
-macros/Examples/p-values/README
-
+See the tutorial:
+https://twiki.cern.ch/twiki/bin/viewauth/AtlasProtected/HistFitterTutorial
 
 Directory structure:
 --------------------
@@ -103,14 +67,15 @@ svn co $SVNPHYS/Physics/SUSY/Analyses/HistFitter/trunk HistFitter
 export SVNPHYS="svn+ssh://CERNUSERNAME@svn.cern.ch/reps/atlasphys"
 svn co $SVNPHYS/Physics/SUSY/Analyses/HistFitter/trunk HistFitter
 
-svn up -r 14439 configManager.py
-
-
 ... where CERNUSERNAMEHERE is your CERN username.
 
 3. Tagging:
 svn cp . $SVNPHYS/Physics/SUSY/Analyses/HistFitter/tags/HistFitter-00-00-01 -m "tagging message"
 
-Don't forget to update ChangeLog before tagging!
+4. Checking out a specific release number:
 
+svn up -r 14439 configManager.py
+
+
+When committing, don't forget to update ChangeLog before tagging!
 
