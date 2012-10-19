@@ -6,15 +6,20 @@ if [ ! $ROOTSYS ]; then
   # first, setup gcc to version 4.3
   source /afs/cern.ch/sw/lcg/external/gcc/4.3.2/x86_64-slc5/setup.sh
   # setup corresponding root
-  cd /afs/cern.ch/atlas/offline/external/FullChainTest/tier0-vol3/test/mbaak/root/root-5.32.02b
-  source bin/thisroot.sh
-  # setup xrootd
   export BUILD=x86_64-slc5-gcc43-opt
-  export PATH=/afs/cern.ch/sw/lcg/external/xrootd/3.1.0p2/$BUILD/bin:$PATH
-  export LD_LIBRARY_PATH=/afs/cern.ch/sw/lcg/external/xrootd/3.1.0p2/$BUILD/lib64:$LD_LIBRARY_PATH
-  # hack: libNetx library from pre=installed root version
-  export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/afs/cern.ch/sw/lcg/app/releases/ROOT/5.32.02/$BUILD/root/lib
+  cd /afs/cern.ch/sw/lcg/app/releases/ROOT/5.34.02/$BUILD/root
+  source bin/thisroot.sh
   cd $CWD
+  #
+  #cd /afs/cern.ch/atlas/offline/external/FullChainTest/tier0-vol3/test/mbaak/root/root-5.32.02b
+  #source bin/thisroot.sh
+  ## setup xrootd
+  #export BUILD=x86_64-slc5-gcc43-opt
+  #export PATH=/afs/cern.ch/sw/lcg/external/xrootd/3.1.0p2/$BUILD/bin:$PATH
+  #export LD_LIBRARY_PATH=/afs/cern.ch/sw/lcg/external/xrootd/3.1.0p2/$BUILD/lib64:$LD_LIBRARY_PATH
+  ## hack: libNetx library from pre=installed root version
+  #export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/afs/cern.ch/sw/lcg/app/releases/ROOT/5.32.02/$BUILD/root/lib
+  #cd $CWD
 fi
 
 # check Root environment setup again
