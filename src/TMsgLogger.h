@@ -79,7 +79,18 @@ class TMsgLogger : public std::ostringstream, public TObject {
             *(std::ostringstream*)this << arg; return *this;
         }
 
-        static void SetMinLevel( TMsgLevel minLevel ) { m_minLevel = minLevel; }
+        static void SetMinLevel( TMsgLevel minLevel, bool lock=false ) {
+            if(m_levelLock) 
+                return;
+
+            m_minLevel = minLevel;
+            if(lock)
+                m_levelLock = true;
+        }
+
+        static bool GetLevelLock() {
+            return m_levelLock;
+        }
 
         std::map<TMsgLevel, std::string> GetLevelMap() const { return m_levelMap; }
 
@@ -89,6 +100,8 @@ class TMsgLogger : public std::ostringstream, public TObject {
         }
 
     private:
+        //can the level setting be changed?
+        static bool m_levelLock;
 
         // the current minimum level is global for the whole Combination
         // it can only be changed by the central storage singleton object

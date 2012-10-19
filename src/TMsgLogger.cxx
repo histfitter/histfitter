@@ -40,6 +40,7 @@ static const char* SUFFIX = ": ";
 #endif
 
 TMsgLevel TMsgLogger::m_minLevel = kINFO;
+bool TMsgLogger::m_levelLock = false;
 
 TMsgLogger::TMsgLogger( const TObject* source, TMsgLevel minLevel )
    : m_objSource( source ), 
