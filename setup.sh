@@ -5,6 +5,10 @@ if [ ! $ROOTSYS ]; then
   export CWD=$PWD
   # first, setup gcc to version 4.3
   source /afs/cern.ch/sw/lcg/external/gcc/4.3.2/x86_64-slc5/setup.sh
+  # second, setup python version
+  export BUILD=x86_64-slc5-gcc43-opt
+  export PATH="/afs/cern.ch/sw/lcg/external/Python/2.6.5/$BUILD/bin:${PATH}"
+  export LD_LIBRARY_PATH="/afs/cern.ch/sw/lcg/external/Python/2.6.5/$BUILD/lib:${LD_LIBRARY_PATH}"
   # setup corresponding root
   export BUILD=x86_64-slc5-gcc43-opt
   cd /afs/cern.ch/sw/lcg/app/releases/ROOT/5.34.02/$BUILD/root

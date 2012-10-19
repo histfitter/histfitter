@@ -373,10 +373,11 @@ RooStats::HypoTestTool::SetupHypoTestCalculator(RooWorkspace * w, bool doUL,
     else 
         m_logger << kINFO << "Using data set " << dataName << GEndl;
 
-    if (mUseVectorStore) { 
-        RooAbsData::defaultStorageType = RooAbsData::Vector;
-        data->convertToVectorStore() ;
-    }
+    //// MB : comment out for root 5.34, no longer works
+    //if (mUseVectorStore) { 
+    //    RooAbsData::defaultStorageType = RooAbsData::Vector;
+    //    data->convertToVectorStore() ;
+    //}
 
     // get models from WS
     // get the modelConfig out of the file
