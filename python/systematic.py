@@ -181,26 +181,48 @@ class SystematicBase:
 
                         # if the systematic has a dedicated file
                         # list, use it
-                        if s.name in systNorm.filesHi:
-                            filelist = systNorm.filesHi[s.name]
-                        else:
-                            # otherwise - take the sample file list
-                            filelist = s.files
-                        if s.name in systNorm.treeHiName:
-                            treeName = systNorm.treeHiName[s.name]
-                        else:
-                            # otherwise - take the default tree name
-                            # for the sample
-                            if self.type == "tree":
-                                treeName = s.treeName + systNorm.high  # NM
+
+                        if 'Low' in lowhigh:
+                            if s.name in systNorm.filesLo:
+                                filelist = systNorm.filesLo[s.name]
                             else:
-                                treeName = s.treeName
-                        if treeName == '' or treeName == systNorm.high:
-                            treeName = s.name + systNorm.high
+                                # otherwise - take the sample file list
+                                filelist = s.files
+                            if s.name in systNorm.treeLoName:
+                                treeName = systNorm.treeLoName[s.name]
+                            else:
+                                # otherwise - take the default tree name
+                                # for the sample
+                                if self.type == "tree":
+                                    treeName = s.treeName + systNorm.low  # NM
+                                else:
+                                    treeName = s.treeName
+                            if treeName == '' or treeName == systNorm.low:
+                                treeName = s.name + systNorm.low
+
+                        if 'High' in lowhigh:
+                            if s.name in systNorm.filesHi:
+                                filelist = systNorm.filesHi[s.name]
+                            else:
+                                # otherwise - take the sample file list
+                                filelist = s.files
+                            if s.name in systNorm.treeHiName:
+                                treeName = systNorm.treeHiName[s.name]
+                            else:
+                                # otherwise - take the default tree name
+                                # for the sample
+                                if self.type == "tree":
+                                    treeName = s.treeName + systNorm.high  # NM
+                                else:
+                                    treeName = s.treeName
+                            if treeName == '' or treeName == systNorm.high:
+                                treeName = s.name + systNorm.high
+
 
                         log.verbose("s.name %s"%s.name)
                         log.verbose("sam.name %s"%sam.name)
                         log.verbose("systNorm high %s"%systNorm.high)
+                        log.verbose("systNorm low %s"%systNorm.low)
                         log.verbose("treeName %s"%treeName)
 
                         abstract.prepare.read(treeName, filelist)
@@ -220,7 +242,12 @@ class SystematicBase:
                             log.verbose("normalization cuts %s"%(abstract.cutsDict["".join(normReg[0])]))
                             log.verbose("current chain %s"%(abstract.prepare.currentChainName))
                             log.verbose("projecting string %s"%(str(abstract.lumiUnits*abstract.outputLumi/abstract.inputLumi)+" * "+"*".join(s.weights)+" * ("+abstract.cutsDict["".join(normReg[0])]+")"))
-                            abstract.chains[abstract.prepare.currentChainName].Project("temp",abstract.cutsDict["".join(normReg[0])],str(abstract.lumiUnits*abstract.outputLumi/abstract.inputLumi)+" * "+"*".join(s.systDict[systNorm.name].high)+" * ("+abstract.cutsDict["".join(normReg[0])]+")")
+
+                            if 'High' in lowhigh:
+                                abstract.chains[abstract.prepare.currentChainName].Project("temp",abstract.cutsDict["".join(normReg[0])],str(abstract.lumiUnits*abstract.outputLumi/abstract.inputLumi)+" * "+"*".join(s.systDict[systNorm.name].high)+" * ("+abstract.cutsDict["".join(normReg[0])]+")")
+                            elif 'Low' in lowhigh:
+                                abstract.chains[abstract.prepare.currentChainName].Project("temp",abstract.cutsDict["".join(normReg[0])],str(abstract.lumiUnits*abstract.outputLumi/abstract.inputLumi)+" * "+"*".join(s.systDict[systNorm.name].low)+" * ("+abstract.cutsDict["".join(normReg[0])]+")")
+
                             abstract.hists[histName].SetBinContent(1,abstract.hists[histName].GetSum()+tempHist.GetSumOfWeights())
                         del tempHist
                 else:
