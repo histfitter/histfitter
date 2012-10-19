@@ -3,6 +3,7 @@ from ROOT import gROOT,gSystem,gDirectory,RooAbsData,RooRandom,RooWorkspace
 gSystem.Load("libSusyFitter.so")
 from ROOT import ConfigMgr
 gROOT.Reset()
+from logger import Logger
 
 from logger import Logger
 log = Logger('HistFitter')
@@ -139,6 +140,7 @@ def GenerateFitAndPlot(tl, drawBeforeAfterFit):
 if __name__ == "__main__":
     from configManager import configMgr
     from prepareHistos import TreePrepare, HistoPrepare
+    log = Logger("HistFitter")
 
     configMgr.readFromTree = False
     configMgr.executeHistFactory = False
@@ -201,10 +203,11 @@ if __name__ == "__main__":
         elif opt == '-i':
             runInterpreter = True
         elif opt == '-L':
+            #2nd argument forces the log level to be locked for python scripts
             if len(arg) == 1: #assume this is an integer log level
-                log.setLevel(int(arg))
+                log.setLevel(int(arg),True)
             else:
-                log.setLevel(arg) #can take both strings and ints, does its own checking 
+                log.setLevel(arg,True) #can take both strings and ints, does its own checking 
         elif opt == '-l':
             printLimits = True
         elif opt == '-p':
