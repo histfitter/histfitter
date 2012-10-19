@@ -8,6 +8,18 @@ from logger import Logger
 from logger import Logger
 log = Logger('HistFitter')
 
+
+
+def enum(typename, field_names):
+    "Create a new enumeration type"
+
+    if isinstance(field_names, str):
+        field_names = field_names.replace(',', ' ').split()
+    d = dict((reversed(nv) for nv in enumerate(field_names)), __slots__ = ())
+    return type(typename, (object,), d)()
+
+
+
 def GenerateFitAndPlot(tl, drawBeforeAfterFit):
     from configManager import configMgr
 
@@ -151,7 +163,12 @@ if __name__ == "__main__":
     doUL = True           # default is exclusion. goes toegether with doHypoTests
     drawBeforeAfterFit = False
     pickedSRs = []
+    runToys = False
 
+    FitType = enum('FitType','Discovery , Exclusion , Background')
+    myFitType=FitType.Background
+    doValidation = False
+    
     print "\n * * * Welcome to HistFitter * * *\n"
 
     import os, sys
@@ -159,22 +176,23 @@ if __name__ == "__main__":
     def usage():
         print "HistFitter.py [-L loglevel] [-i] [-t] [-w] [-f] [-l] [-p] [-d] [-n nTOYs] [-s seed] [-r SRs] [-g gridPoint] [-b bkgParName,value] <configuration_file>\n"
         print "(all OFF by default. Turn steps ON with options)"
-        print "-L set log level (VERBOSE, DEBUG, INFO, WARNING, ERROR, FATAL, ALWAYS; default INFO)"
-        print "-t re-create histograms from TTrees (default: %s)" % (configMgr.readFromTree)
-        print "-w re-create workspace from histograms (default: %s)" % (configMgr.executeHistFactory)
-        print "-f fit the workspace (default: %s)" % (configMgr.executeHistFactory)
-        print "-n <nTOYs> sets number of TOYs (<=0 means to use real data, default: %i)" % configMgr.nTOYs
-        print "-s <number> set the random seed for toy generation (default is CPU clock: %i)" % configMgr.toySeed
-        print "-a use Asimov dataset for fitting and plotting (default: %i)" % configMgr.useAsimovSet
-        print "-i stays in interactive session after executing the script (default %s)" % runInterpreter
-        print "-l make limit plot of workspace (default %s)" % printLimits
-        print "-p run (exclusion) hypothesis test on workspace (default %s)" % doHypoTests
-        print "-z run the discovery hypothesis test instead. In combination with -p. (default %s)" % (not doUL)
-        print "-g <grid points to be processed> - give as comma separated list"
-        print "-r signal region to be processed - give as comma separated list (default = all)"
-        print "-d Draw before/after fit plots of all channels (default: %s)" % drawBeforeAfterFit
-        print "-b when doing hypotest, correct bkg-level to: bkg strength parameter, bkg value"
-        print "-0 removes empty bins when drawing the data histograms with (complimentary to -d)"
+        print "-L   set log level (VERBOSE, DEBUG, INFO, WARNING, ERROR, FATAL, ALWAYS; default INFO)"
+        print "-t   re-create histograms from TTrees (default: %s)" % (configMgr.readFromTree)
+        print "-w   re-create workspace from histograms (default: %s)" % (configMgr.executeHistFactory)
+        print "-f   fit the workspace (default: %s)" % (configMgr.executeHistFactory)
+        print "-n   <nTOYs> sets number of TOYs (<=0 means to use real data, default: %i)" % configMgr.nTOYs
+        print "-s   <number> set the random seed for toy generation (default is CPU clock: %i)" % configMgr.toySeed
+        print "-a   use Asimov dataset for fitting and plotting (default: %i)" % configMgr.useAsimovSet
+        print "-i   stays in interactive session after executing the script (default %s)" % runInterpreter
+        print "-l   make limit plot of workspace (default %s)" % printLimits
+        print "-p   run (exclusion) hypothesis test on workspace (default %s)" % doHypoTests
+        print "--pz run the discovery hypothesis test (default %s)" % (not doUL)
+        print "-g   <grid points to be processed> - give as comma separated list"
+        print "-r   signal region to be processed - give as comma separated list (default = all)"
+        print "-d   Draw before/after fit plots of all channels (default: %s)" % drawBeforeAfterFit
+        print "-b   when doing hypotest, correct bkg-level to: bkg strength parameter, bkg value"
+        print "-0   removes empty bins when drawing the data histograms with (complimentary to -d)"
+        print "-t   run toys (default with mu)."
 
         print "\nAlso see the README file.\n"
         print "Command examples:"
@@ -186,14 +204,24 @@ if __name__ == "__main__":
         sys.exit(0)
 
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "zd0twfinals:r:b:g:L:p")
+        opts, args = getopt.getopt(sys.argv[1:], "d0twfinals:r:b:g:L:p",["bkgfit","exclfit","discfit","vr","pz"])
         configFile = str(args[0])
     except:
         usage()
 
-    for opt, arg in opts:
-        if opt == '-t':
-            configMgr.readFromTree = True
+    
+    for opt,arg in opts:
+        print opt,arg
+        if opt == '--bkgfit':
+            myFitType=FitType.Background
+        elif opt == '--exclfit':
+            myFitType=FitType.Exclusion
+        elif opt == '--discfit':
+            myFitType=FitType.Discovery
+        elif opt == '--vr':
+            doValidation=True
+        elif opt == '-t':
+            configMgr.readFromTree=True
         elif opt == '-w':
             configMgr.executeHistFactory = True
         elif opt == '-f':
@@ -212,7 +240,8 @@ if __name__ == "__main__":
             printLimits = True
         elif opt == '-p':
             doHypoTests = True
-        elif opt == '-z':
+        elif opt == '--pz':
+            doHypoTests = True
             doUL = False
         elif opt == '-d':
             drawBeforeAfterFit = True
@@ -227,6 +256,8 @@ if __name__ == "__main__":
             sigSamples = arg.split(',')
         elif opt == '-r':
             pickedSRs = arg.split(',')
+        elif opt == '-t':
+            runToys = True
         elif opt == '-b':
             bkgArgs = arg.split(',')
             if len(bkgArgs) == 2:
@@ -286,7 +317,7 @@ if __name__ == "__main__":
         configMgr.cppMgr.doHypoTestAll('results/',doUL)
         pass
 
-    if configMgr.nTOYs > 0 and doHypoTests == False and printLimits == False and runFit == False:
+    if runToys and configMgr.nTOYs > 0 and doHypoTests == False and printLimits == False and runFit == False:
         configMgr.cppMgr.runToysAll()
         pass
 
