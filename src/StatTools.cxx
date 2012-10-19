@@ -82,7 +82,8 @@ TTree* RooStats::toyMC_gen_fit( RooWorkspace* w, const int& nexp, const double& 
     }
 
     // silence the output
-    RooMsgService::instance().setGlobalKillBelow(ERROR); 
+    //RooMsgService::instance().setGlobalKillBelow(ERROR); 
+    RooMsgService::instance().setGlobalKillBelow(StatToolsLogger.GetRooFitMsgLevel()); 
 
     // to avoid effects from boundary and simplify asymptotic comparison, set min=-max
     RooRealVar* poi = Util::GetPOI(w);

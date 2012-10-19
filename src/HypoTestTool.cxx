@@ -511,14 +511,15 @@ RooStats::HypoTestTool::SetupHypoTestCalculator(RooWorkspace * w, bool doUL,
         if (sbModel->GetNuisanceParameters() ) constrainParams.add(*sbModel->GetNuisanceParameters());
         RooStats::RemoveConstantParameters(&constrainParams);
         TStopwatch tw;
-        tw.Start(); 
+        tw.Start();
+        Bool_t verbose = (m_logger.GetMinLevel() <= kDEBUG) ? kTRUE : kFALSE;
         RooFitResult * fitres = sbModel->GetPdf()->fitTo(*data,InitialHesse(false), Hesse(false),
-                Minimizer(mMinimizerType.c_str(),"Migrad"), Strategy(0), 
+                Minimizer(mMinimizerType.c_str(),"Migrad"), Strategy(0), Verbose(verbose),
                 PrintLevel(mPrintLevel+1), Constrain(constrainParams), Save(true) );
         if (fitres->status() != 0) { 
             Warning("StandardHypoTestInvDemo","Fit to the model failed - try with strategy 1 and perform first an Hesse computation");
             fitres = sbModel->GetPdf()->fitTo(*data,InitialHesse(true), Hesse(false),Minimizer(mMinimizerType.c_str(),"Migrad"), 
-                    Strategy(1), PrintLevel(mPrintLevel+1), Constrain(constrainParams), Save(true) );
+                    Strategy(1), PrintLevel(mPrintLevel+1), Constrain(constrainParams), Save(true), Verbose(verbose) );
         }
         if (fitres->status() != 0) 
             Warning("StandardHypoTestInvDemo"," Fit still failed - continue anyway.....");

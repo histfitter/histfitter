@@ -26,6 +26,7 @@
 // ROOT include(s)
 #include "TObject.h"
 #include "TString.h"
+#include "RooGlobalFunc.h"
 
 enum TMsgLevel { 
     kVERBOSE = 1, 
@@ -57,6 +58,28 @@ class TMsgLogger : public std::ostringstream, public TObject {
 
         TMsgLevel          GetMinLevel() const     { return m_minLevel; }
         const std::string& GetMinLevelStr() const  { return m_levelMap.find( m_minLevel )->second; }
+
+        const RooFit::MsgLevel GetRooFitMsgLevel() const {
+            if(m_minLevel == kVERBOSE)
+                return RooFit::DEBUG;
+
+            if(m_minLevel == kDEBUG)
+                return RooFit::DEBUG;
+
+            if(m_minLevel == kINFO)
+                return RooFit::INFO;
+
+            if(m_minLevel == kWARNING)
+                return RooFit::WARNING;
+
+            if(m_minLevel == kERROR)
+                return RooFit::ERROR;
+
+            if(m_minLevel == kFATAL)
+                return RooFit::FATAL;
+
+            return RooFit::INFO;
+        }
 
         TMsgLevel   MapLevel( const TString& instr ) const;
 
