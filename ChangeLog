@@ -1,3 +1,9 @@
+2012-10-19 Max Baak <mbaak@cern.ch>
+        * Multiple minor bug-fixes for normalized histograms. 
+        * Achieves numerically identical results wrt HF-13 for 0-lepton fit.
+        * Introduction of dedicated logger to stream-line output on screen (by Geert-Jan)
+        * Tagging: HistFitter-00-00-17
+
 2012-10-02 David Cote <david.cote@cern.ch>
 	* Multiple bug fixes. Achieves numerically identical results w.r.t. HistFitter-00-00-13-03
 	  for normFactor + stat + userNormHistSys. Similar but not identical results for HistoSys and OverallSys.
