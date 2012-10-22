@@ -4,6 +4,7 @@ from ROOT import kBlack, kWhite, kGray, kRed, kPink, kMagenta, kViolet, kBlue, k
 from os import system
 from math import fabs
 from logger import Logger
+from systematic import SystematicBase
 
 log = Logger('Sample')
 
@@ -588,16 +589,33 @@ class Sample(object):
             return
 
     def getSystematic(self, systName):
+        """
+        Get systematic from internal storage
+        """
+
+        #protection against strange people who use getSystematic 
+        # with the object they want to retrieve
+        name = systName
+        if(isinstance(systName, SystematicBase)):
+            name = systName.name
+        
         try:
-            return self.systDict[systName]
+            return self.systDict[name]
         except KeyError:
-            log.warning("could not find systematic %s in sample %s" % (systName, self.name))
+            log.warning("could not find systematic %s in sample %s" % (name, self.name))
+        
         return
 
-    def removeSystematic(self, name):
+    def removeSystematic(self, systName):
         """
         Remove a systematic
         """
+
+        # do we get a name or a Systematic passed?
+        name = systName
+        if(isinstance(systName, SystematicBase)):
+            name = systName.name
+
         del self.systDict[name]
 
     def clearSystematics(self):
