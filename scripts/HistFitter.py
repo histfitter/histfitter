@@ -209,7 +209,7 @@ if __name__ == "__main__":
 
     
     for opt,arg in opts:
-        print opt,arg
+        #print opt,arg
         if opt == '--bkgfit':
             myFitType=FitType.Background
         elif opt == '--exclfit':
