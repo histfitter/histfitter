@@ -1,3 +1,9 @@
+2012-10-22 Max Baak <mbaak@cern.ch>
+	M       configManager.py
+	M       sample.py
+	M       systematic.py
+	* Introduce histoSysOneSideSym
+
 2012-10-19 Max Baak <mbaak@cern.ch>
 	* Updates for root 5.34, minor patches to get this to work.
 	* Migration to python 2.6.5

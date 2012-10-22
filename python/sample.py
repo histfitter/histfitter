@@ -398,7 +398,7 @@ class Sample(object):
 
                 self.histoSystList.append((systName, highName, lowName, configMgr.histCacheFile, "", "", "", ""))
                 return
-            elif oneSide:
+            elif symmetrize and oneSide:
                 # symmetrize
                 configMgr.hists[lowName] = configMgr.hists[nomName].Clone(lowName)
                 configMgr.hists[lowName].Scale(2.0)

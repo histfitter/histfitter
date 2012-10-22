@@ -48,7 +48,7 @@ class SystematicBase:
             raise ValueError("Constraints can only be specified for shapeSys")
         self.constraint = constraint
         allowedSys = ["histoSys","overallSys","userOverallSys","overallHistoSys","normHistoSys",
-                      "shapeSys","histoSysOneSide","normHistoSysOneSide","normHistoSysOneSideSym","userHistoSys","userNormHistoSys",
+                      "shapeSys","histoSysOneSide","histoSysOneSideSym","normHistoSysOneSide","normHistoSysOneSideSym","userHistoSys","userNormHistoSys",
                       "overallNormHistoSys","overallNormHistoSysOneSide","overallNormHistoSysOneSideSym" ]
 
         if not self.method in allowedSys:

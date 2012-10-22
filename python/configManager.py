@@ -589,6 +589,8 @@ class ConfigManager(object):
             chan.getSample(sam.name).addHistoSys(syst.name,nomName,highName,lowName,False,False)
         elif syst.method == "histoSysOneSide":
             chan.getSample(sam.name).addHistoSys(syst.name,nomName,highName,lowName,False,False,False,True)
+        elif syst.method == "histoSysOneSideSym":
+            chan.getSample(sam.name).addHistoSys(syst.name,nomName,highName,lowName,False,False,True,True)
         elif syst.method == "overallSys":
             highIntegral = configMgr.hists[highName].Integral()
             lowIntegral = configMgr.hists[lowName].Integral()
