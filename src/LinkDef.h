@@ -26,6 +26,13 @@
 
 #pragma link C++ class TEasyFormula ;
 
+#pragma link C++ function get_Pvalue;
+#pragma link C++ function CollectLimitResults;
+#pragma link C++ function WriteResultSet;
+#pragma link C++ function CollectAndWriteResultSet;
+#pragma link C++ function CollectAndWriteHypoTestResults;
+#pragma link C++ function CollectHypoTestResults;
+
 #pragma link C++ function GetMCStudy;
 #pragma link C++ function GetWorkspaceFromFile;
 #pragma link C++ function CollectAndWriteResultSet;
