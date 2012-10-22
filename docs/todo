@@ -9,8 +9,8 @@ Prioritized todo-list:
 >>> (At a minimum, let's try to do this before the post-mortem)
 
 - Move tutorial examples to HFUser?
-- Commit HF patches for tutorial into trunk.
-- There is no script/method for merging toys from discovery mode.
+V Commit HF patches for tutorial into trunk.
+V There is no script/method for merging toys from discovery mode.
 
 - Upgrade to ROOT v5.34. Python-based objects (Geert-Jan)
 - document new systematic uncertainties (Max)
