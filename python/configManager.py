@@ -104,7 +104,7 @@ class ConfigManager(object):
         return
 
     def addTopLevelXML(self, input, name=""):
-        print "WARNING: addTopLevelXML() is deprecated and has been renamed addFitConfig()"
+        log.warning("addTopLevelXML() is deprecated and has been renamed addFitConfig()")
         return self.addFitConfig(input, name)
 
     def addFitConfig(self, input, name=""):

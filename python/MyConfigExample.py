@@ -11,7 +11,7 @@
 
 from configManager import configMgr
 from ROOT import kBlack,kWhite,kGray,kRed,kPink,kMagenta,kViolet,kBlue,kAzure,kCyan,kTeal,kGreen,kSpring,kYellow,kOrange,kDashed,kSolid,kDotted
-from configWriter import TopLevelXML,Measurement,ChannelXML,Sample
+from configWriter import fitConfig,Measurement,Channel,Sample
 from systematic import Systematic
 from math import sqrt
 
