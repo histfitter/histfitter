@@ -1,3 +1,10 @@
+2012-10-22 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
+	* Now supports direct writing of workspacea
+	* HistFitter -X uses the old code path to create XML files by hand
+	* Compatibility with ROOT v5.32 now definitely broken
+	* removeSystematic() methods can now take SystematicBase objects next to
+	  strings with the name 
+
 2012-10-22 Max Baak <mbaak@cern.ch>
 	M       configManager.py
 	M       sample.py
