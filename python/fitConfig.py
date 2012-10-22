@@ -136,57 +136,18 @@ class fitConfig(object):
         channelObjects = []
         for chan in self.channels:
             c = chan.createHistFactoryObject()
-            #add channel to some array to use below
+            #add channel to some array to use below, all channels by default belong to all measurements
             channelObjects.append(c)
-
-        #if not os.path.exists("xmlFromPy"):
-            #os.makedirs("xmlFromPy")
         
         for meas in self.measurements:
-            
-            #m = ROOT.RooStats.HistFactory.Measurement(self.prefix, self.prefix)
-            m = ROOT.RooStats.HistFactory.Measurement("NormalMeasurement")
-            m.SetOutputFilePrefix( "./results/"+self.prefix )
-            m.SetPOI( (meas.poiList)[0] )
-            
-            m.SetLumi(meas.lumi)
-            m.SetLumiRelErr(meas.lumiErr)
-            m.SetExportOnly(meas.exportOnly)
-
-            m.SetBinLow(meas.binLow)
-            m.SetBinHigh(meas.binHigh)
-
-            for (param, setting) in meas.paramSettingDict.iteritems():
-                #setting is array [const, value]
-                if not setting[0]: 
-                    continue #means this param is not const
-                    
-                m.AddConstantParam(param)
-                if setting[1]:
-                    m.SetParamValue(param, setting[1])
-
-            for (syst, constraint) in meas.constraintTermDict.iteritems():
-                #constraint is array [type, relUnc]; latter only allowed for Gamma and LogNormal
-                if constraint[0] == "Gamma":
-                    if constraint[1] is not None:
-                        m.AddGammaSyst(syst, constraint[1])
-                    else:
-                        m.AddGammaSyst(syst)
-                elif constraint[0] == "LogNormal":
-                    if constraint[1] is not None:
-                        m.AddLogNormSyst(syst, constraint[1])
-                    else:
-                        m.AddLogNormSyst(syst)
-                elif constraint[0] == "Uniform":
-                    m.AddUniformSyst(syst)    
-                elif constraint[0] == "NoConstraint":
-                    m.AddNoSyst(syst)
+            m = meas.createHistFactoryObject(self.prefix)
 
             for chan in channelObjects:
                 m.AddChannel(chan)
 
             m.CollectHistograms()
-            #m.PrintTree()
+            
+            # can be used to compare to our own XML if necessary
             #m.PrintXML("xmlFromPy/"+self.prefix, m.GetOutputFilePrefix())
             
             #NB this function's name is deceiving - does not run fits unless m.exportOnly=False

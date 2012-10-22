@@ -61,6 +61,46 @@ class Measurement(object):
         """
         self.constraintTermDict[paramName] = (type,relUnc)
 
+    def createHistFactoryObject(self, prefix):
+        m = ROOT.RooStats.HistFactory.Measurement("NormalMeasurement")
+        m.SetOutputFilePrefix( "./results/"+prefix )
+        m.SetPOI( (self.poiList)[0] )
+        
+        m.SetLumi(self.lumi)
+        m.SetLumiRelErr(self.lumiErr)
+        m.SetExportOnly(self.exportOnly)
+
+        m.SetBinLow(self.binLow)
+        m.SetBinHigh(self.binHigh)
+
+        for (param, setting) in self.paramSettingDict.iteritems():
+            #setting is array [const, value]
+            if not setting[0]: 
+                continue #means this param is not const
+                
+            m.AddConstantParam(param)
+            if setting[1]:
+                m.SetParamValue(param, setting[1])
+
+        for (syst, constraint) in self.constraintTermDict.iteritems():
+            #constraint is array [type, relUnc]; latter only allowed for Gamma and LogNormal
+            if constraint[0] == "Gamma":
+                if constraint[1] is not None:
+                    m.AddGammaSyst(syst, constraint[1])
+                else:
+                    m.AddGammaSyst(syst)
+            elif constraint[0] == "LogNormal":
+                if constraint[1] is not None:
+                    m.AddLogNormSyst(syst, constraint[1])
+                else:
+                    m.AddLogNormSyst(syst)
+            elif constraint[0] == "Uniform":
+                m.AddUniformSyst(syst)    
+            elif constraint[0] == "NoConstraint":
+                m.AddNoSyst(syst)
+       
+        return m
+
     def __str__(self):
         """
         Convert instance to an XML string
