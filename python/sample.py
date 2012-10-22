@@ -1,3 +1,4 @@
+import ROOT
 from ROOT import TFile, TMath, RooRandom, TH1, TH1F
 from ROOT import kBlack, kWhite, kGray, kRed, kPink, kMagenta, kViolet, kBlue, kAzure, kCyan, kTeal, kGreen, kSpring, kYellow, kOrange, kDashed, kSolid, kDotted
 from os import system
@@ -533,7 +534,7 @@ class Sample(object):
         """
         Add a normlization factor
         """
-        self.normFactor.append( (name, val, high, low, str(const)) )
+        self.normFactor.append( (name, val, high, low, const) )
         if not name in configMgr.normList:
             configMgr.normList.append(name)
         return
@@ -543,7 +544,7 @@ class Sample(object):
         Set normalization factor
         """
         self.normFactor = []
-        self.normFactor.append( (name, val, high, low, str(const)) )
+        self.normFactor.append( (name, val, high, low, const) )
         if not name in configMgr.normList:
             configMgr.normList.append(name)
         return
@@ -604,24 +605,58 @@ class Sample(object):
         Remove a systematic
         """
         self.systDict.clear()
+   
+    def createHistFactoryObject(self):
+        s = ROOT.RooStats.HistFactory.Sample(self.name, self.histoName, configMgr.histCacheFile)
+        s.SetNormalizeByTheory(self.normByTheory)
+        if self.statConfig:
+            s.ActivateStatError()
+        
+        for histoSys in self.histoSystList:
+            s.AddHistoSys(histoSys[0], histoSys[1], configMgr.histCacheFile, "", 
+                                       histoSys[2], configMgr.histCacheFile, "")
+
+        for shapeSys in self.shapeSystList:
+            constraintType = ROOT.RooStats.HistFactory.Constraint.GetType(shapeSys[2])
+            s.AddShapeSys(shapeSys[0], constraintType, shapeSys[1], configMgr.histCacheFile)
+
+        for overallSys in self.overallSystList:
+            s.AddOverallSys(overallSys[0], overallSys[2], overallSys[1])
+
+        for shapeFact in self.shapeFactorList:
+            s.AddShapeFactor(shapeFact)
+
+        if len(self.normFactor) > 0:
+            for normFactor in self.normFactor:
+                s.AddNormFactor(normFactor[0], normFactor[1], normFactor[3], normFactor[2], normFactor[4])
+
+        return s
+
     def __str__(self):
         """
         Convert instance to XML string
         """
         self.sampleString = "  <Sample Name=\"%s\" HistoName=\"%s\" InputFile=\"%s\" NormalizeByTheory=\"%s\">\n"  % (self.name, self.histoName, configMgr.histCacheFile, self.normByTheory)
+        
         if self.statConfig:
             self.sampleString += "    <StatError Activate=\"%s\"/>\n" % (self.statConfig)
+        
         for histoSyst in self.histoSystList:
             self.sampleString += "    <HistoSys Name=\"%s\" HistoNameHigh=\"%s\" HistoNameLow=\"%s\" />\n" % (histoSyst[0], histoSyst[1], histoSyst[2])
+        
         for shapeSyst in self.shapeSystList:
             self.sampleString += "    <ShapeSys Name=\"%s\" HistoName=\"%s\" ConstraintType=\"%s\"/>\n" % (shapeSyst[0], shapeSyst[1], shapeSyst[2])
+        
         for overallSyst in self.overallSystList:
             self.sampleString += "    <OverallSys Name=\"%s\" High=\"%g\" Low=\"%g\" />\n" % (overallSyst[0], overallSyst[1], overallSyst[2])
+        
         for shapeFact in self.shapeFactorList:
             self.sampleString += "    <ShapeFactor Name=\"%s\" />\n" % (shapeFact)
+        
         if len(self.normFactor)>0:
             for normFactor in self.normFactor:
                 self.sampleString += "    <NormFactor Name=\"%s\" Val=\"%g\" High=\"%g\" Low=\"%g\" Const=\"%s\" />\n" % (normFactor[0], normFactor[1], normFactor[2], normFactor[3], normFactor[4])
                 pass
+        
         self.sampleString += "  </Sample>\n\n"
         return self.sampleString

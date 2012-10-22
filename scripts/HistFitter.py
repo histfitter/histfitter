@@ -9,7 +9,6 @@ from logger import Logger
 log = Logger('HistFitter')
 
 
-
 def enum(typename, field_names):
     "Create a new enumeration type"
 
@@ -18,21 +17,19 @@ def enum(typename, field_names):
     d = dict((reversed(nv) for nv in enumerate(field_names)), __slots__ = ())
     return type(typename, (object,), d)()
 
-
-
-def GenerateFitAndPlot(tl, drawBeforeAfterFit):
+def GenerateFitAndPlot(fc, drawBeforeAfterFit):
     from configManager import configMgr
 
     from ROOT import Util
     from ROOT import RooExpandedFitResult
-    print "\n***GenerateFitAndPlot for TopLevelXML %s***\n" % tl.name
+    print "\n***GenerateFitAndPlot for TopLevelXML %s***\n" % fc.name
 
-    w = Util.GetWorkspaceFromFile(tl.wsFileName, "combined")
+    w = Util.GetWorkspaceFromFile(fc.wsFileName, "combined")
     Util.SaveInitialSnapshot(w)
-    #   Util.ReadWorkspace(w, tl.wsFileName,"combined")
+    #   Util.ReadWorkspace(w, fc.wsFileName,"combined")
 
     plotChannels = ""
-    for reg in tl.validationChannels:
+    for reg in fc.validationChannels:
         if len(plotChannels) > 0:
             plotChannels += ","
             pass
@@ -40,7 +37,7 @@ def GenerateFitAndPlot(tl, drawBeforeAfterFit):
     plotChannels = "ALL"
 
     fitChannels = ""
-    for reg in tl.bkgConstrainChannels:
+    for reg in fc.bkgConstrainChannels:
         if len(fitChannels) > 0:
             fitChannels += ","
             pass
@@ -48,7 +45,7 @@ def GenerateFitAndPlot(tl, drawBeforeAfterFit):
         pass
 
     fitChannelsCR = fitChannels
-    for reg in tl.signalChannels:
+    for reg in fc.signalChannels:
         if len(fitChannels) > 0:
             fitChannels += ","
             pass
@@ -57,7 +54,7 @@ def GenerateFitAndPlot(tl, drawBeforeAfterFit):
 
     #hack to be fixed at HistFactory level (check again with ROOT 5.34)
     lumiConst = True
-    if tl.signalSample and not tl.hasDiscovery:
+    if fc.signalSample and not fc.hasDiscovery:
         lumiConst = False
 
     # fit toy MC if specified. When left None, data is fit by default
@@ -82,8 +79,8 @@ def GenerateFitAndPlot(tl, drawBeforeAfterFit):
     # to a small number for the before the fit plots
     normList = configMgr.normList
     for norm in normList:
-        if norm in tl.measurements[0].paramSettingDict.keys():
-            if tl.measurements[0].paramSettingDict[norm][0]:
+        if norm in fc.measurements[0].paramSettingDict.keys():
+            if fc.measurements[0].paramSettingDict[norm][0]:
                 continue
         normfac = w.var(norm)
         if normfac:
@@ -108,7 +105,7 @@ def GenerateFitAndPlot(tl, drawBeforeAfterFit):
 
     # plot before fit
     if drawBeforeAfterFit:
-        Util.PlotPdfWithComponents(w, tl.name, plotChannels, "beforeFit",
+        Util.PlotPdfWithComponents(w, fc.name, plotChannels, "beforeFit",
                                    expResultBefore, toyMC, plotRatio)
 
     # fit of all regions
@@ -121,11 +118,11 @@ def GenerateFitAndPlot(tl, drawBeforeAfterFit):
 
     # plot after fit
     if drawBeforeAfterFit:
-        Util.PlotPdfWithComponents(w, tl.name, plotChannels, "afterFit",
+        Util.PlotPdfWithComponents(w, fc.name, plotChannels, "afterFit",
                                    expResultAfter, toyMC, plotRatio)
         #plot each component of each region separately with propagated
         #error after fit  (interesting for debugging)
-        #Util.PlotSeparateComponents(tl.name, plotChannels,
+        #Util.PlotSeparateComponents(fc.name, plotChannels,
         #                             "afterFit", result,toyMC)
 
         # plot correlation matrix for result
@@ -135,9 +132,9 @@ def GenerateFitAndPlot(tl, drawBeforeAfterFit):
         #Util.PlotNLL(w, expResultAfter, plotPLL, "", toyMC)
 
     if toyMC:
-        Util.WriteWorkspace(w, tl.wsFileName, toyMC.GetName())
+        Util.WriteWorkspace(w, fc.wsFileName, toyMC.GetName())
     else:
-        Util.WriteWorkspace(w, tl.wsFileName)
+        Util.WriteWorkspace(w, fc.wsFileName)
 
     try:
         if not result == None:
@@ -174,11 +171,12 @@ if __name__ == "__main__":
     import os, sys
     import getopt
     def usage():
-        print "HistFitter.py [-L loglevel] [-i] [-t] [-w] [-f] [-l] [-p] [-d] [-n nTOYs] [-s seed] [-r SRs] [-g gridPoint] [-b bkgParName,value] <configuration_file>\n"
+        print "HistFitter.py [-L loglevel] [-i] [-t] [-w] [-x] [-f] [-l] [-p] [-d] [-n nTOYs] [-s seed] [-r SRs] [-g gridPoint] [-b bkgParName,value] <configuration_file>\n"
         print "(all OFF by default. Turn steps ON with options)"
         print "-L   set log level (VERBOSE, DEBUG, INFO, WARNING, ERROR, FATAL, ALWAYS; default INFO)"
         print "-t   re-create histograms from TTrees (default: %s)" % (configMgr.readFromTree)
         print "-w   re-create workspace from histograms (default: %s)" % (configMgr.executeHistFactory)
+        print "-x   use XML and hist2workspace, instead of HistFactory python methods, to generate workspaces (default: %s)" % (configMgr.writeXML)
         print "-f   fit the workspace (default: %s)" % (configMgr.executeHistFactory)
         print "-n   <nTOYs> sets number of TOYs (<=0 means to use real data, default: %i)" % configMgr.nTOYs
         print "-s   <number> set the random seed for toy generation (default is CPU clock: %i)" % configMgr.toySeed
@@ -204,7 +202,7 @@ if __name__ == "__main__":
         sys.exit(0)
 
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "d0twfinals:r:b:g:L:p",["bkgfit","exclfit","discfit","vr","pz","ty"])
+        opts, args = getopt.getopt(sys.argv[1:], "xd0twfinals:r:b:g:L:p",["bkgfit","exclfit","discfit","vr","pz","ty"])
         configFile = str(args[0])
     except:
         usage()
@@ -224,6 +222,8 @@ if __name__ == "__main__":
             configMgr.readFromTree=True
         elif opt == '-w':
             configMgr.executeHistFactory = True
+        elif opt == '-x':
+            configMgr.writeXML = True
         elif opt == '-f':
             runFit = True
         elif opt == '-n':
@@ -288,30 +288,30 @@ if __name__ == "__main__":
         configMgr.executeAll()
 
     if runFit:
-        if len(configMgr.topLvls) > 0:
-            r = GenerateFitAndPlot(configMgr.topLvls[0], drawBeforeAfterFit)
-            #r=GenerateFitAndPlot(configMgr.topLvls[1],drawBeforeAfterFit)
-            #r=GenerateFitAndPlot(configMgr.topLvls[2],drawBeforeAfterFit)
-            #for idx in range(len(configMgr.topLvls)):
-            #    r=GenerateFitAndPlot(configMgr.topLvls[idx],drawBeforeAfterFit)
+        if len(configMgr.fitConfigs) > 0:
+            r = GenerateFitAndPlot(configMgr.fitConfigs[0], drawBeforeAfterFit)
+            #r=GenerateFitAndPlot(configMgr.fitConfigs[1],drawBeforeAfterFit)
+            #r=GenerateFitAndPlot(configMgr.fitConfigs[2],drawBeforeAfterFit)
+            #for idx in range(len(configMgr.fitConfigs)):
+            #    r=GenerateFitAndPlot(configMgr.fitConfigs[idx],drawBeforeAfterFit)
             pass
         #configMgr.cppMgr.fitAll()
-        print "\nr0=GenerateFitAndPlot(configMgr.topLvls[0],False)"
-        print "r1=GenerateFitAndPlot(configMgr.topLvls[1],False)"
-        print "r2=GenerateFitAndPlot(configMgr.topLvls[2],False)"
+        print "\nr0=GenerateFitAndPlot(configMgr.fitConfigs[0],False)"
+        print "r1=GenerateFitAndPlot(configMgr.fitConfigs[1],False)"
+        print "r2=GenerateFitAndPlot(configMgr.fitConfigs[2],False)"
         pass
 
     if printLimits:
-        for tl in configMgr.topLvls:
-            if len(tl.validationChannels) > 0:
+        for fc in configMgr.fitConfigs:
+            if len(fc.validationChannels) > 0:
                 raise(Exception, "Validation regions should be turned off for setting an upper limit!")
             pass
         configMgr.cppMgr.doUpperLimitAll()
         pass
 
     if doHypoTests:
-        for tl in configMgr.topLvls:
-            if len(tl.validationChannels) > 0:
+        for fc in configMgr.fitConfigs:
+            if len(fc.validationChannels) > 0:
                 raise(Exception,"Validation regions should be turned off for doing hypothesis test!")
             pass
         configMgr.cppMgr.doHypoTestAll('results/',doUL)
