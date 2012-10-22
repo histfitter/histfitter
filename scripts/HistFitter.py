@@ -9,7 +9,6 @@ from logger import Logger
 log = Logger('HistFitter')
 
 
-
 def enum(typename, field_names):
     "Create a new enumeration type"
 
@@ -17,8 +16,6 @@ def enum(typename, field_names):
         field_names = field_names.replace(',', ' ').split()
     d = dict((reversed(nv) for nv in enumerate(field_names)), __slots__ = ())
     return type(typename, (object,), d)()
-
-
 
 def GenerateFitAndPlot(tl, drawBeforeAfterFit):
     from configManager import configMgr
