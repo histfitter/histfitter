@@ -1,9 +1,8 @@
-import ROOT
 from ROOT import TFile,TMath,RooRandom,TH1,TH1F
 from ROOT import kBlack,kWhite,kGray,kRed,kPink,kMagenta,kViolet,kBlue,kAzure,kCyan,kTeal,kGreen,kSpring,kYellow,kOrange,kDashed,kSolid,kDotted
 from os import system
 from math import fabs
-from channel import Channel
+from channelxml import ChannelXML
 from sample import Sample
 
 
@@ -31,7 +30,7 @@ class Measurement(object):
         self.binLow = 0
         self.binHigh = 50
         self.mode = "comb"
-        self.exportOnly = True
+        self.exportOnly = "True"
         self.poiList = []
         self.constraintTermDict = {}
         self.paramSettingDict = {}
@@ -65,7 +64,7 @@ class Measurement(object):
         """
         Convert instance to an XML string
         """
-        measurementString = "  <Measurement Name=\"%s\" Lumi=\"%g\" LumiRelErr=\"%g\" BinLow=\"%d\" BinHigh=\"%d\" ExportOnly=\"%s\">\n" % (self.name,self.lumi,self.lumiErr,self.binLow,self.binHigh,str(self.exportOnly))
+        measurementString = "  <Measurement Name=\"%s\" Lumi=\"%g\" LumiRelErr=\"%g\" BinLow=\"%d\" BinHigh=\"%d\" ExportOnly=\"%s\">\n" % (self.name,self.lumi,self.lumiErr,self.binLow,self.binHigh,self.exportOnly)
         for (iPOI, poi) in enumerate(self. poiList):
             measurementString += "    <POI>%s</POI>\n" % (poi)
         for (param, setting) in self.paramSettingDict. iteritems():

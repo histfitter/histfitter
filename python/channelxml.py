@@ -1,4 +1,3 @@
-import ROOT
 from ROOT import TFile, TMath, RooRandom, TH1, TH1F
 from ROOT import kBlack, kWhite, kGray, kRed, kPink, kMagenta, kViolet, kBlue, kAzure, kCyan, kTeal, kGreen, kSpring, kYellow, kOrange, kDashed, kSolid, kDotted
 from os import system
@@ -13,9 +12,9 @@ TH1.SetDefaultSumw2(True)
 from copy import deepcopy, copy
 from configManager import configMgr
 
-log = Logger('Channel')
+log = Logger('ChannelXML')
 
-class Channel(object):
+class ChannelXML(object):
     """
     Defines the content of a channel HistFactory xml file
     """
@@ -298,41 +297,6 @@ class Channel(object):
             raise KeyError("Could not find systematic %s "
                            "in topLevel %s" % (systName, self.name))
 
-    def setTreeName(self, treeName):
-        self.treeName = treeName
-        return
-
-    def propagateTreeName(self, treeName):
-        if self.treeName == '':
-            self.treeName = treeName
-        ##  MAB : Propagate down to samples
-        for sam in self.sampleList:
-            sam.propagateTreeName(self.treeName)
-            pass
-        return
-
-    def createHistFactoryObject(self):
-        c = ROOT.RooStats.HistFactory.Channel( self.channelName, configMgr.histCacheFile )
-        for d in self.dataList:
-            #d should be array of form [inputFile, histoName, histoPath]
-            
-            histoPath = "" #paths never start with /
-            if len(d[2]) > 0:
-                histoPath = d[2]
-            c.SetData(d[1], d[0], histoPath)
-
-        if self.hasStatConfig:
-           c.SetStatErrorConfig(self.statErrorThreshold, self.statErrorType)
-        
-        for (iSample, sample) in enumerate(self.sampleList):
-            if not sample.write:
-                continue
-
-            s = sample.createHistFactoryObject()
-            c.AddSample(s)
-
-        return c
-    
     def __str__(self):
         """
         Convert instance to XML string
@@ -352,7 +316,7 @@ class Channel(object):
         self.writeString += "</Channel>\n"
         return self.writeString
 
-    def writeXML(self):
+    def close(self):
         """
         Write and close file
         """
@@ -362,3 +326,15 @@ class Channel(object):
         self.xmlFile.close()
         return
 
+    def setTreeName(self, treeName):
+        self.treeName = treeName
+        return
+
+    def propagateTreeName(self, treeName):
+        if self.treeName == '':
+            self.treeName = treeName
+        ##  MAB : Propagate down to samples
+        for sam in self.sampleList:
+            sam.propagateTreeName(self.treeName)
+            pass
+        return

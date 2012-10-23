@@ -1,6 +1,6 @@
-from fitConfig import fitConfig
+from topLevelxml import TopLevelXML
 from measurement import Measurement
-from channel import Channel
+from channelxml import ChannelXML
 from sample import Sample
 
 

@@ -1,14 +1,13 @@
-import ROOT
 from ROOT import TFile, TMath, RooRandom, TH1, TH1F
 from ROOT import kBlack, kWhite, kGray, kRed, kPink, kMagenta, kViolet, kBlue, kAzure, kCyan, kTeal, kGreen, kSpring, kYellow, kOrange, kDashed, kSolid, kDotted
 from os import system
 from math import fabs
 from measurement import Measurement
-from channel import Channel
+from channelxml import ChannelXML
 from sample import Sample
 from logger import Logger
 
-log = Logger('fitConfig')
+log = Logger('TopLevelXML')
 
 import generateToys
 import os
@@ -18,9 +17,9 @@ TH1.SetDefaultSumw2(True)
 from copy import deepcopy,copy
 from configManager import configMgr
 
-class fitConfig(object):
+class TopLevelXML(object):
     """
-    Defines the content of a top-level HistFactory workspace
+    Defines the content of a top-level HistFactory xml file
     """
 
     def __init__(self, name):
@@ -71,20 +70,31 @@ class fitConfig(object):
         self.wsFileName = "N/A"
         return
 
+    def __str__(self):
+        """
+        Convert instance to XML string
+        """
+        self.writeString = "<!DOCTYPE Combination  SYSTEM 'HistFactorySchema.dtd'>\n\n"
+        self.writeString += "<Combination OutputFilePrefix=\"./results/" + self.prefix + "\" >\n\n"
+        for chan in self.channels:
+            self.writeString += "  <Input>" + chan.xmlFileName + "</Input>\n"
+        self.writeString += "\n"
+        for meas in self.measurements:
+            self.writeString += str(meas)
+        self.writeString += "</Combination>\n"
+        return self.writeString
+
+
     def initialize(self):
         self.xmlFileName = "config/"+self.prefix+".xml"
-        
         #Note: wsFileName is an educated guess of the workspace
         # file name externally decided by HistFactory.
-        self.wsFileName = "results/" + self.prefix + "_combined_" + \
-                          self.measurements[0].name + "_model.root"
-        
+        self.wsFileName = "results/" + self.prefix + "_combined_" + self.measurements[0].name + "_model.root"
         for sam in self.sampleList:
             if sam.isData: # FIXME (works but ugly)
                 self.sampleList.remove(sam)       #Just making sure that Data is the last element of the list
                 self.sampleList.append(sam)
                 break
-        
         #Consistency checks
         if not self.signalSample == None:
             found = False
@@ -131,73 +141,44 @@ class fitConfig(object):
             #                chan.getSample(sample.name).addSystematic(s)
         return
 
-    def writeWorkspaces(self):
-        channelObjects = []
-        for chan in self.channels:
-            c = chan.createHistFactoryObject()
-            #add channel to some array to use below
-            channelObjects.append(c)
-
-        #if not os.path.exists("xmlFromPy"):
-            #os.makedirs("xmlFromPy")
-        
-        for meas in self.measurements:
-            
-            #m = ROOT.RooStats.HistFactory.Measurement(self.prefix, self.prefix)
-            m = ROOT.RooStats.HistFactory.Measurement("NormalMeasurement")
-            m.SetOutputFilePrefix( "./results/"+self.prefix )
-            m.SetPOI( (meas.poiList)[0] )
-            
-            m.SetLumi(meas.lumi)
-            m.SetLumiRelErr(meas.lumiErr)
-            m.SetExportOnly(meas.exportOnly)
-
-            m.SetBinLow(meas.binLow)
-            m.SetBinHigh(meas.binHigh)
-
-            for (param, setting) in meas.paramSettingDict.iteritems():
-                #setting is array [const, value]
-                if not setting[0]: 
-                    continue #means this param is not const
-                    
-                m.AddConstantParam(param)
-                if setting[1]:
-                    m.SetParamValue(param, setting[1])
-
-            for (syst, constraint) in meas.constraintTermDict.iteritems():
-                #constraint is array [type, relUnc]; latter only allowed for Gamma and LogNormal
-                if constraint[0] == "Gamma":
-                    if constraint[1] is not None:
-                        m.AddGammaSyst(syst, constraint[1])
-                    else:
-                        m.AddGammaSyst(syst)
-                elif constraint[0] == "LogNormal":
-                    if constraint[1] is not None:
-                        m.AddLogNormSyst(syst, constraint[1])
-                    else:
-                        m.AddLogNormSyst(syst)
-                elif constraint[0] == "Uniform":
-                    m.AddUniformSyst(syst)    
-                elif constraint[0] == "NoConstraint":
-                    m.AddNoSyst(syst)
-
-            for chan in channelObjects:
-                m.AddChannel(chan)
-
-            m.CollectHistograms()
-            #m.PrintTree()
-            #m.PrintXML("xmlFromPy/"+self.prefix, m.GetOutputFilePrefix())
-            
-            #NB this function's name is deceiving - does not run fits unless m.exportOnly=False
-            ROOT.RooStats.HistFactory.MakeModelAndMeasurementFast(m);
-        
-        return
-
     def close(self):
         """
-        Write workspace to file and close
+        Write instance to file and close
         """
-        self.writeWorkspaces()
+        log.info("Writing file: '%s'" % self.xmlFileName)
+        log.verbose("Following will be written:")
+        log.verbose(str(self))
+        
+        self.xmlFile = open(self.xmlFileName, "w")
+        self.xmlFile.write(str(self))
+        self.xmlFile.close()
+        for chan in self.channels:
+            log.verbose("Following channel XML will be written:")    
+            log.verbose(str(chan))
+            chan.close()
+        return
+
+    def execute(self, option=""):
+        """
+        Run hist2workspace binary on this file
+        """
+        cmd = "hist2workspace "
+        if len(option):
+            cmd += "-" + option
+
+        cmd += self.xmlFileName
+
+        log.info("Executing: '%s'" % cmd)
+        p = os.popen(cmd)
+        output = p.readline()
+        while 1:
+            line = p.readline()
+            if not line: break
+            log.debug(line.strip())
+
+        p.close()
+
+        log.info("Created workspace 'combined' in file '%s'\n" % self.wsFileName)
         return
 
     def addMeasurement(self, name, lumi, lumiErr):
@@ -241,7 +222,7 @@ class fitConfig(object):
             binLow = 0
             binHigh = nBins
             pass
-        chanObj = Channel(variableName, regions, self.prefix, nBins,
+        chanObj = ChannelXML(variableName, regions, self.prefix, nBins,
                              binLow, binHigh, self.statErrThreshold)
 
         # Verify that this name is not already used
@@ -272,7 +253,7 @@ class fitConfig(object):
         """
         Add channel as a pre-built object
         """
-        if not isinstance(obj, Channel):
+        if not isinstance(obj, ChannelXML):
             raise RuntimeError("addChannel does not support input of type '%s'." % (type(obj)))
 
         # Verify that this name is not already used
@@ -470,7 +451,7 @@ class fitConfig(object):
             inList = [input]
             pass
         for i in inList:
-            if isinstance(i, Channel):
+            if isinstance(i, ChannelXML):
                 chanName = i.channelName
             else:
                 chanName = i
@@ -590,63 +571,3 @@ class fitConfig(object):
             chan.propagateTreeName(self.treeName)
             pass
         return
-
-    def __str__(self):
-        """
-        Convert instance to XML string
-        """
-        self.writeString = "<!DOCTYPE Combination  SYSTEM 'HistFactorySchema.dtd'>\n\n"
-        self.writeString += "<Combination OutputFilePrefix=\"./results/" + self.prefix + "\"  >\n\n"
-        
-        for chan in self.channels:
-            self.writeString += "  <Input>" + chan.xmlFileName + "</Input>\n"
-        
-        self.writeString += "\n"
-        
-        for meas in self.measurements:
-            self.writeString += str(meas)
-        
-        self.writeString += "</Combination>\n"
-        
-        return self.writeString
-
-    def writeXML(self):
-        """
-        Write instance to XML file and close
-        """
-        log.info("Writing file: '%s'" % self.xmlFileName)
-        log.verbose("Following will be written:")
-        log.verbose(str(self))
-        
-        self.xmlFile = open(self.xmlFileName, "w")
-        self.xmlFile.write(str(self))
-        self.xmlFile.close()
-        for chan in self.channels:
-            log.verbose("Following channel XML will be written:")    
-            log.verbose(str(chan))
-            chan.writeXML()
-        return
-
-    def executehist2workspace(self, option=""):
-        """
-        Run hist2workspace binary for the XML file for this fitConfig
-        """
-        cmd = "hist2workspace "
-        if len(option):
-            cmd += "-" + option
-
-        cmd += self.xmlFileName
-
-        log.info("Executing: '%s'" % cmd)
-        p = os.popen(cmd)
-        output = p.readline()
-        while 1:
-            line = p.readline()
-            if not line: break
-            log.debug(line.strip())
-
-        p.close()
-
-        log.info("Created workspace 'combined' in file '%s'\n" % self.wsFileName)
-        return
-
