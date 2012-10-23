@@ -24,12 +24,41 @@
 //////////////////////////////////////
 /// Functions from combination package
 
+// up to 'namespace StatTools', these were previously included
+// by including the entire (now dropped) Combination namespace
+
+//CombinationUtils.cxx
+#pragma link C++ function resetFloatPars;
+
+//CombineWorkSpaces.cxx
+#pragma link C++ function clearVec;
+#pragma link C++ function CollectWorkspaces;
+#pragma link C++ function GetMatchingWorkspaces;
+#pragma link C++ function GetWorkspaceFromFile;
+#pragma link C++ function GetHypoTestResultFromFile;
+#pragma link C++ function GetFitResultFromFile;
+#pragma link C++ function GetMCStudy;
+#pragma link C++ function ParseWorkspaceID;
+
+//profile_get_Pvalue.cxx
+#pragma link C++ function doFreeFit;
+#pragma link C++ function doFreeFitSave;
+
+//TEasyFormula.cxx
 #pragma link C++ class TEasyFormula ;
 
-#pragma link C++ function GetMCStudy;
-#pragma link C++ function GetWorkspaceFromFile;
-#pragma link C++ function CollectAndWriteResultSet;
+//TMsgLogger.cxx
+#pragma link C++ class TMsgLogger;
 
+//toy_utils.cxx
+#pragma link C++ function get_Pvalue;
+#pragma link C++ function CollectLimitResults;
+#pragma link C++ function WriteResultSet;
+#pragma link C++ function CollectAndWriteResultSet;
+#pragma link C++ function CollectAndWriteHypoTestResults;
+#pragma link C++ function CollectHypoTestResults;
+
+//StatTools.cxx & SRootFinder.cxx
 #pragma link C++ namespace StatTools;
 #pragma link C++ class StatTools::SRootFinder;
 #pragma link C++ function StatTools::GetProbFromSigma;
@@ -43,11 +72,13 @@
 #pragma link C++ function StatTools::FindSNSigma ;
 #pragma link C++ function StatTools::FindXSNSigma;
 
+//DrawUtils.cxx
 #pragma link C++ namespace DrawUtil;
 #pragma link C++ function DrawUtil::triwsmooth;
 #pragma link C++ function DrawUtil::makesignificancehistos;
 #pragma link C++ function DrawUtil::linearsmooth;
 
+//StatTools.cxx
 #pragma link C++ namespace RooStats;
 #pragma link C++ function RooStats::toyMC_gen_fit;
 #pragma link C++ function RooStats::DoHypoTestInversion;
@@ -57,6 +88,7 @@
 #pragma link C++ function RooStats::get_Presult;
 #pragma link C++ function RooStats::get_htr;
 
+//HypoTestTool.cxx
 #pragma link C++ class RooStats::HypoTestTool;
 
 #pragma link C++ class LimitResult;
