@@ -12,7 +12,7 @@ Prioritized todo-list:
 V Commit HF patches for tutorial into trunk.
 V There is no script/method for merging toys from discovery mode.
 
-- Upgrade to ROOT v5.34. Python-based objects (Geert-Jan)
+V Upgrade to ROOT v5.34. Python-based objects (Geert-Jan)
 - document new systematic uncertainties (Max)
 - Treatment of negative QCD weights: can lead to crash in signal region. (Zach,Max)
 - Absolute errors in case of nominal prediction with 0.0 events. Empty nominal, non-empty systematic (Marcello)
