@@ -679,7 +679,7 @@ class ConfigManager(object):
                     if syst.isMerged():
                         chan.getSample(sam.name).addShapeSys(syst.name,nomMergedName,highMergedName,lowMergedName,syst.constraint)
                         syst.Reset()
-                    chan.getSample(sam.name).shapeSystList.append((systName, nomMergedName+"Norm", syst.constraint, "", "", "", ""))
+                    chan.getSample(sam.name).shapeSystList.append((syst.name, nomMergedName+"Norm", syst.constraint, "", "", "", ""))
             else:
                 chan.getSample(sam.name).addShapeSys(syst.name, nomName, highName, lowName)
                 chan.getSample(sam.name).shapeSystList.append((syst.name, nomName+"Norm", syst.constraint, "", "", "", ""))
