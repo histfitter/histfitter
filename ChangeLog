@@ -1,3 +1,8 @@
+2012-10-23 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
+		* LinkDef.h again includes functions previously in the Combination
+		namespace
+		* Tagging: HistFitter-00-00-17-01
+
 2012-10-19 Max Baak <mbaak@cern.ch>
         * Multiple minor bug-fixes for normalized histograms b/n control and signal regions. 
         * Now achieves numerically identical results wrt HF-13 for 0-lepton fit.
