@@ -863,12 +863,12 @@ class ConfigManager(object):
 
                                 # if the overflow bin is used for this channel, make sure the normalization takes it into account
                                 if c.useOverflowBin:
-                                    self.hists["h"+s.name+"Nom_"+normString+"Norm"].SetBinContent(1, self.hists["h"+s.name+"Nom_"+normString+"Norm"].GetBinContent(1) + tempHist.GetIntegral())
+                                    self.hists["h"+s.name+"Nom_"+normString+"Norm"].SetBinContent(1, self.hists["h"+s.name+"Nom_"+normString+"Norm"].GetBinContent(1) + tempHist.Integral())
                                 else:
                                     self.hists["h"+s.name+"Nom_"+normString+"Norm"].SetBinContent(1, self.hists["h"+s.name+"Nom_"+normString+"Norm"].GetBinContent(1) + tempHist.GetSumOfWeights())
                                 del tempHist
 
-                        log.verbose("nom =%f"%self.hists["h"+s.name+"Nom_"+normString+"Norm"].GetSumOfWeights()) 
+                                log.verbose("nom =%f"%self.hists["h"+s.name+"Nom_"+normString+"Norm"].GetSumOfWeights()) 
                     else:
                         self.hists["h"+sam.name+"Nom_"+normString+"Norm"] = None
                         try:
