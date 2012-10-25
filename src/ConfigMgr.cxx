@@ -185,7 +185,7 @@ void ConfigMgr::doHypoTest(FitConfig* fc, TString outdir, double SigXSecSysnsigm
         return;
     }
 
-    if(m_fixSigXSec && fc->m_signalSampleName != "" ){
+    if(m_fixSigXSec && fc->m_signalSampleName != "" && w->var("alpha_SigXSec") != NULL){
         w->var("alpha_SigXSec")->setVal(SigXSecSysnsigma);
         w->var("alpha_SigXSec")->setConstant(true);
     }

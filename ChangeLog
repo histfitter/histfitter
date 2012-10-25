@@ -1,3 +1,8 @@
+2012-10-25 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
+	* Fix a segfault occuring in ConfigMgr.cxx when using an empty region in
+	  combination with the theory band. w->var("alpha_SigXSec") could end up
+	  being NULL
+
 2012-10-23 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
 	* LinkDef.h now includes all the functions previously in the Combination
 	  namespace
