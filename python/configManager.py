@@ -700,7 +700,7 @@ class ConfigManager(object):
         chan.getSample(sam.name).setWrite(True)
         chan.getSample(sam.name).setHistoName(prefixNom)
         if chan.getSample(sam.name).qcdSyst == "histoSys":
-            chan.getSample(sam.name).addHistoSys("QCDNorm_"+regionString+"_"+replaceSymbols(chan.variableName),prefixNom,prefixHigh,prefixLow,False,False)
+            chan.getSample(sam.name).addHistoSys("QCDNorm_"+regionString,prefixNom,prefixHigh,prefixLow,False,False)
         elif chan.getSample(sam.name).qcdSyst == "overallSys":
             highIntegral = configMgr.hists[prefixHigh].Integral()
             lowIntegral = configMgr.hists[prefixLow].Integral()
@@ -710,16 +710,16 @@ class ConfigManager(object):
                 overallSystHigh = highIntegral / nomIntegral
                 overallSystLow = lowIntegral / nomIntegral
             except ZeroDivisionError:
-                log.warning("Error generating HistoSys for %s syst=%s nom=%g high=%g low=%g" % (nomName,"QCDNorm_"+regionString+"_"+replaceSymbols(chan.variableName),nomIntegral,highIntegral,lowIntegral))
+                log.warning("Error generating HistoSys for %s syst=%s nom=%g high=%g low=%g" % (nomName,"QCDNorm_"+regionString,nomIntegral,highIntegral,lowIntegral))
             
-            chan.getSample(sam.name).addOverallSys("QCDNorm_"+regionString+"_"+replaceSymbols(chan.variableName),overallSystHigh,overallSystLow)
+            chan.getSample(sam.name).addOverallSys("QCDNorm_"+regionString,overallSystHigh,overallSystLow)
         elif chan.getSample(sam.name).qcdSyst == "overallHistoSys":
-            chan.getSample(sam.name).addHistoSys("QCDNorm_"+regionString+"_"+replaceSymbols(chan.variableName),prefixNom,prefixHigh,prefixLow,True,False)
+            chan.getSample(sam.name).addHistoSys("QCDNorm_"+regionString,prefixNom,prefixHigh,prefixLow,True,False)
         elif chan.getSample(sam.name).qcdSyst == "normHistoSys":
-            chan.getSample(sam.name).addHistoSys("QCDNorm_"+regionString+"_"+replaceSymbols(chan.variableName),prefixNom,prefixHigh,prefixLow,False,True)
+            chan.getSample(sam.name).addHistoSys("QCDNorm_"+regionString,prefixNom,prefixHigh,prefixLow,False,True)
         elif chan.getSample(sam.name).qcdSyst == "shapeSys":
-            chan.getSample(sam.name).addShapeSys("QCDNorm_"+regionString+"_"+replaceSymbols(chan.variableName),prefixNom,prefixHigh,prefixLow)
-            chan.getSample(sam.name).shapeSystList.append(("QCDNorm_"+regionString+"_"+replaceSymbols(chan.variableName),prefixNom+"Norm","data/"+configMgr.analysisName+".root","","","",""))
+            chan.getSample(sam.name).addShapeSys("QCDNorm_"+regionString,prefixNom,prefixHigh,prefixLow)
+            chan.getSample(sam.name).shapeSystList.append(("QCDNorm_"+regionString,prefixNom+"Norm","data/"+configMgr.analysisName+".root","","","",""))
         elif chan.getSample(sam.name).qcdSyst == "uncorr":
             chan.getSample(sam.name).setWrite(False)
             for iBin in xrange(1,nHists+1):
@@ -728,7 +728,7 @@ class ConfigManager(object):
                 chan.addSample(qcdSam)
                 chan.getSample(qcdSam.name).setWrite(True)
                 chan.getSample(qcdSam.name).setHistoName("h"+sam.name+"Nom_"+regionString+"_obs_"+replaceSymbols(chan.variableName)+"_"+str(iBin))
-                chan.getSample(qcdSam.name).addHistoSys("NormQCD"+regionString+"_"+replaceSymbols(chan.variableName)+"_"+str(iBin),prefixNom+"_"+str(iBin),prefixHigh+"_"+str(iBin),prefixLow+"_"+str(iBin),False,False)
+                chan.getSample(qcdSam.name).addHistoSys("NormQCD"+regionString+"_"+str(iBin),prefixNom+"_"+str(iBin),prefixHigh+"_"+str(iBin),prefixLow+"_"+str(iBin),False,False)
         else:
             raise Exception("Incorrect systematic method specified for QCD: %s"%getSample(sam.name).qcdSyst)
 
