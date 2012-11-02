@@ -580,366 +580,94 @@ vector<TString> Util::GetRegionsVec(TString regions, RooCategory* regionCat){
 
 
 
-// //__________________________________________________________________________________________________________________________________________________________
-// void Util::PlotPdfSumWithComponents(RooWorkspace* w, TString fcName, TString plotRegions, TString outputPrefix, RooFitResult* rFit, RooAbsData* inputData, Bool_t plotRatio)
-// {
+//__________________________________________________________________________________________________________________________________________________________
+void Util::PlotPdfSumWithComponents(RooWorkspace* w, TString fcName, TString plotRegions, TString outputPrefix, RooFitResult* rFit, RooAbsData* inputData, Bool_t plotRatio)
+{
 
-//   Bool_t plotComponents=true;
-//   ConfigMgr* mgr = ConfigMgr::getInstance();
-//   FitConfig* fc = mgr->getFitConfig(fcName);
+  Bool_t plotComponents=true;
+  ConfigMgr* mgr = ConfigMgr::getInstance();
+  FitConfig* fc = mgr->getFitConfig(fcName);
 
-//   cout << GEndl << endl << " ------ Starting Plot with parameters:   analysisName = " << fcName 
-//        << "    plotRegions = " <<  plotRegions <<  "  plotComponents = " << plotComponents << "  outputPrefix = " << outputPrefix  << GEndl << GEndl;
+  cout << GEndl << endl << " ------ Starting Plot with parameters:   analysisName = " << fcName 
+       << "    plotRegions = " <<  plotRegions <<  "  plotComponents = " << plotComponents << "  outputPrefix = " << outputPrefix  << GEndl << GEndl;
 
-//   RooMsgService::instance().getStream(1).removeTopic(NumIntegration);
-//   RooMsgService::instance().getStream(1).removeTopic(Plotting);
-
-
-//   if(w==NULL){ cout << GEndl << " Workspace not found, no plotting performed" << endl << GEndl; return; }
-//   RooSimultaneous* pdf = (RooSimultaneous*) w->pdf("simPdf");
-//   //pdf->Print("t");
-
-//   RooAbsData* data = ( inputData!=0 ? inputData : (RooAbsData*)w->data("obsData") ); 
-
-//   RooCategory* regionCat = (RooCategory*) w->cat("channelCat");
-//   data->table(*((RooAbsCategory*)regionCat))->Print("v");
-
-//   if(plotRegions =="") plotRegions = "ALL";
-//   std::vector<TString> regionsVec = GetRegionsVec(plotRegions, regionCat);
-
-//   unsigned  int numPlots = regionsVec.size();  
-//   TCanvas* canVec[numPlots];
-//   //  RooPlot* frameVec[numPlots];
-
-//   RooAddPdf* combinedPdf = new RooAddPdf();
-//   RooDataSet* combinedData = new RooDataSet();
-//   RooRealVar* firstVar;
-//   RooRealVar* replaceVar;
-//   RooAbsPdf* firstPdf ;
-//   RooAbsPdf* replacePdf ;
-//   RooArgList* coefList;
-//   RooArgList* pdfList;
-
-//   // iterate over all the regions 
-//   for(unsigned int iVec=0; iVec<numPlots; iVec++){
-//     TString regionCatLabel = regionsVec[iVec];
-//     if( regionCat->setLabel(regionCatLabel,kTRUE)){  cout << GEndl << " Label '" << regionCatLabel << "' is not a state of channelCat (see Table) " << endl << endl << GEndl; }
-//     else{
-//       RooAbsPdf* regionPdf = (RooAbsPdf*) pdf->getPdf(regionCatLabel.Data());
-//       cout << " region pdf = " << GEndl;
-//       regionPdf->Print();
-
-//       TString dataCatLabel = Form("channelCat==channelCat::%s",regionCatLabel.Data());
-//       RooDataSet* regionData = (RooDataSet*) data->reduce(dataCatLabel.Data());
-//       if(regionPdf==NULL || regionData==NULL){ 
-// 	cout << " Either the Pdf or the Dataset do not have an appropriate state for the region = " << regionCatLabel << ", check the Workspace file" << GEndl;
-// 	cout << " regionPdf = " << regionPdf << "   regionData = " << regionData << GEndl;  
-// 	continue; 
-//       }
-
-//       if (iVec==0) combinedData = regionData;
-//       else combinedData->append(*regionData);
-
-//       cout << " IVec = " << iVec << " combinedData.sumEntries() = " << combinedData->sumEntries() << GEndl;
-
-//       RooRealVar* regionVar =(RooRealVar*) ((RooArgSet*) regionPdf->getObservables(*regionData))->find(Form("obs_x_%s",regionCatLabel.Data()));
-//       if (iVec==0) firstVar = regionVar;
-//       else replaceVar = regionVar;
-
-//       if (iVec==0) firstPdf = regionPdf;
-//       else {
-// 	w->factory(Form("EDIT::%s_REPLACED(%s,%s=%s)",regionPdf->GetName(),regionPdf->GetName(),regionVar->GetName(),firstVar->GetName()));
-// 	//	w->factory(Form("EDIT::%s_model_REPLACED(%s_model,%s=%s)",regionCatLabel.Data(),regionCatLabel.Data(),regionVar->GetName(),firstVar->GetName()));
-// 	TString RRSPdfName = Form("%s_model",regionCatLabel.Data()); 
-// 	//replacePdf = (RooAbsPdf*) pdf->getPdf(regionCatLabel.Data());
-// 	replacePdf = (RooAbsPdf*) w->pdf(Form("%s_REPLACED",regionPdf->GetName()));
-// 	cout << " replace pdf = " << GEndl;
-// 	replacePdf->Print();
-// 	cout<< " firstVar = " << firstVar->GetName()  << " regionVar = " << regionVar->GetName() << GEndl;
-
-// 	// addition
-// 	RooConstVar* var = new RooConstVar("additionVar1","additionVar1",1.);
-// 	RooConstVar* var2 = new RooConstVar("additionVar2","additionVar2",1.);
-// 	coefList = new RooArgList(*var,*var2);
-// 	combinedPdf = new RooAddPdf("combinedPdf","combinedPdf", RooArgList(*firstPdf, *replacePdf), *coefList);
-// 	combinedPdf->Print();
-//       }
-
-//       if (iVec>0){
-// 	regionData = combinedData;
-// 	regionPdf = combinedPdf;
-// 	regionVar = firstVar;
-//       }
-
-//       //create plot
-//       RooPlot* frame =  regionVar->frame(); 
-//       frame->SetName(Form("frame_%s_%s",regionCatLabel.Data(),outputPrefix.Data()));
-//       //  data->plotOn(frame,Cut(dataCatLabel),RooFit::DataError(RooAbsData::Poisson),MarkerColor(fc->getDataColor()),LineColor(fc->getDataColor()));
-//       regionData->plotOn(frame,RooFit::DataError(RooAbsData::Poisson),MarkerColor(fc->getDataColor()),LineColor(fc->getDataColor()));
-//       if(fc->m_removeEmptyBins){
-// 	cout << GEndl << "RemoveEmptyDataBins() removing empty bin points from data histogram on plot " << frame->GetName() << GEndl;
-// 	RemoveEmptyDataBins(w, frame);
-//       }
-
-//       // normalize pdf to number of expected events, not to number of events in dataset
-//       double normCount = regionPdf->expectedEvents(*regionVar);
-//       regionPdf->plotOn(frame,Normalization(normCount,RooAbsReal::NumEvent),Precision(1e-5),LineColor(fc->getTotalPdfColor()));
-
-//       // plot components
-//       if(plotComponents)  AddComponentsToPlot(w, fc, frame, regionPdf, regionData, regionVar, regionCatLabel.Data());
-
-//       // visualize error of fit
-//       if(rFit != NULL) 	regionPdf->plotOn(frame,Normalization(normCount,RooAbsReal::NumEvent),Precision(1e-5),FillColor(fc->getErrorFillColor()),FillStyle(fc->getErrorFillStyle()),LineColor(fc->getErrorLineColor()),LineStyle(fc->getErrorLineStyle()),VisualizeError(*rFit));
-//       // re-plot data and pdf, so they are on top of error and components
-//       regionPdf->plotOn(frame,Normalization(normCount,RooAbsReal::NumEvent),Precision(1e-5),LineColor(fc->getTotalPdfColor()));
-//       regionData->plotOn(frame,RooFit::DataError(RooAbsData::Poisson),MarkerColor(fc->getDataColor()),LineColor(fc->getDataColor()));
-//       if(fc->m_removeEmptyBins) RemoveEmptyDataBins(w, frame);
-
-//       TString canName=Form("can_%s_%s",regionCatLabel.Data(),outputPrefix.Data());
-//       canVec[iVec] = new TCanvas(canName,canName, 700, 600);
-
-//       // two pads, one for 'standard' plot, one for data/MC ratio
-//       TPad *pad1 = new TPad(Form("%s_pad1",canName.Data()),Form("%s_pad1",canName.Data()),0.,0.305,.99,1);
-//       pad1->SetBottomMargin(0.005);
-//       pad1->SetFillColor(kWhite);
-//       TPad *pad2 = new TPad(Form("%s_pad2",canName.Data()),Form("%s_pad2",canName.Data()),0.,0.01,.99,0.295);
-//       pad2->SetTopMargin(0.005);
-//       pad2->SetBottomMargin(0.3);
-//       pad2->SetFillColor(kWhite);
-
-//       if(fc->getChannelLogY(regionCatLabel)) pad1->SetLogy();
-//       //pad1->SetLogy();
-//       pad1->Draw();
-//       pad2->Draw();
-
-//       pad1->cd();
-
-//       if( fabs(fc->getChannelMinY(regionCatLabel) + 9999.) > 0.000001){
-//         frame->SetMinimum(fc->getChannelMinY(regionCatLabel));
-//       } else{
-//         frame->SetMinimum(0.05);
-//       }
-
-//       if( fabs(fc->getChannelMaxY(regionCatLabel) + 999.) > 0.000001){
-// 	      frame->SetMaximum(fc->getChannelMaxY(regionCatLabel));
-//       }
-//       else frame->SetMaximum(frame->GetMaximum()*5.);
-
-//       // draw frame
-//       frame->SetTitle(""); 
-//       frame->GetXaxis()->SetLabelSize(0.); 
-//       frame->Draw();
-
-//       // add cosmetics
-//       if( (fabs(fc->getChannelATLASLabelX(regionCatLabel) + 1.) > 0.000001) &&  (fabs(fc->getChannelATLASLabelY(regionCatLabel) + 1.) > 0.000001) ){
-// 	      ATLASLabel(fc->getChannelATLASLabelX(regionCatLabel),fc->getChannelATLASLabelY(regionCatLabel),fc->getChannelATLASLabelText(regionCatLabel)) ; //"for approval");
-//       }
-//       else ATLASLabel(0.195,0.8,"for approval");
-
-//       if( fc->getChannelShowLumi(regionCatLabel) ){
-// 	      Float_t lumi =  fc->getLumi(); 
-// 	      AddText(0.175,0.775,Form("#int Ldt = %.1f fb^{-1}",lumi));
-//       }
-//       else {
-//         Float_t lumi =  fc->getLumi();
-//         AddText(0.05,0.7,Form("#int Ldt = %.1f fb^{-1}",lumi));
-//       }
-
-//       // uncomments to label the channel
-//       //if (canName.Contains("Mu")) AddText(0.05,0.60,"1 muon, #geq 7 jets");
-//       //else if (canName.Contains("El")) AddText(0.05,0.60,"1 electron, #geq 7 jets");
-
-//       TLegend* leg = fc->getTLegend();
-//       // default TLegend built from sample names/colors
-//       if(leg == NULL){
-// 	leg = new TLegend(0.5,0.44,0.895,0.895,"");
-// 	leg->SetFillStyle(0);
-// 	leg->SetFillColor(0);
-// 	leg->SetBorderSize(0);
-// 	TLegendEntry* entry=leg->AddEntry("","Data 2011 (#sqrt{s}=7 TeV)","p") ;
-// 	entry->SetMarkerColor(fc->getDataColor());
-// 	entry->SetMarkerStyle(20);
-// 	entry=leg->AddEntry("","Standard Model","lf") ;
-// 	entry->SetLineColor(fc->getTotalPdfColor());
-// 	entry->SetFillColor(fc->getErrorFillColor());
-// 	entry->SetFillStyle(fc->getErrorFillStyle());
-
-// 	// add components to legend
-// 	TString RRSPdfName = Form("%s_model",regionCatLabel.Data()); 
-// 	RooRealSumPdf* RRSPdf = (RooRealSumPdf*) regionPdf->getComponents()->find(RRSPdfName);
-// 	RooArgList RRSComponentsList =  RRSPdf->funcList();
-// 	RooLinkedListIter iter = RRSComponentsList.iterator() ;
-// 	RooProduct* component;
-// 	vector<TString> compNameVec;
-// 	compNameVec.clear();
-// 	while( (component = (RooProduct*) iter.Next())) { 
-// 	  TString  componentName = component->GetName();
-// 	  compNameVec.push_back(componentName);
-// 	}
-
-//   char NP[10];
-//   TString NP_str;
-// 	for( int iComp = (compNameVec.size()-1) ; iComp>-1; iComp--){
-// 	  Int_t  compPlotColor    = ( (fc!=0) ? fc->getSampleColor(compNameVec[iComp]) : iComp );
-//     TString  compShortName  = ( (fc!=0) ? fc->getSampleName(compNameVec[iComp])  : "" );
-
-//     TString legName = compShortName; //"";
-// 	  if(compShortName.Contains("BG")) legName = "single top & diboson";
-//     for (int inp=0; inp<6; inp++) {
-//       sprintf(NP,"Np%d",inp);
-//       NP_str = NP;
-//       if(compShortName.Contains("WZ") && compShortName.Contains(NP)) legName = "WZ+"+NP_str;
-// 	    if(compShortName.Contains("Top") && compShortName.Contains(NP)) legName = "t#bar{t}+"+NP_str;
-//     }
-//     if(compShortName.Contains("QCD")) legName = "multijets (data estimate)";
-// 	  if(compShortName.Contains("Discovery")) legName = "signal";
-// 	  //
-// 	  if(compShortName.Contains("WZpT0GeV"))   legName = "W/Z (p_{T}^{V,Truth}=0-50GeV)";
-// 	  if(compShortName.Contains("WZpT50GeV"))  legName = "W/Z (p_{T}^{V,Truth}=50-100GeV)";
-// 	  if(compShortName.Contains("WZpT100GeV")) legName = "W/Z (p_{T}^{V,Truth}=100-150GeV)";
-// 	  if(compShortName.Contains("WZpT150GeV")) legName = "W/Z (p_{T}^{V,Truth}=150-200GeV)";
-// 	  if(compShortName.Contains("WZpT200GeV")) legName = "W/Z (p_{T}^{V,Truth}=200-250GeV)";
-// 	  if(compShortName.Contains("WZpT250GeV")) legName = "W/Z (p_{T}^{V,Truth}=250GeV-)";
-// 	  //
-// 	  entry=leg->AddEntry("",legName.Data(),"f") ;
-// 	  entry->SetLineColor(compPlotColor);
-// 	  entry->SetFillColor(compPlotColor);
-// 	  entry->SetFillStyle(1001);
-// 	}
-//       }
-//       leg->Draw();	
-//       //      frameVec[iVec]=frame;
-
-//       // now make/draw the ratio histogram
-//       pad2->cd();
-
-//       // data/pdf ratio histograms is plotted by RooPlot.ratioHist()
-//       RooPlot* frame_dummy =  regionVar->frame(); 
-//       data->plotOn(frame_dummy,Cut(dataCatLabel),RooFit::DataError(RooAbsData::Poisson));
-//       // normalize pdf to number of expected events, not to number of events in dataset
-//       regionPdf->plotOn(frame_dummy,Normalization(normCount,RooAbsReal::NumEvent),Precision(1e-5));      
-//       // Construct a histogram with the ratio of the data w.r.t the pdf curve
-//       RooHist* hratio = NULL;
-//       if(plotRatio)  hratio = (RooHist*) frame_dummy->ratioHist() ;
-//       else hratio = (RooHist*) frame_dummy->pullHist() ;
-//       hratio->SetMarkerColor(fc->getDataColor());
-//       hratio->SetLineColor(fc->getDataColor());
-
-//       // Construct a histogram with the ratio of the pdf curve w.r.t the pdf curve +/- 1 sigma
-//       RooCurve* hratioPdfError = new RooCurve;
-//       if (rFit != NULL)  hratioPdfError = MakePdfErrorRatioHist(w, regionData, regionPdf, regionVar, rFit);
-//       hratioPdfError->SetFillColor(fc->getErrorFillColor());
-//       hratioPdfError->SetFillStyle(fc->getErrorFillStyle());
-//       hratioPdfError->SetLineColor(fc->getErrorLineColor());
-//       hratioPdfError->SetLineStyle(fc->getErrorLineStyle());
-
-//       // Create a new frame to draw the residual distribution and add the distribution to the frame
-//       RooPlot* frame2 = regionVar->frame() ;
-//       if(plotRatio)  hratio->SetTitle("Ratio Distribution");
-//       else hratio->SetTitle("Pull Distribution");
-//       // only add PdfErrorsPlot when the plot shows ratio, not with pull
-//       if (rFit != NULL && plotRatio)   frame2->addPlotable(hratioPdfError,"F");
-//       frame2->addPlotable(hratio,"P");
-
-//       // ratio plot cosmetics
-//       int firstbin = frame_dummy->GetXaxis()->GetFirst();
-//       int lastbin = frame_dummy->GetXaxis()->GetLast();
-//       double xmax = frame_dummy->GetXaxis()->GetBinUpEdge(lastbin) ;
-//       double xmin = frame_dummy->GetXaxis()->GetBinLowEdge(firstbin) ;
-
-//       TLine* l = new TLine(xmin,1.,xmax,1.);
-//       TLine* l2 = new TLine(xmin,0.5,xmax,0.5);
-//       TLine* l3 = new TLine(xmin,1.5,xmax,1.5);
-//       TLine* l4 = new TLine(xmin,2.,xmax,2.);
-//       TLine* l5 = new TLine(xmin,2.5,xmax,2.5);
-//       l->SetLineWidth(1);
-//       l->SetLineStyle(2);
-//       l2->SetLineStyle(3);
-//       l3->SetLineStyle(3);
-//       l4->SetLineStyle(3);
-//       l5->SetLineStyle(3);
+  RooMsgService::instance().getStream(1).removeTopic(NumIntegration);
+  RooMsgService::instance().getStream(1).removeTopic(Plotting);
 
 
-//       TLine* lp1 = new TLine(xmin,1.,xmax,1.);	
-//       TLine* lp2 = new TLine(xmin,2.,xmax,2.);	
-//       TLine* lp3 = new TLine(xmin,3.,xmax,3.);
-//       TLine* lp4 = new TLine(xmin,4.,xmax,4.);
-//       TLine* lp5 = new TLine(xmin,5.,xmax,5.);
-//       TLine* lp6 = new TLine(xmin,-1.,xmax,-1.);	
-//       TLine* lp7 = new TLine(xmin,-2.,xmax,-2.);	
-//       TLine* lp8 = new TLine(xmin,-3.,xmax,-3.);
-//       TLine* lp9 = new TLine(xmin,-4.,xmax,-4.);
-//       TLine* lp10 = new TLine(xmin,-5.,xmax,-5.);
+  if(w==NULL){ cout << GEndl << " Workspace not found, no plotting performed" << endl << GEndl; return; }
+  RooSimultaneous* pdf = (RooSimultaneous*) w->pdf("simPdf");
+  //pdf->Print("t");
 
-//       lp1->SetLineStyle(3);
-//       lp2->SetLineStyle(3);
-//       lp3->SetLineStyle(3);
-//       lp4->SetLineStyle(3);
-//       lp5->SetLineStyle(3);
-//       lp6->SetLineStyle(3);
-//       lp7->SetLineStyle(3);
-//       lp8->SetLineStyle(3);
-//       lp9->SetLineStyle(3);
-//       lp10->SetLineStyle(3);
+  RooAbsData* data = ( inputData!=0 ? inputData : (RooAbsData*)w->data("obsData") ); 
 
-//       if(plotRatio){	
-// 	frame2->addObject(l);
-// 	frame2->addObject(l2);
-// 	frame2->addObject(l3);
-// 	frame2->addObject(l4);
-// 	frame2->addObject(l5);
-//       } else {
-// 	frame2->addObject(lp1);
-// 	frame2->addObject(lp2);
-// 	frame2->addObject(lp3);
-//     	frame2->addObject(lp4);
-// 	frame2->addObject(lp5);
-// 	frame2->addObject(lp6);
-//     	frame2->addObject(lp7);
-// 	frame2->addObject(lp8);
-// 	frame2->addObject(lp9);
-// 	frame2->addObject(lp10);
-//       }
+  RooCategory* regionCat = (RooCategory*) w->cat("channelCat");
+  data->table(*((RooAbsCategory*)regionCat))->Print("v");
 
-//       Double_t lowerlimit = 0.; 
-//       Double_t upperlimit = 2.2; 
-//       if (!plotRatio){ lowerlimit = -5.7; upperlimit = 5.7;}
+  if(plotRegions =="") plotRegions = "ALL";
+  std::vector<TString> regionsVec = GetRegionsVec(plotRegions, regionCat);
 
-//       frame2->SetMinimum(lowerlimit);
-//       frame2->SetMaximum(upperlimit);
 
-//       if(plotRatio) frame2->GetYaxis()->SetTitle("Data / SM");
-//       else frame2->GetYaxis()->SetTitle("Pull");
+  Logger << kWARNING << "Util::PlotPdfSumWithComponents() : " << plotRegions << GEndl;
 
-//       if(fc->getChannelTitleX(regionCatLabel) != "")  frame2->GetXaxis()->SetTitle(fc->getChannelTitleX(regionCatLabel));
-//       else  frame2->GetXaxis()->SetTitle(GetXTitle(regionVar)); //Name());
 
-//       if(fc->getChannelTitleY(regionCatLabel) != "")  frame->GetYaxis()->SetTitle(fc->getChannelTitleY(regionCatLabel));
+  unsigned  int numPlots = regionsVec.size();  
+  TCanvas* canVec[numPlots];
+  //  RooPlot* frameVec[numPlots];
 
-//       frame2->GetYaxis()->SetLabelSize(0.13);
-//       frame2->GetYaxis()->SetNdivisions(504);                                                                                                   
-//       frame2->GetXaxis()->SetLabelSize(0.13);
-//       frame2->GetYaxis()->SetTitleSize(0.14);
-//       frame2->GetXaxis()->SetTitleSize(0.14);
-//       frame2->GetYaxis()->SetTitleOffset(0.35);
-//       frame2->GetXaxis()->SetTitleOffset(1.);
-//       frame2->GetYaxis()->SetLabelOffset(0.01);
-//       frame2->GetXaxis()->SetLabelOffset(0.03);
-//       frame2->GetXaxis()->SetTickLength(0.06);
+  RooAddPdf* combinedPdf = new RooAddPdf();
+  RooDataSet* combinedData = new RooDataSet();
+  RooRealVar* firstVar;
+  RooRealVar* replaceVar;
+  RooAbsPdf* firstPdf ;
 
-//       frame2->SetTitle("");
-//       frame2->GetYaxis()->CenterTitle(); 
-//       frame2->Draw();
+  RooAbsPdf* replacePdf ;
+  RooArgList* coefList;
+  RooArgList* pdfList;
 
-//       canVec[iVec]->SaveAs("results/"+canName+".pdf");
-//       canVec[iVec]->SaveAs("results/"+canName+".eps");
+  RooWorkspace* wcomb = new RooWorkspace("wcombination");
 
-//     }
-//   }
+  TString allObs;
 
-//   cout << GEndl << GEndl;
+  // iterate over all the regions 
+  for(unsigned int iVec=0; iVec<numPlots; iVec++){
 
-// }
+    Logger << kWARNING << "Util::PlotPdfSumWithComponents() : " << regionsVec[iVec] << GEndl;
+
+    TString regionCatLabel = regionsVec[iVec];
+    if( regionCat->setLabel(regionCatLabel,kTRUE)){  cout << GEndl << " Label '" << regionCatLabel << "' is not a state of channelCat (see Table) " << endl << endl << GEndl; }
+    else{
+      RooAbsPdf* regionPdf = (RooAbsPdf*) pdf->getPdf(regionCatLabel.Data());
+      cout << " region pdf = " << GEndl;
+      regionPdf->Print();
+
+      TString dataCatLabel = Form("channelCat==channelCat::%s",regionCatLabel.Data());
+      RooDataSet* regionData = (RooDataSet*) data->reduce(dataCatLabel.Data());
+      if(regionPdf==NULL || regionData==NULL){ 
+	cout << " Either the Pdf or the Dataset do not have an appropriate state for the region = " << regionCatLabel << ", check the Workspace file" << GEndl;
+	cout << " regionPdf = " << regionPdf << "   regionData = " << regionData << GEndl;  
+	continue; 
+      }
+
+      regionData->Print("v");
+
+      RooRealVar* regionVar =(RooRealVar*) ((RooArgSet*) regionPdf->getObservables(*regionData))->find(Form("obs_x_%s",regionCatLabel.Data()));
+
+      //wcomb->import(*regionVar,RenameVariable(firstVar->GetName(),"obs"),RecycleConflictNodes(true) ) ;
+
+      RooDataSet* rdata = (RooDataSet*)regionData->reduce(RooArgSet(*regionVar,*w->var("weightVar")));
+
+      wcomb->import( *rdata, Rename( TString("obsData_")+TString(regionVar->GetName()) ), RenameVariable(regionVar->GetName(),"obs"), RecycleConflictNodes(true) );  
+      wcomb->import( *regionPdf, RenameVariable(regionVar->GetName(),"obs"), RecycleConflictNodes(true) );
+
+    }
+  }
+
+  cout << GEndl << GEndl;
+
+  wcomb->writeToFile("wsmod.root");
+
+}
 
 
 
