@@ -16,6 +16,12 @@ upperlimit()
 
   // open the workspace
   gSystem->Load("libSusyFitter.so");
+
+  RooMsgService::instance().setGlobalKillBelow(RooFit::FATAL); // Reduce the noise from RooFit
+  ROOT::Math::MinimizerOptions::SetDefaultMinimizer("Minuit2"); // More stable minimizer - otherwise "Minuit"
+  ROOT::Math::MinimizerOptions::SetDefaultStrategy(0); // Standard default
+  ROOT::Math::MinimizerOptions::SetDefaultPrintLevel(-1); // Quiet please...
+
   TFile *file = TFile::Open("example_channel1_GaussExample_model.root");
   RooWorkspace* w = (RooWorkspace *)file->Get("channel1"); 
   
