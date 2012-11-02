@@ -104,7 +104,7 @@ wzKtScale = Systematic("KtScaleWZ",configMgr.weights,ktScaleWHighWeights,ktScale
 
 
 # JES uncertainty as shapeSys - one systematic per region (combine WR and TR), merge samples
-jes = Systematic("JC","_NoSys","_JESup","_JESdown","tree","shapeSys")
+jes = Systematic("JES","_NoSys","_JESup","_JESdown","tree","normHistoSys")
 
 # name of nominal histogram for systematics
 configMgr.nomName = "_NoSys"
@@ -113,12 +113,15 @@ configMgr.nomName = "_NoSys"
 topSample = Sample("Top",kGreen-9)
 topSample.setNormFactor("mu_Top",1.,0.,5.)
 topSample.setStatConfig(useStat)
+topSample.setNormRegions([("SLWR","nJet"),("SLTR","nJet")])
 wzSample = Sample("WZ",kAzure+1)
 wzSample.setNormFactor("mu_WZ",1.,0.,5.)
 wzSample.setStatConfig(useStat)
+wzSample.setNormRegions([("SLWR","nJet"),("SLTR","nJet")])
 bgSample = Sample("BG",kYellow-3)
 bgSample.setNormFactor("mu_BG",1.,0.,5.)
 bgSample.setStatConfig(useStat)
+bgSample.setNormRegions([("SLWR","nJet"),("SLTR","nJet")])
 qcdSample = Sample("QCD",kGray+1)
 qcdSample.setQCD(True,"histoSys")
 qcdSample.setStatConfig(useStat)
@@ -160,7 +163,7 @@ srBinHigh = 1.5
 #Bkg only fit
 #************
 
-bkt = configMgr.addTopLevelXML("BkgOnly")
+bkt = configMgr.addFitConfig("BkgOnly")
 if useStat:
     bkt.statErrThreshold=0.05 
 else:
@@ -185,8 +188,6 @@ nJetWS.hasB = True
 nJetWS.hasBQCD = False
 nJetWS.useOverflowBin = False
 nJetWS.addSystematic(jes)
-#[s.mergeSamples([topSample.name,wzSample.name,bgSample.name]) for s in nJetWS.getSystematic(jes.name)]
-nJetWS.getSystematic(jes.name).mergeSamples([topSample.name,wzSample.name,bgSample.name])
 
 # TR using nJet
 nJetTS = bkt.addChannel("nJet",["SLTR"],nJetBinHighTR-nJetBinLowSoft,nJetBinLowSoft,nJetBinHighTR)
@@ -194,8 +195,6 @@ nJetTS.hasB = True
 nJetTS.hasBQCD = True
 nJetTS.useOverflowBin = False    
 nJetTS.addSystematic(jes)
-#[s.mergeSamples([topSample.name,wzSample.name,bgSample.name]) for s in nJetTS.getSystematic(jes.name)]
-nJetTS.getSystematic(jes.name).mergeSamples([topSample.name,wzSample.name,bgSample.name])
 
 bkt.setBkgConstrainChannels([nJetWS,nJetTS])
 
@@ -278,37 +277,15 @@ if doValidation:
     # s1l2jT
     srs1l2jTChannel = bkt.addChannel("cuts",["SR1sl2j"],srNBins,srBinLow,srBinHigh)
     srs1l2jTChannel.addSystematic(jes)
-    #[s.mergeSamples([topSample.name,wzSample.name,bgSample.name]) for s in srs1l2jTChannel.getSystematic(jes.name)]
-    srs1l2jTChannel.getSystematic(jes.name).mergeSamples([topSample.name,wzSample.name,bgSample.name])
 
     # additional VRs if using soft lep CRs
     nJetSLVR2 = bkt.addChannel("nJet",["SLVR2"],nJetBinHighTR-nJetBinLowSoft,nJetBinLowSoft,nJetBinHighTR)
     nJetSLVR2.addSystematic(jes)
-    #[s.mergeSamples([topSample.name,wzSample.name,bgSample.name]) for s in nJetSLVR2.getSystematic(jes.name)]
-    nJetSLVR2.getSystematic(jes.name).mergeSamples([topSample.name,wzSample.name,bgSample.name])
-
-##    nBJetSLVR2 = bkt.addChannel("nBJet",["SLVR2"],nBJetBinHigh-nBJetBinLow,nBJetBinLow,nBJetBinHigh)
-##     nBJetSLVR2.addSystematic(jes)
-##     [s.mergeSamples([topSample.name,wzSample.name,bgSample.name]) for s in nBJetSLVR2.getSystematic(jes.name)]
-    
-##     meffSLVR2 = bkt.addChannel("meffInc",["SLVR2"],meffNBins,meffBinLow,meffBinHigh)
-##     meffSLVR2.addSystematic(jes)
-##     [s.mergeSamples([topSample.name,wzSample.name,bgSample.name]) for s in meffSLVR2.getSystematic(jes.name)]
-    
-##    metmeffSLVR2 = bkt.addChannel("met/meff2Jet",["SLVR2"],6,0.1,0.7)
-##     metmeffSLVR2.addSystematic(jes)
-##     [s.mergeSamples([topSample.name,wzSample.name,bgSample.name]) for s in metmeffSLVR2.getSystematic(jes.name)]
-    
- ##    metSLVR2 = bkt.addChannel("met",["SLVR2"],7,180,250)
-##     metSLVR2.addSystematic(jes)
-##     [s.mergeSamples([topSample.name,wzSample.name,bgSample.name]) for s in metSLVR2.getSystematic(jes.name)]
     
     #signal region treated as validation region for this case
     mm2J = bkt.addChannel("met/meff2Jet",["SS"],6,0.1,0.7)
     mm2J.useOverflowBin=True
     mm2J.addSystematic(jes)
-    #[s.mergeSamples([topSample.name,wzSample.name,bgSample.name]) for s in mm2J.getSystematic(jes.name)]
-    mm2J.getSystematic(jes.name).mergeSamples([topSample.name,wzSample.name,bgSample.name])
 
     #    bkt.setValidationChannels([nJetSLVR2,metSLVR2,meffSLVR2,nBJetSLVR2,metmeffSLVR2,mm2J,srs1l2jTChannel])
     bkt.setValidationChannels([nJetSLVR2,srs1l2jTChannel,mm2J])
@@ -326,7 +303,6 @@ if doDiscovery:
     # s1l2jT = signal region/channel
     ssChannel = discovery.addChannel("cuts",["SS"],srNBins,srBinLow,srBinHigh)
     ssChannel.addSystematic(jes)
-    [s.mergeSamples([topSample.name,wzSample.name,bgSample.name]) for s in ssChannel.getSystematic(jes.name)]
     ssChannel.addDiscoverySamples(["SS"],[1.],[0.],[100.],[kMagenta])
     discovery.setSignalChannels([ssChannel])
 
@@ -348,9 +324,6 @@ if doExclusion:
         myTopLvl.addSamples(sigSample)
         myTopLvl.setSignalSample(sigSample)
     
-        # Reassign merging for shapeSys
-        [s.mergeSamples([topSample.name,wzSample.name,bgSample.name,sigSample.name]) for s in myTopLvl.getChannel("nJet",["SLWR"]).getSystematic(jes.name)]
-        [s.mergeSamples([topSample.name,wzSample.name,bgSample.name,sigSample.name]) for s in myTopLvl.getChannel("nJet",["SLTR"]).getSystematic(jes.name)]
 
         # s1l2j using met/meff
         if doValidation:
@@ -361,6 +334,5 @@ if doExclusion:
             mm2J = myTopLvl.addChannel("met/meff2Jet",["SS"],5,0.2,0.7)
             mm2J.useOverflowBin=True
             mm2J.addSystematic(jes)
-            [s.mergeSamples([topSample.name,wzSample.name,bgSample.name,sigSample.name]) for s in mm2J.getSystematic(jes.name)]
             pass
         myTopLvl.setSignalChannels([mm2J])
