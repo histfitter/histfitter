@@ -264,8 +264,14 @@ class TreePrepare(PrepareHistosABC):
                 binVal = self.configMgr.hists[prefixNom].GetBinContent(iBin)
                 #binError = sqrt(qcdHistoSyst.GetBinContent(iBin)**2+qcdHistoStat.GetBinContent(iBin)**2)
                 #binStatError = qcdHistoStat.GetBinContent(iBin)
-                binError = sqrt(qcdHistoSyst.GetBinContent(iBin)**2+qcdHistoStat.GetBinContent(iBin))
-                binStatError = sqrt(qcdHistoStat.GetBinContent(iBin))
+                if qcdHistoStat.GetBinContent(iBin)<-1*qcdHistoSyst.GetBinContent(iBin)**2: # Exception for folks using negative weights 
+                    binError = sqrt(-qcdHistoSyst.GetBinContent(iBin)**2-qcdHistoStat.GetBinContent(iBin))
+                else: 
+                    binError = sqrt(qcdHistoSyst.GetBinContent(iBin)**2+qcdHistoStat.GetBinContent(iBin))
+                if qcdHistoStat.GetBinContent(iBin)<0: # Check for negative weights (possible in QCD!)
+                    binStatError = sqrt(-qcdHistoStat.GetBinContent(iBin))
+                else:
+                    binStatError = sqrt(qcdHistoStat.GetBinContent(iBin))
                 binSystError = qcdHistoSyst.GetBinContent(iBin)
                 ##self.configMgr.hists[prefixNom+"_"+str(iBin)].SetBinContent(iBin,self.configMgr.hists[prefixNom].GetBinContent(iBin))
                 #
