@@ -105,7 +105,9 @@ std::list<LimitResult> CollectHypoTestResults( const TString& infile, const TStr
     std::map<TString,TString>::iterator itr=wsnameMap.begin(), end=wsnameMap.end();
 
     int counter_failed_fits = 0;
+    int counter_not_great_fits = 0;
     int counter_badcovquality = 0;
+    int counter_probably_bad_fit = 0;
 
     for (; itr!=end; ++itr) {
         RooStats::HypoTestInverterResult* ht = GetHypoTestResultFromFile( infile, itr->second );
@@ -126,10 +128,15 @@ std::list<LimitResult> CollectHypoTestResults( const TString& infile, const TStr
                 fitresult->Print();	
                 failed_fit = true;   
             }
-            if (fitresult->covQual() < 2.1) {
+            if (fitresult->covQual() < 1.1) {
                 ToyUtilsLogger << kWARNING << "Fit result " << fitresultname.Data() << " has bad covariance matrix quality! Check your fit setup!" << GEndl;
                 counter_badcovquality++;
                 failed_fit = true;
+            }
+            else if (fitresult->covQual() < 2.1) {
+                ToyUtilsLogger << kWARNING << "Fit result " << fitresultname.Data() << " has mediocre covariance matrix quality.  Might be ok if you ran asymptotics." << GEndl;
+                counter_not_great_fits++;
+                //failed_fit = true;
             }
         }
 
@@ -137,6 +144,13 @@ std::list<LimitResult> CollectHypoTestResults( const TString& infile, const TStr
             ToyUtilsLogger << kWARNING << "Fit result " << fitresultname.Data() << " has failed HypoTestInverterResult - do not use result" << GEndl;
         } else {
             LimitResult result = RooStats::get_Pvalue( ht );
+
+            if (fabs(result.GetP0()-0.5)<0.0001 && result.GetSigma0()<0.0001){
+              counter_probably_bad_fit++;
+              ToyUtilsLogger << kWARNING << "One of the base fits seems to have failed for point " << fitresultname.Data() << " : " << result.GetP0() << " " << result.GetSigma0() << GEndl;
+              failed_fit = true;
+            }
+
             result.AddMetaData ( ParseWorkspaceID(itr->first) );
             if (!failed_fit) limres.push_back(result); // store info from interpretation string (eg m0 and m12 value) 
         }
@@ -145,6 +159,8 @@ std::list<LimitResult> CollectHypoTestResults( const TString& infile, const TStr
     }
 
     ToyUtilsLogger << kINFO << counter_failed_fits << " failed fit(s) and " << counter_badcovquality << " fit(s) with bad covariance matrix quality were counted" << GEndl;
+    ToyUtilsLogger << kINFO << counter_probably_bad_fit << " fit(s) with a bad p-value and " << counter_not_great_fits << " fit(s) with mediocre covariance matrix quality were counted" << GEndl;
+    ToyUtilsLogger << kINFO << "All but the ones with mediocre covariance matrix quality were rejected from the final results list." << GEndl;
 
     return limres;
 }
