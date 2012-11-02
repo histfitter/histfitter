@@ -666,7 +666,7 @@ class Sample(object):
             self.sampleString += "    <ShapeSys Name=\"%s\" HistoName=\"%s\" ConstraintType=\"%s\"/>\n" % (shapeSyst[0], shapeSyst[1], shapeSyst[2])
         
         for overallSyst in self.overallSystList:
-            self.sampleString += "    <OverallSys Name=\"%s\" High=\"%g\" Low=\"%g\" />\n" % (overallSyst[0], overallSyst[1], overallSyst[2])
+            self.sampleString += "    <OverallSys Name=\"%s\" High=\"%g\" Low=\"%g\" />\n" % (overallSyst[0], float(overallSyst[1]), float(overallSyst[2]))
         
         for shapeFact in self.shapeFactorList:
             self.sampleString += "    <ShapeFactor Name=\"%s\" />\n" % (shapeFact)

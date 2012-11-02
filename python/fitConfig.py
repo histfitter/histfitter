@@ -1,7 +1,7 @@
 import ROOT
 from ROOT import TFile, TMath, RooRandom, TH1, TH1F
 from ROOT import kBlack, kWhite, kGray, kRed, kPink, kMagenta, kViolet, kBlue, kAzure, kCyan, kTeal, kGreen, kSpring, kYellow, kOrange, kDashed, kSolid, kDotted
-from os import system
+from os import system,mkdir
 from math import fabs
 from measurement import Measurement
 from channel import Channel
@@ -67,7 +67,16 @@ class fitConfig(object):
     def ConstructorInit(self, name):
         #shared method between __init__ and Clone
         self.name = name
-        self.prefix = configMgr.analysisName + "_" + self.name
+        try:
+            mkdir('./results/'+configMgr.analysisName)
+        except: pass
+        try:
+            mkdir('./config/'+configMgr.analysisName)
+        except: pass
+        try:
+            mkdir('./data/'+configMgr.analysisName)
+        except: pass
+        self.prefix=configMgr.analysisName + "/" + self.name
         self.xmlFileName = "N/A"
         self.wsFileName = "N/A"
         return
@@ -568,7 +577,7 @@ class fitConfig(object):
         """
         Convert instance to XML string
         """
-        self.writeString = "<!DOCTYPE Combination  SYSTEM 'HistFactorySchema.dtd'>\n\n"
+        self.writeString = "<!DOCTYPE Combination  SYSTEM '../HistFactorySchema.dtd'>\n\n"
         self.writeString += "<Combination OutputFilePrefix=\"./results/" + self.prefix + "\"  >\n\n"
         
         for chan in self.channels:
