@@ -579,6 +579,107 @@ vector<TString> Util::GetRegionsVec(TString regions, RooCategory* regionCat){
 
 
 
+void Util::DecomposeWS(const char* infile, const char* wsname, const char* outfile)
+{
+
+    TString fileName(infile);
+    if (fileName.IsNull()) {
+        Logger << kERROR << "Input filename is empty. Exit." << GEndl;
+        return;
+    }
+
+    // open file and check if input file exists
+    TFile * file = TFile::Open(fileName); 
+
+    // if input file was specified but not found, quit
+    if(!file && !TString(infile).IsNull()){
+        Logger << kERROR << "file " << fileName << " not found" << GEndl;
+        return;
+    }
+
+    if(!file){
+        // if it is still not there, then we can't continue
+        Logger << kERROR << "Not able to open input file" <<GEndl;
+        return;
+    }
+
+    RooWorkspace* w = (RooWorkspace *)file->Get(wsname);
+
+    if (!w) {
+        // if it is still not there, then we can't continue
+        Logger << kERROR << "Not able to retrieve workspace" <<GEndl;
+        return;
+    }
+
+  RooSimultaneous* pdf = (RooSimultaneous*) w->pdf("simPdf");
+
+  RooAbsData* data = ( (RooAbsData*)w->data("obsData") );
+
+  RooCategory* regionCat = (RooCategory*) w->cat("channelCat");
+  data->table(*((RooAbsCategory*)regionCat))->Print("v");
+
+  TString plotRegions = "ALL";
+  std::vector<TString> regionsVec = GetRegionsVec(plotRegions, regionCat);
+
+  unsigned  int numPlots = regionsVec.size();
+  TCanvas* canVec[numPlots];
+  //  RooPlot* frameVec[numPlots];
+
+  RooAddPdf* combinedPdf = new RooAddPdf();
+  RooDataSet* combinedData = new RooDataSet();
+  RooRealVar* firstVar;
+  RooRealVar* replaceVar;
+  RooAbsPdf* firstPdf ;
+
+  RooAbsPdf* replacePdf ;
+  RooArgList* coefList;
+  RooArgList* pdfList;
+
+  RooWorkspace* wcomb = new RooWorkspace(wsname);
+
+  TString allObs;
+
+  // iterate over all the regions 
+  for(unsigned int iVec=0; iVec<numPlots; iVec++){
+
+    Logger << kWARNING << "Util::PlotPdfSumWithComponents() : " << regionsVec[iVec] << GEndl;
+
+    TString regionCatLabel = regionsVec[iVec];
+    if( regionCat->setLabel(regionCatLabel,kTRUE)){  cout << GEndl << " Label '" << regionCatLabel << "' is not a state of channelCat (see Table) " << endl << endl << GEndl; }
+    else{
+      RooAbsPdf* regionPdf = (RooAbsPdf*) pdf->getPdf(regionCatLabel.Data());
+      cout << " region pdf = " << GEndl;
+      regionPdf->Print();
+
+      TString dataCatLabel = Form("channelCat==channelCat::%s",regionCatLabel.Data());
+      RooDataSet* regionData = (RooDataSet*) data->reduce(dataCatLabel.Data());
+      if(regionPdf==NULL || regionData==NULL){
+        cout << " Either the Pdf or the Dataset do not have an appropriate state for the region = " << regionCatLabel << ", check the Workspace file" << GEndl;
+        cout << " regionPdf = " << regionPdf << "   regionData = " << regionData << GEndl;
+        continue;
+      }
+
+      regionData->Print("v");
+
+      RooRealVar* regionVar =(RooRealVar*) ((RooArgSet*) regionPdf->getObservables(*regionData))->find(Form("obs_x_%s",regionCatLabel.Data()));
+
+      //wcomb->import(*regionVar,RenameVariable(firstVar->GetName(),"obs"),RecycleConflictNodes(true) ) ;
+
+      RooDataSet* rdata = (RooDataSet*)regionData->reduce(RooArgSet(*regionVar,*w->var("weightVar")));
+
+      wcomb->import( *rdata, Rename( TString("obsData_")+TString(regionVar->GetName()) ), RenameVariable(regionVar->GetName(),"obs"), RecycleConflictNodes(true) );
+      wcomb->import( *regionPdf, RenameVariable(regionVar->GetName(),"obs"), RecycleConflictNodes(true) );
+
+    }
+  }
+
+  cout << GEndl << GEndl;
+
+  wcomb->writeToFile(outfile);
+
+  file->Close();
+}
+
 
 //__________________________________________________________________________________________________________________________________________________________
 void Util::PlotPdfSumWithComponents(RooWorkspace* w, TString fcName, TString plotRegions, TString outputPrefix, RooFitResult* rFit, RooAbsData* inputData, Bool_t plotRatio)
