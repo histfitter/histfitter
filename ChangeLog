@@ -1,3 +1,17 @@
+2012-11-01  Zach Marshall <zach.marshall@cern.ch>
+	* src/Utils.cxx: Allow white samples
+	* python/prepareHistos.py: Handle negative QCD bins safely
+	* python/configManager.py: QCD normalization in the same region is the same, independent of plotting
+	* python/sample.py: Protecting against strings being put in as numbers for systematics
+	* python/channel.py, python/fitConfig.py: Moving to directory-based output structure
+	* docs/todo: Updating
+	* src/toy_utils.cxx: Protecting against additional fit failure modes, loosening cov. matrix quality cut
+	* macros/Examples/p-values/compute_p0.C: Generic script from Aaron Armbruster for computing p-values
+	* macros/Examples/upperlimit/upperlimit.C: Modifications for stability and quiet from Aaron A.
+	* setup.sh: Moving gcc and python setups outside of ROOTSYS if to get batch running working
+	* macros/contourplot/makelistfiles.C: CollectAndWriteHypoTestResults not in Combination namespace any more
+	* macros/contourplot/contourmacros/SUSY_m0_vs_m12_all_withBand_cls.C: Cleanup and common use of HistFitterUser
+	* macros/contourplot/makecontourhists.C: Cleanup and demonstrating repeated use in a nicer way
 
 2012-11-02 Max Baak <mbaak@cern.ch>
 	M       Utils.cxx
