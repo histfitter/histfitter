@@ -2,18 +2,8 @@
 #include "TColor.h"
 #include <algorithm>
 
-//#include "../Tevatron/msugra_oldlim.C"
-//#include "contourmacros/ol1.C"
-//#include "contourmacros/ol2.C"
-//#include "contourmacros/ol3.C"
-
-//#include "cmsoff.C" // cms alpha-T prl official contour (not yet used)
-//#include "contourmacros/cms.C"      // cms alpha-T prelim contour
 #include "contourmacros/cdftanb5.C"
 #include "contourmacros/d0tanb3muneg.C"
-//#include "contourmacros/stautanb3.C"
-//#include "contourmacros/1leptonOR_smooth_list_contour_obscls.C"
-//#include "contourmacros/ShapeSys_2.cxx"
 #include "contourmacros/ATLAS10_1lepton.C"
 #include "../../../HistFitterUser/common/ATLAS_EPS_contours.C"
 
@@ -488,7 +478,7 @@ void SUSY_m0_vs_m12_all_withBand_cls( TString fname0 = "mudat_list.root",// nomi
     //atlasexp = ATLAS10_1leptonexp();
   }
   
-  msugraThExcl("../../../HistFitterUser/common/msugra_status.txt", staulsp, negmasssq, noRGE, noEWSB, tachyon);  
+  msugraThExcl("../../../HistFitterUser/common/msugra_status.txt", staulsp, negmasssq, noRGE, noEWSB, tachyon, "../../../HistFitterUser/common/mSugraGridtanbeta10_charginoMasses.root");  
   
 /*
   TGraph* cmscurve(0);
