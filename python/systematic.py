@@ -194,7 +194,9 @@ class SystematicBase:
                                 # otherwise - take the default tree name
                                 # for the sample
                                 if self.type == "tree":
-                                    treeName = s.treeName + systNorm.low  # NM
+                                    treeName = s.treeName + systNorm.low
+                                elif self.type == "weight":
+                                    treeName = s.name + abstract.nomName
                                 else:
                                     treeName = s.treeName
                             if treeName == '' or treeName == systNorm.low:
@@ -212,7 +214,9 @@ class SystematicBase:
                                 # otherwise - take the default tree name
                                 # for the sample
                                 if self.type == "tree":
-                                    treeName = s.treeName + systNorm.high  # NM
+                                    treeName = s.treeName + systNorm.high
+                                elif self.type == "weight":
+                                    treeName = s.name + abstract.nomName
                                 else:
                                     treeName = s.treeName
                             if treeName == '' or treeName == systNorm.high:
@@ -221,8 +225,8 @@ class SystematicBase:
 
                         log.verbose("s.name %s"%s.name)
                         log.verbose("sam.name %s"%sam.name)
-                        log.verbose("systNorm high %s"%systNorm.high)
-                        log.verbose("systNorm low %s"%systNorm.low)
+                        #log.verbose("systNorm high %s"%systNorm.high)
+                        #log.verbose("systNorm low %s"%systNorm.low)
                         log.verbose("treeName %s"%treeName)
 
                         abstract.prepare.read(treeName, filelist)
