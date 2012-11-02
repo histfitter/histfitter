@@ -13,7 +13,8 @@ if [ ! $ROOTSYS ]; then
   export CWD=$PWD
   # setup corresponding root
   export BUILD=x86_64-slc5-gcc43-opt
-  cd /afs/cern.ch/sw/lcg/app/releases/ROOT/5.34.02/$BUILD/root
+  #cd /afs/cern.ch/sw/lcg/app/releases/ROOT/5.34.02/$BUILD/root
+  cd /afs/cern.ch/atlas/offline/external/FullChainTest/tier0/test/mbaak/root/root-5.34.03
   source bin/thisroot.sh
   cd $CWD
   #
