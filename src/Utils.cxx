@@ -1050,7 +1050,7 @@ void Util::AddComponentsToPlot(RooWorkspace* w, FitConfig* fc, RooPlot* frame, R
     for( int iVec = (compFracVec.size()-1) ; iVec>-1; iVec--){
         Int_t  compPlotColor = ( (fc!=0) ? fc->getSampleColor(compNameVec[iVec]) : iVec );
 
-        if(compPlotColor == 0) compPlotColor = kMagenta;
+        if(compPlotColor < 0) compPlotColor = kMagenta;
 
         regionPdf->plotOn(frame,Components(compStackNameVec[iVec].Data()),FillColor(compPlotColor),FillStyle(1001),DrawOption("F"),Normalization(compStackFracVec[iVec]*normCount,RooAbsReal::NumEvent),Precision(1e-5));
 
