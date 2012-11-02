@@ -586,16 +586,16 @@ void Util::PlotPdfSumWithComponents(RooWorkspace* w, TString fcName, TString plo
 
   Bool_t plotComponents=true;
   ConfigMgr* mgr = ConfigMgr::getInstance();
-  FitConfig* fc = mgr->getFitConfig(fcName);
+  FitConfig* fc __attribute__((unused)) = mgr->getFitConfig(fcName);
 
-  cout << GEndl << endl << " ------ Starting Plot with parameters:   analysisName = " << fcName 
-       << "    plotRegions = " <<  plotRegions <<  "  plotComponents = " << plotComponents << "  outputPrefix = " << outputPrefix  << GEndl << GEndl;
+  cout << endl << endl << " ------ Starting Plot with parameters:   analysisName = " << fcName 
+       << "    plotRegions = " <<  plotRegions <<  "  plotComponents = " << plotComponents << "  outputPrefix = " << outputPrefix  << endl << endl;
 
   RooMsgService::instance().getStream(1).removeTopic(NumIntegration);
   RooMsgService::instance().getStream(1).removeTopic(Plotting);
 
 
-  if(w==NULL){ cout << GEndl << " Workspace not found, no plotting performed" << endl << GEndl; return; }
+  if(w==NULL){ Logger << kERROR << " Workspace not found, no plotting performed" << GEndl << GEndl; return; }
   RooSimultaneous* pdf = (RooSimultaneous*) w->pdf("simPdf");
   //pdf->Print("t");
 
@@ -610,20 +610,18 @@ void Util::PlotPdfSumWithComponents(RooWorkspace* w, TString fcName, TString plo
 
   Logger << kWARNING << "Util::PlotPdfSumWithComponents() : " << plotRegions << GEndl;
 
-
   unsigned  int numPlots = regionsVec.size();  
-  TCanvas* canVec[numPlots];
+  // TCanvas* canVec[numPlots];
   //  RooPlot* frameVec[numPlots];
 
-  RooAddPdf* combinedPdf = new RooAddPdf();
-  RooDataSet* combinedData = new RooDataSet();
-  RooRealVar* firstVar;
-  RooRealVar* replaceVar;
-  RooAbsPdf* firstPdf ;
-
-  RooAbsPdf* replacePdf ;
-  RooArgList* coefList;
-  RooArgList* pdfList;
+  RooAddPdf* combinedPdf __attribute__((unused)) = new RooAddPdf();
+  RooDataSet* combinedData __attribute__((unused)) = new RooDataSet();
+  //RooRealVar* firstVar;
+  //RooRealVar* replaceVar;
+  //RooAbsPdf* firstPdf ;
+  //RooAbsPdf* replacePdf ;
+  //RooArgList* coefList;
+  //RooArgList* pdfList;
 
   RooWorkspace* wcomb = new RooWorkspace("wcombination");
 
@@ -635,17 +633,17 @@ void Util::PlotPdfSumWithComponents(RooWorkspace* w, TString fcName, TString plo
     Logger << kWARNING << "Util::PlotPdfSumWithComponents() : " << regionsVec[iVec] << GEndl;
 
     TString regionCatLabel = regionsVec[iVec];
-    if( regionCat->setLabel(regionCatLabel,kTRUE)){  cout << GEndl << " Label '" << regionCatLabel << "' is not a state of channelCat (see Table) " << endl << endl << GEndl; }
+    if( regionCat->setLabel(regionCatLabel,kTRUE)){  Logger << kWARNING << GEndl << " Label '" << regionCatLabel << "' is not a state of channelCat (see Table) " << endl << endl << GEndl; }
     else{
       RooAbsPdf* regionPdf = (RooAbsPdf*) pdf->getPdf(regionCatLabel.Data());
-      cout << " region pdf = " << GEndl;
+      Logger << kINFO << " region pdf = " << GEndl;
       regionPdf->Print();
 
       TString dataCatLabel = Form("channelCat==channelCat::%s",regionCatLabel.Data());
       RooDataSet* regionData = (RooDataSet*) data->reduce(dataCatLabel.Data());
       if(regionPdf==NULL || regionData==NULL){ 
-	cout << " Either the Pdf or the Dataset do not have an appropriate state for the region = " << regionCatLabel << ", check the Workspace file" << GEndl;
-	cout << " regionPdf = " << regionPdf << "   regionData = " << regionData << GEndl;  
+	Logger << kWARNING << " Either the Pdf or the Dataset do not have an appropriate state for the region = " << regionCatLabel << ", check the Workspace file" << GEndl;
+	Logger << kWARNING << " regionPdf = " << regionPdf << "   regionData = " << regionData << GEndl;  
 	continue; 
       }
 
@@ -663,7 +661,7 @@ void Util::PlotPdfSumWithComponents(RooWorkspace* w, TString fcName, TString plo
     }
   }
 
-  cout << GEndl << GEndl;
+  cout << endl << endl; 
 
   wcomb->writeToFile("wsmod.root");
 

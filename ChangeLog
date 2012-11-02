@@ -12,6 +12,7 @@
 	* macros/contourplot/makelistfiles.C: CollectAndWriteHypoTestResults not in Combination namespace any more
 	* macros/contourplot/contourmacros/SUSY_m0_vs_m12_all_withBand_cls.C: Cleanup and common use of HistFitterUser
 	* macros/contourplot/makecontourhists.C: Cleanup and demonstrating repeated use in a nicer way
+	* src/Utils.cxx: Fixing compiler warnings - note that you should not mix Logger/GEndl and cout/endl
 
 2012-11-02 Max Baak <mbaak@cern.ch>
 	M       Utils.cxx
