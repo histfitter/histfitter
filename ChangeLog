@@ -1,3 +1,9 @@
+
+2012-11-02 Max Baak <mbaak@cern.ch>
+	M       Utils.cxx
+	M       Utils.h
+	* Turn on again PlotPdfSumComponents (functions by Alex)
+
 2012-10-25 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
 	* Fix a segfault occuring in ConfigMgr.cxx when using an empty region in
 	  combination with the theory band. w->var("alpha_SigXSec") could end up
