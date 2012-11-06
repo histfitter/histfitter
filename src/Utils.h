@@ -54,6 +54,8 @@ namespace Util
 
   void PlotPdfWithComponents(RooWorkspace* w, TString setupName = "Example3b",TString plotRegions = "ALL", 
 			     TString outputPrefix = "", RooFitResult* rFit = NULL, RooAbsData* inputData=0, Bool_t plotRatio=kFALSE );
+  void PlotPdfWithComponents(RooWorkspace* w, FitConfig* fc, TString plotRegions= "ALL", TString outputPrefix = "", 
+			     RooFitResult* rFit= NULL, RooAbsData* inputData=0, Bool_t plotRatio=kFALSE );
   void PlotPdfSumWithComponents(RooWorkspace* w, TString setupName = "Example3b", TString plotRegions = "ALL",  
   		                  TString outputPrefix = "", RooFitResult* rFit = NULL, RooAbsData* inputData=0, Bool_t plotRatio=kFALSE ); 
   void AddComponentsToPlot(RooWorkspace* w,FitConfig* fc, RooPlot* frame, RooAbsPdf* regionPdf, RooAbsData* regionData, RooRealVar* obsRegion, TString regionCatLabel);

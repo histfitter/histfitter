@@ -579,8 +579,11 @@ vector<TString> Util::GetRegionsVec(TString regions, RooCategory* regionCat){
 
 
 
+//_____________________________________________________________________________________________________________________________________
 void Util::DecomposeWS(const char* infile, const char* wsname, const char* outfile)
 {
+  
+  Logger << kINFO << " ------ Util::DecomposeWS with parameters:   infile " << infile << "  wsname = " << wsname << "  outfile = " << outfile  << GEndl;
 
     TString fileName(infile);
     if (fileName.IsNull()) {
@@ -622,18 +625,18 @@ void Util::DecomposeWS(const char* infile, const char* wsname, const char* outfi
   std::vector<TString> regionsVec = GetRegionsVec(plotRegions, regionCat);
 
   unsigned  int numPlots = regionsVec.size();
-  TCanvas* canVec[numPlots];
+  //TCanvas* canVec[numPlots];
   //  RooPlot* frameVec[numPlots];
 
-  RooAddPdf* combinedPdf = new RooAddPdf();
-  RooDataSet* combinedData = new RooDataSet();
-  RooRealVar* firstVar;
-  RooRealVar* replaceVar;
-  RooAbsPdf* firstPdf ;
+//   RooAddPdf* combinedPdf = new RooAddPdf();
+//   RooDataSet* combinedData = new RooDataSet();
+//   RooRealVar* firstVar;
+//   RooRealVar* replaceVar;
+//   RooAbsPdf* firstPdf ;
 
-  RooAbsPdf* replacePdf ;
-  RooArgList* coefList;
-  RooArgList* pdfList;
+//   RooAbsPdf* replacePdf ;
+//   RooArgList* coefList;
+//   RooArgList* pdfList;
 
   RooWorkspace* wcomb = new RooWorkspace(wsname);
 
@@ -642,29 +645,25 @@ void Util::DecomposeWS(const char* infile, const char* wsname, const char* outfi
   // iterate over all the regions 
   for(unsigned int iVec=0; iVec<numPlots; iVec++){
 
-    Logger << kWARNING << "Util::PlotPdfSumWithComponents() : " << regionsVec[iVec] << GEndl;
-
     TString regionCatLabel = regionsVec[iVec];
-    if( regionCat->setLabel(regionCatLabel,kTRUE)){  cout << GEndl << " Label '" << regionCatLabel << "' is not a state of channelCat (see Table) " << endl << endl << GEndl; }
-    else{
+    if( regionCat->setLabel(regionCatLabel,kTRUE)){  
+      Logger << kINFO << " Label '" << regionCatLabel << "' is not a state of channelCat (see Table) " << GEndl; 
+    }else{
       RooAbsPdf* regionPdf = (RooAbsPdf*) pdf->getPdf(regionCatLabel.Data());
-      cout << " region pdf = " << GEndl;
-      regionPdf->Print();
-
+      //regionPdf->Print();
+      
       TString dataCatLabel = Form("channelCat==channelCat::%s",regionCatLabel.Data());
       RooDataSet* regionData = (RooDataSet*) data->reduce(dataCatLabel.Data());
       if(regionPdf==NULL || regionData==NULL){
-        cout << " Either the Pdf or the Dataset do not have an appropriate state for the region = " << regionCatLabel << ", check the Workspace file" << GEndl;
-        cout << " regionPdf = " << regionPdf << "   regionData = " << regionData << GEndl;
-        continue;
+	Logger << kWARNING << " Either the Pdf or the Dataset do not have an appropriate state for the region = " << regionCatLabel << ", check the Workspace file" << GEndl;
+	Logger << kWARNING << " regionPdf = " << regionPdf << "   regionData = " << regionData << GEndl;  
+	continue;
       }
-
-      regionData->Print("v");
-
+      
+      // regionData->Print("v");
+      
       RooRealVar* regionVar =(RooRealVar*) ((RooArgSet*) regionPdf->getObservables(*regionData))->find(Form("obs_x_%s",regionCatLabel.Data()));
-
       //wcomb->import(*regionVar,RenameVariable(firstVar->GetName(),"obs"),RecycleConflictNodes(true) ) ;
-
       RooDataSet* rdata = (RooDataSet*)regionData->reduce(RooArgSet(*regionVar,*w->var("weightVar")));
 
       wcomb->import( *rdata, Rename( TString("obsData_")+TString(regionVar->GetName()) ), RenameVariable(regionVar->GetName(),"obs"), RecycleConflictNodes(true) );
@@ -673,7 +672,7 @@ void Util::DecomposeWS(const char* infile, const char* wsname, const char* outfi
     }
   }
 
-  cout << GEndl << GEndl;
+  //  cout << GEndl << GEndl;
 
   wcomb->writeToFile(outfile);
 
@@ -771,17 +770,21 @@ void Util::PlotPdfSumWithComponents(RooWorkspace* w, TString fcName, TString plo
 
 
 
-
-
 //__________________________________________________________________________________________________________________________________________________________
 void Util::PlotPdfWithComponents(RooWorkspace* w, TString fcName, TString plotRegions, TString outputPrefix, RooFitResult* rFit, RooAbsData* inputData, Bool_t plotRatio)
 {
-
-    Bool_t plotComponents=true;
     ConfigMgr* mgr = ConfigMgr::getInstance();
     FitConfig* fc = mgr->getFitConfig(fcName);
 
-    Logger << kINFO << " ------ Starting Plot with parameters:   analysisName = " << fcName << GEndl; 
+    Util::PlotPdfWithComponents(w, fc, plotRegions, outputPrefix, rFit, inputData, plotRatio);
+}
+
+//__________________________________________________________________________________________________________________________________________________________
+void Util::PlotPdfWithComponents(RooWorkspace* w, FitConfig* fc, TString plotRegions, TString outputPrefix, RooFitResult* rFit, RooAbsData* inputData, Bool_t plotRatio)
+{
+    Bool_t plotComponents=true;
+
+    Logger << kINFO << " ------ Starting Plot with parameters:   analysisName = " << fc->m_Name << GEndl; 
     Logger << kINFO << "    plotRegions = " <<  plotRegions <<  "  plotComponents = " << plotComponents << "  outputPrefix = " << outputPrefix  << GEndl;
 
     RooMsgService::instance().getStream(1).removeTopic(NumIntegration);

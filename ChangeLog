@@ -1,3 +1,8 @@
+2012-11-06 Alex Koutsman <alex.koutsman@cern.ch>
+	* src/Utils.cxx: clean up of DecomposeWS
+	* src/Utils.h: addition of some functions (incomplete functionality)
+	* src/FitConfig.h: add function addSample(samplename, color)
+
 2012-11-01  Zach Marshall <zach.marshall@cern.ch>
 	* src/Utils.cxx: Allow white samples
 	* python/prepareHistos.py: Handle negative QCD bins safely
