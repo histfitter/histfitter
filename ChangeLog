@@ -2,7 +2,8 @@
 	* src/Utils.cxx: clean up of DecomposeWS
 	* src/Utils.h: addition of some functions (incomplete functionality)
 	* src/FitConfig.h: add function addSample(samplename, color)
-
+	* set default ROOT version to 5.34.02 (small configuration bug in 5.34.03)
+	
 2012-11-01  Zach Marshall <zach.marshall@cern.ch>
 	* src/Utils.cxx: Allow white samples
 	* python/prepareHistos.py: Handle negative QCD bins safely
