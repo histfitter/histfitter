@@ -1,3 +1,13 @@
+2012-11-07 Alex Koutsman <alex.koutsman@cern.ch>
+	* python/configManager.py : small addition of function setting for C++ cfgMgr
+	* scripts/HistFitter.py : addition of GenerateFitAndPlotCPP function and --draw command with options
+	* src/Utils.cxx : addition of GenerateFitAndPlot() function in C++, to decouple C++ side from python
+	* src/FitConfig.cxx : small cleaning adjustments
+	* src/ConfigMgr.cxx  : small cleaning adjustments
+	* src/Utils.h  : addition of GenerateFitAndPlot() function in C++
+	* src/FitConfig.h  : small cleaning adjustments
+	* src/ConfigMgr.h  : small cleaning adjustments
+
 2012-11-06 Alex Koutsman <alex.koutsman@cern.ch>
 	* src/Utils.cxx: clean up of DecomposeWS
 	* src/Utils.h: addition of some functions (incomplete functionality)

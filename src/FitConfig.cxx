@@ -13,7 +13,7 @@ FitConfig::FitConfig() : m_logger("FitConfig"){
 }
 
 FitConfig::FitConfig(const TString& name) : m_logger("FitConfig") {
-    m_Name=name;
+    m_name=name;
 
     m_dataColor = kBlack;	     
     m_totalPdfColor = kBlue;
@@ -37,7 +37,7 @@ Int_t FitConfig::getSampleColor(const TString& sample){
 
 
 Float_t FitConfig::getLumi(){
-    return m_Lumi;
+    return m_lumi;
 }
 
 
@@ -52,7 +52,7 @@ TString FitConfig::getSampleName(const TString& sample){
 }
 
 void FitConfig::Print(){
-    m_logger << kINFO << "*** Fit Config: " << m_Name << " ***" << GEndl;
+    m_logger << kINFO << "*** Fit Config: " << m_name << " ***" << GEndl;
     m_logger << kINFO << " inputWorkspaceFileName: " << m_inputWorkspaceFileName << GEndl;
     m_logger << kINFO << " signalSampleName: " << m_signalSampleName << GEndl;
     

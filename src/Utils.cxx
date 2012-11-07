@@ -123,6 +123,125 @@ double Util::getNonQcdVal(const TString& proc, const TString& reg, TMap* map,con
 
 
 
+
+//_____________________________________________________________________________
+void Util::GenerateFitAndPlot(TString fcName, Bool_t drawBeforeAfterFit, Bool_t plotCorrelationMatrix, Bool_t plotSeparateComponents, Bool_t plotNLL ){
+
+  ConfigMgr* mgr = ConfigMgr::getInstance();
+  FitConfig* fc = mgr->getFitConfig(fcName);
+
+  Logger << kINFO << GEndl << GEndl <<" GenerateFitAndPlot for FitConfig = " << fc->m_name << GEndl;
+  Logger << kINFO << "     drawBeforeAfterFit = " << drawBeforeAfterFit << GEndl;
+  //   from configManager import configMgr
+  
+  //   from ROOT import Util
+  //  from ROOT import RooExpandedFitResult
+  //  print "\n***GenerateFitAndPlot for TopLevelXML %s***\n" % fc.name
+  
+  RooWorkspace* w = GetWorkspaceFromFile(fc->m_inputWorkspaceFileName, "combined");
+  SaveInitialSnapshot(w);
+  
+  //     plotChannels = ""
+  //     for reg in fc.validationChannels:
+  //         if len(plotChannels) > 0:
+  //             plotChannels += ","
+  //             pass
+  //         plotChannels += reg
+  // plot all channels
+  TString plotChannels = "ALL";
+  
+  // fit only in CRs and SRs, not in VR
+  TString fitChannels = "";
+  for(unsigned int i=0; i <fc->m_bkgConstrainChannels.size(); i++){
+    if (i > 0)   fitChannels += ",";
+    fitChannels += fc->m_bkgConstrainChannels[i];
+  }
+  
+  for(unsigned int i=0; i <fc->m_signalChannels.size(); i++){
+    if (i > 0)   fitChannels += ",";
+    fitChannels += fc->m_signalChannels[i];
+  }
+  
+  //hack to be fixed at HistFactory level (check again with ROOT 5.34)
+  Bool_t lumiConst = kTRUE;
+  if (fc->m_signalChannels.size()>0) lumiConst = kFALSE;
+
+  //  fit toy MC if specified. When left None, data is fit by default
+  RooAbsData* toyMC = NULL;
+  if( mgr->m_seed != 0 && !mgr->m_useAsimovSet){
+    // generate a toy dataset
+    Logger << kINFO << " Util::GenerateFitAndPlot() : generating toy MC set for fitting and plotting.      Seed =" << mgr->m_seed << GEndl;
+    toyMC = GetToyMC();    // this generates one toy dataset
+  } else if (mgr->m_useAsimovSet && mgr->m_seed == 0 ){
+    Logger << kINFO << " Util::GenerateFitAndPlot() : using Asimov set for fitting and plotting." << GEndl;
+    toyMC = GetAsimovSet(w);  // this returns the asimov set
+  }else {
+    Logger << kINFO << " Util::GenerateFitAndPlot()  : using data for fitting and plotting." <<  GEndl;
+  }
+  
+  // set Errors of all parameters to 'natural' values before plotting/fitting
+  resetAllErrors(w);
+  
+  //   // normFactors (such as mu_Top, mu_WZ, etc) need to have their errors set
+  //   // to a small number for the before the fit plots
+  //     normList = configMgr.normList
+  //     for norm in normList:
+  //         if norm in fc.measurements[0].paramSettingDict.keys():
+  //             if fc.measurements[0].paramSettingDict[norm][0]:
+  //                 continue
+  //         normfac = w.var(norm)
+  //         if normfac:
+  //             normfac.setError(0.001)
+  //             print "Uncertainty on parameter: ", norm, " set to 0.001"
+
+  // set the flag for plotting ratio or pull distribution under the plot
+  // plotRatio = False means that a pull distribution will be drawn
+  Bool_t plotRatio = kTRUE;
+  
+  // get a list of all floating parameters for all regions
+  RooAbsPdf* simPdf = w->pdf("simPdf");
+  ModelConfig*  mc = GetModelConfig(w);
+  const RooArgSet* obsSet = mc->GetObservables();
+  RooArgList floatPars = getFloatParList(*simPdf, *obsSet);
+    
+  // create an RooExpandedFitResult encompassing all the
+  // regions/parameters & save it to workspace
+  RooExpandedFitResult* expResultBefore = new RooExpandedFitResult(floatPars);
+  ImportInWorkspace(w, expResultBefore, "RooExpandedFitResult_beforeFit");
+
+  // plot before fit
+  if (drawBeforeAfterFit) PlotPdfWithComponents(w, fc->m_name, plotChannels, "beforeFit", expResultBefore, toyMC, plotRatio);
+
+  //fit of all regions
+  RooFitResult*  result = FitPdf(w, fitChannels, lumiConst, toyMC);
+
+  // create an RooExpandedFitResult encompassing all the regions/parameters
+  //  with the result & save it to workspace
+  RooExpandedFitResult* expResultAfter = new RooExpandedFitResult(result, floatPars);
+  ImportInWorkspace(w, expResultAfter, "RooExpandedFitResult_afterFit");
+
+  // plot after fit
+  if (drawBeforeAfterFit) PlotPdfWithComponents(w, fc->m_name, plotChannels, "afterFit", expResultAfter, toyMC, plotRatio);
+        
+  // plot each component of each region separately with propagated
+  // error after fit  (interesting for debugging)
+  if(plotSeparateComponents) PlotSeparateComponents(w, fc->m_name, plotChannels,"afterFit", result,toyMC);
+
+  //plot correlation matrix for result
+  if(plotCorrelationMatrix)  PlotCorrelationMatrix(result);
+   
+  // plot likelihood
+  Bool_t   plotPLL = kFALSE;
+  if(plotNLL) PlotNLL(w, expResultAfter, plotPLL, "", toyMC);
+
+  if (toyMC) WriteWorkspace(w, fc->m_inputWorkspaceFileName, toyMC->GetName());
+  else WriteWorkspace(w, fc->m_inputWorkspaceFileName);
+
+  if (result)  result->Print();
+   
+}
+
+
 //_____________________________________________________________________________
 void Util::SaveInitialSnapshot(RooWorkspace* w){
 
@@ -784,7 +903,7 @@ void Util::PlotPdfWithComponents(RooWorkspace* w, FitConfig* fc, TString plotReg
 {
     Bool_t plotComponents=true;
 
-    Logger << kINFO << " ------ Starting Plot with parameters:   analysisName = " << fc->m_Name << GEndl; 
+    Logger << kINFO << " ------ Starting Plot with parameters:   analysisName = " << fc->m_name << GEndl; 
     Logger << kINFO << "    plotRegions = " <<  plotRegions <<  "  plotComponents = " << plotComponents << "  outputPrefix = " << outputPrefix  << GEndl;
 
     RooMsgService::instance().getStream(1).removeTopic(NumIntegration);
@@ -1172,7 +1291,7 @@ void Util::PlotSeparateComponents(RooWorkspace* w,TString fcName, TString plotRe
     ConfigMgr* mgr = ConfigMgr::getInstance();
     FitConfig* fc = mgr->getFitConfig(fcName);
 
-    Logger << kINFO << " ------ Starting Plot with parameters:   analysisName = " << fcName << GEndl; 
+    Logger << kINFO << " ------ Starting PlotSeparateComponents with parameters:   analysisName = " << fcName << GEndl; 
     Logger << kINFO << "    fitRegions = " <<  plotRegions <<  "  plotComponents = " << plotComponents << "  outputPrefix = " << outputPrefix  << GEndl;
 
     if(w==NULL){ 
@@ -1402,11 +1521,14 @@ void Util::PlotNLL(RooWorkspace* w, RooFitResult* rFit, Bool_t plotPLL, TString 
 //_____________________________________________________________________________
 TH2D* Util::PlotCorrelationMatrix(RooFitResult* rFit){
 
+
     if(rFit==NULL){ 
         Logger << kWARNING << "Running PlotCorrelationMatrix() without a RooFitResult is pointless, I'm done" << GEndl ; 
         throw 1 ; 
     }
-
+     
+    Logger << kINFO << " ------ Starting PlotCorrelationMatrix() " << GEndl;
+ 
     Int_t numPars = rFit->floatParsFinal().getSize();
 
     TString canName = Form("c_corrMatrix_%s",rFit->GetName());
@@ -2440,10 +2562,13 @@ Util::resetError( RooWorkspace* wspace, const RooArgList& parList, const RooArgL
 
         } // End Stat Error
         else {
-            // Some unknown uncertainty
-            Logger << kWARNING << "Couldn't identify type of uncertainty for parameter: " << UncertaintyName << ". Skip." << GEndl;
-            continue;
-        }
+	  // Some unknown uncertainty
+	  Logger << kWARNING << "Couldn't identify type of uncertainty for parameter: " << UncertaintyName << ".  Probably a normalization factor." << GEndl;
+	  Logger << kINFO << " Setting uncertainty to 0.0001 before the fit for parameter: " << UncertaintyName << GEndl;
+	  sigma = 0.0001;
+	  val_low = var->getVal() - sigma;
+	  val_hi = var->getVal() + sigma;
+          }
 
         Logger << kINFO << "Uncertainties on parameter: " << UncertaintyName 
             << " low: "  << val_low

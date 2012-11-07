@@ -13,6 +13,7 @@
 #include "RooFitResult.h"
 #include "RooArgSet.h"
 #include "RooArgList.h"
+#include "RooExpandedFitResult.h"
 
 class TMap;
 class TTree;
@@ -43,6 +44,8 @@ namespace Util
   double looseToTightVal(const TString& reg, TMap* map);
   double looseToTightErr(const TString& reg, TMap* map);
   double getNonQcdVal(const TString& proc, const TString& reg, TMap* map, const TString& opt);
+  
+  void GenerateFitAndPlot(TString fcName, Bool_t drawBeforeAfterFit, Bool_t plotCorrelationMatrix, Bool_t plotSeparateComponents, Bool_t plotNLL);
 
   RooWorkspace* GetWorkspaceFromFile( const TString& infile, const TString& wsname );
   void WriteWorkspace(RooWorkspace* w, TString outFileName="./results/BkgForumTest_combined_ComHistoSysOverConst_model.root", TString suffix = "");

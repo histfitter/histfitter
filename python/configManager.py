@@ -286,6 +286,7 @@ class ConfigManager(object):
         self.cppMgr.setNPoints( self.nPoints )
         self.cppMgr.setSeed( self.seed )
         self.cppMgr.setMuValGen( self.muValGen )
+        self.cppMgr.setUseAsimovSet( self.useAsimovSet)
 
         if self.outputFileName:
             self.cppMgr.m_outputFileName = self.outputFileName

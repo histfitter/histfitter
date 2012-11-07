@@ -90,6 +90,9 @@ class ConfigMgr {
         void setMuValGen(const double& val) { m_muValGen = val; }
         double getMuValGen() { return m_muValGen; }
 
+       void setUseAsimovSet(const bool& useAsimov=false) { m_useAsimovSet=useAsimov; }
+       bool getUseAsimovSet() { return m_useAsimovSet; }
+
         void SetBkgCorrVal(const double& val) { m_bkgCorrValVec.clear(); m_bkgCorrValVec.push_back(val); }
         void SetBkgParName(const char* par)   { m_bkgParNameVec.clear(); m_bkgParNameVec.push_back(par); }
         void SetBkgChlName(const char* par)   { m_chnNameVec.clear();    m_chnNameVec.push_back(par); }
@@ -115,6 +118,8 @@ class ConfigMgr {
         TString m_status;
         TString m_outputFileName;
         std::vector<FitConfig*> m_fitConfigs;
+        int  m_seed;
+        bool m_useAsimovSet;  
 
 
     private:
@@ -127,10 +132,9 @@ class ConfigMgr {
         bool m_fixSigXSec;
         bool m_doUL;
         int  m_nPoints;
-        int  m_seed;
         double m_muValGen;
         bool m_removeEmptyBins;
-
+	
         std::vector<std::string> m_chnNameVec; 
         std::vector<std::string> m_bkgParNameVec;
         std::vector<double> m_bkgCorrValVec;

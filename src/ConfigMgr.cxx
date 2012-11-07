@@ -37,6 +37,7 @@ ConfigMgr::ConfigMgr() : m_logger("ConfigMgrCPP") {
     m_nPoints=10;
     m_muValGen=0.0;  
     m_removeEmptyBins=false;
+    m_useAsimovSet=false;
 }
 
 FitConfig* ConfigMgr::addFitConfig(const TString& name){
@@ -47,7 +48,7 @@ FitConfig* ConfigMgr::addFitConfig(const TString& name){
 
 FitConfig* ConfigMgr::getFitConfig(const TString& name){
     for(unsigned int i=0; i<m_fitConfigs.size(); i++) {
-        if(m_fitConfigs.at(i)->m_Name==name){
+        if(m_fitConfigs.at(i)->m_name==name){
             return m_fitConfigs.at(i);
         }
     }

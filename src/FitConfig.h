@@ -20,9 +20,9 @@ class FitConfig {
   ~FitConfig(){}
 
   // per FitConfig options (in python equivalent to TopLevelXML)
-  TString m_Name;
+  TString m_name;
   TString m_inputWorkspaceFileName;
-  Float_t m_Lumi;
+  Float_t m_lumi;
   TString m_signalSampleName;
 
   std::vector<TString> m_signalChannels;
@@ -63,7 +63,7 @@ class FitConfig {
   void setSampleName(const TString& sample){ m_sampleNames.push_back(sample);}
 
   Float_t getLumi();
-  void setLumi(Double_t lumi){ m_Lumi = lumi; }
+  void setLumi(Double_t lumi){ m_lumi = lumi; }
 
   Int_t getDataColor() { return m_dataColor; }
   void setDataColor(const Int_t& color) { m_dataColor = color; }

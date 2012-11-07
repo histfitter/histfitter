@@ -17,6 +17,20 @@ def enum(typename, field_names):
     d = dict((reversed(nv) for nv in enumerate(field_names)), __slots__ = ())
     return type(typename, (object,), d)()
 
+
+def GenerateFitAndPlotCPP(fc, drawBeforeAfterFit, drawCorrelationMatrix, drawSeparateComponents, drawLogLikelihood):
+    print "drawBeforeAfterFit ",               drawBeforeAfterFit              
+    print "drawCorrelationMatrix ",             drawCorrelationMatrix           
+    print "drawSeparateComponents",             drawSeparateComponents          
+    print "drawLogLikelihood        ",          drawLogLikelihood
+
+    from ROOT import Util
+    #    from configManager import configMgr
+    Util.GenerateFitAndPlot(fc.name, drawBeforeAfterFit, drawCorrelationMatrix, drawSeparateComponents, drawLogLikelihood)
+
+
+
+
 def GenerateFitAndPlot(fc, drawBeforeAfterFit):
     from configManager import configMgr
 
@@ -75,17 +89,17 @@ def GenerateFitAndPlot(fc, drawBeforeAfterFit):
     # set Errors of all parameters to 'natural' values before plotting/fitting
     Util.resetAllErrors(w)
 
-    # normFactors (such as mu_Top, mu_WZ, etc) need to have their errors set
-    # to a small number for the before the fit plots
-    normList = configMgr.normList
-    for norm in normList:
-        if norm in fc.measurements[0].paramSettingDict.keys():
-            if fc.measurements[0].paramSettingDict[norm][0]:
-                continue
-        normfac = w.var(norm)
-        if normfac:
-            normfac.setError(0.001)
-            print "Uncertainty on parameter: ", norm, " set to 0.001"
+##     # normFactors (such as mu_Top, mu_WZ, etc) need to have their errors set
+##     # to a small number for the before the fit plots
+##     normList = configMgr.normList
+##     for norm in normList:
+##         if norm in fc.measurements[0].paramSettingDict.keys():
+##             if fc.measurements[0].paramSettingDict[norm][0]:
+##                 continue
+##         normfac = w.var(norm)
+##         if normfac:
+##             normfac.setError(0.001)
+##             print "Uncertainty on parameter: ", norm, " set to 0.001"
 
     # set the flag for plotting ratio or pull distribution under the plot
     # plotRatio = False means that a pull distribution will be drawn
@@ -103,10 +117,10 @@ def GenerateFitAndPlot(fc, drawBeforeAfterFit):
     Util.ImportInWorkspace(w, expResultBefore,
                             "RooExpandedFitResult_beforeFit")
 
-    # plot before fit
-    if drawBeforeAfterFit:
-        Util.PlotPdfWithComponents(w, fc.name, plotChannels, "beforeFit",
-                                   expResultBefore, toyMC, plotRatio)
+##     # plot before fit
+##     if drawBeforeAfterFit:
+##         Util.PlotPdfWithComponents(w, fc.name, plotChannels, "beforeFit",
+##                                    expResultBefore, toyMC, plotRatio)
 
     # fit of all regions
     result = Util.FitPdf(w, fitChannels, lumiConst, toyMC)
@@ -128,8 +142,8 @@ def GenerateFitAndPlot(fc, drawBeforeAfterFit):
         # plot correlation matrix for result
         Util.PlotCorrelationMatrix(result)
         # plot likelihood
-        # plotPLL = False
-        #Util.PlotNLL(w, expResultAfter, plotPLL, "", toyMC)
+        #    plotPLL = False
+        #         Util.PlotNLL(w, expResultAfter, plotPLL, "", toyMC)
 
     if toyMC:
         Util.WriteWorkspace(w, fc.wsFileName, toyMC.GetName())
@@ -158,7 +172,10 @@ if __name__ == "__main__":
     printLimits = False
     doHypoTests = False
     doUL = True           # default is exclusion. goes toegether with doHypoTests
-    drawBeforeAfterFit = False
+    drawBeforeAfterFit              = False
+    drawCorrelationMatrix         = False
+    drawSeparateComponents = False
+    drawLogLikelihood               = False
     pickedSRs = []
     runToys = False
 
@@ -171,7 +188,7 @@ if __name__ == "__main__":
     import os, sys
     import getopt
     def usage():
-        print "HistFitter.py [-L loglevel] [-i] [-t] [-w] [-x] [-f] [-l] [-p] [-d] [-n nTOYs] [-s seed] [-r SRs] [-g gridPoint] [-b bkgParName,value] <configuration_file>\n"
+        print "HistFitter.py [-L loglevel] [-i] [-t] [-w] [-x] [-f] [-l] [-p] [-d] [-n nTOYs] [-s seed] [-r SRs] [-g gridPoint] [-b bkgParName,value] [--draw plotOpts] <configuration_file>\n"
         print "(all OFF by default. Turn steps ON with options)"
         print "-L   set log level (VERBOSE, DEBUG, INFO, WARNING, ERROR, FATAL, ALWAYS; default INFO)"
         print "-t   re-create histograms from TTrees (default: %s)" % (configMgr.readFromTree)
@@ -187,10 +204,11 @@ if __name__ == "__main__":
         print "--pz run the discovery hypothesis test (default %s)" % (not doUL)
         print "-g   <grid points to be processed> - give as comma separated list"
         print "-r   signal region to be processed - give as comma separated list (default = all)"
-        print "-d   Draw before/after fit plots of all channels (default: %s)" % drawBeforeAfterFit
+        print "-d   Draw before/after fit plots of all channels (default: %s)" % drawBeforeAfterFit,  "  additional arguments 'allPlots' or comma separated 'beforeAfter, corrMatrix, sepComponents, likelihood'"
         print "-b   when doing hypotest, correct bkg-level to: bkg strength parameter, bkg value"
         print "-0   removes empty bins when drawing the data histograms with (complimentary to -d)"
         print "--ty run toys (default with mu)."
+        print "--draw with arguments 'allPlots' or comma separated 'beforeAfter, corrMatrix, sepComponents, likelihood'"
 
         print "\nAlso see the README file.\n"
         print "Command examples:"
@@ -202,7 +220,7 @@ if __name__ == "__main__":
         sys.exit(0)
 
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "xd0twfinals:r:b:g:L:p",["bkgfit","exclfit","discfit","vr","pz","ty"])
+        opts, args = getopt.getopt(sys.argv[1:], "xd0twfinals:r:b:g:L:p:",["bkgfit","exclfit","discfit","vr","pz","ty","draw="])
         configFile = str(args[0])
     except:
         usage()
@@ -245,6 +263,26 @@ if __name__ == "__main__":
             doUL = False
         elif opt == '-d':
             drawBeforeAfterFit = True
+        elif opt == '--draw':
+            drawArgs = arg.split(',')
+            #print "drawArgs(",drawArgs, ")  length = ", len(drawArgs)
+            if len(drawArgs) == 1 and drawArgs[0] == "allPlots":
+                drawBeforeAfterFit = True
+                drawCorrelationMatrix         = True
+                drawSeparateComponents = True
+                drawLogLikelihood               = True
+            elif len(drawArgs)>0:
+                for drawArg in drawArgs:
+                    if drawArg == "beforeAfter":
+                        drawBeforeAfterFit = True
+                    elif drawArg == "corrMatrix":
+                        drawCorrelationMatrix         = True
+                    elif drawArg == "sepComponents":
+                        drawSeparateComponents = True
+                    elif drawArg == "likelihood":
+                        drawLogLikelihood               = True
+                    else:
+                        print " Wrong draw argument: ", drawArg, "\n  Possible draw arguments are 'allPlots' or comma separated 'beforeAfter, corrMatrix, sepComponents, likelihood'"
         elif opt == '-0':
             configMgr.removeEmptyBins = True
         elif opt == '-s':
@@ -289,16 +327,20 @@ if __name__ == "__main__":
 
     if runFit:
         if len(configMgr.fitConfigs) > 0:
-            r = GenerateFitAndPlot(configMgr.fitConfigs[0], drawBeforeAfterFit)
+      #      r = GenerateFitAndPlot(configMgr.fitConfigs[0], drawBeforeAfterFit)
             #r=GenerateFitAndPlot(configMgr.fitConfigs[1],drawBeforeAfterFit)
             #r=GenerateFitAndPlot(configMgr.fitConfigs[2],drawBeforeAfterFit)
             #for idx in range(len(configMgr.fitConfigs)):
             #    r=GenerateFitAndPlot(configMgr.fitConfigs[idx],drawBeforeAfterFit)
+            r = GenerateFitAndPlotCPP(configMgr.fitConfigs[0], drawBeforeAfterFit, drawCorrelationMatrix, drawSeparateComponents, drawLogLikelihood)
             pass
         #configMgr.cppMgr.fitAll()
         print "\nr0=GenerateFitAndPlot(configMgr.fitConfigs[0],False)"
         print "r1=GenerateFitAndPlot(configMgr.fitConfigs[1],False)"
         print "r2=GenerateFitAndPlot(configMgr.fitConfigs[2],False)"
+        print " OR \n GenerateFitAndPlotCPP(configMgr.fitConfigs[0], drawBeforeAfterFit, drawCorrelationMatrix, drawSeparateComponents, drawLogLikelihood)"
+        print "    where drawBeforeAfterFit, drawCorrelationMatrix, drawSeparateComponents, drawLogLikelihood are booleans"
+
         pass
 
     if printLimits:
