@@ -3,7 +3,9 @@
 
 # Must have gcc setup outside of ROOTSYS def for batch running!
 # first, setup gcc to version 4.3
-source /afs/cern.ch/sw/lcg/external/gcc/4.3.2/x86_64-slc5/setup.sh
+# TODO this should be some optional argument, it screws up local running!
+# source /afs/cern.ch/sw/lcg/external/gcc/4.3.2/x86_64-slc5/setup.sh
+
 # second, setup python version
 export BUILD=x86_64-slc5-gcc43-opt
 export PATH="/afs/cern.ch/sw/lcg/external/Python/2.6.5/$BUILD/bin:${PATH}"

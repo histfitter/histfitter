@@ -19,24 +19,22 @@ def enum(typename, field_names):
 
 
 def GenerateFitAndPlotCPP(fc, drawBeforeAfterFit, drawCorrelationMatrix, drawSeparateComponents, drawLogLikelihood):
-    print "drawBeforeAfterFit ",               drawBeforeAfterFit              
-    print "drawCorrelationMatrix ",             drawCorrelationMatrix           
-    print "drawSeparateComponents",             drawSeparateComponents          
-    print "drawLogLikelihood        ",          drawLogLikelihood
-
     from ROOT import Util
+    
+    log.debug("GenerateFitAndPlotCPP: drawBeforeAfterFit %s " % drawBeforeAfterFit) 
+    log.debug("GenerateFitAndPlotCPP: drawCorrelationMatrix %s " % drawCorrelationMatrix) 
+    log.debug("GenerateFitAndPlotCPP: drawSeparateComponents %s " % drawSeparateComponents)
+    log.debug("GenerateFitAndPlotCPP: drawLogLikelihood %s " % drawLogLikelihood)
+
     #    from configManager import configMgr
     Util.GenerateFitAndPlot(fc.name, drawBeforeAfterFit, drawCorrelationMatrix, drawSeparateComponents, drawLogLikelihood)
-
-
-
 
 def GenerateFitAndPlot(fc, drawBeforeAfterFit):
     from configManager import configMgr
 
     from ROOT import Util
     from ROOT import RooExpandedFitResult
-    print "\n***GenerateFitAndPlot for TopLevelXML %s***\n" % fc.name
+    log.info("\n***GenerateFitAndPlot for TopLevelXML %s***\n" % fc.name)
 
     w = Util.GetWorkspaceFromFile(fc.wsFileName, "combined")
     Util.SaveInitialSnapshot(w)
@@ -75,16 +73,16 @@ def GenerateFitAndPlot(fc, drawBeforeAfterFit):
     toyMC = None
     if configMgr.toySeedSet and not configMgr.useAsimovSet:
         # generate a toy dataset
-        print "INFO : generating toy MC set for fitting and plotting." \
-              " Seed = %i" % configMgr.toySeed
+        log.info("generating toy MC set for fitting and plotting." \
+              " Seed = %i" % configMgr.toySeed)
         toyMC = Util.GetToyMC()   # this generates one toy dataset
         pass
     elif configMgr.useAsimovSet and not configMgr.toySeedSet:
-        print "INFO : using Asimov set for fitting and plotting."
+        log.info("using Asimov set for fitting and plotting.")
         toyMC = Util.GetAsimovSet(w)  # this returns the asimov set
         pass
     else:
-        print "INFO : using data for fitting and plotting."
+        log.info("using data for fitting and plotting.")
 
     # set Errors of all parameters to 'natural' values before plotting/fitting
     Util.resetAllErrors(w)
@@ -282,7 +280,7 @@ if __name__ == "__main__":
                     elif drawArg == "likelihood":
                         drawLogLikelihood               = True
                     else:
-                        print " Wrong draw argument: ", drawArg, "\n  Possible draw arguments are 'allPlots' or comma separated 'beforeAfter, corrMatrix, sepComponents, likelihood'"
+                        log.fatal("Wrong draw argument: %s\n  Possible draw arguments are 'allPlots' or comma separated 'beforeAfter, corrMatrix, sepComponents, likelihood'" % drawArg)
         elif opt == '-0':
             configMgr.removeEmptyBins = True
         elif opt == '-s':
@@ -335,11 +333,11 @@ if __name__ == "__main__":
             r = GenerateFitAndPlotCPP(configMgr.fitConfigs[0], drawBeforeAfterFit, drawCorrelationMatrix, drawSeparateComponents, drawLogLikelihood)
             pass
         #configMgr.cppMgr.fitAll()
-        print "\nr0=GenerateFitAndPlot(configMgr.fitConfigs[0],False)"
-        print "r1=GenerateFitAndPlot(configMgr.fitConfigs[1],False)"
-        print "r2=GenerateFitAndPlot(configMgr.fitConfigs[2],False)"
-        print " OR \n GenerateFitAndPlotCPP(configMgr.fitConfigs[0], drawBeforeAfterFit, drawCorrelationMatrix, drawSeparateComponents, drawLogLikelihood)"
-        print "    where drawBeforeAfterFit, drawCorrelationMatrix, drawSeparateComponents, drawLogLikelihood are booleans"
+        log.info("\nr0=GenerateFitAndPlot(configMgr.fitConfigs[0],False)")
+        log.info("r1=GenerateFitAndPlot(configMgr.fitConfigs[1],False)")
+        log.info("r2=GenerateFitAndPlot(configMgr.fitConfigs[2],False)")
+        log.info(" OR \n GenerateFitAndPlotCPP(configMgr.fitConfigs[0], drawBeforeAfterFit, drawCorrelationMatrix, drawSeparateComponents, drawLogLikelihood)")
+        log.info("    where drawBeforeAfterFit, drawCorrelationMatrix, drawSeparateComponents, drawLogLikelihood are booleans")
 
         pass
 
@@ -370,4 +368,4 @@ if __name__ == "__main__":
         cons.interact("Continuing interactive session... press Ctrl+d to exit")
         pass
 
-    print "Leaving HistFitter... Bye!"
+    log.info("Leaving HistFitter... Bye!")

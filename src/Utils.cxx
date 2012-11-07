@@ -1,3 +1,4 @@
+// vim: ts=4:sw=4
 #include "Utils.h"
 #include "ConfigMgr.h"
 #include "TMsgLogger.h"
@@ -127,120 +128,131 @@ double Util::getNonQcdVal(const TString& proc, const TString& reg, TMap* map,con
 //_____________________________________________________________________________
 void Util::GenerateFitAndPlot(TString fcName, Bool_t drawBeforeAfterFit, Bool_t plotCorrelationMatrix, Bool_t plotSeparateComponents, Bool_t plotNLL ){
 
-  ConfigMgr* mgr = ConfigMgr::getInstance();
-  FitConfig* fc = mgr->getFitConfig(fcName);
+    ConfigMgr* mgr = ConfigMgr::getInstance();
+    FitConfig* fc = mgr->getFitConfig(fcName);
 
-  Logger << kINFO << GEndl << GEndl <<" GenerateFitAndPlot for FitConfig = " << fc->m_name << GEndl;
-  Logger << kINFO << "     drawBeforeAfterFit = " << drawBeforeAfterFit << GEndl;
-  //   from configManager import configMgr
-  
-  //   from ROOT import Util
-  //  from ROOT import RooExpandedFitResult
-  //  print "\n***GenerateFitAndPlot for TopLevelXML %s***\n" % fc.name
-  
-  RooWorkspace* w = GetWorkspaceFromFile(fc->m_inputWorkspaceFileName, "combined");
-  SaveInitialSnapshot(w);
-  
-  //     plotChannels = ""
-  //     for reg in fc.validationChannels:
-  //         if len(plotChannels) > 0:
-  //             plotChannels += ","
-  //             pass
-  //         plotChannels += reg
-  // plot all channels
-  TString plotChannels = "ALL";
-  
-  // fit only in CRs and SRs, not in VR
-  TString fitChannels = "";
-  for(unsigned int i=0; i <fc->m_bkgConstrainChannels.size(); i++){
-    if (i > 0)   fitChannels += ",";
-    fitChannels += fc->m_bkgConstrainChannels[i];
-  }
-  
-  for(unsigned int i=0; i <fc->m_signalChannels.size(); i++){
-    if (i > 0)   fitChannels += ",";
-    fitChannels += fc->m_signalChannels[i];
-  }
-  
-  //hack to be fixed at HistFactory level (check again with ROOT 5.34)
-  Bool_t lumiConst = kTRUE;
-  if (fc->m_signalChannels.size()>0) lumiConst = kFALSE;
+    Logger << kINFO << " GenerateFitAndPlot for FitConfig = " << fc->m_name << GEndl;
+    Logger << kINFO << "     drawBeforeAfterFit = " << drawBeforeAfterFit << GEndl;
+    //   from configManager import configMgr
 
-  //  fit toy MC if specified. When left None, data is fit by default
-  RooAbsData* toyMC = NULL;
-  if( mgr->m_seed != 0 && !mgr->m_useAsimovSet){
-    // generate a toy dataset
-    Logger << kINFO << " Util::GenerateFitAndPlot() : generating toy MC set for fitting and plotting.      Seed =" << mgr->m_seed << GEndl;
-    toyMC = GetToyMC();    // this generates one toy dataset
-  } else if (mgr->m_useAsimovSet && mgr->m_seed == 0 ){
-    Logger << kINFO << " Util::GenerateFitAndPlot() : using Asimov set for fitting and plotting." << GEndl;
-    toyMC = GetAsimovSet(w);  // this returns the asimov set
-  }else {
-    Logger << kINFO << " Util::GenerateFitAndPlot()  : using data for fitting and plotting." <<  GEndl;
-  }
-  
-  // set Errors of all parameters to 'natural' values before plotting/fitting
-  resetAllErrors(w);
-  
-  //   // normFactors (such as mu_Top, mu_WZ, etc) need to have their errors set
-  //   // to a small number for the before the fit plots
-  //     normList = configMgr.normList
-  //     for norm in normList:
-  //         if norm in fc.measurements[0].paramSettingDict.keys():
-  //             if fc.measurements[0].paramSettingDict[norm][0]:
-  //                 continue
-  //         normfac = w.var(norm)
-  //         if normfac:
-  //             normfac.setError(0.001)
-  //             print "Uncertainty on parameter: ", norm, " set to 0.001"
+    //   from ROOT import Util
+    //  from ROOT import RooExpandedFitResult
+    //  print "\n***GenerateFitAndPlot for TopLevelXML %s***\n" % fc.name
 
-  // set the flag for plotting ratio or pull distribution under the plot
-  // plotRatio = False means that a pull distribution will be drawn
-  Bool_t plotRatio = kTRUE;
-  
-  // get a list of all floating parameters for all regions
-  RooAbsPdf* simPdf = w->pdf("simPdf");
-  ModelConfig*  mc = GetModelConfig(w);
-  const RooArgSet* obsSet = mc->GetObservables();
-  RooArgList floatPars = getFloatParList(*simPdf, *obsSet);
-    
-  // create an RooExpandedFitResult encompassing all the
-  // regions/parameters & save it to workspace
-  RooExpandedFitResult* expResultBefore = new RooExpandedFitResult(floatPars);
-  ImportInWorkspace(w, expResultBefore, "RooExpandedFitResult_beforeFit");
+    RooWorkspace* w = GetWorkspaceFromFile(fc->m_inputWorkspaceFileName, "combined");
+    SaveInitialSnapshot(w);
 
-  // plot before fit
-  if (drawBeforeAfterFit) PlotPdfWithComponents(w, fc->m_name, plotChannels, "beforeFit", expResultBefore, toyMC, plotRatio);
+    //     plotChannels = ""
+    //     for reg in fc.validationChannels:
+    //         if len(plotChannels) > 0:
+    //             plotChannels += ","
+    //             pass
+    //         plotChannels += reg
+    // plot all channels
+    TString plotChannels = "ALL";
 
-  //fit of all regions
-  RooFitResult*  result = FitPdf(w, fitChannels, lumiConst, toyMC);
-
-  // create an RooExpandedFitResult encompassing all the regions/parameters
-  //  with the result & save it to workspace
-  RooExpandedFitResult* expResultAfter = new RooExpandedFitResult(result, floatPars);
-  ImportInWorkspace(w, expResultAfter, "RooExpandedFitResult_afterFit");
-
-  // plot after fit
-  if (drawBeforeAfterFit) PlotPdfWithComponents(w, fc->m_name, plotChannels, "afterFit", expResultAfter, toyMC, plotRatio);
+    // fit only in CRs and SRs, not in VR
+    TString fitChannels = "";
+    for(unsigned int i=0; i <fc->m_bkgConstrainChannels.size(); i++){
+        if (i > 0)   
+            fitChannels += ",";
         
-  // plot each component of each region separately with propagated
-  // error after fit  (interesting for debugging)
-  if(plotSeparateComponents) PlotSeparateComponents(w, fc->m_name, plotChannels,"afterFit", result,toyMC);
+        fitChannels += fc->m_bkgConstrainChannels[i];
+    }
 
-  //plot correlation matrix for result
-  if(plotCorrelationMatrix)  PlotCorrelationMatrix(result);
-   
-  // plot likelihood
-  Bool_t   plotPLL = kFALSE;
-  if(plotNLL) PlotNLL(w, expResultAfter, plotPLL, "", toyMC);
+    for(unsigned int i=0; i <fc->m_signalChannels.size(); i++){
+        if (i > 0)   
+            fitChannels += ",";
+        
+        fitChannels += fc->m_signalChannels[i];
+    }
 
-  if (toyMC) WriteWorkspace(w, fc->m_inputWorkspaceFileName, toyMC->GetName());
-  else WriteWorkspace(w, fc->m_inputWorkspaceFileName);
+    //hack to be fixed at HistFactory level (check again with ROOT 5.34)
+    Bool_t lumiConst = kTRUE;
+    if (fc->m_signalChannels.size() > 0) 
+        lumiConst = kFALSE;
 
-  if (result)  result->Print();
-   
+    //  fit toy MC if specified. When left None, data is fit by default
+    RooAbsData* toyMC = NULL;
+    if( mgr->m_seed != 0 && !mgr->m_useAsimovSet){
+        // generate a toy dataset
+        Logger << kINFO << " Util::GenerateFitAndPlot() : generating toy MC set for fitting and plotting.      Seed =" << mgr->m_seed << GEndl;
+        toyMC = GetToyMC();    // this generates one toy dataset
+    } else if (mgr->m_useAsimovSet && mgr->m_seed == 0 ){
+        Logger << kINFO << " Util::GenerateFitAndPlot() : using Asimov set for fitting and plotting." << GEndl;
+        toyMC = GetAsimovSet(w);  // this returns the asimov set
+    } else {
+        Logger << kINFO << " Util::GenerateFitAndPlot()  : using data for fitting and plotting." <<  GEndl;
+    }
+
+    // set Errors of all parameters to 'natural' values before plotting/fitting
+    resetAllErrors(w);
+
+    //   // normFactors (such as mu_Top, mu_WZ, etc) need to have their errors set
+    //   // to a small number for the before the fit plots
+    //     normList = configMgr.normList
+    //     for norm in normList:
+    //         if norm in fc.measurements[0].paramSettingDict.keys():
+    //             if fc.measurements[0].paramSettingDict[norm][0]:
+    //                 continue
+    //         normfac = w.var(norm)
+    //         if normfac:
+    //             normfac.setError(0.001)
+    //             print "Uncertainty on parameter: ", norm, " set to 0.001"
+
+    // set the flag for plotting ratio or pull distribution under the plot
+    // plotRatio = False means that a pull distribution will be drawn
+    Bool_t plotRatio = kTRUE;
+
+    // get a list of all floating parameters for all regions
+    RooAbsPdf* simPdf = w->pdf("simPdf");
+    ModelConfig*  mc = GetModelConfig(w);
+    const RooArgSet* obsSet = mc->GetObservables();
+    RooArgList floatPars = getFloatParList(*simPdf, *obsSet);
+
+    // create an RooExpandedFitResult encompassing all the
+    // regions/parameters & save it to workspace
+    RooExpandedFitResult* expResultBefore = new RooExpandedFitResult(floatPars);
+    ImportInWorkspace(w, expResultBefore, "RooExpandedFitResult_beforeFit");
+
+    // plot before fit
+    if (drawBeforeAfterFit) 
+        PlotPdfWithComponents(w, fc->m_name, plotChannels, "beforeFit", expResultBefore, toyMC, plotRatio);
+
+    //fit of all regions
+    RooFitResult*  result = FitPdf(w, fitChannels, lumiConst, toyMC);
+
+    // create an RooExpandedFitResult encompassing all the regions/parameters
+    //  with the result & save it to workspace
+    RooExpandedFitResult* expResultAfter = new RooExpandedFitResult(result, floatPars);
+    ImportInWorkspace(w, expResultAfter, "RooExpandedFitResult_afterFit");
+
+    // plot after fit
+    if (drawBeforeAfterFit) 
+        PlotPdfWithComponents(w, fc->m_name, plotChannels, "afterFit", expResultAfter, toyMC, plotRatio);
+
+    // plot each component of each region separately with propagated
+    // error after fit  (interesting for debugging)
+    if(plotSeparateComponents) 
+        PlotSeparateComponents(w, fc->m_name, plotChannels,"afterFit", result,toyMC);
+
+    //plot correlation matrix for result
+    if(plotCorrelationMatrix)  
+        PlotCorrelationMatrix(result);
+
+    // plot likelihood
+    Bool_t plotPLL = kFALSE;
+    if(plotNLL) 
+        PlotNLL(w, expResultAfter, plotPLL, "", toyMC);
+
+    if (toyMC) 
+        WriteWorkspace(w, fc->m_inputWorkspaceFileName, toyMC->GetName());
+    else 
+        WriteWorkspace(w, fc->m_inputWorkspaceFileName);
+
+    if (result)  
+        result->Print();
 }
-
 
 //_____________________________________________________________________________
 void Util::SaveInitialSnapshot(RooWorkspace* w){
@@ -701,8 +713,8 @@ vector<TString> Util::GetRegionsVec(TString regions, RooCategory* regionCat){
 //_____________________________________________________________________________________________________________________________________
 void Util::DecomposeWS(const char* infile, const char* wsname, const char* outfile)
 {
-  
-  Logger << kINFO << " ------ Util::DecomposeWS with parameters:   infile " << infile << "  wsname = " << wsname << "  outfile = " << outfile  << GEndl;
+
+    Logger << kINFO << " ------ Util::DecomposeWS with parameters:   infile " << infile << "  wsname = " << wsname << "  outfile = " << outfile  << GEndl;
 
     TString fileName(infile);
     if (fileName.IsNull()) {
@@ -733,69 +745,69 @@ void Util::DecomposeWS(const char* infile, const char* wsname, const char* outfi
         return;
     }
 
-  RooSimultaneous* pdf = (RooSimultaneous*) w->pdf("simPdf");
+    RooSimultaneous* pdf = (RooSimultaneous*) w->pdf("simPdf");
 
-  RooAbsData* data = ( (RooAbsData*)w->data("obsData") );
+    RooAbsData* data = ( (RooAbsData*)w->data("obsData") );
 
-  RooCategory* regionCat = (RooCategory*) w->cat("channelCat");
-  data->table(*((RooAbsCategory*)regionCat))->Print("v");
+    RooCategory* regionCat = (RooCategory*) w->cat("channelCat");
+    data->table(*((RooAbsCategory*)regionCat))->Print("v");
 
-  TString plotRegions = "ALL";
-  std::vector<TString> regionsVec = GetRegionsVec(plotRegions, regionCat);
+    TString plotRegions = "ALL";
+    std::vector<TString> regionsVec = GetRegionsVec(plotRegions, regionCat);
 
-  unsigned  int numPlots = regionsVec.size();
-  //TCanvas* canVec[numPlots];
-  //  RooPlot* frameVec[numPlots];
+    unsigned  int numPlots = regionsVec.size();
+    //TCanvas* canVec[numPlots];
+    //  RooPlot* frameVec[numPlots];
 
-//   RooAddPdf* combinedPdf = new RooAddPdf();
-//   RooDataSet* combinedData = new RooDataSet();
-//   RooRealVar* firstVar;
-//   RooRealVar* replaceVar;
-//   RooAbsPdf* firstPdf ;
+    //   RooAddPdf* combinedPdf = new RooAddPdf();
+    //   RooDataSet* combinedData = new RooDataSet();
+    //   RooRealVar* firstVar;
+    //   RooRealVar* replaceVar;
+    //   RooAbsPdf* firstPdf ;
 
-//   RooAbsPdf* replacePdf ;
-//   RooArgList* coefList;
-//   RooArgList* pdfList;
+    //   RooAbsPdf* replacePdf ;
+    //   RooArgList* coefList;
+    //   RooArgList* pdfList;
 
-  RooWorkspace* wcomb = new RooWorkspace(wsname);
+    RooWorkspace* wcomb = new RooWorkspace(wsname);
 
-  TString allObs;
+    TString allObs;
 
-  // iterate over all the regions 
-  for(unsigned int iVec=0; iVec<numPlots; iVec++){
+    // iterate over all the regions 
+    for(unsigned int iVec=0; iVec<numPlots; iVec++){
 
-    TString regionCatLabel = regionsVec[iVec];
-    if( regionCat->setLabel(regionCatLabel,kTRUE)){  
-      Logger << kINFO << " Label '" << regionCatLabel << "' is not a state of channelCat (see Table) " << GEndl; 
-    }else{
-      RooAbsPdf* regionPdf = (RooAbsPdf*) pdf->getPdf(regionCatLabel.Data());
-      //regionPdf->Print();
-      
-      TString dataCatLabel = Form("channelCat==channelCat::%s",regionCatLabel.Data());
-      RooDataSet* regionData = (RooDataSet*) data->reduce(dataCatLabel.Data());
-      if(regionPdf==NULL || regionData==NULL){
-	Logger << kWARNING << " Either the Pdf or the Dataset do not have an appropriate state for the region = " << regionCatLabel << ", check the Workspace file" << GEndl;
-	Logger << kWARNING << " regionPdf = " << regionPdf << "   regionData = " << regionData << GEndl;  
-	continue;
-      }
-      
-      // regionData->Print("v");
-      
-      RooRealVar* regionVar =(RooRealVar*) ((RooArgSet*) regionPdf->getObservables(*regionData))->find(Form("obs_x_%s",regionCatLabel.Data()));
-      //wcomb->import(*regionVar,RenameVariable(firstVar->GetName(),"obs"),RecycleConflictNodes(true) ) ;
-      RooDataSet* rdata = (RooDataSet*)regionData->reduce(RooArgSet(*regionVar,*w->var("weightVar")));
+        TString regionCatLabel = regionsVec[iVec];
+        if( regionCat->setLabel(regionCatLabel,kTRUE)){  
+            Logger << kINFO << " Label '" << regionCatLabel << "' is not a state of channelCat (see Table) " << GEndl; 
+        }else{
+            RooAbsPdf* regionPdf = (RooAbsPdf*) pdf->getPdf(regionCatLabel.Data());
+            //regionPdf->Print();
 
-      wcomb->import( *rdata, Rename( TString("obsData_")+TString(regionVar->GetName()) ), RenameVariable(regionVar->GetName(),"obs"), RecycleConflictNodes(true) );
-      wcomb->import( *regionPdf, RenameVariable(regionVar->GetName(),"obs"), RecycleConflictNodes(true) );
+            TString dataCatLabel = Form("channelCat==channelCat::%s",regionCatLabel.Data());
+            RooDataSet* regionData = (RooDataSet*) data->reduce(dataCatLabel.Data());
+            if(regionPdf==NULL || regionData==NULL){
+                Logger << kWARNING << " Either the Pdf or the Dataset do not have an appropriate state for the region = " << regionCatLabel << ", check the Workspace file" << GEndl;
+                Logger << kWARNING << " regionPdf = " << regionPdf << "   regionData = " << regionData << GEndl;  
+                continue;
+            }
 
+            // regionData->Print("v");
+
+            RooRealVar* regionVar =(RooRealVar*) ((RooArgSet*) regionPdf->getObservables(*regionData))->find(Form("obs_x_%s",regionCatLabel.Data()));
+            //wcomb->import(*regionVar,RenameVariable(firstVar->GetName(),"obs"),RecycleConflictNodes(true) ) ;
+            RooDataSet* rdata = (RooDataSet*)regionData->reduce(RooArgSet(*regionVar,*w->var("weightVar")));
+
+            wcomb->import( *rdata, Rename( TString("obsData_")+TString(regionVar->GetName()) ), RenameVariable(regionVar->GetName(),"obs"), RecycleConflictNodes(true) );
+            wcomb->import( *regionPdf, RenameVariable(regionVar->GetName(),"obs"), RecycleConflictNodes(true) );
+
+        }
     }
-  }
 
-  //  cout << GEndl << GEndl;
+    //  cout << GEndl << GEndl;
 
-  wcomb->writeToFile(outfile);
+    wcomb->writeToFile(outfile);
 
-  file->Close();
+    file->Close();
 }
 
 
@@ -803,86 +815,86 @@ void Util::DecomposeWS(const char* infile, const char* wsname, const char* outfi
 void Util::PlotPdfSumWithComponents(RooWorkspace* w, TString fcName, TString plotRegions, TString outputPrefix, RooFitResult* rFit, RooAbsData* inputData, Bool_t plotRatio)
 {
 
-  Bool_t plotComponents=true;
-  ConfigMgr* mgr = ConfigMgr::getInstance();
-  FitConfig* fc __attribute__((unused)) = mgr->getFitConfig(fcName);
+    Bool_t plotComponents=true;
+    ConfigMgr* mgr = ConfigMgr::getInstance();
+    FitConfig* fc __attribute__((unused)) = mgr->getFitConfig(fcName);
 
-  cout << endl << endl << " ------ Starting Plot with parameters:   analysisName = " << fcName 
-       << "    plotRegions = " <<  plotRegions <<  "  plotComponents = " << plotComponents << "  outputPrefix = " << outputPrefix  << endl << endl;
+    cout << endl << endl << " ------ Starting Plot with parameters:   analysisName = " << fcName 
+        << "    plotRegions = " <<  plotRegions <<  "  plotComponents = " << plotComponents << "  outputPrefix = " << outputPrefix  << endl << endl;
 
-  RooMsgService::instance().getStream(1).removeTopic(NumIntegration);
-  RooMsgService::instance().getStream(1).removeTopic(Plotting);
-
-
-  if(w==NULL){ Logger << kERROR << " Workspace not found, no plotting performed" << GEndl << GEndl; return; }
-  RooSimultaneous* pdf = (RooSimultaneous*) w->pdf("simPdf");
-  //pdf->Print("t");
-
-  RooAbsData* data = ( inputData!=0 ? inputData : (RooAbsData*)w->data("obsData") ); 
-
-  RooCategory* regionCat = (RooCategory*) w->cat("channelCat");
-  data->table(*((RooAbsCategory*)regionCat))->Print("v");
-
-  if(plotRegions =="") plotRegions = "ALL";
-  std::vector<TString> regionsVec = GetRegionsVec(plotRegions, regionCat);
+    RooMsgService::instance().getStream(1).removeTopic(NumIntegration);
+    RooMsgService::instance().getStream(1).removeTopic(Plotting);
 
 
-  Logger << kWARNING << "Util::PlotPdfSumWithComponents() : " << plotRegions << GEndl;
+    if(w==NULL){ Logger << kERROR << " Workspace not found, no plotting performed" << GEndl << GEndl; return; }
+    RooSimultaneous* pdf = (RooSimultaneous*) w->pdf("simPdf");
+    //pdf->Print("t");
 
-  unsigned  int numPlots = regionsVec.size();  
-  // TCanvas* canVec[numPlots];
-  //  RooPlot* frameVec[numPlots];
+    RooAbsData* data = ( inputData!=0 ? inputData : (RooAbsData*)w->data("obsData") ); 
 
-  RooAddPdf* combinedPdf __attribute__((unused)) = new RooAddPdf();
-  RooDataSet* combinedData __attribute__((unused)) = new RooDataSet();
-  //RooRealVar* firstVar;
-  //RooRealVar* replaceVar;
-  //RooAbsPdf* firstPdf ;
-  //RooAbsPdf* replacePdf ;
-  //RooArgList* coefList;
-  //RooArgList* pdfList;
+    RooCategory* regionCat = (RooCategory*) w->cat("channelCat");
+    data->table(*((RooAbsCategory*)regionCat))->Print("v");
 
-  RooWorkspace* wcomb = new RooWorkspace("wcombination");
+    if(plotRegions =="") plotRegions = "ALL";
+    std::vector<TString> regionsVec = GetRegionsVec(plotRegions, regionCat);
 
-  TString allObs;
 
-  // iterate over all the regions 
-  for(unsigned int iVec=0; iVec<numPlots; iVec++){
+    Logger << kWARNING << "Util::PlotPdfSumWithComponents() : " << plotRegions << GEndl;
 
-    Logger << kWARNING << "Util::PlotPdfSumWithComponents() : " << regionsVec[iVec] << GEndl;
+    unsigned  int numPlots = regionsVec.size();  
+    // TCanvas* canVec[numPlots];
+    //  RooPlot* frameVec[numPlots];
 
-    TString regionCatLabel = regionsVec[iVec];
-    if( regionCat->setLabel(regionCatLabel,kTRUE)){  Logger << kWARNING << GEndl << " Label '" << regionCatLabel << "' is not a state of channelCat (see Table) " << endl << endl << GEndl; }
-    else{
-      RooAbsPdf* regionPdf = (RooAbsPdf*) pdf->getPdf(regionCatLabel.Data());
-      Logger << kINFO << " region pdf = " << GEndl;
-      regionPdf->Print();
+    RooAddPdf* combinedPdf __attribute__((unused)) = new RooAddPdf();
+    RooDataSet* combinedData __attribute__((unused)) = new RooDataSet();
+    //RooRealVar* firstVar;
+    //RooRealVar* replaceVar;
+    //RooAbsPdf* firstPdf ;
+    //RooAbsPdf* replacePdf ;
+    //RooArgList* coefList;
+    //RooArgList* pdfList;
 
-      TString dataCatLabel = Form("channelCat==channelCat::%s",regionCatLabel.Data());
-      RooDataSet* regionData = (RooDataSet*) data->reduce(dataCatLabel.Data());
-      if(regionPdf==NULL || regionData==NULL){ 
-	Logger << kWARNING << " Either the Pdf or the Dataset do not have an appropriate state for the region = " << regionCatLabel << ", check the Workspace file" << GEndl;
-	Logger << kWARNING << " regionPdf = " << regionPdf << "   regionData = " << regionData << GEndl;  
-	continue; 
-      }
+    RooWorkspace* wcomb = new RooWorkspace("wcombination");
 
-      regionData->Print("v");
+    TString allObs;
 
-      RooRealVar* regionVar =(RooRealVar*) ((RooArgSet*) regionPdf->getObservables(*regionData))->find(Form("obs_x_%s",regionCatLabel.Data()));
+    // iterate over all the regions 
+    for(unsigned int iVec=0; iVec<numPlots; iVec++){
 
-      //wcomb->import(*regionVar,RenameVariable(firstVar->GetName(),"obs"),RecycleConflictNodes(true) ) ;
+        Logger << kWARNING << "Util::PlotPdfSumWithComponents() : " << regionsVec[iVec] << GEndl;
 
-      RooDataSet* rdata = (RooDataSet*)regionData->reduce(RooArgSet(*regionVar,*w->var("weightVar")));
+        TString regionCatLabel = regionsVec[iVec];
+        if( regionCat->setLabel(regionCatLabel,kTRUE)){  Logger << kWARNING << GEndl << " Label '" << regionCatLabel << "' is not a state of channelCat (see Table) " << endl << endl << GEndl; }
+        else{
+            RooAbsPdf* regionPdf = (RooAbsPdf*) pdf->getPdf(regionCatLabel.Data());
+            Logger << kINFO << " region pdf = " << GEndl;
+            regionPdf->Print();
 
-      wcomb->import( *rdata, Rename( TString("obsData_")+TString(regionVar->GetName()) ), RenameVariable(regionVar->GetName(),"obs"), RecycleConflictNodes(true) );  
-      wcomb->import( *regionPdf, RenameVariable(regionVar->GetName(),"obs"), RecycleConflictNodes(true) );
+            TString dataCatLabel = Form("channelCat==channelCat::%s",regionCatLabel.Data());
+            RooDataSet* regionData = (RooDataSet*) data->reduce(dataCatLabel.Data());
+            if(regionPdf==NULL || regionData==NULL){ 
+                Logger << kWARNING << " Either the Pdf or the Dataset do not have an appropriate state for the region = " << regionCatLabel << ", check the Workspace file" << GEndl;
+                Logger << kWARNING << " regionPdf = " << regionPdf << "   regionData = " << regionData << GEndl;  
+                continue; 
+            }
 
+            regionData->Print("v");
+
+            RooRealVar* regionVar =(RooRealVar*) ((RooArgSet*) regionPdf->getObservables(*regionData))->find(Form("obs_x_%s",regionCatLabel.Data()));
+
+            //wcomb->import(*regionVar,RenameVariable(firstVar->GetName(),"obs"),RecycleConflictNodes(true) ) ;
+
+            RooDataSet* rdata = (RooDataSet*)regionData->reduce(RooArgSet(*regionVar,*w->var("weightVar")));
+
+            wcomb->import( *rdata, Rename( TString("obsData_")+TString(regionVar->GetName()) ), RenameVariable(regionVar->GetName(),"obs"), RecycleConflictNodes(true) );  
+            wcomb->import( *regionPdf, RenameVariable(regionVar->GetName(),"obs"), RecycleConflictNodes(true) );
+
+        }
     }
-  }
 
-  cout << endl << endl; 
+    cout << endl << endl; 
 
-  wcomb->writeToFile("wsmod.root");
+    wcomb->writeToFile("wsmod.root");
 
 }
 
@@ -1454,65 +1466,65 @@ void Util::PlotNLL(RooWorkspace* w, RooFitResult* rFit, Bool_t plotPLL, TString 
 
     // loop over all floating pars
     for(unsigned int iPar=0; iPar<numPars ; iPar++){
-      RooAbsArg* arg = fpf.at(iPar);
-      if(arg->InheritsFrom("RooRealVar")){
-	RooRealVar* par = (RooRealVar*) arg;
-	TString parName = par->GetName();
-	Logger << kINFO << "Plotting NLL for par = " << parName << GEndl;
-	RooPlot* frame = par->frame();
-	nll->plotOn(frame, ShiftToZero());
-	frame->SetMinimum(0.);
-	
-	const char* curvename = 0;
-	RooCurve* curve = (RooCurve*) frame->findObject(curvename,RooCurve::Class()) ;
-	Double_t curveMax = curve->getYAxisMax();
-	// safety for weird RooPlots where curve goes to infinity in first/last bin(s)
-	if (curveMax > 0. && !std::isinf(curveMax) )   frame->SetMaximum(curveMax * 2.); 
-	else if(curveMax > 0. && std::isinf(curveMax) ){
-	  Int_t iBin = 1;
-	  Double_t xFirstBin = 0.;
-	  Double_t yFirstBin = -1.;	
-	  while ( (yFirstBin<0 || std::isinf(yFirstBin) )&& iBin < curve->GetN()-1){
-	    iBin++;
-	    curve->GetPoint(iBin,xFirstBin,yFirstBin) ;
-	  }
-	  iBin = curve->GetN()-1;
-	  Double_t xLastBin = 0.;
-	  Double_t yLastBin = -1.;	
-	  while ( (yLastBin < 0 || std::isinf(yLastBin)) && iBin >0){
-	    iBin--;
-	    curve->GetPoint(iBin,xLastBin,yLastBin) ;
-	  }
-	  curveMax = yLastBin>yFirstBin ? yLastBin : yFirstBin;      
-	  frame->SetMaximum(curveMax * 2. ); 
-	}
-	else frame->SetMaximum(1000.);
-	
-	
-	if(plotPLL)   pll->plotOn(frame,LineColor(kRed),LineStyle(kDashed),NumCPU(4)) ;
-	
-	can->cd(iPar+1);
-	frame->Draw();  
-	
-	TLegend* leg = new TLegend(0.55,0.65,0.85,0.9,"");
-	leg->SetFillStyle(0);
-	leg->SetFillColor(0);
-	leg->SetBorderSize(0);
-	TLegendEntry* entry=leg->AddEntry("","NLL","l") ;
-	entry->SetLineColor(kBlue);
-	if(plotPLL) {	
-	  entry=leg->AddEntry("","PLL","l") ;
-	  entry->SetLineColor(kRed);
-	  entry->SetLineStyle(kDashed);
-	}
-	leg->Draw();
-	
-      }
+        RooAbsArg* arg = fpf.at(iPar);
+        if(arg->InheritsFrom("RooRealVar")){
+            RooRealVar* par = (RooRealVar*) arg;
+            TString parName = par->GetName();
+            Logger << kINFO << "Plotting NLL for par = " << parName << GEndl;
+            RooPlot* frame = par->frame();
+            nll->plotOn(frame, ShiftToZero());
+            frame->SetMinimum(0.);
+
+            const char* curvename = 0;
+            RooCurve* curve = (RooCurve*) frame->findObject(curvename,RooCurve::Class()) ;
+            Double_t curveMax = curve->getYAxisMax();
+            // safety for weird RooPlots where curve goes to infinity in first/last bin(s)
+            if (curveMax > 0. && !std::isinf(curveMax) )   frame->SetMaximum(curveMax * 2.); 
+            else if(curveMax > 0. && std::isinf(curveMax) ){
+                Int_t iBin = 1;
+                Double_t xFirstBin = 0.;
+                Double_t yFirstBin = -1.;	
+                while ( (yFirstBin<0 || std::isinf(yFirstBin) )&& iBin < curve->GetN()-1){
+                    iBin++;
+                    curve->GetPoint(iBin,xFirstBin,yFirstBin) ;
+                }
+                iBin = curve->GetN()-1;
+                Double_t xLastBin = 0.;
+                Double_t yLastBin = -1.;	
+                while ( (yLastBin < 0 || std::isinf(yLastBin)) && iBin >0){
+                    iBin--;
+                    curve->GetPoint(iBin,xLastBin,yLastBin) ;
+                }
+                curveMax = yLastBin>yFirstBin ? yLastBin : yFirstBin;      
+                frame->SetMaximum(curveMax * 2. ); 
+            }
+            else frame->SetMaximum(1000.);
+
+
+            if(plotPLL)   pll->plotOn(frame,LineColor(kRed),LineStyle(kDashed),NumCPU(4)) ;
+
+            can->cd(iPar+1);
+            frame->Draw();  
+
+            TLegend* leg = new TLegend(0.55,0.65,0.85,0.9,"");
+            leg->SetFillStyle(0);
+            leg->SetFillColor(0);
+            leg->SetBorderSize(0);
+            TLegendEntry* entry=leg->AddEntry("","NLL","l") ;
+            entry->SetLineColor(kBlue);
+            if(plotPLL) {	
+                entry=leg->AddEntry("","PLL","l") ;
+                entry->SetLineColor(kRed);
+                entry->SetLineStyle(kDashed);
+            }
+            leg->Draw();
+
+        }
     }
-    
+
     can->SaveAs("results/"+canName+".pdf");
     can->SaveAs("results/"+canName+".eps");
-    
+
     delete nll ;
     delete pll;
 
@@ -1526,9 +1538,9 @@ TH2D* Util::PlotCorrelationMatrix(RooFitResult* rFit){
         Logger << kWARNING << "Running PlotCorrelationMatrix() without a RooFitResult is pointless, I'm done" << GEndl ; 
         throw 1 ; 
     }
-     
+
     Logger << kINFO << " ------ Starting PlotCorrelationMatrix() " << GEndl;
- 
+
     Int_t numPars = rFit->floatParsFinal().getSize();
 
     TString canName = Form("c_corrMatrix_%s",rFit->GetName());
@@ -2401,7 +2413,7 @@ double Util::GetPropagatedError(RooAbsReal* var, const RooFitResult& fr)
     for (unsigned int j=0 ; j<plusVar.size() ; j++) {
         F[j] = (plusVar[j]-minusVar[j])/2 ;
     }
-    
+
     if(Logger.GetMinLevel() < kDEBUG) {
         F.Print();
         C.Print();
@@ -2562,13 +2574,13 @@ Util::resetError( RooWorkspace* wspace, const RooArgList& parList, const RooArgL
 
         } // End Stat Error
         else {
-	  // Some unknown uncertainty
-	  Logger << kWARNING << "Couldn't identify type of uncertainty for parameter: " << UncertaintyName << ".  Probably a normalization factor." << GEndl;
-	  Logger << kINFO << " Setting uncertainty to 0.0001 before the fit for parameter: " << UncertaintyName << GEndl;
-	  sigma = 0.0001;
-	  val_low = var->getVal() - sigma;
-	  val_hi = var->getVal() + sigma;
-          }
+            // Some unknown uncertainty
+            Logger << kWARNING << "Couldn't identify type of uncertainty for parameter: " << UncertaintyName << ".  Probably a normalization factor." << GEndl;
+            Logger << kINFO << " Setting uncertainty to 0.0001 before the fit for parameter: " << UncertaintyName << GEndl;
+            sigma = 0.0001;
+            val_low = var->getVal() - sigma;
+            val_hi = var->getVal() + sigma;
+        }
 
         Logger << kINFO << "Uncertainties on parameter: " << UncertaintyName 
             << " low: "  << val_low

@@ -1,3 +1,10 @@
+2012-11-07 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
+	* setup.sh: source statement for gcc breaks setups when running locally.
+				This ought to be made an optional argument!
+	* src/Utils.cxx: indenting identical to other .cxx files
+	* src/Utils.cxx: GenerateFitAndPlot removed extra GEndl statements
+	* scripts/HistFitter.py: print statements now through logger
+
 2012-11-07 Alex Koutsman <alex.koutsman@cern.ch>
 	* python/configManager.py : small addition of function setting for C++ cfgMgr
 	* scripts/HistFitter.py : addition of GenerateFitAndPlotCPP function and --draw command with options
