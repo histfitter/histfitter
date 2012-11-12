@@ -1,5 +1,5 @@
 from ROOT import THStack,TLegend,TCanvas,TFile,std,TH1F
-from ROOT import ConfigMgr,FitConfig #this module comes from gSystem.Load("libSusyFitter.so")
+from ROOT import ConfigMgr,FitConfig,ChannelStyle #this module comes from gSystem.Load("libSusyFitter.so")
 from prepareHistos import TreePrepare,HistoPrepare
 from copy import deepcopy
 from systematic import Systematic
@@ -298,19 +298,7 @@ class ConfigManager(object):
             cppTl.m_Lumi = self.lumiUnits*self.outputLumi
             if not tl.signalSample == None:
                 cppTl.m_signalSampleName = tl.signalSample
-
-            #samples name & color
-            for s in tl.sampleList:
-                cppTl.m_sampleNames.push_back(s.name)
-                cppTl.m_sampleColors.push_back(s.color)
-
-            # Sample name and color for discovery mode
-            for c in tl.channels:
-                for s in c.sampleList:
-                    if s.isDiscovery:
-                        cppTl.m_sampleNames.push_back(s.name)
-                        cppTl.m_sampleColors.push_back(s.color)
-
+     
             #CR/SR/VR channels
             for cName in tl.signalChannels:
                 cppTl.m_signalChannels.push_back(cName)
@@ -318,40 +306,50 @@ class ConfigManager(object):
                 cppTl.m_validationChannels.push_back(cName)
             for cName in tl.bkgConstrainChannels:
                 cppTl.m_bkgConstrainChannels.push_back(cName)
-            
-            # Plot cosmetics per fitConfig 
-            cppTl.m_dataColor = tl.dataColor
-            cppTl.m_totalPdfColor = tl.totalPdfColor
-            cppTl.m_errorLineColor = tl.errorLineColor
-            cppTl.m_errorLineStyle = tl.errorLineStyle
-            cppTl.m_errorFillColor = tl.errorFillColor
-            cppTl.m_errorFillStyle = tl.errorFillStyle
-            if not tl.tLegend == None:
-                cppTl.m_legend = tl.tLegend
-            cppTl.m_removeEmptyBins = self.removeEmptyBins
-
+       
             # Plot cosmetics per channel
             for c in tl.channels:
-                 cppTl.m_channels.push_back(c.channelName)
-                 cppTl.m_channelsNBins.push_back(c.nBins)
+                 style = ChannelStyle(c.channelName)
+                 style.setNBins(c.nBins)
                  if not c.minY == None:
-                     cppTl.m_channelsMinY.push_back(c.minY)
+                    style.setMinY(c.minY)
                  if not c.maxY == None:
-                   cppTl.m_channelsMaxY.push_back(c.maxY)
+                   style.setMaxY(c.maxY)
                  if not c.titleX == None:
-                     cppTl.m_channelsTitleX.push_back(c.titleX)
+                     style.setTitleX(c.titleX)
                  if not c.titleY == None:
-                     cppTl.m_channelsTitleY.push_back(c.titleY)
+                     style.setTitleY(c.titleY)
                  if not c.logY == None:
-                     cppTl.m_channelsLogY.push_back(c.logY)
+                     style.setLogY(c.logY)
                  if not c.ATLASLabelX == None:
-                     cppTl.m_channelsATLASLabelX.push_back(c.ATLASLabelX)
+                     style.setATLASLabelX(c.ATLASLabelX)
                  if not c.ATLASLabelY == None:
-                     cppTl.m_channelsATLASLabelY.push_back(c.ATLASLabelY)
+                     style.setATLASLabelY(c.ATLASLabelY)
                  if not c.ATLASLabelX == None:
-                     cppTl.m_channelsATLASLabelText.push_back(c.ATLASLabelText)
+                     style.setATLASLabelText(c.ATLASLabelText)
                  if not c.showLumi == None:
-                     cppTl.m_channelsShowLumi.push_back(c.showLumi)
+                     style.setShowLumi(c.showLumi)     
+
+                 # Plot cosmetics per fitConfig 
+                 style.setDataColor(tl.dataColor)
+                 style.setTotalPdfColor(tl.totalPdfColor)
+                 style.setErrorLineColor(tl.errorLineColor)
+                 style.setErrorLineStyle(tl.errorLineStyle)
+                 style.setErrorFillColor(tl.errorFillColor)
+                 style.setErrorFillStyle(tl.errorFillStyle)
+                 style.setRemoveEmptyBins = self.removeEmptyBins
+                 if not tl.tLegend == None:
+                     style.setTLegend(tl.tLegend)
+
+                 # Sample name and color
+                 for s in c.sampleList:
+                     style.m_sampleNames.push_back(s.name)
+                     style.m_sampleColors.push_back(s.color)
+
+                 # add channel and style for channel to C++ FitConfig (these two are expected to be synchronous
+                 cppTl.m_channels.push_back(c.channelName)
+                 cppTl.m_channelsStyle.push_back(style)
+                 
         self.cppMgr.checkConsistency()
         self.cppMgr.initialize()
         return

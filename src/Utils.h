@@ -15,6 +15,7 @@
 #include "RooArgSet.h"
 #include "RooArgList.h"
 #include "RooExpandedFitResult.h"
+#include "ChannelStyle.h"
 
 class TMap;
 class TTree;
@@ -46,7 +47,7 @@ namespace Util
   double looseToTightErr(const TString& reg, TMap* map);
   double getNonQcdVal(const TString& proc, const TString& reg, TMap* map, const TString& opt);
   
-  void GenerateFitAndPlot(TString fcName, Bool_t drawBeforeAfterFit, Bool_t plotCorrelationMatrix, Bool_t plotSeparateComponents, Bool_t plotNLL);
+  void GenerateFitAndPlot(TString fcName, Bool_t drawBeforeFit, Bool_t drawAfterFit, Bool_t plotCorrelationMatrix, Bool_t plotSeparateComponents, Bool_t plotNLL);
 
   RooWorkspace* GetWorkspaceFromFile( const TString& infile, const TString& wsname );
   void WriteWorkspace(RooWorkspace* w, TString outFileName="./results/BkgForumTest_combined_ComHistoSysOverConst_model.root", TString suffix = "");
@@ -62,7 +63,8 @@ namespace Util
 			     RooFitResult* rFit= NULL, RooAbsData* inputData=0, Bool_t plotRatio=kFALSE );
   void PlotPdfSumWithComponents(RooWorkspace* w, TString setupName = "Example3b", TString plotRegions = "ALL",  
   		                  TString outputPrefix = "", RooFitResult* rFit = NULL, RooAbsData* inputData=0, Bool_t plotRatio=kFALSE ); 
-  void AddComponentsToPlot(RooWorkspace* w,FitConfig* fc, RooPlot* frame, RooAbsPdf* regionPdf, RooAbsData* regionData, RooRealVar* obsRegion, TString regionCatLabel);
+  //void AddComponentsToPlot(RooWorkspace* w,FitConfig* fc, RooPlot* frame, RooAbsPdf* regionPdf, RooAbsData* regionData, RooRealVar* obsRegion, TString regionCatLabel);
+  void AddComponentsToPlot(RooWorkspace* w,FitConfig* fc, RooPlot* frame, RooAbsPdf* regionPdf, RooAbsData* regionData, RooRealVar* obsRegion, TString regionCatLabel, ChannelStyle style);
   void PlotSeparateComponents(RooWorkspace* w, TString setupName = "Example3b",TString plotRegions = "ALL", 
 			      TString outputPrefix = "", RooFitResult* rFit = NULL, RooAbsData* inputData=0 );
   TH2D* PlotCorrelationMatrix(RooFitResult* rFit = NULL);

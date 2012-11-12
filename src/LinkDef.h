@@ -20,6 +20,9 @@
 #pragma link C++ namespace ValidationUtils;
 #pragma link C++ function ValidationUtils::PullPlot3;
 
+#pragma link C++ class ChannelStyle;
+#pragma link C++ class std::vector<ChannelStyle>;
+#pragma link C++ class vector<ChannelStyle>::iterator;
 
 //////////////////////////////////////
 /// Functions from combination package

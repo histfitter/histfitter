@@ -1,5 +1,15 @@
+2012-11-07 Alex Koutsman <alex.koutsman@cern.ch>
+	* LinkDef.h : inclusion new ROOT class ChannelStyle for smoother transition to decoupled C++ side, no real change for users
+	* ChannelStyle.cxx : new ROOT class ChannelStyle, that defines all plotting options for each channel
+	* ChannelStyle.h : new ROOT class ChannelStyle, that defines all plotting options for each channel
+	* FitConfig.cxx : moving many functions/functionality to ChannelStyle
+	* FitConfig.h : moving many functions/functionality to ChannelStyle
+	* Utils.h : adjustments for ChannelStyle
+	* Utils.cxx : adjustments for ChannelStyle, addition of flags to GenerateFitAndPlot function to turn on plots at command line
+	* python/configManager.py : adjustments for ChannelStyle
+	
 2012-11-12 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
-    * scripts/HistFitter.py: -D is -d again; using without options gives old
+	* scripts/HistFitter.py: -D is -d again; using without options gives old
 	                         behaviour (before+after)
 
 2012-11-12 Geert-Jan Besjes <geert-jan.besjes@cern.ch>

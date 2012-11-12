@@ -1,0 +1,88 @@
+// vim: ts=4:sw=4
+////////////////////////////////////////////////////////////////////////
+// Creation: November 2012, Alex Koutsman (CERN)                          //
+// New class to set plot style for channel             
+////////////////////////////////////////////////////////////////////////
+
+#include <iostream>
+#include "ChannelStyle.h"
+
+using namespace std;
+
+ClassImp(ChannelStyle);
+
+
+ChannelStyle::ChannelStyle() : m_logger("ChannelStyle"){
+}
+
+ChannelStyle::ChannelStyle(const TString& name) : m_logger("ChannelStyle") {
+    m_name=name;
+    m_dataColor = kBlack;	     
+    m_totalPdfColor = kBlue;
+    m_errorLineColor = kBlue - 5;
+    m_errorLineStyle = 1;    // AK: 1 = kSolid, which somehow does not compile    
+    m_errorFillColor = kBlue - 5;
+    m_errorFillStyle = 3004;
+    m_legend = NULL;
+    m_removeEmptyBins = false;     
+
+    m_minY = 0.05;
+    m_maxY = -999.;
+    m_nBins = -1;
+    m_titleX = "";
+    m_titleY = "";
+    m_logY = kFALSE;
+    m_ATLASLabelX = -1.;
+    m_ATLASLabelY = -1.;
+    m_ATLASLabelText = "";
+    m_showLumi = kFALSE;
+
+    m_defaultSampleColor = kBlue;
+    m_defaultSampleCounter = 0;
+}
+
+Int_t ChannelStyle::getSampleColor(const TString& sample){
+  Bool_t sampleFound = kFALSE;
+  for(unsigned int i = 0; i< m_sampleColors.size(); i++){
+    m_logger << kDEBUG << "getSampleColor:  requested sample name: "<<sample  << " , defined m_sampleNames[" << i << "]="<< m_sampleNames[i] << GEndl;
+    if( sample.Contains(m_sampleNames[i].Data())){
+      sampleFound = kTRUE;
+      return m_sampleColors[i];
+    }
+  }
+  
+  if(!sampleFound){
+    m_logger << kWARNING << "getSampleColor unknown sample name: "<<sample << ", will use default color"<< GEndl;
+    Int_t color = m_defaultSampleColor + m_defaultSampleCounter;
+    m_defaultSampleCounter++;
+    return color;
+  }
+  
+  return 0;
+}
+
+TString ChannelStyle::getSampleName(const TString& sample){
+    for(unsigned int i = 0; i< m_sampleNames.size(); i++){
+      m_logger << kDEBUG << "getSampleName: requested sample name: "<<sample  << ", defined m_sampleNames[" << i << "]="<< m_sampleNames[i] << GEndl;
+      if( sample.Contains(m_sampleNames[i].Data())){
+            return m_sampleNames[i];
+        }
+    }
+    m_logger << kWARNING << "getSampleName unknown sample name: "<<sample << GEndl;
+    return "";
+}
+
+void ChannelStyle::Print(){
+    m_logger << kINFO << "*** ChannelStyle: " << m_name << " ***" << GEndl;
+        
+    m_logger << kINFO << " sampleNames: ";
+    for(unsigned int i = 0; i< m_sampleNames.size(); i++){ 
+        m_logger << kINFO << m_sampleNames.at(i) << " "; 
+    }
+    m_logger << kINFO << " sampleColors: ";
+    for(unsigned int i = 0; i< m_sampleColors.size(); i++){ 
+        m_logger << kINFO << m_sampleColors.at(i) << " "; 
+    }
+    
+    return;
+}
