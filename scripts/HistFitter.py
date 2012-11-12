@@ -205,7 +205,7 @@ if __name__ == "__main__":
     parser.add_argument("-z", "--discovery-hypotest", help="run discovery hypothesis test", action="store_true", default=not doUL)
     parser.add_argument("-g", "--grid_points", help="grid points to process (comma-seperated)")
     parser.add_argument("-r", "--regions", help="signal regions to process (comma-seperated)", default="all")
-    parser.add_argument("-d", "--draw", nargs="*",choices=["allPlots", "before","after", "corrMatrix", "sepComponents", "likelihood"], help="plots to draw")
+    parser.add_argument("-d", "--draw", nargs="*",choices=["allPlots", "before","after", "corrMatrix", "sepComponents", "likelihood"], help="plots to draw (none specified will draw before and after)")
     parser.add_argument("-b", "--background", help="when doing hypotest, set background levels to values, form of bkgParName,value")
     parser.add_argument("-0", "--no-empty", help="do not draw empty bins when drawing", action="store_true")
     parser.add_argument("-T", "--run-toys", help="run toys (default with mu)", action="store_true")
@@ -252,8 +252,11 @@ if __name__ == "__main__":
     if args.discovery_hypotest:
         doHypoTests = True
         doUL = False
- 
-    if args.draw:
+
+    if args.draw is not None and args.draw == []:
+        drawBeforeFit = True
+        drawAfterFit = True
+    elif args.draw:
         drawArgs = args.draw
         if len(drawArgs) == 1 and drawArgs[0] == "allPlots":
             drawBeforeFit = True
@@ -275,9 +278,6 @@ if __name__ == "__main__":
                     drawLogLikelihood = True
                 else:
                     log.fatal("Wrong draw argument: %s\n  Possible draw arguments are 'allPlots' or comma separated 'before, after, corrMatrix, sepComponents, likelihood'" % drawArg) #should now be caught by argparse --GJ 7/11/2012
-    else:
-        drawBeforeFit = True
-        drawAfterFit = True
 
     if args.no_empty:
         configMgr.removeEmptyBins = True
