@@ -19,9 +19,9 @@ import sys
 # The main functions are called at the bottom of this file.
 # This will probably require a bit more work to get to work nicely.
 
-def latexfitresults(filename, poiname='mu_SIG', lumiFB=1.0, nTOYS=3000, asimov=False):
+def latexfitresults(filename, poiname='mu_SIG', lumiFB=1.0, nTOYS=3000, asimov=False, wname='combined'):
 
-  workspacename='combined'
+  workspacename=wname
  
   w = Util.GetWorkspaceFromFile(filename,workspacename)
   
@@ -216,6 +216,7 @@ if __name__ == "__main__":
   if poiName == "default":
     poiList = []
   for chan in chanList:
+    origwsChan = None
     if chan in wsFileName:
       origwsChan = chan
     if origwsChan == None:
@@ -252,7 +253,7 @@ if __name__ == "__main__":
     wsFileNameChan = wsFileNameList[index]
     outputFileNameChan = outputFileNameList[index]
     # calculate upper limit
-    ulMapChan = latexfitresults(wsFileNameChan, poiNameChan, lumiFB, nTOYS, useAsimovSet)
+    ulMapChan = latexfitresults(wsFileNameChan, poiNameChan, lumiFB, nTOYS, useAsimovSet, chan)
     upLim[chan] = ulMapChan
     # print file for every channel separately
     if len(chanList)>1:
