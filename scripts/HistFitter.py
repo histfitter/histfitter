@@ -20,7 +20,7 @@ def enum(typename, field_names):
     return type(typename, (object,), d)()
 
 
-def GenerateFitAndPlotCPP(fc, drawBeforeAfterFit, drawCorrelationMatrix, drawSeparateComponents, drawLogLikelihood):
+def GenerateFitAndPlotCPP(fc, drawBeforeFit, drawAfterFit, drawCorrelationMatrix, drawSeparateComponents, drawLogLikelihood):
     from ROOT import Util
     
     log.debug("GenerateFitAndPlotCPP: drawBeforeFit %s " % drawBeforeFit) 
@@ -30,7 +30,7 @@ def GenerateFitAndPlotCPP(fc, drawBeforeAfterFit, drawCorrelationMatrix, drawSep
     log.debug("GenerateFitAndPlotCPP: drawLogLikelihood %s " % drawLogLikelihood)
 
     #    from configManager import configMgr
-    Util.GenerateFitAndPlot(fc.name, drawBeforeAfterFit, drawCorrelationMatrix, drawSeparateComponents, drawLogLikelihood)
+    Util.GenerateFitAndPlot(fc.name, drawBeforeFit, drawAfterFit, drawCorrelationMatrix, drawSeparateComponents, drawLogLikelihood)
 
 def GenerateFitAndPlot(fc, drawBeforeAfterFit):
     from configManager import configMgr
@@ -90,17 +90,18 @@ def GenerateFitAndPlot(fc, drawBeforeAfterFit):
     # set Errors of all parameters to 'natural' values before plotting/fitting
     Util.resetAllErrors(w)
 
-##     # normFactors (such as mu_Top, mu_WZ, etc) need to have their errors set
-##     # to a small number for the before the fit plots
-##     normList = configMgr.normList
-##     for norm in normList:
-##         if norm in fc.measurements[0].paramSettingDict.keys():
-##             if fc.measurements[0].paramSettingDict[norm][0]:
-##                 continue
-##         normfac = w.var(norm)
-##         if normfac:
-##             normfac.setError(0.001)
-##             print "Uncertainty on parameter: ", norm, " set to 0.001"
+    # AK: now done in Util.resetAllErrors()
+    #     # normFactors (such as mu_Top, mu_WZ, etc) need to have their errors set
+    #     # to a small number for the before the fit plots
+    #     normList = configMgr.normList
+    #     for norm in normList:
+    #         if norm in fc.measurements[0].paramSettingDict.keys():
+    #             if fc.measurements[0].paramSettingDict[norm][0]:
+    #                 continue
+    #         normfac = w.var(norm)
+    #         if normfac:
+    #             normfac.setError(0.001)
+    #             print "Uncertainty on parameter: ", norm, " set to 0.001"
 
     # set the flag for plotting ratio or pull distribution under the plot
     # plotRatio = False means that a pull distribution will be drawn
@@ -117,11 +118,11 @@ def GenerateFitAndPlot(fc, drawBeforeAfterFit):
     expResultBefore = RooExpandedFitResult(floatPars)
     Util.ImportInWorkspace(w, expResultBefore,
                             "RooExpandedFitResult_beforeFit")
-
-##     # plot before fit
-##     if drawBeforeAfterFit:
-##         Util.PlotPdfWithComponents(w, fc.name, plotChannels, "beforeFit",
-##                                    expResultBefore, toyMC, plotRatio)
+    
+    # plot before fit
+    if drawBeforeAfterFit:
+        Util.PlotPdfWithComponents(w, fc.name, plotChannels, "beforeFit",
+                                   expResultBefore, toyMC, plotRatio)
 
     # fit of all regions
     result = Util.FitPdf(w, fitChannels, lumiConst, toyMC)
@@ -204,15 +205,14 @@ if __name__ == "__main__":
     parser.add_argument("-z", "--discovery-hypotest", help="run discovery hypothesis test", action="store_true", default=not doUL)
     parser.add_argument("-g", "--grid_points", help="grid points to process (comma-seperated)")
     parser.add_argument("-r", "--regions", help="signal regions to process (comma-seperated)", default="all")
-    parser.add_argument("-d", help="draw plots", action="store_true")
-    parser.add_argument("-D", "--draw", choices=["allPlots", "before","after", "corrMatrix", "sepComponents", "likelihood"], help="plots to draw", nargs="*")
+    parser.add_argument("-d", "--draw", nargs="*",choices=["allPlots", "before","after", "corrMatrix", "sepComponents", "likelihood"], help="plots to draw")
     parser.add_argument("-b", "--background", help="when doing hypotest, set background levels to values, form of bkgParName,value")
     parser.add_argument("-0", "--no-empty", help="do not draw empty bins when drawing", action="store_true")
     parser.add_argument("-T", "--run-toys", help="run toys (default with mu)", action="store_true")
     parser.add_argument("-V", "--validation", help="include validation regions", action="store_true")
 
     args = parser.parse_args()
-
+   
     if args.fit_type == "bkg":
         myFitType = FitType.Background
     elif args.fit_type == "excl":
@@ -252,16 +252,9 @@ if __name__ == "__main__":
     if args.discovery_hypotest:
         doHypoTests = True
         doUL = False
-
-    if args.d:
-       drawBeforeFit = True 
-       drawAfterFit = True 
-
+ 
     if args.draw:
-        drawBeforeAfterFit = True
-        drawArgs = args.draw.split(',')
-        print "\n\n drawArgs=", drawArgs
-        #print "drawArgs(",drawArgs, ")  length = ", len(drawArgs)
+        drawArgs = args.draw
         if len(drawArgs) == 1 and drawArgs[0] == "allPlots":
             drawBeforeFit = True
             drawAfterFit = True
@@ -272,7 +265,7 @@ if __name__ == "__main__":
             for drawArg in drawArgs:
                 if drawArg == "before":
                     drawBeforeFit = True
-                if drawArg == "after":
+                elif drawArg == "after":
                     drawAfterFit = True
                 elif drawArg == "corrMatrix":
                     drawCorrelationMatrix = True
@@ -282,6 +275,9 @@ if __name__ == "__main__":
                     drawLogLikelihood = True
                 else:
                     log.fatal("Wrong draw argument: %s\n  Possible draw arguments are 'allPlots' or comma separated 'before, after, corrMatrix, sepComponents, likelihood'" % drawArg) #should now be caught by argparse --GJ 7/11/2012
+    else:
+        drawBeforeFit = True
+        drawAfterFit = True
 
     if args.no_empty:
         configMgr.removeEmptyBins = True
@@ -342,7 +338,7 @@ if __name__ == "__main__":
             #r=GenerateFitAndPlot(configMgr.fitConfigs[2],drawBeforeAfterFit)
             #for idx in range(len(configMgr.fitConfigs)):
             #    r=GenerateFitAndPlot(configMgr.fitConfigs[idx],drawBeforeAfterFit)
-            r = GenerateFitAndPlotCPP(configMgr.fitConfigs[0], drawBeforeAfterFit, drawCorrelationMatrix, drawSeparateComponents, drawLogLikelihood)
+            r = GenerateFitAndPlotCPP(configMgr.fitConfigs[0], drawBeforeFit, drawAfterFit, drawCorrelationMatrix, drawSeparateComponents, drawLogLikelihood)
             pass
         #configMgr.cppMgr.fitAll()
         log.info("\nr0=GenerateFitAndPlot(configMgr.fitConfigs[0],False)")
