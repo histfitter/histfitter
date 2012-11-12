@@ -202,14 +202,15 @@ if __name__ == "__main__":
     parser.add_argument("-z", "--discovery-hypotest", help="run discovery hypothesis test", action="store_true", default=not doUL)
     parser.add_argument("-g", "--grid_points", help="grid points to process (comma-seperated)")
     parser.add_argument("-r", "--regions", help="signal regions to process (comma-seperated)", default="all")
-    parser.add_argument("-d", "--draw", choices=["allPlots", "beforeAfter", "corrMatrix", "sepComponents", "likelihood"], help="plots to draw")
+    parser.add_argument("-d", help="draw plots", action="store_true")
+    parser.add_argument("-D", "--draw", choices=["allPlots", "beforeAfter", "corrMatrix", "sepComponents", "likelihood"], help="plots to draw")
     parser.add_argument("-b", "--background", help="when doing hypotest, set background levels to values, form of bkgParName,value")
     parser.add_argument("-0", "--no-empty", help="do not draw empty bins when drawing", action="store_true")
     parser.add_argument("-T", "--run-toys", help="run toys (default with mu)", action="store_true")
     parser.add_argument("-V", "--validation", help="include validation regions", action="store_true")
 
     args = parser.parse_args()
-    
+   
     if args.fit_type == "bkg":
         myFitType = FitType.Background
     elif args.fit_type == "excl":
@@ -249,6 +250,9 @@ if __name__ == "__main__":
     if args.discovery_hypotest:
         doHypoTests = True
         doUL = False
+
+    if args.d:
+       drawBeforeAfterFit = True 
 
     if args.draw:
         drawBeforeAfterFit = True

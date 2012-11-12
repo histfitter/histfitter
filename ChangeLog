@@ -1,5 +1,14 @@
+2012-12-12 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
+	* python/fitConfig.py: statErrorType property added, plus option to set it
+						   progagate down to channels in config
+						   constructorInit uses mkdir_p implementation for new directories
+	* scripts/HistFitter.py: now uses argparse; -d is the old draw setting, Alex'
+							 --draw is now -D. Other changes: --ty -> -T, fit
+							 types via -F (two-letter shorts not allowed) 
+	* setup.sh:	if-statement to check hostname; lx* will take gcc from afs
+
 2012-12-07 Evgeny Khramov <Evgeniy.Khramov@cern.ch>
-  * UpperLimitTable.py: set the workspace name for each individual channel
+	* UpperLimitTable.py: set the workspace name for each individual channel
 
 2012-11-07 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
 	* setup.sh: source statement for gcc breaks setups when running locally.

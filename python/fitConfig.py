@@ -1,7 +1,7 @@
 import ROOT
 from ROOT import TFile, TMath, RooRandom, TH1, TH1F
 from ROOT import kBlack, kWhite, kGray, kRed, kPink, kMagenta, kViolet, kBlue, kAzure, kCyan, kTeal, kGreen, kSpring, kYellow, kOrange, kDashed, kSolid, kDotted
-from os import system,mkdir
+from os import system, sys
 from math import fabs
 from measurement import Measurement
 from channel import Channel
@@ -19,6 +19,16 @@ TH1.SetDefaultSumw2(True)
 from copy import deepcopy,copy
 from configManager import configMgr
 
+import os, errno
+
+def mkdir_p(path):
+    try:
+        os.makedirs(path)
+    except OSError as exc: # Python >2.5
+        if exc.errno == errno.EEXIST and os.path.isdir(path):
+            pass
+        else: raise
+
 class fitConfig(object):
     """
     Defines the content of a top-level HistFactory workspace
@@ -32,6 +42,7 @@ class fitConfig(object):
         #attributes to below are OK to deepcopy
         self.mode = "comb"
         self.statErrThreshold = None #None means to turn OFF mcStat error
+        self.statErrorType = "Gaussian"
         self.measurements = []
         self.channels = []
         self.sampleList = []
@@ -67,16 +78,10 @@ class fitConfig(object):
     def ConstructorInit(self, name):
         #shared method between __init__ and Clone
         self.name = name
-        try:
-            mkdir('./results/'+configMgr.analysisName)
-        except: pass
-        try:
-            mkdir('./config/'+configMgr.analysisName)
-        except: pass
-        try:
-            mkdir('./data/'+configMgr.analysisName)
-        except: pass
-        self.prefix=configMgr.analysisName + "/" + self.name
+        mkdir_p('./results/'+configMgr.analysisName)
+        mkdir_p('./config/'+configMgr.analysisName)
+        mkdir_p('./data/'+configMgr.analysisName)
+        self.prefix = configMgr.analysisName + "/" + self.name
         self.xmlFileName = "N/A"
         self.wsFileName = "N/A"
         return
@@ -88,7 +93,7 @@ class fitConfig(object):
         # file name externally decided by HistFactory.
         self.wsFileName = "results/" + self.prefix + "_combined_" + \
                           self.measurements[0].name + "_model.root"
-        
+       
         for sam in self.sampleList:
             if sam.isData: # FIXME (works but ugly)
                 self.sampleList.remove(sam)       #Just making sure that Data is the last element of the list
@@ -203,7 +208,15 @@ class fitConfig(object):
 
         raise RuntimeError("Measurement %s does not exist in %s" % (name, self.name))
 
-    def addChannel(self, variableName, regions ,nBins, binLow, binHigh):
+    def statStatErrorType(self, t):
+        """
+        Set stat error type for config, and propagate down to channels
+        """
+        self.statErrorType = t
+        for chan in self.channels:
+            chan.statErrorType = t
+
+    def addChannel(self, variableName, regions, nBins, binLow, binHigh):
         """
         Build a channel object from this TopLevel
         """
@@ -222,6 +235,9 @@ class fitConfig(object):
 
         #set channel parent
         chanObj.parentTopLvl = self
+
+        #set stat error type
+        chanObj.statErrorType = self.statErrorType
 
         # Channel doesn't have weights so add them
         chanObj.setWeights(self.weights)
@@ -256,6 +272,8 @@ class fitConfig(object):
 
         #reset channel parent
         newObj.parentTopLvl = self
+
+        newObj.statErrorType = self.statErrorType
 
         # If the channel doesn't have any weights then add them
         if len(newObj.weights) == 0:
