@@ -23,7 +23,8 @@ def enum(typename, field_names):
 def GenerateFitAndPlotCPP(fc, drawBeforeAfterFit, drawCorrelationMatrix, drawSeparateComponents, drawLogLikelihood):
     from ROOT import Util
     
-    log.debug("GenerateFitAndPlotCPP: drawBeforeAfterFit %s " % drawBeforeAfterFit) 
+    log.debug("GenerateFitAndPlotCPP: drawBeforeFit %s " % drawBeforeFit) 
+    log.debug("GenerateFitAndPlotCPP: drawAfterFit %s " % drawAfterFit) 
     log.debug("GenerateFitAndPlotCPP: drawCorrelationMatrix %s " % drawCorrelationMatrix) 
     log.debug("GenerateFitAndPlotCPP: drawSeparateComponents %s " % drawSeparateComponents)
     log.debug("GenerateFitAndPlotCPP: drawLogLikelihood %s " % drawLogLikelihood)
@@ -171,7 +172,8 @@ if __name__ == "__main__":
     printLimits = False
     doHypoTests = False
     doUL = True           # default is exclusion. goes toegether with doHypoTests
-    drawBeforeAfterFit              = False
+    drawBeforeFit              = False
+    drawAfterFit              = False
     drawCorrelationMatrix         = False
     drawSeparateComponents = False
     drawLogLikelihood               = False
@@ -203,7 +205,7 @@ if __name__ == "__main__":
     parser.add_argument("-g", "--grid_points", help="grid points to process (comma-seperated)")
     parser.add_argument("-r", "--regions", help="signal regions to process (comma-seperated)", default="all")
     parser.add_argument("-d", help="draw plots", action="store_true")
-    parser.add_argument("-D", "--draw", choices=["allPlots", "beforeAfter", "corrMatrix", "sepComponents", "likelihood"], help="plots to draw")
+    parser.add_argument("-D", "--draw", choices=["allPlots", "before","after", "corrMatrix", "sepComponents", "likelihood"], help="plots to draw")
     parser.add_argument("-b", "--background", help="when doing hypotest, set background levels to values, form of bkgParName,value")
     parser.add_argument("-0", "--no-empty", help="do not draw empty bins when drawing", action="store_true")
     parser.add_argument("-T", "--run-toys", help="run toys (default with mu)", action="store_true")
@@ -252,21 +254,26 @@ if __name__ == "__main__":
         doUL = False
 
     if args.d:
-       drawBeforeAfterFit = True 
+       drawBeforeFit = True 
+       drawAfterFit = True 
 
     if args.draw:
         drawBeforeAfterFit = True
         drawArgs = args.draw.split(',')
+        print "\n\n drawArgs=", drawArgs
         #print "drawArgs(",drawArgs, ")  length = ", len(drawArgs)
         if len(drawArgs) == 1 and drawArgs[0] == "allPlots":
-            drawBeforeAfterFit = True
+            drawBeforeFit = True
+            drawAfterFit = True
             drawCorrelationMatrix = True
             drawSeparateComponents = True
             drawLogLikelihood = True
         elif len(drawArgs)>0:
             for drawArg in drawArgs:
-                if drawArg == "beforeAfter":
-                    drawBeforeAfterFit = True
+                if drawArg == "before":
+                    drawBeforeFit = True
+                if drawArg == "after":
+                    drawAfterFit = True
                 elif drawArg == "corrMatrix":
                     drawCorrelationMatrix = True
                 elif drawArg == "sepComponents":
@@ -274,7 +281,7 @@ if __name__ == "__main__":
                 elif drawArg == "likelihood":
                     drawLogLikelihood = True
                 else:
-                    log.fatal("Wrong draw argument: %s\n  Possible draw arguments are 'allPlots' or comma separated 'beforeAfter, corrMatrix, sepComponents, likelihood'" % drawArg) #should now be caught by argparse --GJ 7/11/2012
+                    log.fatal("Wrong draw argument: %s\n  Possible draw arguments are 'allPlots' or comma separated 'before, after, corrMatrix, sepComponents, likelihood'" % drawArg) #should now be caught by argparse --GJ 7/11/2012
 
     if args.no_empty:
         configMgr.removeEmptyBins = True
@@ -341,8 +348,8 @@ if __name__ == "__main__":
         log.info("\nr0=GenerateFitAndPlot(configMgr.fitConfigs[0],False)")
         log.info("r1=GenerateFitAndPlot(configMgr.fitConfigs[1],False)")
         log.info("r2=GenerateFitAndPlot(configMgr.fitConfigs[2],False)")
-        log.info(" OR \n GenerateFitAndPlotCPP(configMgr.fitConfigs[0], drawBeforeAfterFit, drawCorrelationMatrix, drawSeparateComponents, drawLogLikelihood)")
-        log.info("    where drawBeforeAfterFit, drawCorrelationMatrix, drawSeparateComponents, drawLogLikelihood are booleans")
+        log.info(" OR \nGenerateFitAndPlotCPP(configMgr.fitConfigs[0], drawBeforeAfterFit, drawCorrelationMatrix, drawSeparateComponents, drawLogLikelihood)")
+        log.info("   where drawBeforeAfterFit, drawCorrelationMatrix, drawSeparateComponents, drawLogLikelihood are booleans")
 
         pass
 
