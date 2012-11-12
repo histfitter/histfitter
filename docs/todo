@@ -8,13 +8,17 @@ Prioritized todo-list:
 >>> Top priority: Crashes & fixes & documentation: 
 >>> (At a minimum, let's try to do this before the post-mortem)
 
-- Move tutorial examples to HFUser?
-V Commit HF patches for tutorial into trunk.
-V There is no script/method for merging toys from discovery mode.
+From 2012-11-12:
+- Example of log-normal constraints
+- Using minos in fit
+- compilation on mac standalone
+- Correct MC stat errors in yields tables.
+- non-truncated p-value when deficit
+- sigma values in list-file.
 
-V Upgrade to ROOT v5.34. Python-based objects (Geert-Jan)
+
+- Move tutorial examples to HFUser?
 - document new systematic uncertainties (Max)
-V Treatment of negative QCD weights: can lead to crash in signal region. (Zach,Max)
 - Absolute errors in case of nominal prediction with 0.0 events. Empty nominal, non-empty systematic (Marcello)
 - Hard-coded names, e.g. sig_xsection. Needs to be documented, or made flexible. (Jeanette?)
 - Contour scripts for plotting the new theoretical error. Properly available and documented? (Yu?)
