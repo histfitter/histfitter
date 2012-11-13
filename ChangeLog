@@ -1,3 +1,6 @@
+2012-11-13 Alex Koutsman <alex.koutsman@cern.ch>
+	* Utils.cxx : bug fix in ratio calculation, only affects crash with ROOT 5.34.03 while plotting, nothing changes in calculated values
+
 2012-11-13 Max Baak <mbaak@cern.ch>
 	M       configManager.py
 	M       sample.py
@@ -6,7 +9,7 @@
 	* Added "shapeStat" systematic, which does statistical errors per sample (i.e. not summed up)
 
 2012-11-13 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
-    * python/measurement.py: user-set measurement name is now properly used
+	* python/measurement.py: user-set measurement name is now properly used
 
 2012-11-12 Alex Koutsman <alex.koutsman@cern.ch>
 	* LinkDef.h : inclusion new ROOT class ChannelStyle for smoother transition to decoupled C++ side, no real change for users

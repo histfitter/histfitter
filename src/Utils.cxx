@@ -1165,10 +1165,10 @@ void Util::PlotPdfWithComponents(RooWorkspace* w, FitConfig* fc, TString plotReg
             if (!plotRatio){ 
                 lowerlimit = -5.7; upperlimit = 5.7;
             }
-
+	  
             frame2->SetMinimum(lowerlimit);
             frame2->SetMaximum(upperlimit);
-
+	   
             if(plotRatio) 
                 frame2->GetYaxis()->SetTitle("Data / SM");
             else 
@@ -2664,7 +2664,7 @@ RooCurve* Util::MakePdfErrorRatioHist(RooWorkspace* w, RooAbsData* regionData, R
     // Find curve object
     RooCurve* curveError = (RooCurve*) frame->findObject(curvename,RooCurve::Class()) ;
     if (!curveError) {
-        Logger << kERROR << "Util::makePdfErrorRatioHist(" << frame->GetName() << ") cannot find curve" << GEndl ;
+        Logger << kERROR << "Util::makePdfErrorRatioHist(" << frame->GetName() << ") cannot find curveError" << GEndl ;
         return 0 ;
     }
 
@@ -2674,13 +2674,14 @@ RooCurve* Util::MakePdfErrorRatioHist(RooWorkspace* w, RooAbsData* regionData, R
     ratioBand->SetLineColor(kBlue-5);
     ratioBand->SetFillColor(kBlue-5);
     ratioBand->SetFillStyle(3004);
-
+    
     Int_t j = 0;
     Bool_t bottomCurve = kFALSE;
     for(Int_t i=1; i<curveError->GetN()-1; i++){
-        Double_t x,y;
+        Double_t x = 0.;
+        Double_t y = 0.;
         curveError->GetPoint(i,x,y) ;
-
+      
         // errorBand curve has twice as many points as does a normal/nominal (pdf) curve
         //  first it walks through all +1 sigma points (topCurve), then the -1 sigma points (bottomCurve)
         //   to divide the errorCurve by the pdfCurve, we need to count back for the pdfCurve once we're in the middle of errorCurve
@@ -2691,9 +2692,10 @@ RooCurve* Util::MakePdfErrorRatioHist(RooWorkspace* w, RooAbsData* regionData, R
 
         // each errorCurve has two more points just outside the plot, so we need to treat them separately
         if( i == (curveNom->GetN() - 1) ||  i == curveNom->GetN() ){
-            xNom = x;
-            yNom = 1.;
-            ratioBand->addPoint(x, (y - yNom) / y + 1.);
+          //  xNom = x;
+          //  yNom = 0.;
+            ratioBand->addPoint(x, 0.);   
+	    //            ratioBand->addPoint(x,((y - yNom) / y + 1.) );
             continue;
         }
 
@@ -2708,9 +2710,11 @@ RooCurve* Util::MakePdfErrorRatioHist(RooWorkspace* w, RooAbsData* regionData, R
 
         // only divide by yNom if it is non-zero
         if(  fabs(yNom) > 0.00001 ){ 
-            ratioBand->addPoint(x, (y - yNom) / yNom + 1.);  
+	  //            ratioBand->addPoint(x, (y - yNom) / yNom + 1.);  
+	  ratioBand->addPoint(x, (y / yNom));  
         } else { 
-            ratioBand->addPoint(x, (y - yNom));       
+	  //            ratioBand->addPoint(x, (y - yNom));       	    
+	  ratioBand->addPoint(x, 0.);       	    
         }
     }
 
