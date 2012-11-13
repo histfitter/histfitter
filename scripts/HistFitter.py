@@ -295,9 +295,9 @@ if __name__ == "__main__":
     if args.regions and args.regions != "" and args.regions != "all":
         pickedSRs = args.regions.split(",")
     else:
-        pickedSRs = None #TODO do we want this?
+        pickedSRs = [] #MB: used by 0-lepton fit
 
-    print pickedSRs
+    if len(pickedSRs)>0: log.info("Selected signal regions: %s" % pickedSRs) 
 
     if args.run_toys:
         runToys = True
