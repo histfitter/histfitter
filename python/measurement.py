@@ -62,7 +62,7 @@ class Measurement(object):
         self.constraintTermDict[paramName] = (type,relUnc)
 
     def createHistFactoryObject(self, prefix):
-        m = ROOT.RooStats.HistFactory.Measurement("NormalMeasurement")
+        m = ROOT.RooStats.HistFactory.Measurement(self.name)
         m.SetOutputFilePrefix( "./results/"+prefix )
         m.SetPOI( (self.poiList)[0] )
         

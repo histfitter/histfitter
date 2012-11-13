@@ -1,4 +1,7 @@
-2012-11-07 Alex Koutsman <alex.koutsman@cern.ch>
+2012-11-13 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
+    * python/measurement.py: user-set measurement name is now properly used
+
+2012-11-12 Alex Koutsman <alex.koutsman@cern.ch>
 	* LinkDef.h : inclusion new ROOT class ChannelStyle for smoother transition to decoupled C++ side, no real change for users
 	* ChannelStyle.cxx : new ROOT class ChannelStyle, that defines all plotting options for each channel
 	* ChannelStyle.h : new ROOT class ChannelStyle, that defines all plotting options for each channel
