@@ -683,6 +683,13 @@ class ConfigManager(object):
             else:
                 chan.getSample(sam.name).addShapeSys(syst.name, nomName, highName, lowName)
                 chan.getSample(sam.name).shapeSystList.append((syst.name, nomName+"Norm", syst.constraint, "", "", "", ""))
+        elif syst.method == "shapeStat":
+            try:
+                threshold = chan.statErrorThreshold
+            except:
+                threshold = None                
+            chan.getSample(sam.name).addShapeStat(syst.name, nomName, statErrorThreshold = threshold )
+            chan.getSample(sam.name).shapeSystList.append(('stat_'+syst.name, nomName+"Norm", syst.constraint, "", "", "", ""))
         else:
             log.error("ERROR don't know what to do with %s %s"%(syst.name,syst.method))
         return

@@ -496,6 +496,27 @@ class Sample(object):
         return
 
 
+    def addShapeStat(self, systName, nomName, constraintType="Gaussian", statErrorThreshold=None):
+        """
+        Add a ShapeStat entry using the nominal histogram
+        """
+        configMgr.hists[nomName+"Norm"]  = configMgr.hists[nomName].Clone(nomName+"Norm")
+
+        for iBin in xrange(configMgr.hists[nomName+"Norm"].GetNbinsX()+1):
+            try:
+                ratio = configMgr.hists[nomName].GetBinError(iBin) / configMgr.hists[nomName].GetBinContent(iBin)
+                if (statErrorThreshold is not None) and (ratio<statErrorThreshold): ratio = 0.0   ## don't show if below threshold
+                configMgr.hists[nomName+"Norm"].SetBinContent( iBin, ratio )
+                configMgr.hists[nomName+"Norm"].SetBinError( iBin, 0. )
+                log.debug("!!!!!! shapeStat %s bin %g value %g" % (systName, iBin, configMgr.hists[nomName+"Norm"].GetBinContent(iBin)) )
+            except ZeroDivisionError:
+                configMgr.hists[nomName+"Norm"].SetBinContent( iBin, 0. )
+                configMgr.hists[nomName+"Norm"].SetBinError( iBin, 0.)
+        if not systName in configMgr.systDict.keys():
+            self.systList.append(systName)
+        return
+
+
     def addOverallSys(self, systName, high, low):
         """
         Add an OverallSys entry using the high and low values

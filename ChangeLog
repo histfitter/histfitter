@@ -1,3 +1,10 @@
+2012-11-13 Max Baak <mbaak@cern.ch>
+	M       configManager.py
+	M       sample.py
+	M       systematic.py
+	M       MyConfigExample.py
+	* Added "shapeStat" systematic, which does statistical errors per sample (i.e. not summed up)
+
 2012-11-13 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
     * python/measurement.py: user-set measurement name is now properly used
 

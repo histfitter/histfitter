@@ -44,11 +44,11 @@ class SystematicBase:
         self.treeLoName = {}
         self.treeHiName = {}
 
-        if not constraint == "Gaussian" and not method == "shapeSys":
+        if not constraint == "Gaussian" and not (method == "shapeSys" or method == "shapeStat"):
             raise ValueError("Constraints can only be specified for shapeSys")
         self.constraint = constraint
         allowedSys = ["histoSys","overallSys","userOverallSys","overallHistoSys","normHistoSys",
-                      "shapeSys","histoSysOneSide","histoSysOneSideSym","normHistoSysOneSide","normHistoSysOneSideSym","userHistoSys","userNormHistoSys",
+                      "shapeSys","shapeStat","histoSysOneSide","histoSysOneSideSym","normHistoSysOneSide","normHistoSysOneSideSym","userHistoSys","userNormHistoSys",
                       "overallNormHistoSys","overallNormHistoSysOneSide","overallNormHistoSysOneSideSym" ]
 
         if not self.method in allowedSys:

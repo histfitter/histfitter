@@ -9,13 +9,12 @@ Prioritized todo-list:
 >>> (At a minimum, let's try to do this before the post-mortem)
 
 From 2012-11-12:
-- Example of log-normal constraints
+- Example of log-normal constraints (for low event statistics)
 - Using minos in fit
 - compilation on mac standalone
 - Correct MC stat errors in yields tables.
-- non-truncated p-value when deficit
+- non-truncated p-value when deficit (check Zach's recent commits)
 - sigma values in list-file.
-
 
 - Move tutorial examples to HFUser?
 - document new systematic uncertainties (Max)

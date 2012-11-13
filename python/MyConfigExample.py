@@ -106,6 +106,9 @@ wzKtScale = Systematic("KtScaleWZ",configMgr.weights,ktScaleWHighWeights,ktScale
 # JES uncertainty as shapeSys - one systematic per region (combine WR and TR), merge samples
 jes = Systematic("JES","_NoSys","_JESup","_JESdown","tree","normHistoSys")
 
+statWRwz  = Systematic("SLWR_wz", "_NoSys","","","tree","shapeStat")
+statWRtop = Systematic("SLWR_top","_NoSys","","","tree","shapeStat")
+
 # name of nominal histogram for systematics
 configMgr.nomName = "_NoSys"
 
@@ -198,6 +201,9 @@ nJetTS.addSystematic(jes)
 
 bkt.setBkgConstrainChannels([nJetWS,nJetTS])
 
+### alternative: statistical error for each sample
+#nJetWS.getSample("Top").addSystematic(statWRtop)
+#nJetWS.getSample("WZ").addSystematic(statWRwz)
 
 ###################
 #                                               #
