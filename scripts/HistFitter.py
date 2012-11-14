@@ -205,7 +205,15 @@ if __name__ == "__main__":
     parser.add_argument("-z", "--discovery-hypotest", help="run discovery hypothesis test", action="store_true", default=not doUL)
     parser.add_argument("-g", "--grid_points", help="grid points to process (comma-seperated)")
     parser.add_argument("-r", "--regions", help="signal regions to process (comma-seperated)", default="all")
-    parser.add_argument("-d", "--draw", nargs="*",choices=["allPlots", "before","after", "corrMatrix", "sepComponents", "likelihood"], help="plots to draw (none specified will draw before and after)")
+    
+    # note that we cannot make -d and -D the same due to http://bugs.python.org/issue9338
+    # if we do so, specifying -d without argument would, if -d is the last option, eat the configFile as draw option
+    # i.e. "HistFitter -f -d configFile.py" would fail, "HistFitter -d -f configFile.py" would work 
+    # (a workaround using "-f -d -- configFile.py" exists but it would confuse users)
+    # --GJ 14/11/2012 
+    parser.add_argument("-d", action="store_true", help="draw before/after plots")
+    parser.add_argument("-D", "--draw", choices=["allPlots", "before","after", "corrMatrix", "sepComponents", "likelihood"], help="specify plots to draw")
+    
     parser.add_argument("-b", "--background", help="when doing hypotest, set background levels to values, form of bkgParName,value")
     parser.add_argument("-0", "--no-empty", help="do not draw empty bins when drawing", action="store_true")
     parser.add_argument("-T", "--run-toys", help="run toys (default with mu)", action="store_true")
@@ -253,10 +261,11 @@ if __name__ == "__main__":
         doHypoTests = True
         doUL = False
 
-    if args.draw is not None and args.draw == []:
+    if args.d:
         drawBeforeFit = True
         drawAfterFit = True
-    elif args.draw:
+    
+    if args.draw:
         drawArgs = args.draw
         if len(drawArgs) == 1 and drawArgs[0] == "allPlots":
             drawBeforeFit = True
