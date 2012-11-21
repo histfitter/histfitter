@@ -505,7 +505,9 @@ class Sample(object):
         for iBin in xrange(configMgr.hists[nomName+"Norm"].GetNbinsX()+1):
             try:
                 ratio = configMgr.hists[nomName].GetBinError(iBin) / configMgr.hists[nomName].GetBinContent(iBin)
-                if (statErrorThreshold is not None) and (ratio<statErrorThreshold): ratio = 0.0   ## don't show if below threshold
+                if (statErrorThreshold is not None) and (ratio<statErrorThreshold): 
+                    log.warning( "!!!!!! shapeStat %s bin %g value %g, below threshold: %g. Reset to 0." % (systName, iBin, ratio, statErrorThreshold) )
+                    ratio = 0.0   ## don't show if below threshold
                 configMgr.hists[nomName+"Norm"].SetBinContent( iBin, ratio )
                 configMgr.hists[nomName+"Norm"].SetBinError( iBin, 0. )
                 log.debug("!!!!!! shapeStat %s bin %g value %g" % (systName, iBin, configMgr.hists[nomName+"Norm"].GetBinContent(iBin)) )
