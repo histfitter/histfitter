@@ -1,3 +1,10 @@
+2012-11-21 Max Baak <mbaak@cern.ch>
+	M       ConfigMgr.cxx
+	M       Makefile
+	M       HypoTestTool.cxx
+	M       ChannelStyle.h
+	* Minor changes to fix compiler problems or warnings on mac. 
+
 2012-11-14 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
     * scripts/HistFitter.py: reverted back to -d and -D. See inline comment
                              for explanation. Necessary due to 
