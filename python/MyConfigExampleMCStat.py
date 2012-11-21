@@ -1,3 +1,7 @@
+## MB: This config file is similar to MyConfigExample.py, but the usual summed-up MC statistical errors for W and top 
+## are replaced by individual MC stat errors per sample
+
+
 ################################################################
 ## In principle all you have to setup is defined in this file ##
 ################################################################
@@ -29,7 +33,7 @@ ROOT.SetAtlasStyle()
 #---------------------------------------
 # Flags to control which fit is executed
 #---------------------------------------
-useStat=True
+useStat=False ## usual summed-up MC statistical errors replaces by individual MC stat errors per sample
 doValidation=True
 doDiscovery=False
 doExclusion=False
@@ -108,6 +112,10 @@ jes = Systematic("JES","_NoSys","_JESup","_JESdown","tree","normHistoSys")
 
 statWRwz  = Systematic("SLWR_wz", "_NoSys","","","tree","shapeStat")
 statWRtop = Systematic("SLWR_top","_NoSys","","","tree","shapeStat")
+statTRwz  = Systematic("SLTR_wz", "_NoSys","","","tree","shapeStat")
+statTRtop = Systematic("SLTR_top","_NoSys","","","tree","shapeStat")
+statSSwz  = Systematic("SLSS_wz", "_NoSys","","","tree","shapeStat")
+statSStop = Systematic("SLSS_top","_NoSys","","","tree","shapeStat")
 
 # name of nominal histogram for systematics
 configMgr.nomName = "_NoSys"
@@ -167,10 +175,13 @@ srBinHigh = 1.5
 #************
 
 bkt = configMgr.addFitConfig("BkgOnly")
-if useStat:
-    bkt.statErrThreshold=0.05 
-else:
-    bkt.statErrThreshold=None
+bkt.statErrThreshold=0.05 
+
+#if useStat:
+#    bkt.statErrThreshold=0.05 
+#else:
+#    bkt.statErrThreshold=None
+
 bkt.addSamples([topSample,wzSample,qcdSample,bgSample,dataSample])
 
 # Systematics to be applied globally within this topLevel
@@ -180,6 +191,25 @@ bkt.getSample("WZ").addSystematic(wzKtScale)
 meas=bkt.addMeasurement(name="NormalMeasurement",lumi=1.0,lumiErr=0.039)
 meas.addPOI("mu_SIG")
 meas.addParamSetting("mu_BG",True,1)
+
+#meas.addParamSetting("gamma_shapestat_SLTR_top_bin_5",True,1)
+#meas.addParamSetting("gamma_shapestat_SLTR_top_bin_6",True,1)
+#meas.addParamSetting("gamma_shapestat_SLTR_top_bin_7",True,1)
+#meas.addParamSetting("gamma_shapestat_SLWR_top_bin_7",True,1)
+
+#meas.addParamSetting("gamma_shapestat_SLTR_wz_bin_5",True,1)
+#meas.addParamSetting("gamma_shapestat_SLTR_wz_bin_6",True,1)
+#meas.addParamSetting("gamma_shapestat_SLTR_wz_bin_7",True,1)
+#meas.addParamSetting("gamma_shapestat_SLWR_wz_bin_7",True,1)
+
+#meas.addParamSetting("gamma_shapestat_SLWR_top_bin_0",True,1)
+#meas.addParamSetting("gamma_shapestat_SLWR_top_bin_1",True,1)
+#meas.addParamSetting("gamma_shapestat_SLWR_top_bin_2",True,1)
+
+#meas.addParamSetting("gamma_shapestat_SLWR_wz_bin_0",True,1)
+#meas.addParamSetting("gamma_shapestat_SLWR_wz_bin_1",True,1)
+#meas.addParamSetting("gamma_shapestat_SLWR_wz_bin_2",True,1)
+
 
 #-------------------------------------------------
 # Constraining regions - statistically independent
@@ -201,9 +231,12 @@ nJetTS.addSystematic(jes)
 
 bkt.setBkgConstrainChannels([nJetWS,nJetTS])
 
-### alternative: statistical error for each sample
-#nJetWS.getSample("Top").addSystematic(statWRtop)
-#nJetWS.getSample("WZ").addSystematic(statWRwz)
+## alternative: statistical error for each sample
+nJetWS.getSample("Top").addSystematic(statWRtop)
+nJetWS.getSample("WZ").addSystematic(statWRwz)
+nJetTS.getSample("Top").addSystematic(statTRtop)
+nJetTS.getSample("WZ").addSystematic(statTRwz)
+
 
 ###################
 #                                               #
@@ -292,6 +325,9 @@ if doValidation:
     mm2J = bkt.addChannel("met/meff2Jet",["SS"],6,0.1,0.7)
     mm2J.useOverflowBin=True
     mm2J.addSystematic(jes)
+
+    mm2J.getSample("Top").addSystematic(statSStop)
+    mm2J.getSample("WZ").addSystematic(statSSwz)
 
     #    bkt.setValidationChannels([nJetSLVR2,metSLVR2,meffSLVR2,nBJetSLVR2,metmeffSLVR2,mm2J,srs1l2jTChannel])
     bkt.setValidationChannels([nJetSLVR2,srs1l2jTChannel,mm2J])
