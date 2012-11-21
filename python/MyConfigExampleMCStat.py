@@ -47,7 +47,7 @@ configMgr.nPoints=20
 #--------------------------------
 
 # First define HistFactory attributes
-configMgr.analysisName = "MyConfigExample"
+configMgr.analysisName = "MyConfigExampleMCStat"
 
 # Scaling calculated by outputLumi / inputLumi
 configMgr.inputLumi = 0.001 # Luminosity of input TTree after weighting
