@@ -644,27 +644,31 @@ class Sample(object):
         Remove a systematic
         """
         self.systDict.clear()
-   
+  
+    # TODO: it would be nice to change the internal lists to dictionaries instead of arrays in a next iteration
     def createHistFactoryObject(self):
         s = ROOT.RooStats.HistFactory.Sample(self.name, self.histoName, configMgr.histCacheFile)
         s.SetNormalizeByTheory(self.normByTheory)
         if self.statConfig:
             s.ActivateStatError()
-        
+       
+        #high = 1, low = 2
         for histoSys in self.histoSystList:
-            s.AddHistoSys(histoSys[0], histoSys[1], configMgr.histCacheFile, "", 
-                                       histoSys[2], configMgr.histCacheFile, "")
+            s.AddHistoSys(histoSys[0], histoSys[2], configMgr.histCacheFile, "", 
+                                       histoSys[1], configMgr.histCacheFile, "")
 
         for shapeSys in self.shapeSystList:
             constraintType = ROOT.RooStats.HistFactory.Constraint.GetType(shapeSys[2])
             s.AddShapeSys(shapeSys[0], constraintType, shapeSys[1], configMgr.histCacheFile)
 
+        # high = 1, low = 2
         for overallSys in self.overallSystList:
             s.AddOverallSys(overallSys[0], overallSys[2], overallSys[1])
 
         for shapeFact in self.shapeFactorList:
             s.AddShapeFactor(shapeFact)
 
+        # high = 2, low = 3
         if len(self.normFactor) > 0:
             for normFactor in self.normFactor:
                 s.AddNormFactor(normFactor[0], normFactor[1], normFactor[3], normFactor[2], normFactor[4])

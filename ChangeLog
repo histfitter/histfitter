@@ -1,3 +1,7 @@
+2012-11-21 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
+    * fixed an issue where HistoSys-based histograms had high/low reverted,
+	  which lead to a factor -1 compared to old results (when not using XML)
+
 2012-11-21 Max Baak <mbaak@cern.ch>
 	M       ConfigMgr.cxx
 	M       Makefile

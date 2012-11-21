@@ -29,6 +29,8 @@ V Directory driven results structure (Zach)
 - Documentation needs cleanup. E.g Documentation of various available systematics. (David,Alex,Max)
 - Make tutorial uptodate with trunk. (David,Alex,Max)
 - Generalized scripts (Alex)
+- Once tag without XML is public, remove XML methods for tag after that, and rewrite the internal
+  lists in sample.py to dictionaries instead of arrays (GJ)
 
 >>> Next: Useful additions & Extra documentation:
 
