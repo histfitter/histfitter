@@ -2,7 +2,7 @@
 # check Root environment setup. Allow for external setup script.
 
 export BUILD="x86_64-slc5-gcc43-opt"
-export ROOTVERSION="5.34.02"
+export ROOTVERSION="5.34.03"
 
 # Must have gcc and python setup outside of ROOTSYS def for batch running!
 # This section here is cern specific.
@@ -22,12 +22,14 @@ if [ ! $ROOTSYS ]; then
   echo "Setting up ROOT ${ROOTVERSION} ..."
   export CWD=$PWD
   # setup corresponding root
-  cd /afs/cern.ch/sw/lcg/app/releases/ROOT/$ROOTVERSION/$BUILD/root/
+  cd /afs/cern.ch/atlas/offline/external/FullChainTest/tier0/test/mbaak/root/root-$ROOTVERSION
   source bin/thisroot.sh
   cd $CWD
   # setup xrootd on top of this
   export PATH=/afs/cern.ch/sw/lcg/external/xrootd/3.1.0p2/$BUILD/bin:$PATH
   export LD_LIBRARY_PATH=/afs/cern.ch/sw/lcg/external/xrootd/3.1.0p2/$BUILD/lib64:$LD_LIBRARY_PATH
+  # hack for xrootd: libNetx library from pre-installed root version
+  export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/afs/cern.ch/sw/lcg/app/releases/ROOT/$ROOTVERSION/$BUILD/root/lib
 fi
 
 # check Root environment setup 
