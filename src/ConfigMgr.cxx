@@ -337,13 +337,13 @@ TString ConfigMgr::makeCorrectedBkgModelConfig( RooWorkspace* w, const char* mod
         TIterator* vrItr = prevSnapSet->createIterator();
         RooRealVar* vr(0);
         for (Int_t i=0; (vr = (RooRealVar*)vrItr->Next()); ++i) {
-            if ((vr==0)) 
+            if (vr==0) 
                 continue;
             
             TString vrName = vr->GetName();
             RooRealVar* par = (RooRealVar*)newSnapSet.find(vrName.Data());
             
-            if ((par==0)) { 
+            if (par==0) { 
                 newSnapSet.add(*vr); // add back if not already present 
             } 
         }
