@@ -687,9 +687,9 @@ class ConfigManager(object):
             try:
                 threshold = chan.statErrorThreshold
             except:
-                threshold = None                
+                threshold = None     
             chan.getSample(sam.name).addShapeStat(syst.name, nomName, statErrorThreshold = threshold )
-            chan.getSample(sam.name).shapeSystList.append(('stat_'+syst.name, nomName+"Norm", syst.constraint, "", "", "", ""))
+            chan.getSample(sam.name).shapeSystList.append(('shapestat_'+syst.name, nomName+"Norm", syst.constraint, "", "", "", ""))
         else:
             log.error("ERROR don't know what to do with %s %s"%(syst.name,syst.method))
         return
