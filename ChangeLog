@@ -1,7 +1,12 @@
 2012-11-21 Max Baak <mbaak@cern.ch>
+	* Tagging: HistFitter-00-00-19
+
+2012-11-21 Max Baak <mbaak@cern.ch>
 	A       MyConfigExampleMCStat.py
 	M       MyConfigExample.py
 	* Example for alternative mc stat implementation, where the MC stat error is implemented per sample. 
+	M 	setup.sh
+	* Revert to root 5.34.02 -- plotting issue (see comment Alex below)
 
 2012-11-21 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
     * fixed an issue where HistoSys-based histograms had high/low reverted,
