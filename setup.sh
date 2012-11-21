@@ -6,7 +6,9 @@ export ROOTVERSION="5.34.03"
 
 # Must have gcc and python setup outside of ROOTSYS def for batch running!
 # This section here is cern specific.
-if [[ `hostname -s` = lx* ]]; then
+if [[ `hostname -s` = lx*.cern.ch ]]; then 
+    #don't check for *.cern.ch - any machine at CERN, incl. your laptop, has that hostname!
+    
     # first, setup gcc to version 4.3
     source /afs/cern.ch/sw/lcg/external/gcc/4.3.2/x86_64-slc5/setup.sh
     # second, setup an uptodate python version
