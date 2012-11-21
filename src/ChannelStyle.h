@@ -94,8 +94,8 @@ class ChannelStyle : public TObject{
   Int_t setDefaultSampleColor() { return m_defaultSampleColor; }
   void setDefaultSampleColor(const Int_t& color) { m_defaultSampleColor = color; }
 
-  void Print();
- 
+  using TObject::Print;
+  virtual void Print();
 
 private:
   
