@@ -1,4 +1,9 @@
 2012-11-21 Max Baak <mbaak@cern.ch>
+	M       MyConfigExampleMCStat.py
+	* commited wrong config file. argh
+        * Tagging: HistFitter-00-00-19-01
+
+2012-11-21 Max Baak <mbaak@cern.ch>
 	* Tagging: HistFitter-00-00-19
 
 2012-11-21 Max Baak <mbaak@cern.ch>
