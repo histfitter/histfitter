@@ -688,8 +688,9 @@ class ConfigManager(object):
                 threshold = chan.statErrorThreshold
             except:
                 threshold = None     
-            chan.getSample(sam.name).addShapeStat(syst.name, nomName, statErrorThreshold = threshold )
-            chan.getSample(sam.name).shapeSystList.append(('shapestat_'+syst.name, nomName+"Norm", syst.constraint, "", "", "", ""))
+            chan.getSample(sam.name).addShapeStat(syst.name, nomName, statErrorThreshold = threshold ) # this stores a new histogram called: nomName+"Norm" 
+            chan.getSample(sam.name).shapeSystList.append(('shape_' + syst.name + '_' + sam.name + "_" + regionString + "_obs_" + replaceSymbols(chan.variableName), \
+                                                           nomName+"Norm", syst.constraint, "", "", "", ""))
         else:
             log.error("ERROR don't know what to do with %s %s"%(syst.name,syst.method))
         return
@@ -803,7 +804,9 @@ class ConfigManager(object):
                 #    self.hists[tmpName]=None    ## MB : do not delete, else cannot rerun later with -w
                     return
             else:
-                self.hists["h"+sam.name+"Nom_"+regionString+"_obs_"+replaceSymbols(chan.variableName)] = TH1F("h"+sam.name+"Nom_"+regionString+"_obs_"+replaceSymbols(chan.variableName),"h"+sam.name+"Nom_"+regionString+"_obs_"+replaceSymbols(chan.variableName),chan.nBins,chan.binLow,chan.binHigh)
+                self.hists["h"+sam.name+"Nom_"+regionString+"_obs_"+replaceSymbols(chan.variableName)] = TH1F("h"+sam.name+"Nom_"+regionString+"_obs_"+replaceSymbols(chan.variableName), \
+                                                                                                              "h"+sam.name+"Nom_"+regionString+"_obs_"+replaceSymbols(chan.variableName), \
+                                                                                                              chan.nBins,chan.binLow,chan.binHigh)
                 for iBin in xrange(self.hists["h"+sam.name+"Nom_"+regionString+"_obs_"+replaceSymbols(chan.variableName)].GetNbinsX()+1):
                     self.hists["h"+sam.name+"Nom_"+regionString+"_obs_"+replaceSymbols(chan.variableName)].SetBinContent(iBin+1,1.)
             chan.getSample(sam.name).setHistoName("h"+sam.name+"Nom_"+regionString+"_obs_"+replaceSymbols(chan.variableName))
@@ -818,7 +821,7 @@ class ConfigManager(object):
                            or sys.method == "overallNormHistoSys" \
                            or sys.method == "overallNormHistoSysOneSide" \
                            or sys.method == "overallNormHistoSysOneSideSym":
-                        log.error("    %s needs normRegions because of %s of type %s but no normalization regions specified. This is not safe, please fix."%(sam.name,sys.name,sys.method))
+                        log.error("    %s needs normRegions because of %s of type %s but no normalization regions specified. This is not safe, please fix." % (sam.name,sys.name,sys.method))
                         needsNorm=True
                         break
                 if needsNorm:
@@ -865,7 +868,8 @@ class ConfigManager(object):
 
                                 tempHist = TH1F("temp","temp",1,0.5,1.5)
 
-                                self.chains[self.prepare.currentChainName].Project("temp",self.cutsDict[r],str(self.lumiUnits*self.outputLumi/self.inputLumi)+" * "+"*".join(s.weights)+" * ("+self.cutsDict[r]+")")
+                                self.chains[self.prepare.currentChainName].Project("temp",self.cutsDict[r], \
+                                                                                   str(self.lumiUnits*self.outputLumi/self.inputLumi)+" * "+"*".join(s.weights)+" * ("+self.cutsDict[r]+")")
 
                                 # if the overflow bin is used for this channel, make sure the normalization takes it into account
                                 if c.useOverflowBin:
@@ -923,7 +927,8 @@ class ConfigManager(object):
                 if info[3] == "userOverallSys": continue
                 if not info[0] == "Nom": continue
                 if not (info[0],regString,replaceSymbols(chan.variableName)) in canDict.keys():
-                    canDict[(info[0],regString,replaceSymbols(chan.variableName))] = TCanvas("c"+fitConfig.name+"_"+info[0]+"_"+regString+"_obs_"+replaceSymbols(chan.variableName),"c"+info[0]+"_"+regString+"_obs_"+replaceSymbols(chan.variableName),800,600,800,600)
+                    canDict[(info[0],regString,replaceSymbols(chan.variableName))] = TCanvas("c"+fitConfig.name+"_"+info[0]+"_"+regString+"_obs_"+replaceSymbols(chan.variableName), \
+                                                                                             "c"+info[0]+"_"+regString+"_obs_"+replaceSymbols(chan.variableName),800,600,800,600)
 
                     stackDict[(info[0],regString,replaceSymbols(chan.variableName))] = THStack(fitConfig.name+"_"+regString+"_obs_"+replaceSymbols(chan.variableName)+"Stack"+info[0],"")
 
@@ -945,7 +950,8 @@ class ConfigManager(object):
                     self.hists["h"+samName+info[0]+"_"+regString+"_obs_"+replaceSymbols(chan.variableName)].SetLineColor(fitConfig.getSample(samName).color)
                     self.hists["h"+samName+info[0]+"_"+regString+"_obs_"+replaceSymbols(chan.variableName)].SetFillColor(fitConfig.getSample(samName).color)
                     stackDict[(info[0],regString,replaceSymbols(chan.variableName))].Add(self.hists["h"+samName+info[0]+"_"+regString+"_obs_"+replaceSymbols(chan.variableName)],"hist")
-                    legDict[(info[0],regString,replaceSymbols(chan.variableName))].AddEntry(self.hists["h"+samName+info[0]+"_"+regString+"_obs_"+replaceSymbols(chan.variableName)],samName+info[0],"lf")
+                    legDict[(info[0],regString,replaceSymbols(chan.variableName))].AddEntry(self.hists["h"+samName+info[0]+"_"+regString+"_obs_"+replaceSymbols(chan.variableName)], \
+                                                                                            samName+info[0],"lf")
                 elif fitConfig.getSample(samName).isQCD:
                     self.hists["h"+samName+"Nom_"+regString+"_obs_"+replaceSymbols(chan.variableName)].SetLineColor(fitConfig.getSample(samName).color)
                     self.hists["h"+samName+"Nom_"+regString+"_obs_"+replaceSymbols(chan.variableName)].SetFillColor(fitConfig.getSample(samName).color)

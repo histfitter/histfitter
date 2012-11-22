@@ -109,13 +109,7 @@ wzKtScale = Systematic("KtScaleWZ",configMgr.weights,ktScaleWHighWeights,ktScale
 
 # JES uncertainty as shapeSys - one systematic per region (combine WR and TR), merge samples
 jes = Systematic("JES","_NoSys","_JESup","_JESdown","tree","normHistoSys")
-
-statWRwz  = Systematic("SLWR_wz", "_NoSys","","","tree","shapeStat")
-statWRtop = Systematic("SLWR_top","_NoSys","","","tree","shapeStat")
-statTRwz  = Systematic("SLTR_wz", "_NoSys","","","tree","shapeStat")
-statTRtop = Systematic("SLTR_top","_NoSys","","","tree","shapeStat")
-statSSwz  = Systematic("SLSS_wz", "_NoSys","","","tree","shapeStat")
-statSStop = Systematic("SLSS_top","_NoSys","","","tree","shapeStat")
+mcstat = Systematic("mcstat", "_NoSys", "_NoSys", "_NoSys", "tree", "shapeStat")
 
 # name of nominal histogram for systematics
 configMgr.nomName = "_NoSys"
@@ -221,6 +215,7 @@ nJetWS.hasB = True
 nJetWS.hasBQCD = False
 nJetWS.useOverflowBin = False
 nJetWS.addSystematic(jes)
+nJetWS.addSystematic(mcstat)
 
 # TR using nJet
 nJetTS = bkt.addChannel("nJet",["SLTR"],nJetBinHighTR-nJetBinLowSoft,nJetBinLowSoft,nJetBinHighTR)
@@ -228,15 +223,9 @@ nJetTS.hasB = True
 nJetTS.hasBQCD = True
 nJetTS.useOverflowBin = False    
 nJetTS.addSystematic(jes)
+nJetTS.addSystematic(mcstat)
 
 bkt.setBkgConstrainChannels([nJetWS,nJetTS])
-
-## alternative: statistical error for each sample
-nJetWS.getSample("Top").addSystematic(statWRtop)
-nJetWS.getSample("WZ").addSystematic(statWRwz)
-nJetTS.getSample("Top").addSystematic(statTRtop)
-nJetTS.getSample("WZ").addSystematic(statTRwz)
-
 
 ###################
 #                                               #
@@ -325,9 +314,7 @@ if doValidation:
     mm2J = bkt.addChannel("met/meff2Jet",["SS"],6,0.1,0.7)
     mm2J.useOverflowBin=True
     mm2J.addSystematic(jes)
-
-    mm2J.getSample("Top").addSystematic(statSStop)
-    mm2J.getSample("WZ").addSystematic(statSSwz)
+    mm2J.addSystematic(mcstat)
 
     #    bkt.setValidationChannels([nJetSLVR2,metSLVR2,meffSLVR2,nBJetSLVR2,metmeffSLVR2,mm2J,srs1l2jTChannel])
     bkt.setValidationChannels([nJetSLVR2,srs1l2jTChannel,mm2J])
