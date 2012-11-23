@@ -1,5 +1,9 @@
 2012-11-22 Max Baak <mbaak@cern.ch>
 	M       python/configManager.py
+	* Change a mkdir into mkdir_p
+
+2012-11-22 Max Baak <mbaak@cern.ch>
+	M       python/configManager.py
 	M       python/MyConfigExampleMCStat.py
 	* updated mc stat uncertainty implementation. Now much simpler to implement for user.
 	* Tagging: HistFitter-00-00-19-02

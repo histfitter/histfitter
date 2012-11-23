@@ -1007,7 +1007,7 @@ class ConfigManager(object):
             legDict[info].Draw()
 
             if not os.path.isdir("plots/"+self.analysisName+"/"+fitConfig.name):
-                os.mkdir("plots/"+self.analysisName+"/"+fitConfig.name)
+                os.makedirs("plots/"+self.analysisName+"/"+fitConfig.name)
             canDict[info].SaveAs("plots/"+self.analysisName+"/"+fitConfig.name+"/stack"+info[1]+"_obs_"+info[2]+"_"+info[0]+".png")
 
             self.canvasList.append(canDict[info])
