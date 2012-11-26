@@ -300,13 +300,15 @@ if __name__ == "__main__":
 
     if args.grid_points and args.grid_points != "":
         sigSamples = args.grid_points.split(",")
+        log.info("Grid points specified: %s" % sigSamples)
 
     if args.regions and args.regions != "" and args.regions != "all":
         pickedSRs = args.regions.split(",")
     else:
         pickedSRs = [] #MB: used by 0-lepton fit
 
-    if len(pickedSRs)>0: log.info("Selected signal regions: %s" % pickedSRs) 
+    if len(pickedSRs) > 0: 
+        log.info("Selected signal regions: %s" % pickedSRs) 
 
     if args.run_toys:
         runToys = True

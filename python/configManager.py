@@ -484,7 +484,7 @@ class ConfigManager(object):
             self.execute(tl)
         return
 
-    def execute(self,fitConfig):
+    def execute(self, fitConfig):
         """
         Make or get the histograms and generate the XML
         """
@@ -498,14 +498,14 @@ class ConfigManager(object):
             varDataDict = {}
         systDict = {}
 
-        for (name,syst) in self.systDict.items():
+        for (name, syst) in self.systDict.items():
             systDict[name] = syst
 
-        for (name,syst) in fitConfig.systDict.items():
+        for (name, syst) in fitConfig.systDict.items():
             if not name in systDict.keys():
                 systDict[name] = syst
             else:
-                raise(Exception,"Syst name %s already defined at global level. Rename for top level %s",(name,fitConfig.name))
+                raise(Exception, "Syst name %s already defined at global level. Rename for top level %s", (name, fitConfig.name))
 
         # Build channel string and cuts for normalization
         normRegions = []
@@ -515,55 +515,58 @@ class ConfigManager(object):
         for (iChan,chan) in enumerate(fitConfig.channels):
             for reg in chan.regions:
                 if not chan.channelName in fitConfig.validationChannels:
+                    normString = "".join(chan.regions)
+                    normCutsList = [ "(%s) || " % (self.cutsDict[reg]) for reg in chan.regions ]
+                    normCuts = "".join(normCutsList)
+                    
                     for reg in chan.regions:
                         normRegions.append(reg)
-                        normString += reg
-                        normCuts += "("+self.cutsDict[reg] + ") || "
+                        #normString += reg
+                        #normCuts += "("+self.cutsDict[reg] + ") || "
+        
         normCuts = normCuts.rstrip(" || ")
-        for (iChan,chan) in enumerate(fitConfig.channels):
-            for (iSam,sam) in enumerate(chan.sampleList):
-                chan.infoDict[sam.name] = [("Nom",self.nomName,sam.weights,"")]
+        for (iChan, chan) in enumerate(fitConfig.channels):
+            for (iSam, sam) in enumerate(chan.sampleList):
+                chan.infoDict[sam.name] = [("Nom", self.nomName, sam.weights, "")]
                 if not sam.isData and not sam.isQCD:
-                    for (systName,syst) in sam.systDict.items():
+                    for (systName, syst) in sam.systDict.items():
                         ###depending on the systematic type: chan.infoDict[sam.name].append(...)
-                        self.appendSystinChanInfoDict(chan,sam,systName,syst)
+                        self.appendSystinChanInfoDict(chan, sam, systName, syst)
 
-        for (iChan,chan) in enumerate(fitConfig.channels):
+        for (iChan, chan) in enumerate(fitConfig.channels):
             log.info("Channel: %s" % chan.name)
-            regionString = ""
-            for reg in chan.regions:
-                regionString += reg
+            regionString = "".join(chan.regions)
             self.prepare.channel = chan
+            
             sampleListRun = deepcopy(chan.sampleList)
-            #for (iSam,sam) in enumerate(fitConfig.sampleList):
-            for (iSam,sam) in enumerate(sampleListRun):
+            #for (iSam, sam) in enumerate(fitConfig.sampleList):
+            for (iSam, sam) in enumerate(sampleListRun):
                 log.info("  Sample: %s" % sam.name)                
                 # Run over the nominal configuration first
-                # Set the weights,cuts,weights
-                self.setWeightsCutsVariable(chan,sam,regionString)
-                #depending on the sample type, the Histos and up/down weights are added
-                self.addSampleSpecificHists(fitConfig,chan,sam,regionString,normRegions,normString,normCuts)
+                # Set the weights, cuts, weights
+                self.setWeightsCutsVariable(chan, sam, regionString)
+                #depending on the sample type,  the Histos and up/down weights are added
+                self.addSampleSpecificHists(fitConfig, chan, sam, regionString, normRegions, normString, normCuts)
 
         #post-processing loop for norm systematics
         for chan in fitConfig.channels:
-            regionString = ""
-            for reg in chan.regions:
-                regionString += reg
-                pass
+            regionString = "".join(chan.regions)
+            
             for sam in chan.sampleList:
                 for syst in sam.systDict.values():
                     if syst.method == "userNormHistoSys":
-                        nomName = "h"+sam.name+"Nom_"+regionString+"_obs_"+replaceSymbols(chan.variableName)
-                        highName = "h"+sam.name+syst.name+"High_"+regionString+"_obs_"+replaceSymbols(chan.variableName)
-                        lowName = "h"+sam.name+syst.name+"Low_"+regionString+"_obs_"+replaceSymbols(chan.variableName)
-                        syst.PrepareGlobalNormalization(normString,self,fitConfig,chan,sam)
-                        sam.addHistoSys(syst.name,nomName,highName,lowName,False,True,False,False,sam.name,normString)
+                        nomName = "h%sNom_%s_obs_%s" % (sam.name, regionString, replaceSymbols(chan.variableName) )
+                        highName = "h%sHigh_%s_obs_%s" % (sam.name, regionString, replaceSymbols(chan.variableName) )
+                        lowName = "h%sLow_%s_obs_%s" % (sam.name, regionString, replaceSymbols(chan.variableName) )
+                        
+                        syst.PrepareGlobalNormalization(normString, self, fitConfig, chan, sam)
+                        sam.addHistoSys(syst.name, nomName, highName, lowName, False, True, False, False, sam.name, normString)
 
         # Build blinded histograms here
-        for (iChan,chan) in enumerate(fitConfig.channels):
+        for (iChan, chan) in enumerate(fitConfig.channels):
             for sam in chan.sampleList:
                 if sam.isData:
-                    self.buildBlindedHistos(fitConfig,chan,sam)
+                    self.buildBlindedHistos(fitConfig, chan, sam)
                 else:
                     pass
         
@@ -584,7 +587,7 @@ class ConfigManager(object):
             else:
                 fitConfig.writeWorkspaces()       
 
-    def appendSystinChanInfoDict(self,chan,sam,systName,syst):
+    def appendSystinChanInfoDict(self, chan, sam, systName, syst):
         log.debug("appendSystinChanInfoDict: appending info:")
         log.debug("  CHAN %s" % chan.name)
         log.debug("  SAM %s" % sam.name)
@@ -604,17 +607,17 @@ class ConfigManager(object):
             chan.infoDict[sam.name].append((systName,syst.high,syst.low,syst.method))
         return
 
-    def addHistoSysforNoQCD(self,regionString,normString,normCuts,fitConfig,chan,sam,syst):
-        nomName = "h"+sam.name+"Nom_"+regionString+"_obs_"+replaceSymbols(chan.variableName)
-        highName = "h"+sam.name+syst.name+"High_"+regionString+"_obs_"+replaceSymbols(chan.variableName)
-        lowName = "h"+sam.name+syst.name+"Low_"+regionString+"_obs_"+replaceSymbols(chan.variableName)
+    def addHistoSysforNoQCD(self, regionString, normString, normCuts, fitConfig, chan, sam, syst):
+        nomName = "h%sNom_%s_obs_%s" % (sam.name, regionString, replaceSymbols(chan.variableName) )
+        highName = "h%s%sHigh_%s_obs_%s" % (sam.name, syst.name, regionString, replaceSymbols(chan.variableName) )
+        lowName = "h%s%sLow_%s_obs_%s" % (sam.name, syst.name, regionString, replaceSymbols(chan.variableName) )
 
         if syst.method == "histoSys":
-            chan.getSample(sam.name).addHistoSys(syst.name,nomName,highName,lowName,False,False)
+            chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName, False, False)
         elif syst.method == "histoSysOneSide":
-            chan.getSample(sam.name).addHistoSys(syst.name,nomName,highName,lowName,False,False,False,True)
+            chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName, False, False, False, True)
         elif syst.method == "histoSysOneSideSym":
-            chan.getSample(sam.name).addHistoSys(syst.name,nomName,highName,lowName,False,False,True,True)
+            chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName, False, False, True, True)
         elif syst.method == "overallSys":
             highIntegral = configMgr.hists[highName].Integral()
             lowIntegral = configMgr.hists[lowName].Integral()
@@ -622,46 +625,46 @@ class ConfigManager(object):
             try:
                 overallSystHigh = highIntegral / nomIntegral
             except ZeroDivisionError:
-                log.warning("    generating High overallSys for %s syst=%s nom=%g high=%g low=%g" % (nomName,syst.name,nomIntegral,highIntegral,lowIntegral))
+                log.warning("    generating High overallSys for %s syst=%s nom=%g high=%g low=%g" % (nomName, syst.name, nomIntegral, highIntegral, lowIntegral))
                 overallSystHigh = 1.0
             try:
                 overallSystLow = lowIntegral / nomIntegral
             except ZeroDivisionError:
-                log.warning("    generating Low overallSys for %s syst=%s nom=%g high=%g low=%g" % (nomName,syst.name,nomIntegral,highIntegral,lowIntegral))
+                log.warning("    generating Low overallSys for %s syst=%s nom=%g high=%g low=%g" % (nomName, syst.name, nomIntegral, highIntegral, lowIntegral))
                 overallSystLow = 1.0
-            chan.getSample(sam.name).addOverallSys(syst.name,overallSystHigh,overallSystLow)
+            chan.getSample(sam.name).addOverallSys(syst.name, overallSystHigh, overallSystLow)
         elif syst.method == "userOverallSys":
-            chan.getSample(sam.name).addOverallSys(syst.name,syst.high,syst.low)
+            chan.getSample(sam.name).addOverallSys(syst.name, syst.high, syst.low)
         elif syst.method == "overallHistoSys":
-            chan.getSample(sam.name).addHistoSys(syst.name,nomName,highName,lowName,True,False)
+            chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName, True, False)
         elif syst.method == "overallNormHistoSys":
-            chan.getSample(sam.name).addHistoSys(syst.name,nomName,highName,lowName,True,True,False,False,sam.name,normString)
+            chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName, True, True, False, False, sam.name, normString)
         elif syst.method == "overallNormHistoSysOneSide":
-            chan.getSample(sam.name).addHistoSys(syst.name,nomName,highName,lowName,True,True,False,True,sam.name,normString)
+            chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName, True, True, False, True, sam.name, normString)
         elif syst.method == "overallNormHistoSysOneSideSym":
-            chan.getSample(sam.name).addHistoSys(syst.name,nomName,highName,lowName,True,True,True,True,sam.name,normString)
+            chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName, True, True, True, True, sam.name, normString)
         elif syst.method == "normHistoSys":
-            chan.getSample(sam.name).addHistoSys(syst.name,nomName,highName,lowName,False,True,False,False,sam.name,normString)
+            chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName, False, True, False, False, sam.name, normString)
         elif syst.method == "normHistoSysOneSide":
-            chan.getSample(sam.name).addHistoSys(syst.name,nomName,highName,lowName,False,True,False,True,sam.name,normString)
+            chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName, False, True, False, True, sam.name, normString)
         elif syst.method == "normHistoSysOneSideSym":
-            chan.getSample(sam.name).addHistoSys(syst.name,nomName,highName,lowName,False,True,True,True,sam.name,normString)
+            chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName, False, True, True, True, sam.name, normString)
         elif syst.method == "userHistoSys" or syst.method == "userNormHistoSys":
             if configMgr.hists[highName] == None:
-                configMgr.hists[highName] = histMgr.buildUserHistoSysFromHist(highName, syst.high, configMgr.hists[nomName])
+                configMgr.hists[highName] = histMgr.buildUserHistoSysFromHist(highName,  syst.high,  configMgr.hists[nomName])
             if configMgr.hists[lowName] == None:
-                configMgr.hists[lowName] = histMgr.buildUserHistoSysFromHist(lowName, syst.low, configMgr.hists[nomName])
+                configMgr.hists[lowName] = histMgr.buildUserHistoSysFromHist(lowName,  syst.low,  configMgr.hists[nomName])
             if syst.method == "userHistoSys":
-                chan.getSample(sam.name).addHistoSys(syst.name,nomName,highName,lowName,False,False)
+                chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName, False, False)
             pass
         elif syst.method == "shapeSys":
             if syst.merged:
-                mergedName = ""
-                for s in syst.sampleList:
-                    mergedName += s
-                nomMergedName = "h"+mergedName+"Nom_"+regionString+"_obs_"+replaceSymbols(chan.variableName)
-                highMergedName = "h"+mergedName+syst.name+"High_"+regionString+"_obs_"+replaceSymbols(chan.variableName)
-                lowMergedName = "h"+mergedName+syst.name+"Low_"+regionString+"_obs_"+replaceSymbols(chan.variableName)
+                mergedName = "".join(syst.sampleList)
+                
+                nomMergedName = "h%sNom_%s_obs_%s" % (mergedName, regionString, replaceSymbols(chan.variableName) )
+                highMergedName = "h%sHigh_%s_obs_%s" % (mergedName, regionString, replaceSymbols(chan.variableName) )
+                lowMergedName = "h%sLow_%s_obs_%s" % (mergedName, regionString, replaceSymbols(chan.variableName) )
+                
                 if sam.name in syst.sampleList:
                     syst.foundSample()
                     if self.hists[nomMergedName] == None:
@@ -899,10 +902,8 @@ class ConfigManager(object):
         return
 
     
-    def buildBlindedHistos(self,fitConfig,chan,sam):
-        regString = ""
-        for reg in chan.regions:
-            regString += reg
+    def buildBlindedHistos(self, fitConfig, chan, sam):
+        regString = "".join(chan.regions)
         if (self.blindSR and (chan.channelName in fitConfig.signalChannels)) or (self.blindCR and chan.channelName in fitConfig.bkgConstrainChannels):
             if not self.hists[sam.blindedHistName]:
                 self.hists[sam.blindedHistName] = TH1F(sam.blindedHistName,sam.blindedHistName,chan.nBins,chan.binLow,chan.binHigh)

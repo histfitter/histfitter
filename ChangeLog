@@ -1,3 +1,10 @@
+2012-11-26 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
+	M       python/configManager.py
+	M       python/prepareHistos.py
+	M       python/systematic.py
+	M       scripts/HistFitter.py
+	* Improvements to speed; ~8% speed gain when running over 12 grid points
+
 2012-11-22 Max Baak <mbaak@cern.ch>
 	M       python/configManager.py
 	* Change a mkdir into mkdir_p

@@ -262,8 +262,8 @@ class SystematicBase:
 
     def tryAddHistos(self, highorlow="", regionString="", normString="",
                      normCuts="", abstract=None, chan=None, sam=None):
-        histName = "h" + sam.name + self.name + highorlow + regionString +\
-                   "_obs_" + replaceSymbols(chan.variableName)
+        histName = "h%s%s%s%s_obs_%s" % (sam.name, self.name, highorlow, regionString, replaceSymbols(chan.variableName) )
+
         log.debug("       adding histo %s" % histName)
         try:
             abstract.prepare.addHisto(histName,
@@ -286,16 +286,17 @@ class TreeWeightSystematic(SystematicBase):
         for highorlow in highandlow:
             abstract.prepare.weights = str(abstract.lumiUnits*abstract.outputLumi/abstract.inputLumi)
             if highorlow == "High_":
-                for myw in self.high:
-                    abstract.prepare.weights += " * " + myw
+                mywList = [ " * %s " % myw for myw in self.high]
+                abstract.prepare.weights += "".join(mywList)
+
             else:
-                for myw in self.low:
-                    abstract.prepare.weights += " * " + myw
+                mywList = [ " * %s " % myw for myw in self.low]
+                abstract.prepare.weights += "".join(mywList)
 
             if abstract.readFromTree:
                 treeName = sam.treeName
                 if treeName == '':
-                    treeName = sam.name + abstract.nomName
+                    treeName = "%s%s" % (sam.name, abstract.nomName)
                 abstract.prepare.read(treeName, sam.files)
             TreeWeightSystematic.tryAddHistos(self, highorlow, regionString,
                                               normString, normCuts, abstract,
@@ -375,9 +376,10 @@ class UserSystematic(SystematicBase):
                                 normCuts="", abstract=None,
                                 topLvl=None, chan=None, sam=None):
 
-        nomName = "h"+sam.name+"Nom_"+regionString+"_obs_"+replaceSymbols(chan.variableName)
+        nomName = "h%sNom_%s_obs_%s" % (sam.name, regionString, replaceSymbols(chan.variableName) )
+        
         for lowhigh in ["High_","Low_"]:
-            lowhighName = "h" + sam.name + self.name + lowhigh + regionString + "_obs_" + replaceSymbols(chan.variableName)
+            lowhighName = "h%s%s%s%s_obs_%s" % (sam.name, self.name, lowhigh, regionString, replaceSymbols(chan.variableName))
             if abstract.hists[lowhighName] == None:
                 if lowhigh=="High_":
                     abstract.hists[lowhighName] = histMgr.buildUserHistoSysFromHist(lowhighName, self.high, abstract.hists[nomName])
@@ -400,7 +402,7 @@ class UserSystematic(SystematicBase):
                         for normReg in sam.normRegions:
                             nameTmp = "h" + sam.name + lowhigh + normReg[0] + "_obs_" + replaceSymbols(chan.variableName)
                             try:
-                                totNorm+=abstract.hists[nameTmp].GetSumOfWeights()
+                                totNorm += abstract.hists[nameTmp].GetSumOfWeights()
                             except:
                                 log.warning("could get histogram %s for normalization" % nameTmp)
                         
