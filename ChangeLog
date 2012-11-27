@@ -1,4 +1,13 @@
 2012-11-27 Alex Koutsman <alex.koutsman@cern.ch>
+	* src/Utils.cxx fixed bug in GetFullRegionName function used by YieldsTable script
+
+2012-11-27 Alex Koutsman <alex.koutsman@cern.ch>
+	* these changes were alrady done on 2012-11-14, but did not get saved in svn or overwritten  (?)
+	* macros/Examples/pythonFreeConfig/Config_pythonFree.C : addition of example macro to run HistFitter C++ side without python side
+	* src/ChannelStyle.cxx : adjustments for unknown samples	
+	* src/ChannelStyle.h : addition of addSample() function		
+	* python/configManager.py : using addSample function
+	* src/Utils.cxx : fix in PlotNL function for inf/Nan propagated to plot error
 
 2012-11-26 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
 	M       python/configManager.py
