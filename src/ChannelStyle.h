@@ -26,11 +26,13 @@ class ChannelStyle : public TObject{
 
   // get/set functions
   Int_t getSampleColor(const TString& sample);
-  void setSampleColor(Int_t color){ m_sampleColors.push_back(color);}
-
   TString getSampleName(const TString& sample);
-  void setSampleName(const TString& sample){ m_sampleNames.push_back(sample);}
-
+ 
+  void addSample(const TString& sample, const Int_t& color){
+    m_sampleNames.push_back(sample);
+    m_sampleColors.push_back(color);
+  }
+ 
   Float_t getLumi(){ return m_lumi;}
   void setLumi(Double_t lumi){ m_lumi = lumi; }
 

@@ -1043,14 +1043,14 @@ void Util::PlotPdfWithComponents(RooWorkspace* w, FitConfig* fc, TString plotReg
                     TString  compShortName  = ( (fc!=0) ? style.getSampleName(compNameVec[iComp])  : "" );
 
                     TString legName = compShortName; //"";
-                    if(compShortName.Contains("BG")) legName = "single top & diboson";
+                    //if(compShortName.Contains("BG")) legName = "single top & diboson";
                     for (int inp=0; inp<6; inp++) {
                         sprintf(NP,"Np%d",inp);
                         NP_str = NP;
                         if(compShortName.Contains("WZ") && compShortName.Contains(NP)) legName = "WZ+"+NP_str;
                         if(compShortName.Contains("Top") && compShortName.Contains(NP)) legName = "t#bar{t}+"+NP_str;
                     }
-                    if(compShortName.Contains("QCD")) legName = "multijets (data estimate)";
+                    //if(compShortName.Contains("QCD")) legName = "multijets (data estimate)";
                     if(compShortName.Contains("Discovery")) legName = "signal";
                     //
                     if(compShortName.Contains("WZpT0GeV"))   legName = "W/Z (p_{T}^{V,Truth}=0-50GeV)";
@@ -1392,7 +1392,7 @@ void Util::PlotSeparateComponents(RooWorkspace* w,TString fcName, TString plotRe
 void Util::PlotNLL(RooWorkspace* w, RooFitResult* rFit, Bool_t plotPLL, TString outputPrefix, RooAbsData* inputData)
 {
     if(rFit==NULL){ 
-        Logger << kWARNING << " Running PlotSeparateComponents() without a RooFitResult is pointless, I'm done" << GEndl ; 
+        Logger << kWARNING << " Running PlotNLL() without a RooFitResult is pointless, I'm done" << GEndl ; 
         return; 
     }
 
@@ -1454,21 +1454,39 @@ void Util::PlotNLL(RooWorkspace* w, RooFitResult* rFit, Bool_t plotPLL, TString 
             RooCurve* curve = (RooCurve*) frame->findObject(curvename,RooCurve::Class()) ;
             Double_t curveMax = curve->getYAxisMax();
             // safety for weird RooPlots where curve goes to infinity in first/last bin(s)
-            if (curveMax > 0. && !std::isinf(curveMax) )   frame->SetMaximum(curveMax * 2.); 
-            else if(curveMax > 0. && std::isinf(curveMax) ){
-                Int_t iBin = 1;
+            if (curveMax > 0. && !std::isinf(curveMax) && !std::isnan(curveMax) )   frame->SetMaximum(curveMax * 2.); 
+            else if(curveMax > 0. && (std::isinf(curveMax) || std::isnan(curveMax))){
+	      for(Int_t iBin=1;  iBin < curve->GetN()-1; iBin++){
+		Double_t xBin = 0.;
+		Double_t yBin = -1.;     
+		curve->GetPoint(iBin,xBin,yBin) ;		    
+		if(std::isinf(yBin)  || std::isnan(yBin)){
+		  curve->RemovePoint(iBin);
+		  Logger << kWARNING << " Removing bin = " << iBin  << " as it was either inf or nan from NLL plot for parameter = " << parName<< GEndl;
+		}
+	      }	
+	      
+	Int_t iBin = 1;
                 Double_t xFirstBin = 0.;
                 Double_t yFirstBin = -1.;	
-                while ( (yFirstBin<0 || std::isinf(yFirstBin) )&& iBin < curve->GetN()-1){
+                while ( (yFirstBin<0 || std::isinf(yFirstBin)  || std::isnan(yFirstBin) )&& iBin < curve->GetN()-1){
                     iBin++;
                     curve->GetPoint(iBin,xFirstBin,yFirstBin) ;
-                }
+	    if(std::isinf(yFirstBin)  || std::isnan(yFirstBin)){
+	      curve->RemovePoint(iBin);
+	      Logger << kWARNING << " Removing bin = " << iBin  << " as it was either inf or nan from NLL plot for parameter = " << parName<< GEndl;
+	    }
+	}
                 iBin = curve->GetN()-1;
                 Double_t xLastBin = 0.;
                 Double_t yLastBin = -1.;	
-                while ( (yLastBin < 0 || std::isinf(yLastBin)) && iBin >0){
+                while ( (yLastBin < 0 || std::isinf(yLastBin) || std::isnan(yLastBin) ) && iBin >0){
                     iBin--;
-                    curve->GetPoint(iBin,xLastBin,yLastBin) ;
+                    curve->GetPoint(iBin,xLastBin,yLastBin) ; 
+	    if(std::isinf(yLastBin)  || std::isnan(yLastBin)){
+	      curve->RemovePoint(iBin);
+	      Logger << kWARNING << " Removing bin = " << iBin  << " as it was either inf or nan from NLL plot for parameter = " << parName<< GEndl;
+	    }
                 }
                 curveMax = yLastBin>yFirstBin ? yLastBin : yFirstBin;      
                 frame->SetMaximum(curveMax * 2. ); 
@@ -2239,13 +2257,14 @@ TString Util::GetFullRegionName(RooCategory* regionCat,  TString regionShortName
             regionFullName = regionsAllVec[iReg];
             foundReg++;
         } 
-        if( regionsAllVec[iReg].Contains(regionShortName) && foundReg>1){
-            foundReg++;
+       else if( regionsAllVec[iReg].Contains(regionShortName) && foundReg>0){
+            foundReg++;	    
         }
     }
 
     if(foundReg>1)
-        Logger << kWARNING << "Util.GetFullRegionName() found more then one region in workspace with shortname = " << regionShortName << GEndl;
+        Logger << kWARNING << "Util.GetFullRegionName() found more then one region in workspace with shortname = " << regionShortName 
+	       << " \n Please use full region names (like WREl_meffInc) insted of shortnames (like WR) " << GEndl;
 
     return regionFullName;
 }

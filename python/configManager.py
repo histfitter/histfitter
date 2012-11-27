@@ -343,9 +343,11 @@ class ConfigManager(object):
 
                  # Sample name and color
                  for s in c.sampleList:
-                     style.m_sampleNames.push_back(s.name)
-                     style.m_sampleColors.push_back(s.color)
-
+                     style.addSample(s.name, s.color)
+                     #style.m_sampleNames.push_back(s.name)
+                     #style.m_sampleColors.push_back(s.color)
+                     
+                     
                  # add channel and style for channel to C++ FitConfig (these two are expected to be synchronous
                  cppTl.m_channels.push_back(c.channelName)
                  cppTl.m_channelsStyle.push_back(style)

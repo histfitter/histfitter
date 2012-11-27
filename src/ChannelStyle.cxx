@@ -37,7 +37,7 @@ ChannelStyle::ChannelStyle(const TString& name) : m_logger("ChannelStyle") {
     m_ATLASLabelText = "";
     m_showLumi = kFALSE;
 
-    m_defaultSampleColor = kBlue;
+    m_defaultSampleColor = kRed-10;
     m_defaultSampleCounter = 0;
 }
 
@@ -52,8 +52,9 @@ Int_t ChannelStyle::getSampleColor(const TString& sample){
   }
   
   if(!sampleFound){
-    m_logger << kWARNING << "getSampleColor unknown sample name: "<<sample << ", will use default color"<< GEndl;
+    m_logger << kWARNING << "getSampleColor unknown sample name: "<<sample << ", will use default color and add this sample to ChannelStyle"<< GEndl;
     Int_t color = m_defaultSampleColor + m_defaultSampleCounter;
+    addSample(sample, color);
     m_defaultSampleCounter++;
     return color;
   }
