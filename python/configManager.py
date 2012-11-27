@@ -6,6 +6,7 @@ from systematic import Systematic
 from histogramsManager import histMgr
 from logger import Logger
 import os
+import sys
 from ROOT import gROOT
 
 gROOT.SetBatch(True)
@@ -779,46 +780,44 @@ class ConfigManager(object):
 
         log.debug('addSampleSpecificHists()')
 
+        histoName = "h%s_%s_obs_%s" % (sam.name, regionString, replaceSymbols(chan.variableName) )
+
         if sam.isData:
             if chan.channelName in fitConfig.signalChannels:
                 if self.blindSR:
                     chan.addData(sam.blindedHistName)
                 else:
-                    self.prepare.addHisto("h"+sam.name+"_"+regionString+"_obs_"+replaceSymbols(chan.variableName),useOverflow=chan.useOverflowBin,useUnderflow=chan.useUnderflowBin)
-                    chan.addData("h"+sam.name+"_"+regionString+"_obs_"+replaceSymbols(chan.variableName))
+                    self.prepare.addHisto(histoName, useOverflow=chan.useOverflowBin, useUnderflow=chan.useUnderflowBin)
+                    chan.addData(histoName)
             elif chan.channelName in fitConfig.bkgConstrainChannels:
                 if self.blindCR:
                     chan.addData(sam.blindedHistName)
                 else:
-                    self.prepare.addHisto("h"+sam.name+"_"+regionString+"_obs_"+replaceSymbols(chan.variableName),useOverflow=chan.useOverflowBin,useUnderflow=chan.useUnderflowBin)
-                    chan.addData("h"+sam.name+"_"+regionString+"_obs_"+replaceSymbols(chan.variableName))
+                    self.prepare.addHisto(histoName, useOverflow=chan.useOverflowBin, useUnderflow=chan.useUnderflowBin)
+                    chan.addData(histoName)
             else:
-                self.prepare.addHisto("h"+sam.name+"_"+regionString+"_obs_"+replaceSymbols(chan.variableName),useOverflow=chan.useOverflowBin,useUnderflow=chan.useUnderflowBin)
-                chan.addData("h"+sam.name+"_"+regionString+"_obs_"+replaceSymbols(chan.variableName))
-
+                self.prepare.addHisto(histoName, useOverflow=chan.useOverflowBin, useUnderflow=chan.useUnderflowBin)
+                chan.addData(histoName)
 
         elif not sam.isQCD and not sam.isDiscovery:
+            tmpName="h"+sam.name+"Nom_"+regionString+"_obs_"+replaceSymbols(chan.variableName)
             if not len(sam.shapeFactorList):
-                tmpName="h"+sam.name+"Nom_"+regionString+"_obs_"+replaceSymbols(chan.variableName)
-                self.prepare.addHisto(tmpName,useOverflow=chan.useOverflowBin,useUnderflow=chan.useUnderflowBin)
+                self.prepare.addHisto(tmpName, useOverflow=chan.useOverflowBin, useUnderflow=chan.useUnderflowBin)
                 ###check that nominal sample is not empty for that channel
                 if self.hists[tmpName].GetSum() == 0.0:
-                    log.warning("    ***nominal sample %s is empty for channel %s. Remove from PDF.***"%(sam.name,chan.name))
+                    log.warning("    ***nominal sample %s is empty for channel %s. Remove from PDF.***"%(sam.name, chan.name))
                     chan.removeSample(sam.name)
                 #    del self.hists[tmpName]
                 #    self.hists[tmpName]=None    ## MB : do not delete, else cannot rerun later with -w
                     return
             else:
-                self.hists["h"+sam.name+"Nom_"+regionString+"_obs_"+replaceSymbols(chan.variableName)] = TH1F("h"+sam.name+"Nom_"+regionString+"_obs_"+replaceSymbols(chan.variableName), \
-                                                                                                              "h"+sam.name+"Nom_"+regionString+"_obs_"+replaceSymbols(chan.variableName), \
-                                                                                                              chan.nBins,chan.binLow,chan.binHigh)
-                for iBin in xrange(self.hists["h"+sam.name+"Nom_"+regionString+"_obs_"+replaceSymbols(chan.variableName)].GetNbinsX()+1):
-                    self.hists["h"+sam.name+"Nom_"+regionString+"_obs_"+replaceSymbols(chan.variableName)].SetBinContent(iBin+1,1.)
-            chan.getSample(sam.name).setHistoName("h"+sam.name+"Nom_"+regionString+"_obs_"+replaceSymbols(chan.variableName))
-
+                self.hists[tmpName] = TH1F(tmpName, tmpName, chan.nBins, chan.binLow, chan.binHigh)
+                for iBin in xrange(self.hists[tmpName].GetNbinsX()+1):
+                    self.hists[tmpName].SetBinContent(iBin+1, 1.)
+            chan.getSample(sam.name).setHistoName(tmpName)
 
             if not sam.normRegions and (not sam.noRenormSys): 
-                needsNorm=False
+                needsNorm = False
                 for sys in sam.systDict.values():
                     if sys.method == "userNormHistoSys" or sys.method == "normHistoSys" \
                            or sys.method == "normHistoSysOneSide" \
@@ -826,19 +825,19 @@ class ConfigManager(object):
                            or sys.method == "overallNormHistoSys" \
                            or sys.method == "overallNormHistoSysOneSide" \
                            or sys.method == "overallNormHistoSysOneSideSym":
-                        log.error("    %s needs normRegions because of %s of type %s but no normalization regions specified. This is not safe, please fix." % (sam.name,sys.name,sys.method))
-                        needsNorm=True
+                        log.error("    %s needs normRegions because of %s of type %s but no normalization regions specified. This is not safe,  please fix." % (sam.name, sys.name, sys.method))
+                        needsNorm = True
                         break
                 if needsNorm:
                     normChannels=[]
                     tl=sam.parentChannel.parentTopLvl
                     for ch in tl.channels:
                         if (ch.channelName in tl.bkgConstrainChannels) or (ch.channelName in tl.signalChannels):
-                            normChannels.append((ch.regionString,ch.variableName))
+                            normChannels.append((ch.regionString, ch.variableName))
                             pass
                         pass
                     sam.setNormRegions(normChannels)
-                    log.warning("            For now, using all non-validation channels by default: %s"%sam.normRegions)
+                    log.warning("            For now, using all non-validation channels by default: %s" % sam.normRegions)
                     
             if sam.normRegions and (not sam.noRenormSys):
                 normString = ""
@@ -850,16 +849,18 @@ class ConfigManager(object):
                     else:
                         c = fitConfig.getChannel(normReg[1],normReg[0])
                     normString += c.regionString
-                if not "h"+sam.name+"Nom_"+normString+"Norm" in self.hists.keys():
+
+                tmpName = "h%sNom_%sNorm" % (sam.name, normString )
+                if not tmpName in self.hists.keys():
                     if self.readFromTree:
-                        self.hists["h"+sam.name+"Nom_"+normString+"Norm"] = TH1F("h"+sam.name+"Nom_"+normString+"Norm","h"+sam.name+"Nom_"+normString+"Norm",1,0.5,1.5)
+                        self.hists[tmpName] = TH1F(tmpName, tmpName, 1, 0.5, 1.5)
                         for normReg in sam.normRegions:
                             if not type(normReg[0]) == "list":
                                 normList = []
                                 normList.append(normReg[0])
-                                c = fitConfig.getChannel(normReg[1],normList)
+                                c = fitConfig.getChannel(normReg[1], normList)
                             else:
-                                c = fitConfig.getChannel(normReg[1],normReg[0])
+                                c = fitConfig.getChannel(normReg[1], normReg[0])
                             for r in c.regions:
                                 try:
                                     s = c.getSample(sam.name)
@@ -871,7 +872,7 @@ class ConfigManager(object):
                                 if treeName=='': treeName = s.name+self.nomName
                                 self.prepare.read(treeName, s.files)
 
-                                tempHist = TH1F("temp","temp",1,0.5,1.5)
+                                tempHist = TH1F("temp", "temp", 1, 0.5, 1.5)
 
                                 self.chains[self.prepare.currentChainName].Project("temp",self.cutsDict[r], \
                                                                                    str(self.lumiUnits*self.outputLumi/self.inputLumi)+" * "+"*".join(s.weights)+" * ("+self.cutsDict[r]+")")
@@ -895,9 +896,9 @@ class ConfigManager(object):
             for (systName,syst) in chan.getSample(sam.name).systDict.items():
                 log.info("    Systematic: %s"%(systName))
                 #first reset weight to nominal value
-                self.setWeightsCutsVariable(chan,sam,regionString)
-                syst.PrepareWeightsAndHistos(regionString,normString,normCuts,self,fitConfig,chan,sam)
-                self.addHistoSysforNoQCD(regionString,normString,normCuts,fitConfig,chan,sam,syst)
+                self.setWeightsCutsVariable(chan, sam, regionString)
+                syst.PrepareWeightsAndHistos(regionString, normString, normCuts, self, fitConfig, chan, sam)
+                self.addHistoSysforNoQCD(regionString, normString, normCuts, fitConfig, chan, sam, syst)
         elif sam.isQCD:
             #Add Histos for Sample-type QCD
             self.addHistoSysForQCD(regionString,normString,normCuts,chan,sam)
