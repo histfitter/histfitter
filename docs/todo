@@ -8,6 +8,8 @@ Prioritized todo-list:
 >>> Top priority: Crashes & fixes & documentation: 
 >>> (At a minimum, let's try to do this before the post-mortem)
 
+- Update tutorial to work with latest tag.
+
 From 2012-11-12:
 - Example of log-normal constraints (for low event statistics)
 - Using minos in fit
