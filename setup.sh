@@ -9,7 +9,7 @@ export ROOTVERSION="5.34.03"
 if [[ `hostname` = l*.cern.ch ]]; then 
     #don't check for *.cern.ch - any machine at CERN, incl. your laptop, has that hostname!
     echo "INFO: hostname matches l*.cern.ch: setting up gcc and python from afs"
-    \# first, setup gcc to version 4.3
+    # first, setup gcc to version 4.3
     echo "Setting up gcc version 4.3.2 ..."
     source /afs/cern.ch/sw/lcg/external/gcc/4.3.2/x86_64-slc5/setup.sh
     # second, setup an uptodate python version
