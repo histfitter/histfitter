@@ -285,7 +285,7 @@ class ConfigManager(object):
         self.cppMgr.setExclusion( self.doExclusion )
         self.cppMgr.setfixSigXSec( self.fixSigXSec )
         self.cppMgr.setNPoints( self.nPoints )
-        self.cppMgr.setSeed( self.seed )
+        self.cppMgr.setSeed( self.toySeed )
         self.cppMgr.setMuValGen( self.muValGen )
         self.cppMgr.setUseAsimovSet( self.useAsimovSet)
 
