@@ -212,7 +212,7 @@ if __name__ == "__main__":
     # (a workaround using "-f -d -- configFile.py" exists but it would confuse users)
     # --GJ 14/11/2012 
     parser.add_argument("-d", action="store_true", help="draw before/after plots")
-    parser.add_argument("-D", "--draw", choices=["allPlots", "before","after", "corrMatrix", "sepComponents", "likelihood"], help="specify plots to draw")
+    parser.add_argument("-D", "--draw", nargs="+", choices=["allPlots", "before","after", "corrMatrix", "sepComponents", "likelihood"], help="specify plots to draw")
     
     parser.add_argument("-b", "--background", help="when doing hypotest, set background levels to values, form of bkgParName,value")
     parser.add_argument("-0", "--no-empty", help="do not draw empty bins when drawing", action="store_true")
