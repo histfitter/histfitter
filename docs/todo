@@ -8,14 +8,16 @@ Prioritized todo-list:
 >>> Top priority: Crashes & fixes & documentation: 
 >>> (At a minimum, let's try to do this before the post-mortem)
 
-- Update tutorial to work with latest tag.
+- Update tutorial to work with latest tag. (GJ)
 - Root 5.34.03: RooPlot has problems with ratio plots (alex)
 - Bug in filling of weight based systematics (GJ, David)
+- Using minos in fit (Max)
+- Remove MC statistical fluctuations from systematics
 
 
 From 2012-11-12:
+- HistFitter running okay on Ubuntu?
 - Example of log-normal constraints (for low event statistics)
-- Using minos in fit
 - non-truncated p-value when deficit (check Zach's recent commits)
 - sigma values in list-file.
 
