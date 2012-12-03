@@ -622,6 +622,13 @@ class ConfigManager(object):
         elif syst.method == "histoSysOneSideSym":
             chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName, False, False, True, True)
         elif syst.method == "overallSys":
+            # MB: possibly use different channel to evaluate systematics
+            if len(chan.remapSystChanName)>0: 
+                log.info("overallSys: remapping evaluation of systematics of this channel <%s> to channel: <%s>"%(chan.name,chan.remapSystChanName))
+                rc = fitConfig.getChannel(chan.remapSystChanName)
+                nomName = "h%sNom_%s_obs_%s" % (sam.name, rc.regionString, replaceSymbols(rc.variableName) )
+                highName = "h%s%sHigh_%s_obs_%s" % (sam.name, syst.name, rc.regionString, replaceSymbols(rc.variableName) )
+                lowName = "h%s%sLow_%s_obs_%s" % (sam.name, syst.name, rc.regionString, replaceSymbols(rc.variableName) )
             highIntegral = configMgr.hists[highName].Integral()
             lowIntegral = configMgr.hists[lowName].Integral()
             nomIntegral = configMgr.hists[nomName].Integral()

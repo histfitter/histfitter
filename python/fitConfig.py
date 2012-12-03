@@ -302,6 +302,18 @@ class fitConfig(object):
         self.setValidationChannels(ch)
         return ch
 
+
+    def getChannel(self, name):
+        """
+        Find the channel with the given name
+        """
+        for chan in self.channels:
+            if chan.name == name:
+                return chan
+
+        raise RuntimeError("No channel with name %s found" % (name))
+
+
     def getChannel(self, variableName, regions):
         """
         Find the channel with the given variable and regions
