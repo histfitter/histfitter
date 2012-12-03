@@ -1,3 +1,8 @@
+2012-12-03 Max Baak <mbaak@cern.ch>
+	M       configManager.py
+	M       fitConfig.py
+	* New feature: for overall sys, possibly use different channel to evaluate systematics
+
 2012-12-02 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
     * scripts/HistFitter.py: missing nargs="+", strings would get chopped up
 
