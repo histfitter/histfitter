@@ -2,7 +2,7 @@
 # check Root environment setup. Allow for external setup script.
 
 export BUILD="x86_64-slc5-gcc43-opt"
-export ROOTVERSION="5.34.03"
+export ROOTVERSION="5.34.02"
 
 # Must have gcc and python setup outside of ROOTSYS def for batch running!
 # This section here is cern specific.
@@ -24,7 +24,8 @@ if [ ! $ROOTSYS ]; then
   echo "With build ${BUILD} ..."
   export CWD=$PWD
   # setup corresponding root
-  cd /afs/cern.ch/atlas/offline/external/FullChainTest/tier0/test/mbaak/root/root-$ROOTVERSION
+  ###cd /afs/cern.ch/atlas/offline/external/FullChainTest/tier0/test/mbaak/root/root-$ROOTVERSION
+  cd /afs/cern.ch/sw/lcg/app/releases/ROOT/$ROOTVERSION/$BUILD/root/
   source bin/thisroot.sh
   cd $CWD
   # setup xrootd on top of this
