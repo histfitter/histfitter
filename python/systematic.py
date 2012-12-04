@@ -49,7 +49,7 @@ class SystematicBase:
         self.constraint = constraint
         allowedSys = ["histoSys","overallSys","userOverallSys","overallHistoSys","normHistoSys",
                       "shapeSys","shapeStat","histoSysOneSide","histoSysOneSideSym","normHistoSysOneSide","normHistoSysOneSideSym","userHistoSys","userNormHistoSys",
-                      "overallNormHistoSys","overallNormHistoSysOneSide","overallNormHistoSysOneSideSym" ]
+                      "overallNormHistoSys","overallNormHistoSysOneSide","overallNormHistoSysOneSideSym", "overallNormSys" ]
 
         if not self.method in allowedSys:
             raise Exception("Given method %s is not known; use one of %s"
@@ -126,6 +126,7 @@ class SystematicBase:
     def FillUpDownHist(self, lowhigh="", regionString="", normString="",
                        normCuts="", abstract=None, topLvl=None, chan=None, sam=None):
         if (self.method == "userNormHistoSys" \
+               or self.method == "overallNormSys" \
                or self.method == "normHistoSys" \
                or self.method == "normHistoSysOneSide" \
                or self.method == "normHistoSysOneSideSym" \
