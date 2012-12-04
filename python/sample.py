@@ -46,7 +46,7 @@ class Sample(object):
         self.unit = "GeV"
         self.cutsDict = {}
         self.files = []
-        self.treeName = ''
+        self.treeName = ""
         self.xsecWeight = None
         self.xsecUp = None
         self.xsecDown = None
@@ -187,9 +187,9 @@ class Sample(object):
             self.treeName = treeName
         ### MAB: Propagate treeName down to systematics of sample
         #for (systName, systList) in self.systDict.items():
-        #    for syst in systList:
-        #        syst.propagateTreeName(self.treeName)
-        #        pass
+           #for syst in systList:
+               #syst.propagateTreeName(self.treeName)
+               #pass
         return
 
     def addHistoSys(self, systName, nomName, highName, lowName, includeOverallSys, normalizeSys, symmetrize=False, oneSide=False, samName="", normString=""):

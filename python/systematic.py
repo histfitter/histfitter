@@ -196,8 +196,6 @@ class SystematicBase:
                                 # for the sample
                                 if self.type == "tree":
                                     treeName = s.treeName + systNorm.low
-                                elif self.type == "weight":
-                                    treeName = s.name + abstract.nomName
                                 else:
                                     treeName = s.treeName
                             if treeName == '' or treeName == systNorm.low:
@@ -216,13 +214,15 @@ class SystematicBase:
                                 # for the sample
                                 if self.type == "tree":
                                     treeName = s.treeName + systNorm.high
-                                elif self.type == "weight":
-                                    treeName = s.name + abstract.nomName
                                 else:
                                     treeName = s.treeName
                             if treeName == '' or treeName == systNorm.high:
                                 treeName = s.name + systNorm.high
 
+                        # weight-based trees assuming up/down are in one tree have identical name for up/low
+                        # if our current name does not exist, we assume this one does
+                        if not abstract.prepare.checkTree(treeName, filelist) and self.type == "weight":
+                            treeName = s.name + abstract.nomName
 
                         log.verbose("s.name %s"%s.name)
                         log.verbose("sam.name %s"%sam.name)
@@ -342,6 +342,7 @@ class TreeWeightSystematic(SystematicBase):
                         treeName = sam.treeName + self.low
                     if treeName == '' or treeName == self.low:
                         treeName = sam.name + self.low
+                
                     abstract.prepare.read(treeName, filelist)
 
             TreeWeightSystematic.tryAddHistos(self, highorlow, regionString,
@@ -356,6 +357,8 @@ class TreeWeightSystematic(SystematicBase):
     def PrepareWeightsAndHistos(self, regionString="", normString="",
                                 normCuts="", abstract=None,
                                 topLvl=None, chan=None, sam=None):
+
+        log.verbose("PrepareWeightsAndHistos()"); 
         if self.type == "weight":
             TreeWeightSystematic.PrepareWAHforWeight(self, regionString,
                                                      normString, normCuts,

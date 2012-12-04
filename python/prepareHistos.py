@@ -84,23 +84,31 @@ class TreePrepare(PrepareHistosABC):
         PrepareHistosABC.__init__(self)
         self.currentChainName=''
 
-    def checkTree(self,treeName,fileList):
+    def checkTree(self, treeName, fileList):
         """
-        Check existence of tree. True=ok, False=none. For now only check first file.
+        Check existence of tree. True=ok, False=none. 
         """
-        if len(fileList)==0 or len(treeName)==0: return False
-        file = TFile.Open(fileList[0])
-        if file==None: return False
-        tree = file.Get(treeName)
-        if tree==None:
-            file.Close()
+        if len(fileList)==0 or len(treeName)==0: 
             return False
-        if tree.ClassName()!='TTree':
-            file.Close()
-            return False
+        
+        for f in fileList:
+            file = TFile.Open(f)
+            if file == None: 
+                continue
 
-        file.Close()
-        return True
+            tree = file.Get(treeName)
+            if tree == None:
+                file.Close()
+                continue
+
+            if tree.ClassName() != 'TTree':
+                file.Close()
+                continue
+
+            file.Close()
+            return True
+
+        return False
 
     def read(self,treeName,fileList):
         """

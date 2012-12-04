@@ -760,13 +760,15 @@ class ConfigManager(object):
             self.prepare.weights += " * " + " * ".join(sam.weights)
             if self.readFromTree and not sam.isDiscovery:
                     treeName = sam.treeName
-                    if treeName=='': treeName = sam.name+self.nomName
+                    if treeName == '': 
+                        treeName = sam.name+self.nomName
                     self.prepare.read(treeName, sam.files)
         else:
             self.prepare.weights = "1."
             if self.readFromTree:
                 treeName = sam.treeName
-                if treeName=='': treeName = sam.name
+                if treeName == '': 
+                    treeName = sam.name
                 self.prepare.read(treeName, sam.files)
 
 
