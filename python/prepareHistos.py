@@ -1,4 +1,4 @@
-from ROOT import gROOT,TFile,TH1F,Double,gDirectory,TChain
+from ROOT import gROOT,TFile,TH1F,Double,gDirectory,TChain,TObject
 from copy import deepcopy,copy
 from math import sqrt
 from logger import Logger
@@ -26,11 +26,16 @@ class PrepareHistosABC(object):
         self.histList = []
         self.nameList = []
 
+    def checkTree(self,treeName,fileList):
+        """
+        Check tree name in file list
+        """
+        raise NotImplementedError("The checkTree method must be implemented "+str(self.__class__.__name__))
+
     def read(self,rootName,fileList):
         """
         Read in the root object that will make histograms
         """
-
         raise NotImplementedError("The read method must be implemented "+str(self.__class__.__name__))
 
     def addHisto(self,name,reg,isCut,nBins,binLow,binHigh,nBinsY=0,binLowY=0.,binHighY=0.):
@@ -78,6 +83,24 @@ class TreePrepare(PrepareHistosABC):
     def __init__(self):
         PrepareHistosABC.__init__(self)
         self.currentChainName=''
+
+    def checkTree(self,treeName,fileList):
+        """
+        Check existence of tree. True=ok, False=none. For now only check first file.
+        """
+        if len(fileList)==0 or len(treeName)==0: return False
+        file = TFile.Open(fileList[0])
+        if file==None: return False
+        tree = file.Get(treeName)
+        if tree==None:
+            file.Close()
+            return False
+        if tree.ClassName()!='TTree':
+            file.Close()
+            return False
+
+        file.Close()
+        return True
 
     def read(self,treeName,fileList):
         """
@@ -386,6 +409,12 @@ class HistoPrepare(PrepareHistosABC):
             self.cacheFile = TFile(filepath,"RECREATE")
             self.recreate=True
         return
+
+    def checkTree(self,treeName,fileList):
+        """
+        Check existence of tree. 
+        """
+        return False
 
     def read(self, name, fileList):
         log.info("HistoPrepare " + str(fileList))
