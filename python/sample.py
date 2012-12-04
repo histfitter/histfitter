@@ -217,6 +217,11 @@ class Sample(object):
             self.setNormRegions(normChannels)
             log.warning("            For now, using all non-validation channels by default: %s"%self.normRegions)
 
+        ## Three use-cases:
+        ## 1. Normalized systematics over control regions, and all sub-cases (symmetrize, includeOverallSys)
+        ## 2. includeOverallSys and not normalizeSys:
+        ## 3. No renormalization, and no overall-systematics
+
         if normalizeSys:
             if not self.normRegions: 
                 raise RuntimeError("Please specify normalization regions!")
@@ -240,8 +245,8 @@ class Sample(object):
                 samNameRemap = samName
 
             highIntegral = configMgr.hists["h"+samNameRemap+systName+"High_"+normString+"Norm"].Integral()
-            lowIntegral = configMgr.hists["h"+samNameRemap+systName+"Low_"+normString+"Norm"].Integral()
-            nomIntegral = configMgr.hists["h"+samNameRemap+"Nom_"+normString+"Norm"].Integral()
+            lowIntegral  = configMgr.hists["h"+samNameRemap+systName+"Low_"+normString+"Norm"].Integral()
+            nomIntegral  = configMgr.hists["h"+samNameRemap+"Nom_"+normString+"Norm"].Integral()
             
             if oneSide and symmetrize:
                 lowIntegral = 2.*nomIntegral - highIntegral # note,  this is an approximation!
