@@ -326,7 +326,6 @@ class Sample(object):
             if nomIntegral==0 or lowIntegral==0 or highIntegral==0:
                 # MB : cannot renormalize,  so don't after all
                 self.histoSystList.append((systName, highName, lowName, configMgr.histCacheFile, "", "", "", ""))
-                return
             else:
                 # renormalize
                 try:
@@ -351,7 +350,7 @@ class Sample(object):
 
         if not includeOverallSys and not normalizeSys: # no renormalization,  and no overall systematic
 
-            if symmetrize and not oneSide:
+            if symmetrize and not oneSide: ## symmetrize the systematic uncertainty
                 nomIntegral = configMgr.hists[nomName].Integral()
                 lowIntegral = configMgr.hists[lowName].Integral()
                 highIntegral = configMgr.hists[highName].Integral()
@@ -363,7 +362,7 @@ class Sample(object):
                     log.error("    generating HistoSys for %s syst=%s nom=%g high=%g low=%g. Systematic is removed from fit." % (nomName, systName, nomIntegral, highIntegral, lowIntegral))
                     return
 
-                if high<1.0 and low<1.0:
+                if high<1.0 and low<1.0 and low>0.0:
                     log.warning("    addHistoSys: high=%f is < 1.0 in %s. Taking symmetric value from low %f %f"% (high, systName, low, 2.-low))
                     configMgr.hists[highName+"Norm"] = configMgr.hists[highName].Clone(highName+"Norm")
                     try:
@@ -372,10 +371,7 @@ class Sample(object):
                         log.error("    generating HistoSys for %s syst=%s nom=%g high=%g low=%g. Systematic is removed from fit." % (nomName, systName, nomIntegral, highIntegral, lowIntegral))
                         return
                     self.histoSystList.append((systName, highName+"Norm", lowName, configMgr.histCacheFile, "", "", "", ""))
-                    if not systName in configMgr.systDict.keys():
-                        self.systList.append(systName)
-                    return
-                if low>1.0 and high>1.0:
+                elif low>1.0 and high>1.0:
                     log.warning("    addHistoSys: low=%f is > 1.0 in %s. Taking symmetric value from high %f %f"% (low, systName, high, 2.-high))
                     configMgr.hists[lowName+"Norm"] = configMgr.hists[lowName].Clone(lowName+"Norm")
                     try:
@@ -384,24 +380,17 @@ class Sample(object):
                         log.error("    generating HistoSys for %s syst=%s nom=%g high=%g low=%g. Systematic is removed from fit." % (nomName, systName, nomIntegral, highIntegral, lowIntegral))
                         return
                     self.histoSystList.append((systName, highName, lowName+"Norm", configMgr.histCacheFile, "", "", "", ""))
-                    if not systName in configMgr.systDict.keys():
-                        self.systList.append(systName)
-                    return
-                if low<0.:
+                elif low<0.:
                     log.warning("    addHistoSys: low=%f is < 0.0 in %s. Setting negative bins to 0.0."% (low, systName))
                     configMgr.hists[lowName+"Norm"] = configMgr.hists[lowName].Clone(lowName+"Norm")
                     for iBin in xrange(1, configMgr.hists[lowName+"Norm"].GetNbinsX()+1):
                         if configMgr.hists[lowName+"Norm"].GetBinContent(iBin) < 0.:
                             configMgr.hists[lowName+"Norm"].SetBinContent(iBin, 0.)
                     self.histoSystList.append((systName, highName, lowName+"Norm", configMgr.histCacheFile, "", "", "", ""))
-                    if not systName in configMgr.systDict.keys():
-                        self.systList.append(systName)
-                        return
-
-                self.histoSystList.append((systName, highName, lowName, configMgr.histCacheFile, "", "", "", ""))
-                return
+                else:
+                    self.histoSystList.append((systName, highName, lowName, configMgr.histCacheFile, "", "", "", ""))
             elif symmetrize and oneSide:
-                # symmetrize
+                # symmetrize one-side systematic, nothing else
                 configMgr.hists[lowName] = configMgr.hists[nomName].Clone(lowName)
                 configMgr.hists[lowName].Scale(2.0)
                 configMgr.hists[lowName].Add(configMgr.hists[highName],  -1.0)
@@ -411,43 +400,13 @@ class Sample(object):
                     if binVal<0.:
                         configMgr.hists[lowName].SetBinContent(iBin, 0.)
 
-                # try to normalize
-                nomIntegral = configMgr.hists[nomName].Integral()
-                lowIntegral = configMgr.hists[lowName].Integral()
-                highIntegral = configMgr.hists[highName].Integral()
-                
-                if nomIntegral==0 or lowIntegral==0 or highIntegral==0:
-                    # cannot renormalize,  so don't
-                    self.histoSystList.append((systName, highName, lowName, configMgr.histCacheFile, "", "", "", ""))
-                else:
-                    # renormalize
-                    try:
-                        high = highIntegral / nomIntegral
-                        low = lowIntegral / nomIntegral
-                    except ZeroDivisionError:
-                        log.error("    generating HistoSys for %s syst=%s nom=%g high=%g low=%g. Systematic is removed from fit." % (nomName, systName, nomIntegral, highIntegral, lowIntegral))
-                        return
-                    
-                    configMgr.hists[highName+"Norm"] = configMgr.hists[highName].Clone(highName+"Norm")
-                    configMgr.hists[lowName+"Norm"] = configMgr.hists[lowName].Clone(lowName+"Norm")
-                    try:
-                        configMgr.hists[highName+"Norm"].Scale(1./high)
-                        configMgr.hists[lowName+"Norm"].Scale(1./low)
-                    except ZeroDivisionError:
-                        log.error("    generating HistoSys for %s syst=%s nom=%g high=%g low=%g keeping in fit (offending histogram should be empty)." % (nomName, systName, nomIntegral, highIntegral, lowIntegral))
-                        return
-
-                    # overall histosys
-                    self.histoSystList.append((systName, highName+"Norm", lowName+"Norm", configMgr.histCacheFile, "", "", "", ""))
-                    self.addOverallSys(systName, high, low)
-                    
-                return    
+                self.histoSystList.append((systName, highName, lowName, configMgr.histCacheFile, "", "", "", "")) 
             else: # default: don't do anything special
                 self.histoSystList.append((systName, highName, lowName, configMgr.histCacheFile, "", "", "", ""))
-                return
 
         if not systName in configMgr.systDict.keys():
             self.systList.append(systName)
+        return
 
 
     def addShapeSys(self, systName, nomName, highName, lowName, constraintType="Gaussian"):
