@@ -192,7 +192,7 @@ class Sample(object):
         #        pass
         return
 
-    def addHistoSys(self, systName, nomName, highName, lowName, includeOverallSys, normalizeSys, symmetrize=False, oneSide=False, samName="", normString="", overallSysOnly=False):
+    def addHistoSys(self, systName, nomName, highName, lowName, includeOverallSys, normalizeSys, symmetrize=False, oneSide=False, samName="", normString=""):
         """
         Add a HistoSys entry using the nominal,  high and low histograms,  set if to include OverallSys
 
