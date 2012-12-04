@@ -646,19 +646,21 @@ class ConfigManager(object):
         elif syst.method == "userOverallSys":
             chan.getSample(sam.name).addOverallSys(syst.name, syst.high, syst.low)
         elif syst.method == "overallHistoSys":
-            chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName, True, False)
+            chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName, True,  False)
+        elif syst.method == "overallNormSys":
+            chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName, True,  True, False, False, sam.name, normString)
         elif syst.method == "overallNormHistoSys":
-            chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName, True, True, False, False, sam.name, normString)
+            chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName, True,  True, False, False, sam.name, normString)
         elif syst.method == "overallNormHistoSysOneSide":
-            chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName, True, True, False, True, sam.name, normString)
+            chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName, True,  True, False, True,  sam.name, normString)
         elif syst.method == "overallNormHistoSysOneSideSym":
-            chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName, True, True, True, True, sam.name, normString)
+            chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName, True,  True, True,  True,  sam.name, normString)
         elif syst.method == "normHistoSys":
             chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName, False, True, False, False, sam.name, normString)
         elif syst.method == "normHistoSysOneSide":
-            chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName, False, True, False, True, sam.name, normString)
+            chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName, False, True, False, True,  sam.name, normString)
         elif syst.method == "normHistoSysOneSideSym":
-            chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName, False, True, True, True, sam.name, normString)
+            chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName, False, True, True,  True,  sam.name, normString)
         elif syst.method == "userHistoSys" or syst.method == "userNormHistoSys":
             if configMgr.hists[highName] == None:
                 configMgr.hists[highName] = histMgr.buildUserHistoSysFromHist(highName,  syst.high,  configMgr.hists[nomName])
@@ -826,9 +828,11 @@ class ConfigManager(object):
             if not sam.normRegions and (not sam.noRenormSys): 
                 needsNorm = False
                 for sys in sam.systDict.values():
-                    if sys.method == "userNormHistoSys" or sys.method == "normHistoSys" \
+                    if sys.method == "userNormHistoSys" \
+                           or sys.method == "normHistoSys" \
                            or sys.method == "normHistoSysOneSide" \
                            or sys.method == "normHistoSysOneSideSym" \
+                           or sys.method == "overallNormSys" \
                            or sys.method == "overallNormHistoSys" \
                            or sys.method == "overallNormHistoSysOneSide" \
                            or sys.method == "overallNormHistoSysOneSideSym":
