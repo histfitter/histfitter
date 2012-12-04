@@ -63,6 +63,7 @@ class Channel(object):
         self.ATLASLabelY = None
         self.ATLASLabelText = None
         self.showLumi = None
+        self.remapSystChanName = ""
         return
 
     def initialize(self):
