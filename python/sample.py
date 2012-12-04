@@ -192,7 +192,7 @@ class Sample(object):
         #        pass
         return
 
-    def addHistoSys(self, systName, nomName, highName, lowName, includeOverallSys, normalizeSys, symmetrize=False, oneSide=False, samName="", normString=""):
+    def addHistoSys(self, systName, nomName, highName, lowName, includeOverallSys, normalizeSys, symmetrize=False, oneSide=False, samName="", normString="", overallSysOnly=False):
         """
         Add a HistoSys entry using the nominal,  high and low histograms,  set if to include OverallSys
 
@@ -219,7 +219,7 @@ class Sample(object):
 
         if normalizeSys:
             if not self.normRegions: 
-                raise RuntimeError("You are using the Zero lepton modified version of HistFitter. Please specify normalization regions!")
+                raise RuntimeError("Please specify normalization regions!")
 
             if oneSide and symmetrize:
                 # symmetrize
@@ -298,7 +298,7 @@ class Sample(object):
 
             # add the systematic
             if oneSide and not symmetrize:
-                ## MB : avoid swapping of histograms
+                ## MB : avoid swapping of histograms, always pass high and nominal
                 self.histoSystList.append((systName, highName+"Norm", nomName, configMgr.histCacheFile, "", "", "", ""))
             else:
                 self.histoSystList.append((systName, highName+"Norm", lowName+"Norm", configMgr.histCacheFile, "", "", "", ""))
@@ -441,9 +441,6 @@ class Sample(object):
                     self.histoSystList.append((systName, highName+"Norm", lowName+"Norm", configMgr.histCacheFile, "", "", "", ""))
                     self.addOverallSys(systName, high, low)
                     
-                #self.histoSystList.append((systName, highName, nomName, configMgr.histCacheFile, "", "", "", ""))
-                #self.histoSystList.append((systName, highName, lowName, configMgr.histCacheFile, "", "", "", ""))
-                
                 return    
             else: # default: don't do anything special
                 self.histoSystList.append((systName, highName, lowName, configMgr.histCacheFile, "", "", "", ""))
