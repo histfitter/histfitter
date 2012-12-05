@@ -32,133 +32,133 @@ def GenerateFitAndPlotCPP(fc, drawBeforeFit, drawAfterFit, drawCorrelationMatrix
     #    from configManager import configMgr
     Util.GenerateFitAndPlot(fc.name, drawBeforeFit, drawAfterFit, drawCorrelationMatrix, drawSeparateComponents, drawLogLikelihood)
 
-def GenerateFitAndPlot(fc, drawBeforeAfterFit):
-    from configManager import configMgr
+## def GenerateFitAndPlot(fc, drawBeforeAfterFit):
+##     from configManager import configMgr
 
-    from ROOT import Util
-    from ROOT import RooExpandedFitResult
-    log.info("\n***GenerateFitAndPlot for TopLevelXML %s***\n" % fc.name)
+##     from ROOT import Util
+##     from ROOT import RooExpandedFitResult
+##     log.info("\n***GenerateFitAndPlot for TopLevelXML %s***\n" % fc.name)
 
-    w = Util.GetWorkspaceFromFile(fc.wsFileName, "combined")
-    Util.SaveInitialSnapshot(w)
-    #   Util.ReadWorkspace(w, fc.wsFileName,"combined")
+##     w = Util.GetWorkspaceFromFile(fc.wsFileName, "combined")
+##     Util.SaveInitialSnapshot(w)
+##     #   Util.ReadWorkspace(w, fc.wsFileName,"combined")
 
-    plotChannels = ""
-    for reg in fc.validationChannels:
-        if len(plotChannels) > 0:
-            plotChannels += ","
-            pass
-        plotChannels += reg
-    plotChannels = "ALL"
+##     plotChannels = ""
+##     for reg in fc.validationChannels:
+##         if len(plotChannels) > 0:
+##             plotChannels += ","
+##             pass
+##         plotChannels += reg
+##     plotChannels = "ALL"
 
-    fitChannels = ""
-    for reg in fc.bkgConstrainChannels:
-        if len(fitChannels) > 0:
-            fitChannels += ","
-            pass
-        fitChannels += reg
-        pass
+##     fitChannels = ""
+##     for reg in fc.bkgConstrainChannels:
+##         if len(fitChannels) > 0:
+##             fitChannels += ","
+##             pass
+##         fitChannels += reg
+##         pass
 
-    fitChannelsCR = fitChannels
-    for reg in fc.signalChannels:
-        if len(fitChannels) > 0:
-            fitChannels += ","
-            pass
-        fitChannels += reg
-    #fitChannels = "ALL"
+##     fitChannelsCR = fitChannels
+##     for reg in fc.signalChannels:
+##         if len(fitChannels) > 0:
+##             fitChannels += ","
+##             pass
+##         fitChannels += reg
+##     #fitChannels = "ALL"
 
-    #hack to be fixed at HistFactory level (check again with ROOT 5.34)
-    lumiConst = True
-    if fc.signalSample and not fc.hasDiscovery:
-        lumiConst = False
+##     #hack to be fixed at HistFactory level (check again with ROOT 5.34)
+##     lumiConst = True
+##     if fc.signalSample and not fc.hasDiscovery:
+##         lumiConst = False
 
-    # fit toy MC if specified. When left None, data is fit by default
-    toyMC = None
-    if configMgr.toySeedSet and not configMgr.useAsimovSet:
-        # generate a toy dataset
-        log.info("generating toy MC set for fitting and plotting." \
-              " Seed = %i" % configMgr.toySeed)
-        toyMC = Util.GetToyMC()   # this generates one toy dataset
-        pass
-    elif configMgr.useAsimovSet and not configMgr.toySeedSet:
-        log.info("using Asimov set for fitting and plotting.")
-        toyMC = Util.GetAsimovSet(w)  # this returns the asimov set
-        pass
-    else:
-        log.info("using data for fitting and plotting.")
+##     # fit toy MC if specified. When left None, data is fit by default
+##     toyMC = None
+##     if configMgr.toySeedSet and not configMgr.useAsimovSet:
+##         # generate a toy dataset
+##         log.info("generating toy MC set for fitting and plotting." \
+##               " Seed = %i" % configMgr.toySeed)
+##         toyMC = Util.GetToyMC()   # this generates one toy dataset
+##         pass
+##     elif configMgr.useAsimovSet and not configMgr.toySeedSet:
+##         log.info("using Asimov set for fitting and plotting.")
+##         toyMC = Util.GetAsimovSet(w)  # this returns the asimov set
+##         pass
+##     else:
+##         log.info("using data for fitting and plotting.")
 
-    # set Errors of all parameters to 'natural' values before plotting/fitting
-    Util.resetAllErrors(w)
+##     # set Errors of all parameters to 'natural' values before plotting/fitting
+##     Util.resetAllErrors(w)
 
-    # AK: now done in Util.resetAllErrors()
-    #     # normFactors (such as mu_Top, mu_WZ, etc) need to have their errors set
-    #     # to a small number for the before the fit plots
-    #     normList = configMgr.normList
-    #     for norm in normList:
-    #         if norm in fc.measurements[0].paramSettingDict.keys():
-    #             if fc.measurements[0].paramSettingDict[norm][0]:
-    #                 continue
-    #         normfac = w.var(norm)
-    #         if normfac:
-    #             normfac.setError(0.001)
-    #             print "Uncertainty on parameter: ", norm, " set to 0.001"
+##     # AK: now done in Util.resetAllErrors()
+##     #     # normFactors (such as mu_Top, mu_WZ, etc) need to have their errors set
+##     #     # to a small number for the before the fit plots
+##     #     normList = configMgr.normList
+##     #     for norm in normList:
+##     #         if norm in fc.measurements[0].paramSettingDict.keys():
+##     #             if fc.measurements[0].paramSettingDict[norm][0]:
+##     #                 continue
+##     #         normfac = w.var(norm)
+##     #         if normfac:
+##     #             normfac.setError(0.001)
+##     #             print "Uncertainty on parameter: ", norm, " set to 0.001"
 
-    # set the flag for plotting ratio or pull distribution under the plot
-    # plotRatio = False means that a pull distribution will be drawn
-    plotRatio = True
+##     # set the flag for plotting ratio or pull distribution under the plot
+##     # plotRatio = False means that a pull distribution will be drawn
+##     plotRatio = True
 
-    # get a list of all floating parameters for all regions
-    simPdf = w.pdf("simPdf")
-    mc = Util.GetModelConfig(w)
-    obsSet = mc.GetObservables()
-    floatPars = Util.getFloatParList(simPdf, obsSet)
+##     # get a list of all floating parameters for all regions
+##     simPdf = w.pdf("simPdf")
+##     mc = Util.GetModelConfig(w)
+##     obsSet = mc.GetObservables()
+##     floatPars = Util.getFloatParList(simPdf, obsSet)
 
-    # create an RooExpandedFitResult encompassing all the
-    # regions/parameters & save it to workspace
-    expResultBefore = RooExpandedFitResult(floatPars)
-    Util.ImportInWorkspace(w, expResultBefore,
-                            "RooExpandedFitResult_beforeFit")
+##     # create an RooExpandedFitResult encompassing all the
+##     # regions/parameters & save it to workspace
+##     expResultBefore = RooExpandedFitResult(floatPars)
+##     Util.ImportInWorkspace(w, expResultBefore,
+##                             "RooExpandedFitResult_beforeFit")
     
-    # plot before fit
-    if drawBeforeAfterFit:
-        Util.PlotPdfWithComponents(w, fc.name, plotChannels, "beforeFit",
-                                   expResultBefore, toyMC, plotRatio)
+##     # plot before fit
+##     if drawBeforeAfterFit:
+##         Util.PlotPdfWithComponents(w, fc.name, plotChannels, "beforeFit",
+##                                    expResultBefore, toyMC, plotRatio)
 
-    # fit of all regions
-    result = Util.FitPdf(w, fitChannels, lumiConst, toyMC)
+##     # fit of all regions
+##     result = Util.FitPdf(w, fitChannels, lumiConst, toyMC)
 
-    # create an RooExpandedFitResult encompassing all the regions/parameters
-    # with the result & save it to workspace
-    expResultAfter = RooExpandedFitResult(result, floatPars)
-    Util.ImportInWorkspace(w, expResultAfter, "RooExpandedFitResult_afterFit")
+##     # create an RooExpandedFitResult encompassing all the regions/parameters
+##     # with the result & save it to workspace
+##     expResultAfter = RooExpandedFitResult(result, floatPars)
+##     Util.ImportInWorkspace(w, expResultAfter, "RooExpandedFitResult_afterFit")
 
-    # plot after fit
-    if drawBeforeAfterFit:
-        Util.PlotPdfWithComponents(w, fc.name, plotChannels, "afterFit",
-                                   expResultAfter, toyMC, plotRatio)
-        #plot each component of each region separately with propagated
-        #error after fit  (interesting for debugging)
-        #Util.PlotSeparateComponents(fc.name, plotChannels,
-        #                             "afterFit", result,toyMC)
+##     # plot after fit
+##     if drawBeforeAfterFit:
+##         Util.PlotPdfWithComponents(w, fc.name, plotChannels, "afterFit",
+##                                    expResultAfter, toyMC, plotRatio)
+##         #plot each component of each region separately with propagated
+##         #error after fit  (interesting for debugging)
+##         #Util.PlotSeparateComponents(fc.name, plotChannels,
+##         #                             "afterFit", result,toyMC)
 
-        # plot correlation matrix for result
-        Util.PlotCorrelationMatrix(result)
-        # plot likelihood
-        #    plotPLL = False
-        #         Util.PlotNLL(w, expResultAfter, plotPLL, "", toyMC)
+##         # plot correlation matrix for result
+##         Util.PlotCorrelationMatrix(result)
+##         # plot likelihood
+##         #    plotPLL = False
+##         #         Util.PlotNLL(w, expResultAfter, plotPLL, "", toyMC)
 
-    if toyMC:
-        Util.WriteWorkspace(w, fc.wsFileName, toyMC.GetName())
-    else:
-        Util.WriteWorkspace(w, fc.wsFileName)
+##     if toyMC:
+##         Util.WriteWorkspace(w, fc.wsFileName, toyMC.GetName())
+##     else:
+##         Util.WriteWorkspace(w, fc.wsFileName)
 
-    try:
-        if not result == None:
-            result.Print()
-            return result
-    except:
-        pass
-    return
+##     try:
+##         if not result == None:
+##             result.Print()
+##             return result
+##     except:
+##         pass
+##     return
 
 
 
@@ -212,7 +212,7 @@ if __name__ == "__main__":
     # (a workaround using "-f -d -- configFile.py" exists but it would confuse users)
     # --GJ 14/11/2012 
     parser.add_argument("-d", action="store_true", help="draw before/after plots")
-    parser.add_argument("-D", "--draw", nargs="+", choices=["allPlots", "before","after", "corrMatrix", "sepComponents", "likelihood"], help="specify plots to draw")
+    parser.add_argument("-D", "--draw", nargs="+", choices=["allPlots", "before","after", "corrMatrix", "sepComponents", "likelihood"], help="specify plots to draw, space separated")
     
     parser.add_argument("-b", "--background", help="when doing hypotest, set background levels to values, form of bkgParName,value")
     parser.add_argument("-0", "--no-empty", help="do not draw empty bins when drawing", action="store_true")
@@ -286,7 +286,7 @@ if __name__ == "__main__":
                 elif drawArg == "likelihood":
                     drawLogLikelihood = True
                 else:
-                    log.fatal("Wrong draw argument: %s\n  Possible draw arguments are 'allPlots' or comma separated 'before, after, corrMatrix, sepComponents, likelihood'" % drawArg) #should now be caught by argparse --GJ 7/11/2012
+                    log.fatal("Wrong draw argument: %s\n  Possible draw arguments are 'allPlots' or space separated 'before after corrMatrix sepComponents likelihood'" % drawArg) #should now be caught by argparse --GJ 7/11/2012
 
     if args.no_empty:
         configMgr.removeEmptyBins = True
@@ -351,12 +351,14 @@ if __name__ == "__main__":
             #    r=GenerateFitAndPlot(configMgr.fitConfigs[idx],drawBeforeAfterFit)
             r = GenerateFitAndPlotCPP(configMgr.fitConfigs[0], drawBeforeFit, drawAfterFit, drawCorrelationMatrix, drawSeparateComponents, drawLogLikelihood)
             pass
-        #configMgr.cppMgr.fitAll()
-        log.info("\nr0=GenerateFitAndPlot(configMgr.fitConfigs[0],False)")
-        log.info("r1=GenerateFitAndPlot(configMgr.fitConfigs[1],False)")
-        log.info("r2=GenerateFitAndPlot(configMgr.fitConfigs[2],False)")
-        log.info(" OR \nGenerateFitAndPlotCPP(configMgr.fitConfigs[0], drawBeforeAfterFit, drawCorrelationMatrix, drawSeparateComponents, drawLogLikelihood)")
-        log.info("   where drawBeforeAfterFit, drawCorrelationMatrix, drawSeparateComponents, drawLogLikelihood are booleans")
+    ##     #configMgr.cppMgr.fitAll()
+##         log.info("\nr0=GenerateFitAndPlot(configMgr.fitConfigs[0],False)")
+##         log.info("r1=GenerateFitAndPlot(configMgr.fitConfigs[1],False)")
+##         log.info("r2=GenerateFitAndPlot(configMgr.fitConfigs[2],False)")
+        log.info(" GenerateFitAndPlotCPP(configMgr.fitConfigs[0], drawBeforeFit, drawAfterFit, drawCorrelationMatrix, drawSeparateComponents, drawLogLikelihood)")
+        log.info(" GenerateFitAndPlotCPP(configMgr.fitConfigs[1], drawBeforeFit, drawAfterFit, drawCorrelationMatrix, drawSeparateComponents, drawLogLikelihood)")
+        log.info(" GenerateFitAndPlotCPP(configMgr.fitConfigs[2], drawBeforeFit, drawAfterFit, drawCorrelationMatrix, drawSeparateComponents, drawLogLikelihood)")
+        log.info("   where drawBeforeFit, drawAfterFit, drawCorrelationMatrix, drawSeparateComponents, drawLogLikelihood are booleans")
 
         pass
 
