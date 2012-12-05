@@ -1,3 +1,7 @@
+2012-12-05 Alex Koutsman <alex.koutsman@cern.ch>
+	* scripts/YieldsTableTex.py: negative errors on yields are now automatically truncated in case they are larger than the central bkg value
+	* Tagging HistFitter-00-00-21
+
 2012-12-04 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
 	* channelxml.py and topLevelxml.py recreated for backwards compatibility.
 
