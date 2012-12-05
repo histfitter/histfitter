@@ -59,9 +59,18 @@ Observed events         '''
 Fitted bkg events        '''
   for index, n in enumerate(m['TOTAL_FITTED_bkg_events']):
     if m['names'][index] in signalregionslist:
-      tableline += " & $" + str(("%.2f" %n)) + " \\pm " + str(("%.2f" %m['TOTAL_FITTED_bkg_events_err'][index])) +  "$         "
+      if (n - m['TOTAL_FITTED_bkg_events_err'][index]) > 0. :
+        tableline += " & $" + str(("%.2f" %n)) + " \\pm " + str(("%.2f" %m['TOTAL_FITTED_bkg_events_err'][index])) +  "$         "
+      else:
+        print "\n YieldsTableTex.py WARNING:   negative error after fit extends below 0. for total bkg pdf:  will print asymmetric error w/ truncated negative error reaching to 0."
+        tableline += " & $" + str(("%.2f" %n)) + "_{-" + str(("%.2f"%n)) + "}^{+" + str(("%.2f" %m['TOTAL_FITTED_bkg_events_err'][index])) +  "}$         "
     else:
-      tableline += " & $" + str(("%.2f" %n)) + " \\pm " + str(("%.2f" %m['TOTAL_FITTED_bkg_events_err'][index])) +  "$         "
+      #tableline += " & $" + str(("%.2f" %n)) + " \\pm " + str(("%.2f" %m['TOTAL_FITTED_bkg_events_err'][index])) +  "$         "
+      if (n - m['TOTAL_FITTED_bkg_events_err'][index]) > 0. :
+        tableline += " & $" + str(("%.2f" %n)) + " \\pm " + str(("%.2f" %m['TOTAL_FITTED_bkg_events_err'][index])) +  "$         "
+      else:
+        print "\n YieldsTableTex.py WARNING:   negative error extends below 0. for total bkg pdf:  will print asymmetric error w/ truncated negative error reaching to 0."
+        tableline += " & $" + str(("%.2f" %n)) + "_{-" + str(("%.2f"%n)) + "}^{+" + str(("%.2f" %m['TOTAL_FITTED_bkg_events_err'][index])) +  "}$         "
   tableline +='''     \\\\
 \\noalign{\\smallskip}\\hline\\noalign{\\smallskip}
 %%'''
@@ -81,11 +90,19 @@ Fitted bkg events        '''
         tableline += ''' events        '''
         for index, n in enumerate(m[name]):
           if m['names'][index] in signalregionslist:
-            tableline += " & $" + str(("%.2f" %n)) + " \\pm " + str(("%.2f" %m['Fitted_err_'+sample][index])) +  "$         "
-            #          tableline +='''     \\\\
-            # %%'''
+            #print "\n XXX   n=", n, "  m['Fitted_err_'+sample][index] = ", m['Fitted_err_'+sample][index] , "  abs(n) =",  abs(n), "    abs(n) > 0.00001 =", abs(n) > 0.00001
+            if ((n - m['Fitted_err_'+sample][index]) > 0.) or not abs(n) > 0.00001:
+              tableline += " & $" + str(("%.2f" %n)) + " \\pm " + str(("%.2f" %m['Fitted_err_'+sample][index])) +  "$         "
+            else:
+              print "\n YieldsTableTex.py WARNING:   negative error after fit extends below 0. for sample", sample, "    will print asymmetric error w/ truncated negative error reaching to 0."
+              tableline += " & $" + str(("%.2f" %n)) + "_{-" + str(("%.2f"%n)) + "}^{+" + str(("%.2f" %m['Fitted_err_'+sample][index])) +  "}$         "
           else:
-            tableline += " & $" + str(("%.2f" %n)) + " \\pm " + str(("%.2f" %m['Fitted_err_'+sample][index])) +  "$         "
+            ##tableline += " & $" + str(("%.2f" %n)) + " \\pm " + str(("%.2f" %m['Fitted_err_'+sample][index])) +  "$         "
+            if ((n - m['Fitted_err_'+sample][index]) > 0.) or not abs(n) > 0.00001:
+              tableline += " & $" + str(("%.2f" %n)) + " \\pm " + str(("%.2f" %m['Fitted_err_'+sample][index])) +  "$         "
+            else:
+              print "\n YieldsTableTex.py WARNING:   negative error after fit extends below 0. for sample", sample, "    will print asymmetric error w/ truncated negative error reaching to 0."
+              tableline += " & $" + str(("%.2f" %n)) + "_{-" + str(("%.2f"%n)) + "}^{+" + str(("%.2f" %m['Fitted_err_'+sample][index])) +  "}$         "
         tableline +='''     \\\\
 %%'''
 
@@ -104,7 +121,11 @@ Fitted bkg events        '''
 MC exp. SM events             '''
   for index, n in enumerate(m['TOTAL_MC_EXP_BKG_events']):
     if showBeforeFitError:
-      tableline += " & $" + str(("%.2f" %n)) + " \\pm " + str(("%.2f" %m['TOTAL_MC_EXP_BKG_err'][index])) +  "$         "
+      if ((n - m['TOTAL_MC_EXP_BKG_err'][index]) > 0.) or not abs(n) > 0.00001:
+        tableline += " & $" + str(("%.2f" %n)) + " \\pm " + str(("%.2f" %m['TOTAL_MC_EXP_BKG_err'][index])) +  "$         "
+      else:
+        print "\n YieldsTableTex.py WARNING:   negative error before fit extends below 0. for total bkg pdf:   will print asymmetric error w/ truncated negative error reaching to 0."
+        tableline += " & $" + str(("%.2f" %n)) + "_{-" + str(("%.2f"%n)) + "}^{+" + str(("%.2f" %m['TOTAL_MC_EXP_BKG_err'][index])) +  "}$         "
     else:
       tableline += " & $" + str(("%.2f" %n)) +  "$         "
   tableline +='''     \\\\
@@ -127,14 +148,18 @@ MC exp. SM events             '''
         for index, n in enumerate(m[name]):
           if m['names'][index] in signalregionslist:
             if showBeforeFitError:
-              tableline += " & $" + str(("%.2f" %n)) + " \\pm " + str(("%.2f" %m['MC_exp_err_'+sample][index])) +  "$         "
+              if ((n - m['MC_exp_err_'+sample][index]) > 0.) or not abs(n) > 0.00001:
+                tableline += " & $" + str(("%.2f" %n)) + " \\pm " + str(("%.2f" %m['MC_exp_err_'+sample][index])) +  "$         "
+              else:
+                print "\n YieldsTableTex.py WARNING:   negative error before fit extends below 0. for sample", sample, "    will print asymmetric error w/ truncated negative error reaching to 0."
+                tableline += " & $" + str(("%.2f" %n)) + "_{-" + str(("%.2f"%n)) + "}^{+" + str(("%.2f" %m['MC_exp_err_'+sample][index])) +  "}$         "
             else:
               tableline += " & $" + str(("%.2f" %n)) +  "$         "
-          else:
-            if showBeforeFitError:
-              tableline += " & $" + str(("%.2f" %n)) + " \\pm " + str(("%.2f" %m['MC_exp_err_'+sample][index])) +  "$         "
-            else:
-              tableline += " & $" + str(("%.2f" %n)) +  "$         "
+##           else:
+##             if showBeforeFitError:
+##               tableline += " & $" + str(("%.2f" %n)) + " \\pm " + str(("%.2f" %m['MC_exp_err_'+sample][index])) +  "$         "
+##             else:
+##               tableline += " & $" + str(("%.2f" %n)) +  "$         "
         tableline +='''     \\\\
 %%'''
 
