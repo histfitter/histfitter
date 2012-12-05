@@ -12,7 +12,8 @@ Prioritized todo-list:
 - Root 5.34.03: RooPlot has problems with ratio plots (alex)
 - Bug in filling of weight based systematics (GJ, David)
 - Using minos in fit (Max)
-- Remove MC statistical fluctuations from systematics
+- Remove MC statistical fluctuations from systematics (Max)
+- Proper treatment of all bins with zero events by HistFactory? Check (See recent mail George Lewis)
 
 
 From 2012-11-12:
