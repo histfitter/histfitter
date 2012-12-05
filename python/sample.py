@@ -467,7 +467,7 @@ class Sample(object):
             try:
                 ratio = configMgr.hists[nomName].GetBinError(iBin) / configMgr.hists[nomName].GetBinContent(iBin)
                 if (statErrorThreshold is not None) and (ratio<statErrorThreshold): 
-                    log.warning( "shapeStat %s bin %g value %g, below threshold of: %g. Will ignore." % (systName, iBin, ratio, statErrorThreshold) )
+                    log.info( "shapeStat %s bin %g value %g, below threshold of: %g. Will ignore." % (systName, iBin, ratio, statErrorThreshold) )
                     ratio = 0.0   ## don't show if below threshold
                 configMgr.hists[nomName+"Norm"].SetBinContent( iBin, ratio )
                 configMgr.hists[nomName+"Norm"].SetBinError( iBin, 0. )
