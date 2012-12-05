@@ -198,7 +198,7 @@ class SystematicBase:
                                     treeName = s.treeName + systNorm.low
                                 else:
                                     treeName = s.treeName
-                            if treeName == '' or treeName == systNorm.low:
+                            if self.type == "tree" and (treeName == '' or treeName == systNorm.low):
                                 treeName = s.name + systNorm.low
 
                         if 'High' in lowhigh:
@@ -216,12 +216,12 @@ class SystematicBase:
                                     treeName = s.treeName + systNorm.high
                                 else:
                                     treeName = s.treeName
-                            if treeName == '' or treeName == systNorm.high:
+                            if self.type == "tree" and (treeName == '' or treeName == systNorm.high):
                                 treeName = s.name + systNorm.high
 
                         # weight-based trees assuming up/down are in one tree have identical name for up/low
                         # if our current name does not exist, we assume this one does
-                        if not abstract.prepare.checkTree(treeName, filelist) and self.type == "weight":
+                        if self.type == "weight" and (not abstract.prepare.checkTree(treeName, filelist)):
                             treeName = s.name + abstract.nomName
 
                         log.verbose("s.name %s"%s.name)
