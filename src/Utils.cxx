@@ -2568,8 +2568,8 @@ Util::resetError( RooWorkspace* wspace, const RooArgList& parList, const RooArgL
         } // End Stat Error
         else {
             // Some unknown uncertainty
-            Logger << kWARNING << "Couldn't identify type of uncertainty for parameter: " << UncertaintyName << ".  Probably a normalization factor." << GEndl;
-            Logger << kINFO << " Setting uncertainty to 0.0001 before the fit for parameter: " << UncertaintyName << GEndl;
+            Logger << kINFO << "Couldn't identify type of uncertainty for parameter: " << UncertaintyName << ". Assuming a normalization factor." << GEndl;
+            Logger << kINFO << "Setting uncertainty to 0.0001 before the fit for parameter: " << UncertaintyName << GEndl;
             sigma = 0.0001;
             val_low = var->getVal() - sigma;
             val_hi = var->getVal() + sigma;
