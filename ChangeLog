@@ -1,3 +1,8 @@
+2012-15-10 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
+	* scripts/HistFitter.py: allow nargs="+" for args.configFile, so that user
+	can access e.g. sys.argv[-1] themselves - this was not allowed due to
+	strict number of args checking by argparse
+
 2012-15-05 Max Baak <mbaak@cern.ch>
 	M python/systematic.py
         * Another fix needed for case below where treeName would be improperly set

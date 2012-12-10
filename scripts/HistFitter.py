@@ -189,7 +189,7 @@ if __name__ == "__main__":
 
     import argparse
     parser = argparse.ArgumentParser()
-    parser.add_argument("configFile", help="configuration file to execute")
+    parser.add_argument("configFile", nargs="+", help="configuration file to execute")
     parser.add_argument("-L", "--log-level", help="set log level", choices=["VERBOSE", "DEBUG", "INFO", "WARNING", "ERROR", "FATAL", "ALWAYS"])
     parser.add_argument("-F", "--fit-type", help="type of fit to run", choices=["bkg", "disc", "excl"])
     parser.add_argument("-t", "--create-histograms", help="re-create histograms from TTrees", action="store_true", default=configMgr.readFromTree)
@@ -330,7 +330,7 @@ if __name__ == "__main__":
     gROOT.SetBatch(not runInterpreter)
 
     #mandatory user-defined configuration
-    execfile(args.configFile)
+    execfile(args.configFile[0]) #[0] since any extra arguments (sys.argv[-1], etc.) are caught here
 
     #standard execution from now on.
     configMgr.initialize()
