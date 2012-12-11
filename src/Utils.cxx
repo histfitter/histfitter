@@ -147,13 +147,13 @@ void Util::GenerateFitAndPlot(TString fcName, Bool_t drawBeforeFit, Bool_t drawA
     // fit only in CRs and SRs, not in VR
     TString fitChannels = "";
     for(unsigned int i=0; i <fc->m_bkgConstrainChannels.size(); i++){
-        if (i > 0)   fitChannels += ",";
-        fitChannels += fc->m_bkgConstrainChannels[i];
+      if (fitChannels.Length() > 0)   fitChannels += ",";
+      fitChannels += fc->m_bkgConstrainChannels[i];
     }
 
     for(unsigned int i=0; i <fc->m_signalChannels.size(); i++){
-        if (i > 0)   fitChannels += ",";
-        fitChannels += fc->m_signalChannels[i];
+      if (fitChannels.Length() > 0)   fitChannels += ",";
+      fitChannels += fc->m_signalChannels[i];
     }
 
     //hack to be fixed at HistFactory level (check again with ROOT 5.34)
