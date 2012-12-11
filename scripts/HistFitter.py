@@ -20,7 +20,7 @@ def enum(typename, field_names):
     return type(typename, (object,), d)()
 
 
-def GenerateFitAndPlotCPP(fc, drawBeforeFit, drawAfterFit, drawCorrelationMatrix, drawSeparateComponents, drawLogLikelihood):
+def GenerateFitAndPlotCPP(fc, drawBeforeFit, drawAfterFit, drawCorrelationMatrix, drawSeparateComponents, drawLogLikelihood, minos, minosPars):
     from ROOT import Util
     
     log.debug("GenerateFitAndPlotCPP: drawBeforeFit %s " % drawBeforeFit) 
@@ -28,9 +28,11 @@ def GenerateFitAndPlotCPP(fc, drawBeforeFit, drawAfterFit, drawCorrelationMatrix
     log.debug("GenerateFitAndPlotCPP: drawCorrelationMatrix %s " % drawCorrelationMatrix) 
     log.debug("GenerateFitAndPlotCPP: drawSeparateComponents %s " % drawSeparateComponents)
     log.debug("GenerateFitAndPlotCPP: drawLogLikelihood %s " % drawLogLikelihood)
+    log.debug("GenerateFitAndPlotCPP: minos %s " % minos)
+    log.debug("GenerateFitAndPlotCPP: minosPars %s " % minosPars)
 
     #    from configManager import configMgr
-    Util.GenerateFitAndPlot(fc.name, drawBeforeFit, drawAfterFit, drawCorrelationMatrix, drawSeparateComponents, drawLogLikelihood)
+    Util.GenerateFitAndPlot(fc.name, drawBeforeFit, drawAfterFit, drawCorrelationMatrix, drawSeparateComponents, drawLogLikelihood, minos, minosPars)
 
 ## def GenerateFitAndPlot(fc, drawBeforeAfterFit):
 ##     from configManager import configMgr
@@ -180,7 +182,9 @@ if __name__ == "__main__":
     drawLogLikelihood               = False
     pickedSRs = []
     runToys = False
-
+    runMinos = True
+    minosPars = ""
+    
     FitType = enum('FitType','Discovery , Exclusion , Background')
     myFitType=FitType.Background
     doValidation = False
@@ -218,6 +222,8 @@ if __name__ == "__main__":
     parser.add_argument("-0", "--no-empty", help="do not draw empty bins when drawing", action="store_true")
     parser.add_argument("-T", "--run-toys", help="run toys (default with mu)", action="store_true")
     parser.add_argument("-V", "--validation", help="include validation regions", action="store_true")
+
+    parser.add_argument("-m", "--minos", nargs="+", help="run minos for asymmetric error calculation, optionally give parameter names for which minos should be run, sapce separated")
 
     args = parser.parse_args()
    
@@ -326,7 +332,18 @@ if __name__ == "__main__":
                 configMgr.AddBkgParName(bkgArgs[iCx+1])
                 configMgr.AddBkgCorrVal(float(bkgArgs[iCx+2]))
                 continue
-        
+
+    if args.minos:
+        runMinos = True
+        minosArgs = args.minos
+        if len(minosArgs) == 1 and not minosArgs == "ALL":
+            print ""
+        elif len(minosArgs)>0 :
+            for index, minosArg in enumerate(minosArgs):
+                 if index>0:
+                    minosPars += ","
+                 minosPars += minosArg
+                    
     gROOT.SetBatch(not runInterpreter)
 
     #mandatory user-defined configuration
@@ -349,7 +366,7 @@ if __name__ == "__main__":
             #r=GenerateFitAndPlot(configMgr.fitConfigs[2],drawBeforeAfterFit)
             #for idx in range(len(configMgr.fitConfigs)):
             #    r=GenerateFitAndPlot(configMgr.fitConfigs[idx],drawBeforeAfterFit)
-            r = GenerateFitAndPlotCPP(configMgr.fitConfigs[0], drawBeforeFit, drawAfterFit, drawCorrelationMatrix, drawSeparateComponents, drawLogLikelihood)
+            r = GenerateFitAndPlotCPP(configMgr.fitConfigs[0], drawBeforeFit, drawAfterFit, drawCorrelationMatrix, drawSeparateComponents, drawLogLikelihood, runMinos, minosPars)
             pass
     ##     #configMgr.cppMgr.fitAll()
 ##         log.info("\nr0=GenerateFitAndPlot(configMgr.fitConfigs[0],False)")

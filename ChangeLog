@@ -1,3 +1,8 @@
+2012-12-11 Alex Koutsman <alex.koutsman@cern.ch>
+	   * scripts/HistFitter.py : added -m/--minos option that must be run with an argument, either "ALL" or a space separate string of parameters
+	   * src/Utils.cxx : added minos error calculation
+	   * src/Utils.h : added minos error calculation
+
 2012-15-10 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
 	* scripts/HistFitter.py: allow nargs="+" for args.configFile, so that user
 	can access e.g. sys.argv[-1] themselves - this was not allowed due to

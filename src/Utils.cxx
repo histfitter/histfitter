@@ -127,7 +127,8 @@ double Util::getNonQcdVal(const TString& proc, const TString& reg, TMap* map,con
 
 
 //_____________________________________________________________________________
-void Util::GenerateFitAndPlot(TString fcName, Bool_t drawBeforeFit, Bool_t drawAfterFit, Bool_t plotCorrelationMatrix, Bool_t plotSeparateComponents, Bool_t plotNLL ){
+//void Util::GenerateFitAndPlot(TString fcName, Bool_t drawBeforeFit, Bool_t drawAfterFit, Bool_t plotCorrelationMatrix, Bool_t plotSeparateComponents, Bool_t plotNLL ){
+void Util::GenerateFitAndPlot(TString fcName, Bool_t drawBeforeFit, Bool_t drawAfterFit, Bool_t plotCorrelationMatrix, Bool_t plotSeparateComponents, Bool_t plotNLL, Bool_t minos, TString minosPars ){
 
     ConfigMgr* mgr = ConfigMgr::getInstance();
     FitConfig* fc = mgr->getFitConfig(fcName);
@@ -197,8 +198,8 @@ void Util::GenerateFitAndPlot(TString fcName, Bool_t drawBeforeFit, Bool_t drawA
         PlotPdfWithComponents(w, fc->m_name, plotChannels, "beforeFit", expResultBefore, toyMC, plotRatio);
 
     //fit of all regions
-    RooFitResult*  result = FitPdf(w, fitChannels, lumiConst, toyMC);
-
+    RooFitResult*  result = FitPdf(w, fitChannels, lumiConst, toyMC, "", minos, minosPars);
+    
     // create an RooExpandedFitResult encompassing all the regions/parameters
     //  with the result & save it to workspace
     RooExpandedFitResult* expResultAfter = new RooExpandedFitResult(result, floatPars);
@@ -228,7 +229,7 @@ void Util::GenerateFitAndPlot(TString fcName, Bool_t drawBeforeFit, Bool_t drawA
         WriteWorkspace(w, fc->m_inputWorkspaceFileName);
 
     if (result)  
-        result->Print();
+        result->Print("v");
 }
 
 //_____________________________________________________________________________
@@ -302,11 +303,11 @@ void Util::WriteWorkspace(RooWorkspace* w, TString outFileName, TString suffix){
 
 
 //_____________________________________________________________________________
-RooFitResult* Util::FitPdf( RooWorkspace* w, TString fitRegions, bool lumiConst, RooAbsData* inputData, TString suffix)
+RooFitResult* Util::FitPdf( RooWorkspace* w, TString fitRegions, Bool_t lumiConst, RooAbsData* inputData, TString suffix, Bool_t minos, TString minosPars)
 {
 
     Logger << kINFO << " ------ Starting FitPdf with parameters:    fitRegions = " <<  fitRegions << GEndl;
-    Logger << kINFO <<  "    inputData = " << inputData << "  suffix = " << suffix  << GEndl;
+    Logger << kINFO <<  "    inputData = " << inputData << "  suffix = " << suffix  << "  minos = " << minos << "  minosPars = " << minosPars  << GEndl;
 
     RooMsgService::instance().getStream(1).removeTopic(NumIntegration);
 
@@ -375,23 +376,35 @@ RooFitResult* Util::FitPdf( RooWorkspace* w, TString fitRegions, bool lumiConst,
     w->import(*simPdfFitRegions,kTRUE);
     gDirectory->Add(simPdfFitRegions);
 
+
+    // find parameters requested for Minos
+    RooArgSet* minosParams = new RooArgSet();
+    if(minosPars != "" && minos){
+      std::vector<TString> parsVec = Tokens(minosPars,",");
+      for(unsigned int i=0; i<parsVec.size();i++){
+	RooRealVar* var = (RooRealVar*) w->var(parsVec[i]);
+	if(var==NULL)  Logger << kWARNING << " Util::FitPdf()   could not find parameter(" << parsVec[i] << ") in workspace while setting up minos" << GEndl;
+	else{
+	  minosParams->add(*var);
+	}
+      }
+    }
+    
     // fit pdf to data
     RooFitResult* r = 0;
 
     TString datasetname = data->GetName();
-    Logger << kINFO << " datasetname = " << datasetname << GEndl;
-    if( datasetname.Contains("asimov")){
-        //r = simPdfFitRegions->fitTo(*dataFitRegions,Save(),SumW2Error(kFALSE)); //MB no verbose :) ,Verbose(kTRUE));
+    Logger << kINFO << " Utils::FitPdf() using datasetname = " << datasetname << GEndl;
+    //    if( datasetname.Contains("asimov")){
+    //r = simPdfFitRegions->fitTo(*dataFitRegions,Save(),SumW2Error(kFALSE)); //MB no verbose :) ,Verbose(kTRUE));
+    
+    RooAbsPdf* pdf_FR = simPdfFitRegions;
+    RooDataSet* data_FR = dataFitRegions;
 
-        /////////////////////////////////////////////////////////////
-
-        RooAbsPdf* pdf = simPdfFitRegions;
-        RooDataSet* data = dataFitRegions;
-
-        RooArgSet* allParams = pdf->getParameters(data);
+        RooArgSet* allParams = pdf_FR->getParameters(data_FR);
         RooStats::RemoveConstantParameters(allParams);
 
-        RooAbsReal* nll = (RooNLLVar*) pdf->createNLL(*data); //, RooFit::CloneData(kFALSE),RooFit::Constrain(*allParams),RooFit::SumW2Error(kFALSE));
+        RooAbsReal* nll = (RooNLLVar*) pdf_FR->createNLL(*data_FR); //, RooFit::CloneData(kFALSE),RooFit::Constrain(*allParams),RooFit::SumW2Error(kFALSE));
 
         int minimPrintLevel = 0; //verbose;
 
@@ -451,10 +464,18 @@ RooFitResult* Util::FitPdf( RooWorkspace* w, TString fitRegions, bool lumiConst,
 
         //RooFitResult * result = 0; 
         double val(0);
-
+	
         if (status%100 == 0) { // ignore errors in Hesse or in Improve
-            r = minim.save();
-            val = r->minNll();
+	  // only calculate minos errors if fit with Migrad converged
+	  if(minos && minosPars==""){
+	    minim.minos();
+	  }
+	  else if(minos && minosPars!="" && minosParams->getSize()>0){
+	    minim.minos(*minosParams);
+	  }
+	  // save fit result	  
+	  r = minim.save();
+	  val = r->minNll();
         }
         else { 
             Logger << kERROR << "FIT FAILED !- return a NaN NLL " << GEndl;
@@ -467,118 +488,118 @@ RooFitResult* Util::FitPdf( RooWorkspace* w, TString fitRegions, bool lumiConst,
         //if (verbose < 2) RooMsgService::instance().setGlobalKillBelow(msglevel);  
 
         //////////////////////////////////////////////////////////////  
-    }
-    else{
-        // r = simPdfFitRegions->fitTo(*dataFitRegions,Save(),SumW2Error(kFALSE));
+//     }
+//     else{
+//         // r = simPdfFitRegions->fitTo(*dataFitRegions,Save(),SumW2Error(kFALSE));
 
-        /////////////////////////////////////////////////////////////
+//         /////////////////////////////////////////////////////////////
 
-        RooAbsPdf* pdf = simPdfFitRegions;
-        RooDataSet* data = dataFitRegions;
+//         RooAbsPdf* pdf = simPdfFitRegions;
+//         RooDataSet* data = dataFitRegions;
 
-        RooArgSet* allParams = pdf->getParameters(data);
-        RooStats::RemoveConstantParameters(allParams);
+//         RooArgSet* allParams = pdf->getParameters(data);
+//         RooStats::RemoveConstantParameters(allParams);
 
-        RooAbsReal* nll = (RooNLLVar*) pdf->createNLL(*data); //, RooFit::CloneData(kFALSE),RooFit::Constrain(*allParams),RooFit::SumW2Error(kFALSE));
+//         RooAbsReal* nll = (RooNLLVar*) pdf->createNLL(*data); //, RooFit::CloneData(kFALSE),RooFit::Constrain(*allParams),RooFit::SumW2Error(kFALSE));
 
-        int minimPrintLevel = 0; //verbose;
+//         int minimPrintLevel = 0; //verbose;
 
-        RooMinimizer minim(*nll);
-        int strategy = ROOT::Math::MinimizerOptions::DefaultStrategy();
-        minim.setStrategy( strategy);
-        // use tolerance - but never smaller than 1 (default in RooMinimizer)
-        double tol =  ROOT::Math::MinimizerOptions::DefaultTolerance();
-        tol = std::max(tol,1.0); // 1.0 is the minimum value used in RooMinimizer
-        minim.setEps( tol );
-        //LM: RooMinimizer.setPrintLevel has +1 offset - so subtruct  here -1
-        minim.setPrintLevel(minimPrintLevel-1);
-        int status = -1;
-        minim.optimizeConst(2);
-        TString minimizer = ROOT::Math::MinimizerOptions::DefaultMinimizerType(); 
-        TString algorithm = ROOT::Math::MinimizerOptions::DefaultMinimizerAlgo(); 
+//         RooMinimizer minim(*nll);
+//         int strategy = ROOT::Math::MinimizerOptions::DefaultStrategy();
+//         minim.setStrategy( strategy);
+//         // use tolerance - but never smaller than 1 (default in RooMinimizer)
+//         double tol =  ROOT::Math::MinimizerOptions::DefaultTolerance();
+//         tol = std::max(tol,1.0); // 1.0 is the minimum value used in RooMinimizer
+//         minim.setEps( tol );
+//         //LM: RooMinimizer.setPrintLevel has +1 offset - so subtruct  here -1
+//         minim.setPrintLevel(minimPrintLevel-1);
+//         int status = -1;
+//         minim.optimizeConst(2);
+//         TString minimizer = ROOT::Math::MinimizerOptions::DefaultMinimizerType(); 
+//         TString algorithm = ROOT::Math::MinimizerOptions::DefaultMinimizerAlgo(); 
 
-        Logger << kINFO << "Util::FitPdf()  ........ using " << minimizer << " / " << algorithm << GEndl; 
-        Logger << kINFO << " with strategy  " << strategy << " and tolerance " << tol << GEndl;
+//         Logger << kINFO << "Util::FitPdf()  ........ using " << minimizer << " / " << algorithm << GEndl; 
+//         Logger << kINFO << " with strategy  " << strategy << " and tolerance " << tol << GEndl;
 
-        bool kickApplied(false);
-        for (int tries = 1, maxtries = 5; tries <= maxtries; ++tries) {
-            //	 status = minim.minimize(fMinimizer, ROOT::Math::MinimizerOptions::DefaultMinimizerAlgo().c_str());
-            status = minim.minimize(minimizer, algorithm);  
-            if (status%1000 == 0) {  // ignore erros from Improve 
-                break;
-            } else { 
-                if (tries == 1) {
-                    Logger << kINFO << "    ----> Doing a re-scan first" << GEndl;
-                    minim.minimize(minimizer,"Scan");
-                }
-                if (tries == 2) {
-                    if (ROOT::Math::MinimizerOptions::DefaultStrategy() == 0 ) { 
-                        Logger << kINFO << "    ----> trying with strategy = 1" << GEndl;
-                        minim.setStrategy(1);
-                    }
-                    else 
-                        tries++; // skip this trial if stratehy is already 1 
-                }
-                if (tries == 3) {
-                    Logger << kINFO << "    ----> trying with improve" << GEndl;
-                    minimizer = "Minuit";
-                    algorithm = "migradimproved";
-                }
-                if (tries == 4 && !kickApplied) {
-                    Logger << kINFO << "    ----> trying fit with different starting values" << GEndl;
-                    RooFitResult* tmpResult = minim.save();
-                    const RooArgList& randList = tmpResult->randomizePars();
-                    *allParams = randList;
-                    delete tmpResult;
-                    tries=0;          // reset the fit cycle
-                    kickApplied=true; // do kick only once
-                }
-            }
-        }
+//         bool kickApplied(false);
+//         for (int tries = 1, maxtries = 5; tries <= maxtries; ++tries) {
+//             //	 status = minim.minimize(fMinimizer, ROOT::Math::MinimizerOptions::DefaultMinimizerAlgo().c_str());
+//             status = minim.minimize(minimizer, algorithm);  
+//             if (status%1000 == 0) {  // ignore erros from Improve 
+//                 break;
+//             } else { 
+//                 if (tries == 1) {
+//                     Logger << kINFO << "    ----> Doing a re-scan first" << GEndl;
+//                     minim.minimize(minimizer,"Scan");
+//                 }
+//                 if (tries == 2) {
+//                     if (ROOT::Math::MinimizerOptions::DefaultStrategy() == 0 ) { 
+//                         Logger << kINFO << "    ----> trying with strategy = 1" << GEndl;
+//                         minim.setStrategy(1);
+//                     }
+//                     else 
+//                         tries++; // skip this trial if stratehy is already 1 
+//                 }
+//                 if (tries == 3) {
+//                     Logger << kINFO << "    ----> trying with improve" << GEndl;
+//                     minimizer = "Minuit";
+//                     algorithm = "migradimproved";
+//                 }
+//                 if (tries == 4 && !kickApplied) {
+//                     Logger << kINFO << "    ----> trying fit with different starting values" << GEndl;
+//                     RooFitResult* tmpResult = minim.save();
+//                     const RooArgList& randList = tmpResult->randomizePars();
+//                     *allParams = randList;
+//                     delete tmpResult;
+//                     tries=0;          // reset the fit cycle
+//                     kickApplied=true; // do kick only once
+//                 }
+//             }
+//         }
 
 
-        //   RooRealVar* alpha_MC = w->var("alpha_MC");
-        //     RooRealVar* alpha_MP = w->var("alpha_MP");
-        //     RooRealVar* alpha_JHigh = w->var("alpha_JHigh");
-        //     RooRealVar* alpha_JMedium = w->var("alpha_JMedium");
-        //     RooRealVar* alpha_JLow = w->var("alpha_JLow");
+//         //   RooRealVar* alpha_MC = w->var("alpha_MC");
+//         //     RooRealVar* alpha_MP = w->var("alpha_MP");
+//         //     RooRealVar* alpha_JHigh = w->var("alpha_JHigh");
+//         //     RooRealVar* alpha_JMedium = w->var("alpha_JMedium");
+//         //     RooRealVar* alpha_JLow = w->var("alpha_JLow");
 
-        //     RooArgSet nuisPars;
-        //     if(alpha_MC) nuisPars.add(*alpha_MC);
-        //     if(alpha_MP) nuisPars.add(*alpha_MP);
-        //     if(alpha_JHigh) nuisPars.add(*alpha_JHigh);
-        //     if(alpha_JMedium) nuisPars.add(*alpha_JMedium);
-        //     if(alpha_JLow) nuisPars.add(*alpha_JLow);
+//         //     RooArgSet nuisPars;
+//         //     if(alpha_MC) nuisPars.add(*alpha_MC);
+//         //     if(alpha_MP) nuisPars.add(*alpha_MP);
+//         //     if(alpha_JHigh) nuisPars.add(*alpha_JHigh);
+//         //     if(alpha_JMedium) nuisPars.add(*alpha_JMedium);
+//         //     if(alpha_JLow) nuisPars.add(*alpha_JLow);
 
-        //     //  minim.setVerbose(kTRUE);
+//         //     //  minim.setVerbose(kTRUE);
 
-        //     if(nuisPars.getSize() > 0) {
-        //       cout << GEndl << endl << "XXX running minos with" << GEndl;
-        //       nuisPars.Print("v");
-        //       minim.minos(nuisPars);
-        //     }
+//         //     if(nuisPars.getSize() > 0) {
+//         //       cout << GEndl << endl << "XXX running minos with" << GEndl;
+//         //       nuisPars.Print("v");
+//         //       minim.minos(nuisPars);
+//         //     }
 
-        //RooFitResult * result = 0; 
-        double val(0);
+//         //RooFitResult * result = 0; 
+//         double val(0);
 
-        if (status%100 == 0) { // ignore errors in Hesse or in Improve
-            r = minim.save();
-            val = r->minNll();
-        }
-        else { 
-            Logger << kERROR << "FIT FAILED !- return a NaN NLL " << GEndl;
-            val =  TMath::QuietNaN();       
-        }
+//         if (status%100 == 0) { // ignore errors in Hesse or in Improve
+//             r = minim.save();
+//             val = r->minNll();
+//         }
+//         else { 
+//             Logger << kERROR << "FIT FAILED !- return a NaN NLL " << GEndl;
+//             val =  TMath::QuietNaN();       
+//         }
 
         //minim.optimizeConst(false);
         //if (result) delete result;
         //if (verbose < 2) RooMsgService::instance().setGlobalKillBelow(msglevel);  
 
         //////////////////////////////////////////////////////////////  
-    }
+	// }
     r->Print("v");
 
-    TString fitName = data->GetName();
+    TString fitName = data_FR->GetName();
     for(unsigned int iVec=0; iVec<fitRegionsVec.size(); iVec++){
         if(iVec ==0)  fitName += "_fitRegions";
         fitName += "_" + fitRegionsVec[iVec];
@@ -591,7 +612,7 @@ RooFitResult* Util::FitPdf( RooWorkspace* w, TString fitRegions, bool lumiConst,
     gDirectory->Add(r);
 
     // save snapshot after fit has been done
-    RooArgSet* params = (RooArgSet*) pdf->getParameters(*data) ;
+    RooArgSet* params = (RooArgSet*) pdf_FR->getParameters(*data_FR) ;
     w->saveSnapshot(Form("snapshot_paramsVals_%s",resultname.Data()),*params);
 
     return r;

@@ -47,7 +47,8 @@ namespace Util
   double looseToTightErr(const TString& reg, TMap* map);
   double getNonQcdVal(const TString& proc, const TString& reg, TMap* map, const TString& opt);
   
-  void GenerateFitAndPlot(TString fcName, Bool_t drawBeforeFit, Bool_t drawAfterFit, Bool_t plotCorrelationMatrix, Bool_t plotSeparateComponents, Bool_t plotNLL);
+  void GenerateFitAndPlot(TString fcName, Bool_t drawBeforeFit, Bool_t drawAfterFit, Bool_t plotCorrelationMatrix, Bool_t plotSeparateComponents, Bool_t plotNLL, 
+			  Bool_t minos = kFALSE, TString minosPars="");
 
   RooWorkspace* GetWorkspaceFromFile( const TString& infile, const TString& wsname );
   void WriteWorkspace(RooWorkspace* w, TString outFileName="./results/BkgForumTest_combined_ComHistoSysOverConst_model.root", TString suffix = "");
@@ -72,7 +73,7 @@ namespace Util
   void PlotNLL(RooWorkspace* w, RooFitResult* rFit = NULL,  Bool_t plotPLL = false, TString outputPrefix = "", RooAbsData* inputData=0);
   RooCurve* MakePdfErrorRatioHist(RooWorkspace* w, RooAbsData* regionData, RooAbsPdf* regionPdf, RooRealVar* regionVar, RooFitResult* rFit, Double_t Nsigma = 1.);
 
-  RooFitResult* FitPdf(RooWorkspace* w,  TString fitRegions="ALL", bool lumiConst=false, RooAbsData* inputData=0, TString suffix ="");
+  RooFitResult* FitPdf(RooWorkspace* w,  TString fitRegions="ALL", Bool_t lumiConst=false, RooAbsData* inputData=0, TString suffix ="", Bool_t minos = kFALSE, TString minosPars="");
   double GetPropagatedError(RooAbsReal* var, const RooFitResult& fr); //, RooArgList varlist=RooArgList() ) ; 
   void RemoveEmptyDataBins(RooWorkspace* w, RooPlot* frame);
 
