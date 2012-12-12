@@ -33,6 +33,8 @@ if [ ! $ROOTSYS ]; then
   export LD_LIBRARY_PATH=/afs/cern.ch/sw/lcg/external/xrootd/3.1.0p2/$BUILD/lib64:$LD_LIBRARY_PATH
   # hack for xrootd: libNetx library from pre-installed root version
   export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/afs/cern.ch/sw/lcg/app/releases/ROOT/$ROOTVERSION/$BUILD/root/lib
+  # missing libraries on lxbatch machines
+  export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/afs/cern.ch/atlas/offline/external/FullChainTest/tier0/test/mbaak/root/extlibs64
 fi
 
 # check Root environment setup 
