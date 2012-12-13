@@ -38,6 +38,8 @@ class FitConfig {
   
   void findChannel(const TString& channel, Int_t& idx, Bool_t& channelFound);
   void Print();
+  TString m_hypoTestName;
+
  private:
   TMsgLogger m_logger;
 };

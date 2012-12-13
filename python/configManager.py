@@ -293,23 +293,24 @@ class ConfigManager(object):
             self.cppMgr.m_outputFileName = self.outputFileName
             self.cppMgr.m_saveTree=True
         #Fill FitConfigs from TopLevelXMLs
-        for tl in self.fitConfigs:
-            cppTl = self.cppMgr.addFitConfig(tl.name)
-            cppTl.m_inputWorkspaceFileName = tl.wsFileName
-            cppTl.m_Lumi = self.lumiUnits*self.outputLumi
-            if not tl.signalSample == None:
-                cppTl.m_signalSampleName = tl.signalSample
+        for fc in self.fitConfigs:
+            cppFC = self.cppMgr.addFitConfig(fc.name)
+            cppFC.m_inputWorkspaceFileName = fc.wsFileName
+            cppFC.m_Lumi = self.lumiUnits*self.outputLumi
+            cppFC.m_hypoTestName = fc.hypoTestName
+            if not fc.signalSample == None:
+                cppFC.m_signalSampleName = fc.signalSample
      
             #CR/SR/VR channels
-            for cName in tl.signalChannels:
-                cppTl.m_signalChannels.push_back(cName)
-            for cName in tl.validationChannels:
-                cppTl.m_validationChannels.push_back(cName)
-            for cName in tl.bkgConstrainChannels:
-                cppTl.m_bkgConstrainChannels.push_back(cName)
+            for cName in fc.signalChannels:
+                cppFC.m_signalChannels.push_back(cName)
+            for cName in fc.validationChannels:
+                cppFC.m_validationChannels.push_back(cName)
+            for cName in fc.bkgConstrainChannels:
+                cppFC.m_bkgConstrainChannels.push_back(cName)
        
             # Plot cosmetics per channel
-            for c in tl.channels:
+            for c in fc.channels:
                  style = ChannelStyle(c.channelName)
                  style.setNBins(c.nBins)
                  if not c.minY == None:
@@ -332,15 +333,15 @@ class ConfigManager(object):
                      style.setShowLumi(c.showLumi)     
 
                  # Plot cosmetics per fitConfig 
-                 style.setDataColor(tl.dataColor)
-                 style.setTotalPdfColor(tl.totalPdfColor)
-                 style.setErrorLineColor(tl.errorLineColor)
-                 style.setErrorLineStyle(tl.errorLineStyle)
-                 style.setErrorFillColor(tl.errorFillColor)
-                 style.setErrorFillStyle(tl.errorFillStyle)
+                 style.setDataColor(fc.dataColor)
+                 style.setTotalPdfColor(fc.totalPdfColor)
+                 style.setErrorLineColor(fc.errorLineColor)
+                 style.setErrorLineStyle(fc.errorLineStyle)
+                 style.setErrorFillColor(fc.errorFillColor)
+                 style.setErrorFillStyle(fc.errorFillStyle)
                  style.setRemoveEmptyBins = self.removeEmptyBins
-                 if not tl.tLegend == None:
-                     style.setTLegend(tl.tLegend)
+                 if not fc.tLegend == None:
+                     style.setTLegend(fc.tLegend)
 
                  # Sample name and color
                  for s in c.sampleList:
@@ -350,8 +351,8 @@ class ConfigManager(object):
                      
                      
                  # add channel and style for channel to C++ FitConfig (these two are expected to be synchronous
-                 cppTl.m_channels.push_back(c.channelName)
-                 cppTl.m_channelsStyle.push_back(style)
+                 cppFC.m_channels.push_back(c.channelName)
+                 cppFC.m_channelsStyle.push_back(style)
                  
         self.cppMgr.checkConsistency()
         self.cppMgr.initialize()

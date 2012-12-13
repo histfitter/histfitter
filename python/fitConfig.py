@@ -64,6 +64,7 @@ class fitConfig(object):
         self.errorFillStyle = 3004
         self.setLogy = False
         self.tLegend = None
+        self.hypoTestName = ""
 
     def Clone(self, newName=""):
         if newName == "":
