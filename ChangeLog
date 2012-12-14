@@ -1,3 +1,8 @@
+2012-12-14 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
+	* python/sample.py: throw a warning for sample names starting with digits.
+	For signal samples starting with a digit, HistFactory misses parameters in
+	the workspace for unknown reasons. 
+
 2012-12-11 Alex Koutsman <alex.koutsman@cern.ch>
 	   * scripts/HistFitter.py : added -m/--minos option that must be run with an argument, either "ALL" or a space separate string of parameters
 	   * src/Utils.cxx : added minos error calculation
