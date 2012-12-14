@@ -55,6 +55,9 @@ class Sample(object):
         self.noRenormSys = True
         self.parentChannel = None
 
+        if self.name[0].isdigit():
+            log.warning("Sample name %s starts with a digit - this can confuse HistFactory internals" % self.name)
+
     def buildHisto(self, binValues, region, var):
         """
         Allow user to give bin values eg. for checking stats in papers
