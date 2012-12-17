@@ -425,7 +425,11 @@ RooStats::HypoTestTool::SetupHypoTestCalculator(RooWorkspace * w, bool doUL,
         bModel = (ModelConfig*) sbModel->Clone();
         bModel->SetName(TString(modelSBName)+TString("_with_poi_0"));      
         RooRealVar * var = dynamic_cast<RooRealVar*>(bModel->GetParametersOfInterest()->first());
-        if (!var) return false;
+        if (!var){
+          Info("HypoTestTool","Cast failed");
+          m_logger << kINFO << "HypoTestTool: Cast failed part 2" << GEndl;
+          return false;
+        }
         double oldval = var->getVal();
         var->setVal(0);
         bModel->SetSnapshot( RooArgSet(*var)  );
