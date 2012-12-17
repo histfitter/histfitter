@@ -1,3 +1,8 @@
+2012-12-17  Zach Marshall <zach.marshall@cern.ch>
+	* src/HypoTestTool.cxx: Adding some helpful debugging output
+	* src/Utils: Moving to folder-based plots
+	* macros/contours: Adding python-based plotting macros
+ 
 2012-12-14 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
 	* python/sample.py: throw a warning for sample names starting with digits.
 	For signal samples starting with a digit, HistFactory misses parameters in
