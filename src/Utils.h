@@ -47,7 +47,7 @@ namespace Util
   double looseToTightErr(const TString& reg, TMap* map);
   double getNonQcdVal(const TString& proc, const TString& reg, TMap* map, const TString& opt);
   
-  void GenerateFitAndPlot(TString fcName, Bool_t drawBeforeFit, Bool_t drawAfterFit, Bool_t plotCorrelationMatrix, Bool_t plotSeparateComponents, Bool_t plotNLL, 
+  void GenerateFitAndPlot(TString fcName, TString anaName, Bool_t drawBeforeFit, Bool_t drawAfterFit, Bool_t plotCorrelationMatrix, Bool_t plotSeparateComponents, Bool_t plotNLL, 
 			  Bool_t minos = kFALSE, TString minosPars="");
 
   RooWorkspace* GetWorkspaceFromFile( const TString& infile, const TString& wsname );
@@ -58,19 +58,19 @@ namespace Util
 
   void DecomposeWS(const char* infile, const char* wsname, const char* outfile);
 
-  void PlotPdfWithComponents(RooWorkspace* w, TString setupName = "Example3b",TString plotRegions = "ALL", 
+  void PlotPdfWithComponents(RooWorkspace* w, TString setupName = "Example3b", TString anaName="Analysis", TString plotRegions = "ALL", 
 			     TString outputPrefix = "", RooFitResult* rFit = NULL, RooAbsData* inputData=0, Bool_t plotRatio=kFALSE );
-  void PlotPdfWithComponents(RooWorkspace* w, FitConfig* fc, TString plotRegions= "ALL", TString outputPrefix = "", 
+  void PlotPdfWithComponents(RooWorkspace* w, FitConfig* fc,  TString anaName="Analysis", TString plotRegions= "ALL", TString outputPrefix = "", 
 			     RooFitResult* rFit= NULL, RooAbsData* inputData=0, Bool_t plotRatio=kFALSE );
-  void PlotPdfSumWithComponents(RooWorkspace* w, TString setupName = "Example3b", TString plotRegions = "ALL",  
+  void PlotPdfSumWithComponents(RooWorkspace* w, TString setupName = "Example3b", TString anaName="Analysis", TString plotRegions = "ALL",  
   		                  TString outputPrefix = "", RooFitResult* rFit = NULL, RooAbsData* inputData=0, Bool_t plotRatio=kFALSE ); 
   //void AddComponentsToPlot(RooWorkspace* w,FitConfig* fc, RooPlot* frame, RooAbsPdf* regionPdf, RooAbsData* regionData, RooRealVar* obsRegion, TString regionCatLabel);
   void AddComponentsToPlot(RooWorkspace* w,FitConfig* fc, RooPlot* frame, RooAbsPdf* regionPdf, RooAbsData* regionData, RooRealVar* obsRegion, TString regionCatLabel, ChannelStyle style);
-  void PlotSeparateComponents(RooWorkspace* w, TString setupName = "Example3b",TString plotRegions = "ALL", 
+  void PlotSeparateComponents(RooWorkspace* w, TString setupName = "Example3b", TString anaName="Analysis", TString plotRegions = "ALL", 
 			      TString outputPrefix = "", RooFitResult* rFit = NULL, RooAbsData* inputData=0 );
-  TH2D* PlotCorrelationMatrix(RooFitResult* rFit = NULL);
-  TH2D* GetCorrelations(RooFitResult* rFit = NULL, double threshold = 0.9);
-  void PlotNLL(RooWorkspace* w, RooFitResult* rFit = NULL,  Bool_t plotPLL = false, TString outputPrefix = "", RooAbsData* inputData=0);
+  TH2D* PlotCorrelationMatrix(RooFitResult* rFit = NULL, TString anaName="Analysis");
+  TH2D* GetCorrelations(RooFitResult* rFit = NULL, double threshold = 0.9, TString anaName="Analysis");
+  void PlotNLL(RooWorkspace* w, RooFitResult* rFit = NULL,  Bool_t plotPLL = false, TString anaName="Analysis", TString outputPrefix = "", RooAbsData* inputData=0);
   RooCurve* MakePdfErrorRatioHist(RooWorkspace* w, RooAbsData* regionData, RooAbsPdf* regionPdf, RooRealVar* regionVar, RooFitResult* rFit, Double_t Nsigma = 1.);
 
   RooFitResult* FitPdf(RooWorkspace* w,  TString fitRegions="ALL", Bool_t lumiConst=false, RooAbsData* inputData=0, TString suffix ="", Bool_t minos = kFALSE, TString minosPars="");

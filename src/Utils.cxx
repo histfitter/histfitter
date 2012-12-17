@@ -128,12 +128,13 @@ double Util::getNonQcdVal(const TString& proc, const TString& reg, TMap* map,con
 
 //_____________________________________________________________________________
 //void Util::GenerateFitAndPlot(TString fcName, Bool_t drawBeforeFit, Bool_t drawAfterFit, Bool_t plotCorrelationMatrix, Bool_t plotSeparateComponents, Bool_t plotNLL ){
-void Util::GenerateFitAndPlot(TString fcName, Bool_t drawBeforeFit, Bool_t drawAfterFit, Bool_t plotCorrelationMatrix, Bool_t plotSeparateComponents, Bool_t plotNLL, Bool_t minos, TString minosPars ){
+void Util::GenerateFitAndPlot(TString fcName, TString anaName, Bool_t drawBeforeFit, Bool_t drawAfterFit, Bool_t plotCorrelationMatrix, Bool_t plotSeparateComponents, Bool_t plotNLL, Bool_t minos, TString minosPars ){
 
     ConfigMgr* mgr = ConfigMgr::getInstance();
     FitConfig* fc = mgr->getFitConfig(fcName);
 
     Logger << kINFO << " GenerateFitAndPlot for FitConfig = " << fc->m_name << GEndl;
+    Logger << kINFO << "     analysisName = " << anaName << GEndl;
     Logger << kINFO << "     drawBeforeFit = " << drawBeforeFit << GEndl;
     Logger << kINFO << "     drawAfterFit = " << drawAfterFit << GEndl;
     Logger << kINFO << "     plotCorrelationMatrix = " << plotCorrelationMatrix << GEndl;
@@ -195,7 +196,7 @@ void Util::GenerateFitAndPlot(TString fcName, Bool_t drawBeforeFit, Bool_t drawA
 
     // plot before fit
     if (drawBeforeFit) 
-        PlotPdfWithComponents(w, fc->m_name, plotChannels, "beforeFit", expResultBefore, toyMC, plotRatio);
+        PlotPdfWithComponents(w, fc->m_name, anaName, plotChannels, "beforeFit", expResultBefore, toyMC, plotRatio);
 
     //fit of all regions
     RooFitResult*  result = FitPdf(w, fitChannels, lumiConst, toyMC, "", minos, minosPars);
@@ -207,21 +208,21 @@ void Util::GenerateFitAndPlot(TString fcName, Bool_t drawBeforeFit, Bool_t drawA
 
     // plot after fit
     if (drawAfterFit) 
-        PlotPdfWithComponents(w, fc->m_name, plotChannels, "afterFit", expResultAfter, toyMC, plotRatio);
+        PlotPdfWithComponents(w, fc->m_name, anaName, plotChannels, "afterFit", expResultAfter, toyMC, plotRatio);
 
     // plot each component of each region separately with propagated
     // error after fit  (interesting for debugging)
     if(plotSeparateComponents) 
-        PlotSeparateComponents(w, fc->m_name, plotChannels,"afterFit", result,toyMC);
+        PlotSeparateComponents(w, fc->m_name, anaName, plotChannels,"afterFit", result,toyMC);
 
     //plot correlation matrix for result
     if(plotCorrelationMatrix)  
-        PlotCorrelationMatrix(result);
+        PlotCorrelationMatrix(result, anaName);
 
     // plot likelihood
     Bool_t plotPLL = kFALSE;
     if(plotNLL) 
-        PlotNLL(w, expResultAfter, plotPLL, "", toyMC);
+        PlotNLL(w, expResultAfter, plotPLL, anaName, "", toyMC);
 
     if (toyMC) 
         WriteWorkspace(w, fc->m_inputWorkspaceFileName, toyMC->GetName());
@@ -810,7 +811,7 @@ void Util::DecomposeWS(const char* infile, const char* wsname, const char* outfi
 
 
 //__________________________________________________________________________________________________________________________________________________________
-void Util::PlotPdfSumWithComponents(RooWorkspace* w, TString fcName, TString plotRegions, TString outputPrefix, RooFitResult* rFit, RooAbsData* inputData, Bool_t plotRatio)
+void Util::PlotPdfSumWithComponents(RooWorkspace* w, TString fcName, TString anaName, TString plotRegions, TString outputPrefix, RooFitResult* rFit, RooAbsData* inputData, Bool_t plotRatio)
 {
 
     Bool_t plotComponents=true;
@@ -900,20 +901,20 @@ void Util::PlotPdfSumWithComponents(RooWorkspace* w, TString fcName, TString plo
 
 
 //__________________________________________________________________________________________________________________________________________________________
-void Util::PlotPdfWithComponents(RooWorkspace* w, TString fcName, TString plotRegions, TString outputPrefix, RooFitResult* rFit, RooAbsData* inputData, Bool_t plotRatio)
+void Util::PlotPdfWithComponents(RooWorkspace* w, TString fcName, TString anaName, TString plotRegions, TString outputPrefix, RooFitResult* rFit, RooAbsData* inputData, Bool_t plotRatio)
 {
     ConfigMgr* mgr = ConfigMgr::getInstance();
     FitConfig* fc = mgr->getFitConfig(fcName);
 
-    Util::PlotPdfWithComponents(w, fc, plotRegions, outputPrefix, rFit, inputData, plotRatio);
+    Util::PlotPdfWithComponents(w, fc, anaName, plotRegions, outputPrefix, rFit, inputData, plotRatio);
 }
 
 //__________________________________________________________________________________________________________________________________________________________
-void Util::PlotPdfWithComponents(RooWorkspace* w, FitConfig* fc, TString plotRegions, TString outputPrefix, RooFitResult* rFit, RooAbsData* inputData, Bool_t plotRatio)
+void Util::PlotPdfWithComponents(RooWorkspace* w, FitConfig* fc, TString anaName, TString plotRegions, TString outputPrefix, RooFitResult* rFit, RooAbsData* inputData, Bool_t plotRatio)
 {
     Bool_t plotComponents=true;
 
-    Logger << kINFO << " ------ Starting Plot with parameters:   analysisName = " << fc->m_name << GEndl; 
+    Logger << kINFO << " ------ Starting Plot with parameters:   analysisName = " << fc->m_name << " and " << anaName << GEndl; 
     Logger << kINFO << "    plotRegions = " <<  plotRegions <<  "  plotComponents = " << plotComponents << "  outputPrefix = " << outputPrefix  << GEndl;
 
     RooMsgService::instance().getStream(1).removeTopic(NumIntegration);
@@ -1218,8 +1219,8 @@ void Util::PlotPdfWithComponents(RooWorkspace* w, FitConfig* fc, TString plotReg
             frame2->GetYaxis()->CenterTitle(); 
             frame2->Draw();
 
-            canVec[iVec]->SaveAs("results/"+canName+".pdf");
-            canVec[iVec]->SaveAs("results/"+canName+".eps");
+            canVec[iVec]->SaveAs("results/"+anaName+"/"+canName+".pdf");
+            canVec[iVec]->SaveAs("results/"+anaName+"/"+canName+".eps");
 
         }
     }
@@ -1287,7 +1288,7 @@ void Util::AddComponentsToPlot(RooWorkspace* w, FitConfig* fc, RooPlot* frame, R
 
 
 //_____________________________________________________________________________________________________________________________________
-void Util::PlotSeparateComponents(RooWorkspace* w,TString fcName, TString plotRegions,TString outputPrefix, RooFitResult* rFit, RooAbsData* inputData)
+void Util::PlotSeparateComponents(RooWorkspace* w,TString fcName, TString anaName, TString plotRegions,TString outputPrefix, RooFitResult* rFit, RooAbsData* inputData)
 {
     if(rFit==NULL){ 
         Logger << kWARNING << " Running PlotSeparateComponents() without a RooFitResult is pointless, I'm done" << GEndl ; 
@@ -1402,15 +1403,15 @@ void Util::PlotSeparateComponents(RooWorkspace* w,TString fcName, TString plotRe
                 leg->Draw();
             }
 
-            canVec[iVec]->SaveAs("results/"+canName+".pdf");
-            canVec[iVec]->SaveAs("results/"+canName+".eps");
+            canVec[iVec]->SaveAs("results/"+anaName+"/"+canName+".pdf");
+            canVec[iVec]->SaveAs("results/"+anaName+"/"+canName+".eps");
         }
     }
 }
 
 
 //_____________________________________________________________________________________________________________________________________
-void Util::PlotNLL(RooWorkspace* w, RooFitResult* rFit, Bool_t plotPLL, TString outputPrefix, RooAbsData* inputData)
+void Util::PlotNLL(RooWorkspace* w, RooFitResult* rFit, Bool_t plotPLL, TString anaName, TString outputPrefix, RooAbsData* inputData)
 {
     if(rFit==NULL){ 
         Logger << kWARNING << " Running PlotNLL() without a RooFitResult is pointless, I'm done" << GEndl ; 
@@ -1536,8 +1537,8 @@ void Util::PlotNLL(RooWorkspace* w, RooFitResult* rFit, Bool_t plotPLL, TString 
         }
     }
 
-    can->SaveAs("results/"+canName+".pdf");
-    can->SaveAs("results/"+canName+".eps");
+    can->SaveAs("results/"+anaName+"/"+canName+".pdf");
+    can->SaveAs("results/"+anaName+"/"+canName+".eps");
 
     delete nll ;
     delete pll;
@@ -1545,7 +1546,7 @@ void Util::PlotNLL(RooWorkspace* w, RooFitResult* rFit, Bool_t plotPLL, TString 
 }
 
 //_____________________________________________________________________________
-TH2D* Util::PlotCorrelationMatrix(RooFitResult* rFit){
+TH2D* Util::PlotCorrelationMatrix(RooFitResult* rFit, TString anaName){
 
 
     if(rFit==NULL){ 
@@ -1595,8 +1596,8 @@ TH2D* Util::PlotCorrelationMatrix(RooFitResult* rFit){
     h_corr->Draw("colz");
     h_corr->Draw("textsame");
 
-    c_corr->SaveAs("results/"+canName+".pdf");
-    c_corr->SaveAs("results/"+canName+".eps");
+    c_corr->SaveAs("results/"+anaName+"/"+canName+".pdf");
+    c_corr->SaveAs("results/"+anaName+"/"+canName+".eps");
 
     gStyle->SetMarkerSize(orig_MarkerSize);
     gStyle->SetMarkerColor(orig_MarkerColor);
@@ -1608,8 +1609,8 @@ TH2D* Util::PlotCorrelationMatrix(RooFitResult* rFit){
 }
 
 //_____________________________________________________________________________
-TH2D* Util::GetCorrelations(RooFitResult* rFit, double threshold) {
-    TH2D* h_corr = Util::PlotCorrelationMatrix(rFit);
+TH2D* Util::GetCorrelations(RooFitResult* rFit, double threshold, TString anaName) {
+    TH2D* h_corr = Util::PlotCorrelationMatrix(rFit, anaName);
 
     unsigned int nBinsX = h_corr->GetNbinsX();
     unsigned int nBinsY = h_corr->GetNbinsY();
@@ -2805,19 +2806,35 @@ TString Util::GetXTitle(RooRealVar* regionVar){
     TString varName = regionVar->GetName();
     TString outName = varName;
 
-    if( varName.Contains("_met")) outName = "E_{T}^{miss} [GeV]"; 
-    else if(  varName.Contains("_mt")) outName = "m_{T} [GeV]"; 
-    else if(  varName.Contains("_meff")) outName = "m_{eff} [GeV]"; 
-    else if(  varName.Contains("_nJet")) outName = "N jets"; 
-    else if( varName.Contains("_met/meff")) outName = "E_{T}^{miss}/m_{eff}"; 
+    if( varName.Contains("_met/meff")) outName = "E_{T}^{miss}/m_{eff}"; 
+    else if( varName.Contains("_met")) outName = "E_{T}^{miss} [GeV]";
+    else if( varName.Contains("_mt")) outName = "m_{T} [GeV]";
+    else if( varName.Contains("_cuts")) outName = "Region";
+    else if( varName.Contains("_nBJet50")) outName = "N b-jets (p_{T}>50 GeV)";
+    else if( varName.Contains("_nBJet30")) outName = "N b-jets (p_{T}>30 GeV)";
+    else if( varName.Contains("_nBJet")) outName = "N b-jets (p_{T}>20 GeV)";
+    else if( varName.Contains("_nJet50")) outName = "N jets (p_{T}>50 GeV)";
+    else if( varName.Contains("_nJet30")) outName = "N jets (p_{T}>30 GeV)";
+    else if( varName.Contains("_nJet")) outName = "N jets";
+    else if( varName.Contains("_MR")) outName = "M_{R}' [GeV]";
+    else if( varName.Contains("_mll")) outName = "m_{ll} [GeV]";
+    else if( varName.Contains("_Wpt")) outName = "p_{T}^{W} [GeV]";
+    else if( varName.Contains("_Zpt")) outName = "p_{T}^{Z} [GeV]";
+    else if( varName.Contains("_ht")) outName = "H_{T} [GeV]";
+    else if( varName.Contains("_meff6")) outName = "6-jet Effective Mass [GeV]";
+    else if( varName.Contains("_meff4")) outName = "4-jet Effective Mass [GeV]";
+    else if( varName.Contains("_meff")) outName = "m_{eff} [GeV]";
+    else if( varName.Contains("_R")) outName = "R";
     else if(  varName.Contains("_Wpt")) outName = "p_{T}^{W} [GeV]"; 
     else if(  varName.Contains("_Zpt")) outName = "p_{T}^{Z} [GeV]"; 
-    else if(  varName.Contains("_lep1Pt")) outName = "p_{T}^{lep1} [GeV]"; 
+    else if(  varName.Contains("_lep1Pt")) outName = "Leading lepton p_{T} [GeV]";
     else if(  varName.Contains("_lep2Pt")) outName = "p_{T}^{lep2} [GeV]"; 
-    else if(  varName.Contains("_jet1Pt")) outName = "p_{T}^{jet1} [GeV]"; 
+    else if(  varName.Contains("_jet1Pt")) outName = "Leading jet p_{T} [GeV]";
     else if(  varName.Contains("_jet2Pt")) outName = "p_{T}^{jet2} [GeV]"; 
     else if(  varName.Contains("_jet3Pt")) outName = "p_{T}^{jet3} [GeV]"; 
     else if(  varName.Contains("_jet4Pt")) outName = "p_{T}^{jet4} [GeV]"; 
+    else if(  varName.Contains("_jet5Pt")) outName = "p_{T}^{jet5} [GeV]"; 
+    else if(  varName.Contains("_jet6Pt")) outName = "p_{T}^{jet6} [GeV]"; 
     else if(  varName.Contains("_jet7Pt")) outName = "p_{T}^{jet7} [GeV]";  
     return outName;
 }
