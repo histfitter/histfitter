@@ -20,9 +20,10 @@ def enum(typename, field_names):
     return type(typename, (object,), d)()
 
 
-def GenerateFitAndPlotCPP(fc, drawBeforeFit, drawAfterFit, drawCorrelationMatrix, drawSeparateComponents, drawLogLikelihood, minos, minosPars):
+def GenerateFitAndPlotCPP(fc, anaName, drawBeforeFit, drawAfterFit, drawCorrelationMatrix, drawSeparateComponents, drawLogLikelihood, minos, minosPars):
     from ROOT import Util
     
+    log.debug('GenerateFitAndPlotCPP: anaName %s ' % anaName)
     log.debug("GenerateFitAndPlotCPP: drawBeforeFit %s " % drawBeforeFit) 
     log.debug("GenerateFitAndPlotCPP: drawAfterFit %s " % drawAfterFit) 
     log.debug("GenerateFitAndPlotCPP: drawCorrelationMatrix %s " % drawCorrelationMatrix) 
@@ -32,7 +33,7 @@ def GenerateFitAndPlotCPP(fc, drawBeforeFit, drawAfterFit, drawCorrelationMatrix
     log.debug("GenerateFitAndPlotCPP: minosPars %s " % minosPars)
 
     #    from configManager import configMgr
-    Util.GenerateFitAndPlot(fc.name, drawBeforeFit, drawAfterFit, drawCorrelationMatrix, drawSeparateComponents, drawLogLikelihood, minos, minosPars)
+    Util.GenerateFitAndPlot(fc.name, anaName, drawBeforeFit, drawAfterFit, drawCorrelationMatrix, drawSeparateComponents, drawLogLikelihood, minos, minosPars)
 
 ## def GenerateFitAndPlot(fc, drawBeforeAfterFit):
 ##     from configManager import configMgr
@@ -361,20 +362,21 @@ if __name__ == "__main__":
 
     if runFit:
         if len(configMgr.fitConfigs) > 0:
-      #      r = GenerateFitAndPlot(configMgr.fitConfigs[0], drawBeforeAfterFit)
+            #r=GenerateFitAndPlot(configMgr.fitConfigs[0], drawBeforeAfterFit)
             #r=GenerateFitAndPlot(configMgr.fitConfigs[1],drawBeforeAfterFit)
             #r=GenerateFitAndPlot(configMgr.fitConfigs[2],drawBeforeAfterFit)
             #for idx in range(len(configMgr.fitConfigs)):
             #    r=GenerateFitAndPlot(configMgr.fitConfigs[idx],drawBeforeAfterFit)
-            r = GenerateFitAndPlotCPP(configMgr.fitConfigs[0], drawBeforeFit, drawAfterFit, drawCorrelationMatrix, drawSeparateComponents, drawLogLikelihood, runMinos, minosPars)
+            r = GenerateFitAndPlotCPP(configMgr.fitConfigs[0], configMgr.analysisName, drawBeforeFit, drawAfterFit, drawCorrelationMatrix, drawSeparateComponents, drawLogLikelihood, runMinos, minosPars)
+            #r = GenerateFitAndPlotCPP(configMgr.fitConfigs[1], configMgr.analysisName, drawBeforeFit, drawAfterFit, drawCorrelationMatrix, drawSeparateComponents, drawLogLikelihood, runMinos, minosPars)
             pass
-    ##     #configMgr.cppMgr.fitAll()
+##         #configMgr.cppMgr.fitAll()
 ##         log.info("\nr0=GenerateFitAndPlot(configMgr.fitConfigs[0],False)")
 ##         log.info("r1=GenerateFitAndPlot(configMgr.fitConfigs[1],False)")
 ##         log.info("r2=GenerateFitAndPlot(configMgr.fitConfigs[2],False)")
-        log.info(" GenerateFitAndPlotCPP(configMgr.fitConfigs[0], drawBeforeFit, drawAfterFit, drawCorrelationMatrix, drawSeparateComponents, drawLogLikelihood)")
-        log.info(" GenerateFitAndPlotCPP(configMgr.fitConfigs[1], drawBeforeFit, drawAfterFit, drawCorrelationMatrix, drawSeparateComponents, drawLogLikelihood)")
-        log.info(" GenerateFitAndPlotCPP(configMgr.fitConfigs[2], drawBeforeFit, drawAfterFit, drawCorrelationMatrix, drawSeparateComponents, drawLogLikelihood)")
+        log.info(" GenerateFitAndPlotCPP(configMgr.fitConfigs[0], configMgr.analysisName, drawBeforeFit, drawAfterFit, drawCorrelationMatrix, drawSeparateComponents, drawLogLikelihood)")
+        log.info(" GenerateFitAndPlotCPP(configMgr.fitConfigs[1], configMgr.analysisName, drawBeforeFit, drawAfterFit, drawCorrelationMatrix, drawSeparateComponents, drawLogLikelihood)")
+        log.info(" GenerateFitAndPlotCPP(configMgr.fitConfigs[2], configMgr.analysisName, drawBeforeFit, drawAfterFit, drawCorrelationMatrix, drawSeparateComponents, drawLogLikelihood)")
         log.info("   where drawBeforeFit, drawAfterFit, drawCorrelationMatrix, drawSeparateComponents, drawLogLikelihood are booleans")
 
         pass
@@ -389,7 +391,7 @@ if __name__ == "__main__":
 
     if doHypoTests:
         for fc in configMgr.fitConfigs:
-            if len(fc.validationChannels) > 0:
+            if len(fc.validationChannels) > 0 and not (fc.signalSample is None or 'Bkg' in fc.signalSample):
                 raise(Exception,"Validation regions should be turned off for doing hypothesis test!")
             pass
         configMgr.cppMgr.doHypoTestAll('results/',doUL)
