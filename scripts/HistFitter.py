@@ -224,7 +224,7 @@ if __name__ == "__main__":
     parser.add_argument("-T", "--run-toys", help="run toys (default with mu)", action="store_true")
     parser.add_argument("-V", "--validation", help="include validation regions", action="store_true")
 
-    parser.add_argument("-m", "--minos", nargs="+", help="run minos for asymmetric error calculation, optionally give parameter names for which minos should be run, sapce separated")
+    parser.add_argument("-m", "--minos", nargs="+", help="run minos for asymmetric error calculation, optionally give parameter names for which minos should be run, space separated", metavar="PARAM")
 
     args = parser.parse_args()
    
