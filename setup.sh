@@ -3,6 +3,7 @@
 
 export BUILD="x86_64-slc5-gcc43-opt"
 export ROOTVERSION="5.34.02"
+export CERNPREFIX="/afs/cern.ch/"
 
 # Must have gcc and python setup outside of ROOTSYS def for batch running!
 # This section here is cern specific.
@@ -11,11 +12,11 @@ if [[ `hostname` = l*.cern.ch ]]; then
     echo "INFO: hostname matches l*.cern.ch: setting up gcc and python from afs"
     # first, setup gcc to version 4.3
     echo "Setting up gcc version 4.3.2 ..."
-    source /afs/cern.ch/sw/lcg/external/gcc/4.3.2/x86_64-slc5/setup.sh
+    source $CERNPREFIX/sw/lcg/external/gcc/4.3.2/x86_64-slc5/setup.sh
     # second, setup an uptodate python version
     echo "Setting up python version 2.6.5 ..."
-    export PATH="/afs/cern.ch/sw/lcg/external/Python/2.6.5/$BUILD/bin:${PATH}"
-    export LD_LIBRARY_PATH="/afs/cern.ch/sw/lcg/external/Python/2.6.5/$BUILD/lib:${LD_LIBRARY_PATH}"
+    export PATH="$CERNPREFIX/sw/lcg/external/Python/2.6.5/$BUILD/bin:${PATH}"
+    export LD_LIBRARY_PATH="$CERNPREFIX/sw/lcg/external/Python/2.6.5/$BUILD/lib:${LD_LIBRARY_PATH}"
 fi
 
 # the root-setup section here is cern specific
@@ -24,17 +25,17 @@ if [ ! $ROOTSYS ]; then
   echo "With build ${BUILD} ..."
   export CWD=$PWD
   # setup corresponding root
-  ###cd /afs/cern.ch/atlas/offline/external/FullChainTest/tier0/test/mbaak/root/root-$ROOTVERSION
-  cd /afs/cern.ch/sw/lcg/app/releases/ROOT/$ROOTVERSION/$BUILD/root/
+  ###cd $CERNPREFIX/atlas/offline/external/FullChainTest/tier0/test/mbaak/root/root-$ROOTVERSION
+  cd $CERNPREFIX/sw/lcg/app/releases/ROOT/$ROOTVERSION/$BUILD/root/
   source bin/thisroot.sh
   cd $CWD
   # setup xrootd on top of this
-  export PATH=/afs/cern.ch/sw/lcg/external/xrootd/3.1.0p2/$BUILD/bin:$PATH
-  export LD_LIBRARY_PATH=/afs/cern.ch/sw/lcg/external/xrootd/3.1.0p2/$BUILD/lib64:$LD_LIBRARY_PATH
+  export PATH=$CERNPREFIX/sw/lcg/external/xrootd/3.1.0p2/$BUILD/bin:$PATH
+  export LD_LIBRARY_PATH=$CERNPREFIX/sw/lcg/external/xrootd/3.1.0p2/$BUILD/lib64:$LD_LIBRARY_PATH
   # hack for xrootd: libNetx library from pre-installed root version
-  export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/afs/cern.ch/sw/lcg/app/releases/ROOT/$ROOTVERSION/$BUILD/root/lib
+  export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$CERNPREFIX/sw/lcg/app/releases/ROOT/$ROOTVERSION/$BUILD/root/lib
   # missing libraries on lxbatch machines
-  export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/afs/cern.ch/atlas/offline/external/FullChainTest/tier0/test/mbaak/root/extlibs64
+  export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$CERNPREFIX/atlas/offline/external/FullChainTest/tier0/test/mbaak/root/extlibs64
 fi
 
 # check Root environment setup 
