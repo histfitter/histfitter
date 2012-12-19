@@ -59,6 +59,10 @@ class configFileAction(argparse.Action):
             parser.error("No configFile set!")
             return
         elif values:
+            # some automatic conversion kicks in, if you specify just the file the array is lost
+            if isinstance(values, basestring):
+                values = [values]
+
             setattr(namespace, self.dest, values)
 
 def enum(typename, field_names):
