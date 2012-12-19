@@ -32,6 +32,7 @@ ConfigMgr::ConfigMgr() : m_logger("ConfigMgrCPP") {
     m_doHypoTest=false;
     m_useCLs=true;
     m_fixSigXSec=false;
+    m_runOnlyNominalXSec=false;
     m_doUL=true;
     m_seed=0;
     m_nPoints=10;
@@ -133,7 +134,7 @@ void ConfigMgr::fit(FitConfig* fc) {
 void ConfigMgr::doHypoTestAll(TString outdir, Bool_t doUL) {
     for(unsigned int i=0; i<m_fitConfigs.size(); i++) {
         doHypoTest( m_fitConfigs.at(i), outdir, 0., doUL );
-        if( m_fixSigXSec ){
+        if( m_fixSigXSec && !m_runOnlyNominalXSec ){
             double SigXSecSysnsigma = 1.;
             doHypoTest( m_fitConfigs.at(i), outdir, SigXSecSysnsigma, doUL );
             doHypoTest( m_fitConfigs.at(i), outdir, SigXSecSysnsigma*(-1.), doUL );

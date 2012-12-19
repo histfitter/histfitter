@@ -78,6 +78,9 @@ class ConfigMgr {
         void setfixSigXSec(const bool& fix=true) { m_fixSigXSec = fix; }
         bool getfixSigXSec() { return m_fixSigXSec; }
 
+        void setRunOnlyNominalXSec(const bool& fix=true) { m_runOnlyNominalXSec = fix; }
+        bool getRunOnlyNominalXSec() { return m_runOnlyNominalXSec; }
+        
         void setExclusion(const bool& cls=true) { m_doUL=cls; }
         bool getExclusion() { return m_doUL; }
 
@@ -130,6 +133,7 @@ class ConfigMgr {
         int  m_testStatType;
         bool m_useCLs;
         bool m_fixSigXSec;
+        bool m_runOnlyNominalXSec;
         bool m_doUL;
         int  m_nPoints;
         double m_muValGen;

@@ -50,6 +50,7 @@ class ConfigManager(object):
         self.useCLs=True # use CLs for upper limits, or not
         self.doExclusion=True # true = exclusion, false = discovery test
         self.fixSigXSec=False # true = fix SigXSec by nominal, +/-1sigma
+        self.runOnlyNominalXSec=False #t true = for fixed xsec, run only nominal fit and not +/- 1 sigma fits
         self.nPoints=20 # number of points in upper limit evaluation
         self.seed=0 # seed for random generator. default is clock
         self.muValGen = 0.0 # mu_sig used for toy generation
