@@ -575,6 +575,24 @@ class Sample(object):
             self.systDict[syst.name] = syst.Clone()
             return
 
+    def getOverallSys(self, name):
+        """
+        Get overall systematic
+        """
+        for syst in self.overallSystList:
+            if name==syst[0]: return syst
+        return None
+
+    def replaceOverallSys(self, rsyst):
+        """
+        replace overall systematic
+        """
+        for idx in xrange(len(self.overallSystList)):
+            syst = self.overallSystList[idx]
+            if rsyst[0]==syst[0]:
+                self.overallSystList[idx] = rsyst
+                return
+
     def getSystematic(self, systName):
         """
         Get systematic from internal storage
@@ -585,7 +603,6 @@ class Sample(object):
         name = systName
         if(isinstance(systName, SystematicBase)):
             name = systName.name
-        
         try:
             return self.systDict[name]
         except KeyError:

@@ -552,7 +552,7 @@ class ConfigManager(object):
                 #depending on the sample type,  the Histos and up/down weights are added
                 self.addSampleSpecificHists(fitConfig, chan, sam, regionString, normRegions, normString, normCuts)
 
-        #post-processing loop for norm systematics
+        #post-processing 1: loop for norm systematics
         for chan in fitConfig.channels:
             regionString = "".join(chan.regions)
             
@@ -565,6 +565,23 @@ class ConfigManager(object):
                         
                         syst.PrepareGlobalNormalization(normString, self, fitConfig, chan, sam)
                         sam.addHistoSys(syst.name, nomName, highName, lowName, False, True, False, False, sam.name, normString)
+
+        #post-processing 2: swapping of overall systematics for specified channel by systematics from ohter channel
+        for chan in fitConfig.channels:
+            # only consider channels for which a remap channel has been defined.
+            if len(chan.remapSystChanName)==0: continue
+            log.warning("overallSys: remapping evaluation of systematics of this channel <%s> to channel: <%s>"%(chan.name,chan.remapSystChanName))
+            rc = fitConfig.getChannel(chan.remapSystChanName)
+            # loop over overallSystematics of all samples, and swap for those of remap channel
+            for sam in chan.sampleList:
+                rs = rc.getSample(sam.name)
+                for osys in sam.overallSystList:
+                    rsys = rs.getOverallSys(osys[0]) # get replacement overall systematic, by name
+                    if rsys==None:
+                        log.warning("For channel %s and sample %s, replacement systematic %s could not be found. Skipping this overall syst." % (chan.name,sam.name,osys[0]))
+                        continue
+                    sam.replaceOverallSys(rsys)
+                    pass
 
         # Build blinded histograms here
         for (iChan, chan) in enumerate(fitConfig.channels):
@@ -623,13 +640,6 @@ class ConfigManager(object):
         elif syst.method == "histoSysOneSideSym":
             chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName, False, False, True, True)
         elif syst.method == "overallSys":
-            # MB: possibly use different channel to evaluate systematics
-            if len(chan.remapSystChanName)>0: 
-                log.info("overallSys: remapping evaluation of systematics of this channel <%s> to channel: <%s>"%(chan.name,chan.remapSystChanName))
-                rc = fitConfig.getChannel(chan.remapSystChanName)
-                nomName = "h%sNom_%s_obs_%s" % (sam.name, rc.regionString, replaceSymbols(rc.variableName) )
-                highName = "h%s%sHigh_%s_obs_%s" % (sam.name, syst.name, rc.regionString, replaceSymbols(rc.variableName) )
-                lowName = "h%s%sLow_%s_obs_%s" % (sam.name, syst.name, rc.regionString, replaceSymbols(rc.variableName) )
             highIntegral = configMgr.hists[highName].Integral()
             lowIntegral = configMgr.hists[lowName].Integral()
             nomIntegral = configMgr.hists[nomName].Integral()
