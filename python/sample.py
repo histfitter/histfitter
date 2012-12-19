@@ -54,6 +54,7 @@ class Sample(object):
         self.normSampleRemap = ''
         self.noRenormSys = True
         self.parentChannel = None
+        self.allowRemapOfSyst = True
 
         if self.name[0].isdigit():
             log.warning("Sample name %s starts with a digit - this can confuse HistFactory internals" % self.name)

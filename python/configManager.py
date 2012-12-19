@@ -574,6 +574,7 @@ class ConfigManager(object):
             rc = fitConfig.getChannel(chan.remapSystChanName)
             # loop over overallSystematics of all samples, and swap for those of remap channel
             for sam in chan.sampleList:
+                if not sam.allowRemapOfSyst: continue
                 rs = rc.getSample(sam.name)
                 for osys in sam.overallSystList:
                     rsys = rs.getOverallSys(osys[0]) # get replacement overall systematic, by name
