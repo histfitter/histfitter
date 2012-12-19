@@ -24,7 +24,6 @@ class NargsAction(argparse.Action):
         # optional args in sys.argv are caught as well, so find the first flename
         for i, value in enumerate(values):
             if os.path.splitext(values[i])[1] == ".py":
-                idx = i
                 break
        
         nargsOpts = values[:i]
