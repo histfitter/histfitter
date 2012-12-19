@@ -304,7 +304,7 @@ class fitConfig(object):
         return ch
 
 
-    def getChannel(self, name):
+    def getChannelByName(self, name):
         """
         Find the channel with the given name
         """

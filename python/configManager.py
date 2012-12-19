@@ -573,17 +573,19 @@ class ConfigManager(object):
         for chan in fitConfig.channels:
             # only consider channels for which a remap channel has been defined.
             if len(chan.remapSystChanName)==0: continue
-            log.warning("overallSys: remapping evaluation of systematics of this channel <%s> to channel: <%s>"%(chan.name,chan.remapSystChanName))
-            rc = fitConfig.getChannel(chan.remapSystChanName)
+            log.info("For overallSys: now setting systematics of channel <%s> to those of channel: <%s>"%(chan.name,chan.remapSystChanName))
+            rc = fitConfig.getChannelByName(chan.remapSystChanName)
             # loop over overallSystematics of all samples, and swap for those of remap channel
             for sam in chan.sampleList:
                 if not sam.allowRemapOfSyst: continue
                 rs = rc.getSample(sam.name)
                 for osys in sam.overallSystList:
+                    if not osys.allowRemapOfSyst: continue
                     rsys = rs.getOverallSys(osys[0]) # get replacement overall systematic, by name
                     if rsys==None:
-                        log.warning("For channel %s and sample %s, replacement systematic %s could not be found. Skipping this overall syst." % (chan.name,sam.name,osys[0]))
+                        log.warning("For channel %s and sample %s, replacement systematic %s could not be found. Skipping replacement of this overall syst." % (chan.name,sam.name,osys[0]))
                         continue
+                    log.info("For channel %s and sample %s, replacement of systematic %s from %s." % (chan.name,sam.name,osys[0],rc.name))
                     sam.replaceOverallSys(rsys)
                     pass
 

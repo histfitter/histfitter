@@ -43,6 +43,7 @@ class SystematicBase:
         self.filesLo = {}
         self.treeLoName = {}
         self.treeHiName = {}
+        self.allowRemapOfSyst = True
 
         if not constraint == "Gaussian" and not (method == "shapeSys" or method == "shapeStat"):
             raise ValueError("Constraints can only be specified for shapeSys")

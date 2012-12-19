@@ -8,7 +8,9 @@
 
 2012-12-19 Max Baak <mbaak@cern.ch>
 	M       python/configManager.py
+	M       python/fitConfig.py
 	M       python/sample.py
+	M       python/systematic.py
 	* Option to replace channel systematics from that of different channel
 
 2012-12-19 David Cote <david.cote@cern.ch>
