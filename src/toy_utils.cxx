@@ -112,6 +112,9 @@ std::list<LimitResult> CollectHypoTestResults( const TString& infile, const TStr
 
     for (; itr!=end; ++itr) {
         RooStats::HypoTestInverterResult* ht = GetHypoTestResultFromFile( infile, itr->second );
+        
+        if(!ht)
+            continue
 
         //Check fit result
         TString fitresultname = TString(ht->GetName());
