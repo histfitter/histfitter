@@ -98,7 +98,8 @@ std::list<LimitResult> CollectHypoTestResults( const TString& infile, const TStr
 
     // collect all hypotest results in input file
     std::map<TString,TString> wsnameMap = GetMatchingWorkspaces( infile, format, interpretation, cutStr );
-    if ( wsnameMap.empty() ) return limres;
+    if ( wsnameMap.empty() ) 
+        return limres;
 
     // loop over hypotestresults and save results
     std::list<LimitResult> limitres;
@@ -138,6 +139,7 @@ std::list<LimitResult> CollectHypoTestResults( const TString& infile, const TStr
                 counter_not_great_fits++;
                 //failed_fit = true;
             }
+            delete fitresult; 
         }
 
         if(ht->ArraySize() == 0){
@@ -145,14 +147,15 @@ std::list<LimitResult> CollectHypoTestResults( const TString& infile, const TStr
         } else {
             LimitResult result = RooStats::get_Pvalue( ht );
 
-            if (fabs(result.GetP0()-0.5)<0.0001 && result.GetSigma0()<0.0001){
+            if (fabs(result.GetP0()-0.5) < 0.0001 && result.GetSigma0() < 0.0001){
               counter_probably_bad_fit++;
               ToyUtilsLogger << kWARNING << "One of the base fits seems to have failed for point " << fitresultname.Data() << " : " << result.GetP0() << " " << result.GetSigma0() << GEndl;
               failed_fit = true;
             }
 
             result.AddMetaData ( ParseWorkspaceID(itr->first) );
-            if (!failed_fit) limres.push_back(result); // store info from interpretation string (eg m0 and m12 value) 
+            if (!failed_fit) 
+                limres.push_back(result); // store info from interpretation string (eg m0 and m12 value) 
         }
 
         delete ht;
