@@ -246,8 +246,14 @@ if __name__ == "__main__":
     
     print "\n * * * Welcome to HistFitter * * *\n"
 
+    # Note: we can NOT use argparse.REMAINDER to catch everything after the configFile, since the options -D
+    #       and -m are greedy. -D does check against a list of choices, but -m by definition cannot. Hence,
+    #       it eats everything, and we really need the minosAction to split it on the first filename. Then, 
+    #       configFileAction to take care of the configFile and any remaining arguments.
+    #       -- GJ 20/12/2012
+
     parser = argparse.ArgumentParser()
-    parser.add_argument("configFile", nargs="?", help="configuration file to execute", action=configFileAction)
+    parser.add_argument("configFile", nargs="+", help="configuration file to execute", action=configFileAction)
     parser.add_argument("-L", "--log-level", help="set log level", choices=["VERBOSE", "DEBUG", "INFO", "WARNING", "ERROR", "FATAL", "ALWAYS"])
     parser.add_argument("-F", "--fit-type", help="type of fit to run", choices=["bkg", "disc", "excl"])
     parser.add_argument("-t", "--create-histograms", help="re-create histograms from TTrees", action="store_true", default=configMgr.readFromTree)
