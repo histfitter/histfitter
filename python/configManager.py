@@ -59,6 +59,7 @@ class ConfigManager(object):
         self.useAsimovSet = False # Use the Asimov dataset
         self.blindSR = False # Blind the SRs only
         self.blindCR = False # Blind the CRs only
+        self.blindVR = False # Blind the VRs only
         self.useSignalInBlindedData=False 
 
         self.normList = [] # List of normalization factors
@@ -208,7 +209,7 @@ class ConfigManager(object):
                         #self.hists["h"+sam.name+"Low_"+reg+"_obs_"+chan.variableName] = None
                         regString += reg
                     if sam.isData:
-                        if (self.blindSR and (chan.channelName in tl.signalChannels)) or (self.blindCR and (chan.channelName in tl.bkgConstrainChannels)):
+                        if (self.blindSR and (chan.channelName in tl.signalChannels)) or (self.blindCR and (chan.channelName in tl.bkgConstrainChannels)) or (self.blindVR and (chan.channelName in tl.validationChannels)):
                             sam.blindedHistName="h"+tl.name+sam.name+"Blind_"+regString+"_obs_"+replaceSymbols(chan.variableName)
                             if not sam.blindedHistName in self.hists.keys():
                                 self.hists[sam.blindedHistName] = None
@@ -823,6 +824,12 @@ class ConfigManager(object):
                 else:
                     self.prepare.addHisto(histoName, useOverflow=chan.useOverflowBin, useUnderflow=chan.useUnderflowBin)
                     chan.addData(histoName)
+            elif chan.channelName in fitConfig.validationChannels:
+                if self.blindVR:
+                    chan.addData(sam.blindedHistName)
+                else:
+                    self.prepare.addHisto(histoName, useOverflow=chan.useOverflowBin, useUnderflow=chan.useUnderflowBin)
+                    chan.addData(histoName)
             else:
                 self.prepare.addHisto(histoName, useOverflow=chan.useOverflowBin, useUnderflow=chan.useUnderflowBin)
                 chan.addData(histoName)
@@ -937,7 +944,7 @@ class ConfigManager(object):
     
     def buildBlindedHistos(self, fitConfig, chan, sam):
         regString = "".join(chan.regions)
-        if (self.blindSR and (chan.channelName in fitConfig.signalChannels)) or (self.blindCR and chan.channelName in fitConfig.bkgConstrainChannels):
+        if (self.blindSR and (chan.channelName in fitConfig.signalChannels)) or (self.blindCR and chan.channelName in fitConfig.bkgConstrainChannels) or (self.blindVR and (chan.channelName in fitConfig.validationChannels)):
             if not self.hists[sam.blindedHistName]:
                 self.hists[sam.blindedHistName] = TH1F(sam.blindedHistName,sam.blindedHistName,chan.nBins,chan.binLow,chan.binHigh)
                 for s in chan.sampleList:
