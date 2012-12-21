@@ -94,7 +94,8 @@ const char* CollectAndWriteHypoTestResults( const TString& infile, const TString
 //________________________________________________________________________________________________
 std::list<LimitResult> CollectHypoTestResults( const TString& infile, const TString& format, const TString& interpretation, const TString& cutStr ) {
     std::list<LimitResult> limres;
-    if ( infile.IsNull() || format.IsNull() || interpretation.IsNull() ) return limres;
+    if ( infile.IsNull() || format.IsNull() || interpretation.IsNull() ) 
+        return limres;
 
     // collect all hypotest results in input file
     std::map<TString,TString> wsnameMap = GetMatchingWorkspaces( infile, format, interpretation, cutStr );
@@ -109,9 +110,12 @@ std::list<LimitResult> CollectHypoTestResults( const TString& infile, const TStr
     int counter_not_great_fits = 0;
     int counter_badcovquality = 0;
     int counter_probably_bad_fit = 0;
+    
+    RooStats::HypoTestInverterResult *ht = NULL; 
+    RooFitResult *fitresult = NULL;
 
     for (; itr!=end; ++itr) {
-        RooStats::HypoTestInverterResult* ht = GetHypoTestResultFromFile( infile, itr->second );
+        ht = GetHypoTestResultFromFile( infile, itr->second );
         
         if(!ht)
             continue;
@@ -121,28 +125,33 @@ std::list<LimitResult> CollectHypoTestResults( const TString& infile, const TStr
         fitresultname.ReplaceAll("hypo_","fitTo_");
         //fitresultname.ReplaceAll("hypo_","hypo_");
         //cout << "Check fit result " << fitresultname << GEndl;
-        RooFitResult *fitresult = GetFitResultFromFile(infile, fitresultname);
+        fitresult = GetFitResultFromFile(infile, fitresultname);
 
         bool failed_fit = false;
 
-        if (fitresult){
-            if (fitresult->status()!=0) {
-                ToyUtilsLogger << kWARNING << "Fit failed for point " << fitresultname.Data() << " - do not use hypo test result" << GEndl;
-                counter_failed_fits++;
-                fitresult->Print();	
-                failed_fit = true;   
+        if(!fitresult) {
+            if (ht) { 
+                delete ht;
+                ht = NULL;
             }
-            if (fitresult->covQual() < 1.1) {
-                ToyUtilsLogger << kWARNING << "Fit result " << fitresultname.Data() << " has bad covariance matrix quality! Check your fit setup!" << GEndl;
-                counter_badcovquality++;
-                failed_fit = true;
-            }
-            else if (fitresult->covQual() < 2.1) {
-                ToyUtilsLogger << kWARNING << "Fit result " << fitresultname.Data() << " has mediocre covariance matrix quality.  Might be ok if you ran asymptotics." << GEndl;
-                counter_not_great_fits++;
-                //failed_fit = true;
-            }
-            delete fitresult; 
+            continue;
+        }
+
+        if (fitresult->status()!=0) {
+            ToyUtilsLogger << kWARNING << "Fit failed for point " << fitresultname.Data() << " - do not use hypo test result" << GEndl;
+            counter_failed_fits++;
+            fitresult->Print();	
+            failed_fit = true;   
+        }
+        
+        if (fitresult->covQual() < 1.1) {
+            ToyUtilsLogger << kWARNING << "Fit result " << fitresultname.Data() << " has bad covariance matrix quality! Check your fit setup!" << GEndl;
+            counter_badcovquality++;
+            failed_fit = true;
+        } else if (fitresult->covQual() < 2.1) {
+            ToyUtilsLogger << kWARNING << "Fit result " << fitresultname.Data() << " has mediocre covariance matrix quality.  Might be ok if you ran asymptotics." << GEndl;
+            counter_not_great_fits++;
+            //failed_fit = true;
         }
 
         if(ht->ArraySize() == 0){
@@ -161,7 +170,15 @@ std::list<LimitResult> CollectHypoTestResults( const TString& infile, const TStr
                 limres.push_back(result); // store info from interpretation string (eg m0 and m12 value) 
         }
 
-        delete ht;
+        if(ht){
+            delete ht;
+            ht = NULL;
+        }
+
+        if(fitresult) {
+            delete fitresult;
+            fitresult = NULL;
+        }
     }
 
     ToyUtilsLogger << kINFO << counter_failed_fits << " failed fit(s) and " << counter_badcovquality << " fit(s) with bad covariance matrix quality were counted" << GEndl;

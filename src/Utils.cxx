@@ -1704,9 +1704,7 @@ Double_t Util::GetComponentFrac(RooWorkspace* w, const char* Component, const ch
 
 
 //________________________________________________________________________________________________
-    RooWorkspace*
-Util::GetWorkspaceFromFile( const TString& infile, const TString& wsname )
-{
+RooWorkspace* Util::GetWorkspaceFromFile( const TString& infile, const TString& wsname ) {
     TFile* file = TFile::Open(infile.Data(), "READ");
     if (!file || file->IsZombie()) {
         Logger << kERROR << "Cannot open file: " << infile << GEndl;
@@ -1734,7 +1732,6 @@ Util::GetWorkspaceFromFile( const TString& infile, const TString& wsname )
         return NULL;
     }
 
-    //file->Close(); // this invalidates w;
     return w;
 }
 

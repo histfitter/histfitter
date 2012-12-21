@@ -231,6 +231,8 @@ RooStats::HypoTestInverterResult* GetHypoTestResultFromFile( const TString& infi
     RooStats::HypoTestInverterResult* v = (RooStats::HypoTestInverterResult*) w->Clone();
 
     file->Close(); // this invalidates w
+    delete obj;
+    w = NULL; obj = NULL;
 
     return v;
 }
@@ -269,6 +271,8 @@ RooFitResult* GetFitResultFromFile( const TString& infile, const TString& fitnam
     RooFitResult* v = (RooFitResult*) w->Clone();
 
     file->Close(); // this invalidates w
+    delete obj;
+    w = NULL; obj = NULL;
 
     return v;
 }
