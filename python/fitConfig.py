@@ -1,8 +1,6 @@
 import ROOT
 from ROOT import TFile, TMath, RooRandom, TH1, TH1F
 from ROOT import kBlack, kWhite, kGray, kRed, kPink, kMagenta, kViolet, kBlue, kAzure, kCyan, kTeal, kGreen, kSpring, kYellow, kOrange, kDashed, kSolid, kDotted
-from os import system, sys
-from math import fabs
 from measurement import Measurement
 from channel import Channel
 from sample import Sample
@@ -11,15 +9,12 @@ from systematic import SystematicBase
 
 log = Logger('fitConfig')
 
-import generateToys
-import os
+import os, errno
 
 TH1.SetDefaultSumw2(True)
 
-from copy import deepcopy,copy
+from copy import deepcopy
 from configManager import configMgr
-
-import os, errno
 
 def mkdir_p(path):
     try:
@@ -39,7 +34,8 @@ class fitConfig(object):
         Set the combination mode, store the configuration and open output file
         """
         self.ConstructorInit(name)
-        #attributes to below are OK to deepcopy
+
+        # attributes to below are OK to deepcopy
         self.mode = "comb"
         self.statErrThreshold = None #None means to turn OFF mcStat error
         self.statErrorType = "Gaussian"
@@ -55,6 +51,7 @@ class fitConfig(object):
         self.weights = []
         self.treeName = ''
         self.hasDiscovery = False
+
         # Plot cosmetics
         self.dataColor = kBlack
         self.totalPdfColor = kBlue
@@ -79,9 +76,9 @@ class fitConfig(object):
     def ConstructorInit(self, name):
         #shared method between __init__ and Clone
         self.name = name
-        mkdir_p('./results/'+configMgr.analysisName)
-        mkdir_p('./config/'+configMgr.analysisName)
-        mkdir_p('./data/'+configMgr.analysisName)
+        mkdir_p('./results/%s' % configMgr.analysisName)
+        mkdir_p('./config/%s' % configMgr.analysisName)
+        mkdir_p('./data/%s' % configMgr.analysisName)
         self.prefix = configMgr.analysisName + "/" + self.name
         self.xmlFileName = "N/A"
         self.wsFileName = "N/A"
@@ -92,8 +89,7 @@ class fitConfig(object):
         
         #Note: wsFileName is an educated guess of the workspace
         # file name externally decided by HistFactory.
-        self.wsFileName = "results/" + self.prefix + "_combined_" + \
-                          self.measurements[0].name + "_model.root"
+        self.wsFileName = "results/%s_combined_%s_model.root" % (self.prefix, self.measurements[0].name)
        
         for sam in self.sampleList:
             if sam.isData: # FIXME (works but ugly)
@@ -166,7 +162,7 @@ class fitConfig(object):
             #m.PrintXML("xmlFromPy/"+self.prefix, m.GetOutputFilePrefix())
             
             #NB this function's name is deceiving - does not run fits unless m.exportOnly=False
-            ROOT.RooStats.HistFactory.MakeModelAndMeasurementFast(m);
+            ROOT.RooStats.HistFactory.MakeModelAndMeasurementFast(m)
         
         return
 
@@ -312,7 +308,7 @@ class fitConfig(object):
             if chan.name == name:
                 return chan
 
-        raise RuntimeError("No channel with name %s found" % (name))
+        raise RuntimeError("No channel with name %s found" % name)
 
 
     def getChannel(self, variableName, regions):
@@ -359,7 +355,6 @@ class fitConfig(object):
 
             # Propagate to channels that are already owned as well
             for c in self.channels:
-                hasSample = False
                 if not s.name in [sam.name for sam in c.sampleList]:
                     c.addSample(self.getSample(s.name))
         return
@@ -400,7 +395,7 @@ class fitConfig(object):
         if not weight in self.weights:
             self.weights.append(weight)
         else:
-            raise RuntimeError("Weight %s already defined in TopLevel" % (weight, self.name))
+            raise RuntimeError("Weight %s already defined in fitConfig %s" % (weight, self.name))
 
         # Propagate to owned channels that do not already have this weight
         for c in self.channels:
@@ -483,26 +478,26 @@ class fitConfig(object):
             pass
         return
 
-    def setSignalChannels(self, chans):
+    def setSignalChannels(self, channels):
         """
         Set the channels to be treated as signal (SRs)
         """
-        self.appendStrChanOrListToList(chans, self.signalChannels)
+        self.appendStrChanOrListToList(channels, self.signalChannels)
         return
 
-    def setBkgConstrainChannels(self, chans):
+    def setBkgConstrainChannels(self, channels):
         """
         Set the channels to be treated as constraining regions (CRs)
         """
-        self.appendStrChanOrListToList(chans, self.bkgConstrainChannels)
+        self.appendStrChanOrListToList(channels, self.bkgConstrainChannels)
         return
 
-    def setValidationChannels(self, chans):
+    def setValidationChannels(self, channels):
      #TODO should be renamed appendValidationChannels !
         """
         Set the channels to be treated as validation regions (VRs)
         """
-        self.appendStrChanOrListToList(chans, self.validationChannels)
+        self.appendStrChanOrListToList(channels, self.validationChannels)
         return
 
     def setFileList(self, filelist):
@@ -557,7 +552,7 @@ class fitConfig(object):
         """
         # protection against strange people who pass a systematic to this function
         name = systName
-        if(isinstance(systName, SystematicBase)):
+        if isinstance(systName, SystematicBase):
             name = systName.name
         
         try:
@@ -579,7 +574,7 @@ class fitConfig(object):
 
         # allow removal using the object too
         name = systName
-        if(isinstance(systName, SystematicBase)):
+        if isinstance(systName, SystematicBase):
             name = systName.name
         
         del self.systDict[name]
@@ -652,7 +647,7 @@ class fitConfig(object):
 
         log.info("Executing: '%s'" % cmd)
         p = os.popen(cmd)
-        output = p.readline()
+        line = p.readline()
         while 1:
             line = p.readline()
             if not line: break

@@ -2,15 +2,21 @@ from ROOT import THStack,TLegend,TCanvas,TFile,std,TH1F
 from ROOT import ConfigMgr,FitConfig,ChannelStyle #this module comes from gSystem.Load("libSusyFitter.so")
 from prepareHistos import TreePrepare,HistoPrepare
 from copy import deepcopy
-from systematic import Systematic
 from histogramsManager import histMgr
 from logger import Logger
 import os
-import sys
 from ROOT import gROOT
 
 gROOT.SetBatch(True)
 log = Logger('ConfigManager')
+
+def mkdir_p(path):
+    try:
+        os.makedirs(path)
+    except OSError as exc: # Python >2.5
+        if exc.errno == errno.EEXIST and os.path.isdir(path):
+            pass
+        else: raise
 
 def replaceSymbols(s):
     s = s.replace("/","").replace("*","").replace("(","").replace(")","")
@@ -98,9 +104,9 @@ class ConfigManager(object):
 
     def setLumiUnits(self,unit):
         # 1=fb-1, 1000=pb-1, etc.
-        if unit=="fb-1" or unit=="fb":
+        if unit == "fb-1" or unit == "fb":
             self.lumiUnits = 1.0
-        elif unit=="pb-1" or unit=="pb":
+        elif unit == "pb-1" or unit == "pb":
             self.lumiUnits = 1000.0
         else:
             raise TypeError("lumi unit '%s' is not supported."%unit)
@@ -124,7 +130,8 @@ class ConfigManager(object):
         #check that newName is not already used
         for tl in self.fitConfigs:
             if tl.name == newName:
-                raise RuntimeError("fitConfig %s already exists in configManager. Please use a different name."%(newName))
+                raise RuntimeError("fitConfig %s already exists in configManager. Please use a different name." %
+                                   newName )
             pass
 
         #create new fitConfig object and return pointer
@@ -133,10 +140,13 @@ class ConfigManager(object):
         else:
             newFitConfig = fitConfig(newName)
             pass
+
         newFitConfig.setWeights(self.weights)
         newFitConfig.removeEmptyBins=self.removeEmptyBins
+
         self.fitConfigs.append(newFitConfig)
-        log.info("Created Fit Config: %s" % (newName))
+        log.info("Created Fit Config: %s" % newName)
+
         return self.fitConfigs[len(self.fitConfigs)-1]
 
     def addTopLevelXMLClone(self, obj, name):
@@ -157,7 +167,7 @@ class ConfigManager(object):
             if tl.name == name:
                 self.fitConfigs.pop(i)
                 return
-        log.warning("fitConfig named '%s' does not exist. Cannot be removed." % (name))
+        log.warning("fitConfig named '%s' does not exist. Cannot be removed." % name)
         return
 
     def getTopLevelXML(self, name):
@@ -168,19 +178,19 @@ class ConfigManager(object):
         for tl in self.fitConfigs:
             if tl.name == name:
                 return tl
-        log.warning("fitConfig named '%s' does not exist. Cannot be returned." % (name))
+        log.warning("fitConfig named '%s' does not exist. Cannot be returned." % name)
         return 0
 
     def initialize(self):
         log.info("Initializing...")
-        if self.histCacheFile=='':
-            tmpName="data/"+self.analysisName+".root"
-            log.info("Giving default name histCacheFile: %s"%(tmpName))
-            self.histCacheFile=tmpName
+        if self.histCacheFile == '':
+            tmpName = "data/%s.root" % self.analysisName
+            log.info("Giving default name histCacheFile: %s" % tmpName)
+            self.histCacheFile = tmpName
             pass
-        if self.inputLumi==None and self.outputLumi==None:
-            self.inputLumi=1.0
-            self.outputLumi=1.0
+        if self.inputLumi is None and self.outputLumi is None:
+            self.inputLumi = 1.0
+            self.outputLumi = 1.0
             pass
 
         # Propagate stuff down from config manager
@@ -202,77 +212,111 @@ class ConfigManager(object):
         for tl in self.fitConfigs:
             for chan in tl.channels:
                 for sam in chan.sampleList:
-                    regString = ""
-                    for reg in chan.regions:
-                        #self.hists["h"+sam.name+"Nom_"+reg+"_obs_"+chan.variableName] = None
-                        #self.hists["h"+sam.name+"High_"+reg+"_obs_"+chan.variableName] = None
-                        #self.hists["h"+sam.name+"Low_"+reg+"_obs_"+chan.variableName] = None
-                        regString += reg
+                    regString = "".join(chan.regions)
+
+                    nomName = "h%sNom_%s_obs_%s" % (sam.name, regString, replaceSymbols(chan.variableName))
+                    highName = "h%sHigh_%s_obs_%s" % (sam.name, regString, replaceSymbols(chan.variableName))
+                    lowName = "h%sLow_%s_obs_%s" % (sam.name, regString, replaceSymbols(chan.variableName))
+
                     if sam.isData:
-                        if (self.blindSR and (chan.channelName in tl.signalChannels)) or (self.blindCR and (chan.channelName in tl.bkgConstrainChannels)) or (self.blindVR and (chan.channelName in tl.validationChannels)):
-                            sam.blindedHistName="h"+tl.name+sam.name+"Blind_"+regString+"_obs_"+replaceSymbols(chan.variableName)
+                        if (self.blindSR and (chan.channelName in tl.signalChannels)) or \
+                           (self.blindCR and (chan.channelName in tl.bkgConstrainChannels)) or \
+                           (self.blindVR and (chan.channelName in tl.validationChannels)):
+                            sam.blindedHistName = "h%s%sBlind_%s_obs_%s" % (tl.name, sam.name, regString,
+                                                                            replaceSymbols(chan.variableName))
                             if not sam.blindedHistName in self.hists.keys():
                                 self.hists[sam.blindedHistName] = None
                         else:
-                            if not "h"+sam.name+"_"+regString+"_obs_"+replaceSymbols(chan.variableName) in self.hists.keys():
-                                self.hists["h"+sam.name+"_"+regString+"_obs_"+replaceSymbols(chan.variableName)] = None                            
+                            histName = "h%s_%s_obs_%s" % (sam.name, regString, replaceSymbols(chan.variableName))
+                            if not histName in self.hists.keys():
+                                self.hists[histName] = None
                     elif sam.isQCD:
-                        if not "h"+sam.name+"Nom_"+regString+"_obs_"+replaceSymbols(chan.variableName) in self.hists.keys():
-                            self.hists["h"+sam.name+"Nom_"+regString+"_obs_"+replaceSymbols(chan.variableName)] = None
-                        if not "h"+sam.name+"High_"+regString+"_obs_"+replaceSymbols(chan.variableName) in self.hists.keys():
-                            self.hists["h"+sam.name+"High_"+regString+"_obs_"+replaceSymbols(chan.variableName)] = None
-                        if not "h"+sam.name+"Low_"+regString+"_obs_"+replaceSymbols(chan.variableName) in self.hists.keys():
-                            self.hists["h"+sam.name+"Low_"+regString+"_obs_"+replaceSymbols(chan.variableName)] = None
-                        if not "h"+sam.name+"Syst_"+regString+"_obs_"+replaceSymbols(chan.variableName) in self.hists.keys():
-                            self.hists["h"+sam.name+"Syst_"+regString+"_obs_"+replaceSymbols(chan.variableName)] = None
-                        if not "h"+sam.name+"Stat_"+regString+"_obs_"+replaceSymbols(chan.variableName) in self.hists.keys():
-                            self.hists["h"+sam.name+"Stat_"+regString+"_obs_"+replaceSymbols(chan.variableName)] = None
+                        systName = "h%sSyst_%s_obs_%s" % (sam.name, regString, replaceSymbols(chan.variableName))
+                        statName = "h%sStat_%s_obs_%s" % (sam.name, regString, replaceSymbols(chan.variableName))
+
+                        if not nomName in self.hists.keys():
+                            self.hists[nomName] = None
+
+                        if not highName in self.hists.keys():
+                            self.hists[highName] = None
+
+                        if not lowName in self.hists.keys():
+                            self.hists[lowName] = None
+
+                        if not systName in self.hists.keys():
+                            self.hists[systName] = None
+
+                        if not statName in self.hists.keys():
+                            self.hists[statName] = None
+
                         if chan.variableName == "cuts":
                             nHists = len(chan.regions)
                         else:
                             nHists = chan.nBins
-                        for iBin in xrange(1,nHists+1):
-                            if not "h"+sam.name+"Nom_"+regString+"_obs_"+replaceSymbols(chan.variableName)+"_"+str(iBin) in self.hists.keys():
-                                self.hists["h"+sam.name+"Nom_"+regString+"_obs_"+replaceSymbols(chan.variableName)+"_"+str(iBin)] = None
-                            if not "h"+sam.name+"High_"+regString+"_obs_"+replaceSymbols(chan.variableName)+"_"+str(iBin) in self.hists.keys():
-                                self.hists["h"+sam.name+"High_"+regString+"_obs_"+replaceSymbols(chan.variableName)+"_"+str(iBin)] = None
-                            if not "h"+sam.name+"Low_"+regString+"_obs_"+replaceSymbols(chan.variableName)+"_"+str(iBin) in self.hists.keys():
-                                self.hists["h"+sam.name+"Low_"+regString+"_obs_"+replaceSymbols(chan.variableName)+"_"+str(iBin)] = None
+
+                        for iBin in xrange(1, nHists+1):
+                            if not "%s_%s" % (nomName, str(iBin)) in self.hists.keys():
+                                self.hists["%s_%s" % (nomName, str(iBin))] = None
+
+                            if not "%s_%s" % (highName, str(iBin)) in self.hists.keys():
+                                self.hists["%s_%s" % (highName, str(iBin))] = None
+
+                            if not "%s_%s" % (lowName, str(iBin)) in self.hists.keys():
+                                self.hists["%s_%s" % (lowName, str(iBin))] = None
+
                     elif not sam.isDiscovery:
-                        if not "h"+sam.name+"Nom_"+regString+"_obs_"+replaceSymbols(chan.variableName) in self.hists.keys():
-                            self.hists["h"+sam.name+"Nom_"+regString+"_obs_"+replaceSymbols(chan.variableName)] = None
-                        for (name,syst) in chan.getSample(sam.name).systDict.items():
-                            if not "h"+sam.name+syst.name+"High_"+regString+"_obs_"+replaceSymbols(chan.variableName) in self.hists.keys():
-                                self.hists["h"+sam.name+syst.name+"High_"+regString+"_obs_"+replaceSymbols(chan.variableName)] = None
-                            if not "h"+sam.name+syst.name+"Low_"+regString+"_obs_"+replaceSymbols(chan.variableName) in self.hists.keys():
-                                self.hists["h"+sam.name+syst.name+"Low_"+regString+"_obs_"+replaceSymbols(chan.variableName)] = None
+                        if not nomName in self.hists.keys():
+                            self.hists[nomName] = None
+
+                        for (name, syst) in chan.getSample(sam.name).systDict.items():
+                            highSystName = "h%s%sHigh_%s_obs_%s" % (sam.name, syst.name, regString,
+                                                                    replaceSymbols(chan.variableName))
+                            if not highSystName in self.hists.keys():
+                                self.hists[highSystName] = None
+
+                            lowSystName = "h%s%sLow_%s_obs_%s" % (sam.name, syst.name, regString,
+                                                                  replaceSymbols(chan.variableName))
+                            if not lowSystName in self.hists.keys():
+                                self.hists[lowSystName] = None
+
                             if syst.merged:
-                                mergedName = ""
-                                for s in syst.sampleList:
-                                    mergedName += s
-                                if not "h"+mergedName+"Nom_"+regString+"_obs_"+replaceSymbols(chan.variableName) in self.hists.keys():
-                                    self.hists["h"+mergedName+"Nom_"+regString+"_obs_"+replaceSymbols(chan.variableName)] = None
-                                if not "h"+mergedName+syst.name+"High_"+regString+"_obs_"+replaceSymbols(chan.variableName) in self.hists.keys():
-                                    self.hists["h"+mergedName+syst.name+"High_"+regString+"_obs_"+replaceSymbols(chan.variableName)] = None
-                                if not "h"+mergedName+syst.name+"Low_"+regString+"_obs_"+replaceSymbols(chan.variableName) in self.hists.keys():
-                                    self.hists["h"+mergedName+syst.name+"Low_"+regString+"_obs_"+replaceSymbols(chan.variableName)] = None
+                                mergedName = "".join(syst.sampleList)
+
+                                nomMergedName = "h%sNom_%s_obs_%s" % (mergedName, regString,
+                                                                      replaceSymbols(chan.variableName))
+                                if not nomMergedName in self.hists.keys():
+                                    self.hists[nomMergedName] = None
+
+                                highMergedName = "h%s%sHigh_%s_obs_%s" % (mergedName, syst.name, regString,
+                                                                          replaceSymbols(chan.variableName))
+                                if not highMergedName in self.hists.keys():
+                                    self.hists[highMergedName] = None
+
+                                lowMergedName = "h%s%sLow_%s_obs_%s" % (mergedName, syst.name, regString,
+                                                                        replaceSymbols(chan.variableName))
+                                if not lowMergedName in self.hists.keys():
+                                    self.hists[lowMergedName] = None
 
         if self.readFromTree:
             log.info("  -build TreePrepare()...")
             self.prepare = TreePrepare()
-            if self.plotHistos==None:    #set plotHistos if not already set by user
+            if self.plotHistos is None:    #set plotHistos if not already set by user
                 self.plotHistos = False  #this is essentially for debugging
                 pass
         else:
             log.info("  -build HistoPrepare()...")
             self.prepare = HistoPrepare(self.histCacheFile)
+
         #C++ alter-ego
         log.info("  -initialize C++ mgr...")
         self.initializeCppMgr()
+
         log.info("  -propagate file list and tree names...")
         self.propagateFileList() # propagate file lists down the tree
+
         ## Assume that all tree names have been set
         self.propagateTreeName()
+
         #Summary
         self.Print() 
         return
@@ -295,13 +339,14 @@ class ConfigManager(object):
         if self.outputFileName:
             self.cppMgr.m_outputFileName = self.outputFileName
             self.cppMgr.m_saveTree=True
+
         #Fill FitConfigs from TopLevelXMLs
         for fc in self.fitConfigs:
             cppFC = self.cppMgr.addFitConfig(fc.name)
             cppFC.m_inputWorkspaceFileName = fc.wsFileName
             cppFC.m_Lumi = self.lumiUnits*self.outputLumi
             cppFC.m_hypoTestName = fc.hypoTestName
-            if not fc.signalSample == None:
+            if not fc.signalSample is None:
                 cppFC.m_signalSampleName = fc.signalSample
      
             #CR/SR/VR channels
@@ -316,23 +361,23 @@ class ConfigManager(object):
             for c in fc.channels:
                  style = ChannelStyle(c.channelName)
                  style.setNBins(c.nBins)
-                 if not c.minY == None:
+                 if not c.minY is None:
                     style.setMinY(c.minY)
-                 if not c.maxY == None:
+                 if not c.maxY is None:
                    style.setMaxY(c.maxY)
-                 if not c.titleX == None:
+                 if not c.titleX is None:
                      style.setTitleX(c.titleX)
-                 if not c.titleY == None:
+                 if not c.titleY is None:
                      style.setTitleY(c.titleY)
-                 if not c.logY == None:
+                 if not c.logY is None:
                      style.setLogY(c.logY)
-                 if not c.ATLASLabelX == None:
+                 if not c.ATLASLabelX is None:
                      style.setATLASLabelX(c.ATLASLabelX)
-                 if not c.ATLASLabelY == None:
+                 if not c.ATLASLabelY is None:
                      style.setATLASLabelY(c.ATLASLabelY)
-                 if not c.ATLASLabelX == None:
+                 if not c.ATLASLabelX is None:
                      style.setATLASLabelText(c.ATLASLabelText)
-                 if not c.showLumi == None:
+                 if not c.showLumi is None:
                      style.setShowLumi(c.showLumi)     
 
                  # Plot cosmetics per fitConfig 
@@ -343,7 +388,7 @@ class ConfigManager(object):
                  style.setErrorFillColor(fc.errorFillColor)
                  style.setErrorFillStyle(fc.errorFillStyle)
                  style.setRemoveEmptyBins = self.removeEmptyBins
-                 if not fc.tLegend == None:
+                 if not fc.tLegend is None:
                      style.setTLegend(fc.tLegend)
 
                  # Sample name and color
@@ -351,8 +396,7 @@ class ConfigManager(object):
                      style.addSample(s.name, s.color)
                      #style.m_sampleNames.push_back(s.name)
                      #style.m_sampleColors.push_back(s.color)
-                     
-                     
+
                  # add channel and style for channel to C++ FitConfig (these two are expected to be synchronous
                  cppFC.m_channels.push_back(c.channelName)
                  cppFC.m_channelsStyle.push_back(style)
@@ -382,10 +426,10 @@ class ConfigManager(object):
         log.info("executeHistFactory: %s" % self.executeHistFactory)
         log.info("fitConfig objects:")
         for tl in self.fitConfigs:
-            log.info("  %s"%tl.name)
+            log.info("  %s" % tl.name)
             for c in tl.channels:
-                log.info("    %s: %s"%(c.name,c.systDict.keys()))
-        log.info("C++ ConfigMgr status: %s"%(self.cppMgr.m_status))
+                log.info("    %s: %s" % (c.name, c.systDict.keys()))
+        log.info("C++ ConfigMgr status: %s" % self.cppMgr.m_status)
         log.info("Histogram names: (set log level DEBUG)")
         configMgr.printHists()
         log.info("Chain names: (set log level DEBUG & note chains are only generated with -t)")
@@ -414,19 +458,23 @@ class ConfigManager(object):
     def printFiles(self):
         log.debug("ConfigManager:")
         log.debug(str(self.fileList))
+
         for fitConfig in self.fitConfigs:
             log.debug("  fitConfig: %s " % fitConfig.name)
             log.debug("             %s " % str(fitConfig.files))
+
             for channel in fitConfig.channels:
-                log.debug("             Channel: " + channel.name)
-                log.debug("             " + str(channel.files))
+                log.debug("             Channel: %s" % channel.name)
+                log.debug("             %s" % str(channel.files))
+
                 for sample in channel.sampleList:
-                    log.debug("             ---> Sample: " + sample.name)
-                    log.debug("                          " + str(sample.files))
+                    log.debug("             ---> Sample: %s" % sample.name)
+                    log.debug("                          %s" % str(sample.files))
+
                     for (systName,syst) in sample.systDict.items():
-                        log.debug("                            ---> Systematic: " + syst.name)
-                        log.debug("                                       Low : " + str(syst.filesLo))
-                        log.debug("                                       High: " + str(syst.filesHi))
+                        log.debug("                            ---> Systematic: %s" % syst.name)
+                        log.debug("                                       Low : %s" % str(syst.filesLo))
+                        log.debug("                                       High: %s" % str(syst.filesHi))
         return
 
     def printTreeNames(self):
@@ -436,19 +484,23 @@ class ConfigManager(object):
 
         log.debug("ConfigManager:")
         log.debug(str(self.treeName).strip())
+
         for fitConfig in self.fitConfigs:
             log.debug("  fitConfig: %s" % fitConfig.name)
             log.debug("             %s" % str(fitConfig.treeName))
+
             for channel in fitConfig.channels:
-                log.debug("    ---> Channel: " + channel.name)
-                log.debug("                  " + str(channel.treeName))
+                log.debug("    ---> Channel: %s" % channel.name)
+                log.debug("                  %s" % str(channel.treeName))
+
                 for sample in channel.sampleList:
-                    log.debug("           ---> Sample: " + sample.name)
-                    log.debug("                        "+str(sample.treeName))
+                    log.debug("           ---> Sample: %s" % sample.name)
+                    log.debug("                        %s" % str(sample.treeName))
+
                     for (systName,syst) in sample.systDict.items():
-                        log.debug("                   ---> Systematic: " + syst.name)
-                        log.debug("                        Low : " + str(syst.treeLoName))
-                        log.debug("                        High: " + str(syst.treeHiName))
+                        log.debug("                   ---> Systematic: %s" % syst.name)
+                        log.debug("                        Low : %s" % str(syst.treeLoName))
+                        log.debug("                        High: %s" % str(syst.treeHiName))
         return
 
     def setFileList(self,filelist):
@@ -519,18 +571,16 @@ class ConfigManager(object):
         normRegions = []
         normString = ""
         normCuts = ""
-        userNormDict = {}
         for (iChan,chan) in enumerate(fitConfig.channels):
-            for reg in chan.regions:
-                if not chan.channelName in fitConfig.validationChannels:
-                    normString = "".join(chan.regions)
-                    normCutsList = [ "(%s) || " % (self.cutsDict[reg]) for reg in chan.regions ]
-                    normCuts = "".join(normCutsList)
-                    
-                    for reg in chan.regions:
-                        normRegions.append(reg)
-                        #normString += reg
-                        #normCuts += "("+self.cutsDict[reg] + ") || "
+            if not chan.channelName in fitConfig.validationChannels:
+                normString = "".join(chan.regions)
+                normCutsList = [ "(%s) || " % (self.cutsDict[reg]) for reg in chan.regions ]
+                normCuts = "".join(normCutsList)
+
+                for reg in chan.regions:
+                    normRegions.append(reg)
+                    #normString += reg
+                    #normCuts += "("+self.cutsDict[reg] + ") || "
         
         normCuts = normCuts.rstrip(" || ")
         for (iChan, chan) in enumerate(fitConfig.channels):
@@ -573,19 +623,26 @@ class ConfigManager(object):
         #post-processing 2: swapping of overall systematics for specified channel by systematics from ohter channel
         for chan in fitConfig.channels:
             # only consider channels for which a remap channel has been defined.
-            if len(chan.remapSystChanName)==0: continue
+            if len(chan.remapSystChanName) == 0:
+                continue
+
             log.info("For overallSys: now setting systematics of channel <%s> to those of channel: <%s>"%(chan.name,chan.remapSystChanName))
             rc = fitConfig.getChannelByName(chan.remapSystChanName)
             # loop over overallSystematics of all samples, and swap for those of remap channel
             for sam in chan.sampleList:
-                if not sam.allowRemapOfSyst: continue
+                if not sam.allowRemapOfSyst:
+                    continue
+
                 rs = rc.getSample(sam.name)
                 for osys in sam.overallSystList:
-                    if not osys.allowRemapOfSyst: continue
+                    if not osys.allowRemapOfSyst:
+                        continue
+
                     rsys = rs.getOverallSys(osys[0]) # get replacement overall systematic, by name
-                    if rsys==None:
+                    if rsys is None:
                         log.warning("For channel %s and sample %s, replacement systematic %s could not be found. Skipping replacement of this overall syst." % (chan.name,sam.name,osys[0]))
                         continue
+
                     log.info("For channel %s and sample %s, replacement of systematic %s from %s." % (chan.name,sam.name,osys[0],rc.name))
                     sam.replaceOverallSys(rsys)
                     pass
@@ -599,8 +656,7 @@ class ConfigManager(object):
                     pass
         
         if self.plotHistos:
-            if not os.path.isdir("plots/"+self.analysisName):
-                os.makedirs("plots/"+self.analysisName)
+            mkdir_p("plots/%s" % self.analysisName)
             for (iChan,chan) in enumerate(fitConfig.channels):
                 if chan.hasDiscovery:
                     continue
@@ -680,9 +736,9 @@ class ConfigManager(object):
         elif syst.method == "normHistoSysOneSideSym":
             chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName, False, True, True,  True,  sam.name, normString)
         elif syst.method == "userHistoSys" or syst.method == "userNormHistoSys":
-            if configMgr.hists[highName] == None:
+            if configMgr.hists[highName] is None:
                 configMgr.hists[highName] = histMgr.buildUserHistoSysFromHist(highName,  syst.high,  configMgr.hists[nomName])
-            if configMgr.hists[lowName] == None:
+            if configMgr.hists[lowName] is None:
                 configMgr.hists[lowName] = histMgr.buildUserHistoSysFromHist(lowName,  syst.low,  configMgr.hists[nomName])
             if syst.method == "userHistoSys":
                 chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName, False, False)
@@ -697,15 +753,15 @@ class ConfigManager(object):
                 
                 if sam.name in syst.sampleList:
                     syst.foundSample()
-                    if self.hists[nomMergedName] == None:
+                    if self.hists[nomMergedName] is None:
                         self.hists[nomMergedName] = self.hists[nomName].Clone(nomMergedName)
                     else:
                         self.hists[nomMergedName].Add(self.hists[nomName])
-                    if self.hists[highMergedName] == None:
+                    if self.hists[highMergedName] is None:
                         self.hists[highMergedName] = self.hists[highName].Clone(highMergedName)
                     else:
                         self.hists[highMergedName].Add(self.hists[highName])
-                    if self.hists[lowMergedName] == None:
+                    if self.hists[lowMergedName] is None:
                         self.hists[lowMergedName] = self.hists[lowName].Clone(lowMergedName)
                     else:
                         self.hists[lowMergedName].Add(self.hists[lowName])
@@ -722,7 +778,9 @@ class ConfigManager(object):
             except:
                 threshold = None     
             chan.getSample(sam.name).addShapeStat(syst.name, nomName, statErrorThreshold = threshold ) # this stores a new histogram called: nomName+"Norm" 
-            chan.getSample(sam.name).shapeSystList.append(('shape_' + syst.name + '_' + sam.name + "_" + regionString + "_obs_" + replaceSymbols(chan.variableName), \
+            chan.getSample(sam.name).shapeSystList.append(('shape_%s_%s_%s_obs_%s' % (syst.name, sam.name,
+                                                                                      regionString,
+                                                                                      replaceSymbols(chan.variableName)),
                                                            nomName+"Norm", syst.constraint, "", "", "", ""))
         else:
             log.error("ERROR don't know what to do with %s %s"%(syst.name,syst.method))
@@ -730,15 +788,19 @@ class ConfigManager(object):
 
     def addHistoSysForQCD(self,regionString,normString,normCuts,chan,sam):
         self.prepare.addQCDHistos(sam,chan.useOverflowBin,chan.useUnderflowBin)
+
         if chan.variableName == "cuts":
             nHists = len(chan.regions)
         else:
             nHists = chan.nBins
-        prefixNom= "h"+sam.name+"Nom_"+regionString+"_obs_"+replaceSymbols(chan.variableName)
-        prefixHigh="h"+sam.name+"High_"+regionString+"_obs_"+replaceSymbols(chan.variableName)
-        prefixLow= "h"+sam.name+"Low_"+regionString+"_obs_"+replaceSymbols(chan.variableName)
+
+        prefixNom = "h%sNom_%s_obs_%s" % (sam.name, regionString, replaceSymbols(chan.variableName))
+        prefixHigh = "h%sHigh_%s_obs_%s" % (sam.name, regionString, replaceSymbols(chan.variableName))
+        prefixLow = "h%sLow_%s_obs_%s" % (sam.name, regionString, replaceSymbols(chan.variableName))
+
         chan.getSample(sam.name).setWrite(True)
         chan.getSample(sam.name).setHistoName(prefixNom)
+
         if chan.getSample(sam.name).qcdSyst == "histoSys":
             chan.getSample(sam.name).addHistoSys("QCDNorm_"+regionString,prefixNom,prefixHigh,prefixLow,False,False)
         elif chan.getSample(sam.name).qcdSyst == "overallSys":
@@ -752,25 +814,26 @@ class ConfigManager(object):
             except ZeroDivisionError:
                 log.warning("Error generating HistoSys for %s syst=%s nom=%g high=%g low=%g" % (nomName,"QCDNorm_"+regionString,nomIntegral,highIntegral,lowIntegral))
             
-            chan.getSample(sam.name).addOverallSys("QCDNorm_"+regionString,overallSystHigh,overallSystLow)
+            chan.getSample(sam.name).addOverallSys("QCDNorm_"+regionString, overallSystHigh, overallSystLow)
         elif chan.getSample(sam.name).qcdSyst == "overallHistoSys":
-            chan.getSample(sam.name).addHistoSys("QCDNorm_"+regionString,prefixNom,prefixHigh,prefixLow,True,False)
+            chan.getSample(sam.name).addHistoSys("QCDNorm_"+regionString, prefixNom, prefixHigh, prefixLow, True, False)
         elif chan.getSample(sam.name).qcdSyst == "normHistoSys":
-            chan.getSample(sam.name).addHistoSys("QCDNorm_"+regionString,prefixNom,prefixHigh,prefixLow,False,True)
+            chan.getSample(sam.name).addHistoSys("QCDNorm_"+regionString, prefixNom, prefixHigh, prefixLow, False, True)
         elif chan.getSample(sam.name).qcdSyst == "shapeSys":
-            chan.getSample(sam.name).addShapeSys("QCDNorm_"+regionString,prefixNom,prefixHigh,prefixLow)
-            chan.getSample(sam.name).shapeSystList.append(("QCDNorm_"+regionString,prefixNom+"Norm","data/"+configMgr.analysisName+".root","","","",""))
+            chan.getSample(sam.name).addShapeSys("QCDNorm_"+regionString, prefixNom, prefixHigh, prefixLow)
+            chan.getSample(sam.name).shapeSystList.append(("QCDNorm_"+regionString, prefixNom+"Norm", "data/"+configMgr.analysisName+".root", "", "", "", ""))
         elif chan.getSample(sam.name).qcdSyst == "uncorr":
             chan.getSample(sam.name).setWrite(False)
+
             for iBin in xrange(1,nHists+1):
                 qcdSam = sam.Clone()
-                qcdSam.name = sam.name+"_"+regionString+"_"+str(iBin)
+                qcdSam.name = "%s_%s_%s" % (sam.name, regionString, str(iBin))
                 chan.addSample(qcdSam)
                 chan.getSample(qcdSam.name).setWrite(True)
                 chan.getSample(qcdSam.name).setHistoName("h"+sam.name+"Nom_"+regionString+"_obs_"+replaceSymbols(chan.variableName)+"_"+str(iBin))
                 chan.getSample(qcdSam.name).addHistoSys("NormQCD"+regionString+"_"+str(iBin),prefixNom+"_"+str(iBin),prefixHigh+"_"+str(iBin),prefixLow+"_"+str(iBin),False,False)
         else:
-            raise Exception("Incorrect systematic method specified for QCD: %s"%getSample(sam.name).qcdSyst)
+            raise Exception("Incorrect systematic method specified for QCD: %s" % getSample(sam.name).qcdSyst)
 
     def setWeightsCutsVariable(self,chan,sam,regionString):
         if not sam.isData and not sam.isQCD and not sam.isDiscovery:
@@ -789,14 +852,12 @@ class ConfigManager(object):
                     treeName = sam.name
                 self.prepare.read(treeName, sam.files)
 
-
         if len(sam.cutsDict.keys()) == 0:
             if not chan.variableName == "cuts":
                 self.prepare.cuts = self.cutsDict[regionString]
         else:
             if not chan.variableName == "cuts":
                 self.prepare.cuts = sam.cutsDict[regionString]
-
 
         if sam.unit == "GeV":
             self.prepare.var = chan.variableName
@@ -806,9 +867,7 @@ class ConfigManager(object):
         return
 
     def addSampleSpecificHists(self,fitConfig,chan,sam,regionString,normRegions,normString,normCuts):
-
         log.debug('addSampleSpecificHists()')
-
         histoName = "h%s_%s_obs_%s" % (sam.name, regionString, replaceSymbols(chan.variableName) )
 
         if sam.isData:
@@ -833,7 +892,6 @@ class ConfigManager(object):
             else:
                 self.prepare.addHisto(histoName, useOverflow=chan.useOverflowBin, useUnderflow=chan.useUnderflowBin)
                 chan.addData(histoName)
-
         elif not sam.isQCD and not sam.isDiscovery:
             tmpName="h"+sam.name+"Nom_"+regionString+"_obs_"+replaceSymbols(chan.variableName)
             if not len(sam.shapeFactorList):
@@ -880,8 +938,7 @@ class ConfigManager(object):
                 normString = ""
                 for normReg in sam.normRegions:
                     if not type(normReg[0]) == "list":
-                        normList = []
-                        normList.append(normReg[0])
+                        normList = [normReg[0]]
                         c = fitConfig.getChannel(normReg[1],normList)
                     else:
                         c = fitConfig.getChannel(normReg[1],normReg[0])
@@ -893,8 +950,7 @@ class ConfigManager(object):
                         self.hists[tmpName] = TH1F(tmpName, tmpName, 1, 0.5, 1.5)
                         for normReg in sam.normRegions:
                             if not type(normReg[0]) == "list":
-                                normList = []
-                                normList.append(normReg[0])
+                                normList = [normReg[0]]
                                 c = fitConfig.getChannel(normReg[1], normList)
                             else:
                                 c = fitConfig.getChannel(normReg[1], normReg[0])
@@ -915,26 +971,30 @@ class ConfigManager(object):
                                                                                    str(self.lumiUnits*self.outputLumi/self.inputLumi)+" * "+"*".join(s.weights)+" * ("+self.cutsDict[r]+")")
 
                                 # if the overflow bin is used for this channel, make sure the normalization takes it into account
+                                nomName = "h%sNom_%sNorm" % (s.name, normString)
                                 if c.useOverflowBin:
-                                    self.hists["h"+s.name+"Nom_"+normString+"Norm"].SetBinContent(1, self.hists["h"+s.name+"Nom_"+normString+"Norm"].GetBinContent(1) + tempHist.Integral())
+                                    self.hists[nomName].SetBinContent(1, self.hists[nomName].GetBinContent(1) + tempHist.Integral())
                                 else:
-                                    self.hists["h"+s.name+"Nom_"+normString+"Norm"].SetBinContent(1, self.hists["h"+s.name+"Nom_"+normString+"Norm"].GetBinContent(1) + tempHist.GetSumOfWeights())
+                                    self.hists[nomName].SetBinContent(1, self.hists[nomName].GetBinContent(1) + tempHist.GetSumOfWeights())
                                 del tempHist
 
-                                log.verbose("nom =%f"%self.hists["h"+s.name+"Nom_"+normString+"Norm"].GetSumOfWeights()) 
+                                log.verbose("nom =%f" % self.hists[nomName].GetSumOfWeights())
                     else:
-                        self.hists["h"+sam.name+"Nom_"+normString+"Norm"] = None
+                        nomName = "h%sNom_%sNorm" % (sam.name, normString)
+                        self.hists[nomName] = None
                         try:
-                            self.prepare.addHisto("h"+sam.name+"Nom_"+normString+"Norm")
+                            self.prepare.addHisto(nomName)
                         except:    
                             # assume that if no histogram is made, then it is not needed  
                             pass
 
             for (systName,syst) in chan.getSample(sam.name).systDict.items():
-                log.info("    Systematic: %s"%(systName))
+                log.info("    Systematic: %s" % systName)
+
                 #first reset weight to nominal value
                 self.setWeightsCutsVariable(chan, sam, regionString)
                 syst.PrepareWeightsAndHistos(regionString, normString, normCuts, self, fitConfig, chan, sam)
+
                 self.addHistoSysforNoQCD(regionString, normString, normCuts, fitConfig, chan, sam, syst)
         elif sam.isQCD:
             #Add Histos for Sample-type QCD
@@ -943,96 +1003,110 @@ class ConfigManager(object):
 
     
     def buildBlindedHistos(self, fitConfig, chan, sam):
-        regString = "".join(chan.regions)
-        if (self.blindSR and (chan.channelName in fitConfig.signalChannels)) or (self.blindCR and chan.channelName in fitConfig.bkgConstrainChannels) or (self.blindVR and (chan.channelName in fitConfig.validationChannels)):
+        if (self.blindSR and (chan.channelName in fitConfig.signalChannels)) or \
+           (self.blindCR and chan.channelName in fitConfig.bkgConstrainChannels) or \
+           (self.blindVR and (chan.channelName in fitConfig.validationChannels)):
             if not self.hists[sam.blindedHistName]:
                 self.hists[sam.blindedHistName] = TH1F(sam.blindedHistName,sam.blindedHistName,chan.nBins,chan.binLow,chan.binHigh)
+
                 for s in chan.sampleList:
                     if (not s.isData) and (self.useSignalInBlindedData or s.name!=fitConfig.signalSample):
                         self.hists[sam.blindedHistName].Add(self.hists[s.histoName])
         return
     
-    def makeDicts(self,fitConfig, chan):
-        regString = ""
-        for reg in chan.regions:
-            regString += reg
+    def makeDicts(self, fitConfig, chan):
+        regString = "".join(chan.regions)
 
         canDict = {}
         stackDict = {}
-        mcDict = {}
         legDict = {}
         dataNameDict = {}
         qcdNameDict = {}
+
         for (samName,infoList) in chan.infoDict.items():
             for info in infoList:
-                if info[3] == "userOverallSys": continue
-                if not info[0] == "Nom": continue
-                if not (info[0],regString,replaceSymbols(chan.variableName)) in canDict.keys():
-                    canDict[(info[0],regString,replaceSymbols(chan.variableName))] = TCanvas("c"+fitConfig.name+"_"+info[0]+"_"+regString+"_obs_"+replaceSymbols(chan.variableName), \
-                                                                                             "c"+info[0]+"_"+regString+"_obs_"+replaceSymbols(chan.variableName),800,600,800,600)
+                if info[3] == "userOverallSys":
+                    continue
 
-                    stackDict[(info[0],regString,replaceSymbols(chan.variableName))] = THStack(fitConfig.name+"_"+regString+"_obs_"+replaceSymbols(chan.variableName)+"Stack"+info[0],"")
+                if not info[0] == "Nom":
+                    continue
 
-                    legDict[(info[0],regString,replaceSymbols(chan.variableName))] = TLegend(0.7,0.7,0.88,0.88)
-                    legDict[(info[0],regString,replaceSymbols(chan.variableName))].SetBorderSize(0)
-                    legDict[(info[0],regString,replaceSymbols(chan.variableName))].SetTextFont(42)
-                    legDict[(info[0],regString,replaceSymbols(chan.variableName))].SetTextSize(0.05)
-                    legDict[(info[0],regString,replaceSymbols(chan.variableName))].SetFillColor(0)
-                    legDict[(info[0],regString,replaceSymbols(chan.variableName))].SetLineColor(0)
+                myKey = (info[0], regString, replaceSymbols(chan.variableName))
+                if not myKey in canDict.keys():
+                    canDict[myKey] = TCanvas("c"+fitConfig.name+"_"+info[0]+"_"+regString+"_obs_"+replaceSymbols(chan.variableName), "c"+info[0]+"_"+regString+"_obs_"+replaceSymbols(chan.variableName),800,600,800,600)
 
-                    legDict[(info[0],regString,replaceSymbols(chan.variableName))].Clear()
+                    stackDict[myKey] = THStack(fitConfig.name+"_"+regString+"_obs_"+replaceSymbols(chan.variableName)+"Stack"+info[0],"")
+
+                    legDict[myKey] = TLegend(0.7,0.7,0.88,0.88)
+                    legDict[myKey].SetBorderSize(0)
+                    legDict[myKey].SetTextFont(42)
+                    legDict[myKey].SetTextSize(0.05)
+                    legDict[myKey].SetFillColor(0)
+                    legDict[myKey].SetLineColor(0)
+
+                    legDict[myKey].Clear()
 
                 if not (regString,replaceSymbols(chan.variableName)) in dataNameDict.keys():
                     dataNameDict[(regString,replaceSymbols(chan.variableName))] = ""
+
                 if not (regString,replaceSymbols(chan.variableName)) in qcdNameDict.keys():
                     qcdNameDict[(regString,replaceSymbols(chan.variableName))] = ""
 
                 if not fitConfig.getSample(samName).isData and not fitConfig.getSample(samName).isQCD:
-                    self.hists["h"+samName+info[0]+"_"+regString+"_obs_"+replaceSymbols(chan.variableName)].SetLineColor(fitConfig.getSample(samName).color)
-                    self.hists["h"+samName+info[0]+"_"+regString+"_obs_"+replaceSymbols(chan.variableName)].SetFillColor(fitConfig.getSample(samName).color)
-                    stackDict[(info[0],regString,replaceSymbols(chan.variableName))].Add(self.hists["h"+samName+info[0]+"_"+regString+"_obs_"+replaceSymbols(chan.variableName)],"hist")
-                    legDict[(info[0],regString,replaceSymbols(chan.variableName))].AddEntry(self.hists["h"+samName+info[0]+"_"+regString+"_obs_"+replaceSymbols(chan.variableName)], \
-                                                                                            samName+info[0],"lf")
+                    histName = "h"+samName+info[0]+"_"+regString+"_obs_"+replaceSymbols(chan.variableName)
+                    self.hists[histName].SetLineColor(fitConfig.getSample(samName).color)
+                    self.hists[histName].SetFillColor(fitConfig.getSample(samName).color)
+
+                    stackDict[myKey].Add(self.hists[histName],"hist")
+                    legDict[myKey].AddEntry(self.hists[histName], samName+info[0], "lf")
                 elif fitConfig.getSample(samName).isQCD:
-                    self.hists["h"+samName+"Nom_"+regString+"_obs_"+replaceSymbols(chan.variableName)].SetLineColor(fitConfig.getSample(samName).color)
-                    self.hists["h"+samName+"Nom_"+regString+"_obs_"+replaceSymbols(chan.variableName)].SetFillColor(fitConfig.getSample(samName).color)
-                    self.hists["h"+samName+"Low_"+regString+"_obs_"+replaceSymbols(chan.variableName)].SetLineColor(fitConfig.getSample(samName).color)
-                    self.hists["h"+samName+"Low_"+regString+"_obs_"+replaceSymbols(chan.variableName)].SetFillColor(fitConfig.getSample(samName).color)
-                    self.hists["h"+samName+"High_"+regString+"_obs_"+replaceSymbols(chan.variableName)].SetLineColor(fitConfig.getSample(samName).color)
-                    self.hists["h"+samName+"High_"+regString+"_obs_"+replaceSymbols(chan.variableName)].SetFillColor(fitConfig.getSample(samName).color)
-                    qcdNameDict[(regString,replaceSymbols(chan.variableName))] = "h"+samName+"Nom_"+regString+"_obs_"+replaceSymbols(chan.variableName)
+                    nomName = "h%sNom_%s_obs_%s" % (samName, regString, replaceSymbols(chan.variableName))
+                    self.hists[nomName].SetLineColor(fitConfig.getSample(samName).color)
+                    self.hists[nomName].SetFillColor(fitConfig.getSample(samName).color)
+
+                    lowName = "h%sLow_%s_obs_%s" % (samName, regString, replaceSymbols(chan.variableName))
+                    self.hists[lowName].SetLineColor(fitConfig.getSample(samName).color)
+                    self.hists[lowName].SetFillColor(fitConfig.getSample(samName).color)
+
+                    highName = "h%sHigh_%s_obs_%s" % (samName, regString, replaceSymbols(chan.variableName))
+                    self.hists[highName].SetLineColor(fitConfig.getSample(samName).color)
+                    self.hists[highName].SetFillColor(fitConfig.getSample(samName).color)
+
+                    qcdNameDict[(regString,replaceSymbols(chan.variableName))] = nomName
                 else:
-                    self.hists["h"+samName+"_"+regString+"_obs_"+replaceSymbols(chan.variableName)].SetLineColor(fitConfig.getSample(samName).color)
-                    dataNameDict[(regString,replaceSymbols(chan.variableName))] = "h"+samName+"_"+regString+"_obs_"+replaceSymbols(chan.variableName)
+                    histName = "h%s_%s_obs_%s" % (samName, regString, replaceSymbols(chan.variableName))
+                    self.hists[histName].SetLineColor(fitConfig.getSample(samName).color)
+                    dataNameDict[(regString,replaceSymbols(chan.variableName))] = histName
 
         for info in stackDict.keys():
             canDict[info].cd()
 
-            if not qcdNameDict[(info[1],info[2])] == "":
-                stackDict[info].Add(self.hists[qcdNameDict[(info[1],info[2])]],"hist")
-                legDict[info].AddEntry(self.hists[qcdNameDict[(info[1],info[2])]],"QCDNom","lf")
+            infoKey = (info[1], info[2])
+            if not qcdNameDict[infoKey] == "":
+                stackDict[info].Add(self.hists[qcdNameDict[infoKey]],"hist")
+                legDict[info].AddEntry(self.hists[qcdNameDict[infoKey]],"QCDNom","lf")
 
-            if not dataNameDict[(info[1],info[2])] == "":
-                legDict[info].AddEntry(self.hists[dataNameDict[(info[1],info[2])]],"Data","lf")
-                self.hists[dataNameDict[(info[1],info[2])]].SetStats(False)
-                self.hists[dataNameDict[(info[1],info[2])]].GetYaxis().SetTitleOffset(1.3)
-                self.hists[dataNameDict[(info[1],info[2])]].Draw()
-                self.hists[dataNameDict[(info[1],info[2])]].GetXaxis().SetTitle(chan.variableName)
-                self.hists[dataNameDict[(info[1],info[2])]].GetYaxis().SetTitle("entries")
+            if not dataNameDict[infoKey] == "":
+                legDict[info].AddEntry(self.hists[dataNameDict[infoKey]],"Data","lf")
+                self.hists[dataNameDictinfoKey].SetStats(False)
+                self.hists[dataNameDict[infoKey]].GetYaxis().SetTitleOffset(1.3)
+                self.hists[dataNameDict[infoKey]].Draw()
+                self.hists[dataNameDict[infoKey]].GetXaxis().SetTitle(chan.variableName)
+                self.hists[dataNameDict[infoKey]].GetYaxis().SetTitle("entries")
                 stackDict[info].Draw("same")
-                self.hists[dataNameDict[(info[1],info[2])]].Draw("same")
+                self.hists[dataNameDict[infoKey]].Draw("same")
 
-                if self.hists[dataNameDict[(info[1],info[2])]].GetBinContent(self.hists[dataNameDict[(info[1],info[2])]].GetMaximumBin()) > stackDict[info].GetMaximum():
-                    rangeMax = self.hists[dataNameDict[(info[1],info[2])]].GetBinContent(self.hists[dataNameDict[(info[1],info[2])]].GetMaximumBin())
+                if self.hists[dataNameDict[infoKey]].GetBinContent(self.hists[dataNameDict[infoKey]].GetMaximumBin()) > stackDict[info].GetMaximum():
+                    rangeMax = self.hists[dataNameDict[infoKey]].GetBinContent(self.hists[dataNameDict[infoKey]].GetMaximumBin())
                 else:
                     rangeMax = stackDict[info].GetMaximum()
 
-                if self.hists[dataNameDict[(info[1],info[2])]].GetBinContent(self.hists[dataNameDict[(info[1],info[2])]].GetMinimumBin()) < stackDict[info].GetMinimum():
-                    rangeMin = self.hists[dataNameDict[(info[1],info[2])]].GetBinContent(self.hists[dataNameDict[(info[1],info[2])]].GetMinimumBin())
+                if self.hists[dataNameDict[infoKey]].GetBinContent(self.hists[dataNameDict[infoKey]].GetMinimumBin()) < stackDict[info].GetMinimum():
+                    rangeMin = self.hists[dataNameDict[infoKey]].GetBinContent(self.hists[dataNameDict[infoKey]].GetMinimumBin())
                 else:
                     rangeMin = stackDict[info].GetMinimum()
 
-                self.hists[dataNameDict[(info[1],info[2])]].GetYaxis().SetRangeUser(rangeMin-0.1*rangeMin,rangeMax+0.1*rangeMax)
+                self.hists[dataNameDict[infoKey]].GetYaxis().SetRangeUser(rangeMin-0.1*rangeMin,rangeMax+0.1*rangeMax)
             else:
                 stackDict[info].Draw()
                 stackDict[info].GetHistogram().GetYaxis().SetTitleOffset(1.3)
@@ -1047,21 +1121,24 @@ class ConfigManager(object):
 
             legDict[info].Draw()
 
-            if not os.path.isdir("plots/"+self.analysisName+"/"+fitConfig.name):
-                os.makedirs("plots/"+self.analysisName+"/"+fitConfig.name)
-            canDict[info].SaveAs("plots/"+self.analysisName+"/"+fitConfig.name+"/stack"+info[1]+"_obs_"+info[2]+"_"+info[0]+".png")
+            plotsDir = "plots/%s/%s" % (self.analysisName, fitConfig.name)
+            mkdir_p(plotsDir)
+
+            outputPNG = "%s/stack%s_obs_%s_%s.png" % (plotsDir, info[1], info[2], info[0])
+            canDict[info].SaveAs(outputPNG)
 
             self.canvasList.append(canDict[info])
             self.stackList.append(stackDict[info])
     
     def outputRoot(self):
-        outputRootFile=None
+        outputRootFile = None
         if self.readFromTree:
             outputRootFile = TFile(self.histCacheFile,"RECREATE")
         elif self.prepare.recreate:
             outputRootFile = self.prepare.cacheFile
             if not outputRootFile.IsOpen():
                 outputRootFile = outputRootFile.Open(self.histCacheFile,"UPDATE")
+
         if outputRootFile:
             outputRootFile.cd()
             histosToWrite = self.hists.values()
