@@ -100,14 +100,17 @@ class fitConfig(object):
         #Consistency checks
         if not self.signalSample is None:
             found = False
+
             for s in self.sampleList:
                 if s.name == self.signalSample:
                     found = True
+
             if not found:
                 for chan in self.channels:
                     for s in chan.sampleList:
                         if s.name == self.signalSample:
                             found = True
+
                 if not found:
                     log.warning("signal sample %s is not contained in sampleList of TopLvlXML %s or its daughter channels" % (self.signalSample, self.name))
 
@@ -135,6 +138,7 @@ class fitConfig(object):
 
             if nFound > 1:
                 log.warning("TopLvlXML: %s, Channel: %s --> SR=%s CR=%s VR=%s is ambiguous" % (self.name, chanName, isSR, isCR, isVR))
+
             #for sample in self.sampleList:
             #    try:
             #        chan.getSample(sample.name)
