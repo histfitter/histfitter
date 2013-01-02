@@ -237,7 +237,7 @@ if __name__ == "__main__":
     drawLogLikelihood = False
     pickedSRs = []
     runToys = False
-    runMinos = True
+    runMinos = False
     minosPars = ""
     
     FitType = enum('FitType','Discovery , Exclusion , Background')
@@ -394,6 +394,10 @@ if __name__ == "__main__":
                 continue
 
     if args.minos:
+        print "hello"
+        print args.minos 
+        sys.exit()
+
         runMinos = True
         minosArgs = args.minos
         if len(minosArgs) == 1 and not minosArgs == "ALL":
