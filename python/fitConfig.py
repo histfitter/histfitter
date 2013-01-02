@@ -98,7 +98,7 @@ class fitConfig(object):
                 break
         
         #Consistency checks
-        if not self.signalSample == None:
+        if not self.signalSample is None:
             found = False
             for s in self.sampleList:
                 if s.name == self.signalSample:
@@ -117,17 +117,22 @@ class fitConfig(object):
             isCR = False
             isVR = False
             nFound = 0
+
             if self.signalChannels.__contains__(chanName):
                 isSR = True
                 nFound += 1
+
             if self.bkgConstrainChannels.__contains__(chanName):
                 isCR = True
                 nFound += 1
+
             if self.validationChannels.__contains__(chanName):
                 isVR = True
                 nFound += 1
+
             if nFound == 0:
                 log.warning("TopLvlXML: %s, Channel: %s --> SR/CR/VR undefined" % (self.name, chanName))
+
             if nFound > 1:
                 log.warning("TopLvlXML: %s, Channel: %s --> SR=%s CR=%s VR=%s is ambiguous" % (self.name, chanName, isSR, isCR, isVR))
             #for sample in self.sampleList:
@@ -523,11 +528,13 @@ class fitConfig(object):
         Propagate the file list downwards.
         """
         # if we don't have our own file list, use the one given to us
-        if self.files == []:
+        if not self.files:
             self.files = fileList
+
         # propagate our file list downwards
         for ch in self.channels:
             ch.propagateFileList(self.files)
+
         return
 
     def addSystematic(self, syst):
@@ -539,12 +546,15 @@ class fitConfig(object):
             raise RuntimeError("Attempt to overwrite systematic %s in TopLevel %s" % (syst.name, self.name))
         else:
             self.systDict[syst.name] = syst.Clone()
+
             for chan in self.channels:
                 chan.addSystematic(syst)
+
             for sam in self.sampleList:
                 if not sam.isData and not sam.isDiscovery and not sam.isQCD:
                     sam.addSystematic(syst)
-            return
+
+        return
 
     def getSystematic(self, systName):
         """

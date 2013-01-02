@@ -1,10 +1,8 @@
 from ROOT import THStack,TLegend,TCanvas,TFile,std,TH1F
 from ROOT import ConfigMgr,FitConfig  #from gSystem.Load("libSusyFitter.so")
-from prepareHistos import TreePrepare,HistoPrepare
 from histogramsManager import histMgr
 from copy import deepcopy
 from logger import Logger
-import os
 from ROOT import gROOT
 
 log = Logger('Systematic')
@@ -19,8 +17,6 @@ log = Logger('Systematic')
 # "FillUpDownHist" (for the methods "userNormHistoSys" or "normHistoSys") and
 # "tryAddHistos" function in the Baseclass SystematicBase.
 ###############################################
-
-
 
 def replaceSymbols(s):
     s = s.replace("/", "").replace("*", "").replace("(", "").replace(")", "")
@@ -47,7 +43,9 @@ class SystematicBase:
 
         if not constraint == "Gaussian" and not (method == "shapeSys" or method == "shapeStat"):
             raise ValueError("Constraints can only be specified for shapeSys")
+
         self.constraint = constraint
+
         allowedSys = ["histoSys","overallSys","userOverallSys","overallHistoSys","normHistoSys",
                       "shapeSys","shapeStat","histoSysOneSide","histoSysOneSideSym","normHistoSysOneSide","normHistoSysOneSideSym","userHistoSys","userNormHistoSys",
                       "overallNormHistoSys","overallNormHistoSysOneSide","overallNormHistoSysOneSideSym", "overallNormSys" ]
@@ -126,14 +124,14 @@ class SystematicBase:
 
     def FillUpDownHist(self, lowhigh="", regionString="", normString="",
                        normCuts="", abstract=None, topLvl=None, chan=None, sam=None):
-        if (self.method == "userNormHistoSys" \
-               or self.method == "overallNormSys" \
-               or self.method == "normHistoSys" \
-               or self.method == "normHistoSysOneSide" \
-               or self.method == "normHistoSysOneSideSym" \
-               or self.method == "overallNormHistoSys" \
-               or self.method == "overallNormHistoSysOneSide" \
-               or self.method == "overallNormHistoSysOneSideSym" ) \
+        if (self.method == "userNormHistoSys"
+            or self.method == "overallNormSys"
+            or self.method == "normHistoSys"
+            or self.method == "normHistoSysOneSide"
+            or self.method == "normHistoSysOneSideSym"
+            or self.method == "overallNormHistoSys"
+            or self.method == "overallNormHistoSysOneSide"
+            or self.method == "overallNormHistoSysOneSideSym" ) \
                and (not sam.noRenormSys):
 
             histName = "h" + sam.name + self.name + lowhigh + normString + "Norm"
@@ -154,8 +152,7 @@ class SystematicBase:
                 normString = ""
                 for normReg in sam.normRegions:
                     if not type(normReg[0]) == "list":
-                        normList = []
-                        normList.append(normReg[0])
+                        normList = [normReg[0]]
                         c = topLvl.getChannel(normReg[1],normList)
                     else:
                         c = topLvl.getChannel(normReg[1],normReg[0])
@@ -166,8 +163,7 @@ class SystematicBase:
 
                     for normReg in sam.normRegions:
                         if not type(normReg[0]) == "list":
-                            normList = []
-                            normList.append(normReg[0])
+                            normList = [normReg[0]]
                             c = topLvl.getChannel(normReg[1],normList)
                         else:
                             c = topLvl.getChannel(normReg[1],normReg[0])
@@ -238,7 +234,7 @@ class SystematicBase:
                         if systNorm.type == "tree":
                             log.verbose("normalization region %s"%("".join(normReg[0])))
                             log.verbose("normalization cuts %s"%(abstract.cutsDict["".join(normReg[0])]))
-                            log.verbose("current chain %s"%(abstract.prepare.currentChainName))
+                            log.verbose("current chain %s"% abstract.prepare.currentChainName)
                             log.verbose("projecting string %s"%(str(abstract. lumiUnits*abstract.outputLumi/abstract.inputLumi) + " * " + "*". join(s.weights) + " * (" + abstract.cutsDict["".join(normReg[0])] + ")"))
 
                             abstract.chains[abstract.prepare.currentChainName].Project("temp",abstract.cutsDict["".join(normReg[0])],str(abstract.lumiUnits*abstract.outputLumi/abstract.inputLumi)+" * "+"*".join(s.weights)+" * ("+abstract.cutsDict["".join(normReg[0])]+")")
@@ -246,7 +242,7 @@ class SystematicBase:
                         elif systNorm.type == "weight":
                             log.verbose("normalization region %s"%("".join(normReg[0])))
                             log.verbose("normalization cuts %s"%(abstract.cutsDict["".join(normReg[0])]))
-                            log.verbose("current chain %s"%(abstract.prepare.currentChainName))
+                            log.verbose("current chain %s"% abstract.prepare.currentChainName)
                             log.verbose("projecting string %s"%(str(abstract.lumiUnits*abstract.outputLumi/abstract.inputLumi)+" * "+"*".join(s.weights)+" * ("+abstract.cutsDict["".join(normReg[0])]+")"))
 
                             if 'High' in lowhigh:
@@ -359,7 +355,7 @@ class TreeWeightSystematic(SystematicBase):
                                 normCuts="", abstract=None,
                                 topLvl=None, chan=None, sam=None):
 
-        log.verbose("PrepareWeightsAndHistos()"); 
+        log.verbose("PrepareWeightsAndHistos()")
         if self.type == "weight":
             TreeWeightSystematic.PrepareWAHforWeight(self, regionString,
                                                      normString, normCuts,
@@ -385,7 +381,7 @@ class UserSystematic(SystematicBase):
         
         for lowhigh in ["High_","Low_"]:
             lowhighName = "h%s%s%s%s_obs_%s" % (sam.name, self.name, lowhigh, regionString, replaceSymbols(chan.variableName))
-            if abstract.hists[lowhighName] == None:
+            if abstract.hists[lowhighName] is None:
                 if lowhigh=="High_":
                     abstract.hists[lowhighName] = histMgr.buildUserHistoSysFromHist(lowhighName, self.high, abstract.hists[nomName])
                 elif lowhigh=="Low_":
@@ -395,7 +391,7 @@ class UserSystematic(SystematicBase):
     def PrepareGlobalNormalization(self,normString,abstract,topLvl,chan,sam):
 
         for lowhigh in ["Nom_",self.name+"High_",self.name+"Low_"]:
-            histName = "h" + sam.name + lowhigh + normString + "Norm"
+            histName = "h%s%s%sNorm" % (sam.name, lowhigh, normString)
             if not histName in abstract.hists.keys():
                 if sam.normRegions:
                     if not abstract.readFromTree:

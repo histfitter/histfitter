@@ -1,8 +1,6 @@
 import ROOT
 from ROOT import TFile, TMath, RooRandom, TH1, TH1F
 from ROOT import kBlack, kWhite, kGray, kRed, kPink, kMagenta, kViolet, kBlue, kAzure, kCyan, kTeal, kGreen, kSpring, kYellow, kOrange, kDashed, kSolid, kDotted
-from os import system
-from math import fabs
 from sample import Sample
 from logger import Logger
 
@@ -10,7 +8,7 @@ import generateToys
 
 TH1.SetDefaultSumw2(True)
 
-from copy import deepcopy, copy
+from copy import deepcopy
 from configManager import configMgr
 
 log = Logger('Channel')
@@ -157,8 +155,8 @@ class Channel(object):
         Propagate the file list downwards.
         """
         #  if we don't have our own file list,  use the one given to us
-        if self.files == []:
-                self.files = fileList
+        if not self.files:
+            self.files = fileList
         #  propagate our file list downwards
         for sam in self.sampleList:
                 sam.propagateFileList(self.files)
@@ -227,24 +225,29 @@ class Channel(object):
         """
         self.hasDiscovery = True
         self.parentTopLvl.hasDiscovery = True
+
         if not self.variableName == "cuts":
             raise TypeError("Discovery sample can only be added "
                             "to a cuts channel")
+
         for (iSR, sr) in enumerate(srList):
-            sigSample = Sample("DiscoveryMode_%s" % (sr), colorList[iSR])
-            sigSample.setNormFactor("mu_%s" % (sr), startValList[iSR],
+            sigSample = Sample("DiscoveryMode_%s" % sr, colorList[iSR])
+            sigSample.setNormFactor("mu_%s" % sr, startValList[iSR],
                                     minValList[iSR], maxValList[iSR])
             sigSample.setDiscovery()
             sigSample.clearSystematics()
+
             self.addSample(sigSample)
             self.parentTopLvl.setSignalSample(sigSample)
-            histoName = "h" + sigSample.name + "Nom_" + sr + \
-                        "_obs_" + self.variableName.replace("/", "")
-            self.getSample("DiscoveryMode_%s" % (sr)).setHistoName(histoName)
+
+            histoName = "h%sNom_%s_obs_%s" % (sigSample.name, sr, self.variableName.replace("/", ""))
+            self.getSample("DiscoveryMode_%s" % sr).setHistoName(histoName)
+
             configMgr.hists[histoName] = TH1F(histoName, histoName,
                                               len(srList), 0.0,
                                               float(len(srList)))
             configMgr.hists[histoName].SetBinContent(iSR+1, startValList[iSR])
+
         return
 
     def addData(self, dataName):
@@ -339,7 +342,7 @@ class Channel(object):
         Convert instance to XML string
         """
         self.writeString = "<!DOCTYPE Channel SYSTEM '../HistFactorySchema.dtd'>\n\n"
-        self.writeString += "<Channel Name=\"%s\">\n\n" % (self.channelName)
+        self.writeString += "<Channel Name=\"%s\">\n\n" % self.channelName
         for data in self.dataList:
             if len(data[2]):
                 self.writeString += "  <Data HistoName=\"%s\" InputFile=\"%s\" HistoPath=\"%s\" />\n\n" % (data[1], data[0], data[2])

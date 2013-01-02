@@ -1,19 +1,10 @@
 import ROOT
 from ROOT import TFile,TMath,RooRandom,TH1,TH1F
 from ROOT import kBlack,kWhite,kGray,kRed,kPink,kMagenta,kViolet,kBlue,kAzure,kCyan,kTeal,kGreen,kSpring,kYellow,kOrange,kDashed,kSolid,kDotted
-from os import system
-from math import fabs
-from channel import Channel
-from sample import Sample
-
-
-import generateToys
 
 TH1.SetDefaultSumw2(True)
 
-from copy import deepcopy,copy
-from configManager import configMgr
-
+from copy import deepcopy
 
 class Measurement(object):
     """
@@ -63,8 +54,8 @@ class Measurement(object):
 
     def createHistFactoryObject(self, prefix):
         m = ROOT.RooStats.HistFactory.Measurement(self.name)
-        m.SetOutputFilePrefix( "./results/"+prefix )
-        m.SetPOI( (self.poiList)[0] )
+        m.SetOutputFilePrefix("./results/%s" % prefix)
+        m.SetPOI(self.poiList[0])
         
         m.SetLumi(self.lumi)
         m.SetLumiRelErr(self.lumiErr)
@@ -106,23 +97,28 @@ class Measurement(object):
         Convert instance to an XML string
         """
         measurementString = "  <Measurement Name=\"%s\" Lumi=\"%g\" LumiRelErr=\"%g\" BinLow=\"%d\" BinHigh=\"%d\" ExportOnly=\"%s\">\n" % (self.name,self.lumi,self.lumiErr,self.binLow,self.binHigh,str(self.exportOnly))
+
         for (iPOI, poi) in enumerate(self. poiList):
-            measurementString += "    <POI>%s</POI>\n" % (poi)
+            measurementString += "    <POI>%s</POI>\n" % poi
+
         for (param, setting) in self.paramSettingDict. iteritems():
             if setting[0]:
-                if not setting[1] == None:
+                if not setting[1] is None:
                     measurementString += "    <ParamSetting Const=\"True\" Val=\"%g\">%s</ParamSetting>\n" % (setting[1], param)
                 else:
-                    measurementString += "    <ParamSetting Const=\"True\">%s</ParamSetting>\n" % (param)
+                    measurementString += "    <ParamSetting Const=\"True\">%s</ParamSetting>\n" % param
             else:
-                if not setting[1] == None:
+                if not setting[1] is None:
                     measurementString += "    <ParamSetting Const=\"False\" Val=\"%g\">%s</ParamSetting>\n" % (setting[1], param)
                 else:
-                    measurementString += "    <ParamSetting Const=\"False\">%s</ParamSetting>\n" % (param)
+                    measurementString += "    <ParamSetting Const=\"False\">%s</ParamSetting>\n" % param
+
         for (param, constraint) in self.constraintTermDict.iteritems():
-            if not constraint[1] == None:
+            if not constraint[1] is None:
                 measurementString += "    <ConstraintTerm Type=\"%s\" RelativeUncertainty=\"%g\">%s</ConstraintTerm>\n" % (constraint[0], constraint[1], param)
             else:
                 measurementString += "    <ConstraintTerm Type=\"%s\">%s</ConstraintTerm>\n" % (constraint[0], param)
+
         measurementString += "  </Measurement>\n\n"
+
         return measurementString

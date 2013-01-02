@@ -93,11 +93,11 @@ class TreePrepare(PrepareHistosABC):
         
         for f in fileList:
             file = TFile.Open(f)
-            if file == None: 
+            if file is None:
                 continue
 
             tree = file.Get(treeName)
-            if tree == None:
+            if tree is None:
                 file.Close()
                 continue
 
@@ -185,7 +185,7 @@ class TreePrepare(PrepareHistosABC):
         Recover from ROOT memory and add to dictionary of histograms
         """
         if self.var == "cuts":
-            if self.configMgr.hists[name] == None:
+            if self.configMgr.hists[name] is None:
                 self.configMgr.hists[name] = TH1F(name, name, len(self.channel.regions), 0., float(len(self.channel.regions)))
                 for (iReg,reg) in enumerate(self.channel.regions):
                     self.cuts = self.configMgr.cutsDict[reg]
@@ -204,11 +204,11 @@ class TreePrepare(PrepareHistosABC):
                     for iBin in xrange(1, self.configMgr.hists[name].GetNbinsX()+1):
                         binVal = self.configMgr.hists[name].GetBinContent(iBin)
                         binErr = self.configMgr.hists[name].GetBinError(iBin)
-                        if binVal<0.:
-                            self.configMgr.hists[name].SetBinContent(iBin, 0.)
+                        if binVal < 0.0:
+                            self.configMgr.hists[name].SetBinContent(iBin, 0.0)
 
         else:
-            if self.configMgr.hists[name] == None:
+            if self.configMgr.hists[name] is None:
                 if self.var.find(":") == -1:
                     self.configMgr.hists[name] = TH1F(name, name, self.channel.nBins, self.channel.binLow, self.channel.binHigh)
                 else:
@@ -271,7 +271,7 @@ class TreePrepare(PrepareHistosABC):
         
         if self.var == "cuts":
             for (iReg,reg) in enumerate(self.channel.regions):
-                if self.configMgr.hists[prefixNom+"_"+str(iReg+1)] == None:
+                if self.configMgr.hists[prefixNom+"_"+str(iReg+1)] is None:
                     tempNameSyst = "%sSyst%s" % (self.name, str(iReg+1))
                     qcdHistoSystTemp = TH1F(tempNameSyst, tempNameSyst, self.channel.nBins, self.channel.binLow, self.channel.binHigh)
                     self.configMgr.chains[self.currentChainName].Project(tempNameSyst, self.configMgr.cutsDict[reg], self.weights+"Syst")
@@ -282,21 +282,21 @@ class TreePrepare(PrepareHistosABC):
                     self.configMgr.chains[self.currentChainName].Project(tempNameStat, self.configMgr.cutsDict[reg], self.weights+"Stat")
                     qcdHistoStat.SetBinContent(iReg+1, qcdHistoStatTemp.GetBinContent(1))
         else:
-            if self.weights=="1.0":
-                sysWeightStat="0.01" #rough average of Dan's results
-                sysWeightSyst="0.25" #rough average of Dan's results
+            if self.weights == "1.0":
+                sysWeightStat = "0.01" #rough average of Dan's results
+                sysWeightSyst = "0.25" #rough average of Dan's results
             else:
-                sysWeightStat=self.weights+"Stat"
-                sysWeightSyst=self.weights+"Syst" 
+                sysWeightStat = self.weights+"Stat"
+                sysWeightSyst = self.weights+"Syst"
                 
-            if self.configMgr.hists[prefixNom+"_"+str(1)] == None:
+            if self.configMgr.hists[prefixNom+"_"+str(1)] is None:
                 self.configMgr.chains[self.currentChainName].Project(systName, self.var, sysWeightSyst+" * ("+self.cuts+")")
                 self.configMgr.chains[self.currentChainName].Project(statName, self.var, sysWeightStat+" * ("+self.cuts+")")
 
         ## correct nominal bins (not overflow)
         for iBin in xrange(1,self.configMgr.hists[prefixNom].GetNbinsX()+1):
             #
-            if self.configMgr.hists[prefixNom+"_"+str(iBin)] == None:
+            if self.configMgr.hists[prefixNom+"_"+str(iBin)] is None:
                 if self.channel.variableName == "cuts":
                     self.configMgr.hists[prefixNom+"_"+str(iBin)] = TH1F(prefixNom+"_"+str(iBin),prefixNom+"_"+str(iBin),len(self.channel.regions),0.,float(len(self.channel.regions)))
                 else:
@@ -309,11 +309,13 @@ class TreePrepare(PrepareHistosABC):
                     binError = sqrt(-qcdHistoSyst.GetBinContent(iBin)**2-qcdHistoStat.GetBinContent(iBin))
                 else: 
                     binError = sqrt(qcdHistoSyst.GetBinContent(iBin)**2+qcdHistoStat.GetBinContent(iBin))
+
                 if qcdHistoStat.GetBinContent(iBin)<0: # Check for negative weights (possible in QCD!)
                     binStatError = sqrt(-qcdHistoStat.GetBinContent(iBin))
                 else:
                     binStatError = sqrt(qcdHistoStat.GetBinContent(iBin))
                 binSystError = qcdHistoSyst.GetBinContent(iBin)
+
                 ##self.configMgr.hists[prefixNom+"_"+str(iBin)].SetBinContent(iBin,self.configMgr.hists[prefixNom].GetBinContent(iBin))
                 #
                 #print "GREPME %s bin %g content %.2g stat error %.2g syst error %.2g total error %.2g" % (prefixNom,iBin,self.configMgr.hists[prefixNom].GetBinContent(iBin),binStatError,binSystError,binError)
@@ -326,7 +328,7 @@ class TreePrepare(PrepareHistosABC):
                     self.configMgr.hists[prefixNom].SetBinContent(iBin,0.)
                     self.configMgr.hists[prefixNom].SetBinError(iBin,binError)
             #
-            if self.configMgr.hists[prefixHigh+"_"+str(iBin)] == None:
+            if self.configMgr.hists[prefixHigh+"_"+str(iBin)] is None:
                 if self.channel.variableName == "cuts":
                     self.configMgr.hists[prefixHigh+"_"+str(iBin)] = TH1F(prefixHigh+"_"+str(iBin),prefixHigh+"_"+str(iBin),len(self.channel.regions),0.,float(len(self.channel.regions)))
                 else:
@@ -344,7 +346,7 @@ class TreePrepare(PrepareHistosABC):
                     self.configMgr.hists[prefixHigh].SetBinContent(iBin,0.)
                     self.configMgr.hists[prefixHigh].SetBinError(iBin,binError)
             #
-            if self.configMgr.hists[prefixLow+"_"+str(iBin)] == None:
+            if self.configMgr.hists[prefixLow+"_"+str(iBin)] is None:
                 if self.channel.variableName == "cuts":
                     self.configMgr.hists[prefixLow+"_"+str(iBin)] = TH1F(prefixLow+"_"+str(iBin),prefixLow+"_"+str(iBin),len(self.channel.regions),0.,float(len(self.channel.regions)))
                 else:
@@ -425,10 +427,10 @@ class HistoPrepare(PrepareHistosABC):
         return False
 
     def read(self, name, fileList):
-        log.info("HistoPrepare " + str(fileList))
         """
         Get the histogram from the file
         """
+        log.info("HistoPrepare " + str(fileList))
         return
     
     def addHisto(self, name, nBins=None, binLow=None, binHigh=None, useOverflow=False, useUnderflow=False):
@@ -436,7 +438,7 @@ class HistoPrepare(PrepareHistosABC):
         Add this histogram to the dictionary of histograms
         """
         #Note: useOverflow and useUnderflow has no effect. It's there just for symmetry with TreePrepare above.
-        if self.configMgr.hists[name] == None:
+        if self.configMgr.hists[name] is None:
             try:
                 self.configMgr.hists[name] = self.cacheFile.Get(name)
                 testsum = self.configMgr.hists[name].GetSum()
@@ -454,10 +456,6 @@ class HistoPrepare(PrepareHistosABC):
         Read the nominal, high and low QCD histograms
         """
         regString = "".join(self.channel.regions)
-        
-        prefixNom= "h"+sample.name+"Nom_"+regString+"_obs_"+self.channel.variableName.replace("/","")
-        prefixHigh="h"+sample.name+"High_"+regString+"_obs_"+self.channel.variableName.replace("/","")
-        prefixLow= "h"+sample.name+"Low_"+regString+"_obs_"+self.channel.variableName.replace("/","")
 
         prefixNom = "h%sNom_%s_obs_%s" % (sample.name, regString, self.channel.variableName.replace("/","") )
         prefixHigh = "h%sHigh_%s_obs_%s" % (sample.name, regString, self.channel.variableName.replace("/","") )
@@ -466,15 +464,18 @@ class HistoPrepare(PrepareHistosABC):
         self.addHisto(prefixNom)
         self.addHisto(prefixHigh)
         self.addHisto(prefixLow)
+
         if self.channel.variableName == "cuts":
             nHists = len(self.channel.regions)
         else:
             nHists = self.channel.nBins
+
         for iBin in xrange(1,nHists+1):
             self.addHisto(prefixNom+"_"+str(iBin))
             self.addHisto(prefixHigh+"_"+str(iBin))
             self.addHisto(prefixLow+"_"+str(iBin))
-        return (self.configMgr.hists[prefixNom], self.configMgr.hists[prefixLow], self.configMgr.hists[prefixHigh])
+
+        return self.configMgr.hists[prefixNom], self.configMgr.hists[prefixLow], self.configMgr.hists[prefixHigh]
 
     def __del__(self):
         self.cacheFile.Close()
