@@ -50,15 +50,15 @@ class ConfigManager(object):
         self.inputLumi = None # Luminosity of input histograms
         self.outputLumi = None # Output luminosity
         self.lumiUnits = 1.0 # 1=fb-1, 1000=pb-1, etc.
-        self.nTOYs=-1 #<=0 means to use real data
-        self.calculatorType=0 # frequentist calculator
-        self.testStatType=3   # one-sided test statistic
-        self.useCLs=True # use CLs for upper limits, or not
-        self.doExclusion=True # true = exclusion, false = discovery test
-        self.fixSigXSec=False # true = fix SigXSec by nominal, +/-1sigma
-        self.runOnlyNominalXSec=False #t true = for fixed xsec, run only nominal fit and not +/- 1 sigma fits
-        self.nPoints=20 # number of points in upper limit evaluation
-        self.seed=0 # seed for random generator. default is clock
+        self.nTOYs =- 1 #<=0 means to use real data
+        self.calculatorType = 0 # frequentist calculator
+        self.testStatType = 3   # one-sided test statistic
+        self.useCLs = True # use CLs for upper limits, or not
+        self.doExclusion = True # true = exclusion, false = discovery test
+        self.fixSigXSec = False # true = fix SigXSec by nominal, +/-1sigma
+        self.runOnlyNominalXSec = False #t true = for fixed xsec, run only nominal fit and not +/- 1 sigma fits
+        self.nPoints = 20 # number of points in upper limit evaluation
+        self.seed = 0 # seed for random generator. default is clock
         self.muValGen = 0.0 # mu_sig used for toy generation
         self.toySeedSet = False # Set the seed for toys
         self.toySeed = 0 # CPU clock, default
@@ -66,7 +66,7 @@ class ConfigManager(object):
         self.blindSR = False # Blind the SRs only
         self.blindCR = False # Blind the CRs only
         self.blindVR = False # Blind the VRs only
-        self.useSignalInBlindedData=False 
+        self.useSignalInBlindedData = False
 
         self.normList = [] # List of normalization factors
         self.outputFileName = None # Output file name used to store fit results
@@ -579,8 +579,6 @@ class ConfigManager(object):
 
                 for reg in chan.regions:
                     normRegions.append(reg)
-                    #normString += reg
-                    #normCuts += "("+self.cutsDict[reg] + ") || "
         
         normCuts = normCuts.rstrip(" || ")
         for (iChan, chan) in enumerate(fitConfig.channels):
@@ -1088,7 +1086,7 @@ class ConfigManager(object):
 
             if not dataNameDict[infoKey] == "":
                 legDict[info].AddEntry(self.hists[dataNameDict[infoKey]],"Data","lf")
-                self.hists[dataNameDictinfoKey].SetStats(False)
+                self.hists[dataNameDict[infoKey]].SetStats(False)
                 self.hists[dataNameDict[infoKey]].GetYaxis().SetTitleOffset(1.3)
                 self.hists[dataNameDict[infoKey]].Draw()
                 self.hists[dataNameDict[infoKey]].GetXaxis().SetTitle(chan.variableName)
