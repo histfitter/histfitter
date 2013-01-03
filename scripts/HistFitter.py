@@ -60,7 +60,7 @@ class configFileAction(argparse.Action):
             setattr(namespace, self.dest, values)
 
 def enum(typename, field_names):
-    "Create a new enumeration type"
+    """Create a new enumeration type"""
 
     if isinstance(field_names, str):
         field_names = field_names.replace(',', ' ').split()

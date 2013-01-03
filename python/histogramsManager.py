@@ -13,7 +13,7 @@ class HistogramsManager:
 
     def buildUserHisto(self, hName, xmin, binValues):        
         h = TH1F(hName, hName, len(binValues), xmin, xmin+float(len(binValues)))
-        for val in binValues:
+        for iBin, val in enumerate(binValues):
             h.SetBinContent(iBin+1, val)
             pass
         return h

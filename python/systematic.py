@@ -1,4 +1,4 @@
-from ROOT import THStack,TLegend,TCanvas,TFile,std,TH1F
+from ROOT import THStack,TLegend,TCanvas,TFile,TH1F
 from ROOT import ConfigMgr,FitConfig  #from gSystem.Load("libSusyFitter.so")
 from histogramsManager import histMgr
 from copy import deepcopy

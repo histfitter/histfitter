@@ -1,5 +1,4 @@
 from ROOT import gROOT,TFile,TH1F,Double,gDirectory,TChain,TObject
-from copy import deepcopy,copy
 from math import sqrt
 from logger import Logger
 
@@ -50,7 +49,7 @@ class PrepareHistosABC(object):
         """
         raise NotImplementedError("The qcdHistos method must be implemented "+str(self.__class__.__name__))
 
-    def updateHistBin(self,h,binIn,binOver):
+    def updateHistBin(self, h, binIn, binOver):
         newVal = h.GetBinContent(binIn) + h.GetBinContent(binOver)
         h.SetBinContent(binIn,newVal)
         h.SetBinContent(binOver,0.0)
@@ -61,15 +60,17 @@ class PrepareHistosABC(object):
         h.SetBinError(binOver,0.0)
         return
 
-    def updateOverflowBins(self,h,useOverflow,useUnderflow):        
+    def updateOverflowBins(self, h, useOverflow, useUnderflow):
         if useOverflow:
-            binIn=h.GetNbinsX()
-            binOver=binIn+1
-            self.updateHistBin(h,binIn,binOver)
+            binIn = h.GetNbinsX()
+            binOver = binIn+1
+            self.updateHistBin(h, binIn, binOver)
+
         if useUnderflow:
-            binIn=1
-            binOver=0
-            self.updateHistBin(h,binIn,binOver)
+            binIn = 1
+            binOver = 0
+            self.updateHistBin(h, binIn, binOver)
+
         return
 
 class TreePrepare(PrepareHistosABC):
