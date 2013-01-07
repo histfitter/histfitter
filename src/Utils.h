@@ -77,7 +77,7 @@ namespace Util
   double GetPropagatedError(RooAbsReal* var, const RooFitResult& fr); //, RooArgList varlist=RooArgList() ) ; 
   void RemoveEmptyDataBins(RooWorkspace* w, RooPlot* frame);
 
-  RooAbsReal* GetComponent(RooWorkspace* w, TString component, TString region);
+  RooAbsReal* GetComponent(RooWorkspace* w, TString component, TString region, const bool exactRegionName=false);
   RooAbsPdf* GetRegionPdf(RooWorkspace* w, TString region);
   RooRealVar* GetRegionVar(RooWorkspace* w, TString region);
   //  RooAbsReal* GetRegionPdfIntegral(RooWorkspace* w, TString region);

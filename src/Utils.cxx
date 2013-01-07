@@ -1998,7 +1998,7 @@ void Util::AddText(Double_t x,Double_t y,char* text,Color_t color)
 
 
 //_____________________________________________________________________________
-RooAbsReal* Util::GetComponent(RooWorkspace* w, TString component, TString region){  //, unsigned int bin){
+RooAbsReal* Util::GetComponent(RooWorkspace* w, TString component, TString region, bool exactRegionName){  //, unsigned int bin){
 
     std::vector<TString> componentVec = Tokens(component,",");
     if(componentVec.size() <1) { Logger << kWARNING << " componentVec.size() < 1, for components = " << component << GEndl; }
@@ -2009,7 +2009,13 @@ RooAbsReal* Util::GetComponent(RooWorkspace* w, TString component, TString regio
     }
 
     RooCategory* regionCat = (RooCategory*) w->cat("channelCat");
-    TString regionFullName = GetFullRegionName(regionCat, region);
+    TString regionFullName;
+    if(exactRegionName){
+        Logger << kINFO << "GetComponent(): using exact region names" << GEndl;
+        regionFullName = region+"_cuts"; 
+    } else {
+        regionFullName = GetFullRegionName(regionCat, region);
+    }
 
     RooSimultaneous* pdf = (RooSimultaneous*) w->pdf("simPdf");
     RooAbsPdf* regionPdf = (RooAbsPdf*) pdf->getPdf(regionFullName.Data());
@@ -2287,8 +2293,6 @@ TString Util::GetFullRegionName(RooCategory* regionCat,  TString regionShortName
 
     return regionFullName;
 }
-
-
 
 //__________________________________________________________________________________________
 vector<TString> Util::GetAllComponentNamesInRegion(TString region, RooAbsPdf* regionPdf){

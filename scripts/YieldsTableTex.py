@@ -1,4 +1,5 @@
 import sys
+import pprint
 
 def exampletable():
 
@@ -79,10 +80,13 @@ Fitted bkg events        '''
   map_listofkeys = m.keys()
 #  map_listofkeys.sort()
 
-
   for sample in sampleList:
     for name in map_listofkeys:
-      if "Fitted_events_" in name and sample in name:
+      if "Fitted_events_" in name: 
+        sampleName = name.replace("Fitted_events_","")
+        if sampleName != sample:
+          continue
+        
         sample = name.replace("Fitted_events_","")
         tableline += '''
         Fitted '''

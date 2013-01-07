@@ -16,8 +16,7 @@ import sys
 
 # Main function calls are defined below.
 
-def latexfitresults(filename,regionList,sampleList,dataname='obsData',showSum=False):
-
+def latexfitresults(filename,regionList,sampleList,exactRegionNames=False,dataname='obsData',showSum=False):
   workspacename = 'w'
   w = Util.GetWorkspaceFromFile(filename,'w')
 
@@ -136,7 +135,7 @@ def latexfitresults(filename,regionList,sampleList,dataname='obsData',showSum=Fa
     nSampleInRegionError = []
     sampleInAllRegions = RooArgSet()
     for ireg, region in enumerate(regionList):
-      sampleInRegion = Util.GetComponent(w,sample,region)
+      sampleInRegion = Util.GetComponent(w,sample,region,exactRegionNames)
       sampleInRegionVal = 0.
       sampleInRegionError = 0.
       if not sampleInRegion==None:
@@ -208,7 +207,7 @@ def latexfitresults(filename,regionList,sampleList,dataname='obsData',showSum=Fa
     nMCSampleInRegionError = []
     sampleInAllRegions = RooArgSet()
     for ireg, region in enumerate(regionList):
-      MCSampleInRegion = Util.GetComponent(w,sample,region)
+      MCSampleInRegion = Util.GetComponent(w,sample,region,exactRegionNames)
       MCSampleInRegionVal = 0.
       MCSampleInRegionError = 0.
       if not MCSampleInRegion==None:
@@ -285,6 +284,7 @@ if __name__ == "__main__":
     usage()
 
   outputFileName="default"
+  exactRegionNames=True #if true, Util.GetComponent() calls will use exact region names, rather than string matching
   showBeforeFitError=False
   showSumAllRegions=False
   useAsimovSet=False
@@ -320,11 +320,13 @@ if __name__ == "__main__":
 
   import pickle
   if wsFileName.endswith(".pickle"):
+    print "READING PICKLE FILE"
     f = open(wsFileName, 'r')
     m3 = pickle.load(f)
     f.close()
   else:
-    m3 = latexfitresults(wsFileName,chanList,sampleList,dataname,showSumAllRegions)
+    print "OPENING ROOTFIT WORKSPACE"
+    m3 = latexfitresults(wsFileName,chanList,sampleList,exactRegionNames,dataname,showSumAllRegions)
     f = open(outputFileName.replace(".tex",".pickle"), 'w')
     pickle.dump(m3, f)
     f.close()
