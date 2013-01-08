@@ -146,6 +146,7 @@ if __name__ == "__main__":
     parser.add_argument("-0", "--no-empty", help="do not draw empty bins when drawing", action="store_true")
     parser.add_argument("-T", "--run-toys", help="run toys (default with mu)", action="store_true")
     parser.add_argument("-V", "--validation", help="include validation regions", action="store_true")
+    parser.add_argument("-c", "--cmd", help="python commands to process (semi-colon-seperated)")
 
     args = parser.parse_args()
    
@@ -265,7 +266,11 @@ if __name__ == "__main__":
                  if index>0:
                     minosPars += ","
                  minosPars += minosArg
-    
+
+    if args.cmd:
+        log.info("Python commands executed: %s" % args.cmd)
+        exec(args.cmd) ## python execute
+
     gROOT.SetBatch(not runInterpreter)
 
     #mandatory user-defined configuration

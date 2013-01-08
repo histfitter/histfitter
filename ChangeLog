@@ -1,3 +1,9 @@
+2013-01-08 Max Baak <mbaak@cern.ch>
+	M       python/sample.py 
+	* Change warning into debug statement
+	M       scripts/HistFitter.py
+	* Add python-like -c to command line.
+
 2013-01-07 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
 	* src/Utils.cxx: Util::GetComponent takes extra boolean parameter; if set
 	to true, will not search for short region names but assumes the given name
