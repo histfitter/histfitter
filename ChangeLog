@@ -1,3 +1,9 @@
+2013-01-08 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
+	* src/ConfigMgr.cxx: pass full dirname into prefix for RooStats::AnalyzeHypoTestInverterResult 
+	* src/HypoTestTool.cxx: plots using -l now go into the same directory as
+	the file they used to create, rather than $CWD. Same for
+	the root files with the limit results.
+
 2013-01-08 Max Baak <mbaak@cern.ch>
 	M       python/sample.py 
 	* Change warning into debug statement
