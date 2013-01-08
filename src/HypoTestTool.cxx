@@ -8,6 +8,7 @@
 #include "HypoTestTool.h"
 #include "TMsgLogger.h"
 
+#include "TSystem.h"
 #include "TFile.h"
 #include "RooWorkspace.h"
 #include "RooAbsPdf.h"
@@ -244,7 +245,11 @@ RooStats::HypoTestTool::AnalyzeResult( HypoTestInverterResult * r,
     pave->SetBorderSize(0);
     pave->SetFillColor(0);
     c_sig->Update();
-    c_sig->SaveAs( TString("upperlimit_cls_poi_" + mResultFileName + outfiletype).Data() );
+
+    //split mResultFileName - it might contain a directory
+    TString outputDir = TString(gSystem->DirName(mResultFileName))+"/";
+    TString ULfilename = TString("upperlimit_cls_poi_") + gSystem->BaseName(mResultFileName) + outfiletype;
+    c_sig->SaveAs( TString(outputDir+ULfilename).Data() );
 
     const int nEntries = r->ArraySize();
 

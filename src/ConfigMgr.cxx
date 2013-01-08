@@ -13,6 +13,7 @@
 #include "StatTools.h"
 
 //Root/RooFit/RooStats includes
+#include "TSystem.h"
 #include "TFile.h"
 #include "TTree.h"
 #include "RooMCStudy.h"
@@ -418,19 +419,20 @@ void ConfigMgr::doUpperLimit(FitConfig* fc) {
 
     /// first asumptotic limit, to get a quick but reliable estimate for the upper limit
     /// dynamic evaluation of ranges
-    RooStats::HypoTestInverterResult* hypo = RooStats::DoHypoTestInversion(w,1,2,m_testStatType,m_useCLs,20,0,-1);  
+    RooStats::HypoTestInverterResult* hypo = RooStats::DoHypoTestInversion(w, 1, 2, m_testStatType, m_useCLs, 20, 0, -1);  
 
     /// then reevaluate with proper settings
     if ( hypo!=0 ) { 
         double eul2 = 1.10 * hypo->GetExpectedUpperLimit(2);
         delete hypo; hypo=0;
         //cout << "INFO grepme : " << m_nToys << " " << m_calcType << " " << m_testStatType << " " << m_useCLs << " " << m_nPoints << GEndl;
-        hypo = RooStats::DoHypoTestInversion(w,m_nToys,m_calcType,m_testStatType,m_useCLs,m_nPoints,0,eul2); 
+        hypo = RooStats::DoHypoTestInversion(w, m_nToys, m_calcType, m_testStatType, m_useCLs, m_nPoints, 0, eul2); 
     }
 
     /// store ul as nice plot ..
-    if ( hypo!=0 ) { 
-        RooStats::AnalyzeHypoTestInverterResult( hypo,m_calcType,m_testStatType,m_useCLs,m_nPoints, fc->m_signalSampleName.Data(), ".eps") ;
+    if ( hypo!=0 ) {
+        TString outputPrefix = TString(gSystem->DirName(outfileName))+"/"+fc->m_signalSampleName.Data();
+        RooStats::AnalyzeHypoTestInverterResult( hypo, m_calcType, m_testStatType, m_useCLs, m_nPoints, outputPrefix, ".eps") ;
     }
 
     //cout << "h1" << GEndl;
