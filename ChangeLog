@@ -1,3 +1,7 @@
+2013-01-09 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
+	* src/toy_utils.cxx: hypo test results are perfectly fine without a fit,
+	do not require the presence of a fit result (but use it if there)
+
 2013-01-08 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
 	* src/ConfigMgr.cxx: pass full dirname into prefix for RooStats::AnalyzeHypoTestInverterResult 
 	* src/HypoTestTool.cxx: plots using -l now go into the same directory as
