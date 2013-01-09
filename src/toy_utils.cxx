@@ -129,26 +129,18 @@ std::list<LimitResult> CollectHypoTestResults( const TString& infile, const TStr
 
         bool failed_fit = false;
 
-        if(!fitresult) {
-            if (ht) { 
-                delete ht;
-                ht = NULL;
-            }
-            continue;
-        }
-
-        if (fitresult->status()!=0) {
+        if (fitresult && fitresult->status()!=0) {
             ToyUtilsLogger << kWARNING << "Fit failed for point " << fitresultname.Data() << " - do not use hypo test result" << GEndl;
             counter_failed_fits++;
             fitresult->Print();	
             failed_fit = true;   
         }
         
-        if (fitresult->covQual() < 1.1) {
+        if (fitresult && fitresult->covQual() < 1.1) {
             ToyUtilsLogger << kWARNING << "Fit result " << fitresultname.Data() << " has bad covariance matrix quality! Check your fit setup!" << GEndl;
             counter_badcovquality++;
             failed_fit = true;
-        } else if (fitresult->covQual() < 2.1) {
+        } else if (fitresult && fitresult->covQual() < 2.1) {
             ToyUtilsLogger << kWARNING << "Fit result " << fitresultname.Data() << " has mediocre covariance matrix quality.  Might be ok if you ran asymptotics." << GEndl;
             counter_not_great_fits++;
             //failed_fit = true;
