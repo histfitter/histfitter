@@ -147,6 +147,7 @@ if __name__ == "__main__":
     parser.add_argument("-T", "--run-toys", help="run toys (default with mu)", action="store_true")
     parser.add_argument("-V", "--validation", help="include validation regions", action="store_true")
     parser.add_argument("-c", "--cmd", help="python commands to process (semi-colon-seperated)")
+    parser.add_argument("-u", "--userArg", help="arbitrary user argument(s)", default="")
 
     args = parser.parse_args()
    
@@ -172,6 +173,7 @@ if __name__ == "__main__":
     if args.fit:
         runFit = True
 
+    configMgr.userArg=args.userArg
     configMgr.nTOYs = args.num_toys
 
     if args.interactive:

@@ -46,6 +46,7 @@ class ConfigManager(object):
         self.analysisName = None # Name to give the analysis
         self.nomName = "" # suffix of nominal trees names
         self.cppMgr = ConfigMgr.getInstance() #C++ alter ego of this configManager
+        self.userArg="" #arbitrary user-defined string configurable from command line (-u) and usable freely
 
         self.inputLumi = None # Luminosity of input histograms
         self.outputLumi = None # Output luminosity

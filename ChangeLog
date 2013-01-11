@@ -1,3 +1,6 @@
+2013-01-11 David Cote <david.cote@cern.ch>
+	* add -u option to pass arbitrary user-defined string from command line to configMgr.userArg.
+
 2013-01-09 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
 	* src/toy_utils.cxx: hypo test results are perfectly fine without a fit,
 	do not require the presence of a fit result (but use it if there)
