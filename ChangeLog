@@ -1,3 +1,7 @@
+2013-01-08 Max Baak <mbaak@cern.ch>
+        M       python/fitConfig.py
+	* Fixed buggy bin-boundaries for cuts channels
+
 2013-01-11 David Cote <david.cote@cern.ch>
 	* add -u option to pass arbitrary user-defined string from command line to configMgr.userArg.
 

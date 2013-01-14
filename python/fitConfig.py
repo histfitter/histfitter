@@ -228,8 +228,8 @@ class fitConfig(object):
         """
         if variableName == "cuts":
             nBins = len(regions)
-            binLow = 0
-            binHigh = nBins
+            binLow = 0.5
+            binHigh = nBins + 0.5
             pass
         chanObj = Channel(variableName, regions, self.prefix, nBins,
                              binLow, binHigh, self.statErrThreshold)
