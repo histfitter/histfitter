@@ -22,9 +22,9 @@ def tablefragment(m,table,signalRegions,skiplist,chanStr,showPercent):
 %%'''
 
   tableline += '''
-Total statistical $(\\sqrt{N_{\\rm obs}})$             '''
+Total statistical $(\\sqrt{N_{\\rm exp}})$             '''
   for region in signalRegions:
-    tableline += " & $\\pm " + str(("%.2f" %m[region]['sqrtnobsa'])) + "$       "
+    tableline += " & $\\pm " + str(("%.2f" %m[region]['sqrtnfitted'])) + "$       "
   tableline += '''\\\\
 %%'''
 
