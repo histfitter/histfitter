@@ -98,14 +98,14 @@ Fitted bkg events        '''
             if ((n - m['Fitted_err_'+sample][index]) > 0.) or not abs(n) > 0.00001:
               tableline += " & $" + str(("%.2f" %n)) + " \\pm " + str(("%.2f" %m['Fitted_err_'+sample][index])) +  "$         "
             else:
-              print "\n YieldsTableTex.py WARNING:   negative error after fit extends below 0. for sample", sample, "    will print asymmetric error w/ truncated negative error reaching to 0."
+              print "\n YieldsTableTex.py WARNING:   negative symmetric error after fit extends below 0. for sample", sample, "    will print asymmetric error w/ truncated negative error reaching to 0."
               tableline += " & $" + str(("%.2f" %n)) + "_{-" + str(("%.2f"%n)) + "}^{+" + str(("%.2f" %m['Fitted_err_'+sample][index])) +  "}$         "
           else:
             ##tableline += " & $" + str(("%.2f" %n)) + " \\pm " + str(("%.2f" %m['Fitted_err_'+sample][index])) +  "$         "
             if ((n - m['Fitted_err_'+sample][index]) > 0.) or not abs(n) > 0.00001:
               tableline += " & $" + str(("%.2f" %n)) + " \\pm " + str(("%.2f" %m['Fitted_err_'+sample][index])) +  "$         "
             else:
-              print "\n YieldsTableTex.py WARNING:   negative error after fit extends below 0. for sample", sample, "    will print asymmetric error w/ truncated negative error reaching to 0."
+              print "\n YieldsTableTex.py WARNING:   negative symmetric error after fit extends below 0. for sample", sample, "    will print asymmetric error w/ truncated negative error reaching to 0."
               tableline += " & $" + str(("%.2f" %n)) + "_{-" + str(("%.2f"%n)) + "}^{+" + str(("%.2f" %m['Fitted_err_'+sample][index])) +  "}$         "
         tableline +='''     \\\\
 %%'''
