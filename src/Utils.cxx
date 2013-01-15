@@ -1037,7 +1037,7 @@ void Util::PlotPdfWithComponents(RooWorkspace* w, FitConfig* fc, TString anaName
                 leg->SetFillStyle(0);
                 leg->SetFillColor(0);
                 leg->SetBorderSize(0);
-                TLegendEntry* entry=leg->AddEntry("","Data 2011 (#sqrt{s}=7 TeV)","p") ;
+                TLegendEntry* entry=leg->AddEntry("","Data 2012 (#sqrt{s}=8 TeV)","p") ;
                 entry->SetMarkerColor(style.getDataColor());
                 entry->SetMarkerStyle(20);
                 entry=leg->AddEntry("","Standard Model","lf") ;

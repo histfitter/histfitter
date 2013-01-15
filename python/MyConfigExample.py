@@ -78,6 +78,7 @@ configMgr.cutsDict["SLTR"] = "(lep1Pt < 25 && lep2Pt<10 && met>180 && met<250 &&
 configMgr.cutsDict["SLVR2"] = "(lep1Pt < 25 && lep2Pt<10 && met>180 && met<250 && mt>80 && mt<100 && jet1Pt>130 && jet2Pt>25 && AnalysisType==6) || (lep1Pt < 20 && lep2Pt<10 && met>180 && met<250 && mt>80 && mt<100 && jet1Pt>130 && jet2Pt>25 && AnalysisType==7)"
 #SR
 configMgr.cutsDict["SS"] = "((lep1Pt < 20 && lep2Pt<10 && met>250 && mt>100 && jet1Pt>130 && jet2Pt>25 && AnalysisType==7) || (lep1Pt < 25 && lep2Pt<10 && met>250 && mt>100 && jet1Pt>130 && jet2Pt>25 && AnalysisType==6))"
+configMgr.cutsDict["SSloose"] = "((lep1Pt < 20 && lep2Pt<10 && met>200 && mt>100 && jet1Pt>130 && jet2Pt>25 && AnalysisType==7) || (lep1Pt < 25 && lep2Pt<10 && met>200 && mt>100 && jet1Pt>130 && jet2Pt>25 && AnalysisType==6))"
 configMgr.cutsDict["SR1sl2j"] = configMgr.cutsDict["SS"]+"&& met/meff2Jet>0.3"
 
 
@@ -99,12 +100,12 @@ configMgr.weightsQCDWithB = "qcdBWeight"
 #--------------------
 
 # KtScale uncertainty as histoSys - two-sided, no additional normalization
-topKtScale = Systematic("KtScaleTop",configMgr.weights,ktScaleTopHighWeights,ktScaleTopLowWeights,"weight","normHistoSys")
-wzKtScale = Systematic("KtScaleWZ",configMgr.weights,ktScaleWHighWeights,ktScaleWLowWeights,"weight","normHistoSys")
+topKtScale = Systematic("KtScaleTop",configMgr.weights,ktScaleTopHighWeights,ktScaleTopLowWeights,"weight","overallNormHistoSys")
+wzKtScale = Systematic("KtScaleWZ",configMgr.weights,ktScaleWHighWeights,ktScaleWLowWeights,"weight","overallNormHistoSys")
 
 
 # JES uncertainty as shapeSys - one systematic per region (combine WR and TR), merge samples
-jes = Systematic("JES","_NoSys","_JESup","_JESdown","tree","normHistoSys")
+jes = Systematic("JES","_NoSys","_JESup","_JESdown","tree","overallNormHistoSys")
 
 statWRwz  = Systematic("SLWR_wz", "_NoSys","","","tree","shapeStat")
 statWRtop = Systematic("SLWR_top","_NoSys","","","tree","shapeStat")
@@ -292,9 +293,15 @@ if doValidation:
     mm2J = bkt.addChannel("met/meff2Jet",["SS"],6,0.1,0.7)
     mm2J.useOverflowBin=True
     mm2J.addSystematic(jes)
+    mm2J.remapSystChanName = 'metmeff2Jet_SSloose'
+
+    #signal region treated as validation region for this case
+    mm2Jl = bkt.addChannel("met/meff2Jet",["SSloose"],6,0.1,0.7)
+    mm2Jl.useOverflowBin=True
+    mm2Jl.addSystematic(jes)
 
     #    bkt.setValidationChannels([nJetSLVR2,metSLVR2,meffSLVR2,nBJetSLVR2,metmeffSLVR2,mm2J,srs1l2jTChannel])
-    bkt.setValidationChannels([nJetSLVR2,srs1l2jTChannel,mm2J])
+    bkt.setValidationChannels([nJetSLVR2,srs1l2jTChannel,mm2J,mm2Jl])
    
    
 

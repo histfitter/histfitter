@@ -45,7 +45,7 @@ def tablefragment(m, channel, signalregionslist,sampleList,showBeforeFitError):
   tableline += '''
 Observed events         '''
   for n in m['nobs']:
-    tableline += " & $" + str(int(n)) + "$             "
+    tableline += " & $" + ("%.1f" %n) + "$             "
 
   tableline +='''       \\\\
 \\noalign{\\smallskip}\\hline\\noalign{\\smallskip}
