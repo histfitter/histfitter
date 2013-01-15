@@ -249,9 +249,8 @@ RooFitResult* GetFitResultFromFile( const TString& infile, const TString& fitnam
 
     TObject* obj = file->Get( fitname.Data() ) ;
     if (obj==0) {
-        CombineWorkSpacesLogger << kERROR << "Cannot open RooFitResult<" << fitname << "> in file <" << infile << ">" << GEndl;
+        CombineWorkSpacesLogger << kERROR << "Cannot open RooFitResult <" << fitname << "> in file <" << infile << ">" << GEndl;
         file->Close();
-
         return NULL;
     }
 
