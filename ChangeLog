@@ -1,4 +1,9 @@
 2013-01-16 Max Baak <mbaak@cern.ch>
+	M       fitConfig.py
+	M       sample.py
+	* possibility set set additional sample weights in addition with channel cuts
+
+2013-01-16 Max Baak <mbaak@cern.ch>
         * Tagged HistFitter-00-00-23
 
 2013-01-16 Max Baak <mbaak@cern.ch>
