@@ -1,4 +1,7 @@
 2013-01-16 Max Baak <mbaak@cern.ch>
+        * Tagged HistFitter-00-00-23
+
+2013-01-16 Max Baak <mbaak@cern.ch>
 	M python/sample.py
 	M python/fitConfig.py
 	M python/prepareHistos.py
