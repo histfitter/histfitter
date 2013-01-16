@@ -187,7 +187,7 @@ class TreePrepare(PrepareHistosABC):
         """
         if self.var == "cuts":
             if self.configMgr.hists[name] is None:
-                self.configMgr.hists[name] = TH1F(name, name, len(self.channel.regions), 0., float(len(self.channel.regions)))
+                self.configMgr.hists[name] = TH1F(name, name, len(self.channel.regions), self.channel.binLow, float(len(self.channel.regions))+self.channel.binLow)
                 for (iReg,reg) in enumerate(self.channel.regions):
                     self.cuts = self.configMgr.cutsDict[reg]
                     
@@ -299,7 +299,7 @@ class TreePrepare(PrepareHistosABC):
             #
             if self.configMgr.hists[prefixNom+"_"+str(iBin)] is None:
                 if self.channel.variableName == "cuts":
-                    self.configMgr.hists[prefixNom+"_"+str(iBin)] = TH1F(prefixNom+"_"+str(iBin),prefixNom+"_"+str(iBin),len(self.channel.regions),0.,float(len(self.channel.regions)))
+                    self.configMgr.hists[prefixNom+"_"+str(iBin)] = TH1F(prefixNom+"_"+str(iBin),prefixNom+"_"+str(iBin),len(self.channel.regions),self.channel.binLow,float(len(self.channel.regions))+self.channel.binLow)
                 else:
                     self.configMgr.hists[prefixNom+"_"+str(iBin)] = TH1F(prefixNom+"_"+str(iBin),prefixNom+"_"+str(iBin),self.channel.nBins,self.channel.binLow,self.channel.binHigh)
 
@@ -331,7 +331,7 @@ class TreePrepare(PrepareHistosABC):
             #
             if self.configMgr.hists[prefixHigh+"_"+str(iBin)] is None:
                 if self.channel.variableName == "cuts":
-                    self.configMgr.hists[prefixHigh+"_"+str(iBin)] = TH1F(prefixHigh+"_"+str(iBin),prefixHigh+"_"+str(iBin),len(self.channel.regions),0.,float(len(self.channel.regions)))
+                    self.configMgr.hists[prefixHigh+"_"+str(iBin)] = TH1F(prefixHigh+"_"+str(iBin),prefixHigh+"_"+str(iBin),len(self.channel.regions),self.channel.binLow,float(len(self.channel.regions))+self.channel.binLow)
                 else:
                     self.configMgr.hists[prefixHigh+"_"+str(iBin)] = TH1F(prefixHigh+"_"+str(iBin),prefixHigh+"_"+str(iBin),self.channel.nBins,self.channel.binLow,self.channel.binHigh)
                 #
@@ -349,7 +349,7 @@ class TreePrepare(PrepareHistosABC):
             #
             if self.configMgr.hists[prefixLow+"_"+str(iBin)] is None:
                 if self.channel.variableName == "cuts":
-                    self.configMgr.hists[prefixLow+"_"+str(iBin)] = TH1F(prefixLow+"_"+str(iBin),prefixLow+"_"+str(iBin),len(self.channel.regions),0.,float(len(self.channel.regions)))
+                    self.configMgr.hists[prefixLow+"_"+str(iBin)] = TH1F(prefixLow+"_"+str(iBin),prefixLow+"_"+str(iBin),len(self.channel.regions),self.channel.binLow,float(len(self.channel.regions))+self.channel.binLow)
                 else:
                     self.configMgr.hists[prefixLow+"_"+str(iBin)] = TH1F(prefixLow+"_"+str(iBin),prefixLow+"_"+str(iBin),self.channel.nBins,self.channel.binLow,self.channel.binHigh)
                 #
