@@ -50,6 +50,7 @@ if [ ! $LD_LIBRARY_PATH ]; then
 fi
 
 # setup HistFitter package
+export HF=$PWD
 export HISTFITTER=$PWD
 export SUSYFITTER=$PWD # for backwards compatibility
 
