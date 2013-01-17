@@ -2,7 +2,7 @@
 
 ## Check arguments
 if [ $# -lt 1 ] ; then
-   echo "Usage: runSusyLimitBatch.sh [-d] [-p <setupDir>] [-g <point>] [-r <signal region>] <logfile> " 
+   echo "Usage: runSusyLimitBatch.sh [-d] [-p <setupDir>] [-g <point>] [-r <signal region>] [-o <outputdir>] <configfile> " 
    exit 1
 fi
 
@@ -14,7 +14,7 @@ if [ "$1" = "-d" ] ; then
 fi
 
 ## SusyFitter dir
-SUSYDIR="/afs/cern.ch/user/m/mbaak/Work/private/HistFitter"  ###"/afs/cern.ch/atlas/groups/susy/1lepton/SusyFitter"
+SUSYDIR="/afs/cern.ch/user/m/mbaak/Work/private/HistFitter"  
 if [ "$1" = "-p" ] ; then
   SUSYDIR=$2
   shift 2
@@ -36,8 +36,13 @@ SRSTR=$SR
 SRSTR=`echo $SRSTR | sed 's/,/_/'`
 SRSTR=`echo $SRSTR | sed 's/,/_/'`
 
-LOGFILE=$1
-rm -f ${LOGFILE} ${LOGFILE}.gz
+OUTDIR="/afs/cern.ch/user/m/mbaak/scratch0/Work/Susy/output/"
+if [ "$1" = "-o" ] ; then
+  OUTDIR=$2
+  shift 2
+fi
+
+CONFFILE=$1
 shift 1
 
 date
@@ -47,19 +52,7 @@ hostname
 echo "Now sourcing setup:"
 XCWD=$PWD
 cd $SUSYDIR
-
-export HISTFITTERUSER=$PWD
-export SUSYFITTERUSER=$PWD # backwards compatibility
-
-cd ../HistFitter # doing a gamble here on HistFitter location
 source setup.sh
-cd $HISTFITTERUSER
-
-if [ ! $HISTFITTER ]; then
-  echo "Warning: No valid HISTFITTER setup detected. Please do so first!"
-  return
-fi
-
 cd $XCWD
 
 
@@ -80,16 +73,13 @@ fi
 if [ ! -e "config/" ]
 then
         mkdir -v config
-	cp $SUSYDIR/MET_jets_leptons/config/HistFactorySchema.dtd config/
+	cp $SUSYDIR/config/HistFactorySchema.dtd config/
 fi
 
 echo "directory contains:"
 ls -lh
 
-#mkdir -p -v /afs/cern.ch/work/d/dxu/scratch0/susyresults/$ARGS_hypotestresult 2>&1
-#echo "rootsyst = "$ROOTSYS
-
-RUNCMD="HistFitter.py -tw -F excl -r ${SR} -g ${ARGS} $SUSYDIR/MET_jets_leptons/python/ZLSoftLepton2_OneBin2012.py "
+RUNCMD="HistFitter.py -twp -F excl -r ${SR} -g ${ARGS} ${CONFFILE}"
 
 echo ">> ===================="
 echo ">> Now running command:"
@@ -109,7 +99,7 @@ ls */*/*
 
 pwd
 
-cp -r results/* /afs/cern.ch/user/m/mbaak/scratch0/Work/Susy/output/
+cp -r results/* $OUTDIR
 
 echo ">> ================="
 echo ">> Finished command:"
