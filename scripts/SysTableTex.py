@@ -57,9 +57,9 @@ Total background systematic              '''
         else:
           percentage = m[region][name]/m[region]['totsyserr'] * 100.0
           if percentage <1:
-            tableline += "   & $\\pm " + str(("%.2f" %m[region][name])) + " [" + str(("%.2f" %percentage)) + "\\%] $       "
+            tableline += "   & $\\pm " + str(("%.2f" %m[region][name])) + "\ [" + str(("%.2f" %percentage)) + "\\%] $       "
           else:
-            tableline += "   & $\\pm " + str(("%.2f" %m[region][name])) + " [" + str(("%.1f" %percentage)) + "\\%] $       "
+            tableline += "   & $\\pm " + str(("%.2f" %m[region][name])) + "\ [" + str(("%.1f" %percentage)) + "\\%] $       "
                     
           
         if index == len(signalRegions)-1:
