@@ -2,7 +2,7 @@
 
 ## Check arguments
 if [ $# -lt 1 ] ; then
-   echo "Usage: runSusyLimitBatch.sh [-d] [-p <setupDir>] [-g <point>] [-r <signal region>] [-o <outputdir>] <configfile> " 
+   echo "Usage: runSusyLimitBatch.sh [-d] [-p <setupDir>] [-g <point>] [-r <signal region>] [-c cmd] [-o <outputdir>] <configfile> " 
    exit 1
 fi
 
@@ -35,6 +35,12 @@ fi
 SRSTR=$SR
 SRSTR=`echo $SRSTR | sed 's/,/_/'`
 SRSTR=`echo $SRSTR | sed 's/,/_/'`
+
+CMD="-twp"
+if [ "$1" = "-c" ] ; then
+  CMD=$2
+  shift 2
+fi
 
 OUTDIR="/afs/cern.ch/user/m/mbaak/scratch0/Work/Susy/output/"
 if [ "$1" = "-o" ] ; then
@@ -79,7 +85,7 @@ fi
 echo "directory contains:"
 ls -lh
 
-RUNCMD="HistFitter.py -twp -F excl -r ${SR} -g ${ARGS} ${CONFFILE}"
+RUNCMD="HistFitter.py ${CMD} -F excl -r ${SR} -g ${ARGS} ${CONFFILE}"
 
 echo ">> ===================="
 echo ">> Now running command:"
@@ -99,7 +105,7 @@ ls */*/*
 
 pwd
 
-cp -r results/* $OUTDIR
+cp -rf results/SoftLeptonMoriond2013_${SRSTR}_${ARGS}* $OUTDIR
 
 echo ">> ================="
 echo ">> Finished command:"
@@ -113,3 +119,4 @@ echo
 #  echo "${LOGFILE}.gz"
 #  echo
 #fi
+
