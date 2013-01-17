@@ -14,7 +14,7 @@ if [ "$1" = "-d" ] ; then
 fi
 
 ## SusyFitter dir
-SUSYDIR="/afs/cern.ch/user/m/mbaak/Work/private/HistFitterUser"  ###"/afs/cern.ch/atlas/groups/susy/1lepton/SusyFitter"
+SUSYDIR="/afs/cern.ch/user/m/mbaak/Work/private/HistFitter"  ###"/afs/cern.ch/atlas/groups/susy/1lepton/SusyFitter"
 if [ "$1" = "-p" ] ; then
   SUSYDIR=$2
   shift 2
@@ -61,6 +61,7 @@ if [ ! $HISTFITTER ]; then
 fi
 
 cd $XCWD
+
 
 echo "current directory:"
 pwd
