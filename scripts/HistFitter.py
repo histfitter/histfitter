@@ -213,7 +213,7 @@ if __name__ == "__main__":
             if arg.lower() == "all":
                 minosArgs[idx] = "all"
 
-        minosPars = ",".join(minosPars)
+        minosPars = ",".join(minosArgs)
 
     if args.cmd:
         log.info("Python commands executed: %s" % args.cmd)
