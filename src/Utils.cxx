@@ -140,7 +140,9 @@ void Util::GenerateFitAndPlot(TString fcName, TString anaName, Bool_t drawBefore
     Logger << kINFO << "     plotCorrelationMatrix = " << plotCorrelationMatrix << GEndl;
     Logger << kINFO << "     plotSeparateComponents = " << plotSeparateComponents << GEndl;
     Logger << kINFO << "     plotNLL = " << plotNLL << GEndl;
-   
+    Logger << kINFO << "     minos = " << minos << GEndl;
+    Logger << kINFO << "     minosPars = " << minosPars << GEndl;
+
     RooWorkspace* w = GetWorkspaceFromFile(fc->m_inputWorkspaceFileName, "combined");
     SaveInitialSnapshot(w);
 
@@ -380,7 +382,7 @@ RooFitResult* Util::FitPdf( RooWorkspace* w, TString fitRegions, Bool_t lumiCons
 
     // find parameters requested for Minos
     RooArgSet* minosParams = new RooArgSet();
-    if(minosPars != "" && minos){
+    if(minosPars != "" && minos && minosPars != "all"  && minosPars != "ALL"){
       std::vector<TString> parsVec = Tokens(minosPars,",");
       for(unsigned int i=0; i<parsVec.size();i++){
 	RooRealVar* var = (RooRealVar*) w->var(parsVec[i]);
@@ -468,7 +470,7 @@ RooFitResult* Util::FitPdf( RooWorkspace* w, TString fitRegions, Bool_t lumiCons
 	
         if (status%100 == 0) { // ignore errors in Hesse or in Improve
 	  // only calculate minos errors if fit with Migrad converged
-	  if(minos && minosPars==""){
+	  if(minos && (minosPars == "all" || minosPars == "ALL")){
 	    minim.minos();
 	  }
 	  else if(minos && minosPars!="" && minosParams->getSize()>0){
