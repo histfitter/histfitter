@@ -12,53 +12,6 @@ import argparse
 from logger import Logger
 log = Logger('HistFitter')
 
-class NargsAction(argparse.Action):
-    def __call__(self, parser, namespace, values, option_string=None):
-        self.fixArgs(parser, namespace, values, option_string)
-
-    def fixArgs(self, parser, namespace, values, option_string=None):
-        # optional args in sys.argv are caught as well, so find the first filename
-        for i, value in enumerate(values):
-            if os.path.splitext(values[i])[1] == ".py":
-                break
-       
-        nargsOpts = values[:i]
-        configFileOpts = values[i:]
-
-        setattr(namespace, "configFile", configFileOpts )
-        setattr(namespace, self.dest, nargsOpts)
-        
-        #return the 'real' part of the values, so that child classes can use it
-        return nargsOpts
-
-class DrawAction(NargsAction):
-    CHOICES = ["allPlots", "before","after", "corrMatrix", "sepComponents", "likelihood"]
-    def __call__(self, parser, namespace, values, option_string=None):
-        drawValues = self.fixArgs(parser, namespace, values, option_string)
-        self.checkDrawArgs(parser, namespace, drawValues, option_string)
-    
-    def checkDrawArgs(self, parser, namespace, values, option_string=None):
-        if values:
-            for value in values:
-                if value not in self.CHOICES:
-                    message = ("invalid choice: {0!r} (choose from {1})"
-                               .format(value,', '.join([repr(action) for action in self.CHOICES])))
-
-                    raise argparse.ArgumentError(self, message)
-            setattr(namespace, self.dest, values)
-
-class configFileAction(argparse.Action):
-    def __call__(self, parser, namespace, values, option_string=None):
-        if not values and not namespace.configFile: #last might come from -m or -D already
-            parser.error("No configFile set!")
-            return
-        elif values:
-            # some automatic conversion kicks in, if you specify just the file the array is lost
-            if isinstance(values, basestring):
-                values = [values]
-
-            setattr(namespace, self.dest, values)
-
 def enum(typename, field_names):
     """Create a new enumeration type"""
 
@@ -109,21 +62,15 @@ if __name__ == "__main__":
     
     print "\n * * * Welcome to HistFitter * * *\n"
 
-    # Note: we can NOT use argparse.REMAINDER to catch everything after the configFile, since the options -D
-    #       and -m are greedy. -D does check against a list of choices, but -m by definition cannot. Hence,
-    #       it eats everything, and we really need the minosAction to split it on the first filename. Then, 
-    #       configFileAction to take care of the configFile and any remaining arguments.
-    #       -- GJ 20/12/2012
-
     parser = argparse.ArgumentParser()
-    parser.add_argument("configFile", nargs="+", help="configuration file to execute", action=configFileAction)
+    parser.add_argument("configFile", nargs="+", help="configuration file to execute")
     parser.add_argument("-L", "--log-level", help="set log level", choices=["VERBOSE", "DEBUG", "INFO", "WARNING", "ERROR", "FATAL", "ALWAYS"])
     parser.add_argument("-F", "--fit-type", help="type of fit to run", choices=["bkg", "disc", "excl"])
     parser.add_argument("-t", "--create-histograms", help="re-create histograms from TTrees", action="store_true", default=configMgr.readFromTree)
     parser.add_argument("-w", "--create-workspace", help="re-create workspace from histograms", action="store_true", default=configMgr.executeHistFactory)
     parser.add_argument("-x", "--use-XML", help="write XML files by hand and call hist2workspace on them, instead of directly writing workspaces", action="store_true", default=configMgr.writeXML)
     parser.add_argument("-f", "--fit", help="fit the workspace", action="store_true", default=configMgr.executeHistFactory)
-    parser.add_argument("-m", "--minos", nargs="+", help="run minos for asymmetric error calculation, optionally give parameter names for which minos should be run, space separated. For all params, use ALL", metavar="PARAM", action=NargsAction)
+    parser.add_argument("-m", "--minos", help="run minos for asymmetric error calculation, optionally give parameter names for which minos should be run, space separated. For all params, use ALL", metavar="PARAM")
     parser.add_argument("-n", "--num_toys", type=int, help="set the number of toys, <=0 means to use real data", default=configMgr.nTOYs)
     parser.add_argument("-s", "--seed", type=int, help="set the random seed for toy generation", default=configMgr.toySeed)
     parser.add_argument("-a", "--use-asimov", help="use Asimov dataset for fitting and plotting", action="store_true", default=configMgr.useAsimovSet)
@@ -140,7 +87,7 @@ if __name__ == "__main__":
     # (a workaround using "-f -d -- configFile.py" exists but it would confuse users)
     # --GJ 14/11/2012 
     parser.add_argument("-d", action="store_true", help="draw before/after plots")
-    parser.add_argument("-D", "--draw", nargs="+", help="specify plots to draw, space separated; choose from "+str(DrawAction.CHOICES), action=DrawAction)
+    parser.add_argument("-D", "--draw", help="specify plots to draw, comma separated; choose from "+str(["allPlots", "before","after", "corrMatrix", "sepComponents", "likelihood"]))
     
     parser.add_argument("-b", "--background", help="when doing hypotest, set background levels to values, form of bkgParName,value")
     parser.add_argument("-0", "--no-empty", help="do not draw empty bins when drawing", action="store_true")
@@ -197,7 +144,7 @@ if __name__ == "__main__":
         drawAfterFit = True
     
     if args.draw:
-        drawArgs = args.draw
+        drawArgs = args.draw.split(",")
         if len(drawArgs) == 1 and drawArgs[0] == "allPlots":
             drawBeforeFit = True
             drawAfterFit = True
@@ -217,7 +164,7 @@ if __name__ == "__main__":
                 elif drawArg == "likelihood":
                     drawLogLikelihood = True
                 else:
-                    log.fatal("Wrong draw argument: %s\n  Possible draw arguments are 'allPlots' or space separated 'before after corrMatrix sepComponents likelihood'" % drawArg) #should now be caught by argparse --GJ 7/11/2012
+                    log.fatal("Wrong draw argument: %s\n  Possible draw arguments are 'allPlots' or comma separated 'before after corrMatrix sepComponents likelihood'" % drawArg) 
 
     if args.no_empty:
         configMgr.removeEmptyBins = True
@@ -260,14 +207,13 @@ if __name__ == "__main__":
 
     if args.minos:
         runMinos = True
-        minosArgs = args.minos
-        if len(minosArgs) == 1 and not minosArgs == "ALL":
-            print ""
-        elif len(minosArgs)>0 :
-            for index, minosArg in enumerate(minosArgs):
-                 if index>0:
-                    minosPars += ","
-                 minosPars += minosArg
+        
+        minosArgs = args.minos.split(",")
+        for idx, arg in enumerate(minosArgs):
+            if arg.lower() == "all":
+                minosArgs[idx] = "all"
+
+        minosPars = ",".join(minosPars)
 
     if args.cmd:
         log.info("Python commands executed: %s" % args.cmd)
