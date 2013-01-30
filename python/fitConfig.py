@@ -350,10 +350,9 @@ class fitConfig(object):
 
                 # Only apply weights and systematics to MC-derived samples
                 if not s.isData and not s.isDiscovery and not s.isQCD:
-                    ## If the sample doesn't have weights then add them
-                    #if len(self.sampleList[-1].weights) == 0:
-                    #    self.sampleList[-1].setWeights(self.weights)
-                    self.sampleList[-1].addWeight(self.weights)
+                    # If the sample doesn't have weights then add them
+                    if len(self.sampleList[-1].weights) == 0:
+                        self.sampleList[-1].setWeights(self.weights)
 
                     # Propagate systematics into sample
                     for (systName, syst) in self.systDict.items():
