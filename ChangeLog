@@ -1,3 +1,7 @@
+2013-01-29 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
+	* scripts/HistFitter.py: options -m and -D now comma-seperated to prevent
+	argparse hell
+
 2013-01-16 Max Baak <mbaak@cern.ch>
 	M       fitConfig.py
 	M       sample.py
