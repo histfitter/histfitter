@@ -126,27 +126,20 @@ class Sample(object):
         self.weights = deepcopy(weights)
         return
 
-    def addWeight(self, input):
+    def addWeight(self, weight):
         """
-        Add the weights for this sample
+        Add a weight to this sample and propagate
         """
-        if isinstance(input, list):
-            weights = input
+        if not weight in self.weights:
+            self.weights.append(weight)
         else:
-            weights = [input]
-            pass
-
-        for weight in weights:
-            if not weight in self.weights:
-                self.weights.append(weight)
-            else:
-                raise RuntimeError("Weight %s already defined in sample %s" % (weight, self.name))
-            for syst in self.systDict.values():
-                if syst.type == "weight":
-                    if not weight in syst.high:
-                        syst.high.append(weight)
-                    if not weight in syst.low:
-                        syst.low.append(weight)
+            raise RuntimeError("Weight %s already defined in sample %s" % (weight, self.name))
+        for syst in self.systDict.values():
+            if syst.type == "weight":
+                if not weight in syst.high:
+                    syst.high.append(weight)
+                if not weight in syst.low:
+                    syst.low.append(weight)
         return
 
     def removeWeight(self, weight):
@@ -159,6 +152,7 @@ class Sample(object):
                 if weight in syst.low:
                     syst.low.remove(weight)
         return
+    
     def setQCD(self, isQCD=True, qcdSyst="uncorr"):
         self.isQCD = isQCD
         self.qcdSyst = qcdSyst
