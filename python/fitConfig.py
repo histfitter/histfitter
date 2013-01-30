@@ -358,6 +358,7 @@ class fitConfig(object):
                     for (systName, syst) in self.systDict.items():
                         if not systName in self.sampleList[-1].systDict.keys():
                             self.sampleList[-1].addSystematic(syst)
+
             else:
                 raise RuntimeError("Sample %s already defined in TopLevel %s" % (s.name, self.name))
 

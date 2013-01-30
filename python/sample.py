@@ -37,6 +37,7 @@ class Sample(object):
         self.shapeFactorList = []
         self.systList = []
         self.weights = []
+        self.tempWeights = []
         self.systDict = {}
         self.normFactor = []
         self.qcdSyst = None
@@ -125,6 +126,17 @@ class Sample(object):
         """
         self.weights = deepcopy(weights)
         return
+
+    def addSampleSpecificWeight(self, weight):
+        """
+        Add a sample-specific weight to this sample, and propagate to systematics
+        """
+        if not weight in self.tempWeights:
+            self.tempWeights.append(weight)
+            ## MB : propagated to actual weights in configManager, after all
+            ##      systematics have been added
+        else:
+            raise RuntimeError("Weight %s already defined for sample %s" % (weight, self.name))
 
     def addWeight(self, weight):
         """

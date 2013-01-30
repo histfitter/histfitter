@@ -193,9 +193,6 @@ class TreePrepare(PrepareHistosABC):
                     
                     tempName = "%stemp%s" % (name, str(iReg))
                     tempHist = TH1F(tempName, tempName, 1, 0.5, 1.5)
-
-                    log.warning("addHisto() : %s" % str(self.weights))
-
                     self.configMgr.chains[self.currentChainName].Project(tempName, self.cuts, self.weights)
                     
                     error = Double()

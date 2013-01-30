@@ -206,9 +206,12 @@ class ConfigManager(object):
                         for (name,syst) in self.systDict.items():
                             if not name in chan.getSample(sam.name).systDict.keys():
                                 chan.getSample(sam.name).addSystematic(syst)
+                        ## MB: sample-specific weights (for example cuts)
+                        ##     Make sure these weights propagate down to actual sample and systematics
+                        for w in sam.tempWeights: sam.addWeight(w) 
                     elif sam.isQCD or sam.isData:
                         chan.getSample(sam.name).setWrite(False)
-
+        
         log.info("  -initialize global histogram dictionary...")
         for tl in self.fitConfigs:
             for chan in tl.channels:
