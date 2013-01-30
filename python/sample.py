@@ -142,6 +142,27 @@ class Sample(object):
                     syst.low.append(weight)
         return
 
+    def addWeights(self, weights):
+        """
+        Add a weight to this sample and propagate
+        """
+        #log.warning("addWeights() : existing weights : %s" % str(self.weights))
+        #log.warning("addWeights() : new weights : %s" % str(weights))
+
+        #if not weight in self.weights:
+        #    self.weights.append(weight)
+        #else:
+        #    raise RuntimeError("Weight %s already defined in sample %s" % (weight, self.name))
+        #for syst in self.systDict.values():
+        #    if syst.type == "weight":
+        #        if not weight in syst.high:
+        #            syst.high.append(weight)
+        #        if not weight in syst.low:
+        #            syst.low.append(weight)
+        self.weights += weights
+        #log.warning("addWeights() : existing weights : %s" % str(self.weights))
+        return
+
     def removeWeight(self, weight):
         if weight in self.weights:
             self.weights.remove(weight)

@@ -353,12 +353,13 @@ class fitConfig(object):
                     # If the sample doesn't have weights then add them
                     if len(self.sampleList[-1].weights) == 0:
                         self.sampleList[-1].setWeights(self.weights)
+                    else:
+                        self.sampleList[-1].addWeights(self.weights)
 
                     # Propagate systematics into sample
                     for (systName, syst) in self.systDict.items():
                         if not systName in self.sampleList[-1].systDict.keys():
                             self.sampleList[-1].addSystematic(syst)
-
             else:
                 raise RuntimeError("Sample %s already defined in TopLevel %s" % (s.name, self.name))
 
