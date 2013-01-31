@@ -404,71 +404,71 @@ RooFitResult* Util::FitPdf( RooWorkspace* w, TString fitRegions, Bool_t lumiCons
     RooAbsPdf* pdf_FR = simPdfFitRegions;
     RooDataSet* data_FR = dataFitRegions;
 
-        RooArgSet* allParams = pdf_FR->getParameters(data_FR);
-        RooStats::RemoveConstantParameters(allParams);
+    RooArgSet* allParams = pdf_FR->getParameters(data_FR);
+    RooStats::RemoveConstantParameters(allParams);
 
-        RooAbsReal* nll = (RooNLLVar*) pdf_FR->createNLL(*data_FR); //, RooFit::CloneData(kFALSE),RooFit::Constrain(*allParams),RooFit::SumW2Error(kFALSE));
+    RooAbsReal* nll = (RooNLLVar*) pdf_FR->createNLL(*data_FR); //, RooFit::CloneData(kFALSE),RooFit::Constrain(*allParams),RooFit::SumW2Error(kFALSE));
 
-        int minimPrintLevel = 0; //verbose;
+    int minimPrintLevel = 0; //verbose;
 
-        RooMinimizer minim(*nll);
-        int strategy = ROOT::Math::MinimizerOptions::DefaultStrategy();
-        minim.setStrategy( strategy);
-        // use tolerance - but never smaller than 1 (default in RooMinimizer)
-        double tol =  ROOT::Math::MinimizerOptions::DefaultTolerance();
-        tol = std::max(tol,1.0); // 1.0 is the minimum value used in RooMinimizer
-        minim.setEps( tol );
-        //LM: RooMinimizer.setPrintLevel has +1 offset - so subtruct  here -1
-        minim.setPrintLevel(minimPrintLevel-1);
-        int status = -1;
-        minim.optimizeConst(2);
-        TString minimizer = ROOT::Math::MinimizerOptions::DefaultMinimizerType(); 
-        TString algorithm = ROOT::Math::MinimizerOptions::DefaultMinimizerAlgo(); 
+    RooMinimizer minim(*nll);
+    int strategy = ROOT::Math::MinimizerOptions::DefaultStrategy();
+    minim.setStrategy( strategy);
+    // use tolerance - but never smaller than 1 (default in RooMinimizer)
+    double tol =  ROOT::Math::MinimizerOptions::DefaultTolerance();
+    tol = std::max(tol,1.0); // 1.0 is the minimum value used in RooMinimizer
+    minim.setEps( tol );
+    //LM: RooMinimizer.setPrintLevel has +1 offset - so subtruct  here -1
+    minim.setPrintLevel(minimPrintLevel-1);
+    int status = -1;
+    minim.optimizeConst(2);
+    TString minimizer = ROOT::Math::MinimizerOptions::DefaultMinimizerType(); 
+    TString algorithm = ROOT::Math::MinimizerOptions::DefaultMinimizerAlgo(); 
 
-        Logger << kINFO << "Util::FitPdf()  ........ using " << minimizer << " / " << algorithm << GEndl; 
-        Logger << kINFO << " with strategy  " << strategy << " and tolerance " << tol << GEndl;
+    Logger << kINFO << "Util::FitPdf()  ........ using " << minimizer << " / " << algorithm << GEndl; 
+    Logger << kINFO << " with strategy  " << strategy << " and tolerance " << tol << GEndl;
 
 
-        bool kickApplied(false);
-        for (int tries = 1, maxtries = 5; tries <= maxtries; ++tries) {
-            //	 status = minim.minimize(fMinimizer, ROOT::Math::MinimizerOptions::DefaultMinimizerAlgo().c_str());
-            status = minim.minimize(minimizer, algorithm);  
-            if (status%1000 == 0) {  // ignore erros from Improve 
-                break;
-            } else { 
-                if (tries == 1) {
-                    Logger << kINFO << "    ----> Doing a re-scan first" << GEndl;
-                    minim.minimize(minimizer,"Scan");
+    bool kickApplied(false);
+    for (int tries = 1, maxtries = 5; tries <= maxtries; ++tries) {
+        //	 status = minim.minimize(fMinimizer, ROOT::Math::MinimizerOptions::DefaultMinimizerAlgo().c_str());
+        status = minim.minimize(minimizer, algorithm);  
+        if (status%1000 == 0) {  // ignore erros from Improve 
+            break;
+        } else { 
+            if (tries == 1) {
+                Logger << kINFO << "    ----> Doing a re-scan first" << GEndl;
+                minim.minimize(minimizer,"Scan");
+            }
+            if (tries == 2) {
+                if (ROOT::Math::MinimizerOptions::DefaultStrategy() == 0 ) { 
+                    Logger << kINFO << "    ----> trying with strategy = 1" << GEndl;
+                    minim.setStrategy(1);
                 }
-                if (tries == 2) {
-                    if (ROOT::Math::MinimizerOptions::DefaultStrategy() == 0 ) { 
-                        Logger << kINFO << "    ----> trying with strategy = 1" << GEndl;
-                        minim.setStrategy(1);
-                    }
-                    else 
-                        tries++; // skip this trial if stratehy is already 1 
-                }
-                if (tries == 3) {
-                    Logger << kINFO << "    ----> trying with improve" << GEndl;
-                    minimizer = "Minuit";
-                    algorithm = "migradimproved";
-                }
-                if (tries == 4 && !kickApplied) {
-                    Logger << kINFO << "    ----> trying fit with different starting values" << GEndl;
-                    RooFitResult* tmpResult = minim.save();
-                    const RooArgList& randList = tmpResult->randomizePars();
-                    *allParams = randList;
-                    delete tmpResult;
-                    tries=0;          // reset the fit cycle
-                    kickApplied=true; // do kick only once
-                }
+                else 
+                    tries++; // skip this trial if stratehy is already 1 
+            }
+            if (tries == 3) {
+                Logger << kINFO << "    ----> trying with improve" << GEndl;
+                minimizer = "Minuit";
+                algorithm = "migradimproved";
+            }
+            if (tries == 4 && !kickApplied) {
+                Logger << kINFO << "    ----> trying fit with different starting values" << GEndl;
+                RooFitResult* tmpResult = minim.save();
+                const RooArgList& randList = tmpResult->randomizePars();
+                *allParams = randList;
+                delete tmpResult;
+                tries=0;          // reset the fit cycle
+                kickApplied=true; // do kick only once
             }
         }
+    }
 
-        //RooFitResult * result = 0; 
-        double val(0);
+    //RooFitResult * result = 0; 
+    double val(0);
 	
-        if (status%100 == 0) { // ignore errors in Hesse or in Improve
+    if (status%100 == 0) { // ignore errors in Hesse or in Improve
 	  // only calculate minos errors if fit with Migrad converged
 	  if(minos && (minosPars == "all" || minosPars == "ALL")){
 	    minim.minos();
@@ -485,121 +485,6 @@ RooFitResult* Util::FitPdf( RooWorkspace* w, TString fitRegions, Bool_t lumiCons
             val =  TMath::QuietNaN();       
         }
 
-        //minim.optimizeConst(false);
-        //if (result) delete result;
-
-        //if (verbose < 2) RooMsgService::instance().setGlobalKillBelow(msglevel);  
-
-        //////////////////////////////////////////////////////////////  
-//     }
-//     else{
-//         // r = simPdfFitRegions->fitTo(*dataFitRegions,Save(),SumW2Error(kFALSE));
-
-//         /////////////////////////////////////////////////////////////
-
-//         RooAbsPdf* pdf = simPdfFitRegions;
-//         RooDataSet* data = dataFitRegions;
-
-//         RooArgSet* allParams = pdf->getParameters(data);
-//         RooStats::RemoveConstantParameters(allParams);
-
-//         RooAbsReal* nll = (RooNLLVar*) pdf->createNLL(*data); //, RooFit::CloneData(kFALSE),RooFit::Constrain(*allParams),RooFit::SumW2Error(kFALSE));
-
-//         int minimPrintLevel = 0; //verbose;
-
-//         RooMinimizer minim(*nll);
-//         int strategy = ROOT::Math::MinimizerOptions::DefaultStrategy();
-//         minim.setStrategy( strategy);
-//         // use tolerance - but never smaller than 1 (default in RooMinimizer)
-//         double tol =  ROOT::Math::MinimizerOptions::DefaultTolerance();
-//         tol = std::max(tol,1.0); // 1.0 is the minimum value used in RooMinimizer
-//         minim.setEps( tol );
-//         //LM: RooMinimizer.setPrintLevel has +1 offset - so subtruct  here -1
-//         minim.setPrintLevel(minimPrintLevel-1);
-//         int status = -1;
-//         minim.optimizeConst(2);
-//         TString minimizer = ROOT::Math::MinimizerOptions::DefaultMinimizerType(); 
-//         TString algorithm = ROOT::Math::MinimizerOptions::DefaultMinimizerAlgo(); 
-
-//         Logger << kINFO << "Util::FitPdf()  ........ using " << minimizer << " / " << algorithm << GEndl; 
-//         Logger << kINFO << " with strategy  " << strategy << " and tolerance " << tol << GEndl;
-
-//         bool kickApplied(false);
-//         for (int tries = 1, maxtries = 5; tries <= maxtries; ++tries) {
-//             //	 status = minim.minimize(fMinimizer, ROOT::Math::MinimizerOptions::DefaultMinimizerAlgo().c_str());
-//             status = minim.minimize(minimizer, algorithm);  
-//             if (status%1000 == 0) {  // ignore erros from Improve 
-//                 break;
-//             } else { 
-//                 if (tries == 1) {
-//                     Logger << kINFO << "    ----> Doing a re-scan first" << GEndl;
-//                     minim.minimize(minimizer,"Scan");
-//                 }
-//                 if (tries == 2) {
-//                     if (ROOT::Math::MinimizerOptions::DefaultStrategy() == 0 ) { 
-//                         Logger << kINFO << "    ----> trying with strategy = 1" << GEndl;
-//                         minim.setStrategy(1);
-//                     }
-//                     else 
-//                         tries++; // skip this trial if stratehy is already 1 
-//                 }
-//                 if (tries == 3) {
-//                     Logger << kINFO << "    ----> trying with improve" << GEndl;
-//                     minimizer = "Minuit";
-//                     algorithm = "migradimproved";
-//                 }
-//                 if (tries == 4 && !kickApplied) {
-//                     Logger << kINFO << "    ----> trying fit with different starting values" << GEndl;
-//                     RooFitResult* tmpResult = minim.save();
-//                     const RooArgList& randList = tmpResult->randomizePars();
-//                     *allParams = randList;
-//                     delete tmpResult;
-//                     tries=0;          // reset the fit cycle
-//                     kickApplied=true; // do kick only once
-//                 }
-//             }
-//         }
-
-
-//         //   RooRealVar* alpha_MC = w->var("alpha_MC");
-//         //     RooRealVar* alpha_MP = w->var("alpha_MP");
-//         //     RooRealVar* alpha_JHigh = w->var("alpha_JHigh");
-//         //     RooRealVar* alpha_JMedium = w->var("alpha_JMedium");
-//         //     RooRealVar* alpha_JLow = w->var("alpha_JLow");
-
-//         //     RooArgSet nuisPars;
-//         //     if(alpha_MC) nuisPars.add(*alpha_MC);
-//         //     if(alpha_MP) nuisPars.add(*alpha_MP);
-//         //     if(alpha_JHigh) nuisPars.add(*alpha_JHigh);
-//         //     if(alpha_JMedium) nuisPars.add(*alpha_JMedium);
-//         //     if(alpha_JLow) nuisPars.add(*alpha_JLow);
-
-//         //     //  minim.setVerbose(kTRUE);
-
-//         //     if(nuisPars.getSize() > 0) {
-//         //       cout << GEndl << endl << "XXX running minos with" << GEndl;
-//         //       nuisPars.Print("v");
-//         //       minim.minos(nuisPars);
-//         //     }
-
-//         //RooFitResult * result = 0; 
-//         double val(0);
-
-//         if (status%100 == 0) { // ignore errors in Hesse or in Improve
-//             r = minim.save();
-//             val = r->minNll();
-//         }
-//         else { 
-//             Logger << kERROR << "FIT FAILED !- return a NaN NLL " << GEndl;
-//             val =  TMath::QuietNaN();       
-//         }
-
-        //minim.optimizeConst(false);
-        //if (result) delete result;
-        //if (verbose < 2) RooMsgService::instance().setGlobalKillBelow(msglevel);  
-
-        //////////////////////////////////////////////////////////////  
-	// }
     r->Print("v");
 
     TString fitName = data_FR->GetName();
