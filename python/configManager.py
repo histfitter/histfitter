@@ -654,6 +654,7 @@ class ConfigManager(object):
         for chan in fitConfig.channels:
             for sam in chan.sampleList:
                 if len(sam.mergeOverallSysSet)<=1: continue
+                log.info("Post-processing: for channel %s and sample %s, merging of systematics %s." % (chan.name,sam.name,str(sam.mergeOverallSysSet)))
                 keepName = sam.mergeOverallSysSet[0]
                 lowErr2 = 0.0
                 highErr2 = 0.0
@@ -662,12 +663,14 @@ class ConfigManager(object):
                     if sys!=None:
                         highErr2 += (sys[1]-1.0)**2
                         lowErr2 += (sys[2]-1.0)**2
+                        #log.info("Now processing : %s %f %f" % (systName,sys[1]-1.0,sys[2]-1.0))
                         # and remove ... to be readded merged below
                         sam.removeOverallSys(systName)
                     pass
                 highErr = sqrt(highErr2)
                 lowErr = sqrt(lowErr2)
-                sam.addOverallSys(systName,1.0+highErr,1.0-lowErr)
+                log.info("Merged systematic : %s %f %f" % (keepName,1+highErr,1-lowErr))
+                sam.addOverallSys(keepName,1.0+highErr,1.0-lowErr)
                 
 
         # Build blinded histograms here
