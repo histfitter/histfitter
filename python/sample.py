@@ -53,6 +53,7 @@ class Sample(object):
         self.noRenormSys = True
         self.parentChannel = None
         self.allowRemapOfSyst = True
+        self.mergeOverallSysSet = []
 
         if self.name[0].isdigit():
             log.warning("Sample name %s starts with a digit - this can confuse HistFactory internals" % self.name)
@@ -615,6 +616,17 @@ class Sample(object):
                 self.overallSystList[idx] = rsyst
                 return
 
+    def removeOverallSys(self, systName):
+        """
+        replace overall systematic
+        """
+        for idx in xrange(len(self.overallSystList)):
+            syst = self.overallSystList[idx]
+            if systName==syst[0]:
+                del self.overallSystList[idx]
+                self.removeSystematic(systName)
+                return
+
     def getSystematic(self, systName):
         """
         Get systematic from internal storage
@@ -636,7 +648,6 @@ class Sample(object):
         """
         Remove a systematic
         """
-
         # do we get a name or a Systematic passed?
         name = systName
         if isinstance(systName, SystematicBase):

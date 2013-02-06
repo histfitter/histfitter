@@ -6,6 +6,7 @@ from histogramsManager import histMgr
 from logger import Logger
 import os
 from ROOT import gROOT
+from math import sqrt
 
 gROOT.SetBatch(True)
 log = Logger('ConfigManager')
@@ -648,6 +649,26 @@ class ConfigManager(object):
                     log.info("For channel %s and sample %s, replacement of systematic %s from %s." % (chan.name,sam.name,osys[0],rc.name))
                     sam.replaceOverallSys(rsys)
                     pass
+
+        #post-processing 3: merging of overall systematics (e.g. signal theory), if so requested
+        for chan in fitConfig.channels:
+            for sam in chan.sampleList:
+                if len(sam.mergeOverallSysSet)<=1: continue
+                keepName = sam.mergeOverallSysSet[0]
+                lowErr2 = 0.0
+                highErr2 = 0.0
+                for systName in sam.mergeOverallSysSet:
+                    sys = sam.getOverallSys(systName)
+                    if sys!=None:
+                        highErr2 += (sys[1]-1.0)**2
+                        lowErr2 += (sys[2]-1.0)**2
+                        # and remove ... to be readded merged below
+                        sam.removeOverallSys(systName)
+                    pass
+                highErr = sqrt(highErr2)
+                lowErr = sqrt(lowErr2)
+                sam.addOverallSys(systName,1.0+highErr,1.0-lowErr)
+                
 
         # Build blinded histograms here
         for (iChan, chan) in enumerate(fitConfig.channels):
