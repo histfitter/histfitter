@@ -1,3 +1,9 @@
+2013-02-06 Max Baak <mbaak@cern.ch>
+	M       configManager.py
+	M       sample.py
+	* possibility to merge overall systematics into one.
+	* sam.mergeOverallSysSet = [name1,name2,etc]
+
 2013-01-30 Max Baak <mbaak@cern.ch>
         M       prepareHistos.py
         M       configManager.py
