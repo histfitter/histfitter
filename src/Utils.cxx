@@ -2419,6 +2419,7 @@ Util::resetError( RooWorkspace* wspace, const RooArgList& parList, const RooArgL
         double val_hi  = FLT_MAX;
         double val_low = FLT_MIN;
         double sigma = 0.;
+        bool resetRange(false);
 
         if( UncertaintyName == "" ) {
             Logger << kERROR << "No Uncertainty Name provided" << GEndl;
@@ -2430,6 +2431,7 @@ Util::resetError( RooWorkspace* wspace, const RooArgList& parList, const RooArgL
             val_hi  =  1.0;
             val_low = -1.0;      
             sigma = 1.0;
+            resetRange = true;
         }
         // If it is Lumi:
         else if( UncertaintyName == "Lumi" ) {
@@ -2444,6 +2446,7 @@ Util::resetError( RooWorkspace* wspace, const RooArgList& parList, const RooArgL
 
             val_hi  = val_nom + sigma;
             val_low = val_nom - sigma; 
+            resetRange = true;
         }
         // If it is a stat uncertainty (gamma)
         else if( string(UncertaintyName).find("gamma")!=string::npos ){
@@ -2472,15 +2475,16 @@ Util::resetError( RooWorkspace* wspace, const RooArgList& parList, const RooArgL
                 // Symmetrize shifts
                 val_hi = 1 + sigma;
                 val_low = 1 - sigma;
+                resetRange = true;
             }
             else if( ConstraintType == "RooPoisson" ){
                 RooAbsReal* nom_gamma = (RooAbsReal*) wspace->obj( ("nom_" + UncertaintyName).c_str() );
                 double nom_gamma_val = nom_gamma->getVal();
 
                 sigma = 1/TMath::Sqrt( nom_gamma_val );
-
                 val_hi = 1 + sigma;
                 val_low = 1 - sigma;
+                resetRange = true;
             } 
             else {
                 Logger << kERROR << "Strange constraint type for Stat Uncertainties: " << ConstraintType << GEndl;
@@ -2495,19 +2499,30 @@ Util::resetError( RooWorkspace* wspace, const RooArgList& parList, const RooArgL
             sigma = 0.0001;
             val_low = var->getVal() - sigma;
             val_hi = var->getVal() + sigma;
+            resetRange = false;
         }
-
-        Logger << kINFO << "Uncertainties on parameter: " << UncertaintyName 
-            << " low: "  << val_low
-            << " high: " << val_hi
-            << " sigma: " << sigma
-            << GEndl;
 
         var->setError(abs(sigma));
         //var->setErrorHi(abs(sigma));
         //var->setErrorLo(-abs(sigma));
         //if( ShiftUp ) var->setVal( val_hi );
         //else          var->setVal( val_low );
+        if (resetRange) {
+          double minrange = var->getMin();
+          double maxrange = var->getMax();
+          double newmin = var->getVal() - 6.*sigma;
+          double newmax = var->getVal() + 6.*sigma;
+          if (minrange<newmin) var->setMin(newmin);
+          if (newmax<maxrange) var->setMax(newmax);
+        }
+
+        Logger << kINFO << "Uncertainties on parameter: " << UncertaintyName
+            << " low: "  << val_low
+            << " high: " << val_hi
+            << " sigma: " << sigma
+            << " min range: " << var->getMin()
+            << " max range: " << var->getMax()
+            << GEndl;
 
         // Done
     } // end loop
