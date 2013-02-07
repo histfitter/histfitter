@@ -45,7 +45,7 @@ def tablefragment(m, channel, signalregionslist,sampleList,showBeforeFitError):
   tableline += '''
 Observed events         '''
   for n in m['nobs']:
-    tableline += " & $" + ("%.1f" %n) + "$             "
+    tableline += " & $" + ("%d" %n) + "$             "
 
   tableline +='''       \\\\
 \\noalign{\\smallskip}\\hline\\noalign{\\smallskip}
@@ -124,6 +124,9 @@ Fitted bkg events        '''
   tableline += '''
 MC exp. SM events             '''
   for index, n in enumerate(m['TOTAL_MC_EXP_BKG_events']):
+    #if abs(n)<0.00001:
+    #  tableline += " & -- "
+    #  continue
     if showBeforeFitError:
       if ((n - m['TOTAL_MC_EXP_BKG_err'][index]) > 0.) or not abs(n) > 0.00001:
         tableline += " & $" + str(("%.2f" %n)) + " \\pm " + str(("%.2f" %m['TOTAL_MC_EXP_BKG_err'][index])) +  "$         "
@@ -145,12 +148,19 @@ MC exp. SM events             '''
     for name in map_listofkeys:
       if "MC_exp_events_" in name and sample in name:
         sample = name.replace("MC_exp_events_","")
-        tableline += '''
+        if sample!="QCD":
+            tableline += '''
         MC exp. '''
+        else: 
+            tableline += '''
+        data-driven exp. '''
         tableline += sample
         tableline += ''' events        '''
         for index, n in enumerate(m[name]):
           if m['names'][index] in signalregionslist:
+            #if abs(n)<0.00001:
+            #  tableline += " & -- "
+            #  continue
             if showBeforeFitError:
               if ((n - m['MC_exp_err_'+sample][index]) > 0.) or not abs(n) > 0.00001:
                 tableline += " & $" + str(("%.2f" %n)) + " \\pm " + str(("%.2f" %m['MC_exp_err_'+sample][index])) +  "$         "
@@ -235,7 +245,7 @@ def tableend3(suffix='sr3jl'):
   end = '''%%
 }
 \\end{center}
-\caption{ Background fit results for the S3 (top part) and S4 (bottom part) signal regions, for an integrated luminosity of $4.7$~\\ifb.
+\caption{ Background fit results for the S3 (top part) and S4 (bottom part) signal regions, for an integrated luminosity of $20.5$~\\ifb.
 %%The results are obtained from the control regions using the discovery fit (see text for details). The fit results of the loose-not-tight regions are not shown.
 Nominal MC expectations (normalised to MC cross-sections) are given for comparison. 
 %%The Monte Carlo QCD estimates are provided for illustrational purposes only, and are not used in the fit.
@@ -248,7 +258,11 @@ The errors shown are the statistical plus systematic uncertainties for control r
   return end
 
 
-def tableend4(regionsList, suffix='sr3jl'):
+def tableend4(regionsList, suffix='sr3jl', mentionCh=''):
+
+  tomention = ''
+  if len(mentionCh)>0:
+      tomention = 'related to the analysis containing region %s, ' % mentionCh
 
   end = '''%%
 }
@@ -264,7 +278,7 @@ def tableend4(regionsList, suffix='sr3jl'):
     else:
       end += " and " + region
       
-  end += ''' regions, for an integrated luminosity of $4.7$~\\ifb.
+  end += ''' region(s), %s for an integrated luminosity of $20.5$~\\ifb.
 %%The results are obtained from the control regions using the discovery fit (see text for details). The fit results of the loose-not-tight regions are not shown.
 Nominal MC expectations (normalised to MC cross-sections) are given for comparison. 
 %%The Monte Carlo QCD estimates are provided for illustrational purposes only, and are not used in the fit.
@@ -272,7 +286,7 @@ The errors shown are the statistical plus systematic uncertainties.}
 %%, except for the error on the background estimate in the signal region, which is the systematic uncertainty only.}
 \\label{table.results.yields.fit.%s}
 \\end{table}
-%%''' %(suffix)
+%%''' %(tomention,suffix)
 
   return end
 
