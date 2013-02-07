@@ -328,10 +328,6 @@ RooFitResult* Util::FitPdf( RooWorkspace* w, TString fitRegions, Bool_t lumiCons
     RooCategory* regionCat = (RooCategory*) w->cat("channelCat");  
     data->table(*((RooAbsCategory*)regionCat))->Print("v");
 
-    if( w->var("Lumi")!= NULL ) {
-       w->var("Lumi")->setRange(0.75,1.25);
-    }
-
     if (lumiConst) {
       RooRealVar* lumi = (RooRealVar*) w->var("Lumi");
       if (lumi!=NULL) lumi->setConstant(lumiConst); 
@@ -417,7 +413,7 @@ RooFitResult* Util::FitPdf( RooWorkspace* w, TString fitRegions, Bool_t lumiCons
 
     RooAbsReal* nll = (RooNLLVar*) pdf_FR->createNLL(*data_FR); //, RooFit::CloneData(kFALSE),RooFit::Constrain(*allParams),RooFit::SumW2Error(kFALSE));
 
-    int minimPrintLevel = 0; //verbose;
+    int minimPrintLevel = 1; //verbose;
 
     RooMinimizer minim(*nll);
     int strategy = ROOT::Math::MinimizerOptions::DefaultStrategy();
