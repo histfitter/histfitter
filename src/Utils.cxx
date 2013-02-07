@@ -162,7 +162,7 @@ void Util::GenerateFitAndPlot(TString fcName, TString anaName, Bool_t drawBefore
 
     //hack to be fixed at HistFactory level (check again with ROOT 5.34)
     Bool_t lumiConst = kTRUE;
-    if (fc->m_signalChannels.size() > 0) 
+    //if (fc->m_signalChannels.size() > 0) 
         lumiConst = kFALSE;
 
     //  fit toy MC if specified. When left None, data is fit by default
@@ -326,8 +326,14 @@ RooFitResult* Util::FitPdf( RooWorkspace* w, TString fitRegions, Bool_t lumiCons
     RooCategory* regionCat = (RooCategory*) w->cat("channelCat");  
     data->table(*((RooAbsCategory*)regionCat))->Print("v");
 
-    RooRealVar* lumi = (RooRealVar*) w->var("Lumi");
-    lumi->setConstant(lumiConst); 
+    if( w->var("Lumi")!= NULL ) {
+       w->var("Lumi")->setRange(0.75,1.25);
+    }
+
+    if (lumiConst) {
+      RooRealVar* lumi = (RooRealVar*) w->var("Lumi");
+      if (lumi!=NULL) lumi->setConstant(lumiConst); 
+    }
 
     // Construct an empty simultaneous pdf using category regionCat as index
     RooSimultaneous* simPdfFitRegions = pdf;
