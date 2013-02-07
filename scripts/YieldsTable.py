@@ -277,7 +277,7 @@ if __name__ == "__main__":
 
   wsFileName='/results/MyOneLeptonKtScaleFit_HardLepR17_BkgOnlyKt_combined_NormalMeasurement_model_afterFit.root'
   try:
-    opts, args = getopt.getopt(sys.argv[1:], "o:c:w:s:bSa")
+    opts, args = getopt.getopt(sys.argv[1:], "o:c:w:s:bSag")
   except:
     usage()
   if len(opts)<2:
@@ -288,6 +288,7 @@ if __name__ == "__main__":
   showBeforeFitError=False
   showSumAllRegions=False
   useAsimovSet=False
+  ignoreLastChannel=False
   for opt,arg in opts:
     if opt == '-c':
       chanStr=arg.replace(",","_")
@@ -305,8 +306,14 @@ if __name__ == "__main__":
       showSumAllRegions=True
     elif opt == '-a':
       useAsimovSet=True
+    elif opt == '-g':
+      ignoreLastChannel = True 
 
-      
+  mentionCh = ""
+  if ignoreLastChannel:
+      mentionCh = chanList[-1]
+      chanList = chanList[0:-1]
+
   if outputFileName=="default":
     outputFileName=sampleStr+"_inRegions_"+chanStr+'_YieldsTable.tex'
     pass
@@ -334,7 +341,8 @@ if __name__ == "__main__":
   f = open(outputFileName, 'w')
   f.write( tablestart() )
   f.write( tablefragment(m3, '', regionsList_2Digits,sampleList,showBeforeFitError) )
-  f.write( tableend4(regionsList_1Digit, chanStr) )
+  f.write( tableend4(regionsList_1Digit, chanStr, mentionCh) )
   f.close()
   print "\nResult written in:"
   print outputFileName
+
