@@ -150,13 +150,12 @@ std::list<LimitResult> CollectHypoTestResults( const TString& infile, const TStr
             ToyUtilsLogger << kWARNING << "Fit result " << fitresultname.Data() << " has failed HypoTestInverterResult - do not use result" << GEndl;
         } else {
             LimitResult result = RooStats::get_Pvalue( ht );
-
+            // MB Keeping points for now, this also rejects bad fits.
             if (fabs(result.GetP0()-0.5) < 0.0001 && result.GetSigma0() < 0.0001){
-              counter_probably_bad_fit++;
-              ToyUtilsLogger << kWARNING << "One of the base fits seems to have failed for point " << fitresultname.Data() << " : " << result.GetP0() << " " << result.GetSigma0() << GEndl;
-              failed_fit = true;
+              //counter_probably_bad_fit++;
+              ToyUtilsLogger << kINFO << "One of the base fits _may_ have failed for point (or may not): " << fitresultname.Data() << " : " << result.GetP0() << " " << result.GetSigma0() << " Keeping this. " << GEndl;
+              //failed_fit = true;
             }
-
             result.AddMetaData ( ParseWorkspaceID(itr->first) );
             if (!failed_fit) 
                 limres.push_back(result); // store info from interpretation string (eg m0 and m12 value) 
