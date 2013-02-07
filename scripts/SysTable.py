@@ -20,14 +20,74 @@ import pickle
 def getnamemap():
 
   namemap = {}
+  namemap['alpha_JSig'] = 'Jet energy scale signal'
 
   namemap['alpha_BT'] = 'B tagging'
-  namemap['alpha_JR'] = 'Jet energy resolution'
+  namemap['alpha_JER'] = 'Jet energy resolution'
+  namemap['alpha_JES'] = 'Jet energy scale'
+  namemap['alpha_LE'] = 'Lepto efficiency'
+
+  namemap['alpha_RESOST'] = 'CellOut energy resolution'
+  namemap['alpha_SCALEST'] = 'CellOut energy scale'
+  namemap['alpha_TE'] = 'Trigger weight'
+  
+  namemap['alpha_QCDNorm_SR1L3j'] = 'QCD estimate SR1L3j'
+  namemap['alpha_QCDNorm_SR1L5j'] = 'QCD estimate SR1L5j'
+  namemap['alpha_QCDNorm_SR1a'] = 'QCD estimate SR1a'
+  namemap['alpha_QCDNorm_SR1b'] = 'QCD estimate SR1b'
+  namemap['alpha_QCDNorm_SR2a'] = 'QCD estimate SR2a'
+  namemap['alpha_QCDNorm_SR2b'] = 'QCD estimate SR2b'
+  namemap['alpha_QCDNorm_SR2l'] = 'QCD estimate SR2l'
+  namemap['alpha_QCDNorm_CRT'] = 'QCD estimate CRT'
+  namemap['alpha_QCDNorm_CRW'] = 'QCD estimate CRW'
+  namemap['alpha_QCDNorm_CRT5j'] = 'QCD estimate CRT5j'
+  namemap['alpha_QCDNorm_CRW5j'] = 'QCD estimate CRW5j'
+
+ 
+  namemap['alpha_eglow'] = 'Electron energy scale: low-pt uncertainty'
+  namemap['alpha_egmat'] = 'Electron energy scale: material uncertainty'
+  namemap['alpha_egps'] = 'Electron energy scale: presampler scale uncertainty'
+  namemap['alpha_egres'] = 'Electron energy resolution'
+  namemap['alpha_egzee'] = 'Electron energy scale: Z scale uncertainty'
+
+  namemap['alpha_LRImu'] = 'Muon energy resolution with inner detector'
+  namemap['alpha_LRMmu'] = 'Muon energy resolution with muon system'
+  
+  namemap['alpha_iqoptW'] = 'kT scale Alpgen W+jets'
+  namemap['alpha_ktfacT'] = 'kT scale Alpgen ttbar'
+  namemap['alpha_ktfacW'] = 'kT scale Alpgen W+jets'
+  namemap['alpha_qfacT'] = 'Q scale Alpgen ttbar'
+  namemap['alpha_qfacW'] = 'Q scale Alpgen W+jets'
+  
+
+  namemap['alpha_pileup'] = 'Pile-up'
+
+
+  namemap['gamma_stat_CRW_cuts_bin_0'] = 'MC statistics CRW bin 0'
+  namemap['gamma_stat_CRT_cuts_bin_0'] = 'MC statistics CRT bin 0'
+  namemap['gamma_stat_CRW5j_cuts_bin_0'] = 'MC statistics CRW5j bin 0'
+  namemap['gamma_stat_CRT5j_cuts_bin_0'] = 'MC statistics CRT5j bin 0'
+  namemap['gamma_stat_SR1L3j_cuts_bin_0'] = 'MC statistics SR1L3j bin 0'
+  namemap['gamma_stat_SR1L5j_cuts_bin_0'] = 'MC statistics SR1L5j bin 0'
+  namemap['gamma_stat_SR1a_cuts_bin_0'] = 'MC statistics SR1a bin 0'
+  namemap['gamma_stat_SR1b_cuts_bin_0'] = 'MC statistics SR1b bin 0'
+  namemap['gamma_stat_SR2a_cuts_bin_0'] = 'MC statistics SR2a bin 0'
+  namemap['gamma_stat_SR2b_cuts_bin_0'] = 'MC statistics SR2b bin 0'
+  namemap['gamma_stat_SR2l_cuts_bin_0'] = 'MC statistics SR2l bin 0'
+  namemap['alpha_errBG'] = 'Systematics Background'
+  namemap['alpha_errDB'] = 'Systematics Dibosons'
+  namemap['alpha_errDY'] = 'Systematics AlpgenDrellYan'
+  namemap['alpha_errST'] = 'Systematics SingleTop'
+  namemap['alpha_errTV'] = 'Systematics ttbarV'
+  namemap['alpha_errZ'] = 'Systematics AlpgenZ'
+  namemap['mu_Top'] =  'ttbar yield'
+  namemap['mu_WZ'] = 'W(Z)+jets yield'
+
+
+  
   namemap['alpha_JR3T'] = 'Jet energy resolution 3jT'
   namemap['alpha_JR4T'] =  'Jet energy resolution 4jT'
-  namemap['alpha_KtScaleTop'] = 'kT scale Alpgen ttbar'
-  namemap['alpha_KtScaleWZ'] = 'kT scale Alpgen W+jets'
-  namemap['alpha_LE'] = 'Lepto efficiency'
+
   namemap['alpha_LES'] = 'Lepton energy scale'
   namemap['alpha_LRI'] = 'Lepton energy resolution with inner detector'
   namemap['alpha_LRI3T'] = 'Lepton energy resolution with inner detector 3jT'
@@ -41,7 +101,7 @@ def getnamemap():
   namemap['alpha_MP'] = 'MET pile-up'
   namemap['alpha_MP3T'] = 'MET pile-up 3jT'
   namemap['alpha_MP4T'] = 'MET pile-up 4jT'
-  namemap['alpha_PU'] = 'Pile-up'
+
   namemap['alpha_PtMinTop3T'] = 'pTmin ttbar 3jT'
   namemap['alpha_PtMinTop4T'] = 'pTmin ttbar 4jT'
   namemap['alpha_PtMinTopC'] =  'pTmin ttbar control regions'
@@ -59,7 +119,7 @@ def getnamemap():
   namemap['alpha_QCDNorm_SR3jT_cuts'] = 'QCD estimate 3jT'	   
   namemap['alpha_QCDNorm_SR4jT_cuts'] = 'QCD estimate 4jT'   
 
-  namemap['alpha_TE'] = 'Trigger weight'
+
   namemap['alpha_WP'] = 'W pT reweighting'
 
   namemap['gamma_J3T_bin_0'] = 'Jet energy scale 3jT'
@@ -74,18 +134,18 @@ def getnamemap():
   namemap['gamma_JC_bin_5'] = 'Jet energy scale control regions bin 5'
   namemap['gamma_JC_bin_6'] = 'Jet energy scale control regions bin 6'
 
-  namemap['gamma_stat_S4_cuts_bin_0'] = 'MC statistics 4jT bin 0'
-  namemap['gamma_stat_TR_nJet_bin_6'] = 'MC statistics TRL1 bin 6'
-  namemap['gamma_stat_WR_nJet_bin_6'] = 'MC statistics WRL1 bin 6'
-
-  namemap['gamma_stat_SR1s2j_cuts_bin_0'] = 'MC statistics s1l2j bin 0'
-  namemap['gamma_stat_SR3jT_cuts_bin_0'] = 'MC statistics 3jT bin 0'
-  namemap['gamma_stat_SR4jT_cuts_bin_0'] = 'MC statistics 4jT bin 0'
 
   namemap['mu_S3'] = 'Signal yield 3j'
   namemap['mu_S4'] = 'Signal yield 4j'
   namemap['mu_Top'] =  'ttbar yield'
   namemap['mu_WZ'] = 'W(Z)+jets yield'
+
+  namemap['alpha_KtScaleTop'] = 'kT scale Alpgen ttbar'
+  namemap['alpha_KtScaleWZ'] = 'kT scale Alpgen W+jets'
+  namemap['alpha_LE'] = 'Lepto efficiency'
+  namemap['alpha_PU'] = 'Pile-up'
+  namemap['alpha_TE'] = 'Trigger weight'
+  namemap['alpha_JR'] = 'Jet energy resolution'
 
   namemap['mu_SR3jT'] = 'Signal yield 3jT'
   namemap['mu_SR4jT'] = 'Signal yield 4jT'
@@ -99,8 +159,8 @@ def getnamemap():
 
 def latexfitresults( filename, region='3jL', sample='', resultName="RooExpandedFitResult_afterFit", dataname='obsData'):
 
-  #namemap = {}
-  #namemap = getnamemap()
+  namemap = {} ## add this if I want description
+  namemap = getnamemap() ## add this if I want description
 
   ############################################
   workspacename = 'w'
@@ -196,8 +256,8 @@ def latexfitresults( filename, region='3jL', sample='', resultName="RooExpandedF
     par = w.var(parname)
     par.setConstant(False)
     sysError  = Util.GetPropagatedError(pdfInRegion, result)
-    #if namemap.has_key(parname):
-    #  parname = namemap[parname]
+    if namemap.has_key(parname): ## add this if I want description
+      parname = namemap[parname] ## add this if I want description
     regSys['syserr_'+parname] =  sysError
     par.setConstant()
 
@@ -346,8 +406,8 @@ def latexfitresults_method2(filename,resultname='RooExpandedFitResult_afterFit',
       print "        WARNING :   for parameter ",parname," fixed the fit does not converge, as status=",result_1parfixed.status(), "(converged=0),  and covariance matrix quality=", result_1parfixed.covQual(), " (full accurate==3)"
       print "        WARNING: setting systError = 0 for parameter ",parname
 
-    #if namemap.has_key(parname):
-    #  parname = namemap[parname]
+      #if namemap.has_key(parname):
+      #  parname = namemap[parname]
     regSys['syserr_'+parname] =  systError
 
   return regSys
