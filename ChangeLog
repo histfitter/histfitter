@@ -1,4 +1,7 @@
 2013-02-06 Max Baak <mbaak@cern.ch>
+        * Tagged HistFitter-00-00-24
+
+2013-02-06 Max Baak <mbaak@cern.ch>
 	M       scripts/PrintFitResult.py
 	M       scripts/YieldsTable.py
 	M       scripts/UpperLimitTable.py
