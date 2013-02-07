@@ -1,4 +1,19 @@
 2013-02-06 Max Baak <mbaak@cern.ch>
+	M       scripts/PrintFitResult.py
+	M       scripts/YieldsTable.py
+	M       scripts/UpperLimitTable.py
+	M       scripts/YieldsTableTex.py
+	M       scripts/SysTable.py
+	* updated namemaps, minor textual updates for printing tables.
+	M	src/toy_utils.cxx
+	* Misfeature. Turned off a check that rejects supposedly failed fits with CLs+b values of 0.5. Warning instead.
+	M       src/Utils.cxx
+	M       src/ConfigMgr.cxx
+	* Restrict lumi parameter range to [0.75,1.25], instead of [0,10] as is default in HistFitter
+	M       setup.sh
+	* Points to a patched version of ROOT, one where the binwidth in HistFactory is fixed (no numerical binwidth error). 
+
+2013-02-06 Max Baak <mbaak@cern.ch>
 	M       configManager.py
 	M       sample.py
 	* possibility to merge overall systematics into one.
