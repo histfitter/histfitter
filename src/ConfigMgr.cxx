@@ -193,6 +193,10 @@ void ConfigMgr::doHypoTest(FitConfig* fc, TString outdir, double SigXSecSysnsigm
         w->var("alpha_SigXSec")->setConstant(true);
     }
 
+    if( w->var("Lumi")!= NULL ) {
+        w->var("Lumi")->setRange(0.75,1.25);
+    }
+
     bool useCLs = true;  
     int npoints = 1;   
     double poimin = 1.0;  
