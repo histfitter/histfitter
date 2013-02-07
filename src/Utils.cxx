@@ -1905,7 +1905,7 @@ RooAbsReal* Util::GetComponent(RooWorkspace* w, TString component, TString regio
     TString regionFullName;
     if(exactRegionName){
         Logger << kINFO << "GetComponent(): using exact region names" << GEndl;
-        regionFullName = region+"_cuts"; 
+        regionFullName = region;
     } else {
         regionFullName = GetFullRegionName(regionCat, region);
     }
