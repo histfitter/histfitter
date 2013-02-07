@@ -202,12 +202,14 @@ void Util::GenerateFitAndPlot(TString fcName, TString anaName, Bool_t drawBefore
 
     //fit of all regions
     RooFitResult*  result = FitPdf(w, fitChannels, lumiConst, toyMC, "", minos, minosPars);
+
+    if (result==NULL) return;
     
     // create an RooExpandedFitResult encompassing all the regions/parameters
     //  with the result & save it to workspace
     RooExpandedFitResult* expResultAfter = new RooExpandedFitResult(result, floatPars);
     ImportInWorkspace(w, expResultAfter, "RooExpandedFitResult_afterFit");
-
+ 
     // plot after fit
     if (drawAfterFit) 
         PlotPdfWithComponents(w, fc->m_name, anaName, plotChannels, "afterFit", expResultAfter, toyMC, plotRatio);
@@ -436,7 +438,7 @@ RooFitResult* Util::FitPdf( RooWorkspace* w, TString fitRegions, Bool_t lumiCons
 
 
     bool kickApplied(false);
-    for (int tries = 1, maxtries = 5; tries <= maxtries; ++tries) {
+    for (int tries = 1, maxtries = 4; tries <= maxtries; ++tries) {
         //	 status = minim.minimize(fMinimizer, ROOT::Math::MinimizerOptions::DefaultMinimizerAlgo().c_str());
         status = minim.minimize(minimizer, algorithm);  
         if (status%1000 == 0) {  // ignore erros from Improve 
@@ -459,6 +461,7 @@ RooFitResult* Util::FitPdf( RooWorkspace* w, TString fitRegions, Bool_t lumiCons
                 minimizer = "Minuit";
                 algorithm = "migradimproved";
             }
+            /*
             if (tries == 4 && !kickApplied) {
                 Logger << kINFO << "    ----> trying fit with different starting values" << GEndl;
                 RooFitResult* tmpResult = minim.save();
@@ -468,6 +471,7 @@ RooFitResult* Util::FitPdf( RooWorkspace* w, TString fitRegions, Bool_t lumiCons
                 tries=0;          // reset the fit cycle
                 kickApplied=true; // do kick only once
             }
+            */
         }
     }
 
@@ -491,7 +495,7 @@ RooFitResult* Util::FitPdf( RooWorkspace* w, TString fitRegions, Bool_t lumiCons
             val =  TMath::QuietNaN();       
         }
 
-    r->Print("v");
+    if (r!=0) r->Print("v");
 
     TString fitName = data_FR->GetName();
     for(unsigned int iVec=0; iVec<fitRegionsVec.size(); iVec++){
@@ -501,9 +505,11 @@ RooFitResult* Util::FitPdf( RooWorkspace* w, TString fitRegions, Bool_t lumiCons
 
     TString resultname = Form("RooFitResult_%s",fitName.Data());
     if(suffix!= "") resultname += "_" + suffix;
-    r->SetName(resultname.Data());
-    w->import(*r,kTRUE) ;
-    gDirectory->Add(r);
+    if (r!=0) {
+      r->SetName(resultname.Data());
+      w->import(*r,kTRUE) ;
+      gDirectory->Add(r);
+    }
 
     // save snapshot after fit has been done
     RooArgSet* params = (RooArgSet*) pdf_FR->getParameters(*data_FR) ;
@@ -1751,7 +1757,7 @@ Util::doFreeFit( RooWorkspace* w, RooDataSet* inputdata, const bool& verbose, co
         << " with strategy  " << strategy << " and tolerance " << tol << GEndl;
 
     bool kickApplied(false);
-    for (int tries = 1, maxtries = 5; tries <= maxtries; ++tries) {
+    for (int tries = 1, maxtries = 4; tries <= maxtries; ++tries) {
         //	 status = minim.minimize(fMinimizer, ROOT::Math::MinimizerOptions::DefaultMinimizerAlgo().c_str());
         status = minim.minimize(minimizer, algorithm);  
         if (status%1000 == 0) {  // ignore erros from Improve 
@@ -1773,7 +1779,7 @@ Util::doFreeFit( RooWorkspace* w, RooDataSet* inputdata, const bool& verbose, co
                 Logger << kINFO << "    ----> trying with improve" << GEndl;
                 minimizer = "Minuit";
                 algorithm = "migradimproved";
-            }
+            } /*
             if (tries == 4 && !kickApplied) {
                 Logger << kINFO << "    ----> trying fit with different starting values" << GEndl;
                 RooFitResult* tmpResult = minim.save();
@@ -1782,7 +1788,7 @@ Util::doFreeFit( RooWorkspace* w, RooDataSet* inputdata, const bool& verbose, co
                 delete tmpResult;
                 tries=0;          // reset the fit cycle
                 kickApplied=true; // do kick only once
-            }
+            } */
         }
     }
 
