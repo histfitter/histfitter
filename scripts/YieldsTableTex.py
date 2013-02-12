@@ -36,7 +36,7 @@ def tablefragment(m, channel, signalregionslist,sampleList,showBeforeFitError):
 \\noalign{\\smallskip}\\hline\\noalign{\\smallskip}
 {\\bf %s channel}          ''' %channel
   for region in m['names']:
-    tableline += " & " + region + "           "   
+    tableline += " & " + region.replace('_cuts','') + "           "   
 
   tableline += '''   \\\\[-0.05cm]
 \\noalign{\\smallskip}\\hline\\noalign{\\smallskip}
@@ -258,7 +258,13 @@ The errors shown are the statistical plus systematic uncertainties for control r
   return end
 
 
-def tableend4(regionsList, suffix='sr3jl', mentionCh=''):
+def tableend4(rList, suffix='sr3jl', mentionCh=''):
+
+  regionsList = []
+  for r in rList:
+      regionsList.append(r.replace('_cuts',''))
+
+  mentionCh = mentionCh.replace('_cuts','')
 
   tomention = ''
   if len(mentionCh)>0:
