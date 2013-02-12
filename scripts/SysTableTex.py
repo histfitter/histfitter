@@ -12,7 +12,7 @@ def tablefragment(m,table,signalRegions,skiplist,chanStr,showPercent):
     tableline += "c"   
   tableline += '''}
 \\noalign{\\smallskip}\\hline\\noalign{\\smallskip}
-{\\bf %s channel}                                   ''' % (table)
+{\\bf Uncertainty of channel}                                   ''' 
 
   for region in signalRegions:
     tableline += " & " + region + "           "   
@@ -20,6 +20,20 @@ def tablefragment(m,table,signalRegions,skiplist,chanStr,showPercent):
   tableline += ''' \\\\
 \\noalign{\\smallskip}\\hline\\noalign{\\smallskip}
 %%'''
+
+  tableline += '''
+Total background expectation            '''
+  for region in signalRegions:
+    tableline += " & " + str(("%.2f" %m[region]['nfitted'])) + "$       "
+  tableline += '''\\\\
+%%'''
+
+
+  tableline += ''' \\\\
+\\noalign{\\smallskip}\\hline\\noalign{\\smallskip}
+%%'''
+
+
 
   tableline += '''
 Total statistical $(\\sqrt{N_{\\rm exp}})$             '''
