@@ -193,9 +193,8 @@ void ConfigMgr::doHypoTest(FitConfig* fc, TString outdir, double SigXSecSysnsigm
         w->var("alpha_SigXSec")->setConstant(true);
     }
 
-    if( w->var("Lumi")!= NULL ) {
-        w->var("Lumi")->setRange(0.75,1.25);
-    }
+    // set Errors of all parameters to 'natural' values before plotting/fitting
+    Util::resetAllErrors(w);
 
     bool useCLs = true;  
     int npoints = 1;   
