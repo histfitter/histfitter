@@ -237,6 +237,7 @@ def latexfitresults( filename, region='3jL', sample='', resultName="RooExpandedF
 
   nFittedInRegion = pdfInRegion.getVal()
   regSys['sqrtnfitted'] = TMath.Sqrt(nFittedInRegion)
+  regSys['nfitted'] = nFittedInRegion
 
   pdfFittedErrInRegion = Util.GetPropagatedError(pdfInRegion, result) 
   regSys['totsyserr'] = pdfFittedErrInRegion
@@ -259,7 +260,6 @@ def latexfitresults( filename, region='3jL', sample='', resultName="RooExpandedF
     if namemap.has_key(parname): ## add this if I want description
       parname = namemap[parname] ## add this if I want description
     regSys['syserr_'+parname] =  sysError
-    par.setConstant()
 
 
   return regSys
@@ -516,7 +516,7 @@ if __name__ == "__main__":
   if not showAfterFitError:
     resultName =  'RooExpandedFitResult_beforeFit'
 
-  skiplist = ['sqrtnobsa', 'totbkgsysa', 'poisqcderr','sqrtnfitted','totsyserr']
+  skiplist = ['sqrtnobsa', 'totbkgsysa', 'poisqcderr','sqrtnfitted','totsyserr','nfitted']
 
   chanSys = {}
   origChanList = list(chanList)
