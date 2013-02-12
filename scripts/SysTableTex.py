@@ -76,7 +76,7 @@ Total background systematic              '''
 \\caption[Breakdown of uncertainty on background estimates]{
 Breakdown of the dominant systematic uncertainties on background estimates in the various signal regions.
 Note that the individual uncertainties can be correlated, and do not necessarily add up quadratically to 
-the total background uncertainty.
+the total background uncertainty. The percentages show the size of the uncertainty relative to the total expected background.
 \\label{table.results.bkgestimate.uncertainties.%s}}
 \\end{table}
 %%''' % (chanStr) 
