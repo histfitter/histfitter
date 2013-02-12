@@ -32,7 +32,8 @@ Total statistical $(\\sqrt{N_{\\rm exp}})$             '''
 Total background systematic              '''
 
   for region in signalRegions:
-    tableline += " & $\\pm " + str(("%.2f" %m[region]['totsyserr'])) + "$       "
+    percentage = m[region]['totsyserr']/m[region]['nfitted'] * 100.0    
+    tableline += " & $\\pm " + str(("%.2f" %m[region]['totsyserr'])) + "\ [" + str(("%.2f" %percentage)) + "\\%] $       "
 
   tableline += '''      \\\\
 \\noalign{\\smallskip}\\hline\\noalign{\\smallskip}
@@ -55,7 +56,8 @@ Total background systematic              '''
         if not showPercent:
           tableline += "   & $\\pm " + str(("%.2f" %m[region][name])) + "$       "
         else:
-          percentage = m[region][name]/m[region]['totsyserr'] * 100.0
+#          percentage = m[region][name]/m[region]['totsyserr'] * 100.0
+          percentage = m[region][name]/m[region]['nfitted'] * 100.0
           if percentage <1:
             tableline += "   & $\\pm " + str(("%.2f" %m[region][name])) + "\ [" + str(("%.2f" %percentage)) + "\\%] $       "
           else:
