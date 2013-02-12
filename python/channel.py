@@ -62,6 +62,7 @@ class Channel(object):
         self.ATLASLabelText = None
         self.showLumi = None
         self.remapSystChanName = ""
+        self.doBlindingOverwrite = False
         return
 
     def initialize(self):

@@ -226,7 +226,8 @@ class ConfigManager(object):
                     if sam.isData:
                         if (self.blindSR and (chan.channelName in tl.signalChannels)) or \
                            (self.blindCR and (chan.channelName in tl.bkgConstrainChannels)) or \
-                           (self.blindVR and (chan.channelName in tl.validationChannels)):
+                           (self.blindVR and (chan.channelName in tl.validationChannels)) or \
+                           (chan.doBlindingOverwrite):
                             sam.blindedHistName = "h%s%sBlind_%s_obs_%s" % (tl.name, sam.name, regString,
                                                                             replaceSymbols(chan.variableName))
                             if not sam.blindedHistName in self.hists.keys():
@@ -910,7 +911,7 @@ class ConfigManager(object):
                     self.prepare.addHisto(histoName, useOverflow=chan.useOverflowBin, useUnderflow=chan.useUnderflowBin)
                     chan.addData(histoName)
             elif chan.channelName in fitConfig.validationChannels:
-                if self.blindVR:
+                if self.blindVR or chan.doBlindingOverwrite:
                     chan.addData(sam.blindedHistName)
                 else:
                     self.prepare.addHisto(histoName, useOverflow=chan.useOverflowBin, useUnderflow=chan.useUnderflowBin)
@@ -1031,7 +1032,8 @@ class ConfigManager(object):
     def buildBlindedHistos(self, fitConfig, chan, sam):
         if (self.blindSR and (chan.channelName in fitConfig.signalChannels)) or \
            (self.blindCR and chan.channelName in fitConfig.bkgConstrainChannels) or \
-           (self.blindVR and (chan.channelName in fitConfig.validationChannels)):
+           (self.blindVR and (chan.channelName in fitConfig.validationChannels)) or \
+           (chan.doBlindingOverwrite):
             if not self.hists[sam.blindedHistName]:
                 self.hists[sam.blindedHistName] = TH1F(sam.blindedHistName,sam.blindedHistName,chan.nBins,chan.binLow,chan.binHigh)
 
