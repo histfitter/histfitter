@@ -22,8 +22,8 @@ upperlimit()
   ROOT::Math::MinimizerOptions::SetDefaultStrategy(0); // Standard default
   ROOT::Math::MinimizerOptions::SetDefaultPrintLevel(-1); // Quiet please...
 
-  TFile *file = TFile::Open("example_channel1_GaussExample_model.root");
-  RooWorkspace* w = (RooWorkspace *)file->Get("channel1"); 
+  TFile *file = TFile::Open("/afs/cern.ch/user/m/mbaak/Work/private/HistFitterUser/MET_jets_leptons/results/SoftLeptonMoriond2013_SRs2L__Discovery/Fit_SRs2L__Discovery_combined_BasicMeasurement_model.root");
+  RooWorkspace* w = (RooWorkspace *)file->Get("combined"); 
   
   // set random seed for toy generation
   RooRandom::randomGenerator()->SetSeed(seed);
