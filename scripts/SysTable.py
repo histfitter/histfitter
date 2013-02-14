@@ -260,7 +260,7 @@ def latexfitresults( filename, region='3jL', sample='', resultName="RooExpandedF
     if namemap.has_key(parname): ## add this if I want description
       parname = namemap[parname] ## add this if I want description
     regSys['syserr_'+parname] =  sysError
-
+    par.setConstant() 
 
   return regSys
 
