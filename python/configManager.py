@@ -385,6 +385,8 @@ class ConfigManager(object):
                      style.setATLASLabelText(c.ATLASLabelText)
                  if not c.showLumi is None:
                      style.setShowLumi(c.showLumi)     
+                 if not self.outputLumi is None:
+                     style.setLumi(self.outputLumi)     
 
                  # Plot cosmetics per fitConfig 
                  style.setDataColor(fc.dataColor)
