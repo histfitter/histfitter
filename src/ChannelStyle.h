@@ -39,6 +39,9 @@ class ChannelStyle : public TObject{
   TString getName(){ return m_name;}
   void setName(TString name){ m_name = name; }
 
+  TString getTitle(){ return m_title;}
+  void setTitle(TString title){ m_title = title; }
+
   Int_t getDataColor() { return m_dataColor; }
   void setDataColor(const Int_t& color) { m_dataColor = color; }
 
@@ -103,6 +106,7 @@ private:
   
   TMsgLogger m_logger;  // per ChannelStyle options (in python equivalent to TopLevelXML)
   TString m_name;
+  TString m_title;
   Float_t m_lumi;
 
   Int_t m_dataColor;

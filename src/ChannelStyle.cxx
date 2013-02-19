@@ -16,7 +16,8 @@ ChannelStyle::ChannelStyle() : m_logger("ChannelStyle"){
 }
 
 ChannelStyle::ChannelStyle(const TString& name) : m_logger("ChannelStyle") {
-    m_name=name;
+    m_name = name;
+    m_title = "";
     m_dataColor = kBlack;	     
     m_totalPdfColor = kBlue;
     m_errorLineColor = kBlue - 5;
