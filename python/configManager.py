@@ -367,6 +367,8 @@ class ConfigManager(object):
             for c in fc.channels:
                  style = ChannelStyle(c.channelName)
                  style.setNBins(c.nBins)
+                 if not c.title is None:
+                     style.setTitle(c.title)     
                  if not c.minY is None:
                     style.setMinY(c.minY)
                  if not c.maxY is None:
