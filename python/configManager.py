@@ -366,6 +366,8 @@ class ConfigManager(object):
             for c in fc.channels:
                  style = ChannelStyle(c.channelName)
                  style.setNBins(c.nBins)
+                 if not c.title is None:
+                     style.setTitle(c.title)     
                  if not c.minY is None:
                     style.setMinY(c.minY)
                  if not c.maxY is None:
@@ -384,6 +386,8 @@ class ConfigManager(object):
                      style.setATLASLabelText(c.ATLASLabelText)
                  if not c.showLumi is None:
                      style.setShowLumi(c.showLumi)     
+                 if not self.outputLumi is None:
+                     style.setLumi(self.outputLumi)     
 
                  # Plot cosmetics per fitConfig 
                  style.setDataColor(fc.dataColor)

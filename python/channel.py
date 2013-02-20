@@ -54,6 +54,7 @@ class Channel(object):
         #  Plot cosmetics
         self.minY = None
         self.maxY = None
+        self.title = None
         self.titleX = None
         self.titleY = None
         self.logY = None

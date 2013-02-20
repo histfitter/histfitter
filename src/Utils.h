@@ -98,7 +98,7 @@ namespace Util
   void SetPdfParError(RooWorkspace* w, RooAbsPdf* regionPdf, double Nsigma = 0.);
 
   void ATLASLabel(Double_t x,Double_t y, const char* text=NULL,Color_t color=kBlack) ;
-  void AddText(Double_t x,Double_t y,char* text=NULL,Color_t color=kBlack) ;
+  void AddText(Double_t x, Double_t y, char* text = NULL, Color_t color = kBlack, Float_t textSize = 72.) ;
   
   TString GetXTitle(RooRealVar* regionVar);
   
