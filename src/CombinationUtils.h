@@ -41,6 +41,8 @@ namespace Util
                           const std::string& pn8="", const float& v8=-1, const std::string& pn9="", const float& v9=-1 );
 
   bool findValueFromTree( TTree* tree, const std::string& searchpar, float& searchval, const std::vector<std::string>& pnVec, const std::vector<float>& vVec, const float& defaultVal=-999. );
+
+  float getxsec(const float& mp, const float& mchi, const float& mlsp);
 }
 
 

@@ -8,6 +8,7 @@
 #include "RooWorkspace.h"
 #include "TTree.h"
 #include "TMsgLogger.h"
+#include "TFile.h"
 
 using namespace std;
 
@@ -129,3 +130,14 @@ bool Util::findValueFromTree( TTree* tree, const std::string& searchpar, float& 
     return match;
 }
 
+
+float 
+Util::getxsec(const float& mp, const float& mchi, const float& mlsp) {
+  TFile* file = TFile::Open("xsectree.root");
+  TTree* xstree = (TTree*)file->Get("xstree");
+  float val = Util::getValueFromTree(xstree,"xsec","mp",mp,"mchi",mchi,"mlsp",mlsp);
+  file->Close();
+  //if (xstree!=0) { delete xstree; xstree = 0; }
+
+  return val;
+}
