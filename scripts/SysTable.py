@@ -27,8 +27,8 @@ def getnamemap():
   namemap['alpha_JES'] = 'Jet energy scale'
   namemap['alpha_LE'] = 'Lepto efficiency'
 
-  namemap['alpha_RESOST'] = 'CellOut energy resolution'
-  namemap['alpha_SCALEST'] = 'CellOut energy scale'
+  namemap['alpha_RESOST'] = 'MET soft term energy resolution'
+  namemap['alpha_SCALEST'] = 'MET soft term energy scale'
   namemap['alpha_TE'] = 'Trigger weight'
   
   namemap['alpha_QCDNorm_SR1L3j'] = 'QCD estimate SR1L3j'

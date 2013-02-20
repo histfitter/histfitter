@@ -36,7 +36,10 @@ def tablefragment(m, channel, signalregionslist,sampleList,showBeforeFitError):
 \\noalign{\\smallskip}\\hline\\noalign{\\smallskip}
 {\\bf %s channel}          ''' %channel
   for region in m['names']:
-    tableline += " & " + region + "           "   
+    if region.startswith("SR"):
+      tableline += " & " + region.replace("_meff","$_{exclusion}$").replace("_cuts","").replace("_disc","$_{discovery}$") + "           "   
+    else:
+      tableline += " & " + region.replace("_meff","").replace("_cuts","").replace("_disc","") + "           "   
 
   tableline += '''   \\\\[-0.05cm]
 \\noalign{\\smallskip}\\hline\\noalign{\\smallskip}
@@ -278,15 +281,11 @@ def tableend4(regionsList, suffix='sr3jl', mentionCh=''):
     else:
       end += " and " + region
       
-  end += ''' region(s), %s for an integrated luminosity of $20.5$~\\ifb.
-%%The results are obtained from the control regions using the discovery fit (see text for details). The fit results of the loose-not-tight regions are not shown.
-Nominal MC expectations (normalised to MC cross-sections) are given for comparison. 
-%%The Monte Carlo QCD estimates are provided for illustrational purposes only, and are not used in the fit.
-The errors shown are the statistical plus systematic uncertainties.}
-%%, except for the error on the background estimate in the signal region, which is the systematic uncertainty only.}
-\\label{table.results.yields.fit.%s}
-\\end{table}
-%%''' %(tomention,suffix)
+  end += ''' regions, with the discovery fit configuration, for an integrated luminosity of $20.7$~\\ifb.
+  Nominal MC and data-driven expectations are given for comparison. The errors shown are the systematic uncertainties.}
+  \\label{table.results.yields.fit.%s}
+  \\end{table}
+  %%''' %(suffix)
 
   return end
 
