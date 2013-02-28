@@ -24,7 +24,7 @@ def tablefragment(m,table,signalRegions,skiplist,chanStr,showPercent):
   tableline += '''
 Total background expectation            '''
   for region in signalRegions:
-    tableline += " & " + str(("%.2f" %m[region]['nfitted'])) + "$       "
+    tableline += " &  $" + str(("%.2f" %m[region]['nfitted'])) + "$       "
   tableline += '''\\\\
 %%'''
 
