@@ -127,6 +127,9 @@ std::list<LimitResult> CollectHypoTestResults( const TString& infile, const TStr
         //cout << "Check fit result " << fitresultname << GEndl;
         fitresult = GetFitResultFromFile(infile, fitresultname);
 
+        bool nofit = false;
+        if (fitresult == NULL) { nofit = true; }
+
         bool failed_fit = false;
         if (fitresult && fitresult->status()!=0) {
             ToyUtilsLogger << kWARNING << "Fit failed for point " << fitresultname.Data() << ". Result has been flagged as failed fit." << GEndl;
@@ -170,6 +173,7 @@ std::list<LimitResult> CollectHypoTestResults( const TString& infile, const TStr
             failMap["failedcov"] = float(failed_error);
             failMap["failedp0"] = float(failed_p0half);
             failMap["fitstatus"] = float(fitstatus);
+            failMap["nofit"] = float(nofit);
 
             result.AddMetaData ( ParseWorkspaceID(itr->first) );
             result.AddMetaData ( failMap );
