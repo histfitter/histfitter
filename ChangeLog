@@ -1,7 +1,10 @@
+2013-03-05 Max Baak <mbaak@cern.ch>
+	M src/toy_utils.cxx
+	* Don't reject failed fits, but flag them.
+
 2013-02-13 Max Baak <mbaak@cern.ch>
         * Tag before applying some major updates
         * Tagged HistFitter-00-00-25
-
 
 2013-02-06 Max Baak <mbaak@cern.ch>
         * Tagged HistFitter-00-00-24
