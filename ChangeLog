@@ -1,6 +1,8 @@
 2013-03-05 Max Baak <mbaak@cern.ch>
 	M src/toy_utils.cxx
-	* Don't reject failed fits, but flag them.
+	* Don't reject failed fits, but flag them in list file.
+	M setup.sh
+	* Points to root version that applies kick to reset failed fit during hypo test
 
 2013-02-13 Max Baak <mbaak@cern.ch>
         * Tag before applying some major updates
