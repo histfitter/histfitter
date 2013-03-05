@@ -25,24 +25,46 @@ def getnamemap():
   namemap['alpha_BT'] = 'B tagging'
   namemap['alpha_JER'] = 'Jet energy resolution'
   namemap['alpha_JES'] = 'Jet energy scale'
-  namemap['alpha_LE'] = 'Lepto efficiency'
+  namemap['alpha_LE'] = 'Lepton efficiency'
+
+  namemap['alpha_pythgen'] = 'TTbar: Pythia/Alpgen difference'
+  namemap['alpgen_mes'] = 'Muon energy scale'
 
   namemap['alpha_RESOST'] = 'CellOut energy resolution'
   namemap['alpha_SCALEST'] = 'CellOut energy scale'
   namemap['alpha_TE'] = 'Trigger weight'
   
-  namemap['alpha_QCDNorm_SR1L3j'] = 'QCD estimate SR1L3j'
-  namemap['alpha_QCDNorm_SR1L5j'] = 'QCD estimate SR1L5j'
+
   namemap['alpha_QCDNorm_SR1a'] = 'QCD estimate SR1a'
   namemap['alpha_QCDNorm_SR1b'] = 'QCD estimate SR1b'
   namemap['alpha_QCDNorm_SR2a'] = 'QCD estimate SR2a'
   namemap['alpha_QCDNorm_SR2b'] = 'QCD estimate SR2b'
   namemap['alpha_QCDNorm_SR2l'] = 'QCD estimate SR2l'
+  namemap['alpha_QCDNorm_SR1L3j'] = 'QCD estimate SR1L3j'
+  namemap['alpha_QCDNorm_SR1L5j'] = 'QCD estimate SR1L5j'
+  namemap['alpha_QCDNorm_SR1L1Ba'] = 'QCD estimate SR1L1Ba'
+  namemap['alpha_QCDNorm_SR1L1Bc'] = 'QCD estimate SR1L1Bc'
+  namemap['alpha_QCDNorm_SR1L2Ba'] = 'QCD estimate SR1L2Ba'
+  namemap['alpha_QCDNorm_SR1L2Bc'] = 'QCD estimate SR1L2Bc'
+  namemap['alpha_QCDNorm_SR2L'] = 'QCD estimate SR2L'
   namemap['alpha_QCDNorm_CRT'] = 'QCD estimate CRT'
   namemap['alpha_QCDNorm_CRW'] = 'QCD estimate CRW'
   namemap['alpha_QCDNorm_CRT5j'] = 'QCD estimate CRT5j'
   namemap['alpha_QCDNorm_CRW5j'] = 'QCD estimate CRW5j'
+  namemap['alpha_QCDNorm_CRWbb'] = 'QCD estimate CRWbb'
+  namemap['alpha_QCDNorm_VR1'] = 'QCD estimate VR1'
+  namemap['alpha_QCDNorm_VR2'] = 'QCD estimate VR2'
 
+
+  namemap['alpha_WTheoNpart'] = 'W theoretical uncertainty'
+  namemap['alpha_pdfInter'] = 'pdf (none) uncertainty'
+  namemap['alpha_pdfIntra'] = 'pdf (Intra,Inter) uncertainty'
+  namemap['alpha_pythwig'] = 'TTbar: PowhegPythia/PowhegJimmy difference'
+  namemap['alpha_sherpgen'] = 'W: SherpaWMassiveB/AlpgenJimmyW difference'
+  namemap['alpha_topTheoFacSc'] = 'top theoretical uncertainty: FacSc'
+  namemap['alpha_topTheoPS'] = 'top theoretical uncertainty: PS'
+  namemap['alpha_topTheoRenSc'] = 'top theoretical uncertainty: RenSc'
+  namemap['alpha_wbb'] = 'Wbb uncertainty'
  
   namemap['alpha_eglow'] = 'Electron energy scale: low-pt uncertainty'
   namemap['alpha_egmat'] = 'Electron energy scale: material uncertainty'
@@ -69,17 +91,24 @@ def getnamemap():
   namemap['gamma_stat_CRT5j_cuts_bin_0'] = 'MC statistics CRT5j bin 0'
   namemap['gamma_stat_SR1L3j_cuts_bin_0'] = 'MC statistics SR1L3j bin 0'
   namemap['gamma_stat_SR1L5j_cuts_bin_0'] = 'MC statistics SR1L5j bin 0'
-  namemap['gamma_stat_SR1a_cuts_bin_0'] = 'MC statistics SR1a bin 0'
-  namemap['gamma_stat_SR1b_cuts_bin_0'] = 'MC statistics SR1b bin 0'
-  namemap['gamma_stat_SR2a_cuts_bin_0'] = 'MC statistics SR2a bin 0'
-  namemap['gamma_stat_SR2b_cuts_bin_0'] = 'MC statistics SR2b bin 0'
-  namemap['gamma_stat_SR2l_cuts_bin_0'] = 'MC statistics SR2l bin 0'
+  namemap['gamma_stat_SR1L3j_cuts_bin_0'] = 'MC statistics SR1L3j bin 0'
+  namemap['gamma_stat_SR1L5j_cuts_bin_0'] = 'MC statistics SR1L5j bin 0'
+  namemap['gamma_stat_SR1L1Ba_cuts_bin_0'] = 'MC statistics SR1L1Ba bin 0'
+  namemap['gamma_stat_SR1L1Bc_cuts_bin_0'] = 'MC statistics SR1L1Bc bin 0'
+  namemap['gamma_stat_SR1L2Ba_cuts_bin_0'] = 'MC statistics SR1L2Ba bin 0'
+  namemap['gamma_stat_SR1L2Bc_cuts_bin_0'] = 'MC statistics SR1L2Bc bin 0'
+  namemap['gamma_stat_SR2L_cuts_bin_0'] = 'MC statistics SR2L bin 0'
+  namemap['gamma_stat_VR1_cuts_bin_0'] = 'MC statistics VR1 bin 0'
+  namemap['gamma_stat_VR2_cuts_bin_0'] = 'MC statistics VR2 bin 0'
+  namemap['gamma_stat_VR3_cuts_bin_0'] = 'MC statistics VR3 bin 0'
+
   namemap['alpha_errBG'] = 'Systematics Background'
   namemap['alpha_errDB'] = 'Systematics Dibosons'
   namemap['alpha_errDY'] = 'Systematics AlpgenDrellYan'
   namemap['alpha_errST'] = 'Systematics SingleTop'
   namemap['alpha_errTV'] = 'Systematics ttbarV'
   namemap['alpha_errZ'] = 'Systematics AlpgenZ'
+  namemap['alpha_err'] = 'MC Background'
   namemap['mu_Top'] =  'ttbar yield'
   namemap['mu_WZ'] = 'W(Z)+jets yield'
 
@@ -142,7 +171,7 @@ def getnamemap():
 
   namemap['alpha_KtScaleTop'] = 'kT scale Alpgen ttbar'
   namemap['alpha_KtScaleWZ'] = 'kT scale Alpgen W+jets'
-  namemap['alpha_LE'] = 'Lepto efficiency'
+  namemap['alpha_LE'] = 'Lepton efficiency'
   namemap['alpha_PU'] = 'Pile-up'
   namemap['alpha_TE'] = 'Trigger weight'
   namemap['alpha_JR'] = 'Jet energy resolution'
@@ -261,6 +290,8 @@ def latexfitresults( filename, region='3jL', sample='', resultName="RooExpandedF
       parname = namemap[parname] ## add this if I want description
     regSys['syserr_'+parname] =  sysError
     par.setConstant() 
+
+  
 
   return regSys
 

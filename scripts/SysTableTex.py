@@ -56,8 +56,13 @@ Total background systematic              '''
 
 
   doAsym=False
-  m_listofkeys = m[signalRegions[0]].keys()
-  m_listofkeys.sort()
+  #m_listofkeys = m[signalRegions[0]].keys()
+  #m_listofkeys.sort()
+
+  d = m[signalRegions[0]] 
+
+  m_listofkeys = sorted(d.iterkeys(), key=lambda k: d[k], reverse=True)
+
   for name in m_listofkeys:
     if name not in skiplist:
       printname = name
