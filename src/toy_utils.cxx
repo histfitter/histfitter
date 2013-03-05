@@ -128,37 +128,53 @@ std::list<LimitResult> CollectHypoTestResults( const TString& infile, const TStr
         fitresult = GetFitResultFromFile(infile, fitresultname);
 
         bool failed_fit = false;
-
         if (fitresult && fitresult->status()!=0) {
-            ToyUtilsLogger << kWARNING << "Fit failed for point " << fitresultname.Data() << " - do not use hypo test result" << GEndl;
+            ToyUtilsLogger << kWARNING << "Fit failed for point " << fitresultname.Data() << ". Result has been flagged as failed fit." << GEndl;
             counter_failed_fits++;
             fitresult->Print();	
             failed_fit = true;   
         }
-        
+
+        bool failed_error = false;
         if (fitresult && fitresult->covQual() < 1.1) {
-            ToyUtilsLogger << kWARNING << "Fit result " << fitresultname.Data() << " has bad covariance matrix quality! Check your fit setup!" << GEndl;
+            ToyUtilsLogger << kWARNING << "Fit result " << fitresultname.Data() << " has bad covariance matrix quality! Result has been flagged as failed fit." << GEndl;
             counter_badcovquality++;
             failed_fit = true;
         } else if (fitresult && fitresult->covQual() < 2.1) {
-            ToyUtilsLogger << kWARNING << "Fit result " << fitresultname.Data() << " has mediocre covariance matrix quality.  Might be ok if you ran asymptotics." << GEndl;
+            ToyUtilsLogger << kWARNING << "Fit result " << fitresultname.Data() << " has mediocre covariance matrix quality. Result has been flagged as failed cov matrix." << GEndl;
             counter_not_great_fits++;
             //failed_fit = true;
+            failed_error = true;
         }
 
+        int fitstatus = 0;
+        if (fitresult) {
+            fitstatus = fitresult->status() ;
+        }
+
+        bool failed_p0half = false;
         if(ht->ArraySize() == 0){
-            ToyUtilsLogger << kWARNING << "Fit result " << fitresultname.Data() << " has failed HypoTestInverterResult - do not use result" << GEndl;
+            ToyUtilsLogger << kWARNING << "Fit result " << fitresultname.Data() << " has failed HypoTestInverterResult - cannot use result. Skip." << GEndl;
         } else {
             LimitResult result = RooStats::get_Pvalue( ht );
             // MB Keeping points for now, this also rejects bad fits.
             if (fabs(result.GetP0()-0.5) < 0.0001 && result.GetSigma0() < 0.0001){
               //counter_probably_bad_fit++;
-              ToyUtilsLogger << kINFO << "One of the base fits _may_ have failed for point (or may not): " << fitresultname.Data() << " : " << result.GetP0() << " " << result.GetSigma0() << " Keeping this. " << GEndl;
+              ToyUtilsLogger << kINFO << "One of the base fits _may_ have failed for point (or may not): " << fitresultname.Data() << " : " << result.GetP0() << " " << result.GetSigma0() << " Flagged as p0=0.5." << GEndl;
               //failed_fit = true;
+              failed_p0half = true;
             }
+
+            std::map<TString,float> failMap;
+            failMap["failedfit"] = float(failed_fit);
+            failMap["failedcov"] = float(failed_error);
+            failMap["failedp0"] = float(failed_p0half);
+            failMap["fitstatus"] = float(fitstatus);
+
             result.AddMetaData ( ParseWorkspaceID(itr->first) );
-            if (!failed_fit) 
-                limres.push_back(result); // store info from interpretation string (eg m0 and m12 value) 
+            result.AddMetaData ( failMap );
+
+            limres.push_back(result); // store info from interpretation string (eg m0 and m12 value) 
         }
 
         if(ht){
