@@ -134,7 +134,6 @@ std::list<LimitResult> CollectHypoTestResults( const TString& infile, const TStr
         if (fitresult && fitresult->status()!=0) {
             ToyUtilsLogger << kWARNING << "Fit failed for point " << fitresultname.Data() << ". Result has been flagged as failed fit." << GEndl;
             counter_failed_fits++;
-            fitresult->Print();	
             failed_fit = true;   
         }
 
