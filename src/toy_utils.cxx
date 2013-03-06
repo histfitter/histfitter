@@ -127,6 +127,8 @@ std::list<LimitResult> CollectHypoTestResults( const TString& infile, const TStr
         //cout << "Check fit result " << fitresultname << GEndl;
         fitresult = GetFitResultFromFile(infile, fitresultname);
 
+        ToyUtilsLogger << kINFO << "At fit point " << fitresultname.Data() << GEndl;
+
         bool nofit = false;
         if (fitresult == NULL) { nofit = true; }
 
@@ -229,6 +231,7 @@ const char* WriteResultSet( const std::list<LimitResult>& summary, const TString
     includes     = "\n#include \"TTree.h\"\n";
     includes    += "#include \"TFile.h\"\n";
     includes    += "#include <iostream>\n";
+    includes    += "using namespace std;\n";
 
     harvesttree  = "\nTTree* harvesttree(const char* textfile=0) {\n";
     harvesttree += "  const char* filename    = \"" + outfile + "\";\n";
