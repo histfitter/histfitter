@@ -267,7 +267,7 @@ RooStats::HypoTestTool::AnalyzeResult( HypoTestInverterResult * r,
             pl->SetLogYaxis(true);
             pl->Draw();
         }
-        c2->SaveAs( (TString::Format("cls_distribution_%s%s", mResultFileName.Data(), outfiletype)) );
+        c2->SaveAs( (TString::Format("%scls_distribution_%s%s", outputDir.Data(), gSystem->BaseName(mResultFileName), outfiletype)) );
     }
 }
 
