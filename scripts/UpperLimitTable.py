@@ -97,10 +97,14 @@ def latexfitresults(filename, poiname='mu_SIG', lumiFB=1.0, nTOYS=3000, asimov=F
  #       print " CLB_M =", CLB_M, " CLB_P =", CLB_P, "  mu_P = ", mu_P, " mu_M = ", mu_M
 
   # interpolate the value of CLB to be exactly above upperlimit p-val
-  alpha_CLB = (CLB_P - CLB_M) / (mu_P - mu_M)
-  beta_CLB = CLB_P - alpha_CLB*mu_P
-  # CLB is taken as the point on the CLB curve for the same poi value, as the observed upperlimit
-  CLB = alpha_CLB * uL_nobsinSR + beta_CLB
+  try:
+    alpha_CLB = (CLB_P - CLB_M) / (mu_P - mu_M)
+    beta_CLB = CLB_P - alpha_CLB*mu_P
+    # CLB is taken as the point on the CLB curve for the same poi value, as the observed upperlimit
+    CLB = alpha_CLB * uL_nobsinSR + beta_CLB
+  except ZeroDivisionError:
+    print "WARNING ZeroDivisionError while calculating CLb. Setting CLb=0."
+    CLB=0.0
   #print " CLB = " , CLB
 
   print "\n\n\n\n  ***---  now doing p-value calculation ---*** \n\n\n\n"
@@ -215,20 +219,12 @@ if __name__ == "__main__":
   outputFileNameList = []
   if poiName == "default":
     poiList = []
-  for chan in chanList:
-    origwsChan = None
-    if chan in wsFileName:
-      origwsChan = chan
-    if origwsChan == None:
-      print " \n Warning:  none of the given regions/channels(", chanList, ") correspond to the given workspace file(", wsFileName,") \n   always at least the original channel needs to be given;  \n ie -c SR4jTEl -w MyDiscoveryAnalysis_SR4jTEl_SPlusB_combined_NormalMeasurement_model.root"
-      sys.exit(0)
 
   for chan in chanList:
-    tmp_wsFileName = wsFileName.replace(origwsChan,chan)
-    if os.path.isfile(tmp_wsFileName):
-      wsFileNameList.append(tmp_wsFileName)
+    if os.path.isfile(wsFileName):
+      wsFileNameList.append(wsFileName)
     else:
-      print " \n\n\n Warning: workspace file ", tmp_wsFileName, " does not exist, remove this channel from command or make this workspace file available"
+      print " \n\n\n Warning: workspace file ", wsFileName, " does not exist, remove this channel from command or make this workspace file available"
       sys.exit(0)
     tmp_outputFileName = "UpperLimitTable_"+chan+".tex"
     if useAsimovSet:
@@ -248,10 +244,11 @@ if __name__ == "__main__":
     print " \n Warning: given list of channels has different size than created list of workspace names:  len(chanList) = ", len(chanList), "  len(wsFileNameList) = ", len(wsFileNameList)
 
   upLim = {}
-  for index,chan in enumerate(chanList):
+  for index,chan in enumerate(chanList):      
     poiNameChan = poiList[index]
     wsFileNameChan = wsFileNameList[index]
     outputFileNameChan = outputFileNameList[index]
+      
     # calculate upper limit
     ulMapChan = latexfitresults(wsFileNameChan, poiNameChan, lumiFB, nTOYS, useAsimovSet, chan)
     upLim[chan] = ulMapChan
