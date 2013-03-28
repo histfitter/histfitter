@@ -278,14 +278,14 @@ if __name__ == "__main__":
 
   wsFileName='/results/MyOneLeptonKtScaleFit_HardLepR17_BkgOnlyKt_combined_NormalMeasurement_model_afterFit.root'
   try:
-    opts, args = getopt.getopt(sys.argv[1:], "o:c:w:s:bSag")
+    opts, args = getopt.getopt(sys.argv[1:], "o:c:w:s:bSagy")
   except:
     usage()
   if len(opts)<2:
     usage()
 
   outputFileName="default"
-  exactRegionNames=True #if true, Util.GetComponent() calls will use exact region names, rather than string matching
+  exactRegionNames=False #if true, Util.GetComponent() calls will use exact region names, rather than string matching
   showBeforeFitError=False
   showSumAllRegions=False
   useAsimovSet=False
