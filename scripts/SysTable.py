@@ -16,6 +16,9 @@ from sys import exit
 from SysTableTex import *
 import pickle
 
+from logger import Logger
+log = Logger('SysTable')
+#log.setLevel('DEBUG')
 
 def getnamemap():
 
@@ -186,7 +189,7 @@ def getnamemap():
 
   
 
-def latexfitresults( filename, region='3jL', sample='', resultName="RooExpandedFitResult_afterFit", dataname='obsData'):
+def latexfitresults( filename, region='3jL', sample='', resultName="RooExpandedFitResult_afterFit", dataname='obsData', doAsym=False):
 
   namemap = {} ## add this if I want description
   namemap = getnamemap() ## add this if I want description
@@ -268,7 +271,7 @@ def latexfitresults( filename, region='3jL', sample='', resultName="RooExpandedF
   regSys['sqrtnfitted'] = TMath.Sqrt(nFittedInRegion)
   regSys['nfitted'] = nFittedInRegion
 
-  pdfFittedErrInRegion = Util.GetPropagatedError(pdfInRegion, result) 
+  pdfFittedErrInRegion = Util.GetPropagatedError(pdfInRegion, result, doAsym) 
   regSys['totsyserr'] = pdfFittedErrInRegion
 
 
@@ -285,7 +288,7 @@ def latexfitresults( filename, region='3jL', sample='', resultName="RooExpandedF
     parname = fpf[idx].GetName()
     par = w.var(parname)
     par.setConstant(False)
-    sysError  = Util.GetPropagatedError(pdfInRegion, result)
+    sysError  = Util.GetPropagatedError(pdfInRegion, result, doAsym)
     if namemap.has_key(parname): ## add this if I want description
       parname = namemap[parname] ## add this if I want description
     regSys['syserr_'+parname] =  sysError
@@ -304,7 +307,7 @@ def latexfitresults( filename, region='3jL', sample='', resultName="RooExpandedF
 ##################################
 
 
-def latexfitresults_method2(filename,resultname='RooExpandedFitResult_afterFit', region='3jL', sample='', fitregions = 'WR,TR,S3,S4,SR3jT,SR4jT', dataname='obsData'):
+def latexfitresults_method2(filename,resultname='RooExpandedFitResult_afterFit', region='3jL', sample='', fitregions = 'WR,TR,S3,S4,SR3jT,SR4jT', dataname='obsData', doAsym=False):
 
 #  namemap = {}
 #  namemap = getnamemap()
@@ -394,7 +397,7 @@ def latexfitresults_method2(filename,resultname='RooExpandedFitResult_afterFit',
   nFittedInRegion = pdfInRegion.getVal()
   regSys['sqrtnfitted'] = TMath.Sqrt(nFittedInRegion)
 
-  pdfFittedErrInRegion = Util.GetPropagatedError(pdfInRegion, result) 
+  pdfFittedErrInRegion = Util.GetPropagatedError(pdfInRegion, result, doAsym) 
   regSys['totsyserr'] = pdfFittedErrInRegion
   
   # redo the fit for every parameter being fixed
@@ -421,7 +424,7 @@ def latexfitresults_method2(filename,resultname='RooExpandedFitResult_afterFit',
     expResultAfter_1parfixed = RooExpandedFitResult(result_1parfixed, resultlistOrig)
 
     nFittedInRegion_1parfixed = pdfInRegion.getVal()
-    pdfFittedErrInRegion_1parfixed = Util.GetPropagatedError(pdfInRegion, expResultAfter_1parfixed) #  result_1parfixed)
+    pdfFittedErrInRegion_1parfixed = Util.GetPropagatedError(pdfInRegion, expResultAfter_1parfixed, doAsym) #  result_1parfixed)
 
     if pdfFittedErrInRegion_1parfixed > pdfFittedErrInRegion:
       print "\n\n  WARNING  parameter ", parname," gives a larger error when set constant. Do you expect this?"
@@ -467,6 +470,7 @@ if __name__ == "__main__":
     print "-o <outputFileName>: sets the output table file name, name defined by regions if none provided"
     print "-b: shows the error on samples Before the fit (by default After fit is shown)"
     print "-%: also show the individual errors as percentage of the total systematic error (off by default)"
+    print "-y: take symmetrized average of minos errors"
 
     print "\nFor example:"
     print "SysTable.py -w /afs/cern.ch/user/k/koutsman/HistFitterUser/MET_jets_leptons/results/Combined_KFactorFit_5Channel_Validation_combined_BasicMeasurement_model_afterFit.root  -c SR7jTEl_meffInc,SR7jTMu_meffInc"
@@ -481,7 +485,7 @@ if __name__ == "__main__":
 
   wsFileName='/results/MyOneLeptonKtScaleFit_HardLepR17_BkgOnlyKt_combined_NormalMeasurement_model_afterFit.root'
   try:
-    opts, args = getopt.getopt(sys.argv[1:], "o:c:w:m:f:s:%b")
+    opts, args = getopt.getopt(sys.argv[1:], "o:c:w:m:f:s:%by")
   except:
     usage()
   if len(opts)<2:
@@ -491,6 +495,7 @@ if __name__ == "__main__":
   method="1"
   showAfterFitError=True
   showPercent=False
+  doAsym=False
   for opt,arg in opts:
     if opt == '-c':
       chanStr=arg.replace(",","_")
@@ -515,6 +520,8 @@ if __name__ == "__main__":
       showAfterFitError=False
     elif opt == '-%':
       showPercent=True
+    elif opt == '-y':
+      doAsym=True
      
   if outputFileName=="default":
     outputFileName=chanStr+'_SysTable.tex'
@@ -553,17 +560,17 @@ if __name__ == "__main__":
   origChanList = list(chanList)
   for chan in origChanList:
     if method == "2":
-      regSys = latexfitresults_method2(wsFileName,resultName,chan,'',fitRegionsStr,'obsData')
+      regSys = latexfitresults_method2(wsFileName,resultName,chan,'',fitRegionsStr,'obsData',doAsym)
     else:
-      regSys = latexfitresults(wsFileName,chan,'',resultName,'obsData')
+      regSys = latexfitresults(wsFileName,chan,'',resultName,'obsData',doAsym)
     chanSys[chan] = regSys
 
     if chosenSample:
       for sample in sampleList:
         if method == "2":
-          regSys = latexfitresults_method2(wsFileName,resultName,chan,sample,fitRegionsStr,'obsData')
+          regSys = latexfitresults_method2(wsFileName,resultName,chan,sample,fitRegionsStr,'obsData',doAsym)
         else:
-          regSys = latexfitresults(wsFileName,chan,sample,resultName,'obsData')
+          regSys = latexfitresults(wsFileName,chan,sample,resultName,'obsData',doAsym)
         chanSys[chan+"_"+sample] = regSys
         chanList.append(chan+"_"+sample)
 

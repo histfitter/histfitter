@@ -74,7 +74,7 @@ namespace Util
   RooCurve* MakePdfErrorRatioHist(RooWorkspace* w, RooAbsData* regionData, RooAbsPdf* regionPdf, RooRealVar* regionVar, RooFitResult* rFit, Double_t Nsigma = 1.);
 
   RooFitResult* FitPdf(RooWorkspace* w,  TString fitRegions="ALL", Bool_t lumiConst=false, RooAbsData* inputData=0, TString suffix ="", Bool_t minos = kFALSE, TString minosPars="");
-  double GetPropagatedError(RooAbsReal* var, const RooFitResult& fr); //, RooArgList varlist=RooArgList() ) ; 
+  double GetPropagatedError(RooAbsReal* var, const RooFitResult& fr, const bool& doAsym=false); //, RooArgList varlist=RooArgList() ) ; 
   void RemoveEmptyDataBins(RooWorkspace* w, RooPlot* frame);
 
   RooAbsReal* GetComponent(RooWorkspace* w, TString component, TString region, const bool exactRegionName=false);

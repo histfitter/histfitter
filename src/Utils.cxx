@@ -2243,7 +2243,7 @@ vector<double> Util::GetAllComponentFracInRegion(RooWorkspace* w, TString region
 
 
 //_____________________________________________________________________________
-double Util::GetPropagatedError(RooAbsReal* var, const RooFitResult& fr) 
+double Util::GetPropagatedError(RooAbsReal* var, const RooFitResult& fr, const bool& doAsym) 
 {
 
     // copied from RooAbsReal : fixed bug in reducedCovarianceMatrix (!)
@@ -2290,9 +2290,16 @@ double Util::GetPropagatedError(RooAbsReal* var, const RooFitResult& fr)
         int newI = fpf_idx[ivar];
 
         Double_t cenVal = rrv.getVal() ;
-        Double_t errVal = sqrt(V(newI,newI)) ;
+	Double_t errHes = sqrt(V(newI,newI)) ;
 
-        Logger << kDEBUG << " GPP:  par = " << rrv.GetName() << " cenVal = " << cenVal << " errVal = " << errVal << GEndl;
+	Double_t errHi = rrv.getErrorHi();
+	Double_t errLo = rrv.getErrorLo();
+	Double_t errAvg = (TMath::Abs(errLo) + TMath::Abs(errHi))/2.0;
+
+	Double_t errVal = errHes;
+	if (doAsym) { errVal = errAvg; }
+
+        Logger << kDEBUG << " GPP:  par = " << rrv.GetName() << " cenVal = " << cenVal << " errSym = " << errHes << " errAvgAsym = " << errAvg << GEndl;
 
         // Make Plus variation
         ((RooRealVar*)paramList.at(ivar))->setVal(cenVal+errVal) ;

@@ -16,7 +16,7 @@ import sys
 
 # Main function calls are defined below.
 
-def latexfitresults(filename,regionList,sampleList,exactRegionNames=False,dataname='obsData',showSum=False):
+def latexfitresults(filename,regionList,sampleList,exactRegionNames=False,dataname='obsData',showSum=False, doAsym=False):
   workspacename = 'w'
   w = Util.GetWorkspaceFromFile(filename,'w')
 
@@ -113,7 +113,7 @@ def latexfitresults(filename,regionList,sampleList,exactRegionNames=False,datana
       print pdf.GetName(), " component list:", prodList.Print("v")
     
   nFittedInRegionList =  [ pdf.getVal() for index, pdf in enumerate(rrspdfinRegionList)]
-  pdfFittedErrInRegionList = [ Util.GetPropagatedError(pdf, resultAfterFit) for pdf in rrspdfinRegionList]
+  pdfFittedErrInRegionList = [ Util.GetPropagatedError(pdf, resultAfterFit, doAsym) for pdf in rrspdfinRegionList]
 
   if showSum:
     pdfInAllRegions = RooArgSet()
@@ -264,6 +264,7 @@ if __name__ == "__main__":
     print "-a: use Asimov dataset (off by default)"
     print "-b: shows also the error on samples Before the fit (off by default)"
     print "-S: also show the sum of all regions (off by default)"
+    print "-y: take symmetrized average of minos errors"
 
     print "\nFor example:"
     print "YieldsTable.py -c SR7jTEl,SR7jTMu -s WZ,Top -w /afs/cern.ch/user/k/koutsman/HistFitterUser/MET_jets_leptons/results/Combined_KFactorFit_5Channel_Validation_combined_BasicMeasurement_model_afterFit.root"
@@ -289,6 +290,7 @@ if __name__ == "__main__":
   showSumAllRegions=False
   useAsimovSet=False
   ignoreLastChannel=False
+  doAsym=False
   for opt,arg in opts:
     if opt == '-c':
       chanStr=arg.replace(",","_")
@@ -308,6 +310,8 @@ if __name__ == "__main__":
       useAsimovSet=True
     elif opt == '-g':
       ignoreLastChannel = True 
+    elif opt == '-y':
+      doAsym=True
 
   mentionCh = ""
   if ignoreLastChannel:
@@ -333,7 +337,7 @@ if __name__ == "__main__":
     f.close()
   else:
     print "OPENING ROOTFIT WORKSPACE"
-    m3 = latexfitresults(wsFileName,chanList,sampleList,exactRegionNames,dataname,showSumAllRegions)
+    m3 = latexfitresults(wsFileName,chanList,sampleList,exactRegionNames,dataname,showSumAllRegions,doAsym)
     f = open(outputFileName.replace(".tex",".pickle"), 'w')
     pickle.dump(m3, f)
     f.close()
