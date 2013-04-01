@@ -122,7 +122,7 @@ def latexfitresults(filename,regionList,sampleList,exactRegionNames=False,datana
     pdfSumInAllRegions = RooAddition( "pdf_AllRegions_AFTER", "pdf_AllRegions_AFTER", pdfInAllRegions)
     pdfSumInAllRegions.Print()
     nPdfSumVal = pdfSumInAllRegions.getVal()
-    nPdfSumError = Util.GetPropagatedError(pdfSumInAllRegions, resultAfterFit)
+    nPdfSumError = Util.GetPropagatedError(pdfSumInAllRegions, resultAfterFit, doAsym)
     nFittedInRegionList.append(nPdfSumVal)
     pdfFittedErrInRegionList.append(nPdfSumError)
   
@@ -141,7 +141,7 @@ def latexfitresults(filename,regionList,sampleList,exactRegionNames=False,datana
       if not sampleInRegion==None:
         sampleInRegion.Print()
         sampleInRegionVal = sampleInRegion.getVal()
-        sampleInRegionError = Util.GetPropagatedError(sampleInRegion, resultAfterFit) 
+        sampleInRegionError = Util.GetPropagatedError(sampleInRegion, resultAfterFit, doAsym) 
         sampleInAllRegions.add(sampleInRegion)
       else:
         print " \n YieldsTable.py: WARNING: sample =", sample, " non-existent (empty) in region =",region, "\n"
@@ -152,7 +152,7 @@ def latexfitresults(filename,regionList,sampleList,exactRegionNames=False,datana
       sampleSumInAllRegions = RooAddition( (sample+"_AllRegions_FITTED"), (sample+"_AllRegions_FITTED"), sampleInAllRegions)
       sampleSumInAllRegions.Print()
       nSampleSumVal = sampleSumInAllRegions.getVal()
-      nSampleSumError = Util.GetPropagatedError(sampleSumInAllRegions, resultAfterFit)
+      nSampleSumError = Util.GetPropagatedError(sampleSumInAllRegions, resultAfterFit, doAsym)
       nSampleInRegionVal.append(nSampleSumVal)
       nSampleInRegionError.append(nSampleSumError)
     tablenumbers['Fitted_events_'+sample]   = nSampleInRegionVal
@@ -187,7 +187,7 @@ def latexfitresults(filename,regionList,sampleList,exactRegionNames=False,datana
       print pdf.GetName(), " component list:", prodList.Print("v")
 
   nExpInRegionList =  [ pdf.getVal() for index, pdf in enumerate(rrspdfinRegionList)]
-  pdfExpErrInRegionList = [ Util.GetPropagatedError(pdf, resultBeforeFit)  for pdf in rrspdfinRegionList]
+  pdfExpErrInRegionList = [ Util.GetPropagatedError(pdf, resultBeforeFit, doAsym)  for pdf in rrspdfinRegionList]
   
   if showSum:
     pdfInAllRegions = RooArgSet()
@@ -195,7 +195,7 @@ def latexfitresults(filename,regionList,sampleList,exactRegionNames=False,datana
       pdfInAllRegions.add(pdf)
     pdfSumInAllRegions = RooAddition( "pdf_AllRegions_BEFORE", "pdf_AllRegions_BEFORE", pdfInAllRegions)
     nPdfSumVal = pdfSumInAllRegions.getVal()
-    nPdfSumError = Util.GetPropagatedError(pdfSumInAllRegions, resultAfterFit)
+    nPdfSumError = Util.GetPropagatedError(pdfSumInAllRegions, resultAfterFit, doAsym)
     nExpInRegionList.append(nPdfSumVal)
     pdfExpErrInRegionList.append(nPdfSumError)
   
@@ -212,7 +212,7 @@ def latexfitresults(filename,regionList,sampleList,exactRegionNames=False,datana
       MCSampleInRegionError = 0.
       if not MCSampleInRegion==None:
         MCSampleInRegionVal = MCSampleInRegion.getVal()
-        MCSampleInRegionError = Util.GetPropagatedError(MCSampleInRegion, resultBeforeFit) 
+        MCSampleInRegionError = Util.GetPropagatedError(MCSampleInRegion, resultBeforeFit, doAsym) 
         sampleInAllRegions.add(sampleInRegion)
       else:
         print " \n WARNING: sample=", sample, " non-existent (empty) in region=",region
@@ -222,7 +222,7 @@ def latexfitresults(filename,regionList,sampleList,exactRegionNames=False,datana
     if showSum:
       sampleSumInAllRegions = RooAddition( (sample+"_AllRegions_MC"), (sample+"_AllRegions_MC"), sampleInAllRegions)
       nSampleSumVal = sampleSumInAllRegions.getVal()
-      nSampleSumError = Util.GetPropagatedError(sampleSumInAllRegions, resultBeforeFit)
+      nSampleSumError = Util.GetPropagatedError(sampleSumInAllRegions, resultBeforeFit, doAsym)
       nMCSampleInRegionVal.append(nSampleSumVal)
       nMCSampleInRegionError.append(nSampleSumError)
     tablenumbers['MC_exp_events_'+sample]   = nMCSampleInRegionVal
