@@ -1,3 +1,6 @@
+2013-04-02 David Cote <david.cote@cern.ch>
+	* Updated to more robust pattern for region and component names matching in ChannelStyle.cxx and Utils.cxx
+
 2013-03-28 Max Baak <mbaak@cern.ch>
 	M       scripts/YieldsTable.py
 	M       scripts/SysTable.py
