@@ -46,7 +46,8 @@ Int_t ChannelStyle::getSampleColor(const TString& sample){
   Bool_t sampleFound = kFALSE;
   for(unsigned int i = 0; i< m_sampleColors.size(); i++){
     m_logger << kDEBUG << "getSampleColor:  requested sample name: "<<sample  << " , defined m_sampleNames[" << i << "]="<< m_sampleNames[i] << GEndl;
-    if( sample.Contains(m_sampleNames[i].Data())){
+    TString target = "_"+m_sampleNames[i]+"_";
+    if( sample.Contains(target.Data())){
       sampleFound = kTRUE;
       return m_sampleColors[i];
     }
@@ -66,7 +67,8 @@ Int_t ChannelStyle::getSampleColor(const TString& sample){
 TString ChannelStyle::getSampleName(const TString& sample){
     for(unsigned int i = 0; i< m_sampleNames.size(); i++){
       m_logger << kDEBUG << "getSampleName: requested sample name: "<<sample  << ", defined m_sampleNames[" << i << "]="<< m_sampleNames[i] << GEndl;
-      if( sample.Contains(m_sampleNames[i].Data())){
+      TString target = "_"+m_sampleNames[i]+"_";
+      if( sample.Contains(target.Data())){
             return m_sampleNames[i];
         }
     }

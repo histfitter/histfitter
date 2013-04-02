@@ -1906,10 +1906,10 @@ RooAbsReal* Util::GetComponent(RooWorkspace* w, TString component, TString regio
     RooCategory* regionCat = (RooCategory*) w->cat("channelCat");
     TString regionFullName;
     if(exactRegionName){
-        Logger << kINFO << "GetComponent(): using exact region names" << GEndl;
-        regionFullName = region;
+      Logger << kINFO << "GetComponent(): using exact region name: " << region << GEndl;
+      regionFullName = region;
     } else {
-        regionFullName = GetFullRegionName(regionCat, region);
+      regionFullName = GetFullRegionName(regionCat, region);
     }
 
     RooSimultaneous* pdf = (RooSimultaneous*) w->pdf("simPdf");
@@ -1940,14 +1940,15 @@ RooAbsReal* Util::GetComponent(RooWorkspace* w, TString component, TString regio
     RooArgList compFuncList;
     RooArgList compCoefList;
     for(unsigned int iReg=0; iReg<regionCompNameVec.size(); iReg++){
-        for(unsigned int iComp=0; iComp< componentVec.size(); iComp++){
-	  Logger << kDEBUG << " GetComponent: regionCompNameVec[" << iReg << "] = " << regionCompNameVec[iReg] << " componentVec[" << iComp << "] = " << componentVec[iComp] << GEndl;
-            if(  regionCompNameVec[iReg].Contains(componentVec[iComp])) {
-                compFuncList.add(*(RooProduct*)w->obj(regionCompNameVec[iReg]));
-                compCoefList.add(*regionBinWidth);
-            }
-        }  
-    } 
+      for(unsigned int iComp=0; iComp< componentVec.size(); iComp++){
+	Logger << kDEBUG << " GetComponent: regionCompNameVec[" << iReg << "] = " << regionCompNameVec[iReg] << " componentVec[" << iComp << "] = " << componentVec[iComp] << GEndl;
+	TString target = "_"+componentVec[iComp]+"_";
+	if(  regionCompNameVec[iReg].Contains(target.Data())) {
+	  compFuncList.add(*(RooProduct*)w->obj(regionCompNameVec[iReg]));
+	  compCoefList.add(*regionBinWidth);
+	}
+      }  
+    }
 
     if (compFuncList.getSize()==0 || compCoefList.getSize()==0 || compCoefList.getSize()!=compFuncList.getSize()){
         Logger << kERROR << " Something wrong with compFuncList or compCoefList in Util::GetComponent(w," << component << "," << region 
@@ -2034,12 +2035,13 @@ Double_t Util::GetComponentFracInRegion(RooWorkspace* w, TString component, TStr
     RooArgList compCoefList;
     for(unsigned int iReg=0; iReg<regionCompNameVec.size(); iReg++){
         for(unsigned int iComp=0; iComp< componentVec.size(); iComp++){
-            if(  regionCompNameVec[iReg].Contains(componentVec[iComp])) {
-                compFuncList.add(*(RooProduct*)w->obj(regionCompNameVec[iReg]));
-                compCoefList.add(*regionBinWidth);
-            }
-        }  
-    } 
+	  TString target = "_"+componentVec[iComp]+"_";
+	  if(  regionCompNameVec[iReg].Contains(target.Data())) {
+	    compFuncList.add(*(RooProduct*)w->obj(regionCompNameVec[iReg]));
+	    compCoefList.add(*regionBinWidth);
+	  }
+        } 
+    }
 
     if (compFuncList.getSize()==0 || compCoefList.getSize()==0 || compCoefList.getSize()!=compFuncList.getSize()){
         Logger << kERROR << " Something wrong with compFuncList or compCoefList in Util::GetComponent() "<< GEndl;
@@ -2057,12 +2059,13 @@ Double_t Util::GetComponentFracInRegion(RooWorkspace* w, TString component, TStr
     double componentFrac = 0.;
     for(unsigned int iReg=0; iReg<regionCompNameVec.size(); iReg++){
         for(unsigned int iComp=0; iComp< componentVec.size(); iComp++){
-            if(  regionCompNameVec[iReg].Contains(componentVec[iComp])) {
-                componentFrac += GetComponentFrac(w,regionCompNameVec[iReg],RRSPdfName,regionVar,regionBinWidth) ;
-            }
+	  TString target = "_"+componentVec[iComp]+"_";
+	  if(  regionCompNameVec[iReg].Contains(target.Data())) {
+	    componentFrac += GetComponentFrac(w,regionCompNameVec[iReg],RRSPdfName,regionVar,regionBinWidth) ;
+	  }
         }
     }
-
+    
     return componentFrac;
 
 }
