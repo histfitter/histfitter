@@ -622,8 +622,8 @@ class ConfigManager(object):
                 for syst in sam.systDict.values():
                     if syst.method == "userNormHistoSys":
                         nomName = "h%sNom_%s_obs_%s" % (sam.name, regionString, replaceSymbols(chan.variableName) )
-                        highName = "h%sHigh_%s_obs_%s" % (sam.name, regionString, replaceSymbols(chan.variableName) )
-                        lowName = "h%sLow_%s_obs_%s" % (sam.name, regionString, replaceSymbols(chan.variableName) )
+                        highName = "h%s%sHigh_%s_obs_%s" % (sam.name, syst.name, regionString, replaceSymbols(chan.variableName) )
+                        lowName = "h%s%sLow_%s_obs_%s" % (sam.name, syst.name, regionString, replaceSymbols(chan.variableName) )
                         
                         syst.PrepareGlobalNormalization(normString, self, fitConfig, chan, sam)
                         sam.addHistoSys(syst.name, nomName, highName, lowName, False, True, False, False, sam.name, normString)
