@@ -46,7 +46,9 @@ class HistogramsManager:
          
         #binErrs is the relative errors
         xmin = hNom.GetXaxis().GetXmin()
-        h = TH1F(hName, hName, len(binErrs), xmin, xmin+float(len(binErrs)))
+        xmax = hNom.GetXaxis().GetXmax()
+        #h = TH1F(hName, hName, len(binErrs), xmin, xmin+float(len(binErrs)))
+        h = TH1F(hName, hName, len(binErrs), xmin, xmax)
         for iBin in xrange(hNom.GetNbinsX()):
             val=hNom.GetBinContent(iBin+1)*binErrs[iBin]
             h.SetBinContent(iBin+1, val)
