@@ -1,3 +1,6 @@
+2013-04-03 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
+	* check for proper null-ptr in python/prepareHistos.py
+
 2013-04-02 Jeanette Loranz <jeanette.miriam.lorenz@cern.ch>
         M python/configManager.py
         M python/histogramsManager.py
