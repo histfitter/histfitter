@@ -1427,7 +1427,24 @@ void Util::PlotNLL(RooWorkspace* w, RooFitResult* rFit, Bool_t plotPLL, TString 
                 frame->SetMaximum(curveMax * 2. ); 
             }
             else frame->SetMaximum(1000.);
+	    
+	    // To be able to see the 1/2 sigma
+	    frame->SetMaximum(4.);
 
+	    // plot cosmetics
+            int firstbin = frame->GetXaxis()->GetFirst();
+            int lastbin = frame->GetXaxis()->GetLast();
+            double xmax = frame->GetXaxis()->GetBinUpEdge(lastbin) ;
+            double xmin = frame->GetXaxis()->GetBinLowEdge(firstbin) ;
+
+            TLine* l1 = new TLine(xmin,2.,xmax,2.);
+            TLine* l2 = new TLine(xmin,0.5,xmax,0.5);
+
+	    l1->SetLineStyle(3);
+            l2->SetLineStyle(3);
+
+	    frame->addObject(l1);
+                frame->addObject(l2);
 
             if(plotPLL)   pll->plotOn(frame,LineColor(kRed),LineStyle(kDashed),NumCPU(4)) ;
 
