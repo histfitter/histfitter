@@ -98,11 +98,11 @@ class TreePrepare(PrepareHistosABC):
                 continue
 
             tree = file.Get(treeName)
-            if tree is None:
+            if not tree or tree is None:
                 file.Close()
                 continue
 
-            if tree.ClassName() != 'TTree':
+            if tree is not None and tree.ClassName() != 'TTree':
                 file.Close()
                 continue
 
