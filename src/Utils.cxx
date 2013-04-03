@@ -33,6 +33,7 @@
 #include "RooHist.h"
 #include "RooMinimizer.h"
 #include "RooConstVar.h"
+#include "RooNumIntConfig.h"
 
 #include "RooStats/ModelConfig.h"
 #include "RooStats/ProfileLikelihoodTestStat.h"
@@ -130,6 +131,10 @@ double Util::getNonQcdVal(const TString& proc, const TString& reg, TMap* map,con
 //void Util::GenerateFitAndPlot(TString fcName, Bool_t drawBeforeFit, Bool_t drawAfterFit, Bool_t plotCorrelationMatrix, Bool_t plotSeparateComponents, Bool_t plotNLL ){
 void Util::GenerateFitAndPlot(TString fcName, TString anaName, Bool_t drawBeforeFit, Bool_t drawAfterFit, Bool_t plotCorrelationMatrix, Bool_t plotSeparateComponents, Bool_t plotNLL, Bool_t minos, TString minosPars ){
 
+  
+    //RooAbsReal::defaultIntegratorConfig()->setEpsRel(1e-9) ;
+    //RooAbsReal::defaultIntegratorConfig()->setEpsAbs(1e-9) ;
+
     ConfigMgr* mgr = ConfigMgr::getInstance();
     FitConfig* fc = mgr->getFitConfig(fcName);
 
@@ -144,6 +149,16 @@ void Util::GenerateFitAndPlot(TString fcName, TString anaName, Bool_t drawBefore
     Logger << kINFO << "     minosPars = " << minosPars << GEndl;
 
     RooWorkspace* w = GetWorkspaceFromFile(fc->m_inputWorkspaceFileName, "combined");
+    if(w==NULL){
+      Logger << kWARNING << "     RooWorkspace('combined') does not exist, trying workspace('w')" << GEndl;
+      w = GetWorkspaceFromFile(fc->m_inputWorkspaceFileName, "w");
+    }
+
+    if(w==NULL){
+      Logger << kERROR << "     Cannot find RooWorkspace, quitting " << GEndl;
+      return;
+    }
+
     SaveInitialSnapshot(w);
 
     TString plotChannels = "ALL";
@@ -889,6 +904,8 @@ void Util::PlotPdfWithComponents(RooWorkspace* w, FitConfig* fc, TString anaName
             TPad *pad1 = new TPad(Form("%s_pad1",canName.Data()),Form("%s_pad1",canName.Data()),0.,0.305,.99,1);
             pad1->SetBottomMargin(0.005);
             pad1->SetFillColor(kWhite);
+            pad1->SetTickx();
+            pad1->SetTicky();
             TPad *pad2 = new TPad(Form("%s_pad2",canName.Data()),Form("%s_pad2",canName.Data()),0.,0.01,.99,0.295);
             pad2->SetTopMargin(0.005);
             pad2->SetBottomMargin(0.3);
@@ -1305,6 +1322,7 @@ void Util::PlotSeparateComponents(RooWorkspace* w,TString fcName, TString anaNam
 }
 
 
+
 //_____________________________________________________________________________________________________________________________________
 void Util::PlotNLL(RooWorkspace* w, RooFitResult* rFit, Bool_t plotPLL, TString anaName, TString outputPrefix, RooAbsData* inputData)
 {
@@ -1487,7 +1505,13 @@ TH2D* Util::PlotCorrelationMatrix(RooFitResult* rFit, TString anaName){
 
     gPad->SetLeftMargin(0.18);
     gPad->SetRightMargin(0.13);
-
+ 
+    gStyle->SetMarkerSize(orig_MarkerSize);
+    gStyle->SetMarkerColor(orig_MarkerColor);
+    gStyle->SetPaintTextFormat(orig_PaintTextFormat) ;
+    gStyle->SetLabelSize(orig_LabelSize);
+    gStyle->SetOptStat(00000000);
+    
     h_corr->Draw("colz");
     h_corr->Draw("textsame");
 
@@ -1498,6 +1522,7 @@ TH2D* Util::PlotCorrelationMatrix(RooFitResult* rFit, TString anaName){
     gStyle->SetMarkerColor(orig_MarkerColor);
     gStyle->SetPaintTextFormat(orig_PaintTextFormat) ;
     gStyle->SetLabelSize(orig_LabelSize);
+    gStyle->SetOptStat(00000000);
 
     return h_corr;
 
