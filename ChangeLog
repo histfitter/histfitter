@@ -1,3 +1,9 @@
+2013-04-08 Max Baak <mbaak@cern.ch>
+        M       Utils.cxx
+        M       Utils.h
+        * Always force evaluation of Hesse
+        * Update of plotNLL function.
+
 2013-04-03 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
 	* check for proper null-ptr in python/prepareHistos.py
 

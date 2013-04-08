@@ -70,7 +70,7 @@ namespace Util
 			      TString outputPrefix = "", RooFitResult* rFit = NULL, RooAbsData* inputData=0 );
   TH2D* PlotCorrelationMatrix(RooFitResult* rFit = NULL, TString anaName="Analysis");
   TH2D* GetCorrelations(RooFitResult* rFit = NULL, double threshold = 0.9, TString anaName="Analysis");
-  void PlotNLL(RooWorkspace* w, RooFitResult* rFit = NULL,  Bool_t plotPLL = false, TString anaName="Analysis", TString outputPrefix = "", RooAbsData* inputData=0);
+  void PlotNLL(RooWorkspace* w, RooFitResult* rFit = NULL,  Bool_t plotPLL = false, TString anaName="Analysis", TString outputPrefix = "", RooAbsData* inputData=0, TString plotPars="");
   RooCurve* MakePdfErrorRatioHist(RooWorkspace* w, RooAbsData* regionData, RooAbsPdf* regionPdf, RooRealVar* regionVar, RooFitResult* rFit, Double_t Nsigma = 1.);
 
   RooFitResult* FitPdf(RooWorkspace* w,  TString fitRegions="ALL", Bool_t lumiConst=false, RooAbsData* inputData=0, TString suffix ="", Bool_t minos = kFALSE, TString minosPars="");
@@ -115,6 +115,9 @@ namespace Util
 
   void resetAllErrors( RooWorkspace* wspace );
   void resetError( RooWorkspace* wspace, const RooArgList& parList, const RooArgList& vetoList = RooArgList() ) ;
+
+  void resetAllValues( RooWorkspace* wspace );
+  void resetValue( RooWorkspace* wspace, const RooArgList& parList, const RooArgList& vetoList = RooArgList() ) ;
 
   RooArgList getFloatParList( const RooAbsPdf& pdf, const RooArgSet& obsSet = RooArgSet() );
   

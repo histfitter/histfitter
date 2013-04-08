@@ -491,21 +491,26 @@ RooFitResult* Util::FitPdf( RooWorkspace* w, TString fitRegions, Bool_t lumiCons
 	
     if (status%100 == 0) { // ignore errors in Hesse or in Improve
 	  // only calculate minos errors if fit with Migrad converged
-	  if(minos && (minosPars == "all" || minosPars == "ALL")){
-	    minim.minos();
-	  }
-	  else if(minos && minosPars!="" && minosParams->getSize()>0){
-	    minim.minos(*minosParams);
-	  }
-	  // save fit result	  
-	  r = minim.save();
-	  val = r->minNll();
-        }
-        else { 
-            Logger << kERROR << "FIT FAILED !- return a NaN NLL " << GEndl;
-            val =  TMath::QuietNaN();       
-        }
-
+      if(minos && (minosPars == "all" || minosPars == "ALL")){
+	minim.hesse();
+	minim.minos();
+      }
+      else if(minos && minosPars!="" && minosParams->getSize()>0){
+	minim.hesse();
+	minim.minos(*minosParams);
+      }
+      else {
+	minim.hesse();
+      }
+      // save fit result	  
+      r = minim.save();
+      val = r->minNll();
+    }
+    else { 
+      Logger << kERROR << "FIT FAILED !- return a NaN NLL " << GEndl;
+      val =  TMath::QuietNaN();       
+    }
+    
     if (r!=0) r->Print("v");
 
     TString fitName = data_FR->GetName();
@@ -1324,7 +1329,7 @@ void Util::PlotSeparateComponents(RooWorkspace* w,TString fcName, TString anaNam
 
 
 //_____________________________________________________________________________________________________________________________________
-void Util::PlotNLL(RooWorkspace* w, RooFitResult* rFit, Bool_t plotPLL, TString anaName, TString outputPrefix, RooAbsData* inputData)
+void Util::PlotNLL(RooWorkspace* w, RooFitResult* rFit, Bool_t plotPLL, TString anaName, TString outputPrefix, RooAbsData* inputData, TString plotPars)
 {
     if(rFit==NULL){ 
         Logger << kWARNING << " Running PlotNLL() without a RooFitResult is pointless, I'm done" << GEndl ; 
@@ -1344,6 +1349,19 @@ void Util::PlotNLL(RooWorkspace* w, RooFitResult* rFit, Bool_t plotPLL, TString 
     RooCategory* regionCat = (RooCategory*) w->cat("channelCat");
     data->table(*((RooAbsCategory*)regionCat))->Print("v");
 
+    // find parameters requested for Minos
+    RooArgSet* plotParams = new RooArgSet();
+    if(plotPars != "") {
+      std::vector<TString> parsVec = Tokens(plotPars,",");
+      for(unsigned int i=0; i<parsVec.size();i++){
+	RooRealVar* var = (RooRealVar*) w->var(parsVec[i]);
+	if(var==NULL)  Logger << kWARNING << " Util::PlotNLL() could not find parameter(" << parsVec[i] << ") in workspace while setting up minos" << GEndl;
+	else{
+	  plotParams->add(*var);
+	}
+      }
+    }
+
     // Get all parameters of result
     RooArgList  fpf =  rFit->floatParsFinal();
 
@@ -1351,14 +1369,16 @@ void Util::PlotNLL(RooWorkspace* w, RooFitResult* rFit, Bool_t plotPLL, TString 
     RooAbsReal* nll = pdf->createNLL(*data,NumCPU(2)) ;
     // Create the profile likelihood  
     RooStats::ModelConfig* modelConfig = (RooStats::ModelConfig*) w->obj("ModelConfig");
-    const RooArgSet* poi = modelConfig->GetParametersOfInterest();
-    RooAbsReal* pll = nll->createProfile(*poi) ;
 
-    unsigned  int numPars = fpf.getSize();
+    unsigned int numParsP = plotParams->getSize();
+    if (numParsP==0) { numParsP = fpf.getSize(); }
+
+    unsigned int numPars = fpf.getSize();
     if(numPars<1){
         Logger << kWARNING << "Util::PlotNLL rFit contains no floating parameters" << GEndl;
         return;
     }
+    Logger << kINFO << "Util::PlotNLL rFit contains no floating parameters: " << numParsP << GEndl;
 
     TString canName=Form("can_NLL_%s_%s",outputPrefix.Data(),rFit->GetName());
     TCanvas* can = new TCanvas(canName,canName,600,600); 
@@ -1366,112 +1386,138 @@ void Util::PlotNLL(RooWorkspace* w, RooFitResult* rFit, Bool_t plotPLL, TString 
     // divide the canvas
     Int_t canVecDivX = 1;
     Int_t canVecDivY = 1;
-    if(numPars>0){
-        canVecDivX = ((Int_t) (sqrt(numPars)+0.5));
-        canVecDivY = ((Int_t) (sqrt(numPars)+0.5));
+    if(numParsP>0){
+        canVecDivX = ((Int_t) (sqrt(numParsP)+0.5));
+        canVecDivY = ((Int_t) (sqrt(numParsP)+0.5));
         if(canVecDivX<1) canVecDivX = 1;
         if(canVecDivY<1) canVecDivY = 1;
     }  
+    if ( plotParams->getSize()>0 && fpf.getSize()!=plotParams->getSize() ) {
+      canVecDivX = numParsP;
+      canVecDivY = 1;
+    }
     can->Divide(canVecDivX , canVecDivY);
 
     // loop over all floating pars
-    for(unsigned int iPar=0; iPar<numPars ; iPar++){
+    for(unsigned int iPar=0, jPar=0; iPar<numPars ; iPar++){
         RooAbsArg* arg = fpf.at(iPar);
-        if(arg->InheritsFrom("RooRealVar")){
-            RooRealVar* par = (RooRealVar*) arg;
-            TString parName = par->GetName();
-            Logger << kINFO << "Plotting NLL for par = " << parName << GEndl;
-            RooPlot* frame = par->frame();
-            nll->plotOn(frame, ShiftToZero());
-            frame->SetMinimum(0.);
 
-            const char* curvename = 0;
-            RooCurve* curve = (RooCurve*) frame->findObject(curvename,RooCurve::Class()) ;
-            Double_t curveMax = curve->getYAxisMax();
-            // safety for weird RooPlots where curve goes to infinity in first/last bin(s)
-            if (curveMax > 0. && !std::isinf(curveMax) && !std::isnan(curveMax) )   frame->SetMaximum(curveMax * 2.); 
-            else if(curveMax > 0. && (std::isinf(curveMax) || std::isnan(curveMax))){
-	      for(Int_t iBin=1;  iBin < curve->GetN()-1; iBin++){
-		Double_t xBin = 0.;
-		Double_t yBin = -1.;     
-		curve->GetPoint(iBin,xBin,yBin) ;		    
-		if(std::isinf(yBin)  || std::isnan(yBin)){
-		  curve->RemovePoint(iBin);
-		  Logger << kWARNING << " Removing bin = " << iBin  << " as it was either inf or nan from NLL plot for parameter = " << parName<< GEndl;
-		}
-	      }	
-	      
-	Int_t iBin = 1;
-                Double_t xFirstBin = 0.;
-                Double_t yFirstBin = -1.;	
-                while ( (yFirstBin<0 || std::isinf(yFirstBin)  || std::isnan(yFirstBin) )&& iBin < curve->GetN()-1){
-                    iBin++;
-                    curve->GetPoint(iBin,xFirstBin,yFirstBin) ;
+        if ( (plotParams->getSize()>0) && plotParams->find(arg->GetName())==0 ) { continue; }
+	if ( !arg->InheritsFrom("RooRealVar") ) { continue; }
+
+	jPar++; // special counter when selecting parameters
+
+	RooRealVar* par = (RooRealVar*) arg;
+	TString parName = par->GetName();
+	Logger << kINFO << "Plotting NLL for par = " << parName << GEndl;
+
+	double minRange = par->getMin();
+	double maxRange = par->getMax();
+	par->setMin(-3.);
+	par->setMax(3.);
+
+	RooPlot* frame = par->frame();
+	nll->plotOn(frame, ShiftToZero());
+	frame->SetMinimum(0.);
+	// To be able to see the 1/2 sigma
+	frame->SetMaximum(2.5);
+	
+	const char* curvename = 0;
+	RooCurve* curve = (RooCurve*) frame->findObject(curvename,RooCurve::Class()) ;
+	Double_t curveMax = curve->getYAxisMax();
+	// safety for weird RooPlots where curve goes to infinity in first/last bin(s)
+	if (curveMax > 0. && !std::isinf(curveMax) && !std::isnan(curveMax) )  { ; } // frame->SetMaximum(curveMax * 2.); 
+	else if(curveMax > 0. && (std::isinf(curveMax) || std::isnan(curveMax))){
+	  for(Int_t iBin=1;  iBin < curve->GetN()-1; iBin++){
+	    Double_t xBin = 0.;
+	    Double_t yBin = -1.;     
+	    curve->GetPoint(iBin,xBin,yBin) ;		    
+	    if(std::isinf(yBin)  || std::isnan(yBin)){
+	      curve->RemovePoint(iBin);
+	      Logger << kWARNING << " Removing bin = " << iBin  << " as it was either inf or nan from NLL plot for parameter = " << parName<< GEndl;
+	    }
+	  }	
+	  
+	  Int_t iBin = 1;
+	  Double_t xFirstBin = 0.;
+	  Double_t yFirstBin = -1.;	
+	  while ( (yFirstBin<0 || std::isinf(yFirstBin)  || std::isnan(yFirstBin) )&& iBin < curve->GetN()-1){
+	    iBin++;
+	    curve->GetPoint(iBin,xFirstBin,yFirstBin) ;
 	    if(std::isinf(yFirstBin)  || std::isnan(yFirstBin)){
 	      curve->RemovePoint(iBin);
 	      Logger << kWARNING << " Removing bin = " << iBin  << " as it was either inf or nan from NLL plot for parameter = " << parName<< GEndl;
 	    }
-	}
-                iBin = curve->GetN()-1;
-                Double_t xLastBin = 0.;
-                Double_t yLastBin = -1.;	
-                while ( (yLastBin < 0 || std::isinf(yLastBin) || std::isnan(yLastBin) ) && iBin >0){
-                    iBin--;
-                    curve->GetPoint(iBin,xLastBin,yLastBin) ; 
+	  }
+	  iBin = curve->GetN()-1;
+	  Double_t xLastBin = 0.;
+	  Double_t yLastBin = -1.;	
+	  while ( (yLastBin < 0 || std::isinf(yLastBin) || std::isnan(yLastBin) ) && iBin >0){
+	    iBin--;
+	    curve->GetPoint(iBin,xLastBin,yLastBin) ; 
 	    if(std::isinf(yLastBin)  || std::isnan(yLastBin)){
 	      curve->RemovePoint(iBin);
 	      Logger << kWARNING << " Removing bin = " << iBin  << " as it was either inf or nan from NLL plot for parameter = " << parName<< GEndl;
 	    }
-                }
-                curveMax = yLastBin>yFirstBin ? yLastBin : yFirstBin;      
-                frame->SetMaximum(curveMax * 2. ); 
-            }
-            else frame->SetMaximum(1000.);
-	    
-	    // To be able to see the 1/2 sigma
-	    frame->SetMaximum(4.);
+	  }
+	  curveMax = yLastBin>yFirstBin ? yLastBin : yFirstBin;      
+	  frame->SetMaximum(curveMax * 2. ); 
+	}
+	else { frame->SetMaximum(1000.); }
+		
+	// plot cosmetics
+	int firstbin = frame->GetXaxis()->GetFirst();
+	int lastbin = frame->GetXaxis()->GetLast();
+	double xmax = frame->GetXaxis()->GetBinUpEdge(lastbin) ;
+	double xmin = frame->GetXaxis()->GetBinLowEdge(firstbin) ;
+	
+	TLine* l1 = new TLine(xmin,2.,xmax,2.);
+	TLine* l2 = new TLine(xmin,0.5,xmax,0.5);
+	
+	l1->SetLineStyle(3);
+	l2->SetLineStyle(3);
+	
+	frame->addObject(l1);
+	frame->addObject(l2);
+	
+	RooAbsReal* pll(0);
+	if(plotPLL) { 
+	  pll = nll->createProfile(*par) ;
+	  pll->plotOn(frame,LineColor(kRed),LineStyle(kDashed),NumCPU(4)); 
+	}
+	
+	can->cd(jPar);
+	frame->Draw();  
+	
+	TLegend* leg = new TLegend(0.55,0.65,0.85,0.9,"");
+	leg->SetFillStyle(0);
+	leg->SetFillColor(0);
+	leg->SetBorderSize(0);
+	TLegendEntry* entry=leg->AddEntry("","NLL","l") ;
+	entry->SetLineColor(kBlue);
+	if(plotPLL) {	
+	  entry=leg->AddEntry("","PLL","l") ;
+	  entry->SetLineColor(kRed);
+	  entry->SetLineStyle(kDashed);
+	}
+	leg->Draw();
 
-	    // plot cosmetics
-            int firstbin = frame->GetXaxis()->GetFirst();
-            int lastbin = frame->GetXaxis()->GetLast();
-            double xmax = frame->GetXaxis()->GetBinUpEdge(lastbin) ;
-            double xmin = frame->GetXaxis()->GetBinLowEdge(firstbin) ;
+	// update plot
+	can->Draw();
 
-            TLine* l1 = new TLine(xmin,2.,xmax,2.);
-            TLine* l2 = new TLine(xmin,0.5,xmax,0.5);
+	// reset parameter range to previous values
+	par->setMin(minRange);
+	par->setMax(maxRange);
 
-	    l1->SetLineStyle(3);
-            l2->SetLineStyle(3);
-
-	    frame->addObject(l1);
-                frame->addObject(l2);
-
-            if(plotPLL)   pll->plotOn(frame,LineColor(kRed),LineStyle(kDashed),NumCPU(4)) ;
-
-            can->cd(iPar+1);
-            frame->Draw();  
-
-            TLegend* leg = new TLegend(0.55,0.65,0.85,0.9,"");
-            leg->SetFillStyle(0);
-            leg->SetFillColor(0);
-            leg->SetBorderSize(0);
-            TLegendEntry* entry=leg->AddEntry("","NLL","l") ;
-            entry->SetLineColor(kBlue);
-            if(plotPLL) {	
-                entry=leg->AddEntry("","PLL","l") ;
-                entry->SetLineColor(kRed);
-                entry->SetLineStyle(kDashed);
-            }
-            leg->Draw();
-
-        }
+	if (plotPLL) {
+	  delete pll; pll=0;
+	}
     }
-
+    
     can->SaveAs("results/"+anaName+"/"+canName+".pdf");
     can->SaveAs("results/"+anaName+"/"+canName+".eps");
 
     delete nll ;
-    delete pll;
 
 }
 
@@ -2410,6 +2456,24 @@ Util::resetAllErrors( RooWorkspace* wspace )
 }
 
 
+//_____________________________________________________________________________
+void
+Util::resetAllValues( RooWorkspace* wspace )
+{
+    RooStats::ModelConfig* mc  = Util::GetModelConfig(wspace);
+    if (mc==0) return;
+
+    const RooArgSet* obsSet = mc->GetObservables();
+    if (obsSet==0) return;
+
+    RooAbsPdf* pdf = mc->GetPdf();
+    if (pdf==0) return;
+
+    RooArgList floatParList = Util::getFloatParList( *pdf, *obsSet );
+
+    Util::resetValue(wspace,floatParList);
+}
+
 
 //_____________________________________________________________________________
     RooArgList 
@@ -2439,7 +2503,6 @@ Util::getFloatParList( const RooAbsPdf& pdf, const RooArgSet& obsSet )
 Util::resetError( RooWorkspace* wspace, const RooArgList& parList, const RooArgList& vetoList ) 
 
 {
-
     // For the given workspace,
     // find the input systematic with
     // the given name and shift that
@@ -2579,7 +2642,64 @@ Util::resetError( RooWorkspace* wspace, const RooArgList& parList, const RooArgL
 }
 
 
+//_____________________________________________________________________________
+    void
+Util::resetValue( RooWorkspace* wspace, const RooArgList& parList, const RooArgList& vetoList )
 
+{
+    // For the given workspace,
+    // find the input systematic with
+    // the given name and shift that
+    // systematic by 1-sigma
+
+    TIterator* iter = parList.createIterator() ;
+    RooAbsArg* arg ;
+    while( (arg=(RooAbsArg*)iter->Next()) ) {
+
+        std::string UncertaintyName;
+        if(arg->InheritsFrom("RooRealVar") && !arg->isConstant()){
+            UncertaintyName = arg->GetName();
+        } else { continue; }
+
+        if ( vetoList.FindObject( UncertaintyName.c_str() )!=0 ) { continue; }
+
+        RooRealVar* var = wspace->var( UncertaintyName.c_str() );
+        if( ! var ) {
+            Logger << kERROR << "Could not find variable: " << UncertaintyName
+                << " in workspace: " << wspace->GetName() << ": " << wspace
+                << GEndl;
+        }
+
+        // Initialize
+    double valnom = 0.;
+
+        if( UncertaintyName == "" ) {
+            Logger << kERROR << "No Uncertainty Name provided" << GEndl;
+            throw -1;
+        }
+        // If it is a standard (gaussian) uncertainty
+        else if( string(UncertaintyName).find("alpha")!=string::npos ) {
+      valnom = 0.0;
+        }
+        // If it is Lumi:
+        else if( UncertaintyName == "Lumi" ) {
+      valnom = 1.0;
+        }
+        // If it is a stat uncertainty (gamma)
+        else if( string(UncertaintyName).find("gamma")!=string::npos ){
+      valnom = 1.0;
+        } // End Stat Error
+        else {
+      // Some unknown uncertainty
+      valnom = 1.0;
+        }
+
+        var->setVal(valnom);
+        // Done
+    } // end loop
+
+    delete iter ;
+}
 
 
 //______________________________________________________________________________________________
