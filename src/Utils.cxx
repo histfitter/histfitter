@@ -160,6 +160,7 @@ void Util::GenerateFitAndPlot(TString fcName, TString anaName, Bool_t drawBefore
       return;
     }
 
+    Util::SetInterpolationCode(4); // MB 20130408: overwrite default - change from piece-wise linear to 6th order poly interp + linear extrapolation (also used in Higgs group)
     SaveInitialSnapshot(w);
 
     TString plotChannels = "ALL";
