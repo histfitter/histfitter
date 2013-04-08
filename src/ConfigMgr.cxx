@@ -179,6 +179,9 @@ void ConfigMgr::doHypoTest(FitConfig* fc, TString outdir, double SigXSecSysnsigm
         return; 
     }
 
+    // MB 20130408: overwrite default - change from piece-wise linear to 6th order poly interp + linear extrapolation (also used in Higgs group)
+    Util::SetInterpolationCode(w,4); 
+
     m_logger << kINFO << "Processing analysis " << fc->m_signalSampleName << GEndl;
 
     if ((fc->m_signalSampleName).Contains("Bkg") || (fc->m_signalSampleName) == "") {
@@ -417,6 +420,9 @@ void ConfigMgr::doUpperLimit(FitConfig* fc) {
         m_logger << kERROR << "workspace 'combined' does not exist in file" << GEndl; 
         return; 
     }
+
+    // MB 20130408: overwrite default - change from piece-wise linear to 6th order poly interp + linear extrapolation (also used in Higgs group)
+    Util::SetInterpolationCode(w,4);
 
     /// here we go ...
 

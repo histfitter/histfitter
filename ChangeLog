@@ -4,6 +4,7 @@
         * Always force evaluation of Hesse
         * Update of plotNLL function.
         * Added function to change interpolation code
+        M       src/ConfigMgr.cxx
         * overwrite default fit - change from piece-wise linear to 6th order poly interp + linear extrapolation (also used in Higgs group)
 
 2013-04-03 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
