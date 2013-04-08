@@ -241,7 +241,7 @@ void Util::GenerateFitAndPlot(TString fcName, TString anaName, Bool_t drawBefore
     // plot likelihood
     Bool_t plotPLL = kFALSE;
     if(plotNLL) 
-        PlotNLL(w, expResultAfter, plotPLL, anaName, "", toyMC);
+      PlotNLL(w, expResultAfter, plotPLL, anaName, "", toyMC, "", fitChannels, lumiConst);
 
     if (toyMC) 
         WriteWorkspace(w, fc->m_inputWorkspaceFileName, toyMC->GetName());
@@ -1329,7 +1329,7 @@ void Util::PlotSeparateComponents(RooWorkspace* w,TString fcName, TString anaNam
 
 
 //_____________________________________________________________________________________________________________________________________
-void Util::PlotNLL(RooWorkspace* w, RooFitResult* rFit, Bool_t plotPLL, TString anaName, TString outputPrefix, RooAbsData* inputData, TString plotPars)
+void Util::PlotNLL(RooWorkspace* w, RooFitResult* rFit, Bool_t plotPLL, TString anaName, TString outputPrefix, RooAbsData* inputData, TString plotPars, TString fitRegions, Bool_t lumiConst)
 {
     if(rFit==NULL){ 
         Logger << kWARNING << " Running PlotNLL() without a RooFitResult is pointless, I'm done" << GEndl ; 
@@ -1349,7 +1349,62 @@ void Util::PlotNLL(RooWorkspace* w, RooFitResult* rFit, Bool_t plotPLL, TString 
     RooCategory* regionCat = (RooCategory*) w->cat("channelCat");
     data->table(*((RooAbsCategory*)regionCat))->Print("v");
 
-    // find parameters requested for Minos
+    ///////////////////////////////////////////////////////////////////
+
+    if (lumiConst) {
+      RooRealVar* lumi = (RooRealVar*) w->var("Lumi");
+      if (lumi!=NULL) lumi->setConstant(lumiConst); 
+    }
+
+    // Construct an empty simultaneous pdf using category regionCat as index
+    RooSimultaneous* simPdfFitRegions = pdf;
+    RooDataSet* dataFitRegions = (RooDataSet*) data;
+
+    std::vector<TString> fitRegionsVec = GetRegionsVec(fitRegions, regionCat);
+
+    unsigned int numFitRegions = fitRegionsVec.size();
+    std::vector<RooDataSet*> dataVec;
+    std::vector<RooAbsPdf*> pdfVec;
+
+    for(unsigned int iVec=0; iVec<numFitRegions; iVec++){
+      TString regionCatLabel = fitRegionsVec[iVec];
+      if( regionCat->setLabel(regionCatLabel,kTRUE)){  
+	Logger << kWARNING << " Label '" << regionCatLabel << "' is not a state of channelCat (see Table) " << GEndl; 
+      } else{
+	// dataset for each channel/region/category
+	TString dataCatLabel = Form("channelCat==channelCat::%s",regionCatLabel.Data());
+	RooDataSet* regionData = (RooDataSet*) data->reduce(dataCatLabel.Data());
+	dataVec.push_back(regionData);
+	// pdf for each channel/region/category
+	RooAbsPdf* regionPdf = (RooAbsPdf*) pdf->getPdf(regionCatLabel.Data());
+	pdfVec.push_back(regionPdf);
+      }
+    }
+
+    if(dataVec.empty()){ 
+      Logger << kERROR << "   NONE OF THE REGIONS ARE SPECIFIED IN DATASET, NO FIT WILL BE PERFORMED" << GEndl; 
+      return;
+    }
+    else if(pdfVec.empty()){ 
+      Logger << kERROR << "   NONE OF THE REGIONS ARE SPECIFIED IN SIMULTANEOUS PDF, NO FIT WILL BE PERFORMED" << GEndl; 
+      return;
+    }
+    else{
+      // Construct a simultaneous dataset for all fit regions
+      dataFitRegions = (RooDataSet*) dataVec[0]->Clone("dataFitRegions");
+      for(unsigned int jVec=1; jVec<dataVec.size(); jVec++){
+	dataFitRegions->append(*dataVec[jVec]);
+      }
+      // Construct a simultaneous pdf using category regionCat as index
+      simPdfFitRegions = new RooSimultaneous("simPdfFitRegions","simultaneous pdf only for fit regions",*regionCat) ;
+      for(unsigned int kVec=0; kVec<pdfVec.size(); kVec++){
+	simPdfFitRegions->addPdf(*pdfVec[kVec],fitRegionsVec[kVec].Data());
+      }
+    }
+    
+    /////////////////////////////////////////////////////////////////
+
+    // find parameters requested for plotting
     RooArgSet* plotParams = new RooArgSet();
     if(plotPars != "") {
       std::vector<TString> parsVec = Tokens(plotPars,",");
@@ -1366,9 +1421,7 @@ void Util::PlotNLL(RooWorkspace* w, RooFitResult* rFit, Bool_t plotPLL, TString 
     RooArgList  fpf =  rFit->floatParsFinal();
 
     // Create Log Likelihood    
-    RooAbsReal* nll = pdf->createNLL(*data,NumCPU(2)) ;
-    // Create the profile likelihood  
-    RooStats::ModelConfig* modelConfig = (RooStats::ModelConfig*) w->obj("ModelConfig");
+    RooAbsReal* nll = simPdfFitRegions->createNLL(*dataFitRegions,NumCPU(2)) ;
 
     unsigned int numParsP = plotParams->getSize();
     if (numParsP==0) { numParsP = fpf.getSize(); }
