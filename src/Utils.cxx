@@ -1464,6 +1464,7 @@ void Util::PlotNLL(RooWorkspace* w, RooFitResult* rFit, Bool_t plotPLL, TString 
 	TString parName = par->GetName();
 	Logger << kINFO << "Plotting NLL for par = " << parName << GEndl;
 
+	// set parameter range to readable range
 	double minRange = par->getMin();
 	double maxRange = par->getMax();
 	par->setMin(-3.);
