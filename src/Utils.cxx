@@ -44,6 +44,7 @@
 #include "RooStats/HypoTestInverterResult.h"
 #include "RooStats/HypoTestResult.h"
 #include "RooStats/RooStatsUtils.h"
+#include "RooStats/HistFactory/PiecewiseInterpolation.h"
 
 #include "TF1.h"
 #include "TH2D.h"
@@ -532,6 +533,29 @@ RooFitResult* Util::FitPdf( RooWorkspace* w, TString fitRegions, Bool_t lumiCons
     w->saveSnapshot(Form("snapshot_paramsVals_%s",resultname.Data()),*params);
 
     return r;
+}
+
+
+//_____________________________________________________________________________
+void 
+Util::SetInterpolationCode(RooWorkspace* w, Int_t code)
+{
+  if(w==NULL){
+    Logger << kERROR << "Workspace is NULL. Return." << GEndl;
+    return;
+  }
+
+  RooArgSet funcs = w->allFunctions();
+  TIterator* iter = funcs.createIterator() ;
+
+  RooAbsArg* parg(0);  
+  while((parg=(RooAbsArg*)iter->Next())) {
+    if ( parg->ClassName()!=TString("PiecewiseInterpolation") ) { continue; }    
+    PiecewiseInterpolation* p = (PiecewiseInterpolation*)w->function( parg->GetName() ); // something I can modifiy :)
+    p->setAllInterpCodes(code);
+  }
+
+  delete iter;
 }
 
 
