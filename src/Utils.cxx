@@ -160,7 +160,7 @@ void Util::GenerateFitAndPlot(TString fcName, TString anaName, Bool_t drawBefore
       return;
     }
 
-    Util::SetInterpolationCode(4); // MB 20130408: overwrite default - change from piece-wise linear to 6th order poly interp + linear extrapolation (also used in Higgs group)
+    Util::SetInterpolationCode(w,4); // MB 20130408: overwrite default - change from piece-wise linear to 6th order poly interp + linear extrapolation (also used in Higgs group)
     SaveInitialSnapshot(w);
 
     TString plotChannels = "ALL";
@@ -399,7 +399,6 @@ RooFitResult* Util::FitPdf( RooWorkspace* w, TString fitRegions, Bool_t lumiCons
 
     w->import(*simPdfFitRegions,kTRUE);
     gDirectory->Add(simPdfFitRegions);
-
 
     // find parameters requested for Minos
     RooArgSet* minosParams = new RooArgSet();
