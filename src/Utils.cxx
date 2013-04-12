@@ -442,7 +442,8 @@ RooFitResult* Util::FitPdf( RooWorkspace* w, TString fitRegions, Bool_t lumiCons
     minim.setPrintLevel(minimPrintLevel-1);
     int status = -1;
     minim.optimizeConst(2);
-    TString minimizer = ROOT::Math::MinimizerOptions::DefaultMinimizerType(); 
+    TString minimizer = "Minuit2"; //ROOT::Math::MinimizerOptions::DefaultMinimizerType(); 
+    //TString minimizer = ROOT::Math::MinimizerOptions::DefaultMinimizerType(); 
     TString algorithm = ROOT::Math::MinimizerOptions::DefaultMinimizerAlgo(); 
 
     Logger << kINFO << "Util::FitPdf()  ........ using " << minimizer << " / " << algorithm << GEndl; 
@@ -1539,9 +1540,9 @@ void Util::PlotNLL(RooWorkspace* w, RooFitResult* rFit, Bool_t plotPLL, TString 
 	    }
 	  }
 	  curveMax = yLastBin>yFirstBin ? yLastBin : yFirstBin;      
-	  frame->SetMaximum(curveMax * 2. ); 
+	  //frame->SetMaximum(curveMax * 2. ); 
 	}
-	else { frame->SetMaximum(1000.); }
+	//else { frame->SetMaximum(1000.); }
 		
 	// plot cosmetics
 	int firstbin = frame->GetXaxis()->GetFirst();

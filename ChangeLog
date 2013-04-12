@@ -1,3 +1,9 @@
+2013-04-12 Max Baak <mbaak@cern.ch>
+	M       src/Utils.cxx
+	M       setup.sh
+	* point setup file to root trunk
+	* Fit uses Minuit2
+
 2013-04-08 Max Baak <mbaak@cern.ch>
         M       Utils.cxx
         M       Utils.h
