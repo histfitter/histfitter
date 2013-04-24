@@ -241,9 +241,10 @@ void Util::GenerateFitAndPlot(TString fcName, TString anaName, Bool_t drawBefore
         PlotCorrelationMatrix(result, anaName);
 
     // plot likelihood
-    Bool_t plotPLL = kFALSE;
-    if(plotNLL) 
-      PlotNLL(w, expResultAfter, plotPLL, anaName, "", toyMC, "", fitChannels, lumiConst);
+    Bool_t plotPLL = minos;
+    if(plotNLL) {
+      PlotNLL(w, expResultAfter, plotPLL, anaName, "", toyMC, minosPars, fitChannels, lumiConst);
+    }
 
     if (toyMC) 
         WriteWorkspace(w, fc->m_inputWorkspaceFileName, toyMC->GetName());
