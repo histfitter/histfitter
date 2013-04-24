@@ -189,7 +189,7 @@ def getnamemap():
 
   
 
-def latexfitresults( filename, region='3jL', sample='', resultName="RooExpandedFitResult_afterFit", dataname='obsData', doAsym=False):
+def latexfitresults( filename, region='3jL', sample='', resultName="RooExpandedFitResult_afterFit", dataname='obsData', doAsym=True):
 
   namemap = {} ## add this if I want description
   namemap = getnamemap() ## add this if I want description
@@ -495,7 +495,7 @@ if __name__ == "__main__":
   method="1"
   showAfterFitError=True
   showPercent=False
-  doAsym=False
+  doAsym=True
   for opt,arg in opts:
     if opt == '-c':
       chanStr=arg.replace(",","_")

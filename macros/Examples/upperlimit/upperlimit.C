@@ -17,30 +17,30 @@ upperlimit()
   // open the workspace
   gSystem->Load("libSusyFitter.so");
 
-  RooMsgService::instance().setGlobalKillBelow(RooFit::FATAL); // Reduce the noise from RooFit
-  ROOT::Math::MinimizerOptions::SetDefaultMinimizer("Minuit2"); // More stable minimizer - otherwise "Minuit"
-  ROOT::Math::MinimizerOptions::SetDefaultStrategy(0); // Standard default
-  ROOT::Math::MinimizerOptions::SetDefaultPrintLevel(-1); // Quiet please...
+  //RooMsgService::instance().setGlobalKillBelow(RooFit::FATAL); // Reduce the noise from RooFit
+  //ROOT::Math::MinimizerOptions::SetDefaultMinimizer("Minuit2"); // More stable minimizer - otherwise "Minuit"
+  //ROOT::Math::MinimizerOptions::SetDefaultStrategy(0); // Standard default
+  //ROOT::Math::MinimizerOptions::SetDefaultPrintLevel(-1); // Quiet please...
 
-  TFile *file = TFile::Open("example_channel1_GaussExample_model.root");
-  RooWorkspace* w = (RooWorkspace *)file->Get("channel1"); 
+  TFile *file = TFile::Open("Discovery_combined_NormalMeasurement_model.root");
+  RooWorkspace* w = (RooWorkspace *)file->Get("combined"); 
   
   // set random seed for toy generation
   RooRandom::randomGenerator()->SetSeed(seed);
 
   // option to turn of the luminosity and signal uncertainty.
-  if (false) { 
+  if (true) { 
     w->exportToCint();
-    using namespace channel1;
+    using namespace combined;
     Lumi.setConstant(); 
-    alpha_syst1.setConstant();
+    //alpha_syst1.setConstant();
   }
 
   // determine the upper limit and make a plot
   RooStats::HypoTestInverterResult* hypo = RooStats::MakeUpperLimitPlot(fileprefix,w,calculatorType,testStatType,ntoys,useCLs,npoints);
 
   // to reproduce the plot, do:
-  //RooStats::AnalyzeHypoTestInverterResult(hypo,calculatorType,testStatType,useCLs,npoints);
+  RooStats::AnalyzeHypoTestInverterResult(hypo,calculatorType,testStatType,useCLs,npoints);
 
   delete hypo;
   

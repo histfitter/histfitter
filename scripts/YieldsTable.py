@@ -17,7 +17,7 @@ import sys
 
 # Main function calls are defined below.
 
-def latexfitresults(filename,regionList,sampleList,exactRegionNames=False,dataname='obsData',showSum=False, doAsym=False):
+def latexfitresults(filename,regionList,sampleList,exactRegionNames=False,dataname='obsData',showSum=False, doAsym=True):
   workspacename = 'w'
   w = Util.GetWorkspaceFromFile(filename,'w')
 
@@ -291,7 +291,7 @@ if __name__ == "__main__":
   showSumAllRegions=False
   useAsimovSet=False
   ignoreLastChannel=False
-  doAsym=False
+  doAsym=True
   for opt,arg in opts:
     if opt == '-c':
       chanStr=arg.replace(",","_")
