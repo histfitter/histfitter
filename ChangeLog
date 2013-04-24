@@ -1,4 +1,7 @@
 2013-04-24 Max Baak <mbaak@cern.ch>
+        * Tagged HistFitter-00-00-26
+
+2013-04-24 Max Baak <mbaak@cern.ch>
 	M	setup.sh
 	* Point to root v5.34.06, with several important bug roofit and roostats bug fixes
 	* http://root.cern.ch/drupal/content/root-version-v5-34-00-patch-release-notes
@@ -41,7 +44,6 @@
 	M       src/Utils.cxx
 	M       src/Utils.h
 	* Introduced option -y for YieldsTable.py and SysTable.py to use symmetrized minos errors in tables.
-
 
 2013-03-06 Max Baak <mbaak@cern.ch>
 	M       setup.sh
