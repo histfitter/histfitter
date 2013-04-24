@@ -1,3 +1,8 @@
+2013-04-24 Max Baak <mbaak@cern.ch>
+	M	setup.sh
+	* Point to root v5.34.06, with several important bug roofit and roostats bug fixes
+	* http://root.cern.ch/drupal/content/root-version-v5-34-00-patch-release-notes
+
 2013-04-12 Max Baak <mbaak@cern.ch>
 	M       src/Utils.cxx
 	M       setup.sh
