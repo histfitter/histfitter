@@ -428,7 +428,10 @@ RooFitResult* Util::FitPdf( RooWorkspace* w, TString fitRegions, Bool_t lumiCons
     RooArgSet* allParams = pdf_FR->getParameters(data_FR);
     RooStats::RemoveConstantParameters(allParams);
 
-    RooAbsReal* nll = (RooNLLVar*) pdf_FR->createNLL(*data_FR); //, RooFit::CloneData(kFALSE),RooFit::Constrain(*allParams),RooFit::SumW2Error(kFALSE));
+    RooStats::ModelConfig* mc = Util::GetModelConfig( w );
+    const RooArgSet* globObs = mc->GetGlobalObservables();
+
+    RooAbsReal* nll = (RooNLLVar*) pdf_FR->createNLL(*data_FR, RooFit::GlobalObservables(*globObs), RooFit::Offset(true) ); //, RooFit::CloneData(kFALSE),RooFit::Constrain(*allParams),RooFit::SumW2Error(kFALSE));
 
     int minimPrintLevel = 1; //verbose;
 
@@ -1446,8 +1449,11 @@ void Util::PlotNLL(RooWorkspace* w, RooFitResult* rFit, Bool_t plotPLL, TString 
     // Get all parameters of result
     RooArgList  fpf =  rFit->floatParsFinal();
 
+    RooStats::ModelConfig* mc = Util::GetModelConfig( w );
+    const RooArgSet* globObs = mc->GetGlobalObservables();
+
     // Create Log Likelihood    
-    RooAbsReal* nll = simPdfFitRegions->createNLL(*dataFitRegions,NumCPU(2)) ;
+    RooAbsReal* nll = simPdfFitRegions->createNLL(*dataFitRegions,NumCPU(2), RooFit::GlobalObservables(*globObs), RooFit::Offset(true)) ;
 
     unsigned int numParsP = plotParams->getSize();
     if (numParsP==0) { numParsP = fpf.getSize(); }
@@ -1898,8 +1904,9 @@ Util::doFreeFit( RooWorkspace* w, RooDataSet* inputdata, const bool& verbose, co
     RooArgSet* allParams = pdf->getParameters(data);
     RooStats::RemoveConstantParameters(allParams);
 
+    const RooArgSet* globObs = mc->GetGlobalObservables();
 
-    RooAbsReal* nll = (RooNLLVar*) pdf->createNLL(*data); //, RooFit::CloneData(kFALSE),RooFit::Constrain(*allParams));
+    RooAbsReal* nll = (RooNLLVar*) pdf->createNLL(*data, RooFit::GlobalObservables(*globObs), RooFit::Offset(true)); //, RooFit::CloneData(kFALSE),RooFit::Constrain(*allParams));
 
     int minimPrintLevel = verbose;
 
