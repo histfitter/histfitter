@@ -17,35 +17,39 @@ except Exception, msg:
     sys.exit()
 
 ##directories = glob.glob("GMSB*hypotestresult")
-directories = glob.glob("GMSB_3_2d_8*hypotestresult")
+directories = ['./'] # glob.glob("GMSB_3_2d_8*hypotestresult")
 
 
 for dir in directories:
     print dir
-    files = glob.glob(dir+"/*/*.root")
+    files = glob.glob("Mc12SusyGtt_down_CONF_toys*.root")
 
     first=True
     
     outfile = TFile(dir+"/Merged_Output_hypotest.root","RECREATE")
 
-    resultname = "hypo_"+dir.replace("_hypotestresult","")
+    resultname = "hypo_signal_700_150"
 
     global combinedresult
+
+    hyporesult = RooStats.HypoTestInverterResult()
 
     for f in files:
         file = TFile.Open(f)
         hyporesult = file.Get(resultname)
 
         if first:
-            combinedresult = hyporesult
-
+            combinedresult = RooStats.HypoTestInverterResult()
             first = False
-        else:
-            combinedresult.Add(hyporesult)
+
+        combinedresult.Add(hyporesult)
+        file.Close()
+        pass
 
 
     outfile.cd()
     combinedresult.Write()
     outfile.Write()
     outfile.Close()
+
 

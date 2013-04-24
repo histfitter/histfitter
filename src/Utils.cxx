@@ -241,9 +241,10 @@ void Util::GenerateFitAndPlot(TString fcName, TString anaName, Bool_t drawBefore
         PlotCorrelationMatrix(result, anaName);
 
     // plot likelihood
-    Bool_t plotPLL = kFALSE;
-    if(plotNLL) 
-      PlotNLL(w, expResultAfter, plotPLL, anaName, "", toyMC, "", fitChannels, lumiConst);
+    Bool_t plotPLL = minos;
+    if(plotNLL) {
+      PlotNLL(w, expResultAfter, plotPLL, anaName, "", toyMC, minosPars, fitChannels, lumiConst);
+    }
 
     if (toyMC) 
         WriteWorkspace(w, fc->m_inputWorkspaceFileName, toyMC->GetName());
@@ -450,7 +451,7 @@ RooFitResult* Util::FitPdf( RooWorkspace* w, TString fitRegions, Bool_t lumiCons
     Logger << kINFO << " with strategy  " << strategy << " and tolerance " << tol << GEndl;
 
 
-    bool kickApplied(false);
+    //bool kickApplied(false);
     for (int tries = 1, maxtries = 4; tries <= maxtries; ++tries) {
         //	 status = minim.minimize(fMinimizer, ROOT::Math::MinimizerOptions::DefaultMinimizerAlgo().c_str());
         status = minim.minimize(minimizer, algorithm);  
@@ -1919,7 +1920,7 @@ Util::doFreeFit( RooWorkspace* w, RooDataSet* inputdata, const bool& verbose, co
     Logger << kINFO << "Util::doFreeFit()  ........ using " << minimizer << " / " << algorithm 
         << " with strategy  " << strategy << " and tolerance " << tol << GEndl;
 
-    bool kickApplied(false);
+    //bool kickApplied(false);
     for (int tries = 1, maxtries = 4; tries <= maxtries; ++tries) {
         //	 status = minim.minimize(fMinimizer, ROOT::Math::MinimizerOptions::DefaultMinimizerAlgo().c_str());
         status = minim.minimize(minimizer, algorithm);  
