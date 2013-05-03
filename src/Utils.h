@@ -122,7 +122,10 @@ namespace Util
   void resetValue( RooWorkspace* wspace, const RooArgList& parList, const RooArgList& vetoList = RooArgList() ) ;
 
   RooArgList getFloatParList( const RooAbsPdf& pdf, const RooArgSet& obsSet = RooArgSet() );
-  
+
+  RooAbsReal* CreateNLL( RooWorkspace* w, TString fitRegions, Bool_t lumiConst=false);
+
+  void PlotYieldPLL(RooWorkspace* w, RooAbsReal* nll, RooAbsReal* bkgf, RooFitResult* r=0);  
 }
 
 # endif

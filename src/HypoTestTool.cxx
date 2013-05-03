@@ -673,6 +673,7 @@ RooStats::HypoTestTool::SetupHypoTestCalculator(RooWorkspace * w, bool doUL,
         profll->SetPrintLevel(mPrintLevel);
         profll->SetReuseNLL(mOptimize);
         if (mOptimize) profll->SetStrategy(0);
+        profll->SetLOffset();
     }
 
     if (mMaxPoi > 0) poi->setMax(mMaxPoi);  // increase limit

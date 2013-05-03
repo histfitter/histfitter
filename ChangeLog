@@ -1,6 +1,8 @@
 2013-04-24 Max Baak <mbaak@cern.ch>
 	M       Utils.cxx
+	M       src/HypoTestTool.cxx
 	* Added GlobalObservables() and Offset() to createNll() calls.
+        * Tagged HistFitter-00-00-27
 
 2013-04-24 Max Baak <mbaak@cern.ch>
         * Tagged HistFitter-00-00-26
