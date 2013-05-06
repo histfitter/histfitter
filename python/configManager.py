@@ -642,9 +642,10 @@ class ConfigManager(object):
                     continue
 
                 rs = rc.getSample(sam.name)
-                for osys in sam.overallSystList:
-                    if not osys.allowRemapOfSyst:
-                        continue
+
+                for (key, ssys) in sam.systDict.items():
+                    if not ssys.allowRemapOfSyst: continue
+                    osys = sam.getOverallSys(key) # overall sys part is to be modified
 
                     rsys = rs.getOverallSys(osys[0]) # get replacement overall systematic, by name
                     if rsys is None:
