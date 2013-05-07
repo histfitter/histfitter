@@ -1,5 +1,6 @@
 2013-05-05 Max Baak <mbaak@cern.ch>
 	M       configManager.py
+	M       channel.py
 	* Fix: remapping of overall systematics was broken in the trunk
 
 2013-04-24 Max Baak <mbaak@cern.ch>
