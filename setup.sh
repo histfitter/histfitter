@@ -25,8 +25,8 @@ if [ ! $ROOTSYS ]; then
   echo "With build ${BUILD} ..."
   export CWD=$PWD
   # setup corresponding root
-  cd $CERNPREFIX/atlas/offline/external/FullChainTest/tier0/test/mbaak/root/root-v5-34-00-patches
-  #cd $CERNPREFIX/sw/lcg/app/releases/ROOT/$ROOTVERSION/$BUILD/root/
+  #cd $CERNPREFIX/atlas/offline/external/FullChainTest/tier0/test/mbaak/root/root-v5-34-00-patches
+  cd $CERNPREFIX/sw/lcg/app/releases/ROOT/$ROOTVERSION/$BUILD/root/
   source bin/thisroot.sh
   cd $CWD
   # setup xrootd on top of this
