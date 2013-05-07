@@ -2,6 +2,7 @@
 	M       configManager.py
 	M       channel.py
 	* Fix: remapping of overall systematics was broken in the trunk
+        * Tagged HistFitter-00-00-28
 
 2013-04-24 Max Baak <mbaak@cern.ch>
 	M       Utils.cxx
