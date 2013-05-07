@@ -110,6 +110,7 @@ class Channel(object):
                 self.sampleList[index].addSystematic(syst)
         return
 
+
     def getSample(self, name):
         """
         Get Sample object for this channel
@@ -120,7 +121,19 @@ class Channel(object):
 
         raise Exception("Could not find sample with name %s in %s"
                         % (name, self.sampleList))
+
+
+    def hasSample(self, name):
+        """
+        Get Sample object for this channel
+        """
+        for s in self.sampleList:
+            if s.name == name:
+                return True
+
+        return False
     
+
     def removeSample(self, sample):
         if isinstance(sample, Sample):
             aSam = sample
