@@ -36,8 +36,8 @@ def tablefragment(m, channel, signalregionslist,sampleList,showBeforeFitError):
 \\noalign{\\smallskip}\\hline\\noalign{\\smallskip}
 {\\bf %s channel}          ''' %channel
   for region in m['names']:
-    tableline += " & " + region.replace('_cuts','') + "           "   
-
+    tableline += " & " + region.replace('_','\_') + "           "   
+    
   tableline += '''   \\\\[-0.05cm]
 \\noalign{\\smallskip}\\hline\\noalign{\\smallskip}
 %%''' 
@@ -262,9 +262,9 @@ def tableend4(rList, suffix='sr3jl', mentionCh=''):
 
   regionsList = []
   for r in rList:
-      regionsList.append(r.replace('_cuts',''))
+      regionsList.append(r.replace('_','\_'))
 
-  mentionCh = mentionCh.replace('_cuts','')
+  mentionCh = mentionCh.replace('_','\_')
 
   tomention = ''
   if len(mentionCh)>0:
