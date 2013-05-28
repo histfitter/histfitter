@@ -1469,140 +1469,125 @@ void Util::PlotNLL(RooWorkspace* w, RooFitResult* rFit, Bool_t plotPLL, TString 
     TString canName=Form("can_NLL_%s_%s",outputPrefix.Data(),rFit->GetName());
     TCanvas* can = new TCanvas(canName,canName,600,600); 
 
-    // divide the canvas
-    Int_t canVecDivX = 1;
-    Int_t canVecDivY = 1;
-    if(numParsP>0){
-        canVecDivX = ((Int_t) (sqrt(numParsP)+0.5));
-        canVecDivY = ((Int_t) (sqrt(numParsP)+0.5));
-        if(canVecDivX<1) canVecDivX = 1;
-        if(canVecDivY<1) canVecDivY = 1;
-    }  
-    if ( plotParams->getSize()>0 && fpf.getSize()!=plotParams->getSize() ) {
-      canVecDivX = numParsP;
-      canVecDivY = 1;
-    }
-    can->Divide(canVecDivX , canVecDivY);
-
     // loop over all floating pars
     for(unsigned int iPar=0, jPar=0; iPar<numPars ; iPar++){
-        RooAbsArg* arg = fpf.at(iPar);
+      RooAbsArg* arg = fpf.at(iPar);
 
-        if ( (plotParams->getSize()>0) && plotParams->find(arg->GetName())==0 ) { continue; }
-	if ( !arg->InheritsFrom("RooRealVar") ) { continue; }
+      if ( (plotParams->getSize()>0) && plotParams->find(arg->GetName())==0 ) { continue; }
+      if ( !arg->InheritsFrom("RooRealVar") ) { continue; }
 
-	jPar++; // special counter when selecting parameters
+      jPar++; // special counter when selecting parameters
 
-	RooRealVar* par = (RooRealVar*) arg;
-	TString parName = par->GetName();
-	Logger << kINFO << "Plotting NLL for par = " << parName << GEndl;
+      RooRealVar* par = (RooRealVar*) arg;
+      TString parName = par->GetName();
+      Logger << kINFO << "Plotting NLL for par = " << parName << GEndl;
 
-	// set parameter range to readable range
-	double minRange = par->getMin();
-	double maxRange = par->getMax();
-	par->setMin(-3.);
-	par->setMax(3.);
+      // set parameter range to readable range
+      double minRange = par->getMin();
+      double maxRange = par->getMax();
+      par->setMin(-3.);
+      par->setMax(3.);
 
-	RooPlot* frame = par->frame();
-	nll->plotOn(frame, ShiftToZero());
-	frame->SetMinimum(0.);
-	// To be able to see the 1/2 sigma
-	frame->SetMaximum(2.5);
+      RooPlot* frame = par->frame();
+      nll->plotOn(frame, ShiftToZero());
+      frame->SetMinimum(0.);
+      // To be able to see the 1/2 sigma
+      frame->SetMaximum(2.5);
 	
-	const char* curvename = 0;
-	RooCurve* curve = (RooCurve*) frame->findObject(curvename,RooCurve::Class()) ;
-	Double_t curveMax = curve->getYAxisMax();
-	// safety for weird RooPlots where curve goes to infinity in first/last bin(s)
-	if (curveMax > 0. && !std::isinf(curveMax) && !std::isnan(curveMax) )  { ; } // frame->SetMaximum(curveMax * 2.); 
-	else if(curveMax > 0. && (std::isinf(curveMax) || std::isnan(curveMax))){
-	  for(Int_t iBin=1;  iBin < curve->GetN()-1; iBin++){
-	    Double_t xBin = 0.;
-	    Double_t yBin = -1.;     
-	    curve->GetPoint(iBin,xBin,yBin) ;		    
-	    if(std::isinf(yBin)  || std::isnan(yBin)){
-	      curve->RemovePoint(iBin);
-	      Logger << kWARNING << " Removing bin = " << iBin  << " as it was either inf or nan from NLL plot for parameter = " << parName<< GEndl;
-	    }
-	  }	
+      const char* curvename = 0;
+      RooCurve* curve = (RooCurve*) frame->findObject(curvename,RooCurve::Class()) ;
+      Double_t curveMax = curve->getYAxisMax();
+      // safety for weird RooPlots where curve goes to infinity in first/last bin(s)
+      if (curveMax > 0. && !std::isinf(curveMax) && !std::isnan(curveMax) )  { ; } // frame->SetMaximum(curveMax * 2.); 
+      else if(curveMax > 0. && (std::isinf(curveMax) || std::isnan(curveMax))){
+        for(Int_t iBin=1;  iBin < curve->GetN()-1; iBin++){
+          Double_t xBin = 0.;
+          Double_t yBin = -1.;     
+          curve->GetPoint(iBin,xBin,yBin) ;		    
+          if(std::isinf(yBin)  || std::isnan(yBin)){
+            curve->RemovePoint(iBin);
+            Logger << kWARNING << " Removing bin = " << iBin  << " as it was either inf or nan from NLL plot for parameter = " << parName<< GEndl;
+          }
+        }	
 	  
-	  Int_t iBin = 1;
-	  Double_t xFirstBin = 0.;
-	  Double_t yFirstBin = -1.;	
-	  while ( (yFirstBin<0 || std::isinf(yFirstBin)  || std::isnan(yFirstBin) )&& iBin < curve->GetN()-1){
-	    iBin++;
-	    curve->GetPoint(iBin,xFirstBin,yFirstBin) ;
-	    if(std::isinf(yFirstBin)  || std::isnan(yFirstBin)){
-	      curve->RemovePoint(iBin);
-	      Logger << kWARNING << " Removing bin = " << iBin  << " as it was either inf or nan from NLL plot for parameter = " << parName<< GEndl;
-	    }
-	  }
-	  iBin = curve->GetN()-1;
-	  Double_t xLastBin = 0.;
-	  Double_t yLastBin = -1.;	
-	  while ( (yLastBin < 0 || std::isinf(yLastBin) || std::isnan(yLastBin) ) && iBin >0){
-	    iBin--;
-	    curve->GetPoint(iBin,xLastBin,yLastBin) ; 
-	    if(std::isinf(yLastBin)  || std::isnan(yLastBin)){
-	      curve->RemovePoint(iBin);
-	      Logger << kWARNING << " Removing bin = " << iBin  << " as it was either inf or nan from NLL plot for parameter = " << parName<< GEndl;
-	    }
-	  }
-	  curveMax = yLastBin>yFirstBin ? yLastBin : yFirstBin;      
-	  //frame->SetMaximum(curveMax * 2. ); 
-	}
-	//else { frame->SetMaximum(1000.); }
+        Int_t iBin = 1;
+        Double_t xFirstBin = 0.;
+        Double_t yFirstBin = -1.;	
+        while ( (yFirstBin<0 || std::isinf(yFirstBin)  || std::isnan(yFirstBin) )&& iBin < curve->GetN()-1){
+          iBin++;
+          curve->GetPoint(iBin,xFirstBin,yFirstBin) ;
+          if(std::isinf(yFirstBin)  || std::isnan(yFirstBin)){
+            curve->RemovePoint(iBin);
+            Logger << kWARNING << " Removing bin = " << iBin  << " as it was either inf or nan from NLL plot for parameter = " << parName<< GEndl;
+          }
+        }
+        iBin = curve->GetN()-1;
+        Double_t xLastBin = 0.;
+        Double_t yLastBin = -1.;	
+        while ( (yLastBin < 0 || std::isinf(yLastBin) || std::isnan(yLastBin) ) && iBin >0){
+          iBin--;
+          curve->GetPoint(iBin,xLastBin,yLastBin) ; 
+          if(std::isinf(yLastBin)  || std::isnan(yLastBin)){
+            curve->RemovePoint(iBin);
+            Logger << kWARNING << " Removing bin = " << iBin  << " as it was either inf or nan from NLL plot for parameter = " << parName<< GEndl;
+          }
+        }
+        curveMax = yLastBin>yFirstBin ? yLastBin : yFirstBin;      
+        //frame->SetMaximum(curveMax * 2. ); 
+      }
+      //else { frame->SetMaximum(1000.); }
 		
-	// plot cosmetics
-	int firstbin = frame->GetXaxis()->GetFirst();
-	int lastbin = frame->GetXaxis()->GetLast();
-	double xmax = frame->GetXaxis()->GetBinUpEdge(lastbin) ;
-	double xmin = frame->GetXaxis()->GetBinLowEdge(firstbin) ;
+      // plot cosmetics
+      int firstbin = frame->GetXaxis()->GetFirst();
+      int lastbin = frame->GetXaxis()->GetLast();
+      double xmax = frame->GetXaxis()->GetBinUpEdge(lastbin) ;
+      double xmin = frame->GetXaxis()->GetBinLowEdge(firstbin) ;
 	
-	TLine* l1 = new TLine(xmin,2.,xmax,2.);
-	TLine* l2 = new TLine(xmin,0.5,xmax,0.5);
+      TLine* l1 = new TLine(xmin,2.,xmax,2.);
+      TLine* l2 = new TLine(xmin,0.5,xmax,0.5);
 	
-	l1->SetLineStyle(3);
-	l2->SetLineStyle(3);
+      l1->SetLineStyle(3);
+      l2->SetLineStyle(3);
 	
-	frame->addObject(l1);
-	frame->addObject(l2);
+      frame->addObject(l1);
+      frame->addObject(l2);
 	
-	RooAbsReal* pll(0);
-	if(plotPLL) { 
-	  pll = nll->createProfile(*par) ;
-	  pll->plotOn(frame,LineColor(kRed),LineStyle(kDashed),NumCPU(4)); 
-	}
+      RooAbsReal* pll(0);
+      if(plotPLL) { 
+        pll = nll->createProfile(*par) ;
+        pll->plotOn(frame,LineColor(kRed),LineStyle(kDashed),NumCPU(4)); 
+      }
 	
-	can->cd(jPar);
-	frame->Draw();  
+      can->cd();
+      frame->Draw();  
 	
-	TLegend* leg = new TLegend(0.55,0.65,0.85,0.9,"");
-	leg->SetFillStyle(0);
-	leg->SetFillColor(0);
-	leg->SetBorderSize(0);
-	TLegendEntry* entry=leg->AddEntry("","NLL","l") ;
-	entry->SetLineColor(kBlue);
-	if(plotPLL) {	
-	  entry=leg->AddEntry("","PLL","l") ;
-	  entry->SetLineColor(kRed);
-	  entry->SetLineStyle(kDashed);
-	}
-	leg->Draw();
+      TLegend* leg = new TLegend(0.55,0.65,0.85,0.9,"");
+      leg->SetFillStyle(0);
+      leg->SetFillColor(0);
+      leg->SetBorderSize(0);
+      TLegendEntry* entry=leg->AddEntry("","NLL","l") ;
+      entry->SetLineColor(kBlue);
+      if(plotPLL) {	
+        entry=leg->AddEntry("","PLL","l") ;
+        entry->SetLineColor(kRed);
+        entry->SetLineStyle(kDashed);
+      }
+      leg->Draw();
 
-	// update plot
-	can->Draw();
+      // update plot
+      can->Draw();
 
-	// reset parameter range to previous values
-	par->setMin(minRange);
-	par->setMax(maxRange);
+      // reset parameter range to previous values
+      par->setMin(minRange);
+      par->setMax(maxRange);
 
-	if (plotPLL) {
-	  delete pll; pll=0;
-	}
+      if (plotPLL) {
+        delete pll; pll=0;
+      }
+
+      can->SaveAs("results/"+anaName+"/"+canName+"_"+parName+".pdf");
+      can->SaveAs("results/"+anaName+"/"+canName+"_"+parName+".eps");
     }
-    
-    can->SaveAs("results/"+anaName+"/"+canName+".pdf");
-    can->SaveAs("results/"+anaName+"/"+canName+".eps");
 
     delete nll ;
 

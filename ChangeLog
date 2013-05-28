@@ -1,3 +1,8 @@
+2013-05-29  Zach Marshall <zach.marshall@cern.ch>
+	M       src/Utils.cxx
+	* Moving to one NLL/PLL plot per canvas (no divide) so that they are
+	legible together
+
 2013-05-05 Max Baak <mbaak@cern.ch>
 	M       configManager.py
 	M       channel.py
