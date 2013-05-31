@@ -15,7 +15,8 @@ def tablefragment(m,table,signalRegions,skiplist,chanStr,showPercent):
 {\\bf Uncertainty of channel}                                   ''' 
 
   for region in signalRegions:
-    tableline += " & " + region + "           "   
+    # tableline += " & " + region + "           "   
+    tableline += " & " + region.replace('_','\_') + "           "   
 
   tableline += ''' \\\\
 \\noalign{\\smallskip}\\hline\\noalign{\\smallskip}
