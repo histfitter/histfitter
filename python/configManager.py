@@ -404,7 +404,7 @@ class ConfigManager(object):
                  style.setErrorLineStyle(fc.errorLineStyle)
                  style.setErrorFillColor(fc.errorFillColor)
                  style.setErrorFillStyle(fc.errorFillStyle)
-                 style.setRemoveEmptyBins = self.removeEmptyBins
+                 style.setRemoveEmptyBins(self.removeEmptyBins)
                  if not fc.tLegend is None:
                      style.setTLegend(fc.tLegend)
 
