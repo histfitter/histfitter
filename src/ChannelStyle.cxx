@@ -37,6 +37,7 @@ ChannelStyle::ChannelStyle(const TString& name) : m_logger("ChannelStyle") {
     m_ATLASLabelY = -1.;
     m_ATLASLabelText = "";
     m_showLumi = kFALSE;
+    m_lumi = -1.;
 
     m_defaultSampleColor = kRed-10;
     m_defaultSampleCounter = 0;

@@ -37,6 +37,8 @@ namespace ValidationUtils
   void SetFrameStyle2D( TH1* frame, Float_t scale = 1.0 );
   
   void PullPlot3(XtraValues* inValsEl, XtraValues* inValsMu, const TString& outFileNamePrefix);
+  void PullPlot4(XtraValues* inVals, const TString& outFileNamePrefix);
+
 }
 
 #endif
