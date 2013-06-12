@@ -1,3 +1,18 @@
+
+2013-06-12 Max Baak <mbaak@cern.ch>
+	* Several minor updates
+	M       ChannelStyle.cxx
+	M       ValidationUtils.cxx
+	M       ValidationUtils.h
+	* Option to pickup histograms from a backup file. 
+	* Use this to run discovery mode, using histograms from background-only mode
+	M       HistFitter.py
+	M       prepareHistos.py
+	M       configManager.py
+	M       fitConfig.py
+	M       channel.py
+	
+
 2013-05-29  Zach Marshall <zach.marshall@cern.ch>
 	M       src/Utils.cxx
 	* Moving to one NLL/PLL plot per canvas (no divide) so that they are
