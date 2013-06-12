@@ -95,6 +95,7 @@ if __name__ == "__main__":
     parser.add_argument("-V", "--validation", help="include validation regions", action="store_true")
     parser.add_argument("-c", "--cmd", help="python commands to process (semi-colon-seperated)")
     parser.add_argument("-u", "--userArg", help="arbitrary user argument(s)", default="")
+    parser.add_argument("-A", "--use-archive-histfile", help="use backup histogram cache file", action="store_true")
 
     args = parser.parse_args()
    
@@ -107,6 +108,9 @@ if __name__ == "__main__":
 
     if args.validation:
         doValidation = True
+
+    if args.use_archive_histfile:
+        configMgr.useHistBackupCacheFile = True
 
     if args.create_histograms:
         configMgr.readFromTree = True
