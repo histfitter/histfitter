@@ -131,6 +131,9 @@ class TreePrepare(PrepareHistosABC):
             for fileName in fileList:
                 self.configMgr.chains[self.currentChainName].Add(fileName)
 
+            if not self.configMgr.chains[self.currentChainName].GetBranch("mtmu2"):
+                self.configMgr.chains[self.currentChainName].SetAlias("mtmu2","( sqrt(2*lep2Pt*met*(1-cos(lep2Phi-metPhi))) )")
+
             ## MB : hack to add non-existent branches ...
             if not self.configMgr.chains[self.currentChainName].GetBranch("phQuality"):
                 self.configMgr.chains[self.currentChainName].SetAlias("phQuality","(1>0)")
@@ -409,16 +412,28 @@ class HistoPrepare(PrepareHistosABC):
     Only read from one file
     """
 
-    def __init__(self, filepath):
+    def __init__(self, filepath, file2path=''):
         PrepareHistosABC.__init__(self)
         self.cacheFileName = filepath
         import os
+        #
+        self.cache2FileName = file2path
+        if os.path.isfile(file2path):
+            self.cache2File = TFile(file2path,"READ")
+        else:
+            self.cache2File = None
+        #
         if os.path.isfile(filepath):
-            self.cacheFile = TFile(filepath,"READ")
-            self.recreate=False
+            if not os.path.isfile(file2path): # default, no archive file
+                self.cacheFile = TFile(filepath,"READ")
+                self.recreate=False
+            else:
+                self.cacheFile = TFile(filepath,"UPDATE")
+                self.recreate=True
         else:
             self.cacheFile = TFile(filepath,"RECREATE")
             self.recreate=True
+
         return
 
     def checkTree(self,treeName,fileList):
@@ -441,12 +456,16 @@ class HistoPrepare(PrepareHistosABC):
         #Note: useOverflow and useUnderflow has no effect. It's there just for symmetry with TreePrepare above.
         if self.configMgr.hists[name] is None:
             try:
-                self.configMgr.hists[name] = self.cacheFile.Get(name)
+                self.configMgr.hists[name] = self.cache2File.Get(name)
                 testsum = self.configMgr.hists[name].GetSum()
             except: # IOError:
-                log.error("Could not find histogram <"+name+"> in "+self.cacheFileName+" ! ")
-                self.configMgr.hists[name] = None
-                raise #Exception("Could not find histogram <"+name+"> in "+self.cacheFileName)
+                try:
+                    self.configMgr.hists[name] = self.cacheFile.Get(name)
+                    testsum = self.configMgr.hists[name].GetSum()
+                except: # IOError:
+                    log.error("Could not find histogram <"+name+"> in "+self.cacheFileName+" ! ")
+                    self.configMgr.hists[name] = None
+                    raise #Exception("Could not find histogram <"+name+"> in "+self.cacheFileName)
 
         self.name = name
         return self.configMgr.hists[name]
@@ -480,3 +499,4 @@ class HistoPrepare(PrepareHistosABC):
 
     def __del__(self):
         self.cacheFile.Close()
+        if self.cache2File!=None: self.cache2File.Close()

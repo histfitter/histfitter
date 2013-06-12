@@ -98,6 +98,8 @@ class ConfigManager(object):
         self.prepare = None # PrepareHistos object
 
         self.histCacheFile = ""
+        self.histBackupCacheFile = ""
+        self.useHistBackupCacheFile = False
         self.fileList = [] # File list to be used for tree production
         self.treeName = ''
         self.bkgParName = ''
@@ -311,7 +313,10 @@ class ConfigManager(object):
                 pass
         else:
             log.info("  -build HistoPrepare()...")
-            self.prepare = HistoPrepare(self.histCacheFile)
+            if self.useHistBackupCacheFile:
+                self.prepare = HistoPrepare(self.histCacheFile,self.histBackupCacheFile)
+            else: # default
+                self.prepare = HistoPrepare(self.histCacheFile)
 
         #C++ alter-ego
         log.info("  -initialize C++ mgr...")
@@ -388,7 +393,9 @@ class ConfigManager(object):
                  if not c.showLumi is None:
                      style.setShowLumi(c.showLumi)     
                  if not self.outputLumi is None:
-                     style.setLumi(self.outputLumi)     
+                     if c.lumi is None:
+                         style.setLumi(self.outputLumi)
+                     else: style.setLumi(c.lumi)
 
                  # Plot cosmetics per fitConfig 
                  style.setDataColor(fc.dataColor)
@@ -1175,6 +1182,8 @@ class ConfigManager(object):
                 outputRootFile = outputRootFile.Open(self.histCacheFile,"UPDATE")
 
         if outputRootFile:
+            log.info('Storing histograms in file: %s' % self.histCacheFile)
+
             outputRootFile.cd()
             histosToWrite = self.hists.values()
             def notNull(x): return not type(x).__name__ == "TObject"

@@ -502,7 +502,7 @@ class fitConfig(object):
         return
 
     def setValidationChannels(self, channels):
-     #TODO should be renamed appendValidationChannels !
+        #TODO should be renamed appendValidationChannels !
         """
         Set the channels to be treated as validation regions (VRs)
         """
