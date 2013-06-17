@@ -1,7 +1,7 @@
 # setup ROOT
 # check Root environment setup. Allow for external setup script.
 
-export BUILD="x86_64-slc5-gcc43-opt"
+export BUILD="x86_64-slc5-gcc46-opt"
 export ROOTVERSION="5.34.08"
 export CERNPREFIX="/afs/cern.ch/"
 
@@ -11,8 +11,8 @@ if [[ `hostname` = l*.cern.ch ]]; then
     #don't check for *.cern.ch - any machine at CERN, incl. your laptop, has that hostname!
     echo "INFO: hostname matches l*.cern.ch: setting up gcc and python from afs"
     # first, setup gcc to version 4.3
-    echo "Setting up gcc version 4.3.2 ..."
-    source $CERNPREFIX/sw/lcg/external/gcc/4.3.2/x86_64-slc5/setup.sh
+    echo "Setting up gcc version 4.6 ..."
+    source $CERNPREFIX/sw/lcg/external/gcc/4.6/x86_64-slc5/setup.sh
     # second, setup an uptodate python version
     echo "Setting up python version 2.6.5 ..."
     export PATH="$CERNPREFIX/sw/lcg/external/Python/2.6.5/$BUILD/bin:${PATH}"
