@@ -216,7 +216,7 @@ void Util::GenerateFitAndPlot(TString fcName, TString anaName, Bool_t drawBefore
 
     // plot before fit
     if (drawBeforeFit) 
-        PlotPdfWithComponents(w, fc->m_name, anaName, plotChannels, "beforeFit", expResultBefore, toyMC, plotRatio);
+      PlotPdfWithComponents(w, fc->m_name, anaName, plotChannels, "beforeFit", expResultBefore, toyMC, plotRatio);
 
     //fit of all regions
     RooFitResult*  result = FitPdf(w, fitChannels, lumiConst, toyMC, "", minos, minosPars);
@@ -230,8 +230,8 @@ void Util::GenerateFitAndPlot(TString fcName, TString anaName, Bool_t drawBefore
  
     // plot after fit
     if (drawAfterFit) 
-        PlotPdfWithComponents(w, fc->m_name, anaName, plotChannels, "afterFit", expResultAfter, toyMC, plotRatio);
-
+      	PlotPdfWithComponents(w, fc->m_name, anaName, plotChannels, "afterFit", expResultAfter, toyMC, plotRatio);
+    
     // plot each component of each region separately with propagated
     // error after fit  (interesting for debugging)
     if(plotSeparateComponents) 
@@ -854,6 +854,7 @@ void Util::PlotPdfWithComponents(RooWorkspace* w, TString fcName, TString anaNam
     Util::PlotPdfWithComponents(w, fc, anaName, plotRegions, outputPrefix, rFit, inputData, plotRatio);
 }
 
+
 //__________________________________________________________________________________________________________________________________________________________
 void Util::PlotPdfWithComponents(RooWorkspace* w, FitConfig* fc, TString anaName, TString plotRegions, TString outputPrefix, RooFitResult* rFit, RooAbsData* inputData, Bool_t plotRatio)
 {
@@ -908,16 +909,18 @@ void Util::PlotPdfWithComponents(RooWorkspace* w, FitConfig* fc, TString anaName
             RooPlot* frame =  regionVar->frame(); 
             frame->SetName(Form("frame_%s_%s",regionCatLabel.Data(),outputPrefix.Data()));
             //  data->plotOn(frame,Cut(dataCatLabel),RooFit::DataError(RooAbsData::Poisson),MarkerColor(fc->getDataColor()),LineColor(fc->getDataColor()));
-
             regionData->plotOn(frame,RooFit::DataError(RooAbsData::Poisson),MarkerColor(style.getDataColor()),LineColor(style.getDataColor()));
-            if(style.getRemoveEmptyBins()){
+
+	    if(style.getRemoveEmptyBins()){
                 Logger << kINFO << "RemoveEmptyDataBins() removing empty bin points from data histogram on plot " << frame->GetName() << GEndl;
                 RemoveEmptyDataBins(w, frame);
             }
 
             // normalize pdf to number of expected events, not to number of events in dataset
-            double normCount = regionPdf->expectedEvents(*regionVar);
-            regionPdf->plotOn(frame,Normalization(normCount,RooAbsReal::NumEvent),Precision(1e-5),LineColor(style.getTotalPdfColor()));
+	    //  double normCount = regionPdf->expectedEvents(*regionVar);
+	    //            regionPdf->plotOn(frame,Normalization(normCount,RooAbsReal::NumEvent),Precision(1e-5),LineColor(style.getTotalPdfColor()));
+            regionPdf->plotOn(frame,Normalization(1,RooAbsReal::RelativeExpected),Precision(1e-5),LineColor(style.getTotalPdfColor()));
+	    // regionPdf->plotOn(frame,Normalization(1,RooAbsReal::RelativeExpected),Precision(1e-5),LineStyle(kDashed),LineColor(kCyan));
 
             // plot components
             if(plotComponents)  
@@ -925,11 +928,14 @@ void Util::PlotPdfWithComponents(RooWorkspace* w, FitConfig* fc, TString anaName
 
             // visualize error of fit
             if(rFit != NULL) 	
-                regionPdf->plotOn(frame,Normalization(normCount,RooAbsReal::NumEvent),Precision(1e-5),FillColor(style.getErrorFillColor()),FillStyle(style.getErrorFillStyle()),LineColor(style.getErrorLineColor()),LineStyle(style.getErrorLineStyle()),VisualizeError(*rFit));
-
+	      regionPdf->plotOn(frame,Normalization(1,RooAbsReal::RelativeExpected),Precision(1e-5),FillColor(style.getErrorFillColor()),FillStyle(style.getErrorFillStyle()),LineColor(style.getErrorLineColor()),LineStyle(style.getErrorLineStyle()),VisualizeError(*rFit));
+	    //regionPdf->plotOn(frame,Normalization(normCount,RooAbsReal::NumEvent),Precision(1e-5),FillColor(style.getErrorFillColor()),FillStyle(style.getErrorFillStyle()),LineColor(style.getErrorLineColor()),LineStyle(style.getErrorLineStyle()),VisualizeError(*rFit));
+	    
             // re-plot data and pdf, so they are on top of error and components
-            regionPdf->plotOn(frame,Normalization(normCount,RooAbsReal::NumEvent),Precision(1e-5),LineColor(style.getTotalPdfColor()));
-            regionData->plotOn(frame,RooFit::DataError(RooAbsData::Poisson),MarkerColor(style.getDataColor()),LineColor(style.getDataColor()));
+	    //            regionPdf->plotOn(frame,Normalization(normCount,RooAbsReal::NumEvent),Precision(1e-5),LineColor(style.getTotalPdfColor()));
+	    regionPdf->plotOn(frame,Normalization(1,RooAbsReal::RelativeExpected),Precision(1e-5),LineColor(style.getTotalPdfColor()));
+	    
+	    regionData->plotOn(frame,RooFit::DataError(RooAbsData::Poisson),MarkerColor(style.getDataColor()),LineColor(style.getDataColor()));
             if(style.getRemoveEmptyBins()) RemoveEmptyDataBins(w, frame);
 
             TString canName=Form("can_%s_%s",regionCatLabel.Data(),outputPrefix.Data());
@@ -1045,12 +1051,13 @@ void Util::PlotPdfWithComponents(RooWorkspace* w, FitConfig* fc, TString anaName
             RooPlot* frame_dummy =  regionVar->frame(); 
             data->plotOn(frame_dummy,Cut(dataCatLabel),RooFit::DataError(RooAbsData::Poisson));
             // normalize pdf to number of expected events, not to number of events in dataset
-            regionPdf->plotOn(frame_dummy,Normalization(normCount,RooAbsReal::NumEvent),Precision(1e-5));      
-            // Construct a histogram with the ratio of the data w.r.t the pdf curve
+	    //            regionPdf->plotOn(frame_dummy,Normalization(normCount,RooAbsReal::NumEvent),Precision(1e-5));      
+	    regionPdf->plotOn(frame_dummy,Normalization(1,RooAbsReal::RelativeExpected),Precision(1e-5));
+	    // Construct a histogram with the ratio of the data w.r.t the pdf curve
             RooHist* hratio = NULL;
             if(plotRatio)  hratio = (RooHist*) frame_dummy->ratioHist() ;
             else hratio = (RooHist*) frame_dummy->pullHist() ;
-            hratio->SetMarkerColor(style.getDataColor());
+	    hratio->SetMarkerColor(style.getDataColor());
             hratio->SetLineColor(style.getDataColor());
 
             // Construct a histogram with the ratio of the pdf curve w.r.t the pdf curve +/- 1 sigma
@@ -1066,7 +1073,7 @@ void Util::PlotPdfWithComponents(RooWorkspace* w, FitConfig* fc, TString anaName
             if(plotRatio)  hratio->SetTitle("Ratio Distribution");
             else hratio->SetTitle("Pull Distribution");
             // only add PdfErrorsPlot when the plot shows ratio, not with pull
-            if (rFit != NULL && plotRatio)   frame2->addPlotable(hratioPdfError,"F");
+	    if (rFit != NULL && plotRatio)   frame2->addPlotable(hratioPdfError,"F");
             frame2->addPlotable(hratio,"P");
 
             // ratio plot cosmetics
@@ -1174,6 +1181,12 @@ void Util::PlotPdfWithComponents(RooWorkspace* w, FitConfig* fc, TString anaName
 
 }
 
+
+
+
+
+
+
 //_____________________________________________________________________________
 void Util::AddComponentsToPlot(RooWorkspace* w, FitConfig* fc, RooPlot* frame, RooAbsPdf* regionPdf, RooAbsData* regionData, RooRealVar* obsRegion, TString regionCatLabel, ChannelStyle style) {
 
@@ -1229,6 +1242,7 @@ void Util::AddComponentsToPlot(RooWorkspace* w, FitConfig* fc, RooPlot* frame, R
         if(compPlotColor < 0) compPlotColor = kMagenta;
 
         regionPdf->plotOn(frame,Components(compStackNameVec[iVec].Data()),FillColor(compPlotColor),FillStyle(1001),DrawOption("F"),Normalization(compStackFracVec[iVec]*normCount,RooAbsReal::NumEvent),Precision(1e-5));
+	//  regionPdf->plotOn(frame,Components(compStackNameVec[iVec].Data()),FillColor(compPlotColor-4),FillStyle(3006),DrawOption("F"),Precision(1e-5));
 
     }
 }
@@ -2848,15 +2862,17 @@ RooCurve* Util::MakePdfErrorRatioHist(RooWorkspace* w, RooAbsData* regionData, R
     regionData->plotOn(frame, RooFit::DataError(RooAbsData::Poisson));
 
     // normalize pdf to number of expected events, not to number of events in dataset
-    double normCount = regionPdf->expectedEvents(*regionVar);
-    regionPdf->plotOn(frame,Normalization(normCount,RooAbsReal::NumEvent),Precision(1e-5));
+    //    double normCount = regionPdf->expectedEvents(*regionVar);
+    //    regionPdf->plotOn(frame,Normalization(normCount,RooAbsReal::NumEvent),Precision(1e-5));
+    regionPdf->plotOn(frame,Normalization(1,RooAbsReal::RelativeExpected),Precision(1e-5));
     RooCurve* curveNom = (RooCurve*) frame->findObject(curvename,RooCurve::Class()) ;
     if (!curveNom) {
         Logger << kERROR << "Util::MakePdfErrorRatioHist(" << frame->GetName() << ") cannot find curveNom" << curveNom->GetName() << GEndl ;
         return 0 ;
     }
 
-    if(rFit != NULL) regionPdf->plotOn(frame,Normalization(normCount,RooAbsReal::NumEvent),Precision(1e-5),FillColor(kBlue-5),FillStyle(3004),VisualizeError(*rFit,Nsigma));
+    //    if(rFit != NULL) regionPdf->plotOn(frame,Normalization(normCount,RooAbsReal::NumEvent),Precision(1e-5),FillColor(kBlue-5),FillStyle(3004),VisualizeError(*rFit,Nsigma));
+    if(rFit != NULL) regionPdf->plotOn(frame,Normalization(1,RooAbsReal::RelativeExpected),Precision(1e-5),FillColor(kBlue-5),FillStyle(3004),VisualizeError(*rFit,Nsigma));
 
     // Find curve object
     RooCurve* curveError = (RooCurve*) frame->findObject(curvename,RooCurve::Class()) ;
@@ -2917,6 +2933,7 @@ RooCurve* Util::MakePdfErrorRatioHist(RooWorkspace* w, RooAbsData* regionData, R
 
     return ratioBand;
 }
+
 
 
 
