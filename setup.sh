@@ -2,7 +2,7 @@
 # check Root environment setup. Allow for external setup script.
 
 export BUILD="x86_64-slc5-gcc43-opt"
-export ROOTVERSION="5.34.07"
+export ROOTVERSION="5.34.08"
 export CERNPREFIX="/afs/cern.ch/"
 
 # Must have gcc and python setup outside of ROOTSYS def for batch running!
@@ -26,7 +26,8 @@ if [ ! $ROOTSYS ]; then
   export CWD=$PWD
   # setup corresponding root
   #cd $CERNPREFIX/atlas/offline/external/FullChainTest/tier0/test/mbaak/root/root-v5-34-00-patches
-  cd $CERNPREFIX/sw/lcg/app/releases/ROOT/$ROOTVERSION/$BUILD/root/
+  cd $CERNPREFIX/atlas/project/cern/susy/SPyRoot/root/root-v5-34-patches/
+  #cd $CERNPREFIX/sw/lcg/app/releases/ROOT/$ROOTVERSION/$BUILD/root/
   source bin/thisroot.sh
   cd $CWD
   # setup xrootd on top of this
