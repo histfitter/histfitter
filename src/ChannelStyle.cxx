@@ -41,6 +41,11 @@ ChannelStyle::ChannelStyle(const TString& name) : m_logger("ChannelStyle") {
 
     m_defaultSampleColor = kRed-10;
     m_defaultSampleCounter = 0;
+
+    m_line1 = "";
+    m_line2 = "";
+    m_textsize1 = 0.04;
+    m_textsize2 = 0.04;
 }
 
 Int_t ChannelStyle::getSampleColor(const TString& sample){

@@ -65,6 +65,10 @@ class Channel(object):
         self.lumi = None
         self.remapSystChanName = ""
         self.doBlindingOverwrite = False
+        self.text1 = ''
+        self.text2 = ''
+        self.textsize1 = 0.03
+        self.textsize2 = 0.03
         return
 
     def initialize(self):

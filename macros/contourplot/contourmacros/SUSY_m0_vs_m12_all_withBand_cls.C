@@ -58,7 +58,7 @@ void SUSY_m0_vs_m12_all_withBand_cls( TString fname0 = "mudat_list.root",// nomi
    }
    
    TH2F* histecls = (TH2F*)f0->Get( "sigp1expclsf" ); 
-   TH2F* histocls = (TH2F*)f0->Get( "sigp1clsf" ); 
+   TH2F* histocls = 0;//(TH2F*)f0->Get( "sigp1clsf" ); //HACK 
    if (histecls!=0) histecls->SetDirectory(0);
    if (histocls!=0) histocls->SetDirectory(0);
    
@@ -96,8 +96,8 @@ void SUSY_m0_vs_m12_all_withBand_cls( TString fname0 = "mudat_list.root",// nomi
    if (hist6!=0) hist6->SetDirectory(0);
    f0->Close();
 
-   TH2F* histe_esigxsp1s = (TH2F*)f1->Get( hname0 ); 
-   TH2F* histe_esigxsm1s = (TH2F*)f2->Get( hname0 ); 
+   TH2F* histe_esigxsp1s = 0; //(TH2F*)f1->Get( hname0 ); 
+   TH2F* histe_esigxsm1s = 0; //(TH2F*)f2->Get( hname0 ); 
 
    if (histe_esigxsp1s!=0) histe_esigxsp1s->SetDirectory(0);
    if (histe_esigxsm1s!=0) histe_esigxsm1s->SetDirectory(0);
@@ -114,8 +114,8 @@ void SUSY_m0_vs_m12_all_withBand_cls( TString fname0 = "mudat_list.root",// nomi
    TH2F* contour_em1s    = ( hist5!=0 ? FixAndSetBorders( *hist5, "contour", "contour", 0 ) : 0 );
 
    // For Band
-   TGraph* gr_contour_ep1s = ContourGraph( contour_ep1s )->Clone(); 
-   TGraph* gr_contour_em1s = ContourGraph( contour_em1s )->Clone(); 
+   TGraph* gr_contour_ep1s = ( contour_ep1s!=0 ? ContourGraph( contour_ep1s ) : 0 ); 
+   TGraph* gr_contour_em1s = ( contour_em1s!=0 ? ContourGraph( contour_em1s ) : 0 ); 
    
    TH2F* contour_exp(0);
    if (histe!=0)     { contour_exp     = FixAndSetBorders( *histe, "contour_exp", "contour_exp", 0 ); } 
@@ -152,15 +152,15 @@ void SUSY_m0_vs_m12_all_withBand_cls( TString fname0 = "mudat_list.root",// nomi
   //c->SetGrayscale();
   
   // create and draw the frame
-  //TH2F *frame = new TH2F("frame", "m_{0} vs m_{12} - ATLAS work in progress", 100, 100., 1400., 100, 115., 500. );
-  TH2F *frame = new TH2F("frame", "m_{0} vs m_{12} - ATLAS work in progress", 100, 100., 3750., 100, 115., 700. );
+  TH2F *frame = new TH2F("frame", "m_{0} vs m_{12} - ATLAS work in progress", 100, 200., 600., 100, 0., 300. );
+  //TH2F *frame = new TH2F("frame", "m_{0} vs m_{12} - ATLAS work in progress", 100, 100., 3750., 100, 115., 700. );
   //TH2F *frame = new TH2F("frame", "m_{0} vs m_{12} - ATLAS work in progress", 100, 100., 600., 100, 240., 500. );
   
   // set common frame style
   CombinationGlob::SetFrameStyle2D( frame, 1.0 ); // the size (scale) is 1.0
   
-  frame->SetXTitle( "m_{0} [GeV]" );
-  frame->SetYTitle( "m_{1/2} [GeV]" );
+  frame->SetXTitle( "m_{#tilde{t}} [GeV]" );
+  frame->SetYTitle( "m_{LSP} [GeV]" );
   frame->GetYaxis()->SetTitleOffset(1.35);
 
   //frame->SetTextFont( 42 );
@@ -187,7 +187,7 @@ void SUSY_m0_vs_m12_all_withBand_cls( TString fname0 = "mudat_list.root",// nomi
   Int_t nsigma=2;
 
   //  TLegend *leg = new TLegend(0.7,0.77,0.95,0.915);
-  TLegend *leg = new TLegend(0.57,0.52,0.85,0.915);//(0.565,0.47,0.925,0.915);//(0.59,0.47,0.92,0.915);
+  TLegend *leg = new TLegend(0.65,0.6,0.9,0.915);//(0.565,0.47,0.925,0.915);//(0.59,0.47,0.92,0.915);
 
   leg->SetTextSize( CombinationGlob::DescriptionTextSize );
   leg->SetTextSize( 0.03 );
@@ -205,7 +205,9 @@ void SUSY_m0_vs_m12_all_withBand_cls( TString fname0 = "mudat_list.root",// nomi
 
   TH2F* histSquarkMass   = FixAndSetBorders( *histSq, "SquarkMass", "SquarkMass", 10000 );
   TH2F* histGluinoMass   = FixAndSetBorders( *histGl, "GluinoMass", "GluinoMass", 10000 );
-  
+
+
+  if (false) {  
 //  DrawContourMassLine( histSquarkMass, 400.0 );
 //  DrawContourMassLine( histSquarkMass, 500.0 );
   DrawContourMassLine( histSquarkMass, 600.0 );
@@ -357,6 +359,8 @@ void SUSY_m0_vs_m12_all_withBand_cls( TString fname0 = "mudat_list.root",// nomi
   g1400->SetTextColor( 16 );
   g1400->Draw();
   
+  }
+
   // island hacks
   if (true && channel==4) { // muon fixes 
     cout << "removing islands in muon channel ..." << endl;
@@ -412,7 +416,7 @@ void SUSY_m0_vs_m12_all_withBand_cls( TString fname0 = "mudat_list.root",// nomi
 
 
   Int_t c_myYellow   = TColor::GetColor("#ffe938"); 
-  TGraph* grshadeExp = DrawExpectedBand( gr_contour_ep1s, gr_contour_em1s, CombinationGlob::c_DarkYellow , 1001   , 0)->Clone();
+  TGraph* grshadeExp = ( (gr_contour_ep1s!=0 && gr_contour_em1s!=0) ? DrawExpectedBand( gr_contour_ep1s, gr_contour_em1s, CombinationGlob::c_DarkYellow , 1001   , 0) : 0 );
   
   if (discexcl==1) {
      //if (contour_obs!=0) DrawContourLine95( leg, contour_obs, "Observed PCL 95% CL", 2, 1, 3 );
@@ -464,7 +468,7 @@ void SUSY_m0_vs_m12_all_withBand_cls( TString fname0 = "mudat_list.root",// nomi
   TGraph * negmasssq = new TGraph(); 
 
 
-  if (showtevatron==1 && discexcl==1) {
+  if (false) {
     //lep2char = ol1();
     lep2char = msugra_lepchrg("../../../HistFitterUser/common/mSugraGridtanbeta10_charginoMasses.root"); //ol1();
     //lep2char->Print();
@@ -478,7 +482,7 @@ void SUSY_m0_vs_m12_all_withBand_cls( TString fname0 = "mudat_list.root",// nomi
     //atlasexp = ATLAS10_1leptonexp();
   }
   
-  msugraThExcl("../../../HistFitterUser/common/msugra_status.txt", staulsp, negmasssq, noRGE, noEWSB, tachyon, "../../../HistFitterUser/common/mSugraGridtanbeta10_charginoMasses.root");  
+  if (false) msugraThExcl("../../../HistFitterUser/common/msugra_status.txt", staulsp, negmasssq, noRGE, noEWSB, tachyon, "../../../HistFitterUser/common/mSugraGridtanbeta10_charginoMasses.root");  
   
 /*
   TGraph* cmscurve(0);
@@ -504,7 +508,7 @@ void SUSY_m0_vs_m12_all_withBand_cls( TString fname0 = "mudat_list.root",// nomi
   
   c->cd();  
   
-  
+  if (false) {
    
   staulsp->SetFillColor(CombinationGlob::c_LightGreen);
   staulsp->Draw("FSAME");
@@ -524,6 +528,8 @@ void SUSY_m0_vs_m12_all_withBand_cls( TString fname0 = "mudat_list.root",// nomi
   
   tachyon->Draw("FSAME");
   tachyon->Draw("LSAME");     
+
+  }
   
   c->cd();      
   c->Update();  
@@ -540,11 +546,13 @@ void SUSY_m0_vs_m12_all_withBand_cls( TString fname0 = "mudat_list.root",// nomi
      //leg->AddEntry( cdfgraph, "CDF #tilde{g}, #tilde{q}, tan#beta=5, #mu<0, 2 fb^{-1}","F" );
   }
   
+  if (false) {
   leg->AddEntry( staulsp, "Stau LSP","F" );
   leg->AddEntry( noEWSB, "No EW SB","F" );
   leg->AddEntry( noRGE, "Non-convergent RGE","F" );  
   leg->AddEntry( negmasssq, "negmasssq","F" ); 
-  
+  }  
+
   // legend
   Float_t textSizeOffset = +0.000;
   Double_t xmax = frame->GetXaxis()->GetXmax();
@@ -584,7 +592,7 @@ void SUSY_m0_vs_m12_all_withBand_cls( TString fname0 = "mudat_list.root",// nomi
   Leg0->SetTextFont( 42 );
   Leg0->SetTextSize( CombinationGlob::DescriptionTextSize);
   Leg0->SetTextColor( 1 );
-  Leg0->AppendPad();
+  //Leg0->AppendPad(); //HACK
   
   TLatex *Leg1 = new TLatex();
   Leg1->SetNDC();
@@ -1048,9 +1056,10 @@ ContourGraph( TH2F* hist)
       //    mg->Add((TGraph*)list->At(k));
    }
 
-   gr->SetName(hist->GetName());
-   int N = gr->GetN();
-   double x0, y0;
+   if (gr!=0) 
+     gr->SetName(hist->GetName());
+   //int N = gr->GetN();
+   //double x0, y0;
 
    // for(int j=0; j<N; j++) {
    //    gr->GetPoint(j,x0,y0);

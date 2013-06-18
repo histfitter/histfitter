@@ -396,6 +396,12 @@ class ConfigManager(object):
                      if c.lumi is None:
                          style.setLumi(self.outputLumi)
                      else: style.setLumi(c.lumi)
+                 if len(c.text1)>0:
+                     style.setText1(c.text1)
+                 if len(c.text2)>0:
+                     style.setText2(c.text2)
+                 style.setTextSize1(c.textsize1)
+                 style.setTextSize2(c.textsize2)
 
                  # Plot cosmetics per fitConfig 
                  style.setDataColor(fc.dataColor)

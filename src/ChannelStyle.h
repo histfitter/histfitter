@@ -99,6 +99,16 @@ class ChannelStyle : public TObject{
   Int_t setDefaultSampleColor() { return m_defaultSampleColor; }
   void setDefaultSampleColor(const Int_t& color) { m_defaultSampleColor = color; }
 
+  inline TString  getText1() { return m_line1; }
+  inline TString  getText2() { return m_line2; }
+  inline Double_t getTextSize1() { return m_textsize1; }
+  inline Double_t getTextSize2() { return m_textsize2; }
+
+  inline void  setText1(const TString& text) { m_line1=text; }
+  inline void  setText2(const TString& text) { m_line2=text; }
+  inline void  setTextSize1(const Double_t& fsize) { m_textsize1=fsize; }
+  inline void  setTextSize2(const Double_t& fsize) { m_textsize2=fsize; }
+
   using TObject::Print;
   virtual void Print();
 
@@ -132,6 +142,11 @@ private:
 
   Int_t m_defaultSampleColor;
   Int_t m_defaultSampleCounter;
+
+  TString  m_line1;
+  Double_t m_textsize1;
+  TString  m_line2;
+  Double_t m_textsize2;
 
 };
 
