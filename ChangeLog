@@ -1,17 +1,30 @@
 
+2013-06-18 Max Baak <mbaak@cern.ch>
+	M       src/ChannelStyle.cxx
+	M       src/ChannelStyle.h
+	M       configManager.py
+	M       channel.py
+	* Option to add text lines to plots.
+	M	setup.sh
+	M 	Utils.cxx
+	* Fix of Roofit VisualizeError bug, see:
+	* https://groups.cern.ch/group/hn-atlas-physics-Statistics/Lists/Archive/DispForm.aspx?ID=2070
+	* Switch to head of root-5.34-patches branches for fix.
+
 2013-06-12 Max Baak <mbaak@cern.ch>
 	* Several minor updates
 	M       ChannelStyle.cxx
 	M       ValidationUtils.cxx
 	M       ValidationUtils.h
+        M       HistFitter.py
+        M       prepareHistos.py
+        M       configManager.py
 	* Option to pickup histograms from a backup file. 
 	* Use this to run discovery mode, using histograms from background-only mode
-	M       HistFitter.py
-	M       prepareHistos.py
-	M       configManager.py
 	M       fitConfig.py
 	M       channel.py
-	
+	* Possibility to set luminosity in channelStyle, to be plotted instead of lumi in config file.	
+	* (in case of prescaled triggers)
 
 2013-05-29  Zach Marshall <zach.marshall@cern.ch>
 	M       src/Utils.cxx
