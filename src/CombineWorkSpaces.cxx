@@ -17,6 +17,11 @@
 #include "RooWorkspace.h"
 #include "RooStats/RooStatsUtils.h"
 #include "RooStats/HypoTestInverterResult.h"
+#include "RooCategory.h"
+#include "RooWorkspace.h"
+#include "RooSimultaneous.h"
+#include "RooProdPdf.h"
+#include "RooStats/ModelConfig.h"
 #include "TFile.h"
 #include "TKey.h"
 #include "TObject.h"
@@ -83,7 +88,7 @@ std::vector<RooWorkspace*> CollectWorkspaces( const std::map< TString,TString >&
 // this function categorizes all workspaces found in infile, whose names match the format 
 // string, eg. "muSUSY10_3j_20pb_SU_%f_%f_0_3", where %f and %f are mapped onto the parameters "m0:m12"
 //
-std::map< TString,TString > GetMatchingWorkspaces( const TString& infile, const TString& format, const TString& interpretation, const TString& cutStr, const Int_t& fID, TTree* ORTree ) {
+std::map< TString,TString > GetMatchingWorkspaces( const TString& infile, const TString& theformat, const TString& interpretation, const TString& cutStr, const Int_t& fID, TTree* ORTree ) {
     std::map< TString,TString > wsidMap;
 
     TFile* file = TFile::Open(infile.Data(), "READ");
@@ -91,10 +96,17 @@ std::map< TString,TString > GetMatchingWorkspaces( const TString& infile, const 
         CombineWorkSpacesLogger << kFATAL << "Cannot open file: " << infile << GEndl;
     }
 
+    TString format = theformat;
+    Bool_t searchFileName(kFALSE);
+    if (format.BeginsWith("filename+")) { 
+      format = format.ReplaceAll("filename+","");
+      searchFileName = kTRUE;
+    }
+
     TObjString* objString = NULL;
     std::map<TString,int> keymap;
     int narg1 = format.CountChar('%');
-    TString wsid, wsname, wssel;
+    TString wsid, wsname, wssel, wsnameSearch;
     std::vector<float> wsarg(10);
 
     TObjArray* iArr = interpretation.Tokenize(":");
@@ -124,15 +136,20 @@ std::map< TString,TString > GetMatchingWorkspaces( const TString& infile, const 
         if ( keymap.find(key->GetName())==keymap.end() ) { keymap[key->GetName()] = key->GetCycle(); }
         else if ( key->GetCycle()>keymap[key->GetName()] ) { keymap[key->GetName()] = key->GetCycle(); }
         wsname = Form("%s;%d",key->GetName(),keymap[key->GetName()]) ;
+	wsnameSearch = wsname;
 
-        //// Turn off, this is slow!
-        //// confirm this is a workspace
-        //TObject* obj = file->Get( wsname.Data() );
-        //if (obj==0) continue; 
-        //if ( obj->ClassName() != TString("RooWorkspace") ) continue;
+        // Turn off, this is slow!
+        // confirm this is a workspace
+        TObject* obj = file->Get( wsname.Data() );
+        if (obj==0) continue; 
+        if ( obj->ClassName() != TString("RooWorkspace") ) continue;
+
+	if (searchFileName) {
+	  wsnameSearch = infile + "_" + wsnameSearch;
+	}
 
         // accept upto 10 args in ws name
-        int narg2 = sscanf( wsname.Data(), format.Data(), &wsarg[0],&wsarg[1],&wsarg[2],&wsarg[3],&wsarg[4],&wsarg[5],&wsarg[6],&wsarg[7],&wsarg[8],&wsarg[9] ); 
+        int narg2 = sscanf( wsnameSearch.Data(), format.Data(), &wsarg[0],&wsarg[1],&wsarg[2],&wsarg[3],&wsarg[4],&wsarg[5],&wsarg[6],&wsarg[7],&wsarg[8],&wsarg[9] ); 
         if ( !(narg1==narg2 && narg1==narg3 && narg2>0) ) { continue; }
 
         wsarg.resize(narg2);
@@ -340,6 +357,585 @@ std::map<TString,float> ParseWorkspaceID( const TString& wid ) {
     delete iArr;
 
     return wconf;
+}
+
+
+
+//________________________________________________________________________________________________
+// See MatchingCountingExperimentsVec
+//
+bool 
+MatchingCountingExperiments ( const TString& of,  const TString& opref,
+			      const TString& if1, const TString& f1, const TString& i1, 
+			      const TString& if2, const TString& f2, const TString& i2,
+			      const TString& if3, const TString& f3, const TString& i3,
+			      const TString& if4, const TString& f4, const TString& i4,
+			      const TString& cutStr, const Int_t& combinationMode, TTree* ORTree )
+{
+  std::vector<TString> infile, format, interpretation;
+
+  infile.push_back(if1);  format.push_back(f1);  interpretation.push_back(i1);
+  infile.push_back(if2);  format.push_back(f2);  interpretation.push_back(i2);
+  infile.push_back(if3);  format.push_back(f3);  interpretation.push_back(i3);
+  infile.push_back(if4);  format.push_back(f4);  interpretation.push_back(i4);
+
+  return MatchingCountingExperimentsVec( of, opref, infile, format, interpretation, cutStr, combinationMode, ORTree ) ; 
+}
+
+
+//________________________________________________________________________________________________
+// See MatchingCountingExperimentsVec
+//
+bool
+MatchingCountingExperiments ( const TString& of,  const TString& opref,
+			      const TString& if1, const TString& f1, const TString& i1,
+			      const TString& if2, const TString& f2, const TString& i2,
+			      const TString& if3, const TString& f3, const TString& i3,
+			      const TString& cutStr, const Int_t& combinationMode, TTree* ORTree )
+{
+  std::vector<TString> infile, format, interpretation;
+
+  infile.push_back(if1);  format.push_back(f1);  interpretation.push_back(i1);
+  infile.push_back(if2);  format.push_back(f2);  interpretation.push_back(i2);
+  infile.push_back(if3);  format.push_back(f3);  interpretation.push_back(i3);
+
+  return MatchingCountingExperimentsVec( of, opref, infile, format, interpretation, cutStr, combinationMode, ORTree ) ;
+}
+
+
+//________________________________________________________________________________________________
+// See MatchingCountingExperimentsVec
+//
+bool 
+MatchingCountingExperiments ( const TString& of,     const TString& opref,
+			      const TString& if1,    const TString& f1,    const TString& i1,
+			      const TString& if2,    const TString& f2,    const TString& i2,  
+			      const TString& cutStr, const Int_t& combinationMode, TTree* ORTree )
+{
+  std::vector<TString> infile, format, interpretation;
+  infile.push_back(if1);  format.push_back(f1);  interpretation.push_back(i1);
+  infile.push_back(if2);  format.push_back(f2);  interpretation.push_back(i2);
+
+  return MatchingCountingExperimentsVec( of, opref, infile, format, interpretation, cutStr, combinationMode, ORTree ) ;
+}
+
+
+//________________________________________________________________________________________________
+// Select workspaces from single input file and store them in outputfile
+//
+bool 
+MatchingCountingExperiments( const TString& of,  const TString& opref, const TString& if1, const TString& f1, const TString& i1, const TString& cutStr )
+{
+  std::vector<TString> infile, format, interpretation;
+  infile.push_back(if1);  format.push_back(f1);  interpretation.push_back(i1);
+  return MatchingCountingExperimentsVec( of, opref, infile, format, interpretation, cutStr ) ;
+}
+
+
+bool
+MatchingCountingExperiments( const TString& outfile,  const TString& outws_prefix, 
+                             const std::vector<TString>& infile1, const TString& f1, 
+                             const std::vector<TString>& infile2, const TString& f2, 
+                             const TString& interp, const TString& cutStr )
+{
+  std::vector<TString> format, interpretation, infile(infile1); 
+
+  for (unsigned int i=0; i<infile2.size(); ++i) { infile.push_back(infile2[i]); }
+  interpretation.resize(infile.size(),interp);
+
+  format.resize(infile.size(),f1);
+  for (unsigned int i=0; i<infile2.size(); ++i) { format[infile1.size()+i] = f2; }
+
+  return MatchingCountingExperimentsVec( outfile, outws_prefix, infile, format, interpretation, cutStr );
+}
+
+
+bool
+MatchingCountingExperiments( const TString& of,  const TString& opref, 
+                             const std::vector<TString>& infile1, const TString& f1, 
+                             const std::vector<TString>& infile2, const TString& f2,
+                             const std::vector<TString>& infile3, const TString& f3,
+                             const TString& interp, const TString& cutStr )
+{
+  std::vector<TString> format, interpretation, infile(infile1);
+
+  for (unsigned int i=0; i<infile2.size(); ++i) { infile.push_back(infile2[i]); }
+  for (unsigned int i=0; i<infile3.size(); ++i) { infile.push_back(infile3[i]); }
+  interpretation.resize(infile.size(),interp);
+  
+  format.resize(infile.size(),f1);
+  for (unsigned int i=0; i<infile2.size(); ++i) { 
+    format[infile1.size()+i] = f2; 
+  }
+  for (unsigned int i=0; i<infile2.size()+infile3.size(); ++i) { 
+    format[infile1.size()+i] = f3; 
+  }
+
+  return MatchingCountingExperimentsVec( of, opref, infile, format, interpretation, cutStr );
+}
+
+
+//________________________________________________________________________________________________
+// This function searches for matching workspaces in the list of inputfiles, combines them,
+// and stores them in a new output file
+//
+bool 
+MatchingCountingExperimentsVec ( const TString& outfile, const TString& outws_prefix,
+				 const std::vector<TString>& infile, const std::vector<TString>& format, const std::vector<TString>& interpretation, 
+				 const TString& cutStr, const Int_t& combinationMode, TTree* ORTree )
+{
+  if (infile.empty() || format.empty() || interpretation.empty() ) return false;
+  if ( (infile.size()!=format.size()) || (infile.size()!=interpretation.size()) ) return false;
+
+  // classify all workspaces in input files
+  std::map< TString, std::map<TString,TString> > wsnameMap, wfwMap;
+  for (unsigned int i=0; i<infile.size(); ++i) {
+    wsnameMap[ infile[i] ] = GetMatchingWorkspaces( infile[i], format[i], interpretation[i], cutStr, i, ORTree );
+    //if ( wsnameMap[ infile[i] ].empty() ) return false; // no matching workspaces 
+  }
+
+  // match to-be-combined workspaces 
+  std::map< TString, std::map<TString,TString> >::iterator nItr=wsnameMap.begin(), nEnd=wsnameMap.end();
+  std::map< TString, TString >::iterator widItr, widEnd;
+
+  for ( ; nItr!=nEnd; ++nItr ) {
+    widItr=nItr->second.begin();
+    widEnd=nItr->second.end();
+
+    for (; widItr!=widEnd; ++widItr) {
+      TString wid = widItr->first;
+      if ( wfwMap.find(wid)==wfwMap.end() ) { wfwMap[wid] = std::map<TString,TString>(); }
+      // collect matching workspaces
+      std::map<TString,TString>& fwnameMap = wfwMap[wid];
+      fwnameMap[nItr->first] = widItr->second;
+    }
+  }
+
+  // do ws combination
+  nItr=wfwMap.begin();
+  for (int idx=0; nItr!=wfwMap.end(); ++nItr, ++idx ) {
+
+    // get wid and file/ws map
+    TString wid = nItr->first;
+    std::map<TString,TString>& fwnameMap = nItr->second;
+
+    // get workspace pointers
+    std::vector<RooWorkspace*> wsVec = CollectWorkspaces( fwnameMap, wid );
+
+    // combine workspaces
+    TString combinedName = outws_prefix + "_" + wid + Form("nws%d",static_cast<int>(wsVec.size()));
+    RooWorkspace* combined = ConstructCombinedModel( wsVec ); //CombineWorkspaces( wsVec, combinedName, combinationMode );
+    combined->SetName( combinedName.Data() );
+
+    // store
+    if (combined!=0) { 
+      TString outfilename = outfile;
+      outfilename = outfilename.ReplaceAll(".root","");
+
+      bool recreate = (idx!=0?kFALSE:kTRUE) ;
+
+      if (outfile.EndsWith("+wsid")) {
+	outfilename = outfilename.ReplaceAll("+wsid","_"+wid);
+	recreate = kTRUE; // create unique output file
+      }
+
+      TString outprefix = outws_prefix;
+      if (!outprefix.IsNull() && !outprefix.BeginsWith("_")) { outprefix = "_"+outws_prefix; }
+      outfilename += ".root"; 
+
+      combined->writeToFile(outfilename.Data(), recreate ); // do not recreate file, but update instead
+    }
+
+    // clear 
+    if (combined!=0) { delete combined; combined=0; }
+    clearVec(wsVec);
+  }
+
+  return true;
+}
+
+
+
+RooWorkspace* 
+ConstructCombinedModel(RooWorkspace* ws1, const TString& correlateVarsStr) 
+{
+  std::vector<RooWorkspace*> wsvec;
+  wsvec.push_back(ws1);
+  return ConstructCombinedModel(wsvec,correlateVarsStr);
+}
+
+
+RooWorkspace* 
+ConstructCombinedModel(RooWorkspace* ws1, RooWorkspace* ws2, const TString& correlateVarsStr) 
+{
+  std::vector<RooWorkspace*> wsvec;
+  wsvec.push_back(ws1);
+  wsvec.push_back(ws2);
+  return ConstructCombinedModel(wsvec,correlateVarsStr);
+}
+
+
+RooWorkspace* 
+ConstructCombinedModel(std::vector<RooWorkspace*> chs, const TString& correlateVarsStr) 
+{  
+  //
+  /// These things were used for debugging. Maybe useful in the future
+  //
+
+  std::map<std::string, RooAbsPdf*> pdfMap;
+  std::vector<RooAbsPdf*> models;
+  std::vector<std::string> ch_names;
+  stringstream ss;
+  
+  RooArgList obsList;
+  RooArgSet  globalObs;
+  RooArgSet  poiSet;
+
+  RooWorkspace* combined = new RooWorkspace("combined");
+  RooWorkspace* tempws   = new RooWorkspace("tempws");
+  TString exceptionList = "Lumi,nominalLumi,channelCat,weightVar";
+
+  if (!correlateVarsStr.IsNull()) { exceptionList += "," + correlateVarsStr; }
+
+  /////////////////////////////////////////////////////////////////////////////////////////////////////
+
+  cout << "\n\n------------------\n Administration\n" << endl;
+
+  for(unsigned int i = 0; i< chs.size(); ++i) {
+    RooWorkspace * ch=chs[i];
+    TString suffix = Form("a%d",i);
+
+    ModelConfig* config = (ModelConfig *) chs[i]->obj("ModelConfig");
+    RooAbsPdf* pdf = config->GetPdf();
+
+    poiSet.add( *config->GetParametersOfInterest() );
+    globalObs.add(*ch->set("globalObservables")); // note: this can give duplicates. fine.
+
+    TString className = pdf->ClassName();
+
+    if (className == "RooProdPdf") {
+      TString channel_name = pdf->GetName();
+      channel_name = channel_name.ReplaceAll("model_","");
+
+      ch_names.push_back(channel_name.Data());
+      if (ss.str().empty()) ss << channel_name ;
+      else ss << ',' << channel_name ;
+
+    } else if (className == "RooSimultaneous") {
+      RooCategory* cCat = (RooCategory*)chs[i]->obj("channelCat");
+      for(int j=0; j<cCat->numBins(0); ++j) {
+	cCat->setIndex(j);
+	TString channel_name = cCat->getLabel();
+
+	ch_names.push_back(channel_name.Data());
+	if (ss.str().empty()) ss << channel_name.Data() ;
+	else ss << ',' << channel_name.Data() ;
+      }      
+    }
+  }
+
+
+  // don't rename global observables
+  RooAbsArg* var(0);
+  TString globObsStr;
+  TIterator* varItr = globalObs.createIterator() ;
+  for (Int_t i=0; (var = (RooAbsArg*)varItr->Next()); ++i) {
+    if (i!=0) { globObsStr += ","; }
+    TString varname = var->GetName();
+    globObsStr += varname ;
+  }
+  delete varItr;
+
+  //exceptionList += "," + globObsStr;
+
+  TString poiStr;
+  varItr = globalObs.createIterator() ;
+  for (Int_t i=0; (var = (RooAbsArg*)varItr->Next()); ++i) {
+    if (i!=0) { poiStr += ","; }
+    TString varname = var->GetName();
+    poiStr += varname ;
+  }
+  delete varItr;
+
+  exceptionList += "," + poiStr;
+
+
+  cout << "\n\n------------------\n Creation of obsList ...\n" << endl;
+
+  RooArgSet oSet;
+
+  for(unsigned int i = 0; i< chs.size(); ++i) {
+    TString suffix = Form("a%d",i);
+    RooDataSet* myData = (RooDataSet*) chs[i]->data("asimovData");
+    TString datasetName = Form("%s_%s",suffix.Data(),myData->GetName());
+
+    TString vIn, vOut;
+    RooAbsArg* var ; 
+    RooArgSet const * args = myData->get();
+    TIterator* varItr = args->createIterator() ;
+    for (Int_t j=0; (var = (RooAbsArg*)varItr->Next()); ++j) {
+      if (j!=0) { vIn += ","; vOut += ","; }
+      TString vName = var->GetName();
+      if (vName=="weightVar" || vName=="channelCat") continue;
+      vIn  += var->GetName(); 
+      vOut += ( !suffix.IsNull() ? Form("%s_%s",var->GetName(),suffix.Data()) : var->GetName() ) ;
+    }
+    delete varItr;
+
+    tempws->import( *myData, Rename(datasetName.Data()), RenameVariable(vIn,vOut) );
+    myData = (RooDataSet*) tempws->data( datasetName.Data() );
+
+    RooArgSet obsSet = *myData->get(0) ;
+    if ( chs[i]->obj("weightVar")!=NULL )  { obsSet.remove( *((RooAbsArg*)chs[i]->obj("weightVar")) ); }
+    if ( chs[i]->obj("channelCat")!=NULL ) { obsSet.remove( *((RooAbsArg*)chs[i]->obj("channelCat")) ); }
+
+    oSet.add(obsSet); // ignore duplicates
+  }
+
+  obsList.add(oSet);
+
+
+  cout <<"full list of pois:" << endl;
+  poiSet.Print();
+  cout <<"full list of observables:"<<endl;
+  obsList.Print();
+  cout <<"full list of channels:"<<endl;
+  cout << ss.str() << endl;
+
+
+  ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+  cout << "\n\n------------------\n Entering workspace combination\n" << endl;
+
+  for(unsigned int i = 0; i< chs.size(); ++i) {
+    TString suffix = Form("a%d",i);
+
+    ModelConfig* config = (ModelConfig *) chs[i]->obj("ModelConfig");
+    RooArgSet obsSet = *config->GetObservables();
+    RooAbsPdf* pdf = config->GetPdf();
+
+    TString className = pdf->ClassName();
+
+    if (className == "RooProdPdf") {
+      TString pdfName = suffix + "_" + pdf->GetName();
+      TString channel_name = pdf->GetName();
+      channel_name = channel_name.ReplaceAll("model_","");
+
+      pdf->SetName(pdfName.Data());
+      tempws->import( *pdf, RenameAllNodes(suffix.Data()), RenameAllVariablesExcept(suffix.Data(),exceptionList.Data()) );
+      pdf = tempws->pdf(pdfName.Data());
+
+      models.push_back(pdf);
+      pdfMap[channel_name.Data()]=pdf;
+
+    } else if (className == "RooSimultaneous") {
+      if ( chs[i]->obj("weightVar")!=NULL )  { obsSet.remove( *((RooAbsArg*)chs[i]->obj("weightVar")) ); }
+      if ( chs[i]->obj("channelCat")!=NULL ) { obsSet.remove( *((RooAbsArg*)chs[i]->obj("channelCat")) ); }
+
+      RooCategory* cCat = (RooCategory*)chs[i]->obj("channelCat");
+      for(int j=0; j<cCat->numBins(0); ++j) {
+	cCat->setIndex(j);
+	TString channel_name = cCat->getLabel();
+
+	RooAbsPdf* model = ((RooSimultaneous*)pdf)->getPdf(channel_name.Data());
+	TString pdfName = TString(model->GetName()) + "_" + suffix;
+
+	tempws->import( *model, RenameAllNodes(suffix.Data()), RenameAllVariablesExcept(suffix.Data(),exceptionList.Data()) );
+	model = tempws->pdf(pdfName.Data());
+
+	models.push_back(model);
+	pdfMap[channel_name.Data()]=model;
+      }      
+    }
+  }
+
+  cout << "\n\n------------------\n GREP Done workspace combination\n" << endl;
+
+  combined->factory("weightVar[0,-1e10,1e10]");
+  obsList.add( *combined->var("weightVar") );
+
+  RooCategory* channelCat = (RooCategory*) combined->factory(("channelCat["+ss.str()+"]").c_str());
+  obsList.add(*channelCat);
+
+
+  RooSimultaneous *simPdf= new RooSimultaneous("simPdf","",pdfMap, *channelCat);
+  cout << "\n\n----------------\n Importing combined model" << endl;
+  combined->import(*simPdf,RecycleConflictNodes());
+
+  ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+  cout << "\n\n------------------\n Creation of combined datasets ...\n" << endl;
+
+  // Make toy simultaneous dataset
+  cout <<"-----------------------------------------"<<endl;
+  cout << "create toy data for " << ss.str() << endl;
+    
+  // now with weighted datasets
+  // First Asimov
+  RooDataSet * simData=NULL;
+  
+  for(unsigned int i = 0; i< chs.size(); ++i) {
+
+    TString suffix = Form("a%d",i);
+    TString datasetName = suffix + "_asimovData";
+    RooDataSet* myData = (RooDataSet*) tempws->data( datasetName.Data() );
+
+    ModelConfig* config = (ModelConfig *) chs[i]->obj("ModelConfig");
+    RooAbsPdf* pdf = config->GetPdf();
+    TString className = pdf->ClassName();
+
+    if (className == "RooProdPdf") {
+      TString channel_name = pdf->GetName();
+      channel_name = channel_name.ReplaceAll("model_","");
+
+      RooDataSet* tempData = new RooDataSet(channel_name.Data(), "", obsList, Index(*channelCat),
+					    WeightVar("weightVar"),
+					    Import( channel_name.Data(), *myData ) 
+					   );
+      if (simData) {
+	simData->append(*tempData);
+	delete tempData;
+      } else {
+	simData = tempData;
+      }
+    } else if (className == "RooSimultaneous") {
+      RooCategory* cCat = (RooCategory*)chs[i]->obj("channelCat");
+
+      for(int j=0; j<cCat->numBins(0); ++j) {
+	cCat->setIndex(j);
+	TString channel_name = cCat->getLabel();
+	RooAbsPdf* regionPdf = ((RooSimultaneous*)pdf)->getPdf(channel_name.Data());
+
+	RooArgSet* obsSet = regionPdf->getObservables( myData->get(0) );
+	TString dataCatLabel = Form("channelCat==channelCat::%s", channel_name.Data() ); 
+
+	RooDataSet* regionData = (RooDataSet*) myData->reduce( *obsSet, dataCatLabel.Data() );
+
+	RooDataSet* tempData = new RooDataSet(channel_name.Data(), "", obsList, Index(*channelCat),
+					      WeightVar("weightVar"),
+					      Import( channel_name.Data(), *regionData ) 
+					      );
+	delete regionData;
+
+	if (simData) {
+	  simData->append(*tempData);
+	  delete tempData;
+	} else {
+	  simData = tempData;
+	}
+      }      
+
+    }
+  } // and import
+  if (simData) combined->import(*simData,Rename("asimovData"));
+
+
+  // observed dataset
+  cout << "merging observed data for workspace " << ss.str() << endl;
+
+  simData=NULL;
+
+  for(unsigned int i = 0; i< chs.size(); ++i) {
+
+    TString suffix = Form("a%d",i);
+    RooDataSet* myData = (RooDataSet*) chs[i]->data("obsData");
+    TString datasetName = Form("%s_%s",suffix.Data(),myData->GetName());
+
+    TString vIn, vOut;
+    RooAbsArg* var ; 
+    RooArgSet const * args = myData->get();
+    TIterator* varItr = args->createIterator() ;
+    for (Int_t j=0; (var = (RooAbsArg*)varItr->Next()); ++j) {
+      if (j!=0) { vIn += ","; vOut += ","; }
+      TString vName = var->GetName();
+      if (vName=="weightVar" || vName=="channelCat") continue;
+      vIn  += var->GetName(); 
+      vOut += ( !suffix.IsNull() ? Form("%s_%s",var->GetName(),suffix.Data()) : var->GetName() ) ;
+    }
+    delete varItr;
+
+    tempws->import( *myData, Rename(datasetName.Data()), RenameVariable(vIn,vOut) );
+    myData = (RooDataSet*) tempws->data( datasetName.Data() );
+
+    ModelConfig* config = (ModelConfig *) chs[i]->obj("ModelConfig");
+    RooAbsPdf* pdf = config->GetPdf();
+    TString className = pdf->ClassName();
+
+    if (className == "RooProdPdf") {
+      TString channel_name = pdf->GetName();
+      channel_name = channel_name.ReplaceAll("model_","");
+
+      RooDataSet* tempData = new RooDataSet(channel_name.Data(), "", obsList, Index(*channelCat),
+					    WeightVar("weightVar"),
+					    Import( channel_name.Data(), *myData ) 
+					   );
+      if (simData) {
+	simData->append(*tempData);
+	delete tempData;
+      } else {
+	simData = tempData;
+      }
+    } else if (className == "RooSimultaneous") {
+      RooCategory* cCat = (RooCategory*)chs[i]->obj("channelCat");
+
+      for(int j=0; j<cCat->numBins(0); ++j) {
+	cCat->setIndex(j);
+	TString channel_name = cCat->getLabel();
+	RooAbsPdf* regionPdf = ((RooSimultaneous*)pdf)->getPdf(channel_name.Data());
+
+	RooArgSet* obsSet = regionPdf->getObservables( myData->get(0) );
+	TString dataCatLabel = Form("channelCat==channelCat::%s", channel_name.Data() ); 
+
+	RooDataSet* regionData = (RooDataSet*) myData->reduce( *obsSet, dataCatLabel.Data() );
+
+	RooDataSet* tempData = new RooDataSet(channel_name.Data(), "", obsList, Index(*channelCat),
+					      WeightVar("weightVar"),
+					      Import( channel_name.Data(), *regionData ) 
+					      );
+	delete regionData;
+
+	if (simData) {
+	  simData->append(*tempData);
+	  delete tempData;
+	} else {
+	  simData = tempData;
+	}
+      }      
+
+    }
+  } // and import
+  if (simData) combined->import(*simData,Rename("obsData"));
+
+
+
+  ModelConfig *combined_config = new ModelConfig("ModelConfig", combined);
+  combined_config->SetWorkspace(*combined);
+  //    combined_config->SetNuisanceParameters(*constrainedParams);
+
+
+  combined->import(globalObs);
+  combined->defineSet("globalObservables",globalObs);
+  combined_config->SetGlobalObservables(*combined->set("globalObservables"));  
+
+  //////////////////////////////////////////////////////////////////////////////////////
+
+  // conclusion
+  combined->defineSet("observables",obsList);
+  combined_config->SetObservables(*combined->set("observables"));
+    
+  combined->Print();
+  
+  combined_config->SetPdf(*simPdf);
+  combined_config->SetParametersOfInterest(poiSet);
+
+  //    combined_config->GuessObsAndNuisance(*simData);
+  //    customized->graphVizTree(("results/"+fResultsPrefixStr.str()+"_simul.dot").c_str());
+  combined->import(*combined_config,combined_config->GetName());
+  combined->importClassCode();
+  //    combined->writeToFile("results/model_combined.root");
+  
+  return combined;
 }
 
 
