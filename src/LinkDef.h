@@ -44,6 +44,7 @@
 #pragma link C++ function ParseWorkspaceID;
 #pragma link C++ function MatchingCountingExperiments;
 #pragma link C++ function MatchingCountingExperimentsVec;
+#pragma link C++ function ConstructCombinedModel;
 
 //profile_get_Pvalue.cxx
 #pragma link C++ function doFreeFit;

@@ -212,7 +212,7 @@ RooWorkspace* GetWorkspaceFromFile( const TString& infile, const TString& wsname
         return NULL;
     }
 
-    file->Close();
+    //file->Close();
     return w;
 }
 
@@ -605,6 +605,8 @@ ConstructCombinedModel(std::vector<RooWorkspace*> chs, const TString& correlateV
     RooWorkspace * ch=chs[i];
     TString suffix = Form("a%d",i);
 
+    //ch->Print();
+
     ModelConfig* config = (ModelConfig *) chs[i]->obj("ModelConfig");
     RooAbsPdf* pdf = config->GetPdf();
 
@@ -750,7 +752,7 @@ ConstructCombinedModel(std::vector<RooWorkspace*> chs, const TString& correlateV
     }
   }
 
-  cout << "\n\n------------------\n GREP Done workspace combination\n" << endl;
+  cout << "\n\n------------------\n Done workspace combination\n" << endl;
 
   combined->factory("weightVar[0,-1e10,1e10]");
   obsList.add( *combined->var("weightVar") );
