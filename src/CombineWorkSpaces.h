@@ -60,17 +60,17 @@ bool MatchingCountingExperiments    ( const TString& of,  const TString& opref,
 bool MatchingCountingExperiments( const TString& of,  const TString& opref,
                              const std::vector<TString>& infile1, const TString& f1,
                              const std::vector<TString>& infile2, const TString& f2,
-                             const TString& interpretation, const TString& cutStr="1" );
+                             const TString& interpretation, const TString& combineVars="", const TString& cutStr="1" );
 
 bool MatchingCountingExperiments( const TString& of,  const TString& opref,
                              const std::vector<TString>& infile1, const TString& f1,
                              const std::vector<TString>& infile2, const TString& f2,
                              const std::vector<TString>& infile3, const TString& f3,
-                             const TString& interpretation, const TString& cutStr="1" );
+                             const TString& interpretation, const TString& combineVars="", const TString& cutStr="1" );
 
 bool MatchingCountingExperimentsVec ( const TString& outfile, const TString& outws_prefix,
 				      const std::vector<TString>& infile, const std::vector<TString>& format, const std::vector<TString>& interpretation, 
-				      const TString& cutStr="1", const Int_t& combinationMode=0, TTree* ORTree=0 );
+				      const TString& cutStr="1", const Int_t& combinationMode=0, TTree* ORTree=0, const TString& combineVars="" );
 
 RooWorkspace* ConstructCombinedModel(std::vector<RooWorkspace*> chs, const TString& correlateVarsStr="") ;
 RooWorkspace* ConstructCombinedModel(RooWorkspace* ws1, const TString& correlateVarsStr="") ;

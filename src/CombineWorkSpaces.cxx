@@ -436,7 +436,7 @@ bool
 MatchingCountingExperiments( const TString& outfile,  const TString& outws_prefix, 
                              const std::vector<TString>& infile1, const TString& f1, 
                              const std::vector<TString>& infile2, const TString& f2, 
-                             const TString& interp, const TString& cutStr )
+                             const TString& interp, const TString& cutStr, const TString& combineVars )
 {
   std::vector<TString> format, interpretation, infile(infile1); 
 
@@ -446,7 +446,7 @@ MatchingCountingExperiments( const TString& outfile,  const TString& outws_prefi
   format.resize(infile.size(),f1);
   for (unsigned int i=0; i<infile2.size(); ++i) { format[infile1.size()+i] = f2; }
 
-  return MatchingCountingExperimentsVec( outfile, outws_prefix, infile, format, interpretation, cutStr );
+  return MatchingCountingExperimentsVec( outfile, outws_prefix, infile, format, interpretation, cutStr, 0, 0, combineVars );
 }
 
 
@@ -455,7 +455,7 @@ MatchingCountingExperiments( const TString& of,  const TString& opref,
                              const std::vector<TString>& infile1, const TString& f1, 
                              const std::vector<TString>& infile2, const TString& f2,
                              const std::vector<TString>& infile3, const TString& f3,
-                             const TString& interp, const TString& cutStr )
+                             const TString& interp, const TString& cutStr, const TString& combineVars )
 {
   std::vector<TString> format, interpretation, infile(infile1);
 
@@ -471,7 +471,7 @@ MatchingCountingExperiments( const TString& of,  const TString& opref,
     format[infile1.size()+i] = f3; 
   }
 
-  return MatchingCountingExperimentsVec( of, opref, infile, format, interpretation, cutStr );
+  return MatchingCountingExperimentsVec( of, opref, infile, format, interpretation, cutStr, 0, 0, combineVars );
 }
 
 
@@ -482,7 +482,7 @@ MatchingCountingExperiments( const TString& of,  const TString& opref,
 bool 
 MatchingCountingExperimentsVec ( const TString& outfile, const TString& outws_prefix,
 				 const std::vector<TString>& infile, const std::vector<TString>& format, const std::vector<TString>& interpretation, 
-				 const TString& cutStr, const Int_t& combinationMode, TTree* ORTree )
+				 const TString& cutStr, const Int_t& combinationMode, TTree* ORTree, const TString& combineVars )
 {
   if (infile.empty() || format.empty() || interpretation.empty() ) return false;
   if ( (infile.size()!=format.size()) || (infile.size()!=interpretation.size()) ) return false;
@@ -524,7 +524,7 @@ MatchingCountingExperimentsVec ( const TString& outfile, const TString& outws_pr
 
     // combine workspaces
     TString combinedName = outws_prefix + "_" + wid + Form("nws%d",static_cast<int>(wsVec.size()));
-    RooWorkspace* combined = ConstructCombinedModel( wsVec ); //CombineWorkspaces( wsVec, combinedName, combinationMode );
+    RooWorkspace* combined = ConstructCombinedModel( wsVec, combineVars ); //CombineWorkspaces( wsVec, combinedName, combinationMode );
     combined->SetName( combinedName.Data() );
 
     // store
