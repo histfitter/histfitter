@@ -1,3 +1,7 @@
+2012-12-05 Alex Koutsman <alex.koutsman@cern.ch>
+	M 	Utils.cxx
+	* Fixed the NLL plotting for Inf/NaN-error and wrong range setting.
+	
 2013-06-18 Max Baak <mbaak@cern.ch>
 	M       src/ChannelStyle.cxx
 	M       src/ChannelStyle.h
