@@ -32,6 +32,7 @@ def doHypoTest(fixSigXSec, SigXSecSysnsigma,sigSamples):
 
     #inFile = "results/MyOneLeptonKtScaleFitR17_Sig_"+sigSamples[0]+"_combined_NormalMeasurement_model.root"
     infile_list=glob.glob("results/*"+sigSamples[0]+"_combined_BasicMeasurement_model.root")
+    print infile_list
     if len(infile_list)!=1:
         print "ERROR: More than one file given - please give only one file."
         sys.exit(1)
@@ -52,11 +53,15 @@ def doHypoTest(fixSigXSec, SigXSecSysnsigma,sigSamples):
         #return
 
     print "Processing analysis "+sigSamples[0]
+    
+    Util.SetInterpolationCode(w,4)
 
     if(fixSigXSec and not sigSamples[0] == "" ):
         w.var("alpha_SigXSec").setVal(SigXSecSysnsigma)
         w.var("alpha_SigXSec").setConstant(True)
   
+    #set Errors of all parameters to 'natural' values before plotting/fitting
+    Util.resetAllErrors(w)
 
   
     #Do first fit and save fit result in order to control fit quality
@@ -102,6 +107,7 @@ if __name__ == "__main__":
     runFit = False
     printLimits = False
     doHypoTests = False
+    fixSigXSec = False
     sigSamples = []
     
     print "\n * * * Welcome to HistFitter * * *\n"
@@ -220,8 +226,8 @@ if __name__ == "__main__":
 
         w = inFile.Get("combined")
 
-        w.var("alpha_SigXSec").setVal(0.)
-        w.var("alpha_SigXSec").setConstant(True)
+        #w.var("alpha_SigXSec").setVal(0.)
+        #w.var("alpha_SigXSec").setConstant(True)
 
         #Util.ReadWorkspace(inFile,"combined")
         #w=gDirectory.Get("w")
@@ -229,12 +235,13 @@ if __name__ == "__main__":
            print "workspace 'combined' does not exist in file"
 	   #return
 
+        Util.SetInterpolationCode(w,4)
   
         print "Processing analysis "+sigSamples[0]
 
-        if 'onestepCC' in sigSamples[0] and int(sigSamples[0].split("_")[3])>900:
-            w.var("mu_SIG").setMax(50000.)
-            print "Gluino mass above 900 - extending mu_SIG range \n"
+        #if 'onestepCC' in sigSamples[0] and int(sigSamples[0].split("_")[3])>900:
+        #    w.var("mu_SIG").setMax(50000.)
+        #    print "Gluino mass above 900 - extending mu_SIG range \n"
 
 
         ## first asumptotic limit, to get a quick but reliable estimate for the upper limit
