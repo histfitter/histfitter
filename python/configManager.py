@@ -221,9 +221,9 @@ class ConfigManager(object):
                 for sam in chan.sampleList:
                     regString = "".join(chan.regions)
 
-                    nomName = "h%sNom_%s_obs_%s" % (sam.name, regString, replaceSymbols(chan.variableName))
-                    highName = "h%sHigh_%s_obs_%s" % (sam.name, regString, replaceSymbols(chan.variableName))
-                    lowName = "h%sLow_%s_obs_%s" % (sam.name, regString, replaceSymbols(chan.variableName))
+                    nomName    = "h%sNom_%s_obs_%s" % (sam.name, regString, replaceSymbols(chan.variableName))
+                    highName   = "h%sHigh_%s_obs_%s" % (sam.name, regString, replaceSymbols(chan.variableName))
+                    lowName    = "h%sLow_%s_obs_%s" % (sam.name, regString, replaceSymbols(chan.variableName))
 
                     if sam.isData:
                         if (self.blindSR and (chan.channelName in tl.signalChannels)) or \
@@ -287,6 +287,11 @@ class ConfigManager(object):
                             if not lowSystName in self.hists.keys():
                                 self.hists[lowSystName] = None
 
+                            nomSystName = "h%s%sNom_%s_obs_%s" % (sam.name, syst.name, regString,
+                                                                  replaceSymbols(chan.variableName))
+                            if not nomSystName in self.hists.keys():
+                                self.hists[nomSystName] = None
+
                             if syst.merged:
                                 mergedName = "".join(syst.sampleList)
 
@@ -304,6 +309,11 @@ class ConfigManager(object):
                                                                         replaceSymbols(chan.variableName))
                                 if not lowMergedName in self.hists.keys():
                                     self.hists[lowMergedName] = None
+
+                                nomMergedName = "h%s%sNom_%s_obs_%s" % (mergedName, syst.name, regString,
+                                                                        replaceSymbols(chan.variableName))
+                                if not nomMergedName in self.hists.keys():
+                                    self.hists[nomMergedName] = None
 
         if self.readFromTree:
             log.info("  -build TreePrepare()...")
@@ -627,7 +637,7 @@ class ConfigManager(object):
                 #depending on the sample type,  the Histos and up/down weights are added
                 self.addSampleSpecificHists(fitConfig, chan, sam, regionString, normRegions, normString, normCuts)
 
-        #post-processing 1: loop for norm systematics
+        #post-processing 1: loop for user-norm systematics
         for chan in fitConfig.channels:
             regionString = "".join(chan.regions)
             
@@ -739,16 +749,17 @@ class ConfigManager(object):
         return
 
     def addHistoSysforNoQCD(self, regionString, normString, normCuts, fitConfig, chan, sam, syst):
-        nomName = "h%sNom_%s_obs_%s" % (sam.name, regionString, replaceSymbols(chan.variableName) )
-        highName = "h%s%sHigh_%s_obs_%s" % (sam.name, syst.name, regionString, replaceSymbols(chan.variableName) )
-        lowName = "h%s%sLow_%s_obs_%s" % (sam.name, syst.name, regionString, replaceSymbols(chan.variableName) )
+        nomName    = "h%sNom_%s_obs_%s" % (sam.name, regionString, replaceSymbols(chan.variableName) )
+        nomSysName = "h%s%sNom_%s_obs_%s" % (sam.name, syst.name, regionString, replaceSymbols(chan.variableName) )
+        highName   = "h%s%sHigh_%s_obs_%s" % (sam.name, syst.name, regionString, replaceSymbols(chan.variableName) )
+        lowName    = "h%s%sLow_%s_obs_%s" % (sam.name, syst.name, regionString, replaceSymbols(chan.variableName) )
 
         if syst.method == "histoSys":
-            chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName, False, False)
+            chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName, False, False, nomSysName=nomSysName)
         elif syst.method == "histoSysOneSide":
-            chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName, False, False, False, True)
+            chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName, False, False, False, True, nomSysName=nomSysName)
         elif syst.method == "histoSysOneSideSym":
-            chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName, False, False, True, True)
+            chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName, False, False, True, True, nomSysName=nomSysName)
         elif syst.method == "overallSys":
             highIntegral = configMgr.hists[highName].Integral()
             lowIntegral = configMgr.hists[lowName].Integral()
@@ -767,28 +778,28 @@ class ConfigManager(object):
         elif syst.method == "userOverallSys":
             chan.getSample(sam.name).addOverallSys(syst.name, syst.high, syst.low)
         elif syst.method == "overallHistoSys":
-            chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName, True,  False)
+            chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName, True,  False, nomSysName=nomSysName)
         elif syst.method == "overallNormSys":
-            chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName, True,  True, False, False, sam.name, normString)
+            chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName, True,  True, False, False, sam.name, normString, nomSysName=nomSysName)
         elif syst.method == "overallNormHistoSys":
-            chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName, True,  True, False, False, sam.name, normString)
+            chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName, True,  True, False, False, sam.name, normString, nomSysName=nomSysName)
         elif syst.method == "overallNormHistoSysOneSide":
-            chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName, True,  True, False, True,  sam.name, normString)
+            chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName, True,  True, False, True,  sam.name, normString, nomSysName=nomSysName)
         elif syst.method == "overallNormHistoSysOneSideSym":
-            chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName, True,  True, True,  True,  sam.name, normString)
+            chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName, True,  True, True,  True,  sam.name, normString, nomSysName=nomSysName)
         elif syst.method == "normHistoSys":
-            chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName, False, True, False, False, sam.name, normString)
+            chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName, False, True, False, False, sam.name, normString, nomSysName=nomSysName)
         elif syst.method == "normHistoSysOneSide":
-            chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName, False, True, False, True,  sam.name, normString)
+            chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName, False, True, False, True,  sam.name, normString, nomSysName=nomSysName)
         elif syst.method == "normHistoSysOneSideSym":
-            chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName, False, True, True,  True,  sam.name, normString)
+            chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName, False, True, True,  True,  sam.name, normString, nomSysName=nomSysName)
         elif syst.method == "userHistoSys" or syst.method == "userNormHistoSys":
             if configMgr.hists[highName] is None:
                 configMgr.hists[highName] = histMgr.buildUserHistoSysFromHist(highName,  syst.high,  configMgr.hists[nomName])
             if configMgr.hists[lowName] is None:
                 configMgr.hists[lowName] = histMgr.buildUserHistoSysFromHist(lowName,  syst.low,  configMgr.hists[nomName])
             if syst.method == "userHistoSys":
-                chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName, False, False)
+                chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName, False, False, nomSysName=nomSysName)
             pass
         elif syst.method == "shapeSys":
             if syst.merged:
