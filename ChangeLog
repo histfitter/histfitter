@@ -1,3 +1,14 @@
+2013-07-25 Max Baak <mbaak@cern.ch>
+	M       python/configManager.py
+	M       python/sample.py
+	M       python/systematic.py
+	* Possibility to different nominal tree for systematics evaluation.
+	* Use ala:
+	jes       = Systematic("JES",    "_NoSys", "_JESup"    ,"_JESdown"    ,"tree","overallNormHistoSys") # JES uncertainty - for low pt jets
+        jes.differentNominalTreeWeight = True 
+	* Tagging HistFitter-00-00-30 
+
+
 2012-12-05 Alex Koutsman <alex.koutsman@cern.ch>
 	M 	Utils.cxx
 	* Fixed the NLL plotting for Inf/NaN-error and wrong range setting.
