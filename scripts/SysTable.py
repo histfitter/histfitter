@@ -496,6 +496,7 @@ if __name__ == "__main__":
   showAfterFitError=True
   showPercent=False
   doAsym=True
+  sampleStr=''
   for opt,arg in opts:
     if opt == '-c':
       chanStr=arg.replace(",","_")
@@ -514,7 +515,7 @@ if __name__ == "__main__":
       fitRegionsStr=arg
       fitRegionsList=arg.split(",")
     elif opt == '-s':
-      sampleStr=arg.replace(",","_")
+      sampleStr=arg.replace(",","_") + "_"
       sampleList=arg.split(",")
     elif opt == '-b':
       showAfterFitError=False
@@ -524,7 +525,7 @@ if __name__ == "__main__":
       doAsym=True
      
   if outputFileName=="default":
-    outputFileName=chanStr+'_SysTable.tex'
+    outputFileName=sampleStr+chanStr+'_SysTable.tex'
     pass
 
   try:
@@ -558,14 +559,18 @@ if __name__ == "__main__":
 
   chanSys = {}
   origChanList = list(chanList)
-  for chan in origChanList:
-    if method == "2":
-      regSys = latexfitresults_method2(wsFileName,resultName,chan,'',fitRegionsStr,'obsData',doAsym)
-    else:
-      regSys = latexfitresults(wsFileName,chan,'',resultName,'obsData',doAsym)
-    chanSys[chan] = regSys
+  chanList = []
 
-    if chosenSample:
+  for chan in origChanList:
+
+    if not chosenSample:
+        if method == "2":
+            regSys = latexfitresults_method2(wsFileName,resultName,chan,'',fitRegionsStr,'obsData',doAsym)
+        else:
+            regSys = latexfitresults(wsFileName,chan,'',resultName,'obsData',doAsym)
+        chanSys[chan] = regSys
+        chanList.append(chan)
+    else:
       for sample in sampleList:
         if method == "2":
           regSys = latexfitresults_method2(wsFileName,resultName,chan,sample,fitRegionsStr,'obsData',doAsym)

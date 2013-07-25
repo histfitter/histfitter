@@ -214,7 +214,7 @@ class Sample(object):
                #pass
         return
 
-    def addHistoSys(self, systName, nomName, highName, lowName, includeOverallSys, normalizeSys, symmetrize=False, oneSide=False, samName="", normString=""):
+    def addHistoSys(self, systName, nomName, highName, lowName, includeOverallSys, normalizeSys, symmetrize=False, oneSide=False, samName="", normString="", nomSysName=""):
         """
         Add a HistoSys entry using the nominal,  high and low histograms,  set if to include OverallSys
 
@@ -222,6 +222,31 @@ class Sample(object):
 
         If normalizeSys then normalize shapes to nominal
         """
+
+        ### usecase of different tree from nominal histogram in case of 
+        if len(nomSysName)>0:
+            if configMgr.hists[nomSysName] != None:
+                configMgr.hists[lowName+"_test"] = configMgr.hists[lowName].Clone(lowName+"_test")
+                log.info(lowName + " / " + nomSysName)
+                success = configMgr.hists[lowName].Divide( configMgr.hists[nomSysName] )
+                if not success:
+                    log.error( "Can not divide: " + lowName + " by " + nomSysName )
+                    raise RuntimeError("Divide by zero.")
+                else:
+                    log.info(lowName + " * " + nomName)
+                    configMgr.hists[lowName].Multiply( configMgr.hists[nomName] )
+                    pass
+                #
+                configMgr.hists[highName+"_test"] = configMgr.hists[highName].Clone(highName+"_test")
+                log.info(highName + " * " + nomSysName)
+                success = configMgr.hists[highName].Divide( configMgr.hists[nomSysName] )
+                if not success:
+                    log.error( "Can not divide: " + highName + " by " + nomSysName )
+                    raise RuntimeError("Divide by zero.")
+                else:
+                    log.info(highName + " * " + nomName)
+                    configMgr.hists[highName].Multiply( configMgr.hists[nomName] )
+                    pass
 
         if self.noRenormSys and normalizeSys:
             log.debug("    sample.noRenormSys==True and normalizeSys==True for sample <%s> and syst <%s>. normalizeSys set to False."%(self.name,systName))
@@ -269,6 +294,9 @@ class Sample(object):
             highIntegral = configMgr.hists["h"+samNameRemap+systName+"High_"+normString+"Norm"].Integral()
             lowIntegral  = configMgr.hists["h"+samNameRemap+systName+"Low_"+normString+"Norm"].Integral()
             nomIntegral  = configMgr.hists["h"+samNameRemap+"Nom_"+normString+"Norm"].Integral()
+            if len(nomSysName)>0:  ## renormalization done based on consistent set of trees
+                if configMgr.hists[nomSysName] != None:
+                    nomIntegral  = configMgr.hists["h"+samNameRemap+systName+"Nom_"+normString+"Norm"].Integral()
             
             if oneSide and symmetrize:
                 lowIntegral = 2.*nomIntegral - highIntegral # note,  this is an approximation!

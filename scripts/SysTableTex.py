@@ -72,6 +72,8 @@ Total background systematic              '''
       for index,region in enumerate(signalRegions):
         if index == 0:
           tableline += "\n" + printname + "      "
+
+        #if m[region][name]==0: continue # skip empty systematics
           
         if not showPercent:
           tableline += "   & $\\pm " + str(("%.2f" %m[region][name])) + "$       "

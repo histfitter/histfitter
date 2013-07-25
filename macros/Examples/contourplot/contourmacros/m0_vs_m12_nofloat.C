@@ -8,6 +8,23 @@ void initialize() {
 }
 
 
+float 
+getxsec(const int& id, const float& mp, const float& mlsp) {
+  TFile* file(0);
+  if      (id==0) { file = TFile::Open("xsecgg.root");   }
+  else if (id==1) { file = TFile::Open("xsecss.root");   }
+  else if (id==2) { file = TFile::Open("xsecstop.root"); }
+  else if (id==3) { file = TFile::Open("xsecued.root");  }
+
+  TTree* xstree = (TTree*)file->Get("xstree");
+  float val = Util::getValueFromTree(xstree,"xsec","mp",mp,"mlsp",mlsp);
+  file->Close();
+
+  return val;
+}
+
+
+
 const char*
 m0_vs_m12_nofloat(const char* textfile = 0, TH2D* inputHist = 0, const char* rootfile = "m0m12_nofloat.root", TString id1="m0",TString id2="m12", int   nbinsX=21,int nbinsY=17, float minX=20,float maxX=860, float minY=92.5, float maxY=347.5)
 {
@@ -146,9 +163,9 @@ m0_vs_m12_nofloat(const char* textfile = 0, TH2D* inputHist = 0, const char* roo
 
   if (inputHist!=NULL){
      TH2D *cloneupperlimit=(TH2D*)inputHist->Clone();
-     TH2D* UpperLimit = DrawUtil::triwsmooth( tree, "upperLimit:m12:m0", "upperLimit" , "upperlimit","1", cloneupperlimit);}
+     TH2D* UpperLimit = DrawUtil::triwsmooth( tree, "upperLimit:m12:m0", "upperLimit" , "upperlimit","m12!=60", cloneupperlimit);}
    else{
-     TH2D* UpperLimit = DrawUtil::triwsmooth( tree, "upperLimit:m12:m0", "upperLimit" , "upperlimit","1", inputHist);}
+     TH2D* UpperLimit = DrawUtil::triwsmooth( tree, "upperLimit:m12:m0", "upperLimit" , "upperlimit","m12!=60", inputHist);}
 
 
    if (UpperLimit!=0) {
@@ -158,13 +175,13 @@ m0_vs_m12_nofloat(const char* textfile = 0, TH2D* inputHist = 0, const char* roo
      cout << "Cannot make smoothed significance histogram. Exit." << endl;
    }
 
-
   if (inputHist!=NULL){
      TH2D *clonexsec=(TH2D*)inputHist->Clone();
-     TH2D* xsec = DrawUtil::triwsmooth( tree, "xsec:m12:m0", "xsec" , "xsec","1", clonexsec);}   
+     TH2D* xsec = DrawUtil::triwsmooth( tree, "getxsec(0,m0,m12):m12:m0", "xsec" , "xsec","m12!=60", clonexsec);}   
    else{
-     TH2D* xsec = DrawUtil::triwsmooth( tree, "xsec:m12:m0", "xsec" , "xsec","1", inputHist);}
+     TH2D* xsec = DrawUtil::triwsmooth( tree, "getxsec(0,m0,m12):m12:m0", "xsec" , "xsec","m12!=60", inputHist);}
 
+   output->cd();
 
    if (xsec!=0) {
      xsec->Write();
@@ -175,9 +192,9 @@ m0_vs_m12_nofloat(const char* textfile = 0, TH2D* inputHist = 0, const char* roo
    
   if (inputHist!=NULL){
      TH2D *cloneexcludedXsec=(TH2D*)inputHist->Clone();
-     TH2D* excludedXsec = DrawUtil::triwsmooth( tree, "excludedXsec:m12:m0", "excludedXsec" , "excludedXsec","1", cloneexcludedXsec);}
+     TH2D* excludedXsec = DrawUtil::triwsmooth( tree, "upperLimit*getxsec(0,m0,m12):m12:m0", "excludedXsec" , "excludedXsec","m12!=60", cloneexcludedXsec);}
    else{
-     TH2D* excludedXsec = DrawUtil::triwsmooth( tree, "excludedXsec:m12:m0", "excludedXsec" , "excludedXsec","1", inputHist);}
+     TH2D* excludedXsec = DrawUtil::triwsmooth( tree, "upperLimit*getxsec(0,m0,m12):m12:m0", "excludedXsec" , "excludedXsec","m12!=60", inputHist);}
 
 
    if (excludedXsec!=0) {
@@ -186,7 +203,6 @@ m0_vs_m12_nofloat(const char* textfile = 0, TH2D* inputHist = 0, const char* roo
    } else {
      cout << "Cannot make smoothed significance histogram. Exit." << endl;
    }
-
 
    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

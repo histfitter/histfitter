@@ -40,6 +40,7 @@ class SystematicBase:
         self.treeLoName = {}
         self.treeHiName = {}
         self.allowRemapOfSyst = False
+        self.differentNominalTreeWeight = False
 
         if not constraint == "Gaussian" and not (method == "shapeSys" or method == "shapeStat"):
             raise ValueError("Constraints can only be specified for shapeSys")
@@ -216,6 +217,18 @@ class SystematicBase:
                             if self.type == "tree" and (treeName == '' or treeName == systNorm.high):
                                 treeName = s.name + systNorm.high
 
+                        if 'Nom' in lowhigh:
+                            filelist = s.files
+                            # take the default tree name
+                            # for the sample
+                            if self.type == "tree":
+                                treeName = s.treeName + systNorm.nominal
+                            else:
+                                treeName = s.treeName
+                            ## possibly rename treename
+                            if self.type == "tree" and (treeName == '' or treeName == systNorm.nominal):
+                                treeName = s.name + systNorm.nominal
+
                         # weight-based trees assuming up/down are in one tree have identical name for up/low
                         # if our current name does not exist, we assume this one does
                         if self.type == "weight" and (not abstract.prepare.checkTree(treeName, filelist)):
@@ -280,15 +293,20 @@ class TreeWeightSystematic(SystematicBase):
 
     def PrepareWAHforWeight(self, regionString="", normString="", normCuts="",
                             abstract=None, topLvl=None, chan=None, sam=None):
-        highandlow = ["High_", "Low_"]
+        highandlow = ["High_", "Low_"] # ,"Nom_"]
+        if self.differentNominalTreeWeight:
+            highandlow = ["High_", "Low_", "Nom_"]
+
         for highorlow in highandlow:
             abstract.prepare.weights = str(abstract.lumiUnits*abstract.outputLumi/abstract.inputLumi)
             if highorlow == "High_":
                 mywList = [ " * %s " % myw for myw in self.high]
                 abstract.prepare.weights += "".join(mywList)
-
-            else:
+            elif highorlow == "Low_":
                 mywList = [ " * %s " % myw for myw in self.low]
+                abstract.prepare.weights += "".join(mywList)
+            elif highorlow == "Nom_":
+                mywList = [ " * %s " % myw for myw in self.nominal]
                 abstract.prepare.weights += "".join(mywList)
 
             if abstract.readFromTree:
@@ -307,6 +325,9 @@ class TreeWeightSystematic(SystematicBase):
     def PrepareWAHforTree(self, regionString="", normString="", normCuts="",
                           abstract=None, topLvl=None, chan=None, sam=None):
         highandlow = ["High_", "Low_"]
+        if self.differentNominalTreeWeight:
+            highandlow = ["High_", "Low_", "Nom_"]
+
         weightstemp = abstract.prepare.weights
         for highorlow in highandlow:
             abstract.prepare.weights = weightstemp
@@ -328,7 +349,7 @@ class TreeWeightSystematic(SystematicBase):
                         treeName = sam.name + self.high
 
                     abstract.prepare.read(treeName, filelist)
-                else:
+                elif highorlow == "Low_":
                     if sam.name in self.filesLo:
                         filelist = self.filesLo[sam.name]
                     else:
@@ -339,6 +360,13 @@ class TreeWeightSystematic(SystematicBase):
                         treeName = sam.treeName + self.low
                     if treeName == '' or treeName == self.low:
                         treeName = sam.name + self.low
+                
+                    abstract.prepare.read(treeName, filelist)
+                elif highorlow == "Nom_":
+                    filelist = sam.files
+                    treeName = sam.treeName + self.nominal
+                    if treeName == '' or treeName == self.nominal:
+                        treeName = sam.name + self.nominal
                 
                     abstract.prepare.read(treeName, filelist)
 
