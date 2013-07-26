@@ -103,6 +103,16 @@ std::map< TString,TString > GetMatchingWorkspaces( const TString& infile, const 
       searchFileName = kTRUE;
     }
 
+    TString fullWSName;
+    if (searchFileName) {
+        TObjArray* iArr = format.Tokenize("+");
+        int narg = iArr->GetEntries();
+        if (narg==2) {
+          fullWSName = ((TObjString*)iArr->At(1))->GetString();
+        }
+        delete iArr;
+    }
+
     TObjString* objString = NULL;
     std::map<TString,int> keymap;
     int narg1 = format.CountChar('%');
@@ -136,17 +146,23 @@ std::map< TString,TString > GetMatchingWorkspaces( const TString& infile, const 
         if ( keymap.find(key->GetName())==keymap.end() ) { keymap[key->GetName()] = key->GetCycle(); }
         else if ( key->GetCycle()>keymap[key->GetName()] ) { keymap[key->GetName()] = key->GetCycle(); }
         wsname = Form("%s;%d",key->GetName(),keymap[key->GetName()]) ;
-	wsnameSearch = wsname;
+	    wsnameSearch = wsname;
 
+        if (searchFileName && !fullWSName.IsNull()) { // E.g. WS is called combined 
+          if (fullWSName != TString(key->GetName())) continue;
+        }
+
+/*
         // Turn off, this is slow!
         // confirm this is a workspace
         TObject* obj = file->Get( wsname.Data() );
         if (obj==0) continue; 
-        if ( obj->ClassName() != TString("RooWorkspace") ) continue;
+        if ( obj->ClassName()!=TString("RooWorkspace") ) continue;
+*/
 
-	if (searchFileName) {
-	  wsnameSearch = infile + "_" + wsnameSearch;
-	}
+	    if (searchFileName) {
+	        wsnameSearch = infile + "_" + wsnameSearch;
+	    }
 
         // accept upto 10 args in ws name
         int narg2 = sscanf( wsnameSearch.Data(), format.Data(), &wsarg[0],&wsarg[1],&wsarg[2],&wsarg[3],&wsarg[4],&wsarg[5],&wsarg[6],&wsarg[7],&wsarg[8],&wsarg[9] ); 
@@ -535,8 +551,8 @@ MatchingCountingExperimentsVec ( const TString& outfile, const TString& outws_pr
       bool recreate = (idx!=0?kFALSE:kTRUE) ;
 
       if (outfile.EndsWith("+wsid")) {
-	outfilename = outfilename.ReplaceAll("+wsid","_"+wid);
-	recreate = kTRUE; // create unique output file
+	    outfilename = outfilename.ReplaceAll("+wsid","_"+wid);
+	    recreate = kTRUE; // create unique output file
       }
 
       TString outprefix = outws_prefix;
