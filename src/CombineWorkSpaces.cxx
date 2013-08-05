@@ -32,6 +32,8 @@
 #include "RooFitResult.h"
 #include "TMsgLogger.h"
 
+#include "Roo1DTable.h"
+
 using namespace std;
 using namespace RooFit ;
 using namespace RooStats ;
@@ -64,6 +66,7 @@ std::vector<RooWorkspace*> CollectWorkspaces( const std::map< TString,TString >&
     std::map< TString,TString >::const_iterator wfItr=fwnameMap.begin(), wfEnd=fwnameMap.end();
 
     for (int i=0; wfItr!=wfEnd; ++wfItr, ++i) {
+      //cout << "  wfItr->first.Data() = " << wfItr->first.Data() << "  wfItr->second = " << wfItr->second << endl;
         RooWorkspace* w = GetWorkspaceFromFile( wfItr->first.Data(), wfItr->second );
         if ( w==0 ) {
             CombineWorkSpacesLogger << kFATAL << "Cannot open workspace <" << wfItr->second << "> in file <" << wfItr->second << ">" << GEndl;
@@ -89,6 +92,14 @@ std::vector<RooWorkspace*> CollectWorkspaces( const std::map< TString,TString >&
 // string, eg. "muSUSY10_3j_20pb_SU_%f_%f_0_3", where %f and %f are mapped onto the parameters "m0:m12"
 //
 std::map< TString,TString > GetMatchingWorkspaces( const TString& infile, const TString& theformat, const TString& interpretation, const TString& cutStr, const Int_t& fID, TTree* ORTree ) {
+
+    CombineWorkSpacesLogger << kDEBUG   << " GetMatchingWorkspaces() : infile = " << infile << GEndl;
+    CombineWorkSpacesLogger << kDEBUG   << " GetMatchingWorkspaces() : theformat = " << theformat << GEndl ;
+    CombineWorkSpacesLogger << kDEBUG   << " GetMatchingWorkspaces() : interpretation=" << interpretation << GEndl;
+    CombineWorkSpacesLogger << kDEBUG   << " GetMatchingWorkspaces() : cutStr=" << cutStr << GEndl;
+    CombineWorkSpacesLogger << kDEBUG   << " GetMatchingWorkspaces() : fID = " << fID  << GEndl ;//<< " ORTree = " << ORTree->GetName() << endl;
+  
+    
     std::map< TString,TString > wsidMap;
 
     TFile* file = TFile::Open(infile.Data(), "READ");
@@ -152,17 +163,17 @@ std::map< TString,TString > GetMatchingWorkspaces( const TString& infile, const 
           if (fullWSName != TString(key->GetName())) continue;
         }
 
-/*
+	
         // Turn off, this is slow!
         // confirm this is a workspace
         TObject* obj = file->Get( wsname.Data() );
         if (obj==0) continue; 
         if ( obj->ClassName()!=TString("RooWorkspace") ) continue;
-*/
 
-	    if (searchFileName) {
-	        wsnameSearch = infile + "_" + wsnameSearch;
-	    }
+
+	if (searchFileName) {
+	  wsnameSearch = infile + "_" + wsnameSearch;
+	}
 
         // accept upto 10 args in ws name
         int narg2 = sscanf( wsnameSearch.Data(), format.Data(), &wsarg[0],&wsarg[1],&wsarg[2],&wsarg[3],&wsarg[4],&wsarg[5],&wsarg[6],&wsarg[7],&wsarg[8],&wsarg[9] ); 
@@ -172,7 +183,8 @@ std::map< TString,TString > GetMatchingWorkspaces( const TString& infile, const 
         wsid.Clear();  // form unique ws id
         for (int i=0; i<narg2; ++i) { 
             objString = (TObjString*)iArr->At(i);
-            wsid  += Form("%s=%f_", objString->GetString().Data(), wsarg[i]); 
+            wsid  += Form("%s_%.0f_", objString->GetString().Data(), wsarg[i]); 
+	    //            wsid  += Form("%s=%f_", objString->GetString().Data(), wsarg[i]); 
             formula.SetValue(objString->GetString(),wsarg[i]);
         }        
         //wsid += Form( "%d_",keymap[key->GetName()] );
@@ -188,7 +200,7 @@ std::map< TString,TString > GetMatchingWorkspaces( const TString& infile, const 
         }
 
         // NOTE: wsid always connects to highest key-index found in file!
-        wsidMap[wsid] = wsname;
+        wsidMap[wsid] = wsname;    
     }
 
     CombineWorkSpacesLogger << kINFO << "Found : " << wsidMap.size() << " matching workspaces in file : " << infile << GEndl;
@@ -560,6 +572,9 @@ MatchingCountingExperimentsVec ( const TString& outfile, const TString& outws_pr
       outfilename += ".root"; 
 
       combined->writeToFile(outfilename.Data(), recreate ); // do not recreate file, but update instead
+        
+      CombineWorkSpacesLogger << kINFO << " Written combination workspace to file: " << outfilename << GEndl;
+
     }
 
     // clear 
@@ -703,16 +718,27 @@ ConstructCombinedModel(std::vector<RooWorkspace*> chs, const TString& correlateV
     tempws->import( *myData, Rename(datasetName.Data()), RenameVariable(vIn,vOut) );
     myData = (RooDataSet*) tempws->data( datasetName.Data() );
 
-    RooArgSet obsSet = *myData->get(0) ;
-    if ( chs[i]->obj("weightVar")!=NULL )  { obsSet.remove( *((RooAbsArg*)chs[i]->obj("weightVar")) ); }
-    if ( chs[i]->obj("channelCat")!=NULL ) { obsSet.remove( *((RooAbsArg*)chs[i]->obj("channelCat")) ); }
+    // AK: for some reason remove() does not remove the channelCat,weightVar from the obsSet
+    // Solution: starting from an empty argset, we only add the variables
+    //     RooArgSet obsSet = *myData->get(0) ;
+    //     if ( chs[i]->obj("weightVar")!=NULL )  { obsSet.remove( *((RooAbsArg*)chs[i]->obj("weightVar")) ); cout << " removing weightVar " << endl; }
+    //     if ( chs[i]->obj("channelCat")!=NULL ) { obsSet.remove( *((RooAbsArg*)chs[i]->obj("channelCat")) ); cout << " removing channelCat " << endl;}
 
-    oSet.add(obsSet); // ignore duplicates
+    // starting from an empty argset, we only add the variables
+    RooArgSet obsSet;
+    TIterator* varItr2 = args->createIterator() ;
+    for (Int_t j=0; (var = (RooAbsArg*)varItr2->Next()); ++j) {
+      TString vName = var->GetName();
+      if (vName=="weightVar" || vName=="channelCat") continue;
+      obsSet.add( *((RooAbsArg*)chs[i]->obj(vName)) );
+    }
+    delete varItr2;
+
+    oSet.add(obsSet); // ignore duplicates    
   }
-
+  
   obsList.add(oSet);
-
-
+  
   cout <<"full list of pois:" << endl;
   poiSet.Print();
   cout <<"full list of observables:"<<endl;
@@ -776,22 +802,22 @@ ConstructCombinedModel(std::vector<RooWorkspace*> chs, const TString& correlateV
   RooCategory* channelCat = (RooCategory*) combined->factory(("channelCat["+ss.str()+"]").c_str());
   obsList.add(*channelCat);
 
-
   RooSimultaneous *simPdf= new RooSimultaneous("simPdf","",pdfMap, *channelCat);
   cout << "\n\n----------------\n Importing combined model" << endl;
   combined->import(*simPdf,RecycleConflictNodes());
 
   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-  cout << "\n\n------------------\n Creation of combined datasets ...\n" << endl;
+  cout << "\n\n----------------------------------------- Creation of combined datasets ...\n" << endl;
 
   // Make toy simultaneous dataset
   cout <<"-----------------------------------------"<<endl;
-  cout << "create toy data for " << ss.str() << endl;
+  cout << endl << "create toy data for " << ss.str() << endl;
     
   // now with weighted datasets
   // First Asimov
   RooDataSet * simData=NULL;
+  Int_t lastCatIdx=0;
   
   for(unsigned int i = 0; i< chs.size(); ++i) {
 
@@ -850,10 +876,10 @@ ConstructCombinedModel(std::vector<RooWorkspace*> chs, const TString& correlateV
 
 
   // observed dataset
-  cout << "merging observed data for workspace " << ss.str() << endl;
+  cout << endl << "merging observed data for workspace " << ss.str() << endl;
 
   simData=NULL;
-
+ 
   for(unsigned int i = 0; i< chs.size(); ++i) {
 
     TString suffix = Form("a%d",i);
@@ -896,9 +922,10 @@ ConstructCombinedModel(std::vector<RooWorkspace*> chs, const TString& correlateV
       }
     } else if (className == "RooSimultaneous") {
       RooCategory* cCat = (RooCategory*)chs[i]->obj("channelCat");
-
+     
       for(int j=0; j<cCat->numBins(0); ++j) {
 	cCat->setIndex(j);
+	channelCat->setIndex(lastCatIdx+j);
 	TString channel_name = cCat->getLabel();
 	RooAbsPdf* regionPdf = ((RooSimultaneous*)pdf)->getPdf(channel_name.Data());
 
@@ -907,22 +934,23 @@ ConstructCombinedModel(std::vector<RooWorkspace*> chs, const TString& correlateV
 
 	RooDataSet* regionData = (RooDataSet*) myData->reduce( *obsSet, dataCatLabel.Data() );
 
-	RooDataSet* tempData = new RooDataSet(channel_name.Data(), "", obsList, Index(*channelCat),
+	RooDataSet* tempData = new RooDataSet(Form("obsData_%s",channel_name.Data()), "", obsList, Index(*channelCat),
 					      WeightVar("weightVar"),
 					      Import( channel_name.Data(), *regionData ) 
 					      );
 	delete regionData;
-
-	if (simData) {
+	
+	if(simData) {
 	  simData->append(*tempData);
 	  delete tempData;
-	} else {
+	} else { 
 	  simData = tempData;
 	}
       }      
-
-    }
-  } // and import
+      lastCatIdx += cCat->numBins(0);
+    }  
+  } 
+  // and import
   if (simData) combined->import(*simData,Rename("obsData"));
 
 

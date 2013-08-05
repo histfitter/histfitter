@@ -1,3 +1,8 @@
+2013-08-05 Alex Koutsman <alex.koutsman@cern.ch>
+	M       src/CombineWorkSpaces.cxx
+	* Solved bug, where combination pdf category was out of sync with combination data
+	* Added more print statements and fixed naming-problems
+	
 2013-07-25 Max Baak <mbaak@cern.ch>
 	M       python/configManager.py
 	M       python/sample.py
