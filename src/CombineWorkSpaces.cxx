@@ -107,12 +107,16 @@ std::map< TString,TString > GetMatchingWorkspaces( const TString& infile, const 
         CombineWorkSpacesLogger << kFATAL << "Cannot open file: " << infile << GEndl;
     }
 
+
     TString format = theformat;
+    CombineWorkSpacesLogger << kDEBUG << " 1  format = " << format << GEndl;
     Bool_t searchFileName(kFALSE);
     if (format.BeginsWith("filename+")) { 
       format = format.ReplaceAll("filename+","");
       searchFileName = kTRUE;
     }
+
+    CombineWorkSpacesLogger << kDEBUG << " 2  format = " << format << GEndl;
 
     TString fullWSName;
     if (searchFileName) {
@@ -123,6 +127,7 @@ std::map< TString,TString > GetMatchingWorkspaces( const TString& infile, const 
         }
         delete iArr;
     }
+    CombineWorkSpacesLogger << kDEBUG << " 3  fullWSName = " << fullWSName << GEndl;
 
     TObjString* objString = NULL;
     std::map<TString,int> keymap;
@@ -145,11 +150,20 @@ std::map< TString,TString > GetMatchingWorkspaces( const TString& infile, const 
         wsidvec.push_back( objString->GetString().Data() );
     }
 
+    CombineWorkSpacesLogger << kDEBUG << " 4  wsidvec.size() = " << wsidvec.size() << GEndl;
+    for(unsigned int i=0; i<wsidvec.size();i++){
+      CombineWorkSpacesLogger << kDEBUG << " wsidvec[" << i << "] = " << wsidvec[i] << GEndl;
+    }
+
     file->cd();
 
     TEasyFormula formula( cutStr.Data() );
 
     TList* list = file->GetListOfKeys();
+    CombineWorkSpacesLogger << kDEBUG << " 5 list : "  << GEndl;
+    if(CombineWorkSpacesLogger.GetMinLevel() < kINFO) {
+      list->Print("v");
+    }
     for(int j=0; j<list->GetEntries(); j++) {
         TKey* key = (TKey*)list->At(j);
         // get proper index with name
@@ -157,10 +171,13 @@ std::map< TString,TString > GetMatchingWorkspaces( const TString& infile, const 
         if ( keymap.find(key->GetName())==keymap.end() ) { keymap[key->GetName()] = key->GetCycle(); }
         else if ( key->GetCycle()>keymap[key->GetName()] ) { keymap[key->GetName()] = key->GetCycle(); }
         wsname = Form("%s;%d",key->GetName(),keymap[key->GetName()]) ;
-	    wsnameSearch = wsname;
+	wsnameSearch = wsname;
+	CombineWorkSpacesLogger << kDEBUG <<" 5.1   j = " << j << " wsnameSearch = " << wsnameSearch << GEndl;
 
         if (searchFileName && !fullWSName.IsNull()) { // E.g. WS is called combined 
-          if (fullWSName != TString(key->GetName())) continue;
+	  CombineWorkSpacesLogger << kDEBUG << " 5.2   searchFileName && !fullWSName.IsNull() = " << (searchFileName && !fullWSName.IsNull()) << GEndl;
+	  CombineWorkSpacesLogger << kDEBUG << " 5.3   TString(key->GetName())) = " << TString(key->GetName()) << GEndl;
+          if (fullWSName != TString(key->GetName()))  continue;
         }
 
 	
@@ -168,12 +185,13 @@ std::map< TString,TString > GetMatchingWorkspaces( const TString& infile, const 
         // confirm this is a workspace
         TObject* obj = file->Get( wsname.Data() );
         if (obj==0) continue; 
-        if ( obj->ClassName()!=TString("RooWorkspace") ) continue;
+	//	if ( obj->ClassName()!=TString("RooWorkspace") ) continue;
 
-
+	CombineWorkSpacesLogger << kDEBUG << " 5.4  searchFileName = " << searchFileName << GEndl;
 	if (searchFileName) {
-	  wsnameSearch = infile + "_" + wsnameSearch;
+	  wsnameSearch = infile + "_" + wsnameSearch;	
 	}
+	CombineWorkSpacesLogger << kDEBUG << " 5.5  wsnameSearch = " << wsnameSearch << GEndl;
 
         // accept upto 10 args in ws name
         int narg2 = sscanf( wsnameSearch.Data(), format.Data(), &wsarg[0],&wsarg[1],&wsarg[2],&wsarg[3],&wsarg[4],&wsarg[5],&wsarg[6],&wsarg[7],&wsarg[8],&wsarg[9] ); 
@@ -201,6 +219,7 @@ std::map< TString,TString > GetMatchingWorkspaces( const TString& infile, const 
 
         // NOTE: wsid always connects to highest key-index found in file!
         wsidMap[wsid] = wsname;    
+	CombineWorkSpacesLogger << kDEBUG  << " 5.6  wsidMap[ " << wsid << "] = " << wsname << GEndl;
     }
 
     CombineWorkSpacesLogger << kINFO << "Found : " << wsidMap.size() << " matching workspaces in file : " << infile << GEndl;
@@ -521,6 +540,8 @@ MatchingCountingExperimentsVec ( const TString& outfile, const TString& outws_pr
     wsnameMap[ infile[i] ] = GetMatchingWorkspaces( infile[i], format[i], interpretation[i], cutStr, i, ORTree );
     //if ( wsnameMap[ infile[i] ].empty() ) return false; // no matching workspaces 
   }
+
+  // return false; // -AK
 
   // match to-be-combined workspaces 
   std::map< TString, std::map<TString,TString> >::iterator nItr=wsnameMap.begin(), nEnd=wsnameMap.end();

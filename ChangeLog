@@ -1,3 +1,10 @@
+2013-08-06 Alex Koutsman <alex.koutsman@cern.ch>
+	M       src/CombineWorkSpaces.cxx
+	* Solved re-introduced bug for collecting hypotests
+	*	 for combination of workspaces, one must add "+combined" (where combined is the workspace name in file) to the format string
+	*	 Example : format2 = 'filename+/afs/cern.ch/atlas/project/cern/susy/users/jlorenz/Sig_SM_SS1step_%f_%f_%f+combined'
+	* Added more debug print statements
+
 2013-08-05 Alex Koutsman <alex.koutsman@cern.ch>
 	M       src/CombineWorkSpaces.cxx
 	* Solved bug, where combination pdf category was out of sync with combination data
