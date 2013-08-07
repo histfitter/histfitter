@@ -250,7 +250,7 @@ if __name__ == "__main__":
     outputFileNameChan = outputFileNameList[index]
       
     # calculate upper limit
-    ulMapChan = latexfitresults(wsFileNameChan, poiNameChan, lumiFB, nTOYS, useAsimovSet, chan)
+    ulMapChan = latexfitresults(wsFileNameChan, poiNameChan, lumiFB, nTOYS, useAsimovSet) #, chan)
     upLim[chan] = ulMapChan
     # print file for every channel separately
     if len(chanList)>1:
