@@ -2631,6 +2631,8 @@ Util::resetError( RooWorkspace* wspace, const RooArgList& parList, const RooArgL
     // the given name and shift that
     // systematic by 1-sigma
 
+  Logger << kINFO << " starting with workspace: " << wspace->GetName() << "   parList.getSize(): " << parList.getSize() << "  vetoList.size() = " << vetoList.getSize() << GEndl;
+
     TIterator* iter = parList.createIterator() ;
     RooAbsArg* arg ;
     while( (arg=(RooAbsArg*)iter->Next()) ) {
@@ -2670,8 +2672,15 @@ Util::resetError( RooWorkspace* wspace, const RooArgList& parList, const RooArgL
         // If it is Lumi:
         else if( UncertaintyName == "Lumi" ) {
             // Get the Lumi's constraint term:
-            RooGaussian* lumiConstr = (RooGaussian*) wspace->pdf("lumiConstraint");
-            // Get the uncertainty on the Lumi:
+	    RooGaussian* lumiConstr = (RooGaussian*) wspace->pdf("lumiConstraint");
+	    if(!lumiConstr){
+	      Logger << kERROR << "Could not find wspace->pdf('lumiConstraint') "
+		     << " in workspace: " << wspace->GetName() << ": " << wspace
+		     << " when trying to reset error for parameter: Lumi"
+		     << GEndl;
+	      continue;
+	    }
+	    // Get the uncertainty on the Lumi:
             RooRealVar* lumiSigma = (RooRealVar*) lumiConstr->findServer(0);
             sigma = lumiSigma->getVal();
 
@@ -2699,7 +2708,7 @@ Util::resetError( RooWorkspace* wspace, const RooArgList& parList, const RooArgL
                */
             if( ConstraintType == "" ) {
                 //cout << "Error: Strange constraint type for Stat Uncertainties " << ConstraintType << GEndl;
-                Logger << kINFO << "Assuming parameter is a ShapeFactor and so unconstrained" << GEndl;
+	      Logger << kINFO << "Assuming parameter :" << UncertaintyName << ": is a ShapeFactor and so unconstrained" << GEndl;
                 continue;
             }
             else if( ConstraintType == "RooGaussian" ){

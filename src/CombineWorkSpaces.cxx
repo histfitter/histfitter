@@ -645,7 +645,7 @@ ConstructCombinedModel(std::vector<RooWorkspace*> chs, const TString& correlateV
 
   RooWorkspace* combined = new RooWorkspace("combined");
   RooWorkspace* tempws   = new RooWorkspace("tempws");
-  TString exceptionList = "Lumi,nominalLumi,channelCat,weightVar";
+  TString exceptionList = "Lumi,nominalLumi,LumiConstraint,channelCat,weightVar";
 
   if (!correlateVarsStr.IsNull()) { exceptionList += "," + correlateVarsStr; }
 
@@ -700,10 +700,10 @@ ConstructCombinedModel(std::vector<RooWorkspace*> chs, const TString& correlateV
   }
   delete varItr;
 
-  //exceptionList += "," + globObsStr;
 
+  // don't rename global observables
   TString poiStr;
-  varItr = globalObs.createIterator() ;
+  varItr = poiSet.createIterator() ;
   for (Int_t i=0; (var = (RooAbsArg*)varItr->Next()); ++i) {
     if (i!=0) { poiStr += ","; }
     TString varname = var->GetName();
@@ -712,7 +712,7 @@ ConstructCombinedModel(std::vector<RooWorkspace*> chs, const TString& correlateV
   delete varItr;
 
   exceptionList += "," + poiStr;
-
+  exceptionList += "," + globObsStr;
 
   cout << "\n\n------------------\n Creation of obsList ...\n" << endl;
 
@@ -752,6 +752,9 @@ ConstructCombinedModel(std::vector<RooWorkspace*> chs, const TString& correlateV
       TString vName = var->GetName();
       if (vName=="weightVar" || vName=="channelCat") continue;
       obsSet.add( *((RooAbsArg*)chs[i]->obj(vName)) );
+      // rename the observables
+      TString vName_new =  !suffix.IsNull() ? Form("%s_%s",var->GetName(),suffix.Data()) : var->GetName();
+      obsSet.find(vName)->SetNameTitle(vName_new,vName_new);
     }
     delete varItr2;
 
@@ -760,10 +763,21 @@ ConstructCombinedModel(std::vector<RooWorkspace*> chs, const TString& correlateV
   
   obsList.add(oSet);
   
+  TString obsStr;
+  varItr = oSet.createIterator() ;
+  for (Int_t i=0; (var = (RooAbsArg*)varItr->Next()); ++i) {
+    if (i!=0) { obsStr += ","; }
+    TString varname = var->GetName();
+    obsStr += varname ;
+  }
+  delete varItr;
+
+  exceptionList += "," + obsStr;
+
   cout <<"full list of pois:" << endl;
   poiSet.Print();
   cout <<"full list of observables:"<<endl;
-  obsList.Print();
+  obsList.Print("v");
   cout <<"full list of channels:"<<endl;
   cout << ss.str() << endl;
 
@@ -772,6 +786,7 @@ ConstructCombinedModel(std::vector<RooWorkspace*> chs, const TString& correlateV
 
 
   cout << "\n\n------------------\n Entering workspace combination\n" << endl;
+
 
   for(unsigned int i = 0; i< chs.size(); ++i) {
     TString suffix = Form("a%d",i);
@@ -905,6 +920,7 @@ ConstructCombinedModel(std::vector<RooWorkspace*> chs, const TString& correlateV
 
     TString suffix = Form("a%d",i);
     RooDataSet* myData = (RooDataSet*) chs[i]->data("obsData");
+
     TString datasetName = Form("%s_%s",suffix.Data(),myData->GetName());
 
     TString vIn, vOut;
@@ -935,6 +951,7 @@ ConstructCombinedModel(std::vector<RooWorkspace*> chs, const TString& correlateV
 					    WeightVar("weightVar"),
 					    Import( channel_name.Data(), *myData ) 
 					   );
+
       if (simData) {
 	simData->append(*tempData);
 	delete tempData;
