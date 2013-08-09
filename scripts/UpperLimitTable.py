@@ -49,14 +49,19 @@ def latexfitresults(filename, poiname='mu_SIG', lumiFB=1.0, nTOYS=3000, asimov=F
   if asimov:
     calctype = 2
  
-  hti_result = RooStats.MakeUpperLimitPlot(poiname,w,calctype,3,ntoys,True,npoints)
-  #   RooStats::MakeUpperLimitPlot(const char* fileprefix,
-  # 			     RooWorkspace* w,
-  # 			     int calculatorType ,                         # toys = 0, asymptotic (asimov) = 2
-  # 			     int testStatType , 
-  # 			     int ntoys,
-  # 			     bool useCLs ,  
-  # 			     int npoints )
+  # hti_result = RooStats.MakeUpperLimitPlot(poiname,w,calctype,3,ntoys,True,npoints)
+##   #   RooStats::MakeUpperLimitPlot(const char* fileprefix,
+##   # 			     RooWorkspace* w,
+##   # 			     int calculatorType ,                         # toys = 0, asymptotic (asimov) = 2
+##   # 			     int testStatType , 
+##   # 			     int ntoys,
+##   # 			     bool useCLs ,  
+##   # 			     int npoints )
+
+  murangelow = 0.0
+  murangehigh = 40.0
+  hti_result = RooStats.DoHypoTestInversion(w,ntoys,calcType,3,True,npoints,murangelow,murangehigh)
+
   outFileName = "./htiResult_poi_" + poiname + "_ntoys_" + str(ntoys) + "_calctype_" + str(calctype) + "_npoints_" + str(npoints) + ".root"
   hti_result.SaveAs(outFileName)
   hti_result.Print()
