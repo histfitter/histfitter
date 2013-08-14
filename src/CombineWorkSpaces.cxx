@@ -642,6 +642,7 @@ ConstructCombinedModel(std::vector<RooWorkspace*> chs, const TString& correlateV
   RooArgList obsList;
   RooArgSet  globalObs;
   RooArgSet  poiSet;
+  RooArgSet NPs;
 
   RooWorkspace* combined = new RooWorkspace("combined");
   RooWorkspace* tempws   = new RooWorkspace("tempws");
@@ -664,6 +665,7 @@ ConstructCombinedModel(std::vector<RooWorkspace*> chs, const TString& correlateV
 
     poiSet.add( *config->GetParametersOfInterest() );
     globalObs.add(*ch->set("globalObservables")); // note: this can give duplicates. fine.
+    // NPs.add( *config->GetNuisanceParameters() );
 
     TString className = pdf->ClassName();
 
@@ -701,7 +703,7 @@ ConstructCombinedModel(std::vector<RooWorkspace*> chs, const TString& correlateV
   delete varItr;
 
 
-  // don't rename global observables
+  // don't rename POI
   TString poiStr;
   varItr = poiSet.createIterator() ;
   for (Int_t i=0; (var = (RooAbsArg*)varItr->Next()); ++i) {
@@ -774,10 +776,33 @@ ConstructCombinedModel(std::vector<RooWorkspace*> chs, const TString& correlateV
 
   exceptionList += "," + obsStr;
 
+  // rename nuisance parameters
+  RooArgSet nps;
+  for(unsigned int i = 0; i< chs.size(); ++i) {
+    TString suffix = Form("a%d",i);
+    ModelConfig* config = (ModelConfig *) chs[i]->obj("ModelConfig");
+    nps.add(*config->GetNuisanceParameters());
+    varItr = nps.createIterator() ;
+    for (Int_t i=0; (var = (RooAbsArg*)varItr->Next()); ++i) {
+      TString vName = var->GetName();
+      if (vName=="weightVar" || vName=="channelCat" || vName=="Lumi" ) continue;
+      TString vName_new =  !suffix.IsNull() ? Form("%s_%s",var->GetName(),suffix.Data()) : var->GetName();
+      nps.find(vName)->SetNameTitle(vName_new,vName_new);
+    }
+    delete varItr;
+    //cout << endl << " nps: " << endl;
+    nps.Print("v");
+    NPs.add(nps);
+    nps.removeAll();
+
+  }
+
   cout <<"full list of pois:" << endl;
   poiSet.Print();
   cout <<"full list of observables:"<<endl;
   obsList.Print("v");
+  cout <<"full list of nuisance parameters:"<<endl;
+  NPs.Print("v");
   cout <<"full list of channels:"<<endl;
   cout << ss.str() << endl;
 
@@ -1012,6 +1037,7 @@ ConstructCombinedModel(std::vector<RooWorkspace*> chs, const TString& correlateV
   
   combined_config->SetPdf(*simPdf);
   combined_config->SetParametersOfInterest(poiSet);
+  combined_config->SetNuisanceParameters(NPs);
 
   //    combined_config->GuessObsAndNuisance(*simData);
   //    customized->graphVizTree(("results/"+fResultsPrefixStr.str()+"_simul.dot").c_str());
