@@ -642,7 +642,6 @@ ConstructCombinedModel(std::vector<RooWorkspace*> chs, const TString& correlateV
   RooArgList obsList;
   RooArgSet  globalObs;
   RooArgSet  poiSet;
-  RooArgSet NPs;
 
   RooWorkspace* combined = new RooWorkspace("combined");
   RooWorkspace* tempws   = new RooWorkspace("tempws");
@@ -665,7 +664,6 @@ ConstructCombinedModel(std::vector<RooWorkspace*> chs, const TString& correlateV
 
     poiSet.add( *config->GetParametersOfInterest() );
     globalObs.add(*ch->set("globalObservables")); // note: this can give duplicates. fine.
-    // NPs.add( *config->GetNuisanceParameters() );
 
     TString className = pdf->ClassName();
 
@@ -776,33 +774,10 @@ ConstructCombinedModel(std::vector<RooWorkspace*> chs, const TString& correlateV
 
   exceptionList += "," + obsStr;
 
-  // rename nuisance parameters
-  RooArgSet nps;
-  for(unsigned int i = 0; i< chs.size(); ++i) {
-    TString suffix = Form("a%d",i);
-    ModelConfig* config = (ModelConfig *) chs[i]->obj("ModelConfig");
-    nps.add(*config->GetNuisanceParameters());
-    varItr = nps.createIterator() ;
-    for (Int_t i=0; (var = (RooAbsArg*)varItr->Next()); ++i) {
-      TString vName = var->GetName();
-      if (vName=="weightVar" || vName=="channelCat" || vName=="Lumi" ) continue;
-      TString vName_new =  !suffix.IsNull() ? Form("%s_%s",var->GetName(),suffix.Data()) : var->GetName();
-      nps.find(vName)->SetNameTitle(vName_new,vName_new);
-    }
-    delete varItr;
-    //cout << endl << " nps: " << endl;
-    nps.Print("v");
-    NPs.add(nps);
-    nps.removeAll();
-
-  }
-
   cout <<"full list of pois:" << endl;
   poiSet.Print();
   cout <<"full list of observables:"<<endl;
   obsList.Print("v");
-  cout <<"full list of nuisance parameters:"<<endl;
-  NPs.Print("v");
   cout <<"full list of channels:"<<endl;
   cout << ss.str() << endl;
 
@@ -869,10 +844,9 @@ ConstructCombinedModel(std::vector<RooWorkspace*> chs, const TString& correlateV
 
   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-  cout << "\n\n----------------------------------------- Creation of combined datasets ...\n" << endl;
+  cout << "\n\n-----------------------------------------\n Creation of combined datasets ...\n" << endl;
 
   // Make toy simultaneous dataset
-  cout <<"-----------------------------------------"<<endl;
   cout << endl << "create toy data for " << ss.str() << endl;
     
   // now with weighted datasets
@@ -1016,7 +990,26 @@ ConstructCombinedModel(std::vector<RooWorkspace*> chs, const TString& correlateV
   // and import
   if (simData) combined->import(*simData,Rename("obsData"));
 
-
+  // rename Nuisance Parameters in ModelConfigs (AK: if done previously, multiple name-changes)
+  RooArgSet NPs;
+  for(unsigned int i = 0; i< chs.size(); ++i) {
+    TString suffix = Form("a%d",i);
+    ModelConfig* config = (ModelConfig *) chs[i]->obj("ModelConfig");
+    RooArgSet nps;
+    nps.add(*config->GetNuisanceParameters());
+    varItr = nps.createIterator() ;
+    for (Int_t i=0; (var = (RooAbsArg*)varItr->Next()); ++i) {
+      TString vName = var->GetName();
+      if (vName=="weightVar" || vName=="channelCat" || vName=="Lumi" ) continue;
+      TString vName_new =  !suffix.IsNull() ? Form("%s_%s",var->GetName(),suffix.Data()) : var->GetName();
+      nps.find(vName)->SetNameTitle(vName_new,vName_new);
+    }
+    delete varItr;
+    NPs.add(nps);
+    nps.removeAll();
+  }  
+  cout <<"full list of nuisance parameters:"<<endl;
+  NPs.Print("v");
 
   ModelConfig *combined_config = new ModelConfig("ModelConfig", combined);
   combined_config->SetWorkspace(*combined);
@@ -1033,12 +1026,12 @@ ConstructCombinedModel(std::vector<RooWorkspace*> chs, const TString& correlateV
   combined->defineSet("observables",obsList);
   combined_config->SetObservables(*combined->set("observables"));
     
-  combined->Print();
+  //  combined->Print();
   
   combined_config->SetPdf(*simPdf);
   combined_config->SetParametersOfInterest(poiSet);
   combined_config->SetNuisanceParameters(NPs);
-
+ 
   //    combined_config->GuessObsAndNuisance(*simData);
   //    customized->graphVizTree(("results/"+fResultsPrefixStr.str()+"_simul.dot").c_str());
   combined->import(*combined_config,combined_config->GetName());

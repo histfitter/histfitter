@@ -1,3 +1,7 @@
+2013-08-14 Alex Koutsman <alex.koutsman@cern.ch>
+	M       src/CombineWorkSpaces.cxx
+	* Fixed nuisance parameters being stored correctly in ModelConfig in CombineWorkspaces.cxx
+
 2013-08-12 Max Baak <mbaak@cern.ch>
         M       setup.sh
         * Revert to Python version 2.6.5, this works okay (again) on lxplus.
