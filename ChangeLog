@@ -1,3 +1,9 @@
+2013-08-23 Jeanette Miriam Lorenz <jeanette.miriam.lorenz@cern.ch>
+        M macros/contourplot/contourmacros/SUSY_m0_vs_m12_all_withBand_cls.C
+	A macros/contourplot/contourmacros/limit_plot_SM.py
+	* minor changes in SUSY_m0_vs_m12_all_withBand_cls.C
+	* added new contour plot plotting macro in python: limit_plot_SM.py
+
 2013-08-14 Alex Koutsman <alex.koutsman@cern.ch>
 	M       src/CombineWorkSpaces.cxx
 	* Fixed nuisance parameters being stored correctly in ModelConfig in CombineWorkspaces.cxx
