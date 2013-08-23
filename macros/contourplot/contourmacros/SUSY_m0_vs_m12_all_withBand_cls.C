@@ -114,8 +114,8 @@ void SUSY_m0_vs_m12_all_withBand_cls( TString fname0 = "mudat_list.root",// nomi
    TH2F* contour_em1s    = ( hist5!=0 ? FixAndSetBorders( *hist5, "contour", "contour", 0 ) : 0 );
 
    // For Band
-   TGraph* gr_contour_ep1s = ContourGraph( contour_ep1s )->Clone(); 
-   TGraph* gr_contour_em1s = ContourGraph( contour_em1s )->Clone(); 
+   TGraph* gr_contour_ep1s = ( contour_ep1s!=0 ? ContourGraph( contour_ep1s ) : 0 ); //ContourGraph( contour_ep1s )->Clone(); 
+   TGraph* gr_contour_em1s = ( contour_em1s!=0 ? ContourGraph( contour_em1s ) : 0 ); //ContourGraph( contour_em1s )->Clone(); 
    
    TH2F* contour_exp(0);
    if (histe!=0)     { contour_exp     = FixAndSetBorders( *histe, "contour_exp", "contour_exp", 0 ); } 
@@ -412,7 +412,7 @@ void SUSY_m0_vs_m12_all_withBand_cls( TString fname0 = "mudat_list.root",// nomi
 
 
   Int_t c_myYellow   = TColor::GetColor("#ffe938"); 
-  TGraph* grshadeExp = DrawExpectedBand( gr_contour_ep1s, gr_contour_em1s, CombinationGlob::c_DarkYellow , 1001   , 0)->Clone();
+  TGraph* grshadeExp = ( (gr_contour_ep1s!=0 && gr_contour_em1s!=0) ? DrawExpectedBand( gr_contour_ep1s, gr_contour_em1s, CombinationGlob::c_DarkYellow , 1001   , 0) : 0 ); //DrawExpectedBand( gr_contour_ep1s, gr_contour_em1s, CombinationGlob::c_DarkYellow , 1001   , 0)->Clone();
   
   if (discexcl==1) {
      //if (contour_obs!=0) DrawContourLine95( leg, contour_obs, "Observed PCL 95% CL", 2, 1, 3 );
