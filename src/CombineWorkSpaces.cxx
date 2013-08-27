@@ -201,8 +201,8 @@ std::map< TString,TString > GetMatchingWorkspaces( const TString& infile, const 
         wsid.Clear();  // form unique ws id
         for (int i=0; i<narg2; ++i) { 
             objString = (TObjString*)iArr->At(i);
-            wsid  += Form("%s_%.0f_", objString->GetString().Data(), wsarg[i]); 
-	    //            wsid  += Form("%s=%f_", objString->GetString().Data(), wsarg[i]); 
+	    // wsid  += Form("%s_%.0f_", objString->GetString().Data(), wsarg[i]); 
+	    wsid  += Form("%s=%.0f_", objString->GetString().Data(), wsarg[i]); 
             formula.SetValue(objString->GetString(),wsarg[i]);
         }        
         //wsid += Form( "%d_",keymap[key->GetName()] );
@@ -573,6 +573,7 @@ MatchingCountingExperimentsVec ( const TString& outfile, const TString& outws_pr
 
     // combine workspaces
     TString combinedName = outws_prefix + "_" + wid + Form("nws%d",static_cast<int>(wsVec.size()));
+    combinedName.ReplaceAll("=","_");
     RooWorkspace* combined = ConstructCombinedModel( wsVec, combineVars ); //CombineWorkspaces( wsVec, combinedName, combinationMode );
     combined->SetName( combinedName.Data() );
 
@@ -591,6 +592,7 @@ MatchingCountingExperimentsVec ( const TString& outfile, const TString& outws_pr
       TString outprefix = outws_prefix;
       if (!outprefix.IsNull() && !outprefix.BeginsWith("_")) { outprefix = "_"+outws_prefix; }
       outfilename += ".root"; 
+      outfilename.ReplaceAll("=","_");
 
       combined->writeToFile(outfilename.Data(), recreate ); // do not recreate file, but update instead
         
