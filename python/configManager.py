@@ -684,24 +684,49 @@ class ConfigManager(object):
         #post-processing 3: merging of overall systematics (e.g. signal theory), if so requested
         for chan in fitConfig.channels:
             for sam in chan.sampleList:
-                if len(sam.mergeOverallSysSet)<=1: continue
-                log.info("Post-processing: for channel %s and sample %s, merging of systematics %s." % (chan.name,sam.name,str(sam.mergeOverallSysSet)))
-                keepName = sam.mergeOverallSysSet[0]
-                lowErr2 = 0.0
-                highErr2 = 0.0
-                for systName in sam.mergeOverallSysSet:
-                    sys = sam.getOverallSys(systName)
-                    if sys!=None:
-                        highErr2 += (sys[1]-1.0)**2
-                        lowErr2 += (sys[2]-1.0)**2
-                        #log.info("Now processing : %s %f %f" % (systName,sys[1]-1.0,sys[2]-1.0))
-                        # and remove ... to be readded merged below
-                        sam.removeOverallSys(systName)
-                    pass
-                highErr = sqrt(highErr2)
-                lowErr = sqrt(lowErr2)
-                log.info("Merged systematic : %s %f %f" % (keepName,1+highErr,1-lowErr))
-                sam.addOverallSys(keepName,1.0+highErr,1.0-lowErr)
+                if len(sam.mergeOverallSysSet)>=1:
+                    if isinstance(sam.mergeOverallSysSet[0],list):
+                        for i in range(len(sam.mergeOverallSysSet)): 
+                            if len(sam.mergeOverallSysSet[i])<=1: continue
+                            log.info("Post-processing: for channel %s and sample %s, merging of systematics %s." % (chan.name,sam.name,str(sam.mergeOverallSysSet[i])))
+                            keepName = sam.mergeOverallSysSet[i][0]
+                            lowErr2 = 0.0
+                            highErr2 = 0.0
+                            for systName in sam.mergeOverallSysSet[i]:
+                                sys = sam.getOverallSys(systName)
+                                if sys!=None:
+                                    highErr2 += (sys[1]-1.0)**2
+                                    lowErr2 += (sys[2]-1.0)**2
+                                    log.info("Now processing : %s %f %f" % (systName,sys[1]-1.0,sys[2]-1.0))
+                                    # and remove ... to be readded merged below
+                                    sam.removeOverallSys(systName)
+                                pass
+                            highErr = sqrt(highErr2)
+                            lowErr = sqrt(lowErr2)
+                            log.info("Merged systematic : %s %f %f" % (keepName,1+highErr,1-lowErr))
+                            sam.addOverallSys(keepName,1.0+highErr,1.0-lowErr)
+
+                    elif isinstance(sam.mergeOverallSysSet[0],str):
+                        if len(sam.mergeOverallSysSet)<=1: continue
+                        log.info("Post-processing: for channel %s and sample %s, merging of systematics %s." % (chan.name,sam.name,str(sam.mergeOverallSysSet)))
+                        keepName = sam.mergeOverallSysSet[0]
+                        lowErr2 = 0.0
+                        highErr2 = 0.0
+                        for systName in sam.mergeOverallSysSet:
+                            sys = sam.getOverallSys(systName)
+                            if sys!=None:
+                                highErr2 += (sys[1]-1.0)**2
+                                lowErr2 += (sys[2]-1.0)**2
+                                log.info("Now processing : %s %f %f" % (systName,sys[1]-1.0,sys[2]-1.0))
+                                # and remove ... to be readded merged below
+                                sam.removeOverallSys(systName)
+                            pass
+                        highErr = sqrt(highErr2)
+                        lowErr = sqrt(lowErr2)
+                        log.info("Merged systematic : %s %f %f" % (keepName,1+highErr,1-lowErr))
+                        sam.addOverallSys(keepName,1.0+highErr,1.0-lowErr)
+                
+                 
                 
 
         # Build blinded histograms here

@@ -1,3 +1,7 @@
+2013-08-29 Lucian Ancu <lucian@cern.ch>
+	M python/configManager.py
+	* added infrastructure for adding systematics both from a list [S1,S2,S3] or a list of lists  [[S11,S12],[S21,S22,S23],...]. Summed systematic takes the first name in the list, i.e. S1, S11 or S21. 
+	
 2013-08-23 Jeanette Miriam Lorenz <jeanette.miriam.lorenz@cern.ch>
         M macros/contourplot/contourmacros/SUSY_m0_vs_m12_all_withBand_cls.C
 	A macros/contourplot/contourmacros/limit_plot_SM.py
