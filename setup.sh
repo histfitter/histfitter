@@ -4,6 +4,7 @@
 export BUILD="x86_64-slc5-gcc46-opt"
 export ROOTVERSION="5.34.09"
 export CERNPREFIX="/afs/cern.ch/"
+export PYTHONVERSION="2.6.5" # "2.7.3"
 
 # Must have gcc and python setup outside of ROOTSYS def for batch running!
 # This section here is cern specific.
@@ -14,9 +15,9 @@ if [[ `hostname` = l*.cern.ch ]]; then
     echo "Setting up gcc version 4.6 ..."
     source $CERNPREFIX/sw/lcg/external/gcc/4.6/x86_64-slc5/setup.sh
     # second, setup an uptodate python version
-    echo "Setting up python version 2.6.5 ..."
-    export PATH="$CERNPREFIX/sw/lcg/external/Python/2.6.5/$BUILD/bin:${PATH}"
-    export LD_LIBRARY_PATH="$CERNPREFIX/sw/lcg/external/Python/2.6.5/$BUILD/lib:${LD_LIBRARY_PATH}"
+    echo "Setting up python version ${PYTHONVERSION} ..."
+    export PATH="$CERNPREFIX/sw/lcg/external/Python/${PYTHONVERSION}/$BUILD/bin:${PATH}"
+    export LD_LIBRARY_PATH="$CERNPREFIX/sw/lcg/external/Python/${PYTHONVERSION}/$BUILD/lib:${LD_LIBRARY_PATH}"
 fi
 
 # the root-setup section here is cern specific
