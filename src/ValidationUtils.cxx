@@ -229,9 +229,9 @@ void ValidationUtils::PullPlot3(XtraValues* inValsEl, XtraValues* inValsMu, cons
    frame->GetYaxis()->CenterLabels( 1 );
    frame->GetYaxis()->SetNdivisions( frame->GetNbinsY()+10, 1 );
 
-   Double_t y[Npar];   
+   //Double_t y[Npar];   
    frame->GetYaxis()->SetBinLabel( 1, "" ); // no labels
-   for (Int_t i=0; i<Npar; i++) y[i] = i + offset; 
+   //for (Int_t i=0; i<Npar; i++) y[i] = i + offset; 
 
    frame->Draw();   
 
@@ -346,15 +346,6 @@ void ValidationUtils::PullPlot4(XtraValues* inVals,const TString& outFileNamePre
    
    static Int_t c_DarkGreen     = TColor::GetColor( "#115000" );
    static Int_t c_VDarkGreen    = TColor::GetColor( "#114400" );
-   static Int_t c_LightBlue     = TColor::GetColor( "#66aaff" );
-   static Int_t c_DarkBlue      = TColor::GetColor( "#0000bb" );
-
-   static Int_t c_LightRed      = TColor::GetColor( "#ff3333" );
-   static Int_t c_DarkRed       = TColor::GetColor( "#800000" );
-   static Int_t c_LightYellow   = TColor::GetColor( "#ffff00" );
-   static Int_t c_VLightYellow  = TColor::GetColor( "#ffffe0" );
-   static Int_t c_DarkYellow    = TColor::GetColor( "#ffd700" );
-   static Int_t c_VDarkYellow   = TColor::GetColor( "#ffa500" );
 
    Int_t    col = c_VDarkGreen;
    Int_t    colL = c_DarkGreen;
@@ -409,9 +400,9 @@ void ValidationUtils::PullPlot4(XtraValues* inVals,const TString& outFileNamePre
    frame->GetYaxis()->CenterLabels( 1 );
    frame->GetYaxis()->SetNdivisions( frame->GetNbinsY()+10, 1 );
 
-   Double_t y[Npar];   
+   //Double_t y[Npar];   
    frame->GetYaxis()->SetBinLabel( 1, "" ); // no labels
-   for (Int_t i=0; i<Npar; i++) y[i] = i + offset; 
+   //for (Int_t i=0; i<Npar; i++) y[i] = i + offset; 
 
    frame->Draw();   
  
