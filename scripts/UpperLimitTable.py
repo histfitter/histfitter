@@ -60,7 +60,7 @@ def latexfitresults(filename, poiname='mu_SIG', lumiFB=1.0, nTOYS=3000, asimov=F
 
   murangelow = 0.0
   murangehigh = 40.0
-  hti_result = RooStats.DoHypoTestInversion(w,ntoys,calcType,3,True,npoints,murangelow,murangehigh)
+  hti_result = RooStats.DoHypoTestInversion(w,ntoys,calctype,3,True,npoints,murangelow,murangehigh)
 
   outFileName = "./htiResult_poi_" + poiname + "_ntoys_" + str(ntoys) + "_calctype_" + str(calctype) + "_npoints_" + str(npoints) + ".root"
   hti_result.SaveAs(outFileName)
