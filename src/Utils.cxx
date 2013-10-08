@@ -2599,6 +2599,22 @@ Util::resetAllValues( RooWorkspace* wspace )
 
 
 //_____________________________________________________________________________
+void
+Util::resetAllNominalValues( RooWorkspace* wspace )
+{
+    RooStats::ModelConfig* mc  = Util::GetModelConfig(wspace);
+    if (mc==0) return;
+
+    const RooArgSet* gobsSet = mc->GetGlobalObservables();
+    if (gobsSet==0) return;
+
+    gobsSet->Print("v");
+
+    Util::resetNominalValue( wspace,*gobsSet );
+}
+
+
+//_____________________________________________________________________________
     RooArgList 
 Util::getFloatParList( const RooAbsPdf& pdf, const RooArgSet& obsSet )
 {
@@ -2827,6 +2843,56 @@ Util::resetValue( RooWorkspace* wspace, const RooArgList& parList, const RooArgL
         }
 
         var->setVal(valnom);
+        // Done
+    } // end loop
+
+    delete iter ;
+}
+
+
+//_____________________________________________________________________________
+void 
+Util::resetNominalValue( RooWorkspace* wspace, const RooArgSet& globSet ) 
+{
+    // For the given workspace,
+    // find the input systematic with
+    // the given name and shift that
+    // systematic by 1-sigma
+
+    TIterator* iter = globSet.createIterator() ;
+    RooAbsArg* arg ;
+    while( (arg=(RooAbsArg*)iter->Next()) ) {
+
+        TString UncertaintyName;
+        if(arg->InheritsFrom("RooRealVar") && arg->isConstant()){
+            UncertaintyName = arg->GetName();
+        } else { continue; }
+
+        RooRealVar* var = wspace->var( UncertaintyName.Data() );
+        if( ! var ) {
+            Logger << kERROR << "Could not find variable: " << UncertaintyName
+                << " in workspace: " << wspace->GetName() << ": " << wspace
+                << GEndl;
+        }
+
+        // Initialize
+	double valnom = 0.;
+
+        if( UncertaintyName == "" ) {
+            Logger << kERROR << "No Uncertainty Name provided" << GEndl;
+            throw -1;
+        }
+        // If it is Lumi:
+        else if( UncertaintyName == TString("nominalLumi") ) {
+	  valnom = 1.0;
+        }
+        // If it is a standard (gaussian) uncertainty
+        else if ( UncertaintyName.BeginsWith("nom") ) {
+	  valnom = 0.0;
+        }
+        var->setVal(valnom);
+
+	Logger << kDEBUG << "Now resetting: " << UncertaintyName << " to " << valnom << GEndl;
         // Done
     } // end loop
 

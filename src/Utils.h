@@ -121,6 +121,9 @@ namespace Util
   void resetAllValues( RooWorkspace* wspace );
   void resetValue( RooWorkspace* wspace, const RooArgList& parList, const RooArgList& vetoList = RooArgList() ) ;
 
+  void resetAllNominalValues( RooWorkspace* wspace );
+  void resetNominalValue( RooWorkspace* wspace, const RooArgSet& globSet ) ;
+
   RooArgList getFloatParList( const RooAbsPdf& pdf, const RooArgSet& obsSet = RooArgSet() );
 
   RooAbsReal* CreateNLL( RooWorkspace* w, TString fitRegions, Bool_t lumiConst=false);

@@ -113,6 +113,10 @@ def latexfitresults(filename, poiname='mu_SIG', lumiFB=1.0, nTOYS=3000, asimov=F
   #print " CLB = " , CLB
 
   print "\n\n\n\n  ***---  now doing p-value calculation ---*** \n\n\n\n"
+  Util.resetAllValues(w)
+  Util.resetAllErrors(w)
+  Util.resetAllNominalValues(w)
+
   pval = RooStats.get_Presult(w,False,1000,2)
   # get_Presult(  RooWorkspace* w,
   #           		bool doUL, // = true, // true = exclusion, false = discovery

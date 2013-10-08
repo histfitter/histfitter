@@ -1,3 +1,10 @@
+2013-10-08 Max Baakk <mbaak@cern.ch>
+	M       scripts/UpperLimitTable.py
+	* Reset initial parameter values before p0 calculation
+	M       Utils.cxx
+	M       Utils.h
+	* Function to reset nominal global measurements
+
 2013-08-29 Lucian Ancu <lucian@cern.ch>
 	M python/configManager.py
 	* added infrastructure for adding systematics both from a list [S1,S2,S3] or a list of lists  [[S11,S12],[S21,S22,S23],...]. Summed systematic takes the first name in the list, i.e. S1, S11 or S21. 
