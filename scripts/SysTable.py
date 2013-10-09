@@ -189,7 +189,7 @@ def getnamemap():
 
   
 
-def latexfitresults( filename, region='3jL', sample='', resultName="RooExpandedFitResult_afterFit", dataname='obsData', doAsym=True):
+def latexfitresults( filename, loopmap, region='3jL', sample='', resultName="RooExpandedFitResult_afterFit", dataname='obsData', doAsym=True):
 
   namemap = {} ## add this if I want description
   namemap = getnamemap() ## add this if I want description
@@ -283,18 +283,36 @@ def latexfitresults( filename, region='3jL', sample='', resultName="RooExpandedF
     parname = fpf[idx].GetName()
     par = w.var(parname)
     par.setConstant()
-    
-  for idx in range(fpf.getSize()):
-    parname = fpf[idx].GetName()
-    par = w.var(parname)
-    par.setConstant(False)
-    sysError  = Util.GetPropagatedError(pdfInRegion, result, doAsym)
-    if namemap.has_key(parname): ## add this if I want description
-      parname = namemap[parname] ## add this if I want description
-    regSys['syserr_'+parname] =  sysError
-    par.setConstant() 
 
-  
+  if len(loopmap)>0: 
+    #pre-defined systematics, optionally merged
+    for key in loopmap.keys():
+      print loopmap[key]
+      #
+      for parname in loopmap[key]:
+        par = w.var(parname)
+        par.setConstant(False)
+        pass
+      #
+      sysError  = Util.GetPropagatedError(pdfInRegion, result, doAsym)
+      regSys['syserr_'+key] =  sysError
+      #
+      for idx in range(fpf.getSize()):
+        parname = fpf[idx].GetName()
+        par = w.var(parname)
+        par.setConstant()
+        pass
+  else: 
+    #all systematics, one-by-one
+    for idx in range(fpf.getSize()):
+      parname = fpf[idx].GetName()
+      par = w.var(parname)
+      par.setConstant(False)
+      sysError  = Util.GetPropagatedError(pdfInRegion, result, doAsym)
+      if namemap.has_key(parname): ## add this if I want description
+        parname = namemap[parname] ## add this if I want description
+      regSys['syserr_'+parname] =  sysError
+      par.setConstant() 
 
   return regSys
 
@@ -461,7 +479,7 @@ if __name__ == "__main__":
   import getopt
   def usage():
     print "Usage:"
-    print "SysTable.py [-c channels] [-w workspace_afterFit] [-o outputFileName] [-o outputFileName] [-s sample] [-m method] [-f fitregions] [-%] [-b]\n"
+    print "SysTable.py [-c channels] [-w workspace_afterFit] [-o outputFileName] [-o outputFileName] [-s sample] [-m method] [-f fitregions] [-%] [-b] <python/SystLoopmapExample.py> \n"
     print "Minimal set of inputs [-c channels] [-w workspace_afterFit]"
     print "*** Options are: "
     print "-c <channels>: single channel (region) string or comma separated list accepted (OBLIGATORY)"
@@ -528,6 +546,12 @@ if __name__ == "__main__":
     outputFileName=sampleStr+chanStr+'_SysTable.tex'
     pass
 
+  for xtraFile in args:
+    execfile(xtraFile)
+
+  if not vars().has_key("loopmap"):
+    loopmap={}
+
   try:
     fitRegionsList
     if fitRegionsList and not method=="2":
@@ -567,7 +591,7 @@ if __name__ == "__main__":
         if method == "2":
             regSys = latexfitresults_method2(wsFileName,resultName,chan,'',fitRegionsStr,'obsData',doAsym)
         else:
-            regSys = latexfitresults(wsFileName,chan,'',resultName,'obsData',doAsym)
+            regSys = latexfitresults(wsFileName,loopmap,chan,'',resultName,'obsData',doAsym)
         chanSys[chan] = regSys
         chanList.append(chan)
     else:
@@ -575,7 +599,7 @@ if __name__ == "__main__":
         if method == "2":
           regSys = latexfitresults_method2(wsFileName,resultName,chan,sample,fitRegionsStr,'obsData',doAsym)
         else:
-          regSys = latexfitresults(wsFileName,chan,sample,resultName,'obsData',doAsym)
+          regSys = latexfitresults(wsFileName,loopmap,chan,sample,resultName,'obsData',doAsym)
         chanSys[chan+"_"+sample] = regSys
         chanList.append(chan+"_"+sample)
 
