@@ -266,6 +266,8 @@ if __name__ == "__main__":
     print "-b: shows also the error on samples Before the fit (off by default)"
     print "-S: also show the sum of all regions (off by default)"
     print "-y: take symmetrized average of minos errors"
+    print "-u: arbitrary string propagated to the latex table caption"
+    print "-t: arbitrary string defining the latex table name"
 
     print "\nFor example:"
     print "YieldsTable.py -c SR7jTEl,SR7jTMu -s WZ,Top -w /afs/cern.ch/user/k/koutsman/HistFitterUser/MET_jets_leptons/results/Combined_KFactorFit_5Channel_Validation_combined_BasicMeasurement_model_afterFit.root"
@@ -279,7 +281,7 @@ if __name__ == "__main__":
 
   wsFileName='/results/MyOneLeptonKtScaleFit_HardLepR17_BkgOnlyKt_combined_NormalMeasurement_model_afterFit.root'
   try:
-    opts, args = getopt.getopt(sys.argv[1:], "o:c:w:s:bSagy")
+    opts, args = getopt.getopt(sys.argv[1:], "o:c:w:s:u:t:bSagy")
   except:
     usage()
   if len(opts)<2:
@@ -292,6 +294,8 @@ if __name__ == "__main__":
   useAsimovSet=False
   ignoreLastChannel=False
   doAsym=True
+  userString=""
+  tableName="table.results.yields"
   for opt,arg in opts:
     if opt == '-c':
       chanStr=arg.replace(",","_")
@@ -303,6 +307,10 @@ if __name__ == "__main__":
     elif opt == '-s':
       sampleStr=arg.replace(",","_")
       sampleList=arg.split(",")
+    elif opt == '-u':
+      userString=str(arg)
+    elif opt == '-t':
+      tableName=str(arg)
     elif opt == '-b':
       showBeforeFitError=True
     elif opt == '-S':
@@ -346,7 +354,8 @@ if __name__ == "__main__":
   f = open(outputFileName, 'w')
   f.write( tablestart() )
   f.write( tablefragment(m3, '', regionsList_2Digits,sampleList,showBeforeFitError) )
-  f.write( tableend4(regionsList_1Digit, chanStr, mentionCh) )
+  f.write( tableend(userString,tableName) )
+  #f.write( tableend4(regionsList_1Digit, chanStr, mentionCh) )
   f.close()
   print "\nResult written in:"
   print outputFileName

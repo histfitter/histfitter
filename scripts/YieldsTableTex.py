@@ -202,60 +202,19 @@ def tablestart():
   return start
 
 
-def tableend(signalregion='3+ jets, loose',suffix='sr3jl'):
+def tableend(userString,tableName):
 
   end = '''%%
 }
 \\end{center}
-\\caption{Signal region: %s. Fit results for the electron (top part) and muon (bottom part) channels, for an integrated luminosity of $1035$\,\ipb.
-The results are obtained from the control regions using the discovery fit (see text for details). The fit results of the loose-not-tight regions are not shown.
-Nominal MC expectations (normalised to MC cross-sections) are given for comparison. 
-The Monte Carlo QCD estimates are provided for illustrational purposes only, and are not used in the fit.
-The errors shown are the statistical plus systematic uncertainties, except for the error on the background estimate in the signal region, which is the systematic uncertainty only.}
-\\label{table.results.systematics.in.logL.fit.%s}
+\\caption{Background fit results %s, obtained with the discovery fit configuration for an integrated luminosity of $20.3$~\\ifb.
+  Nominal MC and data-driven expectations are given for comparison. The uncertainties shown are statistical + systematic.}
+\\label{%s}
 \\end{table}
-%%''' % (signalregion,suffix)
+%%''' % (userString,tableName)
 
   return end
 
-
-
-def tableend2(signalregion='3+ jets, loose',suffix='sr3jl'):
-
-  end = '''%%
-}
-\\end{center}
-\\caption{Signal region: %s. Fit results for an integrated luminosity of $1035$\,\ipb.
-The results are obtained from the control regions using the discovery fit (see text for details). 
-Nominal MC expectations (normalised to MC cross-sections) are given for comparison. 
-The Monte Carlo QCD estimates are provided for illustrational purposes only, and are not used in the fit.
-The errors shown are the statistical plus systematic uncertainties, except for the error on the background estimate in the signal region, which is the systematic uncertainty only.
-All presented errors have been derived using MINOS.}
-\\label{table.results.systematics.in.logL.fit.%s}
-\\end{table}
-%%''' % (signalregion,suffix)
-
-  return end
-
-
-
-
-def tableend3(suffix='sr3jl'):
-
-  end = '''%%
-}
-\\end{center}
-\caption{ Background fit results for the S3 (top part) and S4 (bottom part) signal regions, for an integrated luminosity of $20.5$~\\ifb.
-%%The results are obtained from the control regions using the discovery fit (see text for details). The fit results of the loose-not-tight regions are not shown.
-Nominal MC expectations (normalised to MC cross-sections) are given for comparison. 
-%%The Monte Carlo QCD estimates are provided for illustrational purposes only, and are not used in the fit.
-The errors shown are the statistical plus systematic uncertainties for control regions, while only the statistical errors are shown for signal and validation regions, in the case of a background only fit.}
-%%, except for the error on the background estimate in the signal region, which is the systematic uncertainty only.}
-\\label{table.results.systematics.in.logL.fit.%s}
-\\end{table}
-%%''' %(suffix)
-
-  return end
 
 
 def tableend4(rList, suffix='sr3jl', mentionCh=''):
