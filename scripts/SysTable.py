@@ -8,7 +8,9 @@ from ROOT import TFile, RooWorkspace, TObject, TString, RooAbsReal, RooRealVar, 
 from ROOT import Util, TMath
 from ROOT import RooFit
 from ROOT import RooExpandedFitResult
-    
+
+from cmdLineUtils import getPdfInRegions,getName
+
 import os
 import sys
 from sys import exit
@@ -19,180 +21,9 @@ import pickle
 from logger import Logger
 log = Logger('SysTable')
 #log.setLevel('DEBUG')
-
-def getnamemap():
-
-  namemap = {}
-  namemap['alpha_JSig'] = 'Jet energy scale signal'
-
-  namemap['alpha_BT'] = 'B tagging'
-  namemap['alpha_JER'] = 'Jet energy resolution'
-  namemap['alpha_JES'] = 'Jet energy scale'
-  namemap['alpha_LE'] = 'Lepton efficiency'
-
-  namemap['alpha_pythgen'] = 'TTbar: Pythia/Alpgen difference'
-  namemap['alpgen_mes'] = 'Muon energy scale'
-
-  namemap['alpha_RESOST'] = 'CellOut energy resolution'
-  namemap['alpha_SCALEST'] = 'CellOut energy scale'
-  namemap['alpha_TE'] = 'Trigger weight'
   
 
-  namemap['alpha_QCDNorm_SR1a'] = 'QCD estimate SR1a'
-  namemap['alpha_QCDNorm_SR1b'] = 'QCD estimate SR1b'
-  namemap['alpha_QCDNorm_SR2a'] = 'QCD estimate SR2a'
-  namemap['alpha_QCDNorm_SR2b'] = 'QCD estimate SR2b'
-  namemap['alpha_QCDNorm_SR2l'] = 'QCD estimate SR2l'
-  namemap['alpha_QCDNorm_SR1L3j'] = 'QCD estimate SR1L3j'
-  namemap['lpha_QCDNorm_SR1L5j'] = 'QCD estimate SR1L5j'
-  namemap['alpha_QCDNorm_SR1L1Ba'] = 'QCD estimate SR1L1Ba'
-  namemap['alpha_QCDNorm_SR1L1Bc'] = 'QCD estimate SR1L1Bc'
-  namemap['alpha_QCDNorm_SR1L2Ba'] = 'QCD estimate SR1L2Ba'
-  namemap['alpha_QCDNorm_SR1L2Bc'] = 'QCD estimate SR1L2Bc'
-  namemap['alpha_QCDNorm_SR2L'] = 'QCD estimate SR2L'
-  namemap['alpha_QCDNorm_CRT'] = 'QCD estimate CRT'
-  namemap['alpha_QCDNorm_CRW'] = 'QCD estimate CRW'
-  namemap['alpha_QCDNorm_CRT5j'] = 'QCD estimate CRT5j'
-  namemap['alpha_QCDNorm_CRW5j'] = 'QCD estimate CRW5j'
-  namemap['alpha_QCDNorm_CRWbb'] = 'QCD estimate CRWbb'
-  namemap['alpha_QCDNorm_VR1'] = 'QCD estimate VR1'
-  namemap['alpha_QCDNorm_VR2'] = 'QCD estimate VR2'
-
-
-  namemap['alpha_WTheoNpart'] = 'W theoretical uncertainty'
-  namemap['alpha_pdfInter'] = 'pdf (none) uncertainty'
-  namemap['alpha_pdfIntra'] = 'pdf (Intra,Inter) uncertainty'
-  namemap['alpha_pythwig'] = 'TTbar: PowhegPythia/PowhegJimmy difference'
-  namemap['alpha_sherpgen'] = 'W: SherpaWMassiveB/AlpgenJimmyW difference'
-  namemap['alpha_topTheoFacSc'] = 'top theoretical uncertainty: FacSc'
-  namemap['alpha_topTheoPS'] = 'top theoretical uncertainty: PS'
-  namemap['alpha_topTheoRenSc'] = 'top theoretical uncertainty: RenSc'
-  namemap['alpha_wbb'] = 'Wbb uncertainty'
- 
-  namemap['alpha_eglow'] = 'Electron energy scale: low-pt uncertainty'
-  namemap['alpha_egmat'] = 'Electron energy scale: material uncertainty'
-  namemap['alpha_egps'] = 'Electron energy scale: presampler scale uncertainty'
-  namemap['alpha_egres'] = 'Electron energy resolution'
-  namemap['alpha_egzee'] = 'Electron energy scale: Z scale uncertainty'
-
-  namemap['alpha_LRImu'] = 'Muon energy resolution with inner detector'
-  namemap['alpha_LRMmu'] = 'Muon energy resolution with muon system'
-  
-  namemap['alpha_iqoptW'] = 'kT scale Alpgen W+jets'
-  namemap['alpha_ktfacT'] = 'kT scale Alpgen ttbar'
-  namemap['alpha_ktfacW'] = 'kT scale Alpgen W+jets'
-  namemap['alpha_qfacT'] = 'Q scale Alpgen ttbar'
-  namemap['alpha_qfacW'] = 'Q scale Alpgen W+jets'
-  
-
-  namemap['alpha_pileup'] = 'Pile-up'
-
-
-  namemap['gamma_stat_CRW_cuts_bin_0'] = 'MC statistics CRW bin 0'
-  namemap['gamma_stat_CRT_cuts_bin_0'] = 'MC statistics CRT bin 0'
-  namemap['gamma_stat_CRW5j_cuts_bin_0'] = 'MC statistics CRW5j bin 0'
-  namemap['gamma_stat_CRT5j_cuts_bin_0'] = 'MC statistics CRT5j bin 0'
-  namemap['gamma_stat_SR1L3j_cuts_bin_0'] = 'MC statistics SR1L3j bin 0'
-  namemap['gamma_stat_SR1L5j_cuts_bin_0'] = 'MC statistics SR1L5j bin 0'
-  namemap['gamma_stat_SR1L3j_cuts_bin_0'] = 'MC statistics SR1L3j bin 0'
-  namemap['gamma_stat_SR1L5j_cuts_bin_0'] = 'MC statistics SR1L5j bin 0'
-  namemap['gamma_stat_SR1L1Ba_cuts_bin_0'] = 'MC statistics SR1L1Ba bin 0'
-  namemap['gamma_stat_SR1L1Bc_cuts_bin_0'] = 'MC statistics SR1L1Bc bin 0'
-  namemap['gamma_stat_SR1L2Ba_cuts_bin_0'] = 'MC statistics SR1L2Ba bin 0'
-  namemap['gamma_stat_SR1L2Bc_cuts_bin_0'] = 'MC statistics SR1L2Bc bin 0'
-  namemap['gamma_stat_SR2L_cuts_bin_0'] = 'MC statistics SR2L bin 0'
-  namemap['gamma_stat_VR1_cuts_bin_0'] = 'MC statistics VR1 bin 0'
-  namemap['gamma_stat_VR2_cuts_bin_0'] = 'MC statistics VR2 bin 0'
-  namemap['gamma_stat_VR3_cuts_bin_0'] = 'MC statistics VR3 bin 0'
-
-  namemap['alpha_errBG'] = 'Systematics Background'
-  namemap['alpha_errDB'] = 'Systematics Dibosons'
-  namemap['alpha_errDY'] = 'Systematics AlpgenDrellYan'
-  namemap['alpha_errST'] = 'Systematics SingleTop'
-  namemap['alpha_errTV'] = 'Systematics ttbarV'
-  namemap['alpha_errZ'] = 'Systematics AlpgenZ'
-  namemap['alpha_err'] = 'MC Background'
-  namemap['mu_Top'] =  'ttbar yield'
-  namemap['mu_WZ'] = 'W(Z)+jets yield'
-
-
-  
-  namemap['alpha_JR3T'] = 'Jet energy resolution 3jT'
-  namemap['alpha_JR4T'] =  'Jet energy resolution 4jT'
-
-  namemap['alpha_LES'] = 'Lepton energy scale'
-  namemap['alpha_LRI'] = 'Lepton energy resolution with inner detector'
-  namemap['alpha_LRI3T'] = 'Lepton energy resolution with inner detector 3jT'
-  namemap['alpha_LRI4T'] = 'Lepton energy resolution with inner detector 4jT'
-  namemap['alpha_LRM'] =  'Lepton energy resolution with muon system'
-  namemap['alpha_LRM3T'] =  'Lepton energy resolution with muon system 3jT'
-  namemap['alpha_LRM4T'] =  'Lepton energy resolution with muon system 4jT'
-  namemap['alpha_MC'] = 'MET cell-out'
-  namemap['alpha_MC3T'] = 'MET cell-out 3jT'
-  namemap['alpha_MC4T'] = 'MET cell-out 4jT'
-  namemap['alpha_MP'] = 'MET pile-up'
-  namemap['alpha_MP3T'] = 'MET pile-up 3jT'
-  namemap['alpha_MP4T'] = 'MET pile-up 4jT'
-
-  namemap['alpha_PtMinTop3T'] = 'pTmin ttbar 3jT'
-  namemap['alpha_PtMinTop4T'] = 'pTmin ttbar 4jT'
-  namemap['alpha_PtMinTopC'] =  'pTmin ttbar control regions'
-  namemap['alpha_PtMinTopS2T'] =  'pTmin ttbar s1l2j'
-  namemap['alpha_PtMinWZ3T'] =  'pTmin W+jets 3jT'
-  namemap['alpha_PtMinWZ4T'] =  'pTmin W+jets 4jT'
-  namemap['alpha_PtMinWZC'] =  'pTmin W+jets control regions'
-  namemap['alpha_PtMinWZS2T'] =  'pTmin W+jets s1l2j'
-
-  namemap['alpha_QCDNorm_S3_cuts'] = 'QCD estimate 3j'
-  namemap['alpha_QCDNorm_S4_cuts'] = 'QCD estimate 4j'
-  namemap['alpha_QCDNorm_TR_nJet'] =  'QCD estimate TRL1'
-  namemap['alpha_QCDNorm_WR_nJet'] =  'QCD estimate WRL1'
-  namemap['alpha_QCDNorm_SR1s2j_cuts'] = 'QCD estimate s1l2j' 
-  namemap['alpha_QCDNorm_SR3jT_cuts'] = 'QCD estimate 3jT'	   
-  namemap['alpha_QCDNorm_SR4jT_cuts'] = 'QCD estimate 4jT'   
-
-
-  namemap['alpha_WP'] = 'W pT reweighting'
-
-  namemap['gamma_J3T_bin_0'] = 'Jet energy scale 3jT'
-  namemap['gamma_J4T_bin_0'] = 'Jet energy scale 4jT'
-  namemap['gamma_JS2T_bin_0'] = 'Jet energy scale s1l2j'
-
-  namemap['gamma_JC_bin_0'] = 'Jet energy scale control regions bin 0'
-  namemap['gamma_JC_bin_1'] = 'Jet energy scale control regions bin 1'
-  namemap['gamma_JC_bin_2'] = 'Jet energy scale control regions bin 2'
-  namemap['gamma_JC_bin_3'] = 'Jet energy scale control regions bin 3'
-  namemap['gamma_JC_bin_4'] = 'Jet energy scale control regions bin 4'
-  namemap['gamma_JC_bin_5'] = 'Jet energy scale control regions bin 5'
-  namemap['gamma_JC_bin_6'] = 'Jet energy scale control regions bin 6'
-
-
-  namemap['mu_S3'] = 'Signal yield 3j'
-  namemap['mu_S4'] = 'Signal yield 4j'
-  namemap['mu_Top'] =  'ttbar yield'
-  namemap['mu_WZ'] = 'W(Z)+jets yield'
-
-  namemap['alpha_KtScaleTop'] = 'kT scale Alpgen ttbar'
-  namemap['alpha_KtScaleWZ'] = 'kT scale Alpgen W+jets'
-  namemap['alpha_LE'] = 'Lepton efficiency'
-  namemap['alpha_PU'] = 'Pile-up'
-  namemap['alpha_TE'] = 'Trigger weight'
-  namemap['alpha_JR'] = 'Jet energy resolution'
-
-  namemap['mu_SR3jT'] = 'Signal yield 3jT'
-  namemap['mu_SR4jT'] = 'Signal yield 4jT'
-
-  namemap['mu_SS'] = 'Signal yield soft lepton SR'
-  namemap['mu_SR1s2j'] = 'Signal yield s1l2j'
-
-  return namemap
-
-  
-
-def latexfitresults( filename, loopmap, region='3jL', sample='', resultName="RooExpandedFitResult_afterFit", dataname='obsData', doAsym=True):
-
-  namemap = {} ## add this if I want description
-  namemap = getnamemap() ## add this if I want description
+def latexfitresults( filename, namemap, region='3jL', sample='', resultName="RooExpandedFitResult_afterFit", dataname='obsData', doAsym=True):
 
   ############################################
   workspacename = 'w'
@@ -246,19 +77,7 @@ def latexfitresults( filename, loopmap, region='3jL', sample='', resultName="Roo
   ####
 
   if chosenSample:
-    if isinstance(sample,list):
-      sampleArgList = RooArgList()
-      nFittedInRegion = 0.0
-      sample_str="group"
-      for s in sample:
-        componentTmp = Util.GetComponent(w,s,region,True)
-        nFittedInRegion += componentTmp.getVal()
-        sample_str=sample_str+"_"+s
-        sampleArgList.add(componentTmp)
-        pass
-      pdfInRegion = RooAddition(sample_str,sample_str,sampleArgList)
-    else:
-      pdfInRegion  = Util.GetComponent(w,sample,region)
+    pdfInRegion=getPdfInRegions(w,sample,region)
   else:
     rawPdfInRegion = Util.GetRegionPdf(w, region)
     varInRegion =  Util.GetRegionVar(w, region)
@@ -296,12 +115,12 @@ def latexfitresults( filename, loopmap, region='3jL', sample='', resultName="Roo
     par = w.var(parname)
     par.setConstant()
 
-  if len(loopmap)>0: 
+  if len(namemap)>0: 
     #pre-defined systematics, optionally merged
-    for key in loopmap.keys():
-      print loopmap[key]
+    for key in namemap.keys():
+      print namemap[key]
       #
-      for parname in loopmap[key]:
+      for parname in namemap[key]:
         par = w.var(parname)
         par.setConstant(False)
         pass
@@ -321,8 +140,6 @@ def latexfitresults( filename, loopmap, region='3jL', sample='', resultName="Roo
       par = w.var(parname)
       par.setConstant(False)
       sysError  = Util.GetPropagatedError(pdfInRegion, result, doAsym)
-      if namemap.has_key(parname): ## add this if I want description
-        parname = namemap[parname] ## add this if I want description
       regSys['syserr_'+parname] =  sysError
       par.setConstant() 
 
@@ -338,9 +155,6 @@ def latexfitresults( filename, loopmap, region='3jL', sample='', resultName="Roo
 
 
 def latexfitresults_method2(filename,resultname='RooExpandedFitResult_afterFit', region='3jL', sample='', fitregions = 'WR,TR,S3,S4,SR3jT,SR4jT', dataname='obsData', doAsym=False):
-
-#  namemap = {}
-#  namemap = getnamemap()
 
  ############################################
    
@@ -470,8 +284,6 @@ def latexfitresults_method2(filename,resultname='RooExpandedFitResult_afterFit',
       print "        WARNING :   for parameter ",parname," fixed the fit does not converge, as status=",result_1parfixed.status(), "(converged=0),  and covariance matrix quality=", result_1parfixed.covQual(), " (full accurate==3)"
       print "        WARNING: setting systError = 0 for parameter ",parname
 
-      #if namemap.has_key(parname):
-      #  parname = namemap[parname]
     regSys['syserr_'+parname] =  systError
 
   return regSys
@@ -491,7 +303,7 @@ if __name__ == "__main__":
   import getopt
   def usage():
     print "Usage:"
-    print "SysTable.py [-c channels] [-w workspace_afterFit] [-o outputFileName] [-o outputFileName] [-s sample] [-m method] [-f fitregions] [-%] [-b] <python/SystLoopmapExample.py> \n"
+    print "SysTable.py [-c channels] [-w workspace_afterFit] [-o outputFileName] [-o outputFileName] [-s sample] [-m method] [-f fitregions] [-%] [-b] <python/MySystTableConfig.py> \n"
     print "Minimal set of inputs [-c channels] [-w workspace_afterFit]"
     print "*** Options are: "
     print "-c <channels>: single channel (region) string or comma separated list accepted (OBLIGATORY)"
@@ -503,11 +315,11 @@ if __name__ == "__main__":
     print "-y: take symmetrized average of minos errors"
 
     print "\nFor example:"
-    print "SysTable.py -w /afs/cern.ch/user/k/koutsman/HistFitterUser/MET_jets_leptons/results/Combined_KFactorFit_5Channel_Validation_combined_BasicMeasurement_model_afterFit.root  -c SR7jTEl_meffInc,SR7jTMu_meffInc"
-    print "SysTable.py -w  /afs/cern.ch/user/c/cote/susy0/users/cote/HistFitter5/results/Combined_KFactorFit_5Channel_bkgonly_combined_BasicMeasurement_model_afterFit.root  -c SR7jTEl_meffInc,SR7jTMu_meffInc -o SystematicsMultiJetsSR.tex"
-    print "SysTable.py -w  /afs/cern.ch/user/k/koutsman/HistFitterUser/MET_jets_leptons/results/Combined_KFactorFit_5Channel_Validation_combined_BasicMeasurement_model_afterFit.root  -c SR7jTEl,SR7jTMu -m 2 -f WREl,WRMu,TREl,TRMu"
-    print "SysTable.py -w  /afs/cern.ch/user/k/koutsman/HistFitterUser/MET_jets_leptons/results/Combined_KFactorFit_5Channel_Validation_combined_BasicMeasurement_model_afterFit.root  -c SR7jTEl,SR7jTMu -s Top,WZ"
-    print "SysTable.py -w ~/Combined_KFactorFit_5Channel_Validation_combined_BasicMeasurement_model_afterFit.root -c SR7jTEl -m 2 -f TRee_nJet,TRem_nJet,TRmm_nJet,TREl_nJet,TRMu_nJet,ZRee_nJet,ZRmm_nJet,WREl_nJet,WRMu_nJet"
+    print "SysTable.py -w MyName_combined_BasicMeasurement_model_afterFit.root  -c SR7jTEl_meffInc,SR7jTMu_meffInc -o SystematicsMultiJetsSR.tex"
+    print "SysTable.py -w MyName_combined_BasicMeasurement_model_afterFit.root  -c SR7jTEl,SR7jTMu -m 2 -f WREl,WRMu,TREl,TRMu"
+    print "SysTable.py -w MyName_combined_BasicMeasurement_model_afterFit.root  -c SR7jTEl,SR7jTMu -s Top,WZ"
+    print "SysTable.py -w MyName_combined_BasicMeasurement_model_afterFit.root -c SR7jTEl -m 2 -f TRee_nJet,TRem_nJet,TRmm_nJet,TREl_nJet,TRMu_nJet,ZRee_nJet,ZRmm_nJet,WREl_nJet,WRMu_nJet"
+    print "SysTable.py -c SR3Lhigh_disc_cuts -s '[topZ,topW,ttbarHiggs,singleTopZ],[diBosonWZ,diBosonPowhegZZ,triBoson],fakes' -w MyName_combined_NormalMeasurement_model_afterFit.root -o MySystTable.tex python/MySystTableConfig.py"
 
     print "\n  Method-1: set all parameters constant, except for the one you're interested in, calculate the error propagated due to that parameter"
     print "  Method-2: set the parameter you're interested in constant, redo the fit with all other parameters floating, calculate the quadratic difference between default fit and your new model with parameter fixed"
@@ -561,8 +373,8 @@ if __name__ == "__main__":
   for xtraFile in args:
     execfile(xtraFile)
 
-  if not vars().has_key("loopmap"):
-    loopmap={}
+  if not vars().has_key("namemap"):
+    namemap={}
 
   try:
     fitRegionsList
@@ -604,17 +416,18 @@ if __name__ == "__main__":
         if method == "2":
             regSys = latexfitresults_method2(wsFileName,resultName,chan,'',fitRegionsStr,'obsData',doAsym)
         else:
-            regSys = latexfitresults(wsFileName,loopmap,chan,'',resultName,'obsData',doAsym)
+            regSys = latexfitresults(wsFileName,namemap,chan,'',resultName,'obsData',doAsym)
         chanSys[chan] = regSys
         chanList.append(chan)
     else:
       for sample in sampleList:
+        sampleName=getName(sample)
         if method == "2":
           regSys = latexfitresults_method2(wsFileName,resultName,chan,sample,fitRegionsStr,'obsData',doAsym)
         else:
-          regSys = latexfitresults(wsFileName,loopmap,chan,sample,resultName,'obsData',doAsym)
-        chanSys[chan+"_"+str(sample)] = regSys
-        chanList.append(chan+"_"+str(sample))
+          regSys = latexfitresults(wsFileName,namemap,chan,sample,resultName,'obsData',doAsym)
+        chanSys[chan+"_"+sampleName] = regSys
+        chanList.append(chan+"_"+sampleName)
 
   line_chanSysTight = tablefragment(chanSys,'Signal',chanList,skiplist,chanStr,showPercent)
   

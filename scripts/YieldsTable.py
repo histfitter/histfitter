@@ -11,6 +11,8 @@ gROOT.Reset()
 from ROOT import TFile, RooWorkspace, TObject, TString, RooAbsReal, RooRealVar, RooFitResult, RooDataSet, RooAddition, RooArgSet, RooFormulaVar, RooAbsData, RooRandom 
 from ROOT import Util, TMath, TMap, RooExpandedFitResult
 
+from cmdLineUtils import getPdfInRegions,getName
+
 from YieldsTableTex import *
 import os
 import sys
@@ -132,11 +134,13 @@ def latexfitresults(filename,regionList,sampleList,exactRegionNames=False,datana
   
   # components
   for isam, sample in enumerate(sampleList):
+    sampleName=getName(sample)
     nSampleInRegionVal = []
     nSampleInRegionError = []
     sampleInAllRegions = RooArgSet()
     for ireg, region in enumerate(regionList):
-      sampleInRegion = Util.GetComponent(w,sample,region,exactRegionNames)
+      sampleInRegion=getPdfInRegions(w,sample,region)
+      #sampleInRegion = Util.GetComponent(w,sample,region,exactRegionNames)
       sampleInRegionVal = 0.
       sampleInRegionError = 0.
       if not sampleInRegion==None:
@@ -145,19 +149,18 @@ def latexfitresults(filename,regionList,sampleList,exactRegionNames=False,datana
         sampleInRegionError = Util.GetPropagatedError(sampleInRegion, resultAfterFit, doAsym) 
         sampleInAllRegions.add(sampleInRegion)
       else:
-        print " \n YieldsTable.py: WARNING: sample =", sample, " non-existent (empty) in region =",region, "\n"
+        print " \n YieldsTable.py: WARNING: sample =", sampleName, " non-existent (empty) in region =",region, "\n"
       nSampleInRegionVal.append(sampleInRegionVal)
       nSampleInRegionError.append(sampleInRegionError)
-    # print " \n\n  XXX-AFTER sample = ", sample
     if showSum:
-      sampleSumInAllRegions = RooAddition( (sample+"_AllRegions_FITTED"), (sample+"_AllRegions_FITTED"), sampleInAllRegions)
+      sampleSumInAllRegions = RooAddition( (sampleName+"_AllRegions_FITTED"), (sampleName+"_AllRegions_FITTED"), sampleInAllRegions)
       sampleSumInAllRegions.Print()
       nSampleSumVal = sampleSumInAllRegions.getVal()
       nSampleSumError = Util.GetPropagatedError(sampleSumInAllRegions, resultAfterFit, doAsym)
       nSampleInRegionVal.append(nSampleSumVal)
       nSampleInRegionError.append(nSampleSumError)
-    tablenumbers['Fitted_events_'+sample]   = nSampleInRegionVal
-    tablenumbers['Fitted_err_'+sample]   = nSampleInRegionError
+    tablenumbers['Fitted_events_'+sampleName]   = nSampleInRegionVal
+    tablenumbers['Fitted_err_'+sampleName]   = nSampleInRegionError
 
   print tablenumbers
 
@@ -178,7 +181,6 @@ def latexfitresults(filename,regionList,sampleList,exactRegionNames=False,datana
     foundRRS = 0
     for idx in range(prodList.getSize()):
       if prodList[idx].InheritsFrom("RooRealSumPdf"):
-        #      print " \n\n  XXX-BEFORE  prodList[idx] = ", prodList[idx].GetName()
         prodList[idx].Print()
         rrspdfInt =  prodList[idx].createIntegral(RooArgSet(varinRegionList[index]))
         rrspdfinRegionList.append(rrspdfInt)
@@ -204,11 +206,13 @@ def latexfitresults(filename,regionList,sampleList,exactRegionNames=False,datana
   tablenumbers['TOTAL_MC_EXP_BKG_err']    =  pdfExpErrInRegionList
   
   for isam, sample in enumerate(sampleList):
+    sampleName=getName(sample)
     nMCSampleInRegionVal = []
     nMCSampleInRegionError = []
     sampleInAllRegions = RooArgSet()
     for ireg, region in enumerate(regionList):
-      MCSampleInRegion = Util.GetComponent(w,sample,region,exactRegionNames)
+      MCSampleInRegion = getPdfInRegions(w,sample,region)
+      #MCSampleInRegion = Util.GetComponent(w,sample,region,exactRegionNames)
       MCSampleInRegionVal = 0.
       MCSampleInRegionError = 0.
       if not MCSampleInRegion==None:
@@ -216,18 +220,17 @@ def latexfitresults(filename,regionList,sampleList,exactRegionNames=False,datana
         MCSampleInRegionError = Util.GetPropagatedError(MCSampleInRegion, resultBeforeFit, doAsym) 
         sampleInAllRegions.add(sampleInRegion)
       else:
-        print " \n WARNING: sample=", sample, " non-existent (empty) in region=",region
+        print " \n WARNING: sample=", sampleName, " non-existent (empty) in region=",region
       nMCSampleInRegionVal.append(MCSampleInRegionVal)
       nMCSampleInRegionError.append(MCSampleInRegionError)
-    #print " \n\n  XXX-BEFORE  sample = ", sample
     if showSum:
-      sampleSumInAllRegions = RooAddition( (sample+"_AllRegions_MC"), (sample+"_AllRegions_MC"), sampleInAllRegions)
+      sampleSumInAllRegions = RooAddition( (sampleName+"_AllRegions_MC"), (sampleName+"_AllRegions_MC"), sampleInAllRegions)
       nSampleSumVal = sampleSumInAllRegions.getVal()
       nSampleSumError = Util.GetPropagatedError(sampleSumInAllRegions, resultBeforeFit, doAsym)
       nMCSampleInRegionVal.append(nSampleSumVal)
       nMCSampleInRegionError.append(nSampleSumError)
-    tablenumbers['MC_exp_events_'+sample]   = nMCSampleInRegionVal
-    tablenumbers['MC_exp_err_'+sample]   = nMCSampleInRegionError
+    tablenumbers['MC_exp_events_'+sampleName] = nMCSampleInRegionVal
+    tablenumbers['MC_exp_err_'+sampleName] = nMCSampleInRegionError
 
     #  sorted(tablenumbers, key=lambda sample: sample[1])   # sort by age
   map_listofkeys = tablenumbers.keys()
@@ -298,7 +301,7 @@ if __name__ == "__main__":
   tableName="table.results.yields"
   for opt,arg in opts:
     if opt == '-c':
-      chanStr=arg.replace(",","_")
+      chanStr=arg.replace(",","_").replace("[","").replace("]","")
       chanList=arg.split(",")
     elif opt == '-w':
       wsFileName=arg
@@ -306,7 +309,8 @@ if __name__ == "__main__":
       outputFileName=arg
     elif opt == '-s':
       sampleStr=arg.replace(",","_")
-      sampleList=arg.split(",")
+      from cmdLineUtils import cmdStringToListOfLists
+      sampleList=cmdStringToListOfLists(arg)
     elif opt == '-u':
       userString=str(arg)
     elif opt == '-t':

@@ -1,5 +1,6 @@
 import sys
 import pprint
+from cmdLineUtils import getName
 
 def exampletable():
 
@@ -80,7 +81,8 @@ Fitted bkg events        '''
   map_listofkeys = m.keys()
 #  map_listofkeys.sort()
 
-  for sample in sampleList:
+  for ss in sampleList:
+    sample=getName(ss)
     for name in map_listofkeys:
       if "Fitted_events_" in name: 
         sampleName = name.replace("Fitted_events_","")
@@ -144,7 +146,8 @@ MC exp. SM events             '''
 #  map_listofkeys.sort()
 
 
-  for sample in sampleList:
+  for ss in sampleList:
+    sample=getName(ss)
     for name in map_listofkeys:
       if "MC_exp_events_" in name and sample in name:
         sample = name.replace("MC_exp_events_","")
