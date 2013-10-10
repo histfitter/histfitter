@@ -4,7 +4,7 @@ gSystem.Load("libSusyFitter.so")
 from ROOT import ConfigMgr,FitConfig #this module comes from gSystem.Load("libSusyFitter.so")
 gROOT.Reset()
 
-from ROOT import TFile, RooWorkspace, TObject, TString, RooAbsReal, RooRealVar, RooFitResult, RooDataSet, RooAddition, RooArgSet,RooAbsData,RooRandom 
+from ROOT import TFile, RooWorkspace, TObject, TString, RooAbsReal, RooRealVar, RooFitResult, RooDataSet, RooAddition, RooArgSet,RooAbsData,RooRandom,RooArgList 
 from ROOT import Util, TMath
 from ROOT import RooFit
 from ROOT import RooExpandedFitResult
@@ -44,7 +44,7 @@ def getnamemap():
   namemap['alpha_QCDNorm_SR2b'] = 'QCD estimate SR2b'
   namemap['alpha_QCDNorm_SR2l'] = 'QCD estimate SR2l'
   namemap['alpha_QCDNorm_SR1L3j'] = 'QCD estimate SR1L3j'
-  namemap['alpha_QCDNorm_SR1L5j'] = 'QCD estimate SR1L5j'
+  namemap['lpha_QCDNorm_SR1L5j'] = 'QCD estimate SR1L5j'
   namemap['alpha_QCDNorm_SR1L1Ba'] = 'QCD estimate SR1L1Ba'
   namemap['alpha_QCDNorm_SR1L1Bc'] = 'QCD estimate SR1L1Bc'
   namemap['alpha_QCDNorm_SR1L2Ba'] = 'QCD estimate SR1L2Ba'
@@ -246,7 +246,19 @@ def latexfitresults( filename, loopmap, region='3jL', sample='', resultName="Roo
   ####
 
   if chosenSample:
-    pdfInRegion  = Util.GetComponent(w,sample,region)
+    if isinstance(sample,list):
+      sampleArgList = RooArgList()
+      nFittedInRegion = 0.0
+      sample_str="group"
+      for s in sample:
+        componentTmp = Util.GetComponent(w,s,region,True)
+        nFittedInRegion += componentTmp.getVal()
+        sample_str=sample_str+"_"+s
+        sampleArgList.add(componentTmp)
+        pass
+      pdfInRegion = RooAddition(sample_str,sample_str,sampleArgList)
+    else:
+      pdfInRegion  = Util.GetComponent(w,sample,region)
   else:
     rawPdfInRegion = Util.GetRegionPdf(w, region)
     varInRegion =  Util.GetRegionVar(w, region)
@@ -260,14 +272,14 @@ def latexfitresults( filename, loopmap, region='3jL', sample='', resultName="Roo
     if foundRRS >1 or foundRRS==0:
       print " \n\n WARNING: ", pdf.GetName(), " has ", foundRRS, " instances of RooRealSumPdf"
       print pdf.GetName(), " component list:", prodList.Print("v")
-    
+
   if not pdfInRegion:
     if chosenSample:
       print " \n Warning, could not find pdf in region = ",region, " for sample = ",sample
     else:
       print " \n Warning, could not find pdf in region = ",region
 
-  nFittedInRegion = pdfInRegion.getVal()
+  nFittedInRegion=pdfInRegion.getVal()
   regSys['sqrtnfitted'] = TMath.Sqrt(nFittedInRegion)
   regSys['nfitted'] = nFittedInRegion
 
@@ -533,8 +545,8 @@ if __name__ == "__main__":
       fitRegionsStr=arg
       fitRegionsList=arg.split(",")
     elif opt == '-s':
+      rawSampleStr=arg
       sampleStr=arg.replace(",","_") + "_"
-      sampleList=arg.split(",")
     elif opt == '-b':
       showAfterFitError=False
     elif opt == '-%':
@@ -569,7 +581,8 @@ if __name__ == "__main__":
 
   chosenSample = False
   try:
-    sampleList
+    from cmdLineUtils import cmdStringToListOfLists
+    sampleList=cmdStringToListOfLists(rawSampleStr)
     chosenSample=True
   except NameError:
     pass
@@ -600,8 +613,8 @@ if __name__ == "__main__":
           regSys = latexfitresults_method2(wsFileName,resultName,chan,sample,fitRegionsStr,'obsData',doAsym)
         else:
           regSys = latexfitresults(wsFileName,loopmap,chan,sample,resultName,'obsData',doAsym)
-        chanSys[chan+"_"+sample] = regSys
-        chanList.append(chan+"_"+sample)
+        chanSys[chan+"_"+str(sample)] = regSys
+        chanList.append(chan+"_"+str(sample))
 
   line_chanSysTight = tablefragment(chanSys,'Signal',chanList,skiplist,chanStr,showPercent)
   
