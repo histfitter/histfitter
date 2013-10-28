@@ -8,7 +8,7 @@ from ROOT import gROOT,gSystem,gDirectory
 gSystem.Load("libSusyFitter.so")
 gROOT.Reset()
 
-from ROOT import TFile, RooWorkspace, TObject, TString, RooAbsReal, RooRealVar, RooFitResult, RooDataSet, RooAddition, RooArgSet, RooFormulaVar, RooAbsData, RooRandom 
+from ROOT import TFile, RooWorkspace, TObject, TString, RooAbsReal, RooRealVar, RooFitResult, RooDataSet, RooAddition, RooArgSet, RooFormulaVar, RooAbsData, RooRandom, RooArgList 
 from ROOT import Util, TMath, TMap, RooExpandedFitResult
 
 from cmdLineUtils import getPdfInRegions,getName
@@ -122,7 +122,7 @@ def latexfitresults(filename,regionList,sampleList,exactRegionNames=False,datana
     pdfInAllRegions = RooArgSet()
     for index, pdf in enumerate(rrspdfinRegionList):
       pdfInAllRegions.add(pdf)
-    pdfSumInAllRegions = RooAddition( "pdf_AllRegions_AFTER", "pdf_AllRegions_AFTER", pdfInAllRegions)
+    pdfSumInAllRegions = RooAddition( "pdf_AllRegions_AFTER", "pdf_AllRegions_AFTER", RooArgList(pdfInAllRegions))
     pdfSumInAllRegions.Print()
     nPdfSumVal = pdfSumInAllRegions.getVal()
     nPdfSumError = Util.GetPropagatedError(pdfSumInAllRegions, resultAfterFit, doAsym)
@@ -153,7 +153,7 @@ def latexfitresults(filename,regionList,sampleList,exactRegionNames=False,datana
       nSampleInRegionVal.append(sampleInRegionVal)
       nSampleInRegionError.append(sampleInRegionError)
     if showSum:
-      sampleSumInAllRegions = RooAddition( (sampleName+"_AllRegions_FITTED"), (sampleName+"_AllRegions_FITTED"), sampleInAllRegions)
+      sampleSumInAllRegions = RooAddition( (sampleName+"_AllRegions_FITTED"), (sampleName+"_AllRegions_FITTED"), RooArgList(sampleInAllRegions))
       sampleSumInAllRegions.Print()
       nSampleSumVal = sampleSumInAllRegions.getVal()
       nSampleSumError = Util.GetPropagatedError(sampleSumInAllRegions, resultAfterFit, doAsym)
@@ -196,9 +196,9 @@ def latexfitresults(filename,regionList,sampleList,exactRegionNames=False,datana
     pdfInAllRegions = RooArgSet()
     for index, pdf in enumerate(rrspdfinRegionList):
       pdfInAllRegions.add(pdf)
-    pdfSumInAllRegions = RooAddition( "pdf_AllRegions_BEFORE", "pdf_AllRegions_BEFORE", pdfInAllRegions)
+    pdfSumInAllRegions = RooAddition( "pdf_AllRegions_BEFORE", "pdf_AllRegions_BEFORE", RooArgList(pdfInAllRegions))
     nPdfSumVal = pdfSumInAllRegions.getVal()
-    nPdfSumError = Util.GetPropagatedError(pdfSumInAllRegions, resultAfterFit, doAsym)
+    nPdfSumError = Util.GetPropagatedError(pdfSumInAllRegions, resultBeforeFit, doAsym)
     nExpInRegionList.append(nPdfSumVal)
     pdfExpErrInRegionList.append(nPdfSumError)
   
@@ -209,7 +209,7 @@ def latexfitresults(filename,regionList,sampleList,exactRegionNames=False,datana
     sampleName=getName(sample)
     nMCSampleInRegionVal = []
     nMCSampleInRegionError = []
-    sampleInAllRegions = RooArgSet()
+    MCSampleInAllRegions = RooArgSet()
     for ireg, region in enumerate(regionList):
       MCSampleInRegion = getPdfInRegions(w,sample,region)
       #MCSampleInRegion = Util.GetComponent(w,sample,region,exactRegionNames)
@@ -218,17 +218,17 @@ def latexfitresults(filename,regionList,sampleList,exactRegionNames=False,datana
       if not MCSampleInRegion==None:
         MCSampleInRegionVal = MCSampleInRegion.getVal()
         MCSampleInRegionError = Util.GetPropagatedError(MCSampleInRegion, resultBeforeFit, doAsym) 
-        sampleInAllRegions.add(sampleInRegion)
+        MCSampleInAllRegions.add(MCSampleInRegion)
       else:
         print " \n WARNING: sample=", sampleName, " non-existent (empty) in region=",region
       nMCSampleInRegionVal.append(MCSampleInRegionVal)
       nMCSampleInRegionError.append(MCSampleInRegionError)
     if showSum:
-      sampleSumInAllRegions = RooAddition( (sampleName+"_AllRegions_MC"), (sampleName+"_AllRegions_MC"), sampleInAllRegions)
-      nSampleSumVal = sampleSumInAllRegions.getVal()
-      nSampleSumError = Util.GetPropagatedError(sampleSumInAllRegions, resultBeforeFit, doAsym)
-      nMCSampleInRegionVal.append(nSampleSumVal)
-      nMCSampleInRegionError.append(nSampleSumError)
+      MCSampleSumInAllRegions = RooAddition( (sampleName+"_AllRegions_MC"), (sampleName+"_AllRegions_MC"), RooArgList(MCSampleInAllRegions))
+      nMCSampleSumVal = MCSampleSumInAllRegions.getVal()
+      nMCSampleSumError = Util.GetPropagatedError(MCSampleSumInAllRegions, resultBeforeFit, doAsym)
+      nMCSampleInRegionVal.append(nMCSampleSumVal)
+      nMCSampleInRegionError.append(nMCSampleSumError)
     tablenumbers['MC_exp_events_'+sampleName] = nMCSampleInRegionVal
     tablenumbers['MC_exp_err_'+sampleName] = nMCSampleInRegionError
 

@@ -92,7 +92,9 @@ Fitted bkg events        '''
         sample = name.replace("Fitted_events_","")
         tableline += '''
         Fitted '''
-        tableline += sample
+        sampleName = sample
+        sampleName = sampleName.replace("_","\_")
+        tableline += sampleName
         tableline += ''' events        '''
         for index, n in enumerate(m[name]):
           if m['names'][index] in signalregionslist:
@@ -157,13 +159,24 @@ MC exp. SM events             '''
         else: 
             tableline += '''
         data-driven exp. '''
-        tableline += sample
+        sampleName = sample
+        sampleName = sampleName.replace("_","\_")
+        tableline += sampleName
         tableline += ''' events        '''
         for index, n in enumerate(m[name]):
           if m['names'][index] in signalregionslist:
             #if abs(n)<0.00001:
             #  tableline += " & -- "
             #  continue
+            if showBeforeFitError:
+              if ((n - m['MC_exp_err_'+sample][index]) > 0.) or not abs(n) > 0.00001:
+                tableline += " & $" + str(("%.2f" %n)) + " \\pm " + str(("%.2f" %m['MC_exp_err_'+sample][index])) +  "$         "
+              else:
+                print "\n YieldsTableTex.py WARNING:   negative error before fit extends below 0. for sample", sample, "    will print asymmetric error w/ truncated negative error reaching to 0."
+                tableline += " & $" + str(("%.2f" %n)) + "_{-" + str(("%.2f"%n)) + "}^{+" + str(("%.2f" %m['MC_exp_err_'+sample][index])) +  "}$         "
+            else:
+              tableline += " & $" + str(("%.2f" %n)) +  "$         "
+          else:
             if showBeforeFitError:
               if ((n - m['MC_exp_err_'+sample][index]) > 0.) or not abs(n) > 0.00001:
                 tableline += " & $" + str(("%.2f" %n)) + " \\pm " + str(("%.2f" %m['MC_exp_err_'+sample][index])) +  "$         "
