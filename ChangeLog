@@ -1,3 +1,11 @@
+2013-10-28 Alex Koutsman <koutsman@cern.ch>
+	U    scripts/YieldsTable.py
+	U    scripts/YieldsTableTex.py
+	* Fixed a bug in YieldsTable.py, when you run with -S option: show the 
+	* sum of all regions. This option is off though by default, and we
+	* believe noone has been affected. (The summed numbers are so clearly
+	* off that we should've heard something if someone was.)
+	* Tagging HistFitter-00-00-33
 
 2013-10-28 Max Baak <mbaak@cern.ch>
 	M       src/HypoTestTool.cxx
