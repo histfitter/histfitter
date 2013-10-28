@@ -1,4 +1,3 @@
-
 2013-10-28 Max Baak <mbaak@cern.ch>
 	M       src/HypoTestTool.cxx
 	* Initial fit of hypotest done with Minuit2
