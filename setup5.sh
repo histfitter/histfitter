@@ -5,41 +5,22 @@ export BUILD="x86_64-slc5-gcc46-opt"
 export ROOTVERSION="5.34.09"
 export CERNPREFIX="/afs/cern.ch/"
 export PYTHONVERSION="2.7.3"
+export GCCVERSION="4.6"
 
 # Must have gcc and python setup outside of ROOTSYS def for batch running!
 # This section here is cern specific.
 
-if [[ `hostname -f` = l*.cern.ch ]]; then 
+if [[ `hostname -f` = b*.cern.ch ]] || [[ `hostname -f` = l*.cern.ch ]]; then 
     #don't check for *.cern.ch - any machine at CERN, incl. your laptop, has that hostname!
     echo "INFO: hostname matches l*.cern.ch: setting up gcc and python from afs"
-    #export LIBOLD="${LD_LIBRARY_PATH}"
-    #unset LD_LIBRARY_PATH
-    #export LD_LIBRARY_PATH=""
     # first, setup gcc to version 4.3
-    echo "Setting up gcc version 4.6 ..."
-    source $CERNPREFIX/sw/lcg/external/gcc/4.6/x86_64-slc5/setup.sh
+    echo "Setting up gcc version ${GCCVERSION} ..."
+    source $CERNPREFIX/sw/lcg/external/gcc/${GCCVERSION}/x86_64-slc5/setup.sh
     # second, setup an uptodate python version
     echo "Setting up python version ${PYTHONVERSION} ..."
     export PATH="$CERNPREFIX/sw/lcg/external/Python/${PYTHONVERSION}/$BUILD/bin:${PATH}"
     export LD_LIBRARY_PATH="$CERNPREFIX/sw/lcg/external/Python/${PYTHONVERSION}/$BUILD/lib:${LD_LIBRARY_PATH}"
 fi
-
-
-if [[ `hostname -f` = b*.cern.ch ]]; then
-    #don't check for *.cern.ch - any machine at CERN, incl. your laptop, has that hostname!
-    echo "INFO: hostname matches b*.cern.ch: setting up gcc and python from afs"
-    #export LIBOLD="${LD_LIBRARY_PATH}"
-    #unset LD_LIBRARY_PATH
-    #export LD_LIBRARY_PATH=""
-    # first, setup gcc to version 4.3
-    echo "Setting up gcc version 4.6 ..."
-    source $CERNPREFIX/sw/lcg/external/gcc/4.6/x86_64-slc5/setup.sh
-    # second, setup an uptodate python version
-    echo "Setting up python version ${PYTHONVERSION} ..."
-    export PATH="$CERNPREFIX/sw/lcg/external/Python/${PYTHONVERSION}/$BUILD/bin:${PATH}"
-    export LD_LIBRARY_PATH="$CERNPREFIX/sw/lcg/external/Python/${PYTHONVERSION}/$BUILD/lib:${LD_LIBRARY_PATH}"
-fi
-
 
 # the root-setup section here is cern specific
 if [ ! $ROOTSYS ]; then
