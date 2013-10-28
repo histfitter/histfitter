@@ -1,3 +1,11 @@
+
+2013-10-28 Max Baak <mbaak@cern.ch>
+	M 	src/Utils.cxx
+	* Fix to function that resets nominal global measurements for mc stat errors.
+	M       setup.sh
+	* Migration to slc 6
+
+
 2013-10-10 David Cote <david.cote@cern.ch>
 	-major clean-up of SysTable.py
 	  * removed un-used method 2 with its arguments
