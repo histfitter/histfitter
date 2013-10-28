@@ -6,7 +6,9 @@
 	* Fix to function that resets nominal global measurements for mc stat errors.
 	M       setup.sh
 	* Migration to slc 6
-
+	A       setup5.sh
+	* Setup file for slc5
+	* Tagging HistFitter-00-00-32
 
 2013-10-10 David Cote <david.cote@cern.ch>
 	-major clean-up of SysTable.py
