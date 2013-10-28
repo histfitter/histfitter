@@ -2887,6 +2887,10 @@ Util::resetNominalValue( RooWorkspace* wspace, const RooArgSet& globSet )
 	  valnom = 1.0;
         }
         // If it is a standard (gaussian) uncertainty
+        else if ( UncertaintyName.BeginsWith("nom_gamma_stat") ) {
+	  valnom = 1.0;
+        }
+        // If it is a standard (gaussian) uncertainty
         else if ( UncertaintyName.BeginsWith("nom") ) {
 	  valnom = 0.0;
         }
