@@ -424,6 +424,17 @@ void ConfigMgr::doUpperLimit(FitConfig* fc) {
     // MB 20130408: overwrite default - change from piece-wise linear to 6th order poly interp + linear extrapolation (also used in Higgs group)
     Util::SetInterpolationCode(w,4);
 
+    // reset all nominal values
+    Util::resetAllValues(w) ;
+    Util::resetAllErrors(w) ;
+    Util::resetAllNominalValues(w) ;
+
+    // fix x-section uncertainty
+    if(m_fixSigXSec && fc->m_signalSampleName != "" && w->var("alpha_SigXSec") != NULL){
+        w->var("alpha_SigXSec")->setVal(0);
+        w->var("alpha_SigXSec")->setConstant(true);
+    }
+
     /// here we go ...
 
     /// first asumptotic limit, to get a quick but reliable estimate for the upper limit

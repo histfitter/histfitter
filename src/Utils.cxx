@@ -498,7 +498,7 @@ RooFitResult* Util::FitPdf( RooWorkspace* w, TString fitRegions, Bool_t lumiCons
     }
 
     //RooFitResult * result = 0; 
-    double val(0);
+    //double val(0);
 	
     if (status%100 == 0) { // ignore errors in Hesse or in Improve
 	  // only calculate minos errors if fit with Migrad converged
@@ -513,13 +513,14 @@ RooFitResult* Util::FitPdf( RooWorkspace* w, TString fitRegions, Bool_t lumiCons
       else {
 	minim.hesse();
       }
+
       // save fit result	  
       r = minim.save();
-      val = r->minNll();
+      //val = r->minNll();
     }
     else { 
       Logger << kERROR << "FIT FAILED !- return a NaN NLL " << GEndl;
-      val =  TMath::QuietNaN();       
+      //val =  TMath::QuietNaN();       
     }
     
     if (r!=0) r->Print("v");
@@ -1322,7 +1323,7 @@ void Util::PlotSeparateComponents(RooWorkspace* w,TString fcName, TString anaNam
                     canVecDivY = 1;
             }  
 
-            RooPlot* frameVec[numRegions][numComps];
+            //RooPlot* frameVec[numRegions][numComps];
 
             TString canName=Form("can_%s_%s_separateComponents",regionCatLabel.Data(),outputPrefix.Data());
             canVec[iVec] = new TCanvas(canName,canName,600,600); // .c_str()) 
@@ -1347,7 +1348,7 @@ void Util::PlotSeparateComponents(RooWorkspace* w,TString fcName, TString anaNam
                 canVec[iVec]->cd(iComp+1);
                 frame->SetMinimum(0.);
                 frame->Draw();
-                frameVec[iVec][iComp]=frame;
+                //frameVec[iVec][iComp]=frame;
 
                 TLegend* leg = new TLegend(0.55,0.65,0.85,0.9,"");
                 leg->SetFillStyle(0);
@@ -2000,15 +2001,15 @@ Util::doFreeFit( RooWorkspace* w, RooDataSet* inputdata, const bool& verbose, co
     }
 
     RooFitResult * result = 0; 
-    double val(0);
+    //double val(0);
 
     if (status%100 == 0) { // ignore errors in Hesse or in Improve
         result = minim.save();
-        val = result->minNll();
+        //val = result->minNll();
     }
     else { 
         Logger << kERROR << "FIT FAILED !- return a NaN NLL " << GEndl;
-        val =  TMath::QuietNaN();       
+        //val =  TMath::QuietNaN();       
     }
 
     //minim.optimizeConst(false);
