@@ -56,7 +56,7 @@ def latexfitresults( filename, namemap, region='3jL', sample='', resultName="Roo
   if sample is not '':
     chosenSample = True
         
-  #####################################################
+  ######################################################
 
   regSys = {}
 

@@ -48,7 +48,7 @@ def latexfitresults(filename,regionList,sampleList,exactRegionNames=False,datana
   regionFullNameList = [ Util.GetFullRegionName(regionCat, region) for region in regionList]
   print regionFullNameList
 
-  ###
+  ######
 
   snapshot =  'snapshot_paramsVals_RooExpandedFitResult_afterFit'
   w.loadSnapshot(snapshot)
