@@ -1,3 +1,10 @@
+2013-10-28 Alex Koutsman <koutsman@cern.ch>
+	U    scripts/YieldsTable.py
+	U    scripts/YieldsTableTex.py
+	U    scripts/SysTable.py
+	* update YieldsTableTex.py to deal with sample with "_" in the name
+	* change modus for YieldsTable.py and SysTable.py to +x
+
 2013-10-30 Max Baak <mbaak@cenn.ch>
 	M       src/Utils.cxx
 	* Fix compilation warnings
