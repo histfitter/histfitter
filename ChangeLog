@@ -1,3 +1,15 @@
+2013-11-15 Max Baak <mbaak@cern.ch>
+	U setup.sh
+	* Point to patched root version
+	* In the ATLAS SUSY group we find occasionally when doing an
+	* upper limit scan that hypothesis tests of one or several of the scan points fail (for example when mu
+	* is too high, and the fit gets too distorted), but don't get rejected or flagged as such, which
+	* shows up as spikes in the upper limit scan.
+	* I've added a function 
+	HypoTestInverterResult::ExclusionCleanup() 
+	* which excludes such points and redoes the inversion.
+
+
 2013-10-28 Alex Koutsman <koutsman@cern.ch>
 	U    scripts/YieldsTable.py
 	U    scripts/YieldsTableTex.py
