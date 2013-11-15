@@ -440,13 +440,17 @@ void ConfigMgr::doUpperLimit(FitConfig* fc) {
     /// first asumptotic limit, to get a quick but reliable estimate for the upper limit
     /// dynamic evaluation of ranges
     RooStats::HypoTestInverterResult* hypo = RooStats::DoHypoTestInversion(w, 1, 2, m_testStatType, m_useCLs, 20, 0, -1);  
+    //hypo->ExclusionCleanup(); 
 
     /// then reevaluate with proper settings
     if ( hypo!=0 ) { 
         double eul2 = 1.10 * hypo->GetExpectedUpperLimit(2);
         delete hypo; hypo=0;
+        
         //cout << "INFO grepme : " << m_nToys << " " << m_calcType << " " << m_testStatType << " " << m_useCLs << " " << m_nPoints << GEndl;
-        hypo = RooStats::DoHypoTestInversion(w, m_nToys, m_calcType, m_testStatType, m_useCLs, m_nPoints, 0, eul2); 
+        
+        hypo = RooStats::DoHypoTestInversion(w, m_nToys, m_calcType, m_testStatType, m_useCLs, m_nPoints, 0, eul2);
+        //hypo->ExclusionCleanup();
     }
 
     /// store ul as nice plot ..
