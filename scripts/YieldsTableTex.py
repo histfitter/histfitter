@@ -36,7 +36,8 @@ def tablefragment(m, channel, signalregionslist,sampleList,showBeforeFitError):
 \\noalign{\\smallskip}\\hline\\noalign{\\smallskip}
 {\\bf %s channel}          ''' %channel
   for region in m['names']:
-    tableline += " & " + region.replace('_','\_') + "           "   
+    regionName = region.replace("_cuts", "").replace("_meffInc", "").replace('_','\_')
+    tableline += " & " + regionName + "           "   
     
   tableline += '''   \\\\[-0.05cm]
 \\noalign{\\smallskip}\\hline\\noalign{\\smallskip}
@@ -213,6 +214,16 @@ def tablestart():
 
   return start
 
+def tableEndWithCaptionAndLabel(tableCaption, tableLabel):
+  end = '''%%
+}
+\\end{center}
+\\caption{%s}
+\\label{%s}
+\\end{table}
+%%''' % (tableCaption, tableLabel)
+
+  return end
 
 def tableend(signalregion='3+ jets, loose',suffix='sr3jl'):
 

@@ -269,6 +269,8 @@ if __name__ == "__main__":
     print "-b: shows also the error on samples Before the fit (off by default)"
     print "-S: also show the sum of all regions (off by default)"
     print "-y: take symmetrized average of minos errors"
+    print "-C: full table caption"
+    print "-L: full table label" 
     print "-u: arbitrary string propagated to the latex table caption"
     print "-t: arbitrary string defining the latex table name"
 
@@ -284,21 +286,25 @@ if __name__ == "__main__":
 
   wsFileName='/results/MyOneLeptonKtScaleFit_HardLepR17_BkgOnlyKt_combined_NormalMeasurement_model_afterFit.root'
   try:
-    opts, args = getopt.getopt(sys.argv[1:], "o:c:w:s:u:t:bSagy")
+    opts, args = getopt.getopt(sys.argv[1:], "o:c:w:s:u:L:C:t:bSagy")
   except:
     usage()
   if len(opts)<2:
     usage()
 
-  outputFileName="default"
-  exactRegionNames=False #if true, Util.GetComponent() calls will use exact region names, rather than string matching
-  showBeforeFitError=False
-  showSumAllRegions=False
-  useAsimovSet=False
-  ignoreLastChannel=False
-  doAsym=True
-  userString=""
-  tableName="table.results.yields"
+  outputFileName = "default"
+  exactRegionNames = False #if true, Util.GetComponent() calls will use exact region names, rather than string matching
+  showBeforeFitError = False
+  showSumAllRegions = False
+  useAsimovSet = False
+  ignoreLastChannel = False
+  doAsym = True
+  userString = ""
+  tableName = "table.results.yields"
+   
+  tableLabel = ""
+  tableCaption = ""
+  
   for opt,arg in opts:
     if opt == '-c':
       chanStr=arg.replace(",","_").replace("[","").replace("]","")
@@ -313,6 +319,10 @@ if __name__ == "__main__":
       sampleList=cmdStringToListOfLists(arg)
     elif opt == '-u':
       userString=str(arg)
+    elif opt == '-C':
+      tableCaption = str(arg)
+    elif opt == '-L':
+      tableLabel = str(arg)
     elif opt == '-t':
       tableName=str(arg)
     elif opt == '-b':
@@ -357,8 +367,11 @@ if __name__ == "__main__":
 
   f = open(outputFileName, 'w')
   f.write( tablestart() )
-  f.write( tablefragment(m3, '', regionsList_2Digits,sampleList,showBeforeFitError) )
-  f.write( tableend(userString,tableName) )
+  f.write( tablefragment(m3, tableName, regionsList_2Digits,sampleList,showBeforeFitError) )
+  if tableCaption != "" or tableLabel != "":
+      f.write( tableEndWithCaptionAndLabel(tableCaption, tableLabel) )
+  else:
+      f.write( tableend(userString,tableName) )
   #f.write( tableend4(regionsList_1Digit, chanStr, mentionCh) )
   f.close()
   print "\nResult written in:"
