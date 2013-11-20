@@ -1,4 +1,7 @@
 2013-11-20 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
+	* python/pullPlotUtils.py: utility module for pull plots
+
+2013-11-20 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
 	* scripts/YieldsTable.py: allow -C and -L options to set caption and label
  	  by hand for outputted table
 	* scripts/YieldsTableTex.py: propagated changes from YieldsTable.py
