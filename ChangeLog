@@ -1,3 +1,8 @@
+2013-11-20 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
+	* scripts/YieldsTable.py: allow -C and -L options to set caption and label
+ 	  by hand for outputted table
+	* scripts/YieldsTableTex.py: propagated changes from YieldsTable.py
+
 2013-11-15 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
 	* src/ConfigMgr.cxx: use ExclusionCleanup() for the hypothesis tests
 
