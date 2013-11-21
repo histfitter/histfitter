@@ -4,6 +4,9 @@
 	* by default, when merging hypo tests, reject grid points with failed
 	pre-fits.
 	* Tagging HistFitter-00-00-34
+	* Moved examples/ to macros/Examples/
+	* Tagging HistFitter-00-00-35
+
 
 2013-11-21 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
 	* examples/: added an example pull plot script, with demo output
