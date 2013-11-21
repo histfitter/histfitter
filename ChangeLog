@@ -1,7 +1,9 @@
-2013-11-21 Max Baak <mbaak@cern.ch>
-        * src/ConfigMgr.cxx: ExclusionCleanup() now reports the number of
-	rejected hypo tests in per scan.
+2013-11-21 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
+	* examples/: added an example pull plot script, with demo output
 
+2013-11-21 Max Baak <mbaak@cern.ch>
+	* src/ConfigMgr.cxx: ExclusionCleanup() now reports the number of
+	rejected hypo tests in per scan.
 
 2013-11-20 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
 	* python/pullPlotUtils.py: utility module for pull plots
