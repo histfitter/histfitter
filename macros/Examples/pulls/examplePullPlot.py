@@ -82,7 +82,7 @@ def main():
     pullPlotUtils.getSampleColor = getSampleColor
 
     # Where's the background file? 
-    filename = os.getenv("HISTFITTER")+"/examples/pulls/0lepton_bkgFit_example.root"
+    filename = os.getenv("HISTFITTER")+"/macros/Examples/pulls/0lepton_bkgFit_example.root"
     
     # Run blinded?
     doBlind = True
