@@ -92,7 +92,9 @@ const char* CollectAndWriteHypoTestResults( const TString& infile, const TString
 
 
 //________________________________________________________________________________________________
-std::list<LimitResult> CollectHypoTestResults( const TString& infile, const TString& format, const TString& interpretation, const TString& cutStr ) {
+std::list<LimitResult> CollectHypoTestResults( const TString& infile, const TString& format, const TString& interpretation, 
+					       const TString& cutStr, const bool& rejectFailedPrefit ) 
+{
     std::list<LimitResult> limres;
     if ( infile.IsNull() || format.IsNull() || interpretation.IsNull() ) 
         return limres;
@@ -107,6 +109,7 @@ std::list<LimitResult> CollectHypoTestResults( const TString& infile, const TStr
     std::map<TString,TString>::iterator itr=wsnameMap.begin(), end=wsnameMap.end();
 
     int counter_failed_fits = 0;
+    int counter_failed_status = 0;
     int counter_not_great_fits = 0;
     int counter_badcovquality = 0;
     int counter_probably_bad_fit = 0;
@@ -117,8 +120,13 @@ std::list<LimitResult> CollectHypoTestResults( const TString& infile, const TStr
     for (; itr!=end; ++itr) {
         ht = GetHypoTestResultFromFile( infile, itr->second );
         
-        if(!ht)
-            continue;
+        if(!ht) { continue; }
+        if(ht->ArraySize()==0) {
+	  ToyUtilsLogger << kWARNING << "Fit result " << ht->GetName()
+			 << " has failed HypoTestInverterResult - cannot use result. Skip." << GEndl;
+	  delete ht; ht=NULL;
+	  continue;
+        } 
 
         //Check fit result
         TString fitresultname = TString(ht->GetName());
@@ -132,70 +140,83 @@ std::list<LimitResult> CollectHypoTestResults( const TString& infile, const TStr
         bool nofit = false;
         if (fitresult == NULL) { nofit = true; }
 
-        bool failed_fit = false;
+        bool failed_status = false;
         if (fitresult && fitresult->status()!=0) {
             ToyUtilsLogger << kWARNING << "Fit failed for point " << fitresultname.Data() << ". Result has been flagged as failed fit." << GEndl;
-            counter_failed_fits++;
-            failed_fit = true;   
+            counter_failed_status++;
+            failed_status = true;   
         }
 
-        bool failed_error = false;
-        if (fitresult && fitresult->covQual() < 1.1) {
-            ToyUtilsLogger << kWARNING << "Fit result " << fitresultname.Data() << " has bad covariance matrix quality! Result has been flagged as failed fit." << GEndl;
-            counter_badcovquality++;
-            failed_fit = true;
-        } else if (fitresult && fitresult->covQual() < 2.1) {
-            ToyUtilsLogger << kWARNING << "Fit result " << fitresultname.Data() << " has mediocre covariance matrix quality. Result has been flagged as failed cov matrix." << GEndl;
-            counter_not_great_fits++;
-            //failed_fit = true;
-            failed_error = true;
-        }
-
-        int fitstatus = 0;
+        int fitstatus = -1;
         if (fitresult) {
             fitstatus = fitresult->status() ;
         }
 
+        bool failed_cov = false;
+	bool dodgy_cov = false;
+        if (fitresult && fitresult->covQual() < 1.1) {
+            ToyUtilsLogger << kWARNING << "Fit result " << fitresultname.Data() 
+			   << " has bad covariance matrix quality! Result has been flagged as failed fit." << GEndl;
+            counter_badcovquality++;
+            //failed_fit = true;
+            failed_cov = true;
+        } else if (fitresult && fitresult->covQual() < 2.1) {
+            ToyUtilsLogger << kWARNING << "Fit result " << fitresultname.Data() 
+			   << " has mediocre covariance matrix quality. Result has been flagged as failed cov matrix." << GEndl;
+            counter_not_great_fits++;
+            //failed_cov = true;
+	    dodgy_cov = true;
+        }
+	int covqual = ( fitresult!=0 ? fitresult->covQual() : -1 );
+
+	bool failed_fit = ( nofit || failed_status || failed_cov || dodgy_cov );
+	counter_failed_fits++;
+
+	// don't store points with failed fits, if configured so.
+	if (rejectFailedPrefit) {
+	  if(ht) { delete ht; ht=NULL; }
+	  if(fitresult) { delete fitresult; fitresult=NULL; }
+	  continue;
+	}
+
         bool failed_p0half = false;
-        if(ht->ArraySize() == 0){
-            ToyUtilsLogger << kWARNING << "Fit result " << fitresultname.Data() << " has failed HypoTestInverterResult - cannot use result. Skip." << GEndl;
-        } else {
-            LimitResult result = RooStats::get_Pvalue( ht );
-            // MB Keeping points for now, this also rejects bad fits.
-            if (fabs(result.GetP0()-0.5) < 0.0001 && result.GetSigma0() < 0.0001){
-              //counter_probably_bad_fit++;
-              ToyUtilsLogger << kINFO << "One of the base fits _may_ have failed for point (or may not): " << fitresultname.Data() << " : " << result.GetP0() << " " << result.GetSigma0() << " Flagged as p0=0.5." << GEndl;
-              //failed_fit = true;
-              failed_p0half = true;
-            }
+	LimitResult result = RooStats::get_Pvalue( ht );
+	// MB Keeping points for now, this also rejects bad fits.
+	if (fabs(result.GetP0()-0.5) < 0.0001 && result.GetSigma0() < 0.0001){
+	  //counter_probably_bad_fit++;
+	  ToyUtilsLogger << kINFO << "One of the base fits _may_ have failed for point (or may not): " 
+			 << fitresultname.Data() << " : " << result.GetP0() << " " << result.GetSigma0() << " Flagged as p0=0.5." << GEndl;
+	  //failed_fit = true;
+	  failed_p0half = true;
+	}
 
-            std::map<TString,float> failMap;
-            failMap["failedfit"] = float(failed_fit);
-            failMap["failedcov"] = float(failed_error);
-            failMap["failedp0"] = float(failed_p0half);
-            failMap["fitstatus"] = float(fitstatus);
-            failMap["nofit"] = float(nofit);
+	std::map<TString,float> failMap;
+	failMap["nofit"]        = float(nofit);
+	failMap["failedstatus"] = float(failed_status);
+	failMap["fitstatus"]    = float(fitstatus);
+	failMap["failedcov"]    = float(failed_cov);
+	failMap["dodgycov"]     = float(dodgy_cov);
+	failMap["covqual"]      = float(covqual);
+	failMap["failedfit"]    = float(failed_fit);
 
-            result.AddMetaData ( ParseWorkspaceID(itr->first) );
-            result.AddMetaData ( failMap );
+	failMap["failedp0"]     = float(failed_p0half);
+	
+	result.AddMetaData ( ParseWorkspaceID(itr->first) );
+	result.AddMetaData ( failMap );
+	
+	// store info from interpretation string (eg m0 and m12 value) 
+	limres.push_back(result); 
 
-            limres.push_back(result); // store info from interpretation string (eg m0 and m12 value) 
-        }
-
-        if(ht){
-            delete ht;
-            ht = NULL;
-        }
-
-        if(fitresult) {
-            delete fitresult;
-            fitresult = NULL;
-        }
+        if(ht){ delete ht; ht=NULL; }
+        if(fitresult) { delete fitresult; fitresult=NULL; }
     }
 
-    ToyUtilsLogger << kINFO << counter_failed_fits << " failed fit(s) and " << counter_badcovquality << " fit(s) with bad covariance matrix quality were counted" << GEndl;
-    ToyUtilsLogger << kINFO << counter_probably_bad_fit << " fit(s) with a bad p-value and " << counter_not_great_fits << " fit(s) with mediocre covariance matrix quality were counted" << GEndl;
+    ToyUtilsLogger << kINFO << counter_failed_status << " failed fit status and " << counter_badcovquality 
+		   << " fit(s) with bad covariance matrix quality were counted" << GEndl;
+    ToyUtilsLogger << kINFO << counter_probably_bad_fit << " fit(s) with a bad p-value and " << counter_not_great_fits 
+		   << " fit(s) with mediocre covariance matrix quality were counted" << GEndl;
     ToyUtilsLogger << kINFO << "All but the ones with mediocre covariance matrix quality were rejected from the final results list." << GEndl;
+    ToyUtilsLogger << kINFO << counter_failed_fits << " failed fit(s)" << GEndl;
 
     return limres;
 }
