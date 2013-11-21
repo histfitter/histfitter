@@ -15,22 +15,51 @@ from pullPlotUtils import makePullPlot
 # Build a dictionary that remaps region names
 def renameRegions():
     myRegionDict = {}
-    myRegionDict["CRQ"] = "renamed"
+
+    # Remap region names using the old name as index, e.g.:
+    # myRegionDict["CRQ"] = "foo"
    
     return myRegionDict
 
 # Build a list with all the regions you want to use
 def makeRegionList():
-    regionList = ["CRY", "CRQ", "CRW", "CRT", "VRZ", "VRZf", "VRQ", "SR"]
+    regionList=[]
+
+    regionList += ["CRW","CRT", "CRY", "CRQ"]
+    regionList += ["VRZ", "VRZf"]
+    regionList += ["VRWf", "VRWMf", "VRWM"]
+    regionList += ["VRTf", "VRTMf", "VRTM"]
+
+    regionList += ["VRT2L"]    
+    regionList += ["VRWTPlus","VRWTMinus"]
+    regionList += ["VRWTPlusf","VRWTMinusf"]
+ 
+    regionList += ["VRQ1","VRQ2"]
+    regionList += ["VRQ3","VRQ4"]
+   
+    regionList += ["VRWTau", "VRttbarTau"]        
+
+    regionList += ["SR"]
 
     return regionList
 
 # Define the colors for the pull bars
 def getRegionColor(name):
-    if name.find("VRZ") != -1: return ROOT.kBlue+3
+    if name.find("VRZ") != -1: return kBlue+3
     if name.find("VRQ") != -1: return kOrange
-    if name.find("SR")  != -1: return ROOT.kBlack
-    
+    if name.find("SR")  != -1: return kBlack
+    if name.find("VRZ") != -1: return kBlue+3
+    if name.find("VRW") != -1: return kAzure-4
+    if name.find("VRT") != -1: return kGreen-9
+    if name.find("VRWT") != -1: return kYellow
+    if name.find("VRQ") != -1: return kOrange
+    if name.find("VRWTau") != -1: return kRed
+    if name.find("VRttbarTau") != -1: return kRed
+    if name.find("CRW") != -1: return kAzure-4
+    if name.find("CRT") != -1: return kGreen-9
+    if name.find("SR") != -1: return kBlack
+    if name.find("BVR") != -1: return kRed+2
+
     return 1
 
 # Define the colors for the stacked samples
@@ -50,9 +79,7 @@ def main():
     pullPlotUtils.getSampleColor = getSampleColor
 
     # Where's the background file? 
-    output_dir = "/glusterfs/atlas1/users/gbesjes/ZeroLeptonFitter/Paper13/20131115_results_bkgFits/results/"
-    output_dir += "ZL2013_SR2j-meff800-metomeff0-met160-jet1pt130-jet2pt60-jet3pt0-jet4pt0-jet5pt0-jet6pt0-metSig8-dPhi0-Wunres0-Wres0-dPhiR0_Background" 
-    filename = output_dir+"/Fit__Background_combined_NormalMeasurement_model_afterFit.root"
+    filename = os.getenv("HISTFITTER")+"/examples/pulls/0lepton_bkgFit_example.root"
     
     # Run blinded?
     doBlind = True
