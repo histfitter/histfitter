@@ -451,7 +451,7 @@ void ConfigMgr::doUpperLimit(FitConfig* fc) {
         
         hypo = RooStats::DoHypoTestInversion(w, m_nToys, m_calcType, m_testStatType, m_useCLs, m_nPoints, 0, eul2);
         int nPointsRemoved = hypo->ExclusionCleanup();
-        m_logger << kWARNING << "Removed " << nPointsRemoved << " scan point(s) for hypo test inversion: " << hypo->GetName() << GEndl;
+        m_logger << kWARNING << "ExclusionCleanup() removed " << nPointsRemoved << " scan point(s) for hypo test inversion: " << hypo->GetName() << GEndl;
     }
 
     /// store ul as nice plot ..
