@@ -17,8 +17,11 @@ def renameRegions():
     myRegionDict = {}
 
     # Remap region names using the old name as index, e.g.:
-    # myRegionDict["CRQ"] = "foo"
-   
+    myRegionDict["VRWTPlus"] = "VRWT+"
+    myRegionDict["VRWTMinus"] = "VRWT-"
+    myRegionDict["VRWTPlusf"] = "VRWTf+"
+    myRegionDict["VRWTMinusf"] = "VRWTf-"
+    
     return myRegionDict
 
 # Build a list with all the regions you want to use
@@ -85,7 +88,7 @@ def main():
     doBlind = True
 
     # Used as plot title
-    region = "SR2jl"
+    region = "SRAm"
 
     # Samples to stack on top of eachother in each region
     samples = "Diboson,GAMMAjets,Multijets,Top,Wjets,Zjets"
