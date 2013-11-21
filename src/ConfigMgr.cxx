@@ -440,7 +440,7 @@ void ConfigMgr::doUpperLimit(FitConfig* fc) {
     /// first asumptotic limit, to get a quick but reliable estimate for the upper limit
     /// dynamic evaluation of ranges
     RooStats::HypoTestInverterResult* hypo = RooStats::DoHypoTestInversion(w, 1, 2, m_testStatType, m_useCLs, 20, 0, -1);  
-    hypo->ExclusionCleanup(); 
+    (void) hypo->ExclusionCleanup(); 
 
     /// then reevaluate with proper settings
     if ( hypo!=0 ) { 
@@ -450,7 +450,8 @@ void ConfigMgr::doUpperLimit(FitConfig* fc) {
         //cout << "INFO grepme : " << m_nToys << " " << m_calcType << " " << m_testStatType << " " << m_useCLs << " " << m_nPoints << GEndl;
         
         hypo = RooStats::DoHypoTestInversion(w, m_nToys, m_calcType, m_testStatType, m_useCLs, m_nPoints, 0, eul2);
-        hypo->ExclusionCleanup();
+        int nPointsRemoved = hypo->ExclusionCleanup();
+        m_logger << kWARNING << "Removed " << nPointsRemoved << " scan point(s) for hypo test inversion: " << hypo->GetName() << GEndl;
     }
 
     /// store ul as nice plot ..
