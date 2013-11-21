@@ -1,3 +1,7 @@
+2013-11-21 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
+	* macros/Examples/pulls/examplePullPlot.py: fix broken path
+	* HistFitter-00-00-35-01
+
 2013-11-21 Max Baak <mbaak@cern.ch>
 	M       src/toy_utils.h
 	M       src/toy_utils.cxx
