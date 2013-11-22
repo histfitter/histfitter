@@ -70,6 +70,7 @@ if __name__ == "__main__":
     parser.add_argument("-w", "--create-workspace", help="re-create workspace from histograms", action="store_true", default=configMgr.executeHistFactory)
     parser.add_argument("-x", "--use-XML", help="write XML files by hand and call hist2workspace on them, instead of directly writing workspaces", action="store_true", default=configMgr.writeXML)
     parser.add_argument("-f", "--fit", help="fit the workspace", action="store_true", default=configMgr.executeHistFactory)
+    parser.add_argument("--fitname", help="workspace name for fit (not specified takes 1st available fitConfig)", default="")
     parser.add_argument("-m", "--minos", help="run minos for asymmetric error calculation, optionally give parameter names for which minos should be run, space separated. For all params, use ALL", metavar="PARAM")
     parser.add_argument("-n", "--num_toys", type=int, help="set the number of toys, <=0 means to use real data", default=configMgr.nTOYs)
     parser.add_argument("-s", "--seed", type=int, help="set the random seed for toy generation", default=configMgr.toySeed)
@@ -239,24 +240,26 @@ if __name__ == "__main__":
         configMgr.executeAll()
 
     if runFit:
+        idx = 0
         if len(configMgr.fitConfigs) > 0:
-            #r=GenerateFitAndPlot(configMgr.fitConfigs[0], drawBeforeAfterFit)
-            #r=GenerateFitAndPlot(configMgr.fitConfigs[1],drawBeforeAfterFit)
-            #r=GenerateFitAndPlot(configMgr.fitConfigs[2],drawBeforeAfterFit)
-            #for idx in range(len(configMgr.fitConfigs)):
-            #    r=GenerateFitAndPlot(configMgr.fitConfigs[idx],drawBeforeAfterFit)
-            r = GenerateFitAndPlotCPP(configMgr.fitConfigs[0], configMgr.analysisName, drawBeforeFit, drawAfterFit, drawCorrelationMatrix, drawSeparateComponents, drawLogLikelihood, runMinos, minosPars)
-            #r = GenerateFitAndPlotCPP(configMgr.fitConfigs[1], configMgr.analysisName, drawBeforeFit, drawAfterFit, drawCorrelationMatrix, drawSeparateComponents, drawLogLikelihood, runMinos, minosPars)
-            pass
-##         #configMgr.cppMgr.fitAll()
-##         log.info("\nr0=GenerateFitAndPlot(configMgr.fitConfigs[0],False)")
-##         log.info("r1=GenerateFitAndPlot(configMgr.fitConfigs[1],False)")
-##         log.info("r2=GenerateFitAndPlot(configMgr.fitConfigs[2],False)")
-        log.info(" GenerateFitAndPlotCPP(configMgr.fitConfigs[0], configMgr.analysisName, drawBeforeFit, drawAfterFit, drawCorrelationMatrix, drawSeparateComponents, drawLogLikelihood)")
-        log.info(" GenerateFitAndPlotCPP(configMgr.fitConfigs[1], configMgr.analysisName, drawBeforeFit, drawAfterFit, drawCorrelationMatrix, drawSeparateComponents, drawLogLikelihood)")
-        log.info(" GenerateFitAndPlotCPP(configMgr.fitConfigs[2], configMgr.analysisName, drawBeforeFit, drawAfterFit, drawCorrelationMatrix, drawSeparateComponents, drawLogLikelihood)")
-        log.info("   where drawBeforeFit, drawAfterFit, drawCorrelationMatrix, drawSeparateComponents, drawLogLikelihood are booleans")
+            
+            if args.fitname != "": # user specified a fit name
+                fitFound = False
+                for (i, config) in enumerate(configMgr.fitConfigs):
+                    if configMgr.fitConfigs[idx].name == args.fitname:
+                        idx = i
+                        fitFound = True
+                        log.info("Found fitConfig with name %s at index %d" % (args.fitname, idx))
+                        break
+                        
+                if not fitFound:
+                    log.fatal("Unable to find fitConfig with name %s, bailing out" % args.fitname)
 
+            log.info("Running on fitConfig %s" % configMgr.fitConfigs[idx].name)
+            r = GenerateFitAndPlotCPP(configMgr.fitConfigs[idx], configMgr.analysisName, drawBeforeFit, drawAfterFit, drawCorrelationMatrix, drawSeparateComponents, drawLogLikelihood, runMinos, minosPars)
+            pass
+        log.info(" GenerateFitAndPlotCPP(configMgr.fitConfigs[%d], configMgr.analysisName, drawBeforeFit, drawAfterFit, drawCorrelationMatrix, drawSeparateComponents, drawLogLikelihood)" % idx)
+        log.info("   where drawBeforeFit, drawAfterFit, drawCorrelationMatrix, drawSeparateComponents, drawLogLikelihood are booleans")
         pass
 
     if printLimits:
