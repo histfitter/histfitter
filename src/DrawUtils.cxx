@@ -47,7 +47,8 @@ TH2D* DrawUtil::triwsmooth( TTree* tree, const char* varstr, const char* name, c
     gr->Draw("TRIW");
 
     if (inputHist!=NULL){
-        gr->SetHistogram(inputHist);}
+        gr->SetHistogram(inputHist);
+    }
 
     TH2D* foo = gr->GetHistogram();
     TH2D* hist = (TH2D*)foo->Clone();
