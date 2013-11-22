@@ -1,6 +1,7 @@
 2013-11-22 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
 	* src/toy_utils.cxx: accidentally rejected all fits, now fixed to proper
 	behaviour: just reject bad ones
+	* Tagging HistFitter-00-00-36
 
 2013-11-21 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
 	* macros/Examples/pulls/examplePullPlot.py: fix broken path
