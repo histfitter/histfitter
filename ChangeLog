@@ -1,3 +1,7 @@
+2013-11-24 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
+	* scripts/YieldsTable.py: allow -B to run blinded, nObs(SR) will be
+	replaced with -1. Also, run ROOT in batch mode.
+
 2013-11-22 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
 	* scripts/HistFitter.py: add --fitname option to allow user to specify
 	name when running fits with -f. This is relevant for analyses where the
