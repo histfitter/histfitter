@@ -4,7 +4,11 @@
 # from ROOT import gSystem
 # gSystem.Load("libCombinationTools")
 
-from ROOT import gROOT,gSystem,gDirectory
+import ROOT
+ROOT.gROOT.SetBatch(True)
+ROOT.PyConfig.IgnoreCommandLineOptions = True
+
+from ROOT import gROOT,gSystem,gDirectory, PyConfig
 gSystem.Load("libSusyFitter.so")
 gROOT.Reset()
 
@@ -19,7 +23,7 @@ import sys
 
 # Main function calls are defined below.
 
-def latexfitresults(filename,regionList,sampleList,exactRegionNames=False,dataname='obsData',showSum=False, doAsym=True):
+def latexfitresults(filename,regionList,sampleList,exactRegionNames=False,dataname='obsData',showSum=False, doAsym=True, blinded=False):
   workspacename = 'w'
   w = Util.GetWorkspaceFromFile(filename,'w')
 
@@ -131,7 +135,12 @@ def latexfitresults(filename,regionList,sampleList,exactRegionNames=False,datana
   
   tablenumbers['TOTAL_FITTED_bkg_events']    =  nFittedInRegionList
   tablenumbers['TOTAL_FITTED_bkg_events_err']    =  pdfFittedErrInRegionList
-  
+ 
+  if blinded: 
+    nobs_regionList = [ data.sumEntries() for data in regionDatasetList]
+    nobs_regionList[-1] = -1
+    tablenumbers['nobs'] = nobs_regionList
+
   # components
   for isam, sample in enumerate(sampleList):
     sampleName=getName(sample)
@@ -265,6 +274,7 @@ if __name__ == "__main__":
     print "-w <workspaceFileName>: single name accepted only (OBLIGATORY) ;   if multiple channels/regions given in -c, assumes the workspace file contains all channels/regions"
     print "-s <sample>: single unique sample name or comma separated list accepted (OBLIGATORY)"
     print "-o <outputFileName>: sets the output table file name"
+    print "-B: run blinded; replace nObs(SR) by -1"
     print "-a: use Asimov dataset (off by default)"
     print "-b: shows also the error on samples Before the fit (off by default)"
     print "-S: also show the sum of all regions (off by default)"
@@ -286,7 +296,7 @@ if __name__ == "__main__":
 
   wsFileName='/results/MyOneLeptonKtScaleFit_HardLepR17_BkgOnlyKt_combined_NormalMeasurement_model_afterFit.root'
   try:
-    opts, args = getopt.getopt(sys.argv[1:], "o:c:w:s:u:L:C:t:bSagy")
+    opts, args = getopt.getopt(sys.argv[1:], "o:c:w:s:u:L:C:t:bBSagy")
   except:
     usage()
   if len(opts)<2:
@@ -298,6 +308,7 @@ if __name__ == "__main__":
   showSumAllRegions = False
   useAsimovSet = False
   ignoreLastChannel = False
+  blinded = False
   doAsym = True
   userString = ""
   tableName = "table.results.yields"
@@ -307,34 +318,36 @@ if __name__ == "__main__":
   
   for opt,arg in opts:
     if opt == '-c':
-      chanStr=arg.replace(",","_").replace("[","").replace("]","")
-      chanList=arg.split(",")
+      chanStr = arg.replace(",","_").replace("[","").replace("]","")
+      chanList = arg.split(",")
     elif opt == '-w':
-      wsFileName=arg
+      wsFileName = arg
     elif opt == '-o':
-      outputFileName=arg
+      outputFileName = arg
     elif opt == '-s':
-      sampleStr=arg.replace(",","_")
+      sampleStr = arg.replace(",","_")
       from cmdLineUtils import cmdStringToListOfLists
-      sampleList=cmdStringToListOfLists(arg)
+      sampleList = cmdStringToListOfLists(arg)
     elif opt == '-u':
-      userString=str(arg)
+      userString = str(arg)
     elif opt == '-C':
       tableCaption = str(arg)
     elif opt == '-L':
       tableLabel = str(arg)
     elif opt == '-t':
-      tableName=str(arg)
+      tableName = str(arg)
     elif opt == '-b':
-      showBeforeFitError=True
+      showBeforeFitError = True
+    elif opt == '-B':
+      blinded = True
     elif opt == '-S':
-      showSumAllRegions=True
+      showSumAllRegions = True
     elif opt == '-a':
-      useAsimovSet=True
+      useAsimovSet = True
     elif opt == '-g':
       ignoreLastChannel = True 
     elif opt == '-y':
-      doAsym=True
+      doAsym = True
 
   mentionCh = ""
   if ignoreLastChannel:
@@ -360,7 +373,7 @@ if __name__ == "__main__":
     f.close()
   else:
     print "OPENING ROOTFIT WORKSPACE"
-    m3 = latexfitresults(wsFileName,chanList,sampleList,exactRegionNames,dataname,showSumAllRegions,doAsym)
+    m3 = latexfitresults(wsFileName,chanList,sampleList,exactRegionNames,dataname,showSumAllRegions,doAsym, blinded)
     f = open(outputFileName.replace(".tex",".pickle"), 'w')
     pickle.dump(m3, f)
     f.close()
