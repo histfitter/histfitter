@@ -45,7 +45,7 @@ using namespace RooStats;
 static TMsgLogger ToyUtilsLogger("toy_utils");
 
 //________________________________________________________________________________________________
-const char* CollectAndWriteHypoTestResults( const TString& infile, const TString& format, const TString& interpretation, const TString& cutStr, const TString& outDir, const TString& fileprefix  ){
+const char* CollectAndWriteHypoTestResults( const TString& infile, const TString& format, const TString& interpretation, const TString& cutStr, const bool rejectFailedPrefit, const TString& outDir, const TString& fileprefix  ){
     // outdir
     TString outdir = gSystem->pwd();
     if ( !gSystem->cd( outDir.Data() ) ) {
@@ -84,7 +84,7 @@ const char* CollectAndWriteHypoTestResults( const TString& infile, const TString
     TString rootoutfilestub = outdir + listname;
 
     // collect p-values, store rootfile if needed
-    std::list<LimitResult> summary = CollectHypoTestResults( infile, format, interpretation, cutStr ); 
+    std::list<LimitResult> summary = CollectHypoTestResults( infile, format, interpretation, cutStr, rejectFailedPrefit ); 
 
     // store harvest in text file
     return WriteResultSet( summary, listname, outdir );
@@ -169,7 +169,7 @@ std::list<LimitResult> CollectHypoTestResults( const TString& infile, const TStr
         }
         int covqual = ( fitresult!=0 ? fitresult->covQual() : -1 );
 
-        bool failed_fit = ( nofit || failed_status || failed_cov || dodgy_cov );
+        bool failed_fit = ( failed_status || failed_cov || dodgy_cov );
         if(failed_fit) counter_failed_fits++;
 
         // don't store points with failed fits, if configured so.

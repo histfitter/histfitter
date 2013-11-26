@@ -23,7 +23,7 @@ const char* CollectAndWriteResultSet( const TString& infile, const TString& form
         const TString& outDir="./", const TString& fileprefix="" );
 
 // same, but collect and convert hypotest results
-const char* CollectAndWriteHypoTestResults( const TString& infile, const TString& format, const TString& interpretation, const TString& cutStr="1", const TString& outDir="./", const TString& fileprefix="" );
+const char* CollectAndWriteHypoTestResults( const TString& infile, const TString& format, const TString& interpretation, const TString& cutStr="1", const bool rejectFailedPrefit=true, const TString& outDir="./", const TString& fileprefix="" );
 std::list<LimitResult> CollectHypoTestResults( const TString& infile, const TString& format, const TString& interpretation, const TString& cutStr="1", const bool& rejectFailedPrefit=true );
 
 
