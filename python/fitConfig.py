@@ -19,12 +19,10 @@ from configManager import configMgr
 def mkdir_p(path):
     try:
         os.makedirs(path)
-    except:
-        pass
-    #except OSError as exc: # Python >2.5
-        #if exc.errno == errno.EEXIST and os.path.isdir(path):
-            #pass
-        #else: raise
+    except OSError as exc: # Python >2.5
+        if exc.errno == errno.EEXIST and os.path.isdir(path):
+            pass
+        else: raise
 
 class fitConfig(object):
     """
