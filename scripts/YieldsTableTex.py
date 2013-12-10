@@ -234,7 +234,10 @@ def tableend(signalregion='3+ jets, loose',suffix='sr3jl'):
 The results are obtained from the control regions using the discovery fit (see text for details). The fit results of the loose-not-tight regions are not shown.
 Nominal MC expectations (normalised to MC cross-sections) are given for comparison. 
 The Monte Carlo QCD estimates are provided for illustrational purposes only, and are not used in the fit.
-The errors shown are the statistical plus systematic uncertainties, except for the error on the background estimate in the signal region, which is the systematic uncertainty only.}
+The errors shown are the statistical plus systematic uncertainties, except for the error on the background estimate in the signal region, which is the systematic uncertainty only.
+Uncertainties on the fitted yields are symmetric by construction, 
+where the negative error is truncated when reaching to zero event yield.
+}
 \\label{table.results.systematics.in.logL.fit.%s}
 \\end{table}
 %%''' % (signalregion,suffix)
@@ -253,7 +256,10 @@ The results are obtained from the control regions using the discovery fit (see t
 Nominal MC expectations (normalised to MC cross-sections) are given for comparison. 
 The Monte Carlo QCD estimates are provided for illustrational purposes only, and are not used in the fit.
 The errors shown are the statistical plus systematic uncertainties, except for the error on the background estimate in the signal region, which is the systematic uncertainty only.
-All presented errors have been derived using MINOS.}
+%%All presented errors have been derived using MINOS.
+Uncertainties on the fitted yields are symmetric by construction, 
+where the negative error is truncated when reaching to zero event yield.
+}
 \\label{table.results.systematics.in.logL.fit.%s}
 \\end{table}
 %%''' % (signalregion,suffix)
@@ -272,8 +278,11 @@ def tableend3(suffix='sr3jl'):
 %%The results are obtained from the control regions using the discovery fit (see text for details). The fit results of the loose-not-tight regions are not shown.
 Nominal MC expectations (normalised to MC cross-sections) are given for comparison. 
 %%The Monte Carlo QCD estimates are provided for illustrational purposes only, and are not used in the fit.
-The errors shown are the statistical plus systematic uncertainties for control regions, while only the statistical errors are shown for signal and validation regions, in the case of a background only fit.}
-%%, except for the error on the background estimate in the signal region, which is the systematic uncertainty only.}
+The errors shown are the statistical plus systematic uncertainties for control regions, while only the statistical errors are shown for signal and validation regions, in the case of a background only fit.
+Uncertainties on the fitted yields are symmetric by construction, 
+where the negative error is truncated when reaching to zero event yield.
+%%, except for the error on the background estimate in the signal region, which is the systematic uncertainty only.
+}
 \\label{table.results.systematics.in.logL.fit.%s}
 \\end{table}
 %%''' %(suffix)
@@ -311,8 +320,11 @@ def tableend4(rList, suffix='sr3jl', mentionCh=''):
 %%The results are obtained from the control regions using the discovery fit (see text for details). The fit results of the loose-not-tight regions are not shown.
 Nominal MC expectations (normalised to MC cross-sections) are given for comparison. 
 %%The Monte Carlo QCD estimates are provided for illustrational purposes only, and are not used in the fit.
-The errors shown are the statistical plus systematic uncertainties.}
-%%, except for the error on the background estimate in the signal region, which is the systematic uncertainty only.}
+The errors shown are the statistical plus systematic uncertainties.
+%%, except for the error on the background estimate in the signal region, which is the systematic uncertainty only.
+Uncertainties on the fitted yields are symmetric by construction, 
+where the negative error is truncated when reaching to zero event yield.
+}
 \\label{table.results.yields.fit.%s}
 \\end{table}
 %%''' %(tomention,suffix)

@@ -1,3 +1,8 @@
+2013-12-09 Max Baak <mbaak@cern.ch>
+	M       scripts/YieldsTableTex.py
+	* Add sentence in caption that errors are symmetric by construction.
+	
+
 2013-12-05 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
 	* Tagging HistFitter-00-00-36-01
 
