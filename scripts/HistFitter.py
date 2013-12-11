@@ -70,7 +70,7 @@ if __name__ == "__main__":
     parser.add_argument("-w", "--create-workspace", help="re-create workspace from histograms", action="store_true", default=configMgr.executeHistFactory)
     parser.add_argument("-x", "--use-XML", help="write XML files by hand and call hist2workspace on them, instead of directly writing workspaces", action="store_true", default=configMgr.writeXML)
     parser.add_argument("-f", "--fit", help="fit the workspace", action="store_true", default=configMgr.executeHistFactory)
-    parser.add_argument("--fitname", help="workspace name for fit (not specified takes 1st available fitConfig)", default="")
+    parser.add_argument("--fitname", dest="fitname", help="workspace name for fit (not specified takes 1st available fitConfig)", default="")
     parser.add_argument("-m", "--minos", help="run minos for asymmetric error calculation, optionally give parameter names for which minos should be run, space separated. For all params, use ALL", metavar="PARAM")
     parser.add_argument("-n", "--num_toys", type=int, help="set the number of toys, <=0 means to use real data", default=configMgr.nTOYs)
     parser.add_argument("-s", "--seed", type=int, help="set the random seed for toy generation", default=configMgr.toySeed)
@@ -98,58 +98,58 @@ if __name__ == "__main__":
     parser.add_argument("-u", "--userArg", help="arbitrary user argument(s)", default="")
     parser.add_argument("-A", "--use-archive-histfile", help="use backup histogram cache file", action="store_true")
 
-    args = parser.parse_args()
+    HistFitterArgs = parser.parse_args()
    
-    if args.fit_type == "bkg":
+    if HistFitterArgs.fit_type == "bkg":
         myFitType = FitType.Background
-    elif args.fit_type == "excl":
+    elif HistFitterArgs.fit_type == "excl":
         myFitType = FitType.Exclusion
-    elif args.fit_type == "disc":
+    elif HistFitterArgs.fit_type == "disc":
         myFitType = FitType.Discovery
 
-    if args.validation:
+    if HistFitterArgs.validation:
         doValidation = True
 
-    if args.use_archive_histfile:
+    if HistFitterArgs.use_archive_histfile:
         configMgr.useHistBackupCacheFile = True
 
-    if args.create_histograms:
+    if HistFitterArgs.create_histograms:
         configMgr.readFromTree = True
 
-    if args.create_workspace:
+    if HistFitterArgs.create_workspace:
         configMgr.executeHistFactory = True
 
-    if args.use_XML:
+    if HistFitterArgs.use_XML:
         configMgr.writeXML = True
 
-    if args.fit:
+    if HistFitterArgs.fit:
         runFit = True
 
-    configMgr.userArg=args.userArg
-    configMgr.nTOYs = args.num_toys
+    configMgr.userArg=HistFitterArgs.userArg
+    configMgr.nTOYs = HistFitterArgs.num_toys
 
-    if args.interactive:
+    if HistFitterArgs.interactive:
         runInterpreter = True
 
-    if args.log_level:
-        log.setLevel(args.log_level, True) #do not add a default to args.log_level or we will always lock it
+    if HistFitterArgs.log_level:
+        log.setLevel(HistFitterArgs.log_level, True) #do not add a default to HistFitterArgs.log_level or we will always lock it
 
-    if args.limit_plot:
+    if HistFitterArgs.limit_plot:
         printLimits = True
 
-    if args.hypotest:
+    if HistFitterArgs.hypotest:
         doHypoTests = True
 
-    if args.discovery_hypotest:
+    if HistFitterArgs.discovery_hypotest:
         doHypoTests = True
         doUL = False
 
-    if args.d:
+    if HistFitterArgs.d:
         drawBeforeFit = True
         drawAfterFit = True
     
-    if args.draw:
-        drawArgs = args.draw.split(",")
+    if HistFitterArgs.draw:
+        drawArgs = HistFitterArgs.draw.split(",")
         if len(drawArgs) == 1 and drawArgs[0] == "allPlots":
             drawBeforeFit = True
             drawAfterFit = True
@@ -171,33 +171,33 @@ if __name__ == "__main__":
                 else:
                     log.fatal("Wrong draw argument: %s\n  Possible draw arguments are 'allPlots' or comma separated 'before after corrMatrix sepComponents likelihood'" % drawArg) 
 
-    if args.no_empty:
+    if HistFitterArgs.no_empty:
         configMgr.removeEmptyBins = True
 
-    if args.seed != 0: #0 is default because type is int
+    if HistFitterArgs.seed != 0: #0 is default because type is int
         configMgr.toySeedSet = True
-        configMgr.toySeed = args.seed
+        configMgr.toySeed = HistFitterArgs.seed
 
-    if args.use_asimov:
+    if HistFitterArgs.use_asimov:
         configMgr.useAsimovSet = True
 
-    if args.grid_points and args.grid_points != "":
-        sigSamples = args.grid_points.split(",")
+    if HistFitterArgs.grid_points and HistFitterArgs.grid_points != "":
+        sigSamples = HistFitterArgs.grid_points.split(",")
         log.info("Grid points specified: %s" % sigSamples)
 
-    if args.regions and args.regions != "" and args.regions != "all":
-        pickedSRs = args.regions.split(",")
+    if HistFitterArgs.regions and HistFitterArgs.regions != "" and HistFitterArgs.regions != "all":
+        pickedSRs = HistFitterArgs.regions.split(",")
     else:
         pickedSRs = [] #MB: used by 0-lepton fit
 
     if len(pickedSRs) > 0: 
         log.info("Selected signal regions: %s" % pickedSRs) 
 
-    if args.run_toys:
+    if HistFitterArgs.run_toys:
         runToys = True
 
-    if args.background:
-        bkgArgs = args.background.split(',')
+    if HistFitterArgs.background:
+        bkgArgs = HistFitterArgs.background.split(',')
         if len(bkgArgs) == 2:
             configMgr.SetBkgParName(bkgArgs[0])
             configMgr.SetBkgCorrVal(float(bkgArgs[1]))
@@ -210,24 +210,24 @@ if __name__ == "__main__":
                 configMgr.AddBkgCorrVal(float(bkgArgs[iCx+2]))
                 continue
 
-    if args.minos:
+    if HistFitterArgs.minos:
         runMinos = True
         
-        minosArgs = args.minos.split(",")
+        minosArgs = HistFitterArgs.minos.split(",")
         for idx, arg in enumerate(minosArgs):
             if arg.lower() == "all":
                 minosArgs[idx] = "all"
 
         minosPars = ",".join(minosArgs)
 
-    if args.cmd:
-        log.info("Python commands executed: %s" % args.cmd)
-        exec(args.cmd) ## python execute
+    if HistFitterArgs.cmd:
+        log.info("Python commands executed: %s" % HistFitterArgs.cmd)
+        exec(HistFitterArgs.cmd) ## python execute
 
     gROOT.SetBatch(not runInterpreter)
 
     #mandatory user-defined configuration
-    execfile(args.configFile[0]) #[0] since any extra arguments (sys.argv[-1], etc.) are caught here
+    execfile(HistFitterArgs.configFile[0]) #[0] since any extra arguments (sys.argv[-1], etc.) are caught here
 
     #standard execution from now on.
     configMgr.initialize()
@@ -242,18 +242,19 @@ if __name__ == "__main__":
     if runFit:
         idx = 0
         if len(configMgr.fitConfigs) > 0:
-            
-            if args.fitname != "": # user specified a fit name
+           
+            print args
+            if HistFitterArgs.fitname != "": # user specified a fit name
                 fitFound = False
                 for (i, config) in enumerate(configMgr.fitConfigs):
-                    if configMgr.fitConfigs[idx].name == args.fitname:
+                    if configMgr.fitConfigs[idx].name == HistFitterArgs.fitname:
                         idx = i
                         fitFound = True
-                        log.info("Found fitConfig with name %s at index %d" % (args.fitname, idx))
+                        log.info("Found fitConfig with name %s at index %d" % (HistFitterArgs.fitname, idx))
                         break
                         
                 if not fitFound:
-                    log.fatal("Unable to find fitConfig with name %s, bailing out" % args.fitname)
+                    log.fatal("Unable to find fitConfig with name %s, bailing out" % HistFitterArgs.fitname)
 
             log.info("Running on fitConfig %s" % configMgr.fitConfigs[idx].name)
             r = GenerateFitAndPlotCPP(configMgr.fitConfigs[idx], configMgr.analysisName, drawBeforeFit, drawAfterFit, drawCorrelationMatrix, drawSeparateComponents, drawLogLikelihood, runMinos, minosPars)
