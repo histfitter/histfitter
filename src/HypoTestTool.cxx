@@ -428,7 +428,12 @@ RooStats::HypoTestTool::SetupHypoTestCalculator(RooWorkspace * w, bool doUL,
         Info("HypoTestTool","The background model %s does not exist",modelBName);
         Info("HypoTestTool","Copy it from ModelConfig %s and set POI to zero",modelSBName);
         bModel = (ModelConfig*) sbModel->Clone();
-        bModel->SetName(TString(modelSBName)+TString("_with_poi_0"));      
+        bModel->SetName(TString(modelSBName)+TString("_with_poi_0"));
+        if(!bModel->GetParametersOfInterest()->first()){
+            m_logger << kERROR << "HypoTestTool: sbModel has no POI!" << GEndl;
+            return false;
+        }
+        
         RooRealVar * var = dynamic_cast<RooRealVar*>(bModel->GetParametersOfInterest()->first());
         if (!var){
           Info("HypoTestTool","Cast failed");

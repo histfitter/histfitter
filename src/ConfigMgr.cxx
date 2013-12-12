@@ -440,10 +440,10 @@ void ConfigMgr::doUpperLimit(FitConfig* fc) {
     /// first asumptotic limit, to get a quick but reliable estimate for the upper limit
     /// dynamic evaluation of ranges
     RooStats::HypoTestInverterResult* hypo = RooStats::DoHypoTestInversion(w, 1, 2, m_testStatType, m_useCLs, 20, 0, -1);  
-    (void) hypo->ExclusionCleanup(); 
 
     /// then reevaluate with proper settings
     if ( hypo!=0 ) { 
+        (void) hypo->ExclusionCleanup(); 
         double eul2 = 1.10 * hypo->GetExpectedUpperLimit(2);
         delete hypo; hypo=0;
         
