@@ -1,3 +1,6 @@
+2013-12-12 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
+	* src/ConfigMgr.cxx: first ExclusionCleanup() call could segfault, moved
+
 2013-12-12 Alex Koutsman <koutsman@cern.ch>
 	U    scripts/HistFitter.py
 	* small fix for new --fitname option
