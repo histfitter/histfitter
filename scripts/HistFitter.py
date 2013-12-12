@@ -243,11 +243,11 @@ if __name__ == "__main__":
         idx = 0
         if len(configMgr.fitConfigs) > 0:
            
-            print args
+            #print args
             if HistFitterArgs.fitname != "": # user specified a fit name
                 fitFound = False
                 for (i, config) in enumerate(configMgr.fitConfigs):
-                    if configMgr.fitConfigs[idx].name == HistFitterArgs.fitname:
+                    if configMgr.fitConfigs[i].name == HistFitterArgs.fitname:
                         idx = i
                         fitFound = True
                         log.info("Found fitConfig with name %s at index %d" % (HistFitterArgs.fitname, idx))
