@@ -1,3 +1,7 @@
+2013-12-13  Zach Marshall <zach.marshall@cern.ch>
+	* python/prepareHisto.py: Removing very slow alias setting
+	* scripts/HistFitter.py: Adding option to run code profiler
+
 2013-12-12 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
 	* src/ConfigMgr.cxx: first ExclusionCleanup() call could segfault, moved
 
