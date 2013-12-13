@@ -131,54 +131,54 @@ class TreePrepare(PrepareHistosABC):
             for fileName in fileList:
                 self.configMgr.chains[self.currentChainName].Add(fileName)
 
-            if not self.configMgr.chains[self.currentChainName].GetBranch("mtmu2"):
-                self.configMgr.chains[self.currentChainName].SetAlias("mtmu2","( sqrt(2*lep2Pt*met*(1-cos(lep2Phi-metPhi))) )")
+            #### To add non-existent branches, follow examples like these
+            ##if not self.configMgr.chains[self.currentChainName].GetBranch("mtmu2"):
+            ##    self.configMgr.chains[self.currentChainName].SetAlias("mtmu2","( sqrt(2*lep2Pt*met*(1-cos(lep2Phi-metPhi))) )")
 
-            ## MB : hack to add non-existent branches ...
-            if not self.configMgr.chains[self.currentChainName].GetBranch("phQuality"):
-                self.configMgr.chains[self.currentChainName].SetAlias("phQuality","(1>0)")
-            if not self.configMgr.chains[self.currentChainName].GetBranch("phIso"):
-                self.configMgr.chains[self.currentChainName].SetAlias("phIso","(1>0)")
+            ##if not self.configMgr.chains[self.currentChainName].GetBranch("phQuality"):
+            ##    self.configMgr.chains[self.currentChainName].SetAlias("phQuality","(1>0)")
+            ##if not self.configMgr.chains[self.currentChainName].GetBranch("phIso"):
+            ##    self.configMgr.chains[self.currentChainName].SetAlias("phIso","(1>0)")
 
-            if not self.configMgr.chains[self.currentChainName].GetBranch("truthZpt0GeVWeight"):
-                self.configMgr.chains[self.currentChainName].SetAlias("truthZpt0GeVWeight","(1>0)")
-            if not self.configMgr.chains[self.currentChainName].GetBranch("truthZpt50GeVWeight"):
-                self.configMgr.chains[self.currentChainName].SetAlias("truthZpt50GeVWeight","(1>0)")
-            if not self.configMgr.chains[self.currentChainName].GetBranch("truthZpt100GeVWeight"):
-                self.configMgr.chains[self.currentChainName].SetAlias("truthZpt100GeVWeight","(1>0)")
-            if not self.configMgr.chains[self.currentChainName].GetBranch("truthZpt150GeVWeight"):
-                self.configMgr.chains[self.currentChainName].SetAlias("truthZpt150GeVWeight","(1>0)")
-            if not self.configMgr.chains[self.currentChainName].GetBranch("truthZpt200GeVWeight"):
-                self.configMgr.chains[self.currentChainName].SetAlias("truthZpt200GeVWeight","(1>0)")
+            ##if not self.configMgr.chains[self.currentChainName].GetBranch("truthZpt0GeVWeight"):
+            ##    self.configMgr.chains[self.currentChainName].SetAlias("truthZpt0GeVWeight","(1>0)")
+            ##if not self.configMgr.chains[self.currentChainName].GetBranch("truthZpt50GeVWeight"):
+            ##    self.configMgr.chains[self.currentChainName].SetAlias("truthZpt50GeVWeight","(1>0)")
+            ##if not self.configMgr.chains[self.currentChainName].GetBranch("truthZpt100GeVWeight"):
+            ##    self.configMgr.chains[self.currentChainName].SetAlias("truthZpt100GeVWeight","(1>0)")
+            ##if not self.configMgr.chains[self.currentChainName].GetBranch("truthZpt150GeVWeight"):
+            ##    self.configMgr.chains[self.currentChainName].SetAlias("truthZpt150GeVWeight","(1>0)")
+            ##if not self.configMgr.chains[self.currentChainName].GetBranch("truthZpt200GeVWeight"):
+            ##    self.configMgr.chains[self.currentChainName].SetAlias("truthZpt200GeVWeight","(1>0)")
 
-            # up 
-            if not self.configMgr.chains[self.currentChainName].GetBranch("truthZpt0GeVWeightUp"):
-                self.configMgr.chains[self.currentChainName].SetAlias("truthZpt0GeVWeightUp","(1>0)")
-            if not self.configMgr.chains[self.currentChainName].GetBranch("truthZpt50GeVWeightUp"):
-                self.configMgr.chains[self.currentChainName].SetAlias("truthZpt50GeVWeightUp","(1>0)")
-            if not self.configMgr.chains[self.currentChainName].GetBranch("truthZpt100GeVWeightUp"):
-                self.configMgr.chains[self.currentChainName].SetAlias("truthZpt100GeVWeightUp","(1>0)")
-            if not self.configMgr.chains[self.currentChainName].GetBranch("truthZpt150GeVWeightUp"):
-                self.configMgr.chains[self.currentChainName].SetAlias("truthZpt150GeVWeightUp","(1>0)")
-            if not self.configMgr.chains[self.currentChainName].GetBranch("truthZpt200GeVWeightUp"):
-                self.configMgr.chains[self.currentChainName].SetAlias("truthZpt200GeVWeightUp","(1>0)")
+            ### up 
+            ##if not self.configMgr.chains[self.currentChainName].GetBranch("truthZpt0GeVWeightUp"):
+            ##    self.configMgr.chains[self.currentChainName].SetAlias("truthZpt0GeVWeightUp","(1>0)")
+            ##if not self.configMgr.chains[self.currentChainName].GetBranch("truthZpt50GeVWeightUp"):
+            ##    self.configMgr.chains[self.currentChainName].SetAlias("truthZpt50GeVWeightUp","(1>0)")
+            ##if not self.configMgr.chains[self.currentChainName].GetBranch("truthZpt100GeVWeightUp"):
+            ##    self.configMgr.chains[self.currentChainName].SetAlias("truthZpt100GeVWeightUp","(1>0)")
+            ##if not self.configMgr.chains[self.currentChainName].GetBranch("truthZpt150GeVWeightUp"):
+            ##    self.configMgr.chains[self.currentChainName].SetAlias("truthZpt150GeVWeightUp","(1>0)")
+            ##if not self.configMgr.chains[self.currentChainName].GetBranch("truthZpt200GeVWeightUp"):
+            ##    self.configMgr.chains[self.currentChainName].SetAlias("truthZpt200GeVWeightUp","(1>0)")
 
-            # down 
-            if not self.configMgr.chains[self.currentChainName].GetBranch("truthZpt0GeVWeightDown"):
-                self.configMgr.chains[self.currentChainName].SetAlias("truthZpt0GeVWeightDown","(1>0)")
-            if not self.configMgr.chains[self.currentChainName].GetBranch("truthZpt50GeVWeightDown"):
-                self.configMgr.chains[self.currentChainName].SetAlias("truthZpt50GeVWeightDown","(1>0)")
-            if not self.configMgr.chains[self.currentChainName].GetBranch("truthZpt100GeVWeightDown"):
-                self.configMgr.chains[self.currentChainName].SetAlias("truthZpt100GeVWeightDown","(1>0)")
-            if not self.configMgr.chains[self.currentChainName].GetBranch("truthZpt150GeVWeightDown"):
-                self.configMgr.chains[self.currentChainName].SetAlias("truthZpt150GeVWeightDown","(1>0)")
-            if not self.configMgr.chains[self.currentChainName].GetBranch("truthZpt200GeVWeightDown"):
-                self.configMgr.chains[self.currentChainName].SetAlias("truthZpt200GeVWeightDown","(1>0)")
+            ### down 
+            ##if not self.configMgr.chains[self.currentChainName].GetBranch("truthZpt0GeVWeightDown"):
+            ##    self.configMgr.chains[self.currentChainName].SetAlias("truthZpt0GeVWeightDown","(1>0)")
+            ##if not self.configMgr.chains[self.currentChainName].GetBranch("truthZpt50GeVWeightDown"):
+            ##    self.configMgr.chains[self.currentChainName].SetAlias("truthZpt50GeVWeightDown","(1>0)")
+            ##if not self.configMgr.chains[self.currentChainName].GetBranch("truthZpt100GeVWeightDown"):
+            ##    self.configMgr.chains[self.currentChainName].SetAlias("truthZpt100GeVWeightDown","(1>0)")
+            ##if not self.configMgr.chains[self.currentChainName].GetBranch("truthZpt150GeVWeightDown"):
+            ##    self.configMgr.chains[self.currentChainName].SetAlias("truthZpt150GeVWeightDown","(1>0)")
+            ##if not self.configMgr.chains[self.currentChainName].GetBranch("truthZpt200GeVWeightDown"):
+            ##    self.configMgr.chains[self.currentChainName].SetAlias("truthZpt200GeVWeightDown","(1>0)")
 
-            if not self.configMgr.chains[self.currentChainName].GetBranch("hfWeightUp"):
-                self.configMgr.chains[self.currentChainName].SetAlias("hfWeightUp","(1>0)")
-            if not self.configMgr.chains[self.currentChainName].GetBranch("hfWeightDown"):
-                self.configMgr.chains[self.currentChainName].SetAlias("hfWeightDown","(1>0)")
+            ##if not self.configMgr.chains[self.currentChainName].GetBranch("hfWeightUp"):
+            ##    self.configMgr.chains[self.currentChainName].SetAlias("hfWeightUp","(1>0)")
+            ##if not self.configMgr.chains[self.currentChainName].GetBranch("hfWeightDown"):
+            ##    self.configMgr.chains[self.currentChainName].SetAlias("hfWeightDown","(1>0)")
 
         return
 

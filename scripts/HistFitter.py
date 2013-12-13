@@ -55,6 +55,7 @@ if __name__ == "__main__":
     runToys = False
     runMinos = False
     minosPars = ""
+    doCodeProfiling = False
     
     FitType = enum('FitType','Discovery , Exclusion , Background')
     myFitType=FitType.Background
@@ -97,6 +98,7 @@ if __name__ == "__main__":
     parser.add_argument("-c", "--cmd", help="python commands to process (semi-colon-seperated)")
     parser.add_argument("-u", "--userArg", help="arbitrary user argument(s)", default="")
     parser.add_argument("-A", "--use-archive-histfile", help="use backup histogram cache file", action="store_true")
+    parser.add_argument("-P", "--run-profiling", help="Run a python profiler during main HistFitter execution", action="store_true")
 
     HistFitterArgs = parser.parse_args()
    
@@ -112,6 +114,9 @@ if __name__ == "__main__":
 
     if HistFitterArgs.use_archive_histfile:
         configMgr.useHistBackupCacheFile = True
+
+    if HistFitterArgs.run_profiling:
+        doCodeProfiling = True
 
     if HistFitterArgs.create_histograms:
         configMgr.readFromTree = True
@@ -237,7 +242,11 @@ if __name__ == "__main__":
 
     #runs Trees->histos and/or histos->workspace according to specifications
     if configMgr.readFromTree or configMgr.executeHistFactory:
-        configMgr.executeAll()
+        if doCodeProfiling:
+            import cProfile
+            cProfile.run('configMgr.executeAll()')
+        else:
+            configMgr.executeAll()
 
     if runFit:
         idx = 0
