@@ -87,6 +87,9 @@ Fitted bkg events        '''
         sampleName = name.replace("Fitted_events_","")
         if sampleName != sample:
           continue
+        sampleName = name.replace("MC_exp_events_","")
+        if sampleName != sample:
+          continue
         
         sample = name.replace("Fitted_events_","")
         tableline += '''
