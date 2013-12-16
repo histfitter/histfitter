@@ -1,3 +1,13 @@
+2013-12-16 Max Baak <mbaak@cern.ch>
+	M       StatTools.cxx
+	M       ConfigMgr.cxx
+	M       LimitResult.cxx
+	M       HypoTestTool.cxx
+	M       StatTools.h
+	M       LimitResult.h
+	* Now also store expected +- Nsigma variation of discovery p-value
+	* When running HistFitter.py -z myconfigfile.py
+
 2013-12-13  Zach Marshall <zach.marshall@cern.ch>
 	* python/prepareHisto.py: Removing very slow alias setting
 	* scripts/HistFitter.py: Adding option to run code profiler
