@@ -181,6 +181,14 @@ def latexfitresults(filename,regionList,sampleList,exactRegionNames=False,datana
 
   #  FROM HERE ON OUT WE CALCULATE THE EXPECTED NUMBER OF EVENTS BEFORE THE FIT
   w.loadSnapshot('snapshot_paramsVals_RooExpandedFitResult_beforeFit')
+
+  # check if any of the initial scaling factors is != 1
+  _result = w.obj('RooExpandedFitResult_beforeFit')
+  _muFacs = _result.floatParsFinal()
+
+  for i in range(len(_muFacs)):
+    if "mu_" in _muFacs[i].GetName() and _muFacs[i].getVal() != 1.0:
+      print  " \n WARNING: scaling factor %s != 1.0 (%g) expected MC yield WILL BE WRONG!" % (_muFacs[i].GetName(), _muFacs[i].getVal())
   
   pdfinRegionList = [ Util.GetRegionPdf(w, region)  for region in regionList]
   varinRegionList =  [ Util.GetRegionVar(w, region) for region in regionList]
