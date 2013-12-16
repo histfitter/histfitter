@@ -584,16 +584,22 @@ RooStats::HypoTestInverterResult* RooStats::MakeUpperLimitPlot(const char* filep
 }
 
 //________________________________________________________________________________________________
-LimitResult RooStats::get_Pvalue( const RooStats::HypoTestInverterResult* fResults ) {
+LimitResult RooStats::get_Pvalue( const RooStats::HypoTestInverterResult* fResults, bool doUL ) {
     // MB : code taken from HypoTestInverterPlot::MakeExpectedPlot()
-
-    double nsig1(1.0);
-    double nsig2(2.0);
 
     const int nEntries = fResults->ArraySize();
 
+    // MB 20131216: bit of a hack, but we now need to know if running in discovery or exclusion mode. 
+    // poi==0 is assumed convention for discovery.
+    if (doUL && nEntries==1 && fResults->GetXValue(0)==0 ) {
+      doUL = false;
+      StatToolsLogger << kWARNING << "Change of setting: assumption of running in discovery mode. doUL = " << doUL << GEndl;
+    }
+
     //cout << "---------------------------------> nEntries " << nEntries << GEndl;
 
+    double nsig1(1.0);
+    double nsig2(2.0);
     nsig1 = std::abs(nsig1);
     nsig2 = std::abs(nsig2);
     //bool doFirstBand = (nsig1 > 0);
@@ -611,18 +617,18 @@ LimitResult RooStats::get_Pvalue( const RooStats::HypoTestInverterResult* fResul
 
     LimitResult upperLimitResult;
 
-    if (nEntries>1){
+    if (nEntries>1 and doUL){ // clearly an upper limit result
 
         RooStats::HypoTestInverterResult* myfResults = const_cast<RooStats::HypoTestInverterResult*>(fResults);
         double upperLimit = myfResults->UpperLimit();
         double ulError = myfResults->UpperLimitEstimatedError();
 
-        StatToolsLogger << "The computed upper limit is: " << upperLimit << " +/- " << ulError << GEndl;
-        StatToolsLogger << " expected limit (median) " << myfResults->GetExpectedUpperLimit(0) << GEndl;
-        StatToolsLogger << " expected limit (-1 sig) " << myfResults->GetExpectedUpperLimit(-1) << GEndl;
-        StatToolsLogger << " expected limit (+1 sig) " << myfResults->GetExpectedUpperLimit(1) << GEndl;
-        StatToolsLogger << " expected limit (-2 sig) " << myfResults->GetExpectedUpperLimit(-2) << GEndl;
-        StatToolsLogger << " expected limit (+2 sig) " << myfResults->GetExpectedUpperLimit(2) << GEndl;
+        StatToolsLogger << kINFO << "The computed upper limit is: " << upperLimit << " +/- " << ulError << GEndl;
+        StatToolsLogger << kINFO << " expected limit (median) " << myfResults->GetExpectedUpperLimit(0) << GEndl;
+        StatToolsLogger << kINFO << " expected limit (-1 sig) " << myfResults->GetExpectedUpperLimit(-1) << GEndl;
+        StatToolsLogger << kINFO << " expected limit (+1 sig) " << myfResults->GetExpectedUpperLimit(1) << GEndl;
+        StatToolsLogger << kINFO << " expected limit (-2 sig) " << myfResults->GetExpectedUpperLimit(-2) << GEndl;
+        StatToolsLogger << kINFO << " expected limit (+2 sig) " << myfResults->GetExpectedUpperLimit(2) << GEndl;
 
         upperLimitResult.SetUpperLimit(myfResults->UpperLimit());
         upperLimitResult.SetUpperLimitEstimatedError(myfResults->UpperLimitEstimatedError());
@@ -632,19 +638,16 @@ LimitResult RooStats::get_Pvalue( const RooStats::HypoTestInverterResult* fResul
         upperLimitResult.SetExpectedUpperLimitMinus1Sig(myfResults->GetExpectedUpperLimit(-1));
         upperLimitResult.SetExpectedUpperLimitMinus2Sig(myfResults->GetExpectedUpperLimit(-2));
     }
-    else{
-        //cout << "StatTools::get_pValue INFO: No upper limit is calcuated" << GEndl;
-    }
 
+    // MPB: this is called after running HistFitter with -l option --> attached upper limit results or returm call to default constructor
     if (nEntries!=1) { 
-        return upperLimitResult;   // MPB: this is called after running HistFitter with -l option --> attached upper limit results or returm call to default constructor
+        return upperLimitResult;   
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    // Only 1 HypoTestResult from now on ...
+    // Only 1 HypoTestResult from now on ... 
+    // Could be discovery or exclusion case
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    RooStats::HypoTestResult* oneresult = fResults->GetResult(0) ;
 
     p[0] = ROOT::Math::normal_cdf(-nsig2);
     p[1] = ROOT::Math::normal_cdf(-nsig1);
@@ -654,11 +657,15 @@ LimitResult RooStats::get_Pvalue( const RooStats::HypoTestInverterResult* fResul
 
     bool resultIsAsymptotic = ( !fResults->GetNullTestStatDist(0) && !fResults->GetAltTestStatDist(0) ); 
 
-    for (int j=0; j<nEntries; ++j) {
-        int i = index[j]; // i is the order index 
-        SamplingDistribution * s = fResults->GetExpectedPValueDist(i);
-        if (!s)  
-            break; 
+    /// 1. exclusion case
+    if (doUL) {
+        int i = index[0]; // i is the order index 
+
+	SamplingDistribution * s = fResults->GetExpectedPValueDist(i) ;
+        if (!s) { 
+            StatToolsLogger << kFATAL << "Sampling distribution is empty. Exit." << GEndl;
+            exit(1); 
+        } 
         const std::vector<double> & values = s->GetSamplingDistribution();
 
         /// expected p-values
@@ -683,29 +690,72 @@ LimitResult RooStats::get_Pvalue( const RooStats::HypoTestInverterResult* fResul
 
         /// store useful quantities for reuse later ...
         /// http://root.cern.ch/root/html532/src/RooStats__HypoTestInverterPlot.cxx.html#197
-        for (int j=0; j<5; ++j) { 
-            qv[j]=q[j]; 
-        }
+        for (int j=0; j<5; ++j) { qv[j]=q[j]; }
 
-        delete s;
+        delete s; s=0;
+    }
+    /// 2. discovery case
+    else {
+        if (resultIsAsymptotic) {
+
+	    SamplingDistribution * s = fResults->GetExpectedPValueDist(0) ;
+	    if (!s) { 
+	      StatToolsLogger << kFATAL << "Sampling distribution is empty. Exit." << GEndl;
+	      exit(1); 
+	    } 
+	    const std::vector<double> & values = s->GetSamplingDistribution();
+
+            double maxSigma = 5; // == HypoTestInverterResult::fgAsymptoticMaxSigma; // MB: HACK
+            double dsig = 2.*maxSigma / (values.size() -1) ;         
+            int  i0 = (int) TMath::Floor ( ( -nsig2 + maxSigma )/dsig + 0.5 );
+            int  i1 = (int) TMath::Floor ( ( -nsig1 + maxSigma )/dsig + 0.5 );
+            int  i2 = (int) TMath::Floor ( ( maxSigma )/dsig + 0.5 );
+            int  i3 = (int) TMath::Floor ( ( nsig1 + maxSigma )/dsig + 0.5 );
+            int  i4 = (int) TMath::Floor ( ( nsig2 + maxSigma )/dsig + 0.5 );
+            qv[0] = values[i0];
+            qv[1] = values[i1];
+            qv[2] = values[i2];
+            qv[3] = values[i3];
+            qv[4] = values[i4];
+
+        } else {
+	    RooStats::HypoTestResult* oneresult = new RooStats::HypoTestResult( *fResults->GetResult(0) ) ;
+
+            SamplingDistribution* t = oneresult->GetAltDistribution() ;
+            unsigned int sampleSize = t->GetSamplingDistribution().size() ;
+            const std::vector<double> & values = t->GetSamplingDistribution();
+
+	    int idx[5];
+            double ts[5]; 
+	    for (int j=0; j<5; ++j) {
+	      idx[j] = (int) TMath::Floor ( p[j] * sampleSize + 0.5 );
+	      ts[j] = values[idx[j]];	      
+	      oneresult->SetTestStatisticData( ts[j] );
+	      qv[j] = oneresult->NullPValue() ;
+	      //cout << idx[j] << " " << ts[j] << " " << pexp[j] << endl;
+	      // for storage later
+	    }
+
+	    delete oneresult; 
+        }
     }
 
-    //oneresult->Print();
+    // store info into parsable limitresult object
 
     /// observed p-values
+    double p0 = fResults->GetResult(0)->NullPValue();
     qv[5]  = fResults->CLs(0) ; //
-    qv[6]  = fResults->CLsError(0) ; //
     qv[7]  = fResults->CLb(0) ; //
-    qv[8]  = fResults->CLbError(0) ; //
     qv[9]  = fResults->CLsplusb(0) ; //
+    qv[6]  = fResults->CLsError(0) ; //
+    qv[8]  = fResults->CLbError(0) ; //
     qv[10] = fResults->CLsplusbError(0) ; //
-    double p0 = oneresult->NullPValue();
 
-    //jlorenz: dirty hack in order to avoid 0.000000 values
+    //jlorenz: dirty hack in order to avoid 0.000000 values in textfile
     for (int k=0; k<=10; k++) { 
-        if (qv[k] < 0.000001) { 
-            qv[k] = 0.000001; 
-        } 
+      if (TMath::Abs(qv[k]) < 0.000001) { 
+	qv[k] = 0.000001; 
+      } 
     }
 
     /// And pass on to limitresult object
@@ -713,11 +763,19 @@ LimitResult RooStats::get_Pvalue( const RooStats::HypoTestInverterResult* fResul
     result.SetP0(     p0 );
     result.SetP1(     qv[9] );
     result.SetCLs(    qv[5] );
-    result.SetCLsexp( qv[2] );
-    result.SetCLsu1S( qv[3] );
-    result.SetCLsd1S( qv[1] );
-    result.SetCLsu2S( qv[4] );
-    result.SetCLsd2S( qv[0] );  
+    if (doUL) { /// exclusion
+      result.SetCLsexp( qv[2] );
+      result.SetCLsu1S( qv[3] );
+      result.SetCLsd1S( qv[1] );
+      result.SetCLsu2S( qv[4] );
+      result.SetCLsd2S( qv[0] );  
+    } else { /// discovery
+      result.SetP0exp( qv[2] );
+      result.SetP0u1S( qv[3] );
+      result.SetP0d1S( qv[4] );
+      result.SetP0u2S( qv[1] );
+      result.SetP0d2S( qv[0] );        
+    }
 
     return result;
 }
@@ -763,7 +821,7 @@ LimitResult RooStats::get_Pvalue(     RooWorkspace* w,
         }
 
         RooStats::HypoTestResult* result = RooStats::DoHypoTest(w,doUL,ntoys,calculatorType,testStatType,modelSBName,modelBName,dataName,
-                useNumberCounting,nuisPriorName);
+								useNumberCounting,nuisPriorName);
         if (result == 0) { 
             return lres; 
         }
@@ -775,49 +833,53 @@ LimitResult RooStats::get_Pvalue(     RooWorkspace* w,
 }
 
 //________________________________________________________________________________________________
-LimitResult RooStats::get_Pvalue( const RooStats::HypoTestResult* fResult ){
-    // MB : code taken from HypoTestInverterPlot::MakeExpectedPlot()
+LimitResult RooStats::get_Pvalue( const RooStats::HypoTestResult* fResult, bool doUL )
+{
+  // // MB : code taken from HypoTestInverterPlot::MakeExpectedPlot()
+  // std::vector<double> qv;
+  // qv.resize(11,-1.0);
+  
+  // LimitResult upperLimitResult;
+  
+  // /// observed p-values
+  // qv[2]  = 0.5; // cls expected
+  // qv[5]  = fResult->CLs() ; //
+  // qv[6]  = fResult->CLsError() ; //
+  // qv[7]  = fResult->CLb() ; //
+  // qv[8]  = fResult->CLbError() ; //
+  // qv[9]  = fResult->CLsplusb() ; //
+  // qv[10] = fResult->CLsplusbError() ; //
+  // double p0 = fResult->NullPValue(); //
+  
+  // //jlorenz: dirty hack in order to avoid 0.000000 values
+  // for (int k=0; k<=10; k++) { 
+  //     if (qv[k] < 0.000001) {
+  //         qv[k] = 0.000001; 
+  //     } 
+  // }
+  
+  // /// And pass on to limitresult object
+  // LimitResult result;
+  // result.SetP0(     p0 );
+  // result.SetP1(     qv[9] );
+  // result.SetCLs(    qv[5] );
+  // result.SetCLsexp( qv[2] );
+  // result.SetCLsu1S( qv[3] );
+  // result.SetCLsd1S( qv[1] );
+  // result.SetCLsu2S( qv[4] );
+  // result.SetCLsd2S( qv[0] );  
 
-    double nsig1(1.0);
-    double nsig2(2.0);
+  // return result;
 
-    nsig1 = std::abs(nsig1);
-    nsig2 = std::abs(nsig2);
+  RooStats::HypoTestInverterResult* hti = new RooStats::HypoTestInverterResult();
+  if (doUL) { // exclusion test
+    hti->Add( 1.0, *fResult );
+  } else { // discovery
+    hti->Add( 0.0, *fResult );
+  }  
+  hti->UseCLs(doUL);
 
-    std::vector<double> qv;
-    qv.resize(11,-1.0);
-
-    LimitResult upperLimitResult;
-
-    /// observed p-values
-    qv[2]  = 0.5; // cls expected
-    qv[5]  = fResult->CLs() ; //
-    qv[6]  = fResult->CLsError() ; //
-    qv[7]  = fResult->CLb() ; //
-    qv[8]  = fResult->CLbError() ; //
-    qv[9]  = fResult->CLsplusb() ; //
-    qv[10] = fResult->CLsplusbError() ; //
-    double p0 = fResult->NullPValue(); //
-
-    //jlorenz: dirty hack in order to avoid 0.000000 values
-    for (int k=0; k<=10; k++) { 
-        if (qv[k] < 0.000001) {
-            qv[k] = 0.000001; 
-        } 
-    }
-
-    /// And pass on to limitresult object
-    LimitResult result;
-    result.SetP0(     p0 );
-    result.SetP1(     qv[9] );
-    result.SetCLs(    qv[5] );
-    result.SetCLsexp( qv[2] );
-    result.SetCLsu1S( qv[3] );
-    result.SetCLsd1S( qv[1] );
-    result.SetCLsu2S( qv[4] );
-    result.SetCLsd2S( qv[0] );  
-
-    return result;
+  return RooStats::get_Pvalue( hti, doUL );
 }
 
 //________________________________________________________________________________________________
@@ -835,8 +897,9 @@ double RooStats::get_Presult(  RooWorkspace* w,
 {
     double pvalue(-1.);
 
-    RooStats::HypoTestResult* result = RooStats::get_htr(w,doUL,ntoys,calculatorType,testStatType,modelSBName,modelBName,dataName,
-            useCLs,useNumberCounting,nuisPriorName);
+    RooStats::HypoTestResult* result = RooStats::get_htr(w,doUL,ntoys,calculatorType,testStatType,
+							 modelSBName,modelBName,dataName,
+							 useCLs,useNumberCounting,nuisPriorName);
     if (result!=0) { result->Print(); }
     else { return pvalue; }
 
@@ -877,7 +940,8 @@ RooStats::HypoTestResult* RooStats::get_htr(  RooWorkspace* w,
         } 
     }
 
-    RooStats::HypoTestResult* result = RooStats::DoHypoTest(w,doUL,ntoys,calculatorType,testStatType,modelSBName,modelBName,dataName,
-            useNumberCounting,nuisPriorName);
+    RooStats::HypoTestResult* result = RooStats::DoHypoTest(w,doUL,ntoys,calculatorType,testStatType,
+							    modelSBName,modelBName,dataName,
+							    useNumberCounting,nuisPriorName);
     return result;
 }

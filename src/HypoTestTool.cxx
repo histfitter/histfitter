@@ -408,6 +408,11 @@ RooStats::HypoTestTool::SetupHypoTestCalculator(RooWorkspace * w, bool doUL,
     }
     if (!sbModel->GetSnapshot() ) { 
         Info("HypoTestTool","Model %s has no snapshot  - make one using model poi",modelSBName);
+        RooRealVar * var = dynamic_cast<RooRealVar*>(sbModel->GetParametersOfInterest()->first());
+        if (var) {
+	  Info("HypoTestTool","Setting poi to 1.0");
+	  var->setVal(1.0);
+        }
         sbModel->SetSnapshot( *sbModel->GetParametersOfInterest() );
     }
 
@@ -507,6 +512,7 @@ RooStats::HypoTestTool::SetupHypoTestCalculator(RooWorkspace * w, bool doUL,
     bool doFit = mInitialFit;
     if (testStatType == 0 && mInitialFit == -1) doFit = false;  // case of LEP test statistic
     if (type == 3  && mInitialFit == -1) doFit = false;         // case of Asymptoticcalculator with nominal Asimov
+    if (!doUL) doFit = false;                                   // case of discovery: don't want to adjust s+b toys
     double poihat = 0;
 
     if (doFit)  { 
@@ -566,59 +572,6 @@ RooStats::HypoTestTool::SetupHypoTestCalculator(RooWorkspace * w, bool doUL,
         m_logger << kINFO << "StandardHypoTestInvo: snapshot of S+B Model " << sbModel->GetName() 
             << " is set to the best fit value" << GEndl;  
     }
-
-    /*
-       TStopwatch tw; 
-       tw.Start(); 
-       RooFitResult * fitres = sbModel->GetPdf()->fitTo(*data, InitialHesse(false), Hesse(false), Minimizer(mMinimizerType.c_str(),"Migrad"), 
-       Strategy(0), PrintLevel(mPrintLevel+1), Constrain(constrainParams), Save(true) ); //, Minos() );
-       if (fitres->status() != 0) { 
-       Warning("HypoTestTool","Fit to the model failed - try with strategy 1 and perform first an Hesse computation");
-       fitres = sbModel->GetPdf()->fitTo(*data, InitialHesse(true), Hesse(false), Minimizer(mMinimizerType.c_str(),"Migrad"), 
-       Strategy(1), PrintLevel(mPrintLevel+1), Constrain(constrainParams), Save(true) );
-       }
-       if (fitres->status() != 0) 
-       Warning("HypoTestTool"," Fit still failed - continue anyway.....");
-
-
-       double poihat  = poi->getVal();
-       m_logger << kINFO << "HypoTestTool - Best Fit value : " << poi->GetName() << " = "  
-       << poihat << " +/- " << poi->getError() << GEndl;
-       m_logger << kINFO << "Time for fitting : "; tw.Print(); 
-       tw.Stop(); 
-       */
-
-    /*
-       if (false) {
-    /// original code  
-    m_logger << kINFO << "HypoTestTool: snapshot of S+B Model " << sbModel->GetName() 
-    //<< " is set to the best fit value, and poi=1" << GEndl;
-    << " is set to the best fit value." << GEndl;
-    //save best fit value in the poi snapshot 
-
-    sbModel->SetSnapshot(*sbModel->GetParametersOfInterest());
-    poi->setVal(poihat); 
-    }
-    */
-
-    /*
-    /// better approach? MB: old
-    if (false) {
-    m_logger << kINFO << "HypoTestTool: snapshot of S+B Model " << sbModel->GetName() 
-    //<< " is set to the best fit value, and poi=1" << GEndl;
-    << " is set to the best fit value, with poi=1." << GEndl;
-    //save best fit value in the poi snapshot 
-    poi->setVal(1.0);
-    sbModel->SetSnapshot(*sbModel->GetParametersOfInterest());
-
-    m_logger << kINFO << "HypoTestTool: snapshot of B Model " << bModel->GetName()
-    //<< " is set to the best fit value, and poi=1" << GEndl;
-    << " is set to the best fit value, with poi=0." << GEndl;
-    //save best fit value in the poi snapshot 
-    poi->setVal(0.0);
-    bModel->SetSnapshot(*bModel->GetParametersOfInterest());
-    }
-    */
 
     // and reset poi
     poi->setVal(poihat);

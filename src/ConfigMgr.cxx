@@ -135,7 +135,7 @@ void ConfigMgr::fit(FitConfig* fc) {
 void ConfigMgr::doHypoTestAll(TString outdir, Bool_t doUL) {
     for(unsigned int i=0; i<m_fitConfigs.size(); i++) {
         doHypoTest( m_fitConfigs.at(i), outdir, 0., doUL );
-        if( m_fixSigXSec && !m_runOnlyNominalXSec ){
+        if( m_fixSigXSec && !m_runOnlyNominalXSec && doUL ){
             double SigXSecSysnsigma = 1.;
             doHypoTest( m_fitConfigs.at(i), outdir, SigXSecSysnsigma, doUL );
             doHypoTest( m_fitConfigs.at(i), outdir, SigXSecSysnsigma*(-1.), doUL );
@@ -215,8 +215,7 @@ void ConfigMgr::doHypoTest(FitConfig* fc, TString outdir, double SigXSecSysnsigm
         modelBName = makeCorrectedBkgModelConfig(w,modelSBName);
     }
 
-    //Do first fit and save fit result in order to control fit quality
-
+    /// 1. Do first fit and save fit result in order to control fit quality
     RooFitResult* fitresult = Util::doFreeFit( w, 0, false, true ); // reset fit paremeters after the fit ...
 
     if(fitresult) {	
@@ -228,10 +227,12 @@ void ConfigMgr::doHypoTest(FitConfig* fc, TString outdir, double SigXSecSysnsigm
         m_logger << kINFO << "Now storing RooFitResult <" << hypName << ">" << GEndl;
     }
 
+    /// 2. the hypothesis test
+
     RooStats::HypoTestResult* htr(0);
     RooStats::HypoTestInverterResult* result(0);
 
-    if (doUL) { // exclusion
+    if (doUL) { /// a. exclusion
         result = RooStats::DoHypoTestInversion(w, 
                 m_nToys,m_calcType,m_testStatType,
                 useCLs, 
@@ -241,7 +242,8 @@ void ConfigMgr::doHypoTest(FitConfig* fc, TString outdir, double SigXSecSysnsigm
                 modelSBName.Data(), modelBName.Data(),
                 dataName, 
                 nuisPriorName ) ;
-    } else {  // discovery 
+	result->UseCLs(useCLs);
+    } else {  // b. discovery 
         // MB: Hack, needed for ProfileLikeliHoodTestStat to work properly.
         if (m_testStatType==3) { 
             m_logger << kWARNING << "Discovery mode --> Need to change test-statistic type from one-sided to two-sided for RooStats to work." << GEndl; 
@@ -255,10 +257,11 @@ void ConfigMgr::doHypoTest(FitConfig* fc, TString outdir, double SigXSecSysnsigm
             htr->Print(); 
             result = new RooStats::HypoTestInverterResult();
             result->Add(0,*htr);
+            result->UseCLs(false);
         }
     }
 
-    //// Storage
+    /// 3. Storage
     if ( result!=0 ) {	
         outfile->cd();
         TString hypName="hypo_"+fc->m_signalSampleName;
@@ -272,7 +275,7 @@ void ConfigMgr::doHypoTest(FitConfig* fc, TString outdir, double SigXSecSysnsigm
     if ( htr!=0 ) {	
         outfile->cd();
         TString hypName="discovery_htr_"+fc->m_signalSampleName;
-	if(fc->m_hypoTestName.Length() > 0){ hypName="discovery_htr_"+fc->m_hypoTestName; }
+	    if(fc->m_hypoTestName.Length() > 0){ hypName="discovery_htr_"+fc->m_hypoTestName; }
         htr->SetName(hypName);
         htr->Write();
         m_logger << kINFO << "Now storing HypoTestResult <" << hypName << ">" << GEndl;

@@ -125,8 +125,8 @@ namespace RooStats
                 bool useCLs = true ,  
                 int npoints = 20 ) ;
 
-    LimitResult get_Pvalue( const RooStats::HypoTestInverterResult* fResults );
-    LimitResult get_Pvalue( const RooStats::HypoTestResult* fResult );
+    LimitResult get_Pvalue( const RooStats::HypoTestInverterResult* fResults, bool doUL=true );
+    LimitResult get_Pvalue( const RooStats::HypoTestResult* fResult, bool doUL=true );
 }
 
 # endif

@@ -28,6 +28,11 @@ LimitResult::LimitResult(const TString &name, const TString &title) :
     m_expectedUpperLimitPlus2Sig(-1),
     m_expectedUpperLimitMinus1Sig(-1),
     m_expectedUpperLimitMinus2Sig(-1),
+    m_p0exp(-1),
+    m_p0u1S(-1),
+    m_p0d1S(-1),
+    m_p0u2S(-1),
+    m_p0d2S(-1),
     m_resultfilename(""),
     m_comments("") {
     // dummy code: allow unused variable
@@ -62,6 +67,13 @@ void LimitResult::Summary() {
     std::cout << " | Expected Upper Limit (-1 sig):  " << GetExpectedUpperLimitMinus1Sig()  << std::endl;
     std::cout << " | Expected Upper Limit (-2 sig):  " << GetExpectedUpperLimitMinus2Sig()  << std::endl;
 
+    std::cout << " | p0 value:                    " << GetP0()     << std::endl;
+    std::cout << " | Expected p0 value:           " << GetP0exp() << std::endl;
+    std::cout << " | Expected p0 value (+1 sig):  " << GetP0u1S() << std::endl;
+    std::cout << " | Expected p0 value (+2 sig):  " << GetP0d1S() << std::endl;
+    std::cout << " | Expected p0 value (-1 sig):  " << GetP0u2S() << std::endl;
+    std::cout << " | Expected p0 value (-2 sig):  " << GetP0d2S() << std::endl;
+
     std::cout << " | results stored in: " <<GetResultFilename() << std::endl ;
     std::cout << " | Comments: "<<     GetComments() << std::endl;
 }
@@ -76,8 +88,12 @@ TString  LimitResult::GetSummaryString() const {
     summary += Form(" %d %lf %lf",GetfID(),GetSigma0(),GetSigma1());
     // CLs bands:
     summary += Form(" %lf %lf %lf %lf",GetCLsu1S(),GetCLsd1S(),GetCLsu2S(),GetCLsd2S());
+    // p0 bands:
+    summary += Form(" %lf %lf %lf %lf %lf",GetP0exp(),GetP0u1S(),GetP0d1S(),GetP0u2S(),GetP0d2S());
     // upper limits:
-    summary += Form(" %lf %lf %lf %lf %lf %lf %lf -999007. -999007.",GetUpperLimit(),GetUpperLimitEstimatedError(),GetExpectedUpperLimit(),GetExpectedUpperLimitPlus1Sig(),GetExpectedUpperLimitPlus2Sig(),GetExpectedUpperLimitMinus1Sig(),GetExpectedUpperLimitMinus2Sig());
+    summary += Form(" %lf %lf %lf %lf %lf %lf %lf -999007. -999007.",GetUpperLimit(),
+		    GetUpperLimitEstimatedError(),GetExpectedUpperLimit(),GetExpectedUpperLimitPlus1Sig(),
+		    GetExpectedUpperLimitPlus2Sig(),GetExpectedUpperLimitMinus1Sig(),GetExpectedUpperLimitMinus2Sig());
 
     std::map<TString,float>::const_iterator itr=m_metadata.begin(), end=m_metadata.end();
     for (; itr!=end; ++itr) { summary += Form(" %f",itr->second); }
@@ -92,6 +108,7 @@ TString  LimitResult::GetDescriptionString() const {
     description += "CLsexp:";     //1
     description += "fID:sigma0:sigma1:";   //3
     description += "clsu1s:clsd1s:clsu2s:clsd2s:"; //4
+    description += "p0exp:p0u1s:p0d1s:p0u2s:p0d2s:"; //5
     description += "upperLimit:upperLimitEstimatedError:expectedUpperLimit:expectedUpperLimitPlus1Sig:expectedUpperLimitPlus2Sig:expectedUpperLimitMinus1Sig:expectedUpperLimitMinus2Sig:xsec:excludedXsec"; //4
 
     std::map<TString,float>::const_iterator itr=m_metadata.begin(), end=m_metadata.end();

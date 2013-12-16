@@ -33,6 +33,11 @@ class LimitResult {
         double m_expectedUpperLimitMinus1Sig;
         double m_expectedUpperLimitMinus2Sig;
 
+	double m_p0exp;
+	double m_p0u1S;
+	double m_p0d1S;
+	double m_p0u2S;
+	double m_p0d2S;
 
         TString m_resultfilename;
         TString m_comments;
@@ -43,6 +48,12 @@ class LimitResult {
         virtual ~LimitResult();
 
         inline double GetP0() const 				{ return m_p0; }; // p value at signal = 0
+        inline double GetP0exp() const 			{ return m_p0exp; }; //
+        inline double GetP0u1S() const 			{ return m_p0u1S; }; // 1 sigma upper and lower 
+        inline double GetP0d1S() const 			{ return m_p0d1S; }; // from toys               
+        inline double GetP0u2S() const                         { return m_p0u2S; }; // 1 sigma upper and lower 
+        inline double GetP0d2S() const                         { return m_p0d2S; }; // from toys               
+
         inline double GetP1() const 				{ return m_p1; }; // p value at signal = 1
 
         inline double GetCLs() const 			{ return m_CLs; }; // 
@@ -71,6 +82,12 @@ class LimitResult {
 
 
         inline void SetP0(const double & val)		{ m_p0 = val; }; // 
+        inline void SetP0exp(const double & val)	{ m_p0exp = val; }; // 
+        inline void SetP0u1S(const double & val)	{ m_p0u1S= val; }; // 1 sigma upper and lower 
+        inline void SetP0d1S(const double & val)	{ m_p0d1S= val; }; // from toys                  
+        inline void SetP0u2S(const double & val)        { m_p0u2S= val; }; // 1 sigma upper and lower 
+        inline void SetP0d2S(const double & val)        { m_p0d2S= val; }; // from toys        
+
         inline void SetP1(const double & val)		{ m_p1 = val; }; // 
 
         inline void SetCLs(const double & val)		{ m_CLs = val; }; // 
