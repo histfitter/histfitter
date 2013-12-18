@@ -87,9 +87,6 @@ Fitted bkg events        '''
         sampleName = name.replace("Fitted_events_","")
         if sampleName != sample:
           continue
-        sampleName = name.replace("MC_exp_events_","")
-        if sampleName != sample:
-          continue
         
         sample = name.replace("Fitted_events_","")
         tableline += '''
@@ -153,6 +150,9 @@ MC exp. SM events             '''
   for sample in sampleList:
     for name in map_listofkeys:
       if "MC_exp_events_" in name and sample in name:
+        sampleName = name.replace("MC_exp_events_","")
+        if sampleName != sample:
+          continue
         sample = name.replace("MC_exp_events_","")
         if sample!="QCD":
             tableline += '''
@@ -160,6 +160,7 @@ MC exp. SM events             '''
         else: 
             tableline += '''
         data-driven exp. '''
+
         sampleName = sample
         sampleName = sampleName.replace("_","\_")
         tableline += sampleName
