@@ -237,6 +237,9 @@ class fitConfig(object):
         # Verify that this name is not already used
         for chan in self.channels:
             if chan.name == chanObj.name:
+                log.info("Not gonna add the region, because it exists in fitConfig --> channel-List follows:" )
+                for chan in self.channels:
+                    print "     chan.name = ", chan.name
                 raise RuntimeError("Channel %s already exists in TopLevelXML %s. Please use a different name." % (chanObj.name, self.name))
 
         #set channel parent

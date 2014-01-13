@@ -644,6 +644,24 @@ class Sample(object):
                 self.overallSystList[idx] = rsyst
                 return
 
+    def getHistoSys(self, name):
+        """
+        Get histo systematic
+        """
+        for syst in self.histoSystList:
+            if name==syst[0]: return syst
+        return None
+
+    def replaceHistoSys(self, rsyst):
+        """
+        replace histo systematic
+        """
+        for idx in xrange(len(self.histoSystList)):
+            syst = self.histoSystList[idx]
+            if rsyst[0]==syst[0]:
+                self.histoSystList[idx] = rsyst
+                return
+
     def removeOverallSys(self, systName):
         """
         replace overall systematic

@@ -1,3 +1,11 @@
+2013-01-13 Alex Koutsman <koutsman@cern.ch>
+	   U python/configManager.py
+	   U python/channel.py
+	   U python/fitConfig.py
+	   U python/sample.py
+	   * Adding possibility to remap histoSys systematics. 
+	   * In channel.py it is tested whether nBins and bin width is the same for the two channels in question
+	
 2013-12-16 Max Baak <mbaak@cern.ch>
 	M       StatTools.cxx
 	M       ConfigMgr.cxx

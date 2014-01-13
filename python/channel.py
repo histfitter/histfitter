@@ -386,3 +386,17 @@ class Channel(object):
         self.xmlFile.close()
         return
 
+    def compareChannelFormat(self, remapChan):
+        if self.nBins != remapChan.nBins:
+            log.warning("Cannot remap histoSys systematics from %s to channel %s as number of bins do not agree: %g versus %g" % (remapChan.name, self.name, float(self.nBins), float(remapChan.nBins)))
+            return False
+
+        if abs(self.binLow - remapChan.binLow) > 0.0001:
+            log.warning("Cannot remap histoSys systematics from %s to channel %s as number of bins do not agree: %g versus %g" % (remapChan.name, self.name, float(self.binLow), float(remapChan.binLow)))
+            return False
+
+        if abs(self.binHigh - remapChan.binHigh) > 0.0001:
+            log.warning("Cannot remap histoSys systematics from %s to channel %s as number of bins do not agree: %g versus %g" % (remapChan.name, self.name, float(self.binHigh), float(remapChan.binHigh)))
+            return False
+
+        return True
