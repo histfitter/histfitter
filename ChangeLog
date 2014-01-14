@@ -1,3 +1,8 @@
+2013-01-14 Max Baak <mbaak@cern.ch>
+	M       src/Utils.cxx
+	M       src/Utils.h
+	* scanf function (usable in python)
+
 2013-01-13 Alex Koutsman <koutsman@cern.ch>
 	   U python/configManager.py
 	   U python/channel.py

@@ -3613,6 +3613,30 @@ Util::PlotYieldPLL(RooWorkspace* w, RooAbsReal* nll, RooAbsReal* bkgf, RooFitRes
 }
 
 
+TString
+Util::scanStrForFloats(const TString& toscan, const TString& format)
+{
+    int narg1 = format.CountChar('%');
+    TString wsid;
+    std::vector<float> wsarg(10);
+
+    int narg2 = sscanf( toscan.Data(), format.Data(), &wsarg[0],&wsarg[1],&wsarg[2],&wsarg[3],&wsarg[4],&wsarg[5],&wsarg[6],&wsarg[7],&wsarg[8],&wsarg[9] );
+
+    if ( !(narg1==narg2 && narg2>0) ) { 
+        Logger << kERROR << "Util::scanStringForFloats incorrect lengths" << GEndl;
+        return wsid;
+    }
+
+    wsarg.resize(narg2);
+    wsid.Clear();  // form unique ws id
+    for (int i=0; i<narg2; ++i) {
+        if (i!=0) wsid += "_" ;
+        wsid += Form("%.0f", wsarg[i] ); 
+    }
+
+    return wsid;
+}
+
 
 // //_____________________________________________________________________________
 // void Util::AddComponentsToPlot_Moriond(RooWorkspace* w, FitConfig* fc, RooPlot* frame, RooAbsPdf* regionPdf, RooAbsData* regionData, RooRealVar* obsRegion, TString regionCatLabel, ChannelStyle style, RooFitResult* rFit) {
