@@ -12,13 +12,13 @@ import argparse
 from logger import Logger
 log = Logger('HistFitter')
 
-def enum(typename, field_names):
-    """Create a new enumeration type"""
-
-    if isinstance(field_names, str):
-        field_names = field_names.replace(',', ' ').split()
-    d = dict((reversed(nv) for nv in enumerate(field_names)), __slots__ = ())
-    return type(typename, (object,), d)()
+#def enum(typename, field_names):
+#    """Create a new enumeration type"""
+#
+#    if isinstance(field_names, str):
+#        field_names = field_names.replace(',', ' ').split()
+#    d = dict((reversed(nv) for nv in enumerate(field_names)), __slots__ = ())
+#    return type(typename, (object,), d)()
 
 
 def GenerateFitAndPlotCPP(fc, anaName, drawBeforeFit, drawAfterFit, drawCorrelationMatrix, drawSeparateComponents, drawLogLikelihood, minos, minosPars):
@@ -57,7 +57,7 @@ if __name__ == "__main__":
     minosPars = ""
     doCodeProfiling = False
     
-    FitType = enum('FitType','Discovery , Exclusion , Background')
+    FitType = configMgr.FitType #enum('FitType','Discovery , Exclusion , Background')
     myFitType=FitType.Background
     doValidation = False
     
@@ -109,6 +109,8 @@ if __name__ == "__main__":
     elif HistFitterArgs.fit_type == "disc":
         myFitType = FitType.Discovery
 
+    configMgr.myFitType = myFitType
+ 
     if HistFitterArgs.validation:
         doValidation = True
 
