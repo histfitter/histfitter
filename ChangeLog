@@ -1,9 +1,14 @@
-2013-01-14 Max Baak <mbaak@cern.ch>
+2014-01-24 Jeanette Miriam Lorenz <jeanette.miriam.lorenz@cern.ch>
+        M python/ConfigManager.py
+	M scripts/HistFitter.py
+	* remove loose signal regions used for remapping of systematic uncertainties in the exclusion fit (only if remapping was activated)
+
+2014-01-14 Max Baak <mbaak@cern.ch>
 	M       src/Utils.cxx
 	M       src/Utils.h
 	* scanf function (usable in python)
 
-2013-01-13 Alex Koutsman <koutsman@cern.ch>
+2014-01-13 Alex Koutsman <koutsman@cern.ch>
 	   U python/configManager.py
 	   U python/channel.py
 	   U python/fitConfig.py
