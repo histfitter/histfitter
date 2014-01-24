@@ -22,6 +22,14 @@ def mkdir_p(path):
 def replaceSymbols(s):
     s = s.replace("/","").replace("*","").replace("(","").replace(")","")
     return s
+    
+def enum(typename, field_names):
+    """Create a new enumeration type"""
+
+    if isinstance(field_names, str):
+        field_names = field_names.replace(',', ' ').split()
+    d = dict((reversed(nv) for nv in enumerate(field_names)), __slots__ = ())
+    return type(typename, (object,), d)()    
 
 class ConfigManager(object):
     """
@@ -69,6 +77,8 @@ class ConfigManager(object):
         self.blindCR = False # Blind the CRs only
         self.blindVR = False # Blind the VRs only
         self.useSignalInBlindedData = False
+        self.FitType = enum('FitType','Discovery , Exclusion , Background') # to distinguish between background, exclusion and discovery fit
+        self.myFitType = None #propagted from HistFitter.py
 
         self.normList = [] # List of normalization factors
         self.outputFileName = None # Output file name used to store fit results
@@ -777,6 +787,22 @@ class ConfigManager(object):
         self.outputRoot()
         
         if self.executeHistFactory:
+            #removing regions used for remapping systematic uncertainties, but only for exclusion fits
+            #execute the folllowing only if some channel with a remapped systematic uncertaintiy was used
+            #in this case, keep only channels belonging to the signalchannels or the bkgConstrainchannels
+            if self.myFitType==self.FitType.Exclusion and len([chan for chan in fitConfig.channels if len(chan.remapSystChanName)>0]) > 0:
+                log.info("Found top level object for exclusion fit: %s" % fitConfig.name)
+                remove_channels=[]
+                for chan in fitConfig.channels:
+                    if not fitConfig.signalChannels.__contains__(chan.channelName) and not fitConfig.bkgConstrainChannels.__contains__(chan.channelName):
+                        remove_channels.append(chan)
+                for remove_chan in remove_channels:
+                    try:
+                        fitConfig.channels.remove(remove_chan)
+                        log.info("Removing channel %s from top level object %s as not signal region and not control region" % (remove_chan.name,fitConfig.name))
+                    except:
+                        log.warning("Unable to remove channel %s from top level object %s" % (remove_chan.name,fitConfig.name))
+
             if self.writeXML:
                 fitConfig.writeXML()   #<--- this internally calls channel.writeXML()
                 fitConfig.executehist2workspace()
