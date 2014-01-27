@@ -616,7 +616,6 @@ class ConfigManager(object):
         normCuts = ""
         for (iChan,chan) in enumerate(fitConfig.channels):
             if not chan.channelName in fitConfig.validationChannels:
-                normString = "".join(chan.regions)
                 normCutsList = [ "(%s) || " % (self.cutsDict[reg]) for reg in chan.regions ]
                 normCuts = "".join(normCutsList)
 
@@ -657,7 +656,17 @@ class ConfigManager(object):
                         nomName = "h%sNom_%s_obs_%s" % (sam.name, regionString, replaceSymbols(chan.variableName) )
                         highName = "h%s%sHigh_%s_obs_%s" % (sam.name, syst.name, regionString, replaceSymbols(chan.variableName) )
                         lowName = "h%s%sLow_%s_obs_%s" % (sam.name, syst.name, regionString, replaceSymbols(chan.variableName) )
-                        
+
+                        normString = ""
+                        if sam.normRegions is not None:
+                            for normReg in sam.normRegions:
+                                if not type(normReg[0]) == "list":
+                                    normList = [normReg[0]]
+                                    c = fitConfig.getChannel(normReg[1],normList)
+                                else:
+                                    c = fitConfig.getChannel(normReg[1],normReg[0])
+                                normString += c.regionString
+    
                         syst.PrepareGlobalNormalization(normString, self, fitConfig, chan, sam)
                         sam.addHistoSys(syst.name, nomName, highName, lowName, False, True, False, False, sam.name, normString)
 
@@ -1082,7 +1091,7 @@ class ConfigManager(object):
                     else:
                         c = fitConfig.getChannel(normReg[1],normReg[0])
                     normString += c.regionString
-
+          
                 tmpName = "h%sNom_%sNorm" % (sam.name, normString )
                 if not tmpName in self.hists.keys():
                     if self.readFromTree:
@@ -1135,7 +1144,8 @@ class ConfigManager(object):
                 syst.PrepareWeightsAndHistos(regionString, normString, normCuts, self, fitConfig, chan, sam)
 
                 self.addHistoSysforNoQCD(regionString, normString, normCuts, fitConfig, chan, sam, syst)
-        elif sam.isQCD:
+
+        elif sam.isQCD:	
             #Add Histos for Sample-type QCD
             self.addHistoSysForQCD(regionString,normString,normCuts,chan,sam)
         return
