@@ -1,3 +1,7 @@
+2014-01-27 Jeanette Miriam Lorenz <jeanette.miriam.lorenz@cern.ch>
+        M python/ConfigManager.py
+	* bug fix in userNormHistoSys: making sure that the normString identifying regions used for the normalization gets sets correctly depending on the current channel; this ensures that the correct regions are used for the normalization
+
 2014-01-24 Jeanette Miriam Lorenz <jeanette.miriam.lorenz@cern.ch>
         M python/ConfigManager.py
 	M scripts/HistFitter.py
