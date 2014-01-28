@@ -700,35 +700,36 @@ class ConfigManager(object):
                     sam.replaceOverallSys(rsys)
                     pass
 
-            rc = fitConfig.getChannelByName(chan.remapSystChanName)
-            # Check that for histoSys remapping, the channels have the same binning and binWidth
-            # If they do not, then no remapping is performed
-            channelsCompatible = chan.compareChannelFormat(rc)
-            if not channelsCompatible:
-                continue
+##      AK - 28-jan-2014, commenting out remapping for histoSys-type. The problem is that not only should one remap the normalization for this to work, but also the shape, which is not implemented yet.
+##             rc = fitConfig.getChannelByName(chan.remapSystChanName)
+##             # Check that for histoSys remapping, the channels have the same binning and binWidth
+##             # If they do not, then no remapping is performed
+##             channelsCompatible = chan.compareChannelFormat(rc)
+##             if not channelsCompatible:
+##                 continue
             
-            log.info("For histoSys: now setting systematics of channel <%s> to those of channel: <%s>"%(chan.name,chan.remapSystChanName))
-            # loop over overallSystematics of all samples, and swap for those of remap channel
-            for sam in chan.sampleList:
-                if not sam.allowRemapOfSyst: continue
-                if sam.isData: continue
-                if not rc.hasSample(sam.name): continue
+##             log.info("For histoSys: now setting systematics of channel <%s> to those of channel: <%s>"%(chan.name,chan.remapSystChanName))
+##             # loop over overallSystematics of all samples, and swap for those of remap channel
+##             for sam in chan.sampleList:
+##                 if not sam.allowRemapOfSyst: continue
+##                 if sam.isData: continue
+##                 if not rc.hasSample(sam.name): continue
 
-                rs = rc.getSample(sam.name)
+##                 rs = rc.getSample(sam.name)
 
-                for (key, ssys) in sam.systDict.items():
-                    if not ssys.allowRemapOfSyst: continue
+##                 for (key, ssys) in sam.systDict.items():
+##                     if not ssys.allowRemapOfSyst: continue
 
-                    osys = sam.getHistoSys(key) # histo sys part is to be modified
+##                     osys = sam.getHistoSys(key) # histo sys part is to be modified
                   
-                    rsys = rs.getHistoSys(osys[0]) # get replacement histo systematic, by name
-                    if rsys is None:
-                        log.warning("For channel %s and sample %s, replacement systematic %s could not be found. Skipping replacement of this histo syst." % (chan.name,sam.name,osys[0]))
-                        continue
+##                     rsys = rs.getHistoSys(osys[0]) # get replacement histo systematic, by name
+##                     if rsys is None:
+##                         log.warning("For channel %s and sample %s, replacement systematic %s could not be found. Skipping replacement of this histo syst." % (chan.name,sam.name,osys[0]))
+##                         continue
 
-                    log.info("For channel %s and sample %s, replacement of histo systematic %s from %s." % (chan.name,sam.name,osys[0],rc.name))
-                    sam.replaceHistoSys(rsys)
-                    pass
+##                     log.info("For channel %s and sample %s, replacement of histo systematic %s from %s." % (chan.name,sam.name,osys[0],rc.name))
+##                     sam.replaceHistoSys(rsys)
+##                     pass
             
         #post-processing 3: merging of overall systematics (e.g. signal theory), if so requested
         for chan in fitConfig.channels:

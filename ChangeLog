@@ -1,3 +1,7 @@
+2014-01-28 Alex Koutsman <koutsman@cern.ch>
+	U python/configManager.py
+	* turning off the added possibility to remap histoSys systematics (added on 2014-01-13), as functionality to remap the shape-part of the histoSys systematic is not present. So remapping would only change the normalization and result in wrong systematic estimation.
+
 2014-01-27 Jeanette Miriam Lorenz <jeanette.miriam.lorenz@cern.ch>
         M python/ConfigManager.py
 	* bug fix in userNormHistoSys: making sure that the normString identifying regions used for the normalization gets sets correctly depending on the current channel; this ensures that the correct regions are used for the normalization
