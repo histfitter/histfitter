@@ -1,3 +1,6 @@
+2014-01-28 Max Baak <mbaak@cern.ch>
+	* The fix for userNormHistoSys is in, hence tagging HistFitter-00-00-37
+
 2014-01-28 Alex Koutsman <koutsman@cern.ch>
 	U python/configManager.py
 	* turning off the added possibility to remap histoSys systematics (added on 2014-01-13), as functionality to remap the shape-part of the histoSys systematic is not present. So remapping would only change the normalization and result in wrong systematic estimation.
