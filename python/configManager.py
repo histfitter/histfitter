@@ -105,7 +105,11 @@ class ConfigManager(object):
         self.doHypoTest = False
 
         self.fitConfigs = [] # fitConfig object
-        self.prepare = None # PrepareHistos object
+        self.TreePrepare = None # PrepareHistos object
+        self.HistoPrepare = None # PrepareHistos object
+        self.prepare = None
+
+        self.useHistoPrepareFallback = False # if set to true, initialise fallback TreePrepare (needs to be used with useHistBackupCacheFile!)
 
         self.histCacheFile = ""
         self.histBackupCacheFile = ""
@@ -325,19 +329,37 @@ class ConfigManager(object):
                                 if not nomMergedName in self.hists.keys():
                                     self.hists[nomMergedName] = None
 
+        # ALWAYS build the TreePrepare object
+        log.info("  -build TreePrepare()...")
+        self.TreePrepare = TreePrepare()
+        
         if self.readFromTree:
-            log.info("  -build TreePrepare()...")
-            self.prepare = TreePrepare()
+            self.prepare = self.TreePrepare
             if self.plotHistos is None:    #set plotHistos if not already set by user
                 self.plotHistos = False  #this is essentially for debugging
                 pass
         else:
             log.info("  -build HistoPrepare()...")
-            if self.useHistBackupCacheFile:
-                self.prepare = HistoPrepare(self.histCacheFile,self.histBackupCacheFile)
-            else: # default
-                self.prepare = HistoPrepare(self.histCacheFile)
+           
+            if self.useHistoPrepareFallback:
+                if not self.useHistBackupCacheFile: 
+                    log.warning("letting useHistoPrepareFallback imply useHistBackupCacheFile")
+                    self.useHistBackupCacheFile = True
 
+                if self.histBackupCacheFile == "":
+                    log.warning("histBackupCacheFile is empty, what you are trying is likely not to work!")
+          
+                log.info("setting HistoPrepare.prepareAlt")
+
+            if self.useHistoPrepareFallback:
+                self.HistoPrepare = HistoPrepare(self.histCacheFile, self.histBackupCacheFile, self.TreePrepare)
+            elif self.useHistBackupCacheFile:
+                self.HistoPrepare = HistoPrepare(self.histCacheFile, self.histBackupCacheFile)
+            else: # default
+                self.HistoPrepare = HistoPrepare(self.histCacheFile)
+
+            self.prepare = self.HistoPrepare
+        
         #C++ alter-ego
         log.info("  -initialize C++ mgr...")
         self.initializeCppMgr()
@@ -634,7 +656,8 @@ class ConfigManager(object):
         for (iChan, chan) in enumerate(fitConfig.channels):
             log.info("Channel: %s" % chan.name)
             regionString = "".join(chan.regions)
-            self.prepare.channel = chan
+            self.TreePrepare.channel = chan
+            self.HistoPrepare.channel = chan
             
             sampleListRun = deepcopy(chan.sampleList)
             #for (iSam, sam) in enumerate(fitConfig.sampleList):
@@ -986,32 +1009,40 @@ class ConfigManager(object):
 
     def setWeightsCutsVariable(self,chan,sam,regionString):
         if not sam.isData and not sam.isQCD and not sam.isDiscovery:
-            self.prepare.weights = str(self.lumiUnits*self.outputLumi/self.inputLumi)
-            self.prepare.weights += " * " + " * ".join(sam.weights)
-            if self.readFromTree and not sam.isDiscovery:
+            self.HistoPrepare.weights = str(self.lumiUnits*self.outputLumi/self.inputLumi)
+            self.HistoPrepare.weights += " * " + " * ".join(sam.weights)
+            
+            self.TreePrepare.weights = self.HistoPrepare.weights 
+            
+            if not sam.isDiscovery:
                     treeName = sam.treeName
                     if treeName == '': 
                         treeName = sam.name+self.nomName
-                    self.prepare.read(treeName, sam.files)
+                    self.TreePrepare.read(treeName, sam.files)
         else:
-            self.prepare.weights = "1."
-            if self.readFromTree:
-                treeName = sam.treeName
-                if treeName == '': 
-                    treeName = sam.name
-                self.prepare.read(treeName, sam.files)
+            self.HistoPrepare.weights = "1."
+            self.TreePrepare.weights = self.HistoPrepare.weights 
+            
+            treeName = sam.treeName
+            if treeName == '': 
+                treeName = sam.name
+            self.TreePrepare.read(treeName, sam.files)
 
         if len(sam.cutsDict.keys()) == 0:
             if not chan.variableName == "cuts":
-                self.prepare.cuts = self.cutsDict[regionString]
+                self.HistoPrepare.cuts = self.cutsDict[regionString]
+                self.TreePrepare.cuts = self.HistoPrepare.cuts
         else:
             if not chan.variableName == "cuts":
-                self.prepare.cuts = sam.cutsDict[regionString]
+                self.HistoPrepare.cuts = sam.cutsDict[regionString]
+                self.TreePrepare.cuts = self.HistoPrepare.cuts
 
         if sam.unit == "GeV":
-            self.prepare.var = chan.variableName
+            self.HistoPrepare.var = chan.variableName
+            self.TreePrepare.var = self.HistoPrepare.var 
         elif sam.unit == "MeV" and chan.variableName.find("/") < 0 and not chan.variableName.startswith("n"):
-            self.prepare.var = chan.variableName+"/1000."
+            self.HistoPrepare.var = chan.variableName+"/1000."
+            self.TreePrepare.var = self.HistoPrepare.var 
 
         return
 
@@ -1112,12 +1143,13 @@ class ConfigManager(object):
 
                                 treeName = s.treeName
                                 if treeName=='': treeName = s.name+self.nomName
-                                self.prepare.read(treeName, s.files)
+                                self.TreePrepare.read(treeName, s.files)
 
                                 tempHist = TH1F("temp", "temp", 1, 0.5, 1.5)
 
-                                self.chains[self.prepare.currentChainName].Project("temp",self.cutsDict[r], \
+                                self.chains[self.TreePrepare.currentChainName].Project("temp",self.cutsDict[r], \
                                                                                    str(self.lumiUnits*self.outputLumi/self.inputLumi)+" * "+"*".join(s.weights)+" * ("+self.cutsDict[r]+")")
+                                
 
                                 # if the overflow bin is used for this channel, make sure the normalization takes it into account
                                 nomName = "h%sNom_%sNorm" % (s.name, normString)
@@ -1132,10 +1164,48 @@ class ConfigManager(object):
                         nomName = "h%sNom_%sNorm" % (sam.name, normString)
                         self.hists[nomName] = None
                         try:
-                            self.prepare.addHisto(nomName)
+                            self.HistoPrepare.addHisto(nomName)
                         except:    
-                            # assume that if no histogram is made, then it is not needed  
-                            pass
+                            if self.useHistoPrepareFallback:
+                                # UGLY COPY PASTE FROM ABOVE
+
+                                self.hists[tmpName] = TH1F(tmpName, tmpName, 1, 0.5, 1.5)
+                                for normReg in sam.normRegions:
+                                    if not type(normReg[0]) == "list":
+                                        normList = [normReg[0]]
+                                        c = fitConfig.getChannel(normReg[1], normList)
+                                    else:
+                                        c = fitConfig.getChannel(normReg[1], normReg[0])
+                                    for r in c.regions:
+                                        try:
+                                            s = c.getSample(sam.name)
+                                        except:    
+                                            # assume that if no histogram is made, then it is not needed  
+                                            continue
+
+                                        treeName = s.treeName
+                                        if treeName=='': treeName = s.name+self.nomName
+                                        self.TreePrepare.read(treeName, s.files)
+
+                                        tempHist = TH1F("temp", "temp", 1, 0.5, 1.5)
+
+                                        self.chains[self.TreePrepare.currentChainName].Project("temp",self.cutsDict[r], \
+                                                                                           str(self.lumiUnits*self.outputLumi/self.inputLumi)+" * "+"*".join(s.weights)+" * ("+self.cutsDict[r]+")")
+                                        
+
+                                        # if the overflow bin is used for this channel, make sure the normalization takes it into account
+                                        nomName = "h%sNom_%sNorm" % (s.name, normString)
+                                        if c.useOverflowBin:
+                                            self.hists[nomName].SetBinContent(1, self.hists[nomName].GetBinContent(1) + tempHist.Integral())
+                                        else:
+                                            self.hists[nomName].SetBinContent(1, self.hists[nomName].GetBinContent(1) + tempHist.GetSumOfWeights())
+                                        del tempHist
+
+                                        log.verbose("nom =%f" % self.hists[nomName].GetSumOfWeights())
+
+                            else:
+                                # assume that if no histogram is made, then it is not needed  
+                                pass
 
             for (systName,syst) in chan.getSample(sam.name).systDict.items():
                 log.info("    Systematic: %s" % systName)
@@ -1285,8 +1355,8 @@ class ConfigManager(object):
         outputRootFile = None
         if self.readFromTree:
             outputRootFile = TFile(self.histCacheFile,"RECREATE")
-        elif self.prepare.recreate:
-            outputRootFile = self.prepare.cacheFile
+        elif self.HistoPrepare.recreate:
+            outputRootFile = self.HistoPrepare.cacheFile
             if not outputRootFile.IsOpen():
                 outputRootFile = outputRootFile.Open(self.histCacheFile,"UPDATE")
 

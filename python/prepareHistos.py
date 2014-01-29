@@ -196,10 +196,12 @@ class TreePrepare(PrepareHistosABC):
                     
                     tempName = "%stemp%s" % (name, str(iReg))
                     tempHist = TH1F(tempName, tempName, 1, 0.5, 1.5)
+
                     self.configMgr.chains[self.currentChainName].Project(tempName, self.cuts, self.weights)
                     
                     error = Double()
                     integral = tempHist.IntegralAndError(1, tempHist.GetNbinsX(), error)
+
                     self.configMgr.hists[name].SetBinContent(iReg+1, integral)
                     self.configMgr.hists[name].SetBinError(iReg+1, error)
                     self.configMgr.hists[name].GetXaxis().SetBinLabel(iReg+1, reg)
@@ -412,12 +414,13 @@ class HistoPrepare(PrepareHistosABC):
     Only read from one file
     """
 
-    def __init__(self, filepath, file2path=''):
+    def __init__(self, filepath, file2path='', prepareAlt=None):
         PrepareHistosABC.__init__(self)
         self.cacheFileName = filepath
         import os
         #
         self.cache2FileName = file2path
+
         if os.path.isfile(file2path):
             self.cache2File = TFile(file2path,"READ")
         else:
@@ -433,6 +436,9 @@ class HistoPrepare(PrepareHistosABC):
         else:
             self.cacheFile = TFile(filepath,"RECREATE")
             self.recreate=True
+
+        # if prepareAlt is passed, it should be an initialised TreePrepare
+        self.treePrepare = prepareAlt
 
         return
 
@@ -453,7 +459,7 @@ class HistoPrepare(PrepareHistosABC):
         """
         Add this histogram to the dictionary of histograms
         """
-        #Note: useOverflow and useUnderflow has no effect. It's there just for symmetry with TreePrepare above.
+        #Note: useOverflow and useUnderflow only have effect when passed through to TreePrepare
         if self.configMgr.hists[name] is None:
             try:
                 self.configMgr.hists[name] = self.cache2File.Get(name)
@@ -463,9 +469,14 @@ class HistoPrepare(PrepareHistosABC):
                     self.configMgr.hists[name] = self.cacheFile.Get(name)
                     testsum = self.configMgr.hists[name].GetSum()
                 except: # IOError:
-                    log.error("Could not find histogram <"+name+"> in "+self.cacheFileName+" ! ")
-                    self.configMgr.hists[name] = None
-                    raise #Exception("Could not find histogram <"+name+"> in "+self.cacheFileName)
+                    if not self.treePrepare:
+                        log.error("Could not find histogram <"+name+"> in "+self.cacheFileName+" ! ")
+                        self.configMgr.hists[name] = None
+                        raise #Exception("Could not find histogram <"+name+"> in "+self.cacheFileName)
+                    else:
+                        log.warning("Histogram %s not found in either cache file, falling back to TreePrepare()" % name)
+                        self.configMgr.hists[name] = None 
+                        self.treePrepare.addHisto(name, nBins, binLow, binHigh, useOverflow, useUnderflow)
 
         self.name = name
         return self.configMgr.hists[name]
