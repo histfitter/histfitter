@@ -202,10 +202,10 @@ class TreePrepare(PrepareHistosABC):
                     error = Double()
                     integral = tempHist.IntegralAndError(1, tempHist.GetNbinsX(), error)
 
-                    print "NAME = %s => INTEGRAL %d" % (name, integral)
-                    print self.currentChainName
-                    print self.cuts
-                    print self.weights
+                    #print "NAME = %s => INTEGRAL %d" % (name, integral)
+                    #print self.currentChainName
+                    #print self.cuts
+                    #print self.weights
 
                     self.configMgr.hists[name].SetBinContent(iReg+1, integral)
                     self.configMgr.hists[name].SetBinError(iReg+1, error)
