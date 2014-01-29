@@ -14,10 +14,12 @@ log = Logger('ConfigManager')
 def mkdir_p(path):
     try:
         os.makedirs(path)
-    except OSError as exc: # Python >2.5
-        if exc.errno == errno.EEXIST and os.path.isdir(path):
-            pass
-        else: raise
+    except:
+        pass
+    #except OSError as exc: # Python >2.5
+        #if exc.errno == errno.EEXIST and os.path.isdir(path):
+            #pass
+        #else: raise
 
 def replaceSymbols(s):
     s = s.replace("/","").replace("*","").replace("(","").replace(")","")
@@ -657,7 +659,7 @@ class ConfigManager(object):
             log.info("Channel: %s" % chan.name)
             regionString = "".join(chan.regions)
             self.TreePrepare.channel = chan
-            self.HistoPrepare.channel = chan
+            if self.HistoPrepare: self.HistoPrepare.channel = chan
             
             sampleListRun = deepcopy(chan.sampleList)
             #for (iSam, sam) in enumerate(fitConfig.sampleList):
@@ -1009,10 +1011,10 @@ class ConfigManager(object):
 
     def setWeightsCutsVariable(self,chan,sam,regionString):
         if not sam.isData and not sam.isQCD and not sam.isDiscovery:
-            self.HistoPrepare.weights = str(self.lumiUnits*self.outputLumi/self.inputLumi)
-            self.HistoPrepare.weights += " * " + " * ".join(sam.weights)
+            self.TreePrepare.weights = str(self.lumiUnits*self.outputLumi/self.inputLumi)
+            self.TreePrepare.weights += " * " + " * ".join(sam.weights)
             
-            self.TreePrepare.weights = self.HistoPrepare.weights 
+            if self.HistoPrepare: self.HistoPrepare.weights = self.TreePrepare.weights 
             
             if not sam.isDiscovery:
                     treeName = sam.treeName
@@ -1020,8 +1022,8 @@ class ConfigManager(object):
                         treeName = sam.name+self.nomName
                     self.TreePrepare.read(treeName, sam.files)
         else:
-            self.HistoPrepare.weights = "1."
-            self.TreePrepare.weights = self.HistoPrepare.weights 
+            self.TreePrepare.weights = "1."
+            if self.HistoPrepare: self.HistoPrepare.weights = self.TreePrepare.weights 
             
             treeName = sam.treeName
             if treeName == '': 
@@ -1030,19 +1032,19 @@ class ConfigManager(object):
 
         if len(sam.cutsDict.keys()) == 0:
             if not chan.variableName == "cuts":
-                self.HistoPrepare.cuts = self.cutsDict[regionString]
-                self.TreePrepare.cuts = self.HistoPrepare.cuts
+                self.TreePrepare.cuts = self.cutsDict[regionString]
+                self.HistoPrepare.cuts = self.TreePrepare.cuts
         else:
             if not chan.variableName == "cuts":
-                self.HistoPrepare.cuts = sam.cutsDict[regionString]
-                self.TreePrepare.cuts = self.HistoPrepare.cuts
+                self.TreePrepare.cuts = self.cutsDict[regionString]
+                self.HistoPrepare.cuts = self.TreePrepare.cuts
 
         if sam.unit == "GeV":
-            self.HistoPrepare.var = chan.variableName
-            self.TreePrepare.var = self.HistoPrepare.var 
+            self.TreePrepare.var = chan.variableName
+            if self.HistoPrepare: self.HistoPrepare.var = self.TreePrepare.var 
         elif sam.unit == "MeV" and chan.variableName.find("/") < 0 and not chan.variableName.startswith("n"):
-            self.HistoPrepare.var = chan.variableName+"/1000."
-            self.TreePrepare.var = self.HistoPrepare.var 
+            self.TreePrepare.var = chan.variableName+"/1000."
+            if self.HistoPrepare: self.HistoPrepare.var = self.TreePrepare.var 
 
         return
 
@@ -1355,7 +1357,7 @@ class ConfigManager(object):
         outputRootFile = None
         if self.readFromTree:
             outputRootFile = TFile(self.histCacheFile,"RECREATE")
-        elif self.HistoPrepare.recreate:
+        elif self.HistoPrepare and self.HistoPrepare.recreate:
             outputRootFile = self.HistoPrepare.cacheFile
             if not outputRootFile.IsOpen():
                 outputRootFile = outputRootFile.Open(self.histCacheFile,"UPDATE")
