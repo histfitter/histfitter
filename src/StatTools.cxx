@@ -565,19 +565,25 @@ RooStats::HypoTestInverterResult* RooStats::MakeUpperLimitPlot(const char* filep
         int npoints ) {
     /// first asumptotic limit, to get a quick but reliable estimate for the upper limit
     /// dynamic evaluation of ranges
-    RooStats::HypoTestInverterResult* hypo = RooStats::DoHypoTestInversion(w,1,2,testStatType,useCLs,20,0,-1);  
+    RooStats::HypoTestInverterResult* hypo = RooStats::DoHypoTestInversion(w, 1, 2, testStatType, useCLs, 20, 0, -1);  
+    int nPointsRemoved = hypo->ExclusionCleanup();
+    //StatToolsLogger << kWARNING << "MakeUpperLimitPlot(): ExclusionCleanup() removed " << nPointsRemoved << " scan point(s) for hypo test inversion (quick scan): " << hypo->GetName() << GEndl;
 
     /// then reevaluate with proper settings
     if ( hypo!=0 ) { 
         double eul2 = 1.10 * hypo->GetExpectedUpperLimit(2);
         delete hypo; hypo=0;
-        //cout << "INFO grepme : " << m_nToys << " " << m_calcType << " " << m_testStatType << " " << m_useCLs << " " << m_nPoints << GEndl;
-        hypo = RooStats::DoHypoTestInversion(w,ntoys,calculatorType,testStatType,useCLs,npoints,0,eul2); 
+        //cout << "INFO grepme : nToys=" << ntoys << " calcType=" << calculatorType << " testStatType=" << testStatType << " useCLs=" << useCLs << " nPoints=" << npoints << " eul2=" << eul2 << endl;
+        hypo = RooStats::DoHypoTestInversion(w, ntoys, calculatorType, testStatType, useCLs, npoints, 0, eul2); 
     }
 
     /// store ul as nice plot ..
-    if ( hypo!=0 ) { 
-        RooStats::AnalyzeHypoTestInverterResult( hypo,calculatorType,testStatType,useCLs,npoints,fileprefix,".eps") ;
+    if ( hypo!=0 ) {
+        hypo->ExclusionCleanup();
+        nPointsRemoved = hypo->ExclusionCleanup();
+        StatToolsLogger << kWARNING << "MakeUpperLimitPlot(): ExclusionCleanup() removed " << nPointsRemoved << " scan point(s) for hypo test inversion: " << hypo->GetName() << GEndl;
+
+        RooStats::AnalyzeHypoTestInverterResult( hypo, calculatorType, testStatType, useCLs, npoints, fileprefix, ".eps") ;
     }
 
     return hypo;

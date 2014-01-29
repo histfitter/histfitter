@@ -157,7 +157,7 @@ void ConfigMgr::doHypoTest(FitConfig* fc, TString outdir, double SigXSecSysnsigm
         TString SigXSec = ( SigXSecSysnsigma > 0.? "Up" : ( SigXSecSysnsigma < 0. ? "Down" : "Nominal" ));
         suffix = "_fixSigXSec"+SigXSec+"_hypotest.root";
     }
-    
+
     outfileName.ReplaceAll(".root", suffix);
     outfileName.ReplaceAll("results/",outdir);
     TFile* outfile = TFile::Open(outfileName,"UPDATE");
@@ -242,7 +242,7 @@ void ConfigMgr::doHypoTest(FitConfig* fc, TString outdir, double SigXSecSysnsigm
                 modelSBName.Data(), modelBName.Data(),
                 dataName, 
                 nuisPriorName ) ;
-	result->UseCLs(useCLs);
+        if(result) { result->UseCLs(useCLs); }
     } else {  // b. discovery 
         // MB: Hack, needed for ProfileLikeliHoodTestStat to work properly.
         if (m_testStatType==3) { 
@@ -265,7 +265,7 @@ void ConfigMgr::doHypoTest(FitConfig* fc, TString outdir, double SigXSecSysnsigm
     if ( result!=0 ) {	
         outfile->cd();
         TString hypName="hypo_"+fc->m_signalSampleName;
-	if(fc->m_hypoTestName.Length() > 0){ hypName="hypo_"+fc->m_hypoTestName; }
+        if(fc->m_hypoTestName.Length() > 0){ hypName="hypo_"+fc->m_hypoTestName; }
         result->SetName(hypName);
         result->Write();
         m_logger << kINFO << "Now storing HypoTestInverterResult <" << hypName << ">" << GEndl;
@@ -275,7 +275,7 @@ void ConfigMgr::doHypoTest(FitConfig* fc, TString outdir, double SigXSecSysnsigm
     if ( htr!=0 ) {	
         outfile->cd();
         TString hypName="discovery_htr_"+fc->m_signalSampleName;
-	    if(fc->m_hypoTestName.Length() > 0){ hypName="discovery_htr_"+fc->m_hypoTestName; }
+        if(fc->m_hypoTestName.Length() > 0){ hypName="discovery_htr_"+fc->m_hypoTestName; }
         htr->SetName(hypName);
         htr->Write();
         m_logger << kINFO << "Now storing HypoTestResult <" << hypName << ">" << GEndl;
@@ -311,7 +311,7 @@ TString ConfigMgr::makeCorrectedBkgModelConfig( RooWorkspace* w, const char* mod
         m_logger << kERROR << "No signal strength parameter found. Return." << GEndl; 
         return bModelStr; 
     }
-    
+
     double oldpoi = poi->getVal();
     poi->setVal(0); /// MB : turn off the signal component
 
@@ -352,10 +352,10 @@ TString ConfigMgr::makeCorrectedBkgModelConfig( RooWorkspace* w, const char* mod
         for (Int_t i=0; (vr = (RooRealVar*)vrItr->Next()); ++i) {
             if (vr==0) 
                 continue;
-            
+
             TString vrName = vr->GetName();
             RooRealVar* par = (RooRealVar*)newSnapSet.find(vrName.Data());
-            
+
             if (par==0) { 
                 newSnapSet.add(*vr); // add back if not already present 
             } 
@@ -449,9 +449,9 @@ void ConfigMgr::doUpperLimit(FitConfig* fc) {
         (void) hypo->ExclusionCleanup(); 
         double eul2 = 1.10 * hypo->GetExpectedUpperLimit(2);
         delete hypo; hypo=0;
-        
+
         //cout << "INFO grepme : " << m_nToys << " " << m_calcType << " " << m_testStatType << " " << m_useCLs << " " << m_nPoints << GEndl;
-        
+
         hypo = RooStats::DoHypoTestInversion(w, m_nToys, m_calcType, m_testStatType, m_useCLs, m_nPoints, 0, eul2);
         int nPointsRemoved = hypo->ExclusionCleanup();
         m_logger << kWARNING << "ExclusionCleanup() removed " << nPointsRemoved << " scan point(s) for hypo test inversion: " << hypo->GetName() << GEndl;
