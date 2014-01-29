@@ -1,4 +1,8 @@
 2014-01-29 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
+	* Allow HistoPrepare to fall back to TreePrepare for missing histograms in
+	  either of the cache files
+
+2014-01-29 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
 	* ConfigManager.cxx: protect null ptr
 	* StatTools.cxx: MakeUpperLimitPlot() uses ExclusionCleanup() too
 
