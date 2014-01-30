@@ -54,7 +54,6 @@ class Sample(object):
         self.parentChannel = None
         self.allowRemapOfSyst = True
         self.mergeOverallSysSet = []
-        self.rereadTree = False
 
         if self.name[0].isdigit():
             log.warning("Sample name %s starts with a digit - this can confuse HistFactory internals" % self.name)
@@ -198,11 +197,6 @@ class Sample(object):
 
     def setTreeName(self, treeName):
         self.treeName = treeName
-        return
-
-    def setRereadTree(self, rereadTree):
-        log.debug("Setting rereadTree=%s for sample %s" % (rereadTree, self.name))
-        self.rereadTree = rereadTree
         return
 
     def setNormRegions(self, normRegions):
