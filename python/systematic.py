@@ -167,7 +167,7 @@ class SystematicBase:
                 if not abstract.readFromTree:
                     abstract.hists[histName] = None
                     abstract.prepare.addHisto(histName, forceNoFallback=True)
-                    if abstract.hists[histName] == None: reread = True
+                    if abstract.hists[histName] == None and abstract.useCacheToTreeFallback: reread = True
 
                 if abstract.readFromTree or reread:
                     abstract.hists[histName] = TH1F(histName, histName, 1, 0.5, 1.5)
