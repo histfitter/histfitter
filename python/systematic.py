@@ -158,8 +158,18 @@ class SystematicBase:
                     else:
                         c = topLvl.getChannel(normReg[1],normReg[0])
                     normString += c.regionString
+               
+                # Attempt to read from the cache fileout without fallback
+                # If it fails, set this silly boolean and still go into the block below
+                # Necessary, or we end up with nominal == high == low and removed systematics.
 
-                if abstract.readFromTree:
+                reread = False
+                if not abstract.readFromTree:
+                    abstract.hists[histName] = None
+                    abstract.prepare.addHisto(histName, forceNoFallback=True)
+                    if abstract.hists[histName] == None: reread = True
+
+                if abstract.readFromTree or reread:
                     abstract.hists[histName] = TH1F(histName, histName, 1, 0.5, 1.5)
 
                     for normReg in sam.normRegions:
@@ -265,9 +275,6 @@ class SystematicBase:
 
                             abstract.hists[histName].SetBinContent(1,abstract.hists[histName].GetSum()+tempHist.GetSumOfWeights())
                         del tempHist
-                else:
-                    abstract.hists[histName] = None
-                    abstract.prepare.addHisto(histName)
 
         return
 
@@ -309,14 +316,16 @@ class TreeWeightSystematic(SystematicBase):
                 mywList = [ " * %s " % myw for myw in self.nominal]
                 abstract.prepare.weights += "".join(mywList)
 
-            if abstract.readFromTree:
+            if abstract.readFromTree or abstract.useCacheToTreeFallback:
                 treeName = sam.treeName
                 if treeName == '':
                     treeName = "%s%s" % (sam.name, abstract.nomName)
                 abstract.prepare.read(treeName, sam.files)
+            
             TreeWeightSystematic.tryAddHistos(self, highorlow, regionString,
                                               normString, normCuts, abstract,
                                               chan, sam)
+            
             TreeWeightSystematic.FillUpDownHist(self, highorlow, regionString,
                                                 normString, normCuts, abstract,
                                                 topLvl, chan, sam)
@@ -335,7 +344,7 @@ class TreeWeightSystematic(SystematicBase):
                 if abstract.prepare.weights.find(myw) == -1:
                     abstract.prepare.weights += " * " + myw
 
-            if abstract.readFromTree:
+            if abstract.readFromTree or abstract.useCacheToTreeFallback:
                 if highorlow == "High_":
                     if sam.name in self.filesHi:
                         filelist = self.filesHi[sam.name]
@@ -422,6 +431,7 @@ class UserSystematic(SystematicBase):
             histName = "h%s%s%sNorm" % (sam.name, lowhigh, normString)
             if not histName in abstract.hists.keys():
                 if sam.normRegions:
+                    
                     if not abstract.readFromTree:
                         abstract.hists[histName] = None
                         abstract.prepare.addHisto(histName)

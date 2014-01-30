@@ -1,6 +1,6 @@
 from ROOT import THStack,TLegend,TCanvas,TFile,std,TH1F
 from ROOT import ConfigMgr,FitConfig,ChannelStyle #this module comes from gSystem.Load("libSusyFitter.so")
-from prepareHistos import TreePrepare,HistoPrepare
+from prepareHistos import PrepareHistos
 from copy import deepcopy
 from histogramsManager import histMgr
 from logger import Logger
@@ -111,6 +111,7 @@ class ConfigManager(object):
 
         self.histCacheFile = ""
         self.histBackupCacheFile = ""
+        self.useCacheToTreeFallback = False
         self.useHistBackupCacheFile = False
         self.fileList = [] # File list to be used for tree production
         self.treeName = ''
@@ -326,19 +327,25 @@ class ConfigManager(object):
                                                                         replaceSymbols(chan.variableName))
                                 if not nomMergedName in self.hists.keys():
                                     self.hists[nomMergedName] = None
-
+        
         if self.readFromTree:
-            log.info("  -build TreePrepare()...")
-            self.prepare = TreePrepare()
+            log.info("  -build PrepareHistos() for trees...")
+            self.prepare = PrepareHistos(False)
             if self.plotHistos is None:    #set plotHistos if not already set by user
                 self.plotHistos = False  #this is essentially for debugging
                 pass
         else:
-            log.info("  -build HistoPrepare()...")
+            if self.useCacheToTreeFallback:
+                log.info("  -build PrepareHistos() for cache, with fallback to trees...")
+                self.prepare = PrepareHistos(True, True)
+            else:
+                log.info("  -build PrepareHistos() for cache...")
+                self.prepare = PrepareHistos(True)
+
             if self.useHistBackupCacheFile:
-                self.prepare = HistoPrepare(self.histCacheFile,self.histBackupCacheFile)
-            else: # default
-                self.prepare = HistoPrepare(self.histCacheFile)
+                self.prepare.setHistoPaths(self.histCacheFile, self.histBackupCacheFile)
+            else:
+                self.prepare.setHistoPaths(self.histCacheFile)
 
         #C++ alter-ego
         log.info("  -initialize C++ mgr...")
@@ -986,18 +993,18 @@ class ConfigManager(object):
         else:
             raise Exception("Incorrect systematic method specified for QCD: %s" % getSample(sam.name).qcdSyst)
 
-    def setWeightsCutsVariable(self,chan,sam,regionString):
+    def setWeightsCutsVariable(self, chan, sam, regionString):
         if not sam.isData and not sam.isQCD and not sam.isDiscovery:
             self.prepare.weights = str(self.lumiUnits*self.outputLumi/self.inputLumi)
             self.prepare.weights += " * " + " * ".join(sam.weights)
-            if self.readFromTree and not sam.isDiscovery:
+            if (self.readFromTree and not sam.isDiscovery) or self.useCacheToTreeFallback:
                     treeName = sam.treeName
                     if treeName == '': 
                         treeName = sam.name+self.nomName
                     self.prepare.read(treeName, sam.files)
         else:
             self.prepare.weights = "1."
-            if self.readFromTree:
+            if self.readFromTree or self.useCacheToTreeFallback:
                 treeName = sam.treeName
                 if treeName == '': 
                     treeName = sam.name
@@ -1097,7 +1104,16 @@ class ConfigManager(object):
           
                 tmpName = "h%sNom_%sNorm" % (sam.name, normString )
                 if not tmpName in self.hists.keys():
-                    if self.readFromTree:
+                    
+                    if not self.readFromTree:    
+                        nomName = "h%sNom_%sNorm" % (sam.name, normString)
+                        self.hists[nomName] = None
+                        try:
+                            self.prepare.addHisto(nomName)
+                        except:    
+                            # assume that if no histogram is made, then it is not needed  
+                            pass
+                    else:
                         self.hists[tmpName] = TH1F(tmpName, tmpName, 1, 0.5, 1.5)
                         for normReg in sam.normRegions:
                             if not type(normReg[0]) == "list":
@@ -1130,14 +1146,6 @@ class ConfigManager(object):
                                 del tempHist
 
                                 log.verbose("nom =%f" % self.hists[nomName].GetSumOfWeights())
-                    else:
-                        nomName = "h%sNom_%sNorm" % (sam.name, normString)
-                        self.hists[nomName] = None
-                        try:
-                            self.prepare.addHisto(nomName)
-                        except:    
-                            # assume that if no histogram is made, then it is not needed  
-                            pass
 
             for (systName,syst) in chan.getSample(sam.name).systDict.items():
                 log.info("    Systematic: %s" % systName)
