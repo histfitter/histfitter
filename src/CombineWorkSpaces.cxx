@@ -181,11 +181,12 @@ std::map< TString,TString > GetMatchingWorkspaces( const TString& infile, const 
         }
 
 	
-        // Turn off, this is slow!
-        // confirm this is a workspace
-        TObject* obj = file->Get( wsname.Data() );
-        if (obj==0) continue; 
-	//	if ( obj->ClassName()!=TString("RooWorkspace") ) continue;
+        //// Turn off, this is slow! Reading the object and checking for non-NULL doesnt make a lot of sense
+        //// -> we check for NULL when really reading anyway!
+        //// confirm this is a workspace
+        //TObject* obj = file->Get( wsname.Data() );
+        //if (obj==0) continue; 
+	////	if ( obj->ClassName()!=TString("RooWorkspace") ) continue;
 
 	CombineWorkSpacesLogger << kDEBUG << " 5.4  searchFileName = " << searchFileName << GEndl;
 	if (searchFileName) {
