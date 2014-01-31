@@ -243,9 +243,9 @@ class PrepareHistos(object):
         Make the nominal QCD histogram and its errors 
         """
         if self.useCache:
-            return self.__addQCDHistoFromCache(sample, useOverflow, useUnderflow)
+            return self.__addQCDHistosFromCache(sample, useOverflow, useUnderflow)
     
-        return self.__addQCDHistoFromTree(sample, useOverflow, useUnderflow)
+        return self.__addQCDHistosFromTree(sample, useOverflow, useUnderflow)
     
     def __addQCDHistosFromTree(self, sample, useOverflow=False, useUnderflow=False):
         """
