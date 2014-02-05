@@ -208,9 +208,9 @@ class PrepareHistos(object):
     
     def __addHistoFromCacheWithoutFallback(self, name, nBins=None, binLow=None, binHigh=None, useOverflow=False, useUnderflow=False):
         """ simple helper to prevent specifying all the defaults """
-        return self.__addHistoFromCache(name, nBins, binLow, binHigh, useOverflow, useUnderflow, True)
+        return self.__addHistoFromCache(name, nBins, binLow, binHigh, useOverflow, useUnderflow, True, True)
 
-    def __addHistoFromCache(self, name, nBins=None, binLow=None, binHigh=None, useOverflow=False, useUnderflow=False, forceNoFallback=False):
+    def __addHistoFromCache(self, name, nBins=None, binLow=None, binHigh=None, useOverflow=False, useUnderflow=False, forceNoFallback=False, forceReturn=False):
         """
         Add this histogram to the dictionary of histograms.
         """
@@ -225,9 +225,12 @@ class PrepareHistos(object):
                     testsum = self.configMgr.hists[name].GetSum()
                 except: # IOError:
                     if forceNoFallback or not self.useCacheToTreeFallback:
+                        self.configMgr.hists[name] = None
+                        if forceReturn: # used for QCD histograms
+                            log.info("Could not find histogram <"+name+"> in "+self.cacheFileName+" ! Force return.")
+                            return None
                         print "force=%s fallback=%s" % (forceNoFallback, self.useCacheToTreeFallback)
                         log.error("Could not find histogram <"+name+"> in "+self.cacheFileName+" ! ")
-                        self.configMgr.hists[name] = None
                         raise #Exception("Could not find histogram <"+name+"> in "+self.cacheFileName)
                     else:
                         log.info("Could not find histogram <"+name+"> in "+self.cacheFileName+", trying from tree ")
@@ -407,7 +410,7 @@ class PrepareHistos(object):
         prefixLow = "h%sLow_%s_obs_%s" % (sample.name, regString, self.channel.variableName.replace("/","") )
 
         # NOTE: these histograms should NOT fallback to trees, but we fallback this entire function!
-        self.__addHistoFromCacheWithoutFallback(prefixNom)
+        self.__addHistoFromCacheWithoutFallback(prefixNom) 
         self.__addHistoFromCacheWithoutFallback(prefixHigh)
         self.__addHistoFromCacheWithoutFallback(prefixLow)
 
