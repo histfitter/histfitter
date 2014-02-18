@@ -1,3 +1,6 @@
+2014-02-18 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
+	* Tagging HistFitter-00-00-38
+
 2014-02-05 Max Baak
 	M       prepareHistos.py
 	* patch for qcd histograms generation to use tree prepare fallback.
