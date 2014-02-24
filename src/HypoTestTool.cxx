@@ -249,6 +249,7 @@ RooStats::HypoTestTool::AnalyzeResult( HypoTestInverterResult * r,
     //split mResultFileName - it might contain a directory
     TString outputDir = TString(gSystem->DirName(mResultFileName))+"/";
     TString ULfilename = TString("upperlimit_cls_poi_") + gSystem->BaseName(mResultFileName) + outfiletype;
+    m_logger << kINFO << " writing result plot to " << TString(outputDir+ULfilename).Data() << GEndl; 
     c_sig->SaveAs( TString(outputDir+ULfilename).Data() );
 
     const int nEntries = r->ArraySize();

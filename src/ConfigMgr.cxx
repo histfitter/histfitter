@@ -266,6 +266,11 @@ void ConfigMgr::doHypoTest(FitConfig* fc, TString outdir, double SigXSecSysnsigm
         outfile->cd();
         TString hypName="hypo_"+fc->m_signalSampleName;
         if(fc->m_hypoTestName.Length() > 0){ hypName="hypo_"+fc->m_hypoTestName; }
+        
+        //// give discovery HypoTestInverterResult a different name
+        if(!doUL && fc->m_hypoTestName.Length() > 0 ) { hypName = "hypo_discovery_" + fc->m_hypoTestName; }
+        else if(!doUL) { hypName="hypo_discovery_"+fc->m_signalSampleName; }
+        
         result->SetName(hypName);
         result->Write();
         m_logger << kINFO << "Now storing HypoTestInverterResult <" << hypName << ">" << GEndl;
