@@ -45,7 +45,7 @@ if __name__ == "__main__":
     runFit = False
     printLimits = False
     doHypoTests = False
-    doUL = True           # default is exclusion. goes together with doHypoTests
+    doDiscoveryHypoTests = False
     drawBeforeFit = False
     drawAfterFit = False
     drawCorrelationMatrix = False
@@ -79,7 +79,7 @@ if __name__ == "__main__":
     parser.add_argument("-i", "--interactive", help="remain in interactive mode after running", action="store_true", default=runInterpreter)
     parser.add_argument("-l", "--limit-plot", help="make limit plot of workspace", action="store_true", default=printLimits)
     parser.add_argument("-p", "--hypotest", help="run exclusion hypothesis test", action="store_true", default=doHypoTests)
-    parser.add_argument("-z", "--discovery-hypotest", help="run discovery hypothesis test", action="store_true", default=not doUL)
+    parser.add_argument("-z", "--discovery-hypotest", help="run discovery hypothesis test", action="store_true", default=doDiscoveryHypoTests)
     parser.add_argument("-g", "--grid_points", help="grid points to process (comma-seperated)")
     parser.add_argument("-r", "--regions", help="signal regions to process (comma-seperated)", default="all")
     
@@ -148,8 +148,7 @@ if __name__ == "__main__":
         doHypoTests = True
 
     if HistFitterArgs.discovery_hypotest:
-        doHypoTests = True
-        doUL = False
+        doDiscoveryHypoTests = True
 
     if HistFitterArgs.d:
         drawBeforeFit = True
@@ -282,12 +281,18 @@ if __name__ == "__main__":
         configMgr.cppMgr.doUpperLimitAll()
         pass
 
-    if doHypoTests:
+    if doHypoTests or doDiscoveryHypoTests:
         for fc in configMgr.fitConfigs:
             if len(fc.validationChannels) > 0 and not (fc.signalSample is None or 'Bkg' in fc.signalSample):
                 raise(Exception,"Validation regions should be turned off for doing hypothesis test!")
             pass
-        configMgr.cppMgr.doHypoTestAll('results/',doUL)
+        
+        if doDiscoveryHypoTests:
+            configMgr.cppMgr.doHypoTestAll('results/', False)
+        
+        if doHypoTests:
+            configMgr.cppMgr.doHypoTestAll('results/', True)
+
         pass
 
     if runToys and configMgr.nTOYs > 0 and doHypoTests == False and printLimits == False and runFit == False:
