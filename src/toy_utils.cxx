@@ -130,6 +130,7 @@ std::list<LimitResult> CollectHypoTestResults( const TString& infile, const TStr
 
         //Check fit result
         TString fitresultname = TString(ht->GetName());
+        fitresultname.ReplaceAll("hypo_discovery_","fitTo_");
         fitresultname.ReplaceAll("hypo_","fitTo_");
         //fitresultname.ReplaceAll("hypo_","hypo_");
         //cout << "Check fit result " << fitresultname << GEndl;

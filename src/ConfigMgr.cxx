@@ -172,7 +172,6 @@ void ConfigMgr::doHypoTest(FitConfig* fc, TString outdir, double SigXSecSysnsigm
         return; 
     }
 
-
     RooWorkspace* w = (RooWorkspace*)inFile->Get("combined");
     if (w == NULL) { 
         m_logger << kERROR << "workspace 'combined' does not exist in file" << GEndl; 
