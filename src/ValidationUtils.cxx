@@ -47,10 +47,10 @@ void ValidationUtils::HorizontalElMu( TH1 *h, Int_t nbin, Bool_t kLINE, Int_t co
    box->SetLineColor( color );
    box->Draw("F"); 
 
-   TGraph *box2 = new TGraph(5, x, y);
-   box2->SetFillColor( color2 );
-   box2->SetFillStyle( 3544 );
-   box2->Draw("F"); 
+//    TGraph *box2 = new TGraph(5, x, y);
+//    box2->SetFillColor( color2 );
+//    box2->SetFillStyle( 3001 ); //3544
+//    box2->Draw("F"); 
 
 }
 
@@ -188,11 +188,11 @@ void ValidationUtils::PullPlot3(XtraValues* inValsEl, XtraValues* inValsMu, cons
    // ----------- now we can start the plotting -----------------------------
 
    // define canvas
-   TCanvas* c = new TCanvas( "c"+outFileNamePrefix, "Results of the global electroweak fit", 0, 0, 400, 700 );   
+   TCanvas* c = new TCanvas( "c"+outFileNamePrefix, "Pull plot", 0, 0, 400, 700 );   
 
    // Draw frame
    Double_t offset = 0.5;
-   TH2F *frame = new TH2F( "frame"+outFileNamePrefix, "Results of the global SM fit", 
+   TH2F *frame = new TH2F( "frame"+outFileNamePrefix, "Pull plot", 
                            1, -3.0, 3.0, Npar+1, -offset, Float_t(Npar)+offset );
 
    ValidationUtils::SetFrameStyle2D( frame, 1.0 ); // the size (scale) is 1.0
@@ -303,7 +303,7 @@ void ValidationUtils::PullPlot3(XtraValues* inValsEl, XtraValues* inValsMu, cons
    }
    //Draw boxes
    for (Int_t i=0; i<Npar; i++) {
-     if(inValsEl->m_reg_names.at(i).Contains("em")){
+     if(inValsEl->m_reg_names.at(i).Contains("EM")){
        Horizontal( hPullEl, Npar-i, kFALSE, colEMuL, 0.14, 0.14);
        Horizontal( hPullEl, Npar-i, kTRUE, colEMu, 0.14, 0.14);
      }
@@ -314,6 +314,10 @@ void ValidationUtils::PullPlot3(XtraValues* inValsEl, XtraValues* inValsMu, cons
        Horizontal( hPullMu, Npar-i, kTRUE, hPullMu->GetLineColor(), 0.0, 0.28);
      }
    }
+
+   cout << " hPullElMu->GetNEntries() = " << hPullElMu->GetEntries() << endl;
+   cout << " hPullEl->GetNEntries() = " << hPullEl->GetEntries() << endl;
+   cout << " hPullMu->GetNEntries() = " << hPullMu->GetEntries() << endl;
 
    TLegend* leg = new TLegend(xLeft-0.07,0.885,xLeft+0.43,0.96,"");
    leg->SetFillStyle(0);
@@ -334,6 +338,201 @@ void ValidationUtils::PullPlot3(XtraValues* inValsEl, XtraValues* inValsMu, cons
    cout<<"mv "<<outFileNamePrefix<<".pdf ~/www/data/."<<endl;
    return;
 }
+
+void ValidationUtils::PullPlot5(XtraValues* inValsEl, XtraValues* inValsMu, XtraValues* inValsEM, const TString& outFileNamePrefix)
+{
+  // set style and remove existing canvas'
+   ValidationUtils::Initialize();
+
+   const Int_t Npar = inValsEM->size();
+   // if (Npar==0) Npar = inValsEM->size();
+
+   static Int_t c_DarkGreen     = TColor::GetColor( "#115000" );
+   static Int_t c_VDarkGreen    = TColor::GetColor( "#114400" );
+   static Int_t c_LightBlue     = TColor::GetColor( "#66aaff" );
+   static Int_t c_DarkBlue      = TColor::GetColor( "#0000bb" );
+
+   //static Int_t c_LightRed      = TColor::GetColor( "#ff3333" );
+   //static Int_t c_DarkRed       = TColor::GetColor( "#800000" );
+   static Int_t c_LightYellow   = TColor::GetColor( "#ffff00" );
+   //static Int_t c_VLightYellow  = TColor::GetColor( "#ffffe0" );
+   //static Int_t c_DarkYellow    = TColor::GetColor( "#ffd700" );
+   static Int_t c_VDarkYellow   = TColor::GetColor( "#ffa500" );
+
+
+   Int_t    colEl = c_VDarkGreen;
+   Int_t    colElL = c_DarkGreen;
+   Int_t    colMu = c_DarkBlue;
+   Int_t    colMuL = c_LightBlue;
+   Int_t    colEMu = c_VDarkYellow;
+   Int_t    colEMuL = c_LightYellow;
+   
+
+   // ----------- now we can start the plotting -----------------------------
+
+   // define canvas
+   TCanvas* c = new TCanvas( "c"+outFileNamePrefix, "Pull plot", 0, 0, 400, 700 );   
+
+   // Draw frame
+   Double_t offset = 0.5;
+   TH2F *frame = new TH2F( "frame"+outFileNamePrefix, "Pull plot", 
+                           1, -3.0, 3.0, Npar+1, -offset, Float_t(Npar)+offset );
+
+   ValidationUtils::SetFrameStyle2D( frame, 1.0 ); // the size (scale) is 1.0
+   frame->SetLabelFont(42,"X");
+   frame->SetTitleFont(42,"X");
+   frame->SetLabelFont(42,"Y");
+   frame->SetTitleFont(42,"Y");
+
+   // new margins
+   TString XTitleSpaces="";
+   if(outFileNamePrefix.Contains("_MEff") or outFileNamePrefix.Contains("_bTag")){ 
+     c->SetLeftMargin  ( 0.38 ); 
+     XTitleSpaces="            ";
+   }
+   else{ 
+     c->SetLeftMargin  ( 0.26 ); 
+     XTitleSpaces="                  ";
+   }
+   c->SetTopMargin   ( 0.12 );
+   c->SetRightMargin ( 0.05 );
+   c->SetBottomMargin( 0.08 );
+   c->SetGridx();
+     
+   // reduce size of title box
+   gStyle->SetTitleW(0.60);          
+
+   frame->SetLineColor(0);
+   frame->SetTickLength(0,"Y");
+   frame->SetLabelSize(0.034, "X");
+   frame->SetXTitle( "(n_{obs} - n_{pred}) / #sigma_{tot}"+XTitleSpaces );
+   frame->SetLabelOffset( 0.001, "X" );
+   frame->SetTitleOffset( 0.85 , "X");
+   frame->SetTitleSize( 0.046, "X" );
+   frame->GetYaxis()->CenterLabels( 1 );
+   frame->GetYaxis()->SetNdivisions( frame->GetNbinsY()+10, 1 );
+
+   //Double_t y[Npar];   
+   frame->GetYaxis()->SetBinLabel( 1, "" ); // no labels
+   //for (Int_t i=0; i<Npar; i++) y[i] = i + offset; 
+
+   frame->Draw();   
+
+   Float_t xLeft=0.4;
+   TLatex *atlasLabel = new TLatex();
+   atlasLabel->SetNDC();
+   atlasLabel->SetTextFont( 72 );
+   atlasLabel->SetTextColor( 1 );
+   atlasLabel->SetTextSize( 0.05 );
+   atlasLabel->DrawLatex(xLeft,0.97, "ATLAS");
+   atlasLabel->AppendPad();
+   
+   TLatex *prel = new TLatex();
+   prel->SetNDC();
+   prel->SetTextFont( 42 );
+   prel->SetTextColor( 1 );
+   prel->SetTextSize( 0.05 );
+   //prel->DrawLatex(xLeft+0.17, 0.97, "Preliminary");
+   prel->DrawLatex(xLeft+0.17, 0.97, "internal");
+   prel->AppendPad();
+
+   TLine* line = new TLine;
+   line->DrawLine( 0, frame->GetYaxis()->GetXmin(), 0, frame->GetYaxis()->GetXmax() );
+
+   // axis labels (parameters)
+   TLatex* text = new TLatex;
+   text->SetTextFont(42);
+   text->SetTextSize( frame->GetLabelSize( "Y" )*0.55 );
+   Float_t yy = frame->GetYaxis()->GetXmin();
+   Float_t dy = (frame->GetYaxis()->GetXmax() - frame->GetYaxis()->GetXmin())/Float_t(Npar+1);
+   //Float_t dx = frame->GetXaxis()->GetXmax() - frame->GetXaxis()->GetXmin();
+   Float_t x  = frame->GetXaxis()->GetXmin() - 5.4 + (5-3.5);
+   
+   // inputs   
+   x += 1.5;
+
+   for (Int_t i=Npar-1; i>=0; i--) {
+      text->SetTextAlign( 32 );
+      text->SetTextSize( 0.035 );
+      text->DrawLatex( x+2.2, yy - (i-Npar)*dy, inValsEM->m_reg_names.at(i) );
+   }
+
+
+   //The boxes
+   TH1F *hPullEl = new TH1F( "hPullEl"+outFileNamePrefix, "hPullEl", Npar, -1, Npar-1 );
+   hPullEl->SetLineColor(colEl);
+   hPullEl->SetFillColor(colElL);
+   TH1F *hPullMu = new TH1F( "hPullMu"+outFileNamePrefix, "hPullMu", Npar, -1, Npar-1 );
+   hPullMu->SetLineColor(colMu);
+   hPullMu->SetFillColor(colMuL);
+   TH1F *hPullElMu = new TH1F( "hPullElMu"+outFileNamePrefix, "hPullElMu", Npar, -1, Npar-1 );
+   hPullElMu->SetLineColor(colEMu);
+   hPullElMu->SetFillColor(colEMu);
+
+   //Fill values - electron channel
+   for (Int_t i=0; i<inValsEl->size(); i++) {
+      Float_t delta = inValsEl->m_nObs.at(i) - inValsEl->m_nPred.at(i);
+      Float_t err=inValsEl->m_Delta_eTot.at(i);
+      Float_t pull = 0;
+      if(fabs(err)>0){ pull=delta/err; }
+      hPullEl->SetBinContent( Npar-i, pull );
+   }
+   //Fill values -- muon channel
+   for (Int_t i=0; i<inValsMu->size(); i++) {
+      Float_t delta = inValsMu->m_nObs.at(i) - inValsMu->m_nPred.at(i);
+      Float_t err=inValsMu->m_Delta_eTot.at(i);
+      Float_t pull = 0;
+      if(fabs(err)>0){ pull=delta/err; }
+      hPullMu->SetBinContent( Npar-i, pull );
+   }
+   //Fill values -- electron+muon channel
+   for (Int_t i=0; i<Npar; i++) {
+      Float_t delta = inValsEM->m_nObs.at(i) - inValsEM->m_nPred.at(i);
+      Float_t err=inValsEM->m_Delta_eTot.at(i);
+      Float_t pull = 0;
+      if(fabs(err)>0){ pull=delta/err; }
+      //   cout << endl <<" i = " <<i << " pull = " << pull ;
+      hPullElMu->SetBinContent( Npar-i, pull );
+   }   
+
+   //Draw boxes   
+   for (Int_t i=0; i<Npar; i++) {
+     HorizontalElMu( hPullElMu, Npar-i, kFALSE, colEMu, 0.14, 0.14);
+     //HorizontalElMu( hPullElMu, Npar-i, kTRUE, colEMu, 0.14, 0.14);
+     //   cout << "done" << endl;
+     //   }
+//      else{
+//        Horizontal( hPullEl, Npar-i, kFALSE, hPullEl->GetFillColor(), 0.28, 0.0);
+//        Horizontal( hPullEl, Npar-i, kTRUE, hPullEl->GetLineColor(), 0.28, 0.0);
+//        Horizontal( hPullMu, Npar-i, kFALSE, hPullMu->GetFillColor(), 0.0, 0.28);
+//        Horizontal( hPullMu, Npar-i, kTRUE, hPullMu->GetLineColor(), 0.0, 0.28);
+//      }
+   }
+
+//    cout << " hPullElMu->GetNEntries() = " << hPullElMu->GetEntries() << endl;
+//    cout << " hPullEl->GetNEntries() = " << hPullEl->GetEntries() << endl;
+//    cout << " hPullMu->GetNEntries() = " << hPullMu->GetEntries() << endl;
+
+   TLegend* leg = new TLegend(xLeft-0.07,0.885,xLeft+0.43,0.96,"");
+   leg->SetFillStyle(0);
+   leg->SetBorderSize(0);
+   leg->SetTextFont( 42 );
+   leg->SetTextSize( 0.04 );
+
+   //leg->AddEntry(hPullEl, "Electron Channel", "f");
+   //leg->AddEntry(hPullMu, "Muon Channel", "f");
+   leg->AddEntry(hPullElMu, "Electron+Muon Channel", "f");
+   leg->Draw();
+   
+   // final update of canvas
+   c->Update();
+
+   c->Print(outFileNamePrefix+".pdf");
+   c->Print(outFileNamePrefix+".eps");
+   cout<<"mv "<<outFileNamePrefix<<".pdf ~/www/data/."<<endl;
+   return;
+}
+
 
 
 

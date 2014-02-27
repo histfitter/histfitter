@@ -38,6 +38,7 @@ namespace ValidationUtils
   
   void PullPlot3(XtraValues* inValsEl, XtraValues* inValsMu, const TString& outFileNamePrefix);
   void PullPlot4(XtraValues* inVals, const TString& outFileNamePrefix);
+  void PullPlot5(XtraValues* inValsEl, XtraValues* inValsMu,  XtraValues* inValsEM, const TString& outFileNamePrefix);
 
 }
 
