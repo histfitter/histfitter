@@ -50,14 +50,14 @@ def latexfitresults(filename, poiname='mu_SIG', lumiFB=1.0, nTOYS=3000, asimov=F
     calctype = 2
  
   # hti_result = RooStats.MakeUpperLimitPlot(poiname,w,calctype,3,ntoys,True,npoints)
-##   #   RooStats::MakeUpperLimitPlot(const char* fileprefix,
-##   # 			     RooWorkspace* w,
-##   # 			     int calculatorType ,                         # toys = 0, asymptotic (asimov) = 2
-##   # 			     int testStatType , 
-##   # 			     int ntoys,
-##   # 			     bool useCLs ,  
-##   # 			     int npoints )
-
+  #   RooStats::MakeUpperLimitPlot(const char* fileprefix,
+  # 			     RooWorkspace* w,
+  # 			     int calculatorType ,                         # toys = 0, asymptotic (asimov) = 2
+  # 			     int testStatType , 
+  # 			     int ntoys,
+  # 			     bool useCLs ,  
+  # 			     int npoints )
+  
   murangelow = 0.0
   murangehigh = 40.0
   hti_result = RooStats.DoHypoTestInversion(w,ntoys,calctype,3,True,npoints,murangelow,murangehigh)
@@ -65,7 +65,7 @@ def latexfitresults(filename, poiname='mu_SIG', lumiFB=1.0, nTOYS=3000, asimov=F
   outFileName = "./htiResult_poi_" + poiname + "_ntoys_" + str(ntoys) + "_calctype_" + str(calctype) + "_npoints_" + str(npoints) + ".root"
   hti_result.SaveAs(outFileName)
   hti_result.Print()
-  
+
   uL_nobsinSR = hti_result.UpperLimit()
   uL_visXsec = uL_nobsinSR / lumiFB
   # uL_visXsecErrorUp = uL_visXsec - uL_nobsinSR/(lumiFB * (1. + lumiRelUncert))
@@ -98,9 +98,9 @@ def latexfitresults(filename, poiname='mu_SIG', lumiFB=1.0, nTOYS=3000, asimov=F
         CLB_M = hti_result.CLb(iresult-1)
         mu_M = hti_result.GetXValue(iresult-1)
         indexFound = True
- #       print " \n   found the CLB values to interpolate"
- #       print " CLB_M =", CLB_M, " CLB_P =", CLB_P, "  mu_P = ", mu_P, " mu_M = ", mu_M
-
+        #       print " \n   found the CLB values to interpolate"
+        #       print " CLB_M =", CLB_M, " CLB_P =", CLB_P, "  mu_P = ", mu_P, " mu_M = ", mu_M
+   
   # interpolate the value of CLB to be exactly above upperlimit p-val
   try:
     alpha_CLB = (CLB_P - CLB_M) / (mu_P - mu_M)
@@ -110,14 +110,15 @@ def latexfitresults(filename, poiname='mu_SIG', lumiFB=1.0, nTOYS=3000, asimov=F
   except ZeroDivisionError:
     print "WARNING ZeroDivisionError while calculating CLb. Setting CLb=0."
     CLB=0.0
-  #print " CLB = " , CLB
+    # print " CLB = " , CLB
 
+   
   print "\n\n\n\n  ***---  now doing p-value calculation ---*** \n\n\n\n"
   Util.resetAllValues(w)
   Util.resetAllErrors(w)
   Util.resetAllNominalValues(w)
-
-  pval = RooStats.get_Presult(w,False,1000,2)
+  
+  pval = RooStats.get_Presult(w,False,ntoys,calctype)
   # get_Presult(  RooWorkspace* w,
   #           		bool doUL, // = true, // true = exclusion, false = discovery
   #             		int ntoys, //=1000,
@@ -129,6 +130,7 @@ def latexfitresults(filename, poiname='mu_SIG', lumiFB=1.0, nTOYS=3000, asimov=F
   #             		bool useCLs, // = true ,   
   #             		bool useNumberCounting, // = false,
   #             		const char * nuisPriorName) // = 0 
+
   
   ulList = [uL_visXsec, uL_nobsinSR, uL_nexpinSR, uL_nexpinSRerrP, uL_nexpinSRerrM, CLB, pval ]
 
