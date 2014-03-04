@@ -1,3 +1,7 @@
+2014-03-04 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
+	* src/StatTools.cxx: don't exit(1) in get_Pvalue when sampling
+	distribution is empty, but return a dummy result 
+	
 2014-02-25 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
 	* src/toy_utils.cxx: replace hypo_discovery with fitTo properly
 
