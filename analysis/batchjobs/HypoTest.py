@@ -98,7 +98,6 @@ def doHypoTest(fixSigXSec, SigXSecSysnsigma,sigSamples):
 
 if __name__ == "__main__":
     from configManager import configMgr
-    from prepareHistos import TreePrepare,HistoPrepare
     configMgr.readFromTree = False
     configMgr.executeHistFactory=False
     configMgr.calculatorType=0
@@ -225,17 +224,25 @@ if __name__ == "__main__":
 	   #return
 
         w = inFile.Get("combined")
-
-        #w.var("alpha_SigXSec").setVal(0.)
-        #w.var("alpha_SigXSec").setConstant(True)
-
+	
         #Util.ReadWorkspace(inFile,"combined")
         #w=gDirectory.Get("w")
         if not w:
            print "workspace 'combined' does not exist in file"
-	   #return
-
+	   #return	
+	
         Util.SetInterpolationCode(w,4)
+
+        # reset all nominal values
+        Util.resetAllValues(w)
+        Util.resetAllErrors(w)
+        Util.resetAllNominalValues(w)
+
+
+        w.var("alpha_SigXSec").setVal(0.)
+        w.var("alpha_SigXSec").setConstant(True)
+
+        #Util.SetInterpolationCode(w,4)
   
         print "Processing analysis "+sigSamples[0]
 
@@ -254,10 +261,13 @@ if __name__ == "__main__":
 
         # then reevaluate with proper settings
         if ( hypo!=0 ):
+            hypo.ExclusionCleanup()
             eul2 = 1.10 * hypo.GetExpectedUpperLimit(2)
             del hypo
             hypo=0
             hypo = RooStats.DoHypoTestInversion(w,nToys,calcType,testStatType,True,nPoints,0,eul2)
+            nPointsRemoved = hypo.ExclusionCleanup();
+            print "ExclusionCleanup() removed "+str(nPointsRemoved)+" scan point(s) for hypo test inversion: "+hypo.GetName()
 
 
         ##store ul as nice plot ..
