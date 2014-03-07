@@ -1,3 +1,6 @@
+2014-03-07 Jeanette Miriam Lorenz <jeanette.miriam.lorenz@cern.ch>
+       * analysis/batchjobs/HypoTest.py: update for -l to reflect changes in src/ConfigMgr.cxx for upper limits (-l)
+
 2014-03-04 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
 	* src/StatTools.cxx: don't exit(1) in get_Pvalue when sampling
 	distribution is empty, but return a dummy result 
