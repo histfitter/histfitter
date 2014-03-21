@@ -100,6 +100,7 @@ class ConfigManager(object):
         self.includeOverallSys = True # Boolean to chose if HistoSys should also have OverallSys
         self.readFromTree = False # Boolean to chose if reading histograms from tree will also write to file
         self.plotHistos = None # Boolean to chose to plot out the histograms
+        self.plotRatio="ratio" #Pass to cppMgr to configure drawing options: "ratio", "pull", "none"
         self.removeEmptyBins = False # Boolean to chose to remove empty bins from data histogram on plot
         self.executeHistFactory = True # Boolean to chose to execute HistFactory
         self.writeXML = False # Boolean to chose whether to write HistFactory XML files by hand
@@ -375,6 +376,7 @@ class ConfigManager(object):
         self.cppMgr.setSeed( self.toySeed )
         self.cppMgr.setMuValGen( self.muValGen )
         self.cppMgr.setUseAsimovSet( self.useAsimovSet)
+        self.cppMgr.m_plotRatio = self.plotRatio
 
         if self.outputFileName:
             self.cppMgr.m_outputFileName = self.outputFileName
