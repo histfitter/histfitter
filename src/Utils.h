@@ -59,11 +59,11 @@ namespace Util
   void DecomposeWS(const char* infile, const char* wsname, const char* outfile);
 
   void PlotPdfWithComponents(RooWorkspace* w, TString setupName = "Example3b", TString anaName="Analysis", TString plotRegions = "ALL", 
-			     TString outputPrefix = "", RooFitResult* rFit = NULL, RooAbsData* inputData=0, Bool_t plotRatio=kFALSE );
+			     TString outputPrefix = "", RooFitResult* rFit = NULL, RooAbsData* inputData=0);
   void PlotPdfWithComponents(RooWorkspace* w, FitConfig* fc,  TString anaName="Analysis", TString plotRegions= "ALL", TString outputPrefix = "", 
-			     RooFitResult* rFit= NULL, RooAbsData* inputData=0, Bool_t plotRatio=kFALSE );
+			     RooFitResult* rFit= NULL, RooAbsData* inputData=0 );
   void PlotPdfSumWithComponents(RooWorkspace* w, TString setupName = "Example3b", TString anaName="Analysis", TString plotRegions = "ALL",  
-  		                  TString outputPrefix = "", RooFitResult* rFit = NULL, RooAbsData* inputData=0, Bool_t plotRatio=kFALSE ); 
+  		                  TString outputPrefix = "", RooFitResult* rFit = NULL, RooAbsData* inputData=0); 
   //void AddComponentsToPlot(RooWorkspace* w,FitConfig* fc, RooPlot* frame, RooAbsPdf* regionPdf, RooAbsData* regionData, RooRealVar* obsRegion, TString regionCatLabel);
   void AddComponentsToPlot(RooWorkspace* w,FitConfig* fc, RooPlot* frame, RooAbsPdf* regionPdf, RooAbsData* regionData, RooRealVar* obsRegion, TString regionCatLabel, ChannelStyle style);
   void PlotSeparateComponents(RooWorkspace* w, TString setupName = "Example3b", TString anaName="Analysis", TString plotRegions = "ALL", 

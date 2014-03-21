@@ -40,6 +40,7 @@ ConfigMgr::ConfigMgr() : m_logger("ConfigMgrCPP") {
     m_muValGen=0.0;  
     m_removeEmptyBins=false;
     m_useAsimovSet=false;
+    m_plotRatio="ratio"; //options: "ratio", "pull", "none"
 }
 
 FitConfig* ConfigMgr::addFitConfig(const TString& name){

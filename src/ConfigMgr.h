@@ -123,7 +123,7 @@ class ConfigMgr {
         std::vector<FitConfig*> m_fitConfigs;
         int  m_seed;
         bool m_useAsimovSet;  
-
+	std::string m_plotRatio;
 
     private:
         TMsgLogger m_logger;
