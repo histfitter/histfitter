@@ -1,3 +1,7 @@
+2014-03-21 David Cote <david.cote@cern.ch>
+	* Made plotRatio of type string (instead of bool) and configurable via configMgr, with options: "ratio", "pull, "none"
+	* Implemented plotRatio=="none" case in Utils.cxx
+
 2014-03-07 Jeanette Miriam Lorenz <jeanette.miriam.lorenz@cern.ch>
        * analysis/batchjobs/HypoTest.py: update for -l to reflect changes in src/ConfigMgr.cxx for upper limits (-l)
 
