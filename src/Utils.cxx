@@ -945,8 +945,14 @@ void Util::PlotPdfWithComponents(RooWorkspace* w, FitConfig* fc, TString anaName
             canVec[iVec] = new TCanvas(canName,canName, 700, 600);
 
             // two pads, one for 'standard' plot, one for data/MC ratio
-            TPad *pad1 = new TPad(Form("%s_pad1",canName.Data()),Form("%s_pad1",canName.Data()),0.,0.305,.99,1);
-            pad1->SetBottomMargin(0.005);
+	    float yMinP1=0.305;
+	    float bottomMarginP1=0.005;
+	    if(plotRatio=="none"){ 
+	      yMinP1=0.01;
+	      bottomMarginP1=0.09;
+	    }	   
+            TPad *pad1 = new TPad(Form("%s_pad1",canName.Data()),Form("%s_pad1",canName.Data()),0.,yMinP1,.99,1);
+            pad1->SetBottomMargin(bottomMarginP1);
             pad1->SetFillColor(kWhite);
             pad1->SetTickx();
             pad1->SetTicky();
@@ -956,8 +962,17 @@ void Util::PlotPdfWithComponents(RooWorkspace* w, FitConfig* fc, TString anaName
             pad2->SetFillColor(kWhite);
 
             if(style.getLogY()) pad1->SetLogy();
+
+	    if(style.getTitleX() != "")  
+	      frame->GetXaxis()->SetTitle(style.getTitleX());
+	    else  
+	      frame->GetXaxis()->SetTitle(GetXTitle(regionVar));
+
             pad1->Draw();
-            pad2->Draw();
+	    if(plotRatio!="none"){ 
+	      pad2->Draw(); 
+	      frame->GetXaxis()->SetLabelSize(0.); 
+	    }
 
             pad1->cd();
 
@@ -969,7 +984,6 @@ void Util::PlotPdfWithComponents(RooWorkspace* w, FitConfig* fc, TString anaName
 
             // draw frame
             frame->SetTitle(""); 
-            frame->GetXaxis()->SetLabelSize(0.); 
             frame->Draw();
 
             // add cosmetics
@@ -1017,117 +1031,118 @@ void Util::PlotPdfWithComponents(RooWorkspace* w, FitConfig* fc, TString anaName
                 char NP[10];
                 TString NP_str;
                 for( int iComp = (compNameVec.size()-1) ; iComp>-1; iComp--){
-	    Int_t  compPlotColor    = ( (fc!=0) ? style.getSampleColor(compNameVec[iComp]) : iComp );
-                    TString  compShortName  = ( (fc!=0) ? style.getSampleName(compNameVec[iComp])  : "" );
+		  Int_t  compPlotColor    = ( (fc!=0) ? style.getSampleColor(compNameVec[iComp]) : iComp );
+		  TString  compShortName  = ( (fc!=0) ? style.getSampleName(compNameVec[iComp])  : "" );
 
-                    TString legName = compShortName; //"";
-                    //if(compShortName.Contains("BG")) legName = "single top & diboson";
-                    for (int inp=0; inp<6; inp++) {
-                        sprintf(NP,"Np%d",inp);
-                        NP_str = NP;
-                        if(compShortName.Contains("WZ") && compShortName.Contains(NP)) legName = "WZ+"+NP_str;
-                        if(compShortName.Contains("Top") && compShortName.Contains(NP)) legName = "t#bar{t}+"+NP_str;
-                    }
-                    //if(compShortName.Contains("QCD")) legName = "multijets (data estimate)";
-                    if(compShortName.Contains("Discovery")) legName = "signal";
-                    //
-                    if(compShortName.Contains("WZpT0GeV"))   legName = "W/Z (p_{T}^{V,Truth}=0-50GeV)";
-                    if(compShortName.Contains("WZpT50GeV"))  legName = "W/Z (p_{T}^{V,Truth}=50-100GeV)";
-                    if(compShortName.Contains("WZpT100GeV")) legName = "W/Z (p_{T}^{V,Truth}=100-150GeV)";
-                    if(compShortName.Contains("WZpT150GeV")) legName = "W/Z (p_{T}^{V,Truth}=150-200GeV)";
-                    if(compShortName.Contains("WZpT200GeV")) legName = "W/Z (p_{T}^{V,Truth}=200-250GeV)";
-                    if(compShortName.Contains("WZpT250GeV")) legName = "W/Z (p_{T}^{V,Truth}=250GeV-)";
-                    //
-                    entry=leg->AddEntry("",legName.Data(),"f") ;
-                    entry->SetLineColor(compPlotColor);
-                    entry->SetFillColor(compPlotColor);
-                    entry->SetFillStyle(1001);
+		  TString legName = compShortName; //"";
+		  //if(compShortName.Contains("BG")) legName = "single top & diboson";
+		  for (int inp=0; inp<6; inp++) {
+		    sprintf(NP,"Np%d",inp);
+		    NP_str = NP;
+		    if(compShortName.Contains("WZ") && compShortName.Contains(NP)) legName = "WZ+"+NP_str;
+		    if(compShortName.Contains("Top") && compShortName.Contains(NP)) legName = "t#bar{t}+"+NP_str;
+		  }
+		  //if(compShortName.Contains("QCD")) legName = "multijets (data estimate)";
+		  if(compShortName.Contains("Discovery")) legName = "signal";
+		  //
+		  if(compShortName.Contains("WZpT0GeV"))   legName = "W/Z (p_{T}^{V,Truth}=0-50GeV)";
+		  if(compShortName.Contains("WZpT50GeV"))  legName = "W/Z (p_{T}^{V,Truth}=50-100GeV)";
+		  if(compShortName.Contains("WZpT100GeV")) legName = "W/Z (p_{T}^{V,Truth}=100-150GeV)";
+		  if(compShortName.Contains("WZpT150GeV")) legName = "W/Z (p_{T}^{V,Truth}=150-200GeV)";
+		  if(compShortName.Contains("WZpT200GeV")) legName = "W/Z (p_{T}^{V,Truth}=200-250GeV)";
+		  if(compShortName.Contains("WZpT250GeV")) legName = "W/Z (p_{T}^{V,Truth}=250GeV-)";
+		  //
+		  entry=leg->AddEntry("",legName.Data(),"f") ;
+		  entry->SetLineColor(compPlotColor);
+		  entry->SetFillColor(compPlotColor);
+		  entry->SetFillStyle(1001);
                 }
             }
             leg->Draw();	
             //      frameVec[iVec]=frame;
 
             // now make/draw the ratio histogram
-            pad2->cd();
+	    if(plotRatio!="none"){
+	      pad2->cd();
 
-            // data/pdf ratio histograms is plotted by RooPlot.ratioHist()
-            RooPlot* frame_dummy =  regionVar->frame(); 
-            data->plotOn(frame_dummy,Cut(dataCatLabel),RooFit::DataError(RooAbsData::Poisson));
-            // normalize pdf to number of expected events, not to number of events in dataset
-            //regionPdf->plotOn(frame_dummy,Normalization(normCount,RooAbsReal::NumEvent),Precision(1e-5));      
-            regionPdf->plotOn(frame_dummy,Normalization(1,RooAbsReal::RelativeExpected),Precision(1e-5));
+	      // data/pdf ratio histograms is plotted by RooPlot.ratioHist()
+	      RooPlot* frame_dummy =  regionVar->frame(); 
+	      data->plotOn(frame_dummy,Cut(dataCatLabel),RooFit::DataError(RooAbsData::Poisson));
+	      // normalize pdf to number of expected events, not to number of events in dataset
+	      //regionPdf->plotOn(frame_dummy,Normalization(normCount,RooAbsReal::NumEvent),Precision(1e-5));      
+	      regionPdf->plotOn(frame_dummy,Normalization(1,RooAbsReal::RelativeExpected),Precision(1e-5));
 
-            // Construct a histogram with the ratio of the data w.r.t the pdf curve
-            RooHist* hratio = NULL;
-            if(plotRatio=="ratio")  hratio = (RooHist*) frame_dummy->ratioHist() ;
-            else if(plotRatio=="pull") hratio = (RooHist*) frame_dummy->pullHist() ;
-            hratio->SetMarkerColor(style.getDataColor());
-            hratio->SetLineColor(style.getDataColor());
+	      // Construct a histogram with the ratio of the data w.r.t the pdf curve
+	      RooHist* hratio = NULL;
+	      if(plotRatio=="ratio")  hratio = (RooHist*) frame_dummy->ratioHist() ;
+	      else if(plotRatio=="pull") hratio = (RooHist*) frame_dummy->pullHist() ;
+	      hratio->SetMarkerColor(style.getDataColor());
+	      hratio->SetLineColor(style.getDataColor());
 
-            // Construct a histogram with the ratio of the pdf curve w.r.t the pdf curve +/- 1 sigma
-            RooCurve* hratioPdfError = new RooCurve;
-            if (rFit != NULL)  hratioPdfError = MakePdfErrorRatioHist(w, regionData, regionPdf, regionVar, rFit);
-            hratioPdfError->SetFillColor(style.getErrorFillColor());
-            hratioPdfError->SetFillStyle(style.getErrorFillStyle());
-            hratioPdfError->SetLineColor(style.getErrorLineColor());
-            hratioPdfError->SetLineStyle(style.getErrorLineStyle());
+	      // Construct a histogram with the ratio of the pdf curve w.r.t the pdf curve +/- 1 sigma
+	      RooCurve* hratioPdfError = new RooCurve;
+	      if (rFit != NULL)  hratioPdfError = MakePdfErrorRatioHist(w, regionData, regionPdf, regionVar, rFit);
+	      hratioPdfError->SetFillColor(style.getErrorFillColor());
+	      hratioPdfError->SetFillStyle(style.getErrorFillStyle());
+	      hratioPdfError->SetLineColor(style.getErrorLineColor());
+	      hratioPdfError->SetLineStyle(style.getErrorLineStyle());
 
-            // Create a new frame to draw the residual distribution and add the distribution to the frame
-            RooPlot* frame2 = regionVar->frame() ;
-            if(plotRatio=="ratio")  hratio->SetTitle("Ratio Distribution");
-            else  if(plotRatio=="pull") hratio->SetTitle("Pull Distribution");
-            // only add PdfErrorsPlot when the plot shows ratio, not with pull
-            if (rFit != NULL && plotRatio=="ratio")   frame2->addPlotable(hratioPdfError,"F");
-            frame2->addPlotable(hratio,"P");
+	      // Create a new frame to draw the residual distribution and add the distribution to the frame
+	      RooPlot* frame2 = regionVar->frame() ;
+	      if(plotRatio=="ratio")  hratio->SetTitle("Ratio Distribution");
+	      else  if(plotRatio=="pull") hratio->SetTitle("Pull Distribution");
+	      // only add PdfErrorsPlot when the plot shows ratio, not with pull
+	      if (rFit != NULL && plotRatio=="ratio")   frame2->addPlotable(hratioPdfError,"F");
+	      frame2->addPlotable(hratio,"P");
 
-            // ratio plot cosmetics
-            int firstbin = frame_dummy->GetXaxis()->GetFirst();
-            int lastbin = frame_dummy->GetXaxis()->GetLast();
-            double xmax = frame_dummy->GetXaxis()->GetBinUpEdge(lastbin) ;
-            double xmin = frame_dummy->GetXaxis()->GetBinLowEdge(firstbin) ;
+	      // ratio plot cosmetics
+	      int firstbin = frame_dummy->GetXaxis()->GetFirst();
+	      int lastbin = frame_dummy->GetXaxis()->GetLast();
+	      double xmax = frame_dummy->GetXaxis()->GetBinUpEdge(lastbin) ;
+	      double xmin = frame_dummy->GetXaxis()->GetBinLowEdge(firstbin) ;
 
-            TLine* l = new TLine(xmin,1.,xmax,1.);
-            TLine* l2 = new TLine(xmin,0.5,xmax,0.5);
-            TLine* l3 = new TLine(xmin,1.5,xmax,1.5);
-            TLine* l4 = new TLine(xmin,2.,xmax,2.);
-            TLine* l5 = new TLine(xmin,2.5,xmax,2.5);
-            l->SetLineWidth(1);
-            l->SetLineStyle(2);
-            l2->SetLineStyle(3);
-            l3->SetLineStyle(3);
-            l4->SetLineStyle(3);
-            l5->SetLineStyle(3);
+	      TLine* l = new TLine(xmin,1.,xmax,1.);
+	      TLine* l2 = new TLine(xmin,0.5,xmax,0.5);
+	      TLine* l3 = new TLine(xmin,1.5,xmax,1.5);
+	      TLine* l4 = new TLine(xmin,2.,xmax,2.);
+	      TLine* l5 = new TLine(xmin,2.5,xmax,2.5);
+	      l->SetLineWidth(1);
+	      l->SetLineStyle(2);
+	      l2->SetLineStyle(3);
+	      l3->SetLineStyle(3);
+	      l4->SetLineStyle(3);
+	      l5->SetLineStyle(3);
 
 
-            TLine* lp1 = new TLine(xmin,1.,xmax,1.);	
-            TLine* lp2 = new TLine(xmin,2.,xmax,2.);	
-            TLine* lp3 = new TLine(xmin,3.,xmax,3.);
-            TLine* lp4 = new TLine(xmin,4.,xmax,4.);
-            TLine* lp5 = new TLine(xmin,5.,xmax,5.);
-            TLine* lp6 = new TLine(xmin,-1.,xmax,-1.);	
-            TLine* lp7 = new TLine(xmin,-2.,xmax,-2.);	
-            TLine* lp8 = new TLine(xmin,-3.,xmax,-3.);
-            TLine* lp9 = new TLine(xmin,-4.,xmax,-4.);
-            TLine* lp10 = new TLine(xmin,-5.,xmax,-5.);
+	      TLine* lp1 = new TLine(xmin,1.,xmax,1.);	
+	      TLine* lp2 = new TLine(xmin,2.,xmax,2.);	
+	      TLine* lp3 = new TLine(xmin,3.,xmax,3.);
+	      TLine* lp4 = new TLine(xmin,4.,xmax,4.);
+	      TLine* lp5 = new TLine(xmin,5.,xmax,5.);
+	      TLine* lp6 = new TLine(xmin,-1.,xmax,-1.);	
+	      TLine* lp7 = new TLine(xmin,-2.,xmax,-2.);	
+	      TLine* lp8 = new TLine(xmin,-3.,xmax,-3.);
+	      TLine* lp9 = new TLine(xmin,-4.,xmax,-4.);
+	      TLine* lp10 = new TLine(xmin,-5.,xmax,-5.);
 
-            lp1->SetLineStyle(3);
-            lp2->SetLineStyle(3);
-            lp3->SetLineStyle(3);
-            lp4->SetLineStyle(3);
-            lp5->SetLineStyle(3);
-            lp6->SetLineStyle(3);
-            lp7->SetLineStyle(3);
-            lp8->SetLineStyle(3);
-            lp9->SetLineStyle(3);
-            lp10->SetLineStyle(3);
+	      lp1->SetLineStyle(3);
+	      lp2->SetLineStyle(3);
+	      lp3->SetLineStyle(3);
+	      lp4->SetLineStyle(3);
+	      lp5->SetLineStyle(3);
+	      lp6->SetLineStyle(3);
+	      lp7->SetLineStyle(3);
+	      lp8->SetLineStyle(3);
+	      lp9->SetLineStyle(3);
+	      lp10->SetLineStyle(3);
 
-            if(plotRatio=="ratio"){	
+	      if(plotRatio=="ratio"){	
                 frame2->addObject(l);
                 frame2->addObject(l2);
                 frame2->addObject(l3);
                 frame2->addObject(l4);
                 frame2->addObject(l5);
-            } else if(plotRatio=="pull"){
+	      } else if(plotRatio=="pull"){
                 frame2->addObject(lp1);
                 frame2->addObject(lp2);
                 frame2->addObject(lp3);
@@ -1138,44 +1153,45 @@ void Util::PlotPdfWithComponents(RooWorkspace* w, FitConfig* fc, TString anaName
                 frame2->addObject(lp8);
                 frame2->addObject(lp9);
                 frame2->addObject(lp10);
-            }
+	      }
 
-            Double_t lowerlimit = 0.; 
-            Double_t upperlimit = 2.2; 
-            if (plotRatio=="pull"){ 
+	      Double_t lowerlimit = 0.; 
+	      Double_t upperlimit = 2.2; 
+	      if (plotRatio=="pull"){ 
                 lowerlimit = -5.7; upperlimit = 5.7;
-            }
+	      }
 	  
-            frame2->SetMinimum(lowerlimit);
-            frame2->SetMaximum(upperlimit);
+	      frame2->SetMinimum(lowerlimit);
+	      frame2->SetMaximum(upperlimit);
 	   
-            if(plotRatio=="ratio") 
+	      if(plotRatio=="ratio") 
                 frame2->GetYaxis()->SetTitle("Data / SM");
-            else if(plotRatio=="pull")
+	      else if(plotRatio=="pull")
                 frame2->GetYaxis()->SetTitle("Pull");
 
-            if(style.getTitleX() != "")  
+	      if(style.getTitleX() != "")  
                 frame2->GetXaxis()->SetTitle(style.getTitleX());
-            else  
+	      else  
                 frame2->GetXaxis()->SetTitle(GetXTitle(regionVar)); //Name());
 
-            if(style.getTitleY() != "")  
+	      if(style.getTitleY() != "")  
                 frame->GetYaxis()->SetTitle(style.getTitleY());
 
-            frame2->GetYaxis()->SetLabelSize(0.13);
-            frame2->GetYaxis()->SetNdivisions(504);         
-            frame2->GetXaxis()->SetLabelSize(0.13);
-            frame2->GetYaxis()->SetTitleSize(0.14);
-            frame2->GetXaxis()->SetTitleSize(0.14);
-            frame2->GetYaxis()->SetTitleOffset(0.35);
-            frame2->GetXaxis()->SetTitleOffset(1.);
-            frame2->GetYaxis()->SetLabelOffset(0.01);
-            frame2->GetXaxis()->SetLabelOffset(0.03);
-            frame2->GetXaxis()->SetTickLength(0.06);
+	      frame2->GetYaxis()->SetLabelSize(0.13);
+	      frame2->GetYaxis()->SetNdivisions(504);         
+	      frame2->GetXaxis()->SetLabelSize(0.13);
+	      frame2->GetYaxis()->SetTitleSize(0.14);
+	      frame2->GetXaxis()->SetTitleSize(0.14);
+	      frame2->GetYaxis()->SetTitleOffset(0.35);
+	      frame2->GetXaxis()->SetTitleOffset(1.);
+	      frame2->GetYaxis()->SetLabelOffset(0.01);
+	      frame2->GetXaxis()->SetLabelOffset(0.03);
+	      frame2->GetXaxis()->SetTickLength(0.06);
 
-            frame2->SetTitle("");
-            frame2->GetYaxis()->CenterTitle(); 
-            frame2->Draw();
+	      frame2->SetTitle("");
+	      frame2->GetYaxis()->CenterTitle(); 
+	      frame2->Draw();
+	    }
 
             canVec[iVec]->SaveAs("results/"+anaName+"/"+canName+".pdf");
             canVec[iVec]->SaveAs("results/"+anaName+"/"+canName+".eps");
