@@ -1,3 +1,8 @@
+2014-03-26 David Cote <david.cote@cern.ch>
+	* Added ERROR message when high==low in sample.addOveralSys().
+	  Otherwise, HistFactory seems to do something like error=(high-low)/(high+low),
+	  which silently cancels the error.
+
 2014-03-21 David Cote <david.cote@cern.ch>
 	* Made plotRatio of type string (instead of bool) and configurable via configMgr, with options: "ratio", "pull, "none"
 	* Implemented plotRatio=="none" case in Utils.cxx

@@ -546,6 +546,10 @@ class Sample(object):
             log.warning("    addOverallSys for %s high=%g low=%g. Systematic is removed from fit." % (systName, high, low))
             return
 
+        if high==low:
+            low = 2.0 - high
+            log.error("    addOverallSys '%s' has invalid inputs: high==low==%.3f.\n    This would result in error=(high-low)/(high+low)=0, silently cancelled by HistFactory.\n    Please fix your user configuration.\n    For now, will recover by symmetrizing error: high=%.3f low=%.3f."%(systName,high,high,low))
+
         if high==1.0 and low>0.0 and low!=1.0:
             highOld=high
             high = 2.0 - low
