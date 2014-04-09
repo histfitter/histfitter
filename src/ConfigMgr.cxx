@@ -196,8 +196,10 @@ void ConfigMgr::doHypoTest(FitConfig* fc, TString outdir, double SigXSecSysnsigm
         w->var("alpha_SigXSec")->setConstant(true);
     }
 
-    // set Errors of all parameters to 'natural' values before plotting/fitting
+    // set Errors&values of all parameters to 'natural' values before plotting/fitting
     Util::resetAllErrors(w);
+    Util::resetAllValues(w);
+    Util::resetAllNominalValues(w);
 
     bool useCLs = true;  
     int npoints = 1;   
