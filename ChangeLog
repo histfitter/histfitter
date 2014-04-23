@@ -1,3 +1,7 @@
+2014-04-23 Alex Koutsman <koutsman@cern.ch>
+	* scripts/SysTable.py
+	* Added method-2 back to SysTable.py
+
 2014-03-26 David Cote <david.cote@cern.ch>
 	* Added ERROR message when high==low in sample.addOveralSys().
 	  Otherwise, HistFactory seems to do something like error=(high-low)/(high+low),

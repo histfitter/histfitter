@@ -145,7 +145,11 @@ def latexfitresults( filename, namemap, region='3jL', sample='', resultName="Roo
       par.setConstant() 
 
   return regSys
-  
+
+
+
+
+# Method-2: set the parameter you're interested in constant, redo the fit with all other parameters floating, calculate the quadratic difference between default fit and your new model with parameter fixed
 def latexfitresults_method2(filename,resultname='RooExpandedFitResult_afterFit', region='3jL', sample='', fitregions = 'WR,TR,S3,S4,SR3jT,SR4jT', dataname='obsData', doAsym=False):
 
 #  namemap = {}
@@ -235,6 +239,7 @@ def latexfitresults_method2(filename,resultname='RooExpandedFitResult_afterFit',
 
   nFittedInRegion = pdfInRegion.getVal()
   regSys['sqrtnfitted'] = TMath.Sqrt(nFittedInRegion)
+  regSys['nfitted'] = nFittedInRegion
 
   pdfFittedErrInRegion = Util.GetPropagatedError(pdfInRegion, result, doAsym) 
   regSys['totsyserr'] = pdfFittedErrInRegion
@@ -242,10 +247,10 @@ def latexfitresults_method2(filename,resultname='RooExpandedFitResult_afterFit',
   # redo the fit for every parameter being fixed
   lumiConst = True
   fpf = result.floatParsFinal()
-  
+
   # redo the fit for every parameter being fixed
   for idx in range(fpf.getSize()):
-    
+
     parname = fpf[idx].GetName()
     print "\n Method-2: redoing fit with fixed parameter ", parname
 
@@ -258,7 +263,7 @@ def latexfitresults_method2(filename,resultname='RooExpandedFitResult_afterFit',
     #     par.setVal(parDefVal)
     par.setConstant(True)
     suffix = parname + "Fixed"
-    result_1parfixed = Util.FitPdf(w, fitRegionsFullName, lumiConst, data_set, suffix)
+    result_1parfixed = Util.FitPdf(w, fitRegionsFullName, lumiConst, data_set, suffix, doAsym, "all")
 
     expResultAfter_1parfixed = RooExpandedFitResult(result_1parfixed, resultlistOrig)
 
@@ -398,7 +403,9 @@ if __name__ == "__main__":
 
     if not chosenSample:
       if method == "2":
-        regSys = latexfitresults_method2(wsFileName,namemap,chan,'',fitRegionsStr,'obsData',doAsym)
+        #regSys = latexfitresults_method2(wsFileName,namemap,chan,'',fitRegionsStr,'obsData',doAsym)
+        #  def latexfitresults_method2(filename,resultname='RooExpandedFitResult_afterFit', region='3jL', sample='', fitregions = 'WR,TR,S3,S4,SR3jT,SR4jT', dataname='obsData', doAsym=False):
+        regSys = latexfitresults_method2(wsFileName,resultName,chan,'',fitRegionsStr,'obsData',doAsym) 
       else:
         regSys = latexfitresults(wsFileName,namemap,chan,'',resultName,'obsData',doAsym)
       chanSys[chan] = regSys
