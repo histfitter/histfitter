@@ -1,5 +1,33 @@
-2012-08-29 HistFitter Todo list
+HistFitter Todo list
 
+- Update tutorial to work with latest tag.
+  o Revision: the Tutorial/documentation could be a more practical-oriented.
+- Documentation: how to validate the fit? FAQ on failed fits. (stat forum)
+- Advertizement and examples for combination of workspaces.
+
+
+- Advertize the 2 work packages in SUSY group.
+- Migration into ATLAS release
+
+
+- Harmonize the various plotting and batch/grid submission scripts.
+
+- Publication
+
+
+
+Open issues:
+- Migrate to uncapped p0 values.
+
+- Moritz: toys versus asymptotic
+- Roger Caminal.
+
+- Fix rotation schedule for HF support.
+
+
+-------------------------------------------------------------------
+
+HistFitter post-mortem:
 https://indico.cern.ch/conferenceDisplay.py?confId=204995
 
 Prioritized todo-list:
