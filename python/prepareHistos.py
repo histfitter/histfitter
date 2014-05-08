@@ -230,7 +230,7 @@ class PrepareHistos(object):
                         if forceReturn: # used for QCD histograms
                             log.info("Could not find histogram <"+name+"> in "+self.cacheFileName+" ! Force return.")
                             return None
-                        print "force=%s fallback=%s" % (forceNoFallback, self.useCacheToTreeFallback)
+                        log.debug("__addHistoFromCache(): forceNoFallback=%s useCacheToTreeFallback=%s" % (forceNoFallback, self.useCacheToTreeFallback))
                         log.error("Could not find histogram <"+name+"> in "+self.cacheFileName+" ! ")
                         raise #Exception("Could not find histogram <"+name+"> in "+self.cacheFileName)
                     else:
