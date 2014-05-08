@@ -220,6 +220,7 @@ class PrepareHistos(object):
                 self.configMgr.hists[name] = self.cache2File.Get(name)
                 testsum = self.configMgr.hists[name].GetSum()
             except: # IOError:
+                log.info("Could not get histogram <%s> from backupCacheFile %s, trying cacheFile" % name, self.cache2Filename)
                 try:
                     self.configMgr.hists[name] = self.cacheFile.Get(name)
                     testsum = self.configMgr.hists[name].GetSum()
