@@ -3002,7 +3002,8 @@ RooCurve* Util::MakePdfErrorRatioHist(RooWorkspace* w, RooAbsData* regionData, R
         return 0 ;
     }
 
-    if(rFit != NULL) regionPdf->plotOn(frame,Normalization(normCount,RooAbsReal::NumEvent),Precision(1e-5),FillColor(kBlue-5),FillStyle(3004),VisualizeError(*rFit,Nsigma));
+    //    if(rFit != NULL) regionPdf->plotOn(frame,Normalization(normCount,RooAbsReal::NumEvent),Precision(1e-5),FillColor(kBlue-5),FillStyle(3004),VisualizeError(*rFit,Nsigma));
+    if(rFit != NULL) regionPdf->plotOn(frame,Normalization(1,RooAbsReal::RelativeExpected),Precision(1e-5),FillColor(kBlue-5),FillStyle(3004),VisualizeError(*rFit,Nsigma));
 
     // Find curve object
     RooCurve* curveError = (RooCurve*) frame->findObject(curvename,RooCurve::Class()) ;
