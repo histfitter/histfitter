@@ -1,3 +1,7 @@
+2014-05-14 Alex Koutsman <koutsman@cern.ch>
+        * src/Utils.cxx
+	* fixing bug in ratio plot error 
+
 2014-04-23 Alex Koutsman <koutsman@cern.ch>
 	* scripts/SysTable.py
 	* Added method-2 back to SysTable.py
