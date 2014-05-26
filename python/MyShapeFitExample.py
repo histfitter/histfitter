@@ -22,11 +22,6 @@ gROOT.LoadMacro("./macros/AtlasStyle.C")
 import ROOT
 ROOT.SetAtlasStyle()
 
-log = Logger("MyShapeFitExample")
-log.setLevel(logger.INFO) #should have no effect if -L is used
-log.warning("example warning from python")
-log.error("example error from python")
-
 #-------------------------------
 # Parameters for hypothesis test
 #-------------------------------
@@ -107,7 +102,7 @@ dataSample.setData()
 #**************
 
 #Fit config instance
-exclusionFitConfig = configMgr.addTopLevelXML("Exclusion")
+exclusionFitConfig = configMgr.addFitConfig("Exclusion")
 meas=exclusionFitConfig.addMeasurement(name="NormalMeasurement",lumi=1.0,lumiErr=0.039)
 meas.addPOI("mu_SIG")
 
@@ -133,5 +128,5 @@ exclusionFitConfig.addSamples(sigSample)
 exclusionFitConfig.setSignalSample(sigSample)
 
 #2nd cloned-copy just to accomodate -l option...
-exclusionFitClone = configMgr.addTopLevelXMLClone(exclusionFitConfig,"ExclusionFitClone")
+exclusionFitClone = configMgr.addFitConfigClone(exclusionFitConfig,"ExclusionFitClone")
 
