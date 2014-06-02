@@ -136,7 +136,7 @@ double Util::getNonQcdVal(const TString& proc, const TString& reg, TMap* map,con
 //void Util::GenerateFitAndPlot(TString fcName, Bool_t drawBeforeFit, Bool_t drawAfterFit, Bool_t plotCorrelationMatrix, Bool_t plotSeparateComponents, Bool_t plotNLL ){
 void Util::GenerateFitAndPlot(TString fcName, TString anaName, Bool_t drawBeforeFit, Bool_t drawAfterFit, Bool_t plotCorrelationMatrix, Bool_t plotSeparateComponents, Bool_t plotNLL, Bool_t minos, TString minosPars ){
 
-  
+
     //RooAbsReal::defaultIntegratorConfig()->setEpsRel(1e-9) ;
     //RooAbsReal::defaultIntegratorConfig()->setEpsAbs(1e-9) ;
 
@@ -155,13 +155,13 @@ void Util::GenerateFitAndPlot(TString fcName, TString anaName, Bool_t drawBefore
 
     RooWorkspace* w = GetWorkspaceFromFile(fc->m_inputWorkspaceFileName, "combined");
     if(w==NULL){
-      Logger << kWARNING << "     RooWorkspace('combined') does not exist, trying workspace('w')" << GEndl;
-      w = GetWorkspaceFromFile(fc->m_inputWorkspaceFileName, "w");
+        Logger << kWARNING << "     RooWorkspace('combined') does not exist, trying workspace('w')" << GEndl;
+        w = GetWorkspaceFromFile(fc->m_inputWorkspaceFileName, "w");
     }
 
     if(w==NULL){
-      Logger << kERROR << "     Cannot find RooWorkspace, quitting " << GEndl;
-      return;
+        Logger << kERROR << "     Cannot find RooWorkspace, quitting " << GEndl;
+        return;
     }
 
     Util::SetInterpolationCode(w,4); // MB 20130408: overwrite default - change from piece-wise linear to 6th order poly interp + linear extrapolation (also used in Higgs group)
@@ -172,19 +172,19 @@ void Util::GenerateFitAndPlot(TString fcName, TString anaName, Bool_t drawBefore
     // fit only in CRs and SRs, not in VR
     TString fitChannels = "";
     for(unsigned int i=0; i <fc->m_bkgConstrainChannels.size(); i++){
-      if (fitChannels.Length() > 0)   fitChannels += ",";
-      fitChannels += fc->m_bkgConstrainChannels[i];
+        if (fitChannels.Length() > 0)   fitChannels += ",";
+        fitChannels += fc->m_bkgConstrainChannels[i];
     }
 
     for(unsigned int i=0; i <fc->m_signalChannels.size(); i++){
-      if (fitChannels.Length() > 0)   fitChannels += ",";
-      fitChannels += fc->m_signalChannels[i];
+        if (fitChannels.Length() > 0)   fitChannels += ",";
+        fitChannels += fc->m_signalChannels[i];
     }
 
     //hack to be fixed at HistFactory level (check again with ROOT 5.34)
     Bool_t lumiConst = kTRUE;
     //if (fc->m_signalChannels.size() > 0) 
-        lumiConst = kFALSE;
+    lumiConst = kFALSE;
 
     //  fit toy MC if specified. When left None, data is fit by default
     RooAbsData* toyMC = NULL;
@@ -215,22 +215,22 @@ void Util::GenerateFitAndPlot(TString fcName, TString anaName, Bool_t drawBefore
 
     // plot before fit
     if (drawBeforeFit)
-      PlotPdfWithComponents(w, fc->m_name, anaName, plotChannels, "beforeFit", expResultBefore, toyMC);
+        PlotPdfWithComponents(w, fc->m_name, anaName, plotChannels, "beforeFit", expResultBefore, toyMC);
 
     //fit of all regions
     RooFitResult*  result = FitPdf(w, fitChannels, lumiConst, toyMC, "", minos, minosPars);
 
     if (result==NULL) return;
-    
+
     // create an RooExpandedFitResult encompassing all the regions/parameters
     //  with the result & save it to workspace
     RooExpandedFitResult* expResultAfter = new RooExpandedFitResult(result, floatPars);
     ImportInWorkspace(w, expResultAfter, "RooExpandedFitResult_afterFit");
- 
+
     // plot after fit
     if (drawAfterFit)
-      PlotPdfWithComponents(w, fc->m_name, anaName, plotChannels, "afterFit", expResultAfter, toyMC);
-    
+        PlotPdfWithComponents(w, fc->m_name, anaName, plotChannels, "afterFit", expResultAfter, toyMC);
+
 
     // plot each component of each region separately with propagated
     // error after fit  (interesting for debugging)
@@ -244,7 +244,7 @@ void Util::GenerateFitAndPlot(TString fcName, TString anaName, Bool_t drawBefore
     // plot likelihood
     Bool_t plotPLL = minos;
     if(plotNLL) {
-      PlotNLL(w, expResultAfter, plotPLL, anaName, "", toyMC, minosPars, fitChannels, lumiConst);
+        PlotNLL(w, expResultAfter, plotPLL, anaName, "", toyMC, minosPars, fitChannels, lumiConst);
     }
 
     if (toyMC) 
@@ -348,8 +348,8 @@ RooFitResult* Util::FitPdf( RooWorkspace* w, TString fitRegions, Bool_t lumiCons
     data->table(*((RooAbsCategory*)regionCat))->Print("v");
 
     if (lumiConst) {
-      RooRealVar* lumi = (RooRealVar*) w->var("Lumi");
-      if (lumi!=NULL) lumi->setConstant(lumiConst); 
+        RooRealVar* lumi = (RooRealVar*) w->var("Lumi");
+        if (lumi!=NULL) lumi->setConstant(lumiConst); 
     }
 
     // Construct an empty simultaneous pdf using category regionCat as index
@@ -405,16 +405,16 @@ RooFitResult* Util::FitPdf( RooWorkspace* w, TString fitRegions, Bool_t lumiCons
     // find parameters requested for Minos
     RooArgSet* minosParams = new RooArgSet();
     if(minosPars != "" && minos && minosPars != "all"  && minosPars != "ALL"){
-      std::vector<TString> parsVec = Tokens(minosPars,",");
-      for(unsigned int i=0; i<parsVec.size();i++){
-	RooRealVar* var = (RooRealVar*) w->var(parsVec[i]);
-	if(var==NULL)  Logger << kWARNING << " Util::FitPdf()   could not find parameter(" << parsVec[i] << ") in workspace while setting up minos" << GEndl;
-	else{
-	  minosParams->add(*var);
-	}
-      }
+        std::vector<TString> parsVec = Tokens(minosPars,",");
+        for(unsigned int i=0; i<parsVec.size();i++){
+            RooRealVar* var = (RooRealVar*) w->var(parsVec[i]);
+            if(var==NULL)  Logger << kWARNING << " Util::FitPdf()   could not find parameter(" << parsVec[i] << ") in workspace while setting up minos" << GEndl;
+            else{
+                minosParams->add(*var);
+            }
+        }
     }
-    
+
     // fit pdf to data
     RooFitResult* r = 0;
 
@@ -422,7 +422,7 @@ RooFitResult* Util::FitPdf( RooWorkspace* w, TString fitRegions, Bool_t lumiCons
     Logger << kINFO << " Utils::FitPdf() using datasetname = " << datasetname << GEndl;
     //    if( datasetname.Contains("asimov")){
     //r = simPdfFitRegions->fitTo(*dataFitRegions,Save(),SumW2Error(kFALSE)); //MB no verbose :) ,Verbose(kTRUE));
-    
+
     RooAbsPdf* pdf_FR = simPdfFitRegions;
     RooDataSet* data_FR = dataFitRegions;
 
@@ -480,45 +480,45 @@ RooFitResult* Util::FitPdf( RooWorkspace* w, TString fitRegions, Bool_t lumiCons
                 algorithm = "migradimproved";
             }
             /*
-            if (tries == 4 && !kickApplied) {
-                Logger << kINFO << "    ----> trying fit with different starting values" << GEndl;
-                RooFitResult* tmpResult = minim.save();
-                const RooArgList& randList = tmpResult->randomizePars();
-                *allParams = randList;
-                delete tmpResult;
-                tries=0;          // reset the fit cycle
-                kickApplied=true; // do kick only once
-            }
-            */
+               if (tries == 4 && !kickApplied) {
+               Logger << kINFO << "    ----> trying fit with different starting values" << GEndl;
+               RooFitResult* tmpResult = minim.save();
+               const RooArgList& randList = tmpResult->randomizePars();
+             *allParams = randList;
+             delete tmpResult;
+             tries=0;          // reset the fit cycle
+             kickApplied=true; // do kick only once
+             }
+             */
         }
     }
 
     //RooFitResult * result = 0; 
     //double val(0);
-	
-    if (status%100 == 0) { // ignore errors in Hesse or in Improve
-	  // only calculate minos errors if fit with Migrad converged
-      if(minos && (minosPars == "all" || minosPars == "ALL")){
-	minim.hesse();
-	minim.minos();
-      }
-      else if(minos && minosPars!="" && minosParams->getSize()>0){
-	minim.hesse();
-	minim.minos(*minosParams);
-      }
-      else {
-	minim.hesse();
-      }
 
-      // save fit result	  
-      r = minim.save();
-      //val = r->minNll();
+    if (status%100 == 0) { // ignore errors in Hesse or in Improve
+        // only calculate minos errors if fit with Migrad converged
+        if(minos && (minosPars == "all" || minosPars == "ALL")){
+            minim.hesse();
+            minim.minos();
+        }
+        else if(minos && minosPars!="" && minosParams->getSize()>0){
+            minim.hesse();
+            minim.minos(*minosParams);
+        }
+        else {
+            minim.hesse();
+        }
+
+        // save fit result	  
+        r = minim.save();
+        //val = r->minNll();
     }
     else { 
-      Logger << kERROR << "FIT FAILED !- return a NaN NLL " << GEndl;
-      //val =  TMath::QuietNaN();       
+        Logger << kERROR << "FIT FAILED !- return a NaN NLL " << GEndl;
+        //val =  TMath::QuietNaN();       
     }
-    
+
     if (r!=0) r->Print("v");
 
     TString fitName = data_FR->GetName();
@@ -530,9 +530,9 @@ RooFitResult* Util::FitPdf( RooWorkspace* w, TString fitRegions, Bool_t lumiCons
     TString resultname = Form("RooFitResult_%s",fitName.Data());
     if(suffix!= "") resultname += "_" + suffix;
     if (r!=0) {
-      r->SetName(resultname.Data());
-      w->import(*r,kTRUE) ;
-      gDirectory->Add(r);
+        r->SetName(resultname.Data());
+        w->import(*r,kTRUE) ;
+        gDirectory->Add(r);
     }
 
     // save snapshot after fit has been done
@@ -544,25 +544,25 @@ RooFitResult* Util::FitPdf( RooWorkspace* w, TString fitRegions, Bool_t lumiCons
 
 
 //_____________________________________________________________________________
-void 
+    void 
 Util::SetInterpolationCode(RooWorkspace* w, Int_t code)
 {
-  if(w==NULL){
-    Logger << kERROR << "Workspace is NULL. Return." << GEndl;
-    return;
-  }
+    if(w==NULL){
+        Logger << kERROR << "Workspace is NULL. Return." << GEndl;
+        return;
+    }
 
-  RooArgSet funcs = w->allFunctions();
-  TIterator* iter = funcs.createIterator() ;
+    RooArgSet funcs = w->allFunctions();
+    TIterator* iter = funcs.createIterator() ;
 
-  RooAbsArg* parg(0);  
-  while((parg=(RooAbsArg*)iter->Next())) {
-    if ( parg->ClassName()!=TString("PiecewiseInterpolation") ) { continue; }    
-    PiecewiseInterpolation* p = (PiecewiseInterpolation*)w->function( parg->GetName() ); // something I can modifiy :)
-    p->setAllInterpCodes(code);
-  }
+    RooAbsArg* parg(0);  
+    while((parg=(RooAbsArg*)iter->Next())) {
+        if ( parg->ClassName()!=TString("PiecewiseInterpolation") ) { continue; }    
+        PiecewiseInterpolation* p = (PiecewiseInterpolation*)w->function( parg->GetName() ); // something I can modifiy :)
+        p->setAllInterpCodes(code);
+    }
 
-  delete iter;
+    delete iter;
 }
 
 
@@ -919,13 +919,13 @@ void Util::PlotPdfWithComponents(RooWorkspace* w, FitConfig* fc, TString anaName
             //RemoveEmptyDataBins(w, frame);
 
             // normalize pdf to number of expected events, not to number of events in dataset
-	    //  double normCount = regionPdf->expectedEvents(*regionVar);
+            //  double normCount = regionPdf->expectedEvents(*regionVar);
             //regionPdf->plotOn(frame,Normalization(normCount,RooAbsReal::NumEvent),Precision(1e-5),LineColor(style.getTotalPdfColor()));
             regionPdf->plotOn(frame,Normalization(1,RooAbsReal::RelativeExpected),Precision(1e-5),LineColor(style.getTotalPdfColor()));
 
             // plot components
             if(plotComponents)  
-	      AddComponentsToPlot(w, fc, frame, regionPdf, regionData, regionVar, regionCatLabel.Data(),style);
+                AddComponentsToPlot(w, fc, frame, regionPdf, regionData, regionVar, regionCatLabel.Data(),style);
 
             // visualize error of fit
             if(rFit != NULL) { 	
@@ -945,12 +945,12 @@ void Util::PlotPdfWithComponents(RooWorkspace* w, FitConfig* fc, TString anaName
             canVec[iVec] = new TCanvas(canName,canName, 700, 600);
 
             // two pads, one for 'standard' plot, one for data/MC ratio
-	    float yMinP1=0.305;
-	    float bottomMarginP1=0.005;
-	    if(plotRatio=="none"){ 
-	      yMinP1=0.01;
-	      bottomMarginP1=0.09;
-	    }	   
+            float yMinP1=0.305;
+            float bottomMarginP1=0.005;
+            if(plotRatio=="none"){ 
+                yMinP1=0.01;
+                bottomMarginP1=0.09;
+            }	   
             TPad *pad1 = new TPad(Form("%s_pad1",canName.Data()),Form("%s_pad1",canName.Data()),0.,yMinP1,.99,1);
             pad1->SetBottomMargin(bottomMarginP1);
             pad1->SetFillColor(kWhite);
@@ -963,21 +963,21 @@ void Util::PlotPdfWithComponents(RooWorkspace* w, FitConfig* fc, TString anaName
 
             if(style.getLogY()) pad1->SetLogy();
 
-	    if(style.getTitleX() != "")  
-	      frame->GetXaxis()->SetTitle(style.getTitleX());
-	    else  
-	      frame->GetXaxis()->SetTitle(GetXTitle(regionVar));
+            if(style.getTitleX() != "")  
+                frame->GetXaxis()->SetTitle(style.getTitleX());
+            else  
+                frame->GetXaxis()->SetTitle(GetXTitle(regionVar));
 
             pad1->Draw();
-	    if(plotRatio!="none"){ 
-	      pad2->Draw(); 
-	      frame->GetXaxis()->SetLabelSize(0.); 
-	    }
+            if(plotRatio!="none"){ 
+                pad2->Draw(); 
+                frame->GetXaxis()->SetLabelSize(0.); 
+            }
 
             pad1->cd();
 
             frame->SetMinimum(style.getMinY());
-	
+
             if( fabs(style.getMaxY() + 999.) > 0.000001){
                 frame->SetMaximum(style.getMaxY());
             }
@@ -1031,167 +1031,167 @@ void Util::PlotPdfWithComponents(RooWorkspace* w, FitConfig* fc, TString anaName
                 char NP[10];
                 TString NP_str;
                 for( int iComp = (compNameVec.size()-1) ; iComp>-1; iComp--){
-		  Int_t  compPlotColor    = ( (fc!=0) ? style.getSampleColor(compNameVec[iComp]) : iComp );
-		  TString  compShortName  = ( (fc!=0) ? style.getSampleName(compNameVec[iComp])  : "" );
+                    Int_t  compPlotColor    = ( (fc!=0) ? style.getSampleColor(compNameVec[iComp]) : iComp );
+                    TString  compShortName  = ( (fc!=0) ? style.getSampleName(compNameVec[iComp])  : "" );
 
-		  TString legName = compShortName; //"";
-		  //if(compShortName.Contains("BG")) legName = "single top & diboson";
-		  for (int inp=0; inp<6; inp++) {
-		    sprintf(NP,"Np%d",inp);
-		    NP_str = NP;
-		    if(compShortName.Contains("WZ") && compShortName.Contains(NP)) legName = "WZ+"+NP_str;
-		    if(compShortName.Contains("Top") && compShortName.Contains(NP)) legName = "t#bar{t}+"+NP_str;
-		  }
-		  //if(compShortName.Contains("QCD")) legName = "multijets (data estimate)";
-		  if(compShortName.Contains("Discovery")) legName = "signal";
-		  //
-		  if(compShortName.Contains("WZpT0GeV"))   legName = "W/Z (p_{T}^{V,Truth}=0-50GeV)";
-		  if(compShortName.Contains("WZpT50GeV"))  legName = "W/Z (p_{T}^{V,Truth}=50-100GeV)";
-		  if(compShortName.Contains("WZpT100GeV")) legName = "W/Z (p_{T}^{V,Truth}=100-150GeV)";
-		  if(compShortName.Contains("WZpT150GeV")) legName = "W/Z (p_{T}^{V,Truth}=150-200GeV)";
-		  if(compShortName.Contains("WZpT200GeV")) legName = "W/Z (p_{T}^{V,Truth}=200-250GeV)";
-		  if(compShortName.Contains("WZpT250GeV")) legName = "W/Z (p_{T}^{V,Truth}=250GeV-)";
-		  //
-		  entry=leg->AddEntry("",legName.Data(),"f") ;
-		  entry->SetLineColor(compPlotColor);
-		  entry->SetFillColor(compPlotColor);
-		  entry->SetFillStyle(1001);
+                    TString legName = compShortName; //"";
+                    //if(compShortName.Contains("BG")) legName = "single top & diboson";
+                    for (int inp=0; inp<6; inp++) {
+                        sprintf(NP,"Np%d",inp);
+                        NP_str = NP;
+                        if(compShortName.Contains("WZ") && compShortName.Contains(NP)) legName = "WZ+"+NP_str;
+                        if(compShortName.Contains("Top") && compShortName.Contains(NP)) legName = "t#bar{t}+"+NP_str;
+                    }
+                    //if(compShortName.Contains("QCD")) legName = "multijets (data estimate)";
+                    if(compShortName.Contains("Discovery")) legName = "signal";
+                    //
+                    if(compShortName.Contains("WZpT0GeV"))   legName = "W/Z (p_{T}^{V,Truth}=0-50GeV)";
+                    if(compShortName.Contains("WZpT50GeV"))  legName = "W/Z (p_{T}^{V,Truth}=50-100GeV)";
+                    if(compShortName.Contains("WZpT100GeV")) legName = "W/Z (p_{T}^{V,Truth}=100-150GeV)";
+                    if(compShortName.Contains("WZpT150GeV")) legName = "W/Z (p_{T}^{V,Truth}=150-200GeV)";
+                    if(compShortName.Contains("WZpT200GeV")) legName = "W/Z (p_{T}^{V,Truth}=200-250GeV)";
+                    if(compShortName.Contains("WZpT250GeV")) legName = "W/Z (p_{T}^{V,Truth}=250GeV-)";
+                    //
+                    entry=leg->AddEntry("",legName.Data(),"f") ;
+                    entry->SetLineColor(compPlotColor);
+                    entry->SetFillColor(compPlotColor);
+                    entry->SetFillStyle(1001);
                 }
             }
             leg->Draw();	
             //      frameVec[iVec]=frame;
 
             // now make/draw the ratio histogram
-	    if(plotRatio!="none"){
-	      pad2->cd();
+            if(plotRatio!="none"){
+                pad2->cd();
 
-	      // data/pdf ratio histograms is plotted by RooPlot.ratioHist()
-	      RooPlot* frame_dummy =  regionVar->frame(); 
-	      data->plotOn(frame_dummy,Cut(dataCatLabel),RooFit::DataError(RooAbsData::Poisson));
-	      // normalize pdf to number of expected events, not to number of events in dataset
-	      //regionPdf->plotOn(frame_dummy,Normalization(normCount,RooAbsReal::NumEvent),Precision(1e-5));      
-	      regionPdf->plotOn(frame_dummy,Normalization(1,RooAbsReal::RelativeExpected),Precision(1e-5));
+                // data/pdf ratio histograms is plotted by RooPlot.ratioHist()
+                RooPlot* frame_dummy =  regionVar->frame(); 
+                data->plotOn(frame_dummy,Cut(dataCatLabel),RooFit::DataError(RooAbsData::Poisson));
+                // normalize pdf to number of expected events, not to number of events in dataset
+                //regionPdf->plotOn(frame_dummy,Normalization(normCount,RooAbsReal::NumEvent),Precision(1e-5));      
+                regionPdf->plotOn(frame_dummy,Normalization(1,RooAbsReal::RelativeExpected),Precision(1e-5));
 
-	      // Construct a histogram with the ratio of the data w.r.t the pdf curve
-	      RooHist* hratio = NULL;
-	      if(plotRatio=="ratio")  hratio = (RooHist*) frame_dummy->ratioHist() ;
-	      else if(plotRatio=="pull") hratio = (RooHist*) frame_dummy->pullHist() ;
-	      hratio->SetMarkerColor(style.getDataColor());
-	      hratio->SetLineColor(style.getDataColor());
+                // Construct a histogram with the ratio of the data w.r.t the pdf curve
+                RooHist* hratio = NULL;
+                if(plotRatio=="ratio")  hratio = (RooHist*) frame_dummy->ratioHist() ;
+                else if(plotRatio=="pull") hratio = (RooHist*) frame_dummy->pullHist() ;
+                hratio->SetMarkerColor(style.getDataColor());
+                hratio->SetLineColor(style.getDataColor());
 
-	      // Construct a histogram with the ratio of the pdf curve w.r.t the pdf curve +/- 1 sigma
-	      RooCurve* hratioPdfError = new RooCurve;
-	      if (rFit != NULL)  hratioPdfError = MakePdfErrorRatioHist(w, regionData, regionPdf, regionVar, rFit);
-	      hratioPdfError->SetFillColor(style.getErrorFillColor());
-	      hratioPdfError->SetFillStyle(style.getErrorFillStyle());
-	      hratioPdfError->SetLineColor(style.getErrorLineColor());
-	      hratioPdfError->SetLineStyle(style.getErrorLineStyle());
+                // Construct a histogram with the ratio of the pdf curve w.r.t the pdf curve +/- 1 sigma
+                RooCurve* hratioPdfError = new RooCurve;
+                if (rFit != NULL)  hratioPdfError = MakePdfErrorRatioHist(w, regionData, regionPdf, regionVar, rFit);
+                hratioPdfError->SetFillColor(style.getErrorFillColor());
+                hratioPdfError->SetFillStyle(style.getErrorFillStyle());
+                hratioPdfError->SetLineColor(style.getErrorLineColor());
+                hratioPdfError->SetLineStyle(style.getErrorLineStyle());
 
-	      // Create a new frame to draw the residual distribution and add the distribution to the frame
-	      RooPlot* frame2 = regionVar->frame() ;
-	      if(plotRatio=="ratio")  hratio->SetTitle("Ratio Distribution");
-	      else  if(plotRatio=="pull") hratio->SetTitle("Pull Distribution");
-	      // only add PdfErrorsPlot when the plot shows ratio, not with pull
-	      if (rFit != NULL && plotRatio=="ratio")   frame2->addPlotable(hratioPdfError,"F");
-	      frame2->addPlotable(hratio,"P");
+                // Create a new frame to draw the residual distribution and add the distribution to the frame
+                RooPlot* frame2 = regionVar->frame() ;
+                if(plotRatio=="ratio")  hratio->SetTitle("Ratio Distribution");
+                else  if(plotRatio=="pull") hratio->SetTitle("Pull Distribution");
+                // only add PdfErrorsPlot when the plot shows ratio, not with pull
+                if (rFit != NULL && plotRatio=="ratio")   frame2->addPlotable(hratioPdfError,"F");
+                frame2->addPlotable(hratio,"P");
 
-	      // ratio plot cosmetics
-	      int firstbin = frame_dummy->GetXaxis()->GetFirst();
-	      int lastbin = frame_dummy->GetXaxis()->GetLast();
-	      double xmax = frame_dummy->GetXaxis()->GetBinUpEdge(lastbin) ;
-	      double xmin = frame_dummy->GetXaxis()->GetBinLowEdge(firstbin) ;
+                // ratio plot cosmetics
+                int firstbin = frame_dummy->GetXaxis()->GetFirst();
+                int lastbin = frame_dummy->GetXaxis()->GetLast();
+                double xmax = frame_dummy->GetXaxis()->GetBinUpEdge(lastbin) ;
+                double xmin = frame_dummy->GetXaxis()->GetBinLowEdge(firstbin) ;
 
-	      TLine* l = new TLine(xmin,1.,xmax,1.);
-	      TLine* l2 = new TLine(xmin,0.5,xmax,0.5);
-	      TLine* l3 = new TLine(xmin,1.5,xmax,1.5);
-	      TLine* l4 = new TLine(xmin,2.,xmax,2.);
-	      TLine* l5 = new TLine(xmin,2.5,xmax,2.5);
-	      l->SetLineWidth(1);
-	      l->SetLineStyle(2);
-	      l2->SetLineStyle(3);
-	      l3->SetLineStyle(3);
-	      l4->SetLineStyle(3);
-	      l5->SetLineStyle(3);
+                TLine* l = new TLine(xmin,1.,xmax,1.);
+                TLine* l2 = new TLine(xmin,0.5,xmax,0.5);
+                TLine* l3 = new TLine(xmin,1.5,xmax,1.5);
+                TLine* l4 = new TLine(xmin,2.,xmax,2.);
+                TLine* l5 = new TLine(xmin,2.5,xmax,2.5);
+                l->SetLineWidth(1);
+                l->SetLineStyle(2);
+                l2->SetLineStyle(3);
+                l3->SetLineStyle(3);
+                l4->SetLineStyle(3);
+                l5->SetLineStyle(3);
 
 
-	      TLine* lp1 = new TLine(xmin,1.,xmax,1.);	
-	      TLine* lp2 = new TLine(xmin,2.,xmax,2.);	
-	      TLine* lp3 = new TLine(xmin,3.,xmax,3.);
-	      TLine* lp4 = new TLine(xmin,4.,xmax,4.);
-	      TLine* lp5 = new TLine(xmin,5.,xmax,5.);
-	      TLine* lp6 = new TLine(xmin,-1.,xmax,-1.);	
-	      TLine* lp7 = new TLine(xmin,-2.,xmax,-2.);	
-	      TLine* lp8 = new TLine(xmin,-3.,xmax,-3.);
-	      TLine* lp9 = new TLine(xmin,-4.,xmax,-4.);
-	      TLine* lp10 = new TLine(xmin,-5.,xmax,-5.);
+                TLine* lp1 = new TLine(xmin,1.,xmax,1.);	
+                TLine* lp2 = new TLine(xmin,2.,xmax,2.);	
+                TLine* lp3 = new TLine(xmin,3.,xmax,3.);
+                TLine* lp4 = new TLine(xmin,4.,xmax,4.);
+                TLine* lp5 = new TLine(xmin,5.,xmax,5.);
+                TLine* lp6 = new TLine(xmin,-1.,xmax,-1.);	
+                TLine* lp7 = new TLine(xmin,-2.,xmax,-2.);	
+                TLine* lp8 = new TLine(xmin,-3.,xmax,-3.);
+                TLine* lp9 = new TLine(xmin,-4.,xmax,-4.);
+                TLine* lp10 = new TLine(xmin,-5.,xmax,-5.);
 
-	      lp1->SetLineStyle(3);
-	      lp2->SetLineStyle(3);
-	      lp3->SetLineStyle(3);
-	      lp4->SetLineStyle(3);
-	      lp5->SetLineStyle(3);
-	      lp6->SetLineStyle(3);
-	      lp7->SetLineStyle(3);
-	      lp8->SetLineStyle(3);
-	      lp9->SetLineStyle(3);
-	      lp10->SetLineStyle(3);
+                lp1->SetLineStyle(3);
+                lp2->SetLineStyle(3);
+                lp3->SetLineStyle(3);
+                lp4->SetLineStyle(3);
+                lp5->SetLineStyle(3);
+                lp6->SetLineStyle(3);
+                lp7->SetLineStyle(3);
+                lp8->SetLineStyle(3);
+                lp9->SetLineStyle(3);
+                lp10->SetLineStyle(3);
 
-	      if(plotRatio=="ratio"){	
-                frame2->addObject(l);
-                frame2->addObject(l2);
-                frame2->addObject(l3);
-                frame2->addObject(l4);
-                frame2->addObject(l5);
-	      } else if(plotRatio=="pull"){
-                frame2->addObject(lp1);
-                frame2->addObject(lp2);
-                frame2->addObject(lp3);
-                frame2->addObject(lp4);
-                frame2->addObject(lp5);
-                frame2->addObject(lp6);
-                frame2->addObject(lp7);
-                frame2->addObject(lp8);
-                frame2->addObject(lp9);
-                frame2->addObject(lp10);
-	      }
+                if(plotRatio=="ratio"){	
+                    frame2->addObject(l);
+                    frame2->addObject(l2);
+                    frame2->addObject(l3);
+                    frame2->addObject(l4);
+                    frame2->addObject(l5);
+                } else if(plotRatio=="pull"){
+                    frame2->addObject(lp1);
+                    frame2->addObject(lp2);
+                    frame2->addObject(lp3);
+                    frame2->addObject(lp4);
+                    frame2->addObject(lp5);
+                    frame2->addObject(lp6);
+                    frame2->addObject(lp7);
+                    frame2->addObject(lp8);
+                    frame2->addObject(lp9);
+                    frame2->addObject(lp10);
+                }
 
-	      Double_t lowerlimit = 0.; 
-	      Double_t upperlimit = 2.2; 
-	      if (plotRatio=="pull"){ 
-                lowerlimit = -5.7; upperlimit = 5.7;
-	      }
-	  
-	      frame2->SetMinimum(lowerlimit);
-	      frame2->SetMaximum(upperlimit);
-	   
-	      if(plotRatio=="ratio") 
-                frame2->GetYaxis()->SetTitle("Data / SM");
-	      else if(plotRatio=="pull")
-                frame2->GetYaxis()->SetTitle("Pull");
+                Double_t lowerlimit = 0.; 
+                Double_t upperlimit = 2.2; 
+                if (plotRatio=="pull"){ 
+                    lowerlimit = -5.7; upperlimit = 5.7;
+                }
 
-	      if(style.getTitleX() != "")  
-                frame2->GetXaxis()->SetTitle(style.getTitleX());
-	      else  
-                frame2->GetXaxis()->SetTitle(GetXTitle(regionVar)); //Name());
+                frame2->SetMinimum(lowerlimit);
+                frame2->SetMaximum(upperlimit);
 
-	      if(style.getTitleY() != "")  
-                frame->GetYaxis()->SetTitle(style.getTitleY());
+                if(plotRatio=="ratio") 
+                    frame2->GetYaxis()->SetTitle("Data / SM");
+                else if(plotRatio=="pull")
+                    frame2->GetYaxis()->SetTitle("Pull");
 
-	      frame2->GetYaxis()->SetLabelSize(0.13);
-	      frame2->GetYaxis()->SetNdivisions(504);         
-	      frame2->GetXaxis()->SetLabelSize(0.13);
-	      frame2->GetYaxis()->SetTitleSize(0.14);
-	      frame2->GetXaxis()->SetTitleSize(0.14);
-	      frame2->GetYaxis()->SetTitleOffset(0.35);
-	      frame2->GetXaxis()->SetTitleOffset(1.);
-	      frame2->GetYaxis()->SetLabelOffset(0.01);
-	      frame2->GetXaxis()->SetLabelOffset(0.03);
-	      frame2->GetXaxis()->SetTickLength(0.06);
+                if(style.getTitleX() != "")  
+                    frame2->GetXaxis()->SetTitle(style.getTitleX());
+                else  
+                    frame2->GetXaxis()->SetTitle(GetXTitle(regionVar)); //Name());
 
-	      frame2->SetTitle("");
-	      frame2->GetYaxis()->CenterTitle(); 
-	      frame2->Draw();
-	    }
+                if(style.getTitleY() != "")  
+                    frame->GetYaxis()->SetTitle(style.getTitleY());
+
+                frame2->GetYaxis()->SetLabelSize(0.13);
+                frame2->GetYaxis()->SetNdivisions(504);         
+                frame2->GetXaxis()->SetLabelSize(0.13);
+                frame2->GetYaxis()->SetTitleSize(0.14);
+                frame2->GetXaxis()->SetTitleSize(0.14);
+                frame2->GetYaxis()->SetTitleOffset(0.35);
+                frame2->GetXaxis()->SetTitleOffset(1.);
+                frame2->GetYaxis()->SetLabelOffset(0.01);
+                frame2->GetXaxis()->SetLabelOffset(0.03);
+                frame2->GetXaxis()->SetTickLength(0.06);
+
+                frame2->SetTitle("");
+                frame2->GetYaxis()->CenterTitle(); 
+                frame2->Draw();
+            }
 
             canVec[iVec]->SaveAs("results/"+anaName+"/"+canName+".pdf");
             canVec[iVec]->SaveAs("results/"+anaName+"/"+canName+".eps");
@@ -1409,8 +1409,8 @@ void Util::PlotNLL(RooWorkspace* w, RooFitResult* rFit, Bool_t plotPLL, TString 
     ///////////////////////////////////////////////////////////////////
 
     if (lumiConst) {
-      RooRealVar* lumi = (RooRealVar*) w->var("Lumi");
-      if (lumi!=NULL) lumi->setConstant(lumiConst); 
+        RooRealVar* lumi = (RooRealVar*) w->var("Lumi");
+        if (lumi!=NULL) lumi->setConstant(lumiConst); 
     }
 
     // Construct an empty simultaneous pdf using category regionCat as index
@@ -1424,54 +1424,54 @@ void Util::PlotNLL(RooWorkspace* w, RooFitResult* rFit, Bool_t plotPLL, TString 
     std::vector<RooAbsPdf*> pdfVec;
 
     for(unsigned int iVec=0; iVec<numFitRegions; iVec++){
-      TString regionCatLabel = fitRegionsVec[iVec];
-      if( regionCat->setLabel(regionCatLabel,kTRUE)){  
-	Logger << kWARNING << " Label '" << regionCatLabel << "' is not a state of channelCat (see Table) " << GEndl; 
-      } else{
-	// dataset for each channel/region/category
-	TString dataCatLabel = Form("channelCat==channelCat::%s",regionCatLabel.Data());
-	RooDataSet* regionData = (RooDataSet*) data->reduce(dataCatLabel.Data());
-	dataVec.push_back(regionData);
-	// pdf for each channel/region/category
-	RooAbsPdf* regionPdf = (RooAbsPdf*) pdf->getPdf(regionCatLabel.Data());
-	pdfVec.push_back(regionPdf);
-      }
+        TString regionCatLabel = fitRegionsVec[iVec];
+        if( regionCat->setLabel(regionCatLabel,kTRUE)){  
+            Logger << kWARNING << " Label '" << regionCatLabel << "' is not a state of channelCat (see Table) " << GEndl; 
+        } else{
+            // dataset for each channel/region/category
+            TString dataCatLabel = Form("channelCat==channelCat::%s",regionCatLabel.Data());
+            RooDataSet* regionData = (RooDataSet*) data->reduce(dataCatLabel.Data());
+            dataVec.push_back(regionData);
+            // pdf for each channel/region/category
+            RooAbsPdf* regionPdf = (RooAbsPdf*) pdf->getPdf(regionCatLabel.Data());
+            pdfVec.push_back(regionPdf);
+        }
     }
 
     if(dataVec.empty()){ 
-      Logger << kERROR << "   NONE OF THE REGIONS ARE SPECIFIED IN DATASET, NO FIT WILL BE PERFORMED" << GEndl; 
-      return;
+        Logger << kERROR << "   NONE OF THE REGIONS ARE SPECIFIED IN DATASET, NO FIT WILL BE PERFORMED" << GEndl; 
+        return;
     }
     else if(pdfVec.empty()){ 
-      Logger << kERROR << "   NONE OF THE REGIONS ARE SPECIFIED IN SIMULTANEOUS PDF, NO FIT WILL BE PERFORMED" << GEndl; 
-      return;
+        Logger << kERROR << "   NONE OF THE REGIONS ARE SPECIFIED IN SIMULTANEOUS PDF, NO FIT WILL BE PERFORMED" << GEndl; 
+        return;
     }
     else{
-      // Construct a simultaneous dataset for all fit regions
-      dataFitRegions = (RooDataSet*) dataVec[0]->Clone("dataFitRegions");
-      for(unsigned int jVec=1; jVec<dataVec.size(); jVec++){
-	dataFitRegions->append(*dataVec[jVec]);
-      }
-      // Construct a simultaneous pdf using category regionCat as index
-      simPdfFitRegions = new RooSimultaneous("simPdfFitRegions","simultaneous pdf only for fit regions",*regionCat) ;
-      for(unsigned int kVec=0; kVec<pdfVec.size(); kVec++){
-	simPdfFitRegions->addPdf(*pdfVec[kVec],fitRegionsVec[kVec].Data());
-      }
+        // Construct a simultaneous dataset for all fit regions
+        dataFitRegions = (RooDataSet*) dataVec[0]->Clone("dataFitRegions");
+        for(unsigned int jVec=1; jVec<dataVec.size(); jVec++){
+            dataFitRegions->append(*dataVec[jVec]);
+        }
+        // Construct a simultaneous pdf using category regionCat as index
+        simPdfFitRegions = new RooSimultaneous("simPdfFitRegions","simultaneous pdf only for fit regions",*regionCat) ;
+        for(unsigned int kVec=0; kVec<pdfVec.size(); kVec++){
+            simPdfFitRegions->addPdf(*pdfVec[kVec],fitRegionsVec[kVec].Data());
+        }
     }
-    
+
     /////////////////////////////////////////////////////////////////
 
     // find parameters requested for plotting
     RooArgSet* plotParams = new RooArgSet();
     if(plotPars != "") {
-      std::vector<TString> parsVec = Tokens(plotPars,",");
-      for(unsigned int i=0; i<parsVec.size();i++){
-	RooRealVar* var = (RooRealVar*) w->var(parsVec[i]);
-	if(var==NULL)  Logger << kWARNING << " Util::PlotNLL() could not find parameter(" << parsVec[i] << ") in workspace while setting up minos" << GEndl;
-	else{
-	  plotParams->add(*var);
-	}
-      }
+        std::vector<TString> parsVec = Tokens(plotPars,",");
+        for(unsigned int i=0; i<parsVec.size();i++){
+            RooRealVar* var = (RooRealVar*) w->var(parsVec[i]);
+            if(var==NULL)  Logger << kWARNING << " Util::PlotNLL() could not find parameter(" << parsVec[i] << ") in workspace while setting up minos" << GEndl;
+            else{
+                plotParams->add(*var);
+            }
+        }
     }
 
     // Get all parameters of result
@@ -1497,159 +1497,159 @@ void Util::PlotNLL(RooWorkspace* w, RooFitResult* rFit, Bool_t plotPLL, TString 
 
     // loop over all floating pars
     for(unsigned int iPar=0, jPar=0; iPar<numPars ; iPar++){
-      RooAbsArg* arg = fpf.at(iPar);
+        RooAbsArg* arg = fpf.at(iPar);
 
-      if ( (plotParams->getSize()>0) && plotParams->find(arg->GetName())==0 ) { continue; }
-      if ( !arg->InheritsFrom("RooRealVar") ) { continue; }
+        if ( (plotParams->getSize()>0) && plotParams->find(arg->GetName())==0 ) { continue; }
+        if ( !arg->InheritsFrom("RooRealVar") ) { continue; }
 
-      jPar++; // special counter when selecting parameters
+        jPar++; // special counter when selecting parameters
 
-      RooRealVar* par = (RooRealVar*) arg;
-      TString parName = par->GetName();
+        RooRealVar* par = (RooRealVar*) arg;
+        TString parName = par->GetName();
 
-      //    if ( parName.Contains("gamma_stat_TR5JMu_cuts_bin_0") ){
-      Logger << kINFO << "Plotting NLL for par = " << parName << GEndl;
+        //    if ( parName.Contains("gamma_stat_TR5JMu_cuts_bin_0") ){
+        Logger << kINFO << "Plotting NLL for par = " << parName << GEndl;
 
-      // set parameter range to readable range
-      double minRange = par->getMin();
-      double maxRange = par->getMax();
-      if(minRange < 0.){
-	par->setMin(-3.);
-	par->setMax(3.);
-      } else {
-	par->setMin(minRange);
-	par->setMax(2.);
-      }
-
-      RooPlot* frame = par->frame();
-      nll->plotOn(frame, ShiftToZero());
-      frame->SetMinimum(0.);
-      // To be able to see the 1/2 sigma
-      frame->SetMaximum(2.5);
-	
-      const char* curvename = 0;
-      RooCurve* curve = (RooCurve*) frame->findObject(curvename,RooCurve::Class()) ;
-      //  frame->remove();
-      Double_t curveMax = curve->getYAxisMax();
-      // safety for weird RooPlots where curve goes to infinity in first/last bin(s)
-      if (curveMax > 0. && !std::isinf(curveMax) && !std::isnan(curveMax) )  { ; } // frame->SetMaximum(curveMax * 2.); 
-      else if(curveMax > 0. && (std::isinf(curveMax) || std::isnan(curveMax))){
-
-// 	for(Int_t iBin=0;  iBin < curve->GetN(); iBin++){
-//           Double_t xBin = 0.;
-//           Double_t yBin = -1.;     
-//           curve->GetPoint(iBin,xBin,yBin) ;
-// 	  cout << "  BEFORE:   iBin = " << iBin << " xBin = " << xBin << " yBin = " << yBin << endl;		    
-//         }
-	
-
-	// 	cout << endl << " BEFORE  curve->GetN() = " << curve->GetN() << endl;
-	for(Int_t iBin=1;  iBin < curve->GetN()-1; iBin++){
-          Double_t xBin = 0.;
-          Double_t yBin = -1.;     
-          curve->GetPoint(iBin,xBin,yBin) ;
-	  //	  cout << " iBin = " << iBin << " xBin = " << xBin << " yBin = " << yBin << endl;		    
-          if(std::isinf(yBin)  || std::isnan(yBin)){
-            curve->RemovePoint(iBin);
-            Logger << kWARNING << " Removing bin = " << iBin  << " as it was either inf or nan from NLL plot for parameter = " << parName<< GEndl;
-	    iBin--;
-          }
-        }	
-	   
-// 	cout << " AFTER  curve->GetN() = " << curve->GetN() << endl;
-// 	for(Int_t iBin=0;  iBin < curve->GetN(); iBin++){
-//           Double_t xBin = 0.;
-//           Double_t yBin = -1.;     
-//           curve->GetPoint(iBin,xBin,yBin) ;
-// 	  cout  << "  AFTER:   iBin = " << iBin << " xBin = " << xBin << " yBin = " << yBin << endl;		    
-//         }	
-
-        Int_t iBin = 1;
-        Double_t xFirstBin = 0.;
-        Double_t yFirstBin = -1.;	
-        while ( (yFirstBin<0 || std::isinf(yFirstBin)  || std::isnan(yFirstBin) )&& iBin < curve->GetN()-1){
-          iBin++;
-          curve->GetPoint(iBin,xFirstBin,yFirstBin) ;
-	  //	  cout << endl << " iBin = " << iBin << " xFirstBin = " << xFirstBin << " yFirstBin = " << yFirstBin << endl;		    
-	  if(std::isinf(yFirstBin)  || std::isnan(yFirstBin)){
-            curve->RemovePoint(iBin);
-            Logger << kWARNING << " Removing bin = " << iBin  << " as it was either inf or nan from NLL plot for parameter = " << parName<< GEndl;
-          }
+        // set parameter range to readable range
+        double minRange = par->getMin();
+        double maxRange = par->getMax();
+        if(minRange < 0.){
+            par->setMin(-3.);
+            par->setMax(3.);
+        } else {
+            par->setMin(minRange);
+            par->setMax(2.);
         }
-        iBin = curve->GetN()-1;
-        Double_t xLastBin = 0.;
-        Double_t yLastBin = -1.;	
-        while ( (yLastBin < 0 || std::isinf(yLastBin) || std::isnan(yLastBin) ) && iBin >0){
-          iBin--;
-          curve->GetPoint(iBin,xLastBin,yLastBin) ; 
-	  //	  cout << endl << " iBin = " << iBin << " xLastBin = " << xLastBin << " yLastBin = " << yLastBin << endl;		    
-	  if(std::isinf(yLastBin)  || std::isnan(yLastBin)){
-            curve->RemovePoint(iBin);
-            Logger << kWARNING << " Removing bin = " << iBin  << " as it was either inf or nan from NLL plot for parameter = " << parName<< GEndl;
-          }
+
+        RooPlot* frame = par->frame();
+        nll->plotOn(frame, ShiftToZero());
+        frame->SetMinimum(0.);
+        // To be able to see the 1/2 sigma
+        frame->SetMaximum(2.5);
+
+        const char* curvename = 0;
+        RooCurve* curve = (RooCurve*) frame->findObject(curvename,RooCurve::Class()) ;
+        //  frame->remove();
+        Double_t curveMax = curve->getYAxisMax();
+        // safety for weird RooPlots where curve goes to infinity in first/last bin(s)
+        if (curveMax > 0. && !std::isinf(curveMax) && !std::isnan(curveMax) )  { ; } // frame->SetMaximum(curveMax * 2.); 
+        else if(curveMax > 0. && (std::isinf(curveMax) || std::isnan(curveMax))){
+
+            // 	for(Int_t iBin=0;  iBin < curve->GetN(); iBin++){
+            //           Double_t xBin = 0.;
+            //           Double_t yBin = -1.;     
+            //           curve->GetPoint(iBin,xBin,yBin) ;
+            // 	  cout << "  BEFORE:   iBin = " << iBin << " xBin = " << xBin << " yBin = " << yBin << endl;		    
+            //         }
+
+
+            // 	cout << endl << " BEFORE  curve->GetN() = " << curve->GetN() << endl;
+            for(Int_t iBin=1;  iBin < curve->GetN()-1; iBin++){
+                Double_t xBin = 0.;
+                Double_t yBin = -1.;     
+                curve->GetPoint(iBin,xBin,yBin) ;
+                //	  cout << " iBin = " << iBin << " xBin = " << xBin << " yBin = " << yBin << endl;		    
+                if(std::isinf(yBin)  || std::isnan(yBin)){
+                    curve->RemovePoint(iBin);
+                    Logger << kWARNING << " Removing bin = " << iBin  << " as it was either inf or nan from NLL plot for parameter = " << parName<< GEndl;
+                    iBin--;
+                }
+            }	
+
+            // 	cout << " AFTER  curve->GetN() = " << curve->GetN() << endl;
+            // 	for(Int_t iBin=0;  iBin < curve->GetN(); iBin++){
+            //           Double_t xBin = 0.;
+            //           Double_t yBin = -1.;     
+            //           curve->GetPoint(iBin,xBin,yBin) ;
+            // 	  cout  << "  AFTER:   iBin = " << iBin << " xBin = " << xBin << " yBin = " << yBin << endl;		    
+            //         }	
+
+            Int_t iBin = 1;
+            Double_t xFirstBin = 0.;
+            Double_t yFirstBin = -1.;	
+            while ( (yFirstBin<0 || std::isinf(yFirstBin)  || std::isnan(yFirstBin) )&& iBin < curve->GetN()-1){
+                iBin++;
+                curve->GetPoint(iBin,xFirstBin,yFirstBin) ;
+                //	  cout << endl << " iBin = " << iBin << " xFirstBin = " << xFirstBin << " yFirstBin = " << yFirstBin << endl;		    
+                if(std::isinf(yFirstBin)  || std::isnan(yFirstBin)){
+                    curve->RemovePoint(iBin);
+                    Logger << kWARNING << " Removing bin = " << iBin  << " as it was either inf or nan from NLL plot for parameter = " << parName<< GEndl;
+                }
+            }
+            iBin = curve->GetN()-1;
+            Double_t xLastBin = 0.;
+            Double_t yLastBin = -1.;	
+            while ( (yLastBin < 0 || std::isinf(yLastBin) || std::isnan(yLastBin) ) && iBin >0){
+                iBin--;
+                curve->GetPoint(iBin,xLastBin,yLastBin) ; 
+                //	  cout << endl << " iBin = " << iBin << " xLastBin = " << xLastBin << " yLastBin = " << yLastBin << endl;		    
+                if(std::isinf(yLastBin)  || std::isnan(yLastBin)){
+                    curve->RemovePoint(iBin);
+                    Logger << kWARNING << " Removing bin = " << iBin  << " as it was either inf or nan from NLL plot for parameter = " << parName<< GEndl;
+                }
+            }
+            curveMax = yLastBin>yFirstBin ? yLastBin : yFirstBin;      
+            //frame->SetMaximum(curveMax * 2. ); 
         }
-        curveMax = yLastBin>yFirstBin ? yLastBin : yFirstBin;      
-        //frame->SetMaximum(curveMax * 2. ); 
-      }
-      //else { frame->SetMaximum(1000.); }
+        //else { frame->SetMaximum(1000.); }
 
-      // plot cosmetics
-      int firstbin = frame->GetXaxis()->GetFirst();
-      int lastbin = frame->GetXaxis()->GetLast();
-      double xmax = frame->GetXaxis()->GetBinUpEdge(lastbin) ;
-      double xmin = frame->GetXaxis()->GetBinLowEdge(firstbin) ;
-	
-      //  cout << " firstbin = " << firstbin << " lastbin = " << lastbin << " xmax = " << xmax << " xmin = " << xmin << endl;
+        // plot cosmetics
+        int firstbin = frame->GetXaxis()->GetFirst();
+        int lastbin = frame->GetXaxis()->GetLast();
+        double xmax = frame->GetXaxis()->GetBinUpEdge(lastbin) ;
+        double xmin = frame->GetXaxis()->GetBinLowEdge(firstbin) ;
 
-      TLine* l1 = new TLine(xmin,2.,xmax,2.);
-      TLine* l2 = new TLine(xmin,0.5,xmax,0.5);
-	
-      l1->SetLineStyle(3);
-      l2->SetLineStyle(3);
-	
-      frame->addObject(l1);
-      frame->addObject(l2);
-	
-      RooAbsReal* pll(0);
-      if(plotPLL) { 
-        pll = nll->createProfile(*par) ;
-        pll->plotOn(frame,LineColor(kRed),LineStyle(kDashed),NumCPU(4)); 
-      }
+        //  cout << " firstbin = " << firstbin << " lastbin = " << lastbin << " xmax = " << xmax << " xmin = " << xmin << endl;
 
-      cout << " frame->GetMaximum() = " << frame->GetMaximum() << " frame->GetMinimum() = " << frame->GetMinimum() << endl;
+        TLine* l1 = new TLine(xmin,2.,xmax,2.);
+        TLine* l2 = new TLine(xmin,0.5,xmax,0.5);
 
-      TString canName=Form("can_NLL_%s_%s_%s",outputPrefix.Data(),rFit->GetName(),parName.Data());
-      canVec[iPar] = new TCanvas(canName,canName,600,600); 
-      canVec[iPar]->cd();
-      frame->Draw();  
+        l1->SetLineStyle(3);
+        l2->SetLineStyle(3);
 
-      TLegend* leg = new TLegend(0.55,0.65,0.85,0.9,"");
-      leg->SetFillStyle(0);
-      leg->SetFillColor(0);
-      leg->SetBorderSize(0);
-      TLegendEntry* entry=leg->AddEntry("","NLL","l") ;
-      entry->SetLineColor(kBlue);
-      if(plotPLL) {	
-        entry=leg->AddEntry("","PLL","l") ;
-        entry->SetLineColor(kRed);
-        entry->SetLineStyle(kDashed);
-      }
-      leg->Draw();
+        frame->addObject(l1);
+        frame->addObject(l2);
 
-      // update plot
-      canVec[iPar]->Draw();
+        RooAbsReal* pll(0);
+        if(plotPLL) { 
+            pll = nll->createProfile(*par) ;
+            pll->plotOn(frame,LineColor(kRed),LineStyle(kDashed),NumCPU(4)); 
+        }
 
-      // reset parameter range to previous values
-      par->setMin(minRange);
-      par->setMax(maxRange);
+        cout << " frame->GetMaximum() = " << frame->GetMaximum() << " frame->GetMinimum() = " << frame->GetMinimum() << endl;
 
-      if (plotPLL) {
-        delete pll; pll=0;
-      }
+        TString canName=Form("can_NLL_%s_%s_%s",outputPrefix.Data(),rFit->GetName(),parName.Data());
+        canVec[iPar] = new TCanvas(canName,canName,600,600); 
+        canVec[iPar]->cd();
+        frame->Draw();  
 
-      canVec[iPar]->SaveAs("results/"+anaName+"/"+canName+".pdf");
-      canVec[iPar]->SaveAs("results/"+anaName+"/"+canName+".eps");
-      //  }
+        TLegend* leg = new TLegend(0.55,0.65,0.85,0.9,"");
+        leg->SetFillStyle(0);
+        leg->SetFillColor(0);
+        leg->SetBorderSize(0);
+        TLegendEntry* entry=leg->AddEntry("","NLL","l") ;
+        entry->SetLineColor(kBlue);
+        if(plotPLL) {	
+            entry=leg->AddEntry("","PLL","l") ;
+            entry->SetLineColor(kRed);
+            entry->SetLineStyle(kDashed);
+        }
+        leg->Draw();
+
+        // update plot
+        canVec[iPar]->Draw();
+
+        // reset parameter range to previous values
+        par->setMin(minRange);
+        par->setMax(maxRange);
+
+        if (plotPLL) {
+            delete pll; pll=0;
+        }
+
+        canVec[iPar]->SaveAs("results/"+anaName+"/"+canName+".pdf");
+        canVec[iPar]->SaveAs("results/"+anaName+"/"+canName+".eps");
+        //  }
 
     }
 
@@ -1704,13 +1704,13 @@ TH2D* Util::PlotCorrelationMatrix(RooFitResult* rFit, TString anaName){
 
     gPad->SetLeftMargin(0.18);
     gPad->SetRightMargin(0.13);
- 
+
     gStyle->SetMarkerSize(orig_MarkerSize);
     gStyle->SetMarkerColor(orig_MarkerColor);
     gStyle->SetPaintTextFormat(orig_PaintTextFormat) ;
     gStyle->SetLabelSize(orig_LabelSize);
     gStyle->SetOptStat(00000000);
-    
+
     h_corr->Draw("colz");
     h_corr->Draw("textsame");
 
@@ -2001,15 +2001,15 @@ Util::doFreeFit( RooWorkspace* w, RooDataSet* inputdata, const bool& verbose, co
                 minimizer = "Minuit";
                 algorithm = "migradimproved";
             } /*
-            if (tries == 4 && !kickApplied) {
-                Logger << kINFO << "    ----> trying fit with different starting values" << GEndl;
-                RooFitResult* tmpResult = minim.save();
-                const RooArgList& randList = tmpResult->randomizePars();
-                *allParams = randList;
-                delete tmpResult;
-                tries=0;          // reset the fit cycle
-                kickApplied=true; // do kick only once
-            } */
+                 if (tries == 4 && !kickApplied) {
+                 Logger << kINFO << "    ----> trying fit with different starting values" << GEndl;
+                 RooFitResult* tmpResult = minim.save();
+                 const RooArgList& randList = tmpResult->randomizePars();
+               *allParams = randList;
+               delete tmpResult;
+               tries=0;          // reset the fit cycle
+               kickApplied=true; // do kick only once
+               } */
         }
     }
 
@@ -2131,10 +2131,10 @@ RooAbsReal* Util::GetComponent(RooWorkspace* w, TString component, TString regio
     RooCategory* regionCat = (RooCategory*) w->cat("channelCat");
     TString regionFullName;
     if(exactRegionName){
-      Logger << kINFO << "GetComponent(): using exact region name: " << region << GEndl;
-      regionFullName = region;
+        Logger << kINFO << "GetComponent(): using exact region name: " << region << GEndl;
+        regionFullName = region;
     } else {
-      regionFullName = GetFullRegionName(regionCat, region);
+        regionFullName = GetFullRegionName(regionCat, region);
     }
 
     RooSimultaneous* pdf = (RooSimultaneous*) w->pdf("simPdf");
@@ -2165,14 +2165,14 @@ RooAbsReal* Util::GetComponent(RooWorkspace* w, TString component, TString regio
     RooArgList compFuncList;
     RooArgList compCoefList;
     for(unsigned int iReg=0; iReg<regionCompNameVec.size(); iReg++){
-      for(unsigned int iComp=0; iComp< componentVec.size(); iComp++){
-	Logger << kDEBUG << " GetComponent: regionCompNameVec[" << iReg << "] = " << regionCompNameVec[iReg] << " componentVec[" << iComp << "] = " << componentVec[iComp] << GEndl;
-	TString target = "_"+componentVec[iComp]+"_";
-	if(  regionCompNameVec[iReg].Contains(target.Data())) {
-	  compFuncList.add(*(RooProduct*)w->obj(regionCompNameVec[iReg]));
-	  compCoefList.add(*regionBinWidth);
-	}
-      }  
+        for(unsigned int iComp=0; iComp< componentVec.size(); iComp++){
+            Logger << kDEBUG << " GetComponent: regionCompNameVec[" << iReg << "] = " << regionCompNameVec[iReg] << " componentVec[" << iComp << "] = " << componentVec[iComp] << GEndl;
+            TString target = "_"+componentVec[iComp]+"_";
+            if(  regionCompNameVec[iReg].Contains(target.Data())) {
+                compFuncList.add(*(RooProduct*)w->obj(regionCompNameVec[iReg]));
+                compCoefList.add(*regionBinWidth);
+            }
+        }  
     }
 
     if (compFuncList.getSize()==0 || compCoefList.getSize()==0 || compCoefList.getSize()!=compFuncList.getSize()){
@@ -2260,11 +2260,11 @@ Double_t Util::GetComponentFracInRegion(RooWorkspace* w, TString component, TStr
     RooArgList compCoefList;
     for(unsigned int iReg=0; iReg<regionCompNameVec.size(); iReg++){
         for(unsigned int iComp=0; iComp< componentVec.size(); iComp++){
-	  TString target = "_"+componentVec[iComp]+"_";
-	  if(  regionCompNameVec[iReg].Contains(target.Data())) {
-	    compFuncList.add(*(RooProduct*)w->obj(regionCompNameVec[iReg]));
-	    compCoefList.add(*regionBinWidth);
-	  }
+            TString target = "_"+componentVec[iComp]+"_";
+            if(  regionCompNameVec[iReg].Contains(target.Data())) {
+                compFuncList.add(*(RooProduct*)w->obj(regionCompNameVec[iReg]));
+                compCoefList.add(*regionBinWidth);
+            }
         } 
     }
 
@@ -2284,13 +2284,13 @@ Double_t Util::GetComponentFracInRegion(RooWorkspace* w, TString component, TStr
     double componentFrac = 0.;
     for(unsigned int iReg=0; iReg<regionCompNameVec.size(); iReg++){
         for(unsigned int iComp=0; iComp< componentVec.size(); iComp++){
-	  TString target = "_"+componentVec[iComp]+"_";
-	  if(  regionCompNameVec[iReg].Contains(target.Data())) {
-	    componentFrac += GetComponentFrac(w,regionCompNameVec[iReg],RRSPdfName,regionVar,regionBinWidth) ;
-	  }
+            TString target = "_"+componentVec[iComp]+"_";
+            if(  regionCompNameVec[iReg].Contains(target.Data())) {
+                componentFrac += GetComponentFrac(w,regionCompNameVec[iReg],RRSPdfName,regionVar,regionBinWidth) ;
+            }
         }
     }
-    
+
     return componentFrac;
 
 }
@@ -2405,14 +2405,14 @@ TString Util::GetFullRegionName(RooCategory* regionCat,  TString regionShortName
             regionFullName = regionsAllVec[iReg];
             foundReg++;
         } 
-       else if( regionsAllVec[iReg].Contains(regionShortName) && foundReg>0){
+        else if( regionsAllVec[iReg].Contains(regionShortName) && foundReg>0){
             foundReg++;	    
         }
     }
 
     if(foundReg>1)
         Logger << kWARNING << "Util.GetFullRegionName() found more then one region in workspace with shortname = " << regionShortName 
-	       << " \n Please use full region names (like WREl_meffInc) insted of shortnames (like WR) " << GEndl;
+            << " \n Please use full region names (like WREl_meffInc) insted of shortnames (like WR) " << GEndl;
 
     return regionFullName;
 }
@@ -2518,14 +2518,14 @@ double Util::GetPropagatedError(RooAbsReal* var, const RooFitResult& fr, const b
         int newI = fpf_idx[ivar];
 
         Double_t cenVal = rrv.getVal() ;
-	Double_t errHes = sqrt(V(newI,newI)) ;
+        Double_t errHes = sqrt(V(newI,newI)) ;
 
-	Double_t errHi = rrv.getErrorHi();
-	Double_t errLo = rrv.getErrorLo();
-	Double_t errAvg = (TMath::Abs(errLo) + TMath::Abs(errHi))/2.0;
+        Double_t errHi = rrv.getErrorHi();
+        Double_t errLo = rrv.getErrorLo();
+        Double_t errAvg = (TMath::Abs(errLo) + TMath::Abs(errHi))/2.0;
 
-	Double_t errVal = errHes;
-	if (doAsym) { errVal = errAvg; }
+        Double_t errVal = errHes;
+        if (doAsym) { errVal = errAvg; }
 
         Logger << kDEBUG << " GPP:  par = " << rrv.GetName() << " cenVal = " << cenVal << " errSym = " << errHes << " errAvgAsym = " << errAvg << GEndl;
 
@@ -2594,7 +2594,7 @@ Util::resetAllErrors( RooWorkspace* wspace )
 
 
 //_____________________________________________________________________________
-void
+    void
 Util::resetAllValues( RooWorkspace* wspace )
 {
     RooStats::ModelConfig* mc  = Util::GetModelConfig(wspace);
@@ -2613,7 +2613,7 @@ Util::resetAllValues( RooWorkspace* wspace )
 
 
 //_____________________________________________________________________________
-void
+    void
 Util::resetAllNominalValues( RooWorkspace* wspace )
 {
     RooStats::ModelConfig* mc  = Util::GetModelConfig(wspace);
@@ -2661,7 +2661,7 @@ Util::resetError( RooWorkspace* wspace, const RooArgList& parList, const RooArgL
     // the given name and shift that
     // systematic by 1-sigma
 
-  Logger << kINFO << " starting with workspace: " << wspace->GetName() << "   parList.getSize(): " << parList.getSize() << "  vetoList.size() = " << vetoList.getSize() << GEndl;
+    Logger << kINFO << " starting with workspace: " << wspace->GetName() << "   parList.getSize(): " << parList.getSize() << "  vetoList.size() = " << vetoList.getSize() << GEndl;
 
     TIterator* iter = parList.createIterator() ;
     RooAbsArg* arg ;
@@ -2702,15 +2702,15 @@ Util::resetError( RooWorkspace* wspace, const RooArgList& parList, const RooArgL
         // If it is Lumi:
         else if( UncertaintyName == "Lumi" ) {
             // Get the Lumi's constraint term:
-	    RooGaussian* lumiConstr = (RooGaussian*) wspace->pdf("lumiConstraint");
-	    if(!lumiConstr){
-	      Logger << kERROR << "Could not find wspace->pdf('lumiConstraint') "
-		     << " in workspace: " << wspace->GetName() << ": " << wspace
-		     << " when trying to reset error for parameter: Lumi"
-		     << GEndl;
-	      continue;
-	    }
-	    // Get the uncertainty on the Lumi:
+            RooGaussian* lumiConstr = (RooGaussian*) wspace->pdf("lumiConstraint");
+            if(!lumiConstr){
+                Logger << kERROR << "Could not find wspace->pdf('lumiConstraint') "
+                    << " in workspace: " << wspace->GetName() << ": " << wspace
+                    << " when trying to reset error for parameter: Lumi"
+                    << GEndl;
+                continue;
+            }
+            // Get the uncertainty on the Lumi:
             RooRealVar* lumiSigma = (RooRealVar*) lumiConstr->findServer(0);
             sigma = lumiSigma->getVal();
 
@@ -2738,7 +2738,7 @@ Util::resetError( RooWorkspace* wspace, const RooArgList& parList, const RooArgL
                */
             if( ConstraintType == "" ) {
                 //cout << "Error: Strange constraint type for Stat Uncertainties " << ConstraintType << GEndl;
-	      Logger << kINFO << "Assuming parameter :" << UncertaintyName << ": is a ShapeFactor and so unconstrained" << GEndl;
+                Logger << kINFO << "Assuming parameter :" << UncertaintyName << ": is a ShapeFactor and so unconstrained" << GEndl;
                 continue;
             }
             else if( ConstraintType == "RooGaussian" ){
@@ -2781,12 +2781,12 @@ Util::resetError( RooWorkspace* wspace, const RooArgList& parList, const RooArgL
         //if( ShiftUp ) var->setVal( val_hi );
         //else          var->setVal( val_low );
         if (resetRange) {
-          double minrange = var->getMin();
-          double maxrange = var->getMax();
-          double newmin = var->getVal() - 6.*sigma;
-          double newmax = var->getVal() + 6.*sigma;
-          if (minrange<newmin) var->setMin(newmin);
-          if (newmax<maxrange) var->setMax(newmax);
+            double minrange = var->getMin();
+            double maxrange = var->getMax();
+            double newmin = var->getVal() - 6.*sigma;
+            double newmax = var->getVal() + 6.*sigma;
+            if (minrange<newmin) var->setMin(newmin);
+            if (newmax<maxrange) var->setMax(newmax);
         }
 
         Logger << kINFO << "Uncertainties on parameter: " << UncertaintyName
@@ -2833,7 +2833,7 @@ Util::resetValue( RooWorkspace* wspace, const RooArgList& parList, const RooArgL
         }
 
         // Initialize
-    double valnom = 0.;
+        double valnom = 0.;
 
         if( UncertaintyName == "" ) {
             Logger << kERROR << "No Uncertainty Name provided" << GEndl;
@@ -2841,19 +2841,19 @@ Util::resetValue( RooWorkspace* wspace, const RooArgList& parList, const RooArgL
         }
         // If it is a standard (gaussian) uncertainty
         else if( string(UncertaintyName).find("alpha")!=string::npos ) {
-      valnom = 0.0;
+            valnom = 0.0;
         }
         // If it is Lumi:
         else if( UncertaintyName == "Lumi" ) {
-      valnom = 1.0;
+            valnom = 1.0;
         }
         // If it is a stat uncertainty (gamma)
         else if( string(UncertaintyName).find("gamma")!=string::npos ){
-      valnom = 1.0;
+            valnom = 1.0;
         } // End Stat Error
         else {
-      // Some unknown uncertainty
-      valnom = 1.0;
+            // Some unknown uncertainty
+            valnom = 1.0;
         }
 
         var->setVal(valnom);
@@ -2865,7 +2865,7 @@ Util::resetValue( RooWorkspace* wspace, const RooArgList& parList, const RooArgL
 
 
 //_____________________________________________________________________________
-void 
+    void 
 Util::resetNominalValue( RooWorkspace* wspace, const RooArgSet& globSet ) 
 {
     // For the given workspace,
@@ -2890,7 +2890,7 @@ Util::resetNominalValue( RooWorkspace* wspace, const RooArgSet& globSet )
         }
 
         // Initialize
-	double valnom = 0.;
+        double valnom = 0.;
 
         if( UncertaintyName == "" ) {
             Logger << kERROR << "No Uncertainty Name provided" << GEndl;
@@ -2898,19 +2898,19 @@ Util::resetNominalValue( RooWorkspace* wspace, const RooArgSet& globSet )
         }
         // If it is Lumi:
         else if( UncertaintyName == TString("nominalLumi") ) {
-	  valnom = 1.0;
+            valnom = 1.0;
         }
         // If it is a standard (gaussian) uncertainty
         else if ( UncertaintyName.BeginsWith("nom_gamma_stat") ) {
-	  valnom = 1.0;
+            valnom = 1.0;
         }
         // If it is a standard (gaussian) uncertainty
         else if ( UncertaintyName.BeginsWith("nom") ) {
-	  valnom = 0.0;
+            valnom = 0.0;
         }
         var->setVal(valnom);
 
-	Logger << kDEBUG << "Now resetting: " << UncertaintyName << " to " << valnom << GEndl;
+        Logger << kDEBUG << "Now resetting: " << UncertaintyName << " to " << valnom << GEndl;
         // Done
     } // end loop
 
@@ -3018,14 +3018,14 @@ RooCurve* Util::MakePdfErrorRatioHist(RooWorkspace* w, RooAbsData* regionData, R
     ratioBand->SetLineColor(kBlue-5);
     ratioBand->SetFillColor(kBlue-5);
     ratioBand->SetFillStyle(3004);
-    
+
     Int_t j = 0;
     Bool_t bottomCurve = kFALSE;
     for(Int_t i=1; i<curveError->GetN()-1; i++){
         Double_t x = 0.;
         Double_t y = 0.;
         curveError->GetPoint(i,x,y) ;
-      
+
         // errorBand curve has twice as many points as does a normal/nominal (pdf) curve
         //  first it walks through all +1 sigma points (topCurve), then the -1 sigma points (bottomCurve)
         //   to divide the errorCurve by the pdfCurve, we need to count back for the pdfCurve once we're in the middle of errorCurve
@@ -3036,10 +3036,10 @@ RooCurve* Util::MakePdfErrorRatioHist(RooWorkspace* w, RooAbsData* regionData, R
 
         // each errorCurve has two more points just outside the plot, so we need to treat them separately
         if( i == (curveNom->GetN() - 1) ||  i == curveNom->GetN() ){
-          //  xNom = x;
-          //  yNom = 0.;
+            //  xNom = x;
+            //  yNom = 0.;
             ratioBand->addPoint(x, 0.);   
-	    //            ratioBand->addPoint(x,((y - yNom) / y + 1.) );
+            //            ratioBand->addPoint(x,((y - yNom) / y + 1.) );
             continue;
         }
 
@@ -3054,11 +3054,11 @@ RooCurve* Util::MakePdfErrorRatioHist(RooWorkspace* w, RooAbsData* regionData, R
 
         // only divide by yNom if it is non-zero
         if(  fabs(yNom) > 0.00001 ){ 
-	  //            ratioBand->addPoint(x, (y - yNom) / yNom + 1.);  
-	  ratioBand->addPoint(x, (y / yNom));  
+            //            ratioBand->addPoint(x, (y - yNom) / yNom + 1.);  
+            ratioBand->addPoint(x, (y / yNom));  
         } else { 
-	  //            ratioBand->addPoint(x, (y - yNom));       	    
-	  ratioBand->addPoint(x, 0.);       	    
+            //            ratioBand->addPoint(x, (y - yNom));       	    
+            ratioBand->addPoint(x, 0.);       	    
         }
     }
 
@@ -3160,8 +3160,8 @@ RooAbsReal* Util::CreateNLL( RooWorkspace* w, TString fitRegions, Bool_t lumiCon
     data->table(*((RooAbsCategory*)regionCat))->Print("v");
 
     if (lumiConst) {
-      RooRealVar* lumi = (RooRealVar*) w->var("Lumi");
-      if (lumi!=NULL) lumi->setConstant(lumiConst); 
+        RooRealVar* lumi = (RooRealVar*) w->var("Lumi");
+        if (lumi!=NULL) lumi->setConstant(lumiConst); 
     }
 
     // Construct an empty simultaneous pdf using category regionCat as index
@@ -3223,411 +3223,411 @@ RooAbsReal* Util::CreateNLL( RooWorkspace* w, TString fitRegions, Bool_t lumiCon
 
 
 
-void
+    void
 Util::PlotYieldPLL(RooWorkspace* w, RooAbsReal* nll, RooAbsReal* bkgf, RooFitResult* r)
 {
-  // naive first estimate of bkg value and (large) 2-sigma error.
-  double bval = bkgf->getVal();
-  double berr = ( r!=0 ? Util::GetPropagatedError(bkgf,*r) : 4.0 * TMath::Sqrt(bval) );
-  if (bval==0 && berr==0) { berr = 2.0; }
+    // naive first estimate of bkg value and (large) 2-sigma error.
+    double bval = bkgf->getVal();
+    double berr = ( r!=0 ? Util::GetPropagatedError(bkgf,*r) : 4.0 * TMath::Sqrt(bval) );
+    if (bval==0 && berr==0) { berr = 2.0; }
 
-  double floatParInitVal[10000] ;
-  char   floatParName[10000][100] ;
-  int nFloatParInitVal(0) ;
-  RooArgList ral_floats = r->floatParsFinal() ;
-  TIterator* floatParIter = ral_floats.createIterator() ;
-  {
-    RooRealVar* par ;
-    while ( (par = (RooRealVar*) floatParIter->Next()) ) {
-      sprintf( floatParName[nFloatParInitVal], "%s", par->GetName() ) ;
-      floatParInitVal[nFloatParInitVal] = par->getVal() ;
-      nFloatParInitVal++ ;
-    }
-  }
-
-
-  // scan parameter
-  RooRealVar* b = new RooRealVar("b", "background yield", bval, (bval-berr>=0 ? bval-berr : 0.0), bval+berr);
-
-  // lagrange constant
-  RooRealVar* width = new RooRealVar("width", "lagrange constant", 100.);
-  
-  printf("\n\n Unbiased best value for new POI %s is : %7.1f\n\n", bkgf->GetName(), bkgf->getVal() ) ;
-  double best_poi_val = bkgf->getVal() ;
-  
-  char minuit_formula[10000] ;
-  sprintf( minuit_formula, "%s+%s*(%s-%s)*(%s-%s)",
-	   nll->GetName(),
-	   width->GetName(),
-	   bkgf->GetName(), b->GetName(),
-	   bkgf->GetName(), b->GetName()
-	   ) ;
-
-  char weight_formula[10000] ;
-  sprintf( weight_formula, "%s*(%s-%s)*(%s-%s)",
-           width->GetName(),
-           bkgf->GetName(), b->GetName(),
-           bkgf->GetName(), b->GetName()
-           ) ;
-
-  
-  printf("\n\n Creating new minuit variable with formula: %s\n\n", minuit_formula ) ;
-  RooFormulaVar* new_minuit_var = new RooFormulaVar("new_minuit_var", minuit_formula,
-						    RooArgList( *nll,
-								*width,
-								*bkgf, *b,
-								*bkgf, *b
-								) ) ;
-
-  RooFormulaVar* weight_var = new RooFormulaVar("weight_var", weight_formula,
-                                                    RooArgList( *width,
-                                                                *bkgf, *b,
-                                                                *bkgf, *b
-                                                                ) ) ; 
-  
-  printf("\n\n Current value is %.2f\n\n",
-	 new_minuit_var->getVal() ) ;
-  
-  RooMinuit* rminuit = new RooMinuit( *new_minuit_var ) ;
-
-  //RooMinuit* rminuit = new RooMinuit( *nll ) ;
-
-//////////////////////////
-
-  if (false) {
-    RooStats::ModelConfig* mc = Util::GetModelConfig(w);
-
-    if(mc==0){
-        Logger << kERROR << "ModelConfig is null!" << GEndl;
-        return;
-    }
-
-    RooAbsPdf* pdf = mc->GetPdf();
-    const RooArgSet* obsset = mc->GetObservables();
-
-    if((pdf==0)||(obsset==0)){
-        Logger << kERROR << "pdf or observables not found" <<GEndl;
-        return;
-    }
-
-    TIterator* iter = obsset->createIterator() ;
-    RooAbsArg* arg ;
-    while( (arg=(RooAbsArg*)iter->Next()) ) {
-        if(arg->InheritsFrom("RooRealVar") && !arg->isConstant()){
-            TString UncertaintyName = arg->GetName();
-            RooRealVar* var = w->var( UncertaintyName.Data() );
-            var->setConstant();
+    double floatParInitVal[10000] ;
+    char   floatParName[10000][100] ;
+    int nFloatParInitVal(0) ;
+    RooArgList ral_floats = r->floatParsFinal() ;
+    TIterator* floatParIter = ral_floats.createIterator() ;
+    {
+        RooRealVar* par ;
+        while ( (par = (RooRealVar*) floatParIter->Next()) ) {
+            sprintf( floatParName[nFloatParInitVal], "%s", par->GetName() ) ;
+            floatParInitVal[nFloatParInitVal] = par->getVal() ;
+            nFloatParInitVal++ ;
         }
     }
-    delete iter;
-  }
 
-////////////////////////////
 
-  if (true) {
-    rminuit->migrad();
-    rminuit->hesse();
+    // scan parameter
+    RooRealVar* b = new RooRealVar("b", "background yield", bval, (bval-berr>=0 ? bval-berr : 0.0), bval+berr);
 
-    return; 
-  }
-    
-  RooAbsReal* plot_var = nll ;
-  
-  printf("\n\n Current value is %.2f\n\n",
-	 plot_var->getVal() ) ;
-  
-  //rminuit->setPrintLevel(verbLevel-1) ;
-  //if ( verbLevel <=0 ) { rminuit->setNoWarn() ; }
-  
+    // lagrange constant
+    RooRealVar* width = new RooRealVar("width", "lagrange constant", 100.);
 
-  //-- If POI range is -1 to -1, automatically determine the range using the set value.
+    printf("\n\n Unbiased best value for new POI %s is : %7.1f\n\n", bkgf->GetName(), bkgf->getVal() ) ;
+    double best_poi_val = bkgf->getVal() ;
 
-  int npoiPoints = 50;
+    char minuit_formula[10000] ;
+    sprintf( minuit_formula, "%s+%s*(%s-%s)*(%s-%s)",
+            nll->GetName(),
+            width->GetName(),
+            bkgf->GetName(), b->GetName(),
+            bkgf->GetName(), b->GetName()
+           ) ;
 
-  double poiMinVal = -1.;
-  double poiMaxVal = -1.;
-  double startPoiVal = bkgf->getVal();
+    char weight_formula[10000] ;
+    sprintf( weight_formula, "%s*(%s-%s)*(%s-%s)",
+            width->GetName(),
+            bkgf->GetName(), b->GetName(),
+            bkgf->GetName(), b->GetName()
+           ) ;
 
-  if ( poiMinVal < 0. && poiMaxVal < 0. ) {
-    
-    printf("\n\n Automatic determination of scan range.\n\n") ;
-    
-    if ( startPoiVal <= 0. ) {
-      printf("\n\n *** POI starting value zero or negative %g.  Quit.\n\n\n", startPoiVal ) ;
-      return ;
+
+    printf("\n\n Creating new minuit variable with formula: %s\n\n", minuit_formula ) ;
+    RooFormulaVar* new_minuit_var = new RooFormulaVar("new_minuit_var", minuit_formula,
+            RooArgList( *nll,
+                *width,
+                *bkgf, *b,
+                *bkgf, *b
+                ) ) ;
+
+    RooFormulaVar* weight_var = new RooFormulaVar("weight_var", weight_formula,
+            RooArgList( *width,
+                *bkgf, *b,
+                *bkgf, *b
+                ) ) ; 
+
+    printf("\n\n Current value is %.2f\n\n",
+            new_minuit_var->getVal() ) ;
+
+    RooMinuit* rminuit = new RooMinuit( *new_minuit_var ) ;
+
+    //RooMinuit* rminuit = new RooMinuit( *nll ) ;
+
+    //////////////////////////
+
+    if (false) {
+        RooStats::ModelConfig* mc = Util::GetModelConfig(w);
+
+        if(mc==0){
+            Logger << kERROR << "ModelConfig is null!" << GEndl;
+            return;
+        }
+
+        RooAbsPdf* pdf = mc->GetPdf();
+        const RooArgSet* obsset = mc->GetObservables();
+
+        if((pdf==0)||(obsset==0)){
+            Logger << kERROR << "pdf or observables not found" <<GEndl;
+            return;
+        }
+
+        TIterator* iter = obsset->createIterator() ;
+        RooAbsArg* arg ;
+        while( (arg=(RooAbsArg*)iter->Next()) ) {
+            if(arg->InheritsFrom("RooRealVar") && !arg->isConstant()){
+                TString UncertaintyName = arg->GetName();
+                RooRealVar* var = w->var( UncertaintyName.Data() );
+                var->setConstant();
+            }
+        }
+        delete iter;
     }
-    
-    poiMinVal = startPoiVal - 3.5 * sqrt(startPoiVal) ;
-    poiMaxVal = startPoiVal + 6.0 * sqrt(startPoiVal) ;
-    
-    if ( poiMinVal < 0. ) { poiMinVal = 0. ; }
-    
-    printf("    Start val = %g.   Scan range:   %g  to  %g\n\n", startPoiVal, poiMinVal, poiMaxVal ) ;
-        
-  }
-  
+
+    ////////////////////////////
+
+    if (true) {
+        rminuit->migrad();
+        rminuit->hesse();
+
+        return; 
+    }
+
+    RooAbsReal* plot_var = nll ;
+
+    printf("\n\n Current value is %.2f\n\n",
+            plot_var->getVal() ) ;
+
+    //rminuit->setPrintLevel(verbLevel-1) ;
+    //if ( verbLevel <=0 ) { rminuit->setNoWarn() ; }
 
 
-  //----------------------------------------------------------------------------------------------
+    //-- If POI range is -1 to -1, automatically determine the range using the set value.
 
+    int npoiPoints = 50;
 
-  double poiVals_scanDown[1000] ;
-  double nllVals_scanDown[1000] ;
-       
-  //-- Do scan down from best value.
+    double poiMinVal = -1.;
+    double poiMaxVal = -1.;
+    double startPoiVal = bkgf->getVal();
 
-  printf("\n\n +++++ Starting scan down from best value.\n\n") ;
+    if ( poiMinVal < 0. && poiMaxVal < 0. ) {
 
-  double minNllVal(1.e9) ;
+        printf("\n\n Automatic determination of scan range.\n\n") ;
 
-  for ( int poivi=0; poivi < npoiPoints/2 ; poivi++ ) {
+        if ( startPoiVal <= 0. ) {
+            printf("\n\n *** POI starting value zero or negative %g.  Quit.\n\n\n", startPoiVal ) ;
+            return ;
+        }
 
-    ////double poiValue = poiMinVal + poivi*(poiMaxVal-poiMinVal)/(1.*(npoiPoints-1)) ;
-    double poiValue = best_poi_val - poivi*(best_poi_val-poiMinVal)/(1.*(npoiPoints/2-1)) ;
+        poiMinVal = startPoiVal - 3.5 * sqrt(startPoiVal) ;
+        poiMaxVal = startPoiVal + 6.0 * sqrt(startPoiVal) ;
 
-    b -> setVal( poiValue ) ;
-    b -> setConstant( kTRUE ) ;
-    
-    //+++++++++++++++++++++++++++++++++++
+        if ( poiMinVal < 0. ) { poiMinVal = 0. ; }
 
-    rminuit->migrad() ;
-    rminuit->hesse() ;
-    RooFitResult* rfr = rminuit->save() ;
+        printf("    Start val = %g.   Scan range:   %g  to  %g\n\n", startPoiVal, poiMinVal, poiMaxVal ) ;
 
-    //+++++++++++++++++++++++++++++++++++
-
-
-    //if ( verbLevel > 0 ) { rfr->Print("v") ; }
-        
-    float fit_minuit_var_val = rfr->minNll() ;
-    
-    printf(" %02d : poi constraint = %.2f : allvars : MinuitVar, createNLL, PV, POI :    %.5f   %.5f   %.5f\n",
-	   poivi, b->getVal(), fit_minuit_var_val, nll->getVal(), bkgf->getVal() ) ;
-    cout << flush ;
-        
-    poiVals_scanDown[poivi] = bkgf->getVal() ;
-    nllVals_scanDown[poivi] = weight_var->getVal() ; // plot_var->getVal() ;
-    
-    if ( nllVals_scanDown[poivi] < minNllVal ) { minNllVal = nllVals_scanDown[poivi] ; }
-    
-    delete rfr ;
-    
-  } // poivi
-
-
-  printf("\n\n +++++ Resetting floats to best fit values.\n\n") ;
-
-  for ( int pi=0; pi<nFloatParInitVal; pi++ ) {
-    RooRealVar* par = w->var( floatParName[pi] ) ;
-    par->setVal( floatParInitVal[pi] ) ;
-  } // pi.
-  
+    }
 
 
 
-  printf("\n\n +++++ Starting scan up from best value.\n\n") ;
-  
-  //-- Now do scan up.
-  
-  double poiVals_scanUp[1000] ;
-  double nllVals_scanUp[1000] ;
-  
-  for ( int poivi=0; poivi < npoiPoints/2 ; poivi++ ) {
-    
-    double poiValue = best_poi_val + poivi*(poiMaxVal-best_poi_val)/(1.*(npoiPoints/2-1)) ;
-    
-    b -> setVal( poiValue ) ;
-    b -> setConstant( kTRUE ) ;
-    
-    
-    //+++++++++++++++++++++++++++++++++++
-    
-    rminuit->migrad() ;
-    rminuit->hesse() ;
-    RooFitResult* rfr = rminuit->save() ;
-    
-    //+++++++++++++++++++++++++++++++++++
-        
-    float fit_minuit_var_val = rfr->minNll() ;
-    
-    printf(" %02d : poi constraint = %.2f : allvars : MinuitVar, createNLL, PV, POI :   %.5f   %.5f   %.5f\n",
-	   poivi, b->getVal(), fit_minuit_var_val, nll->getVal(), bkgf->getVal() ) ;
-    cout << flush ;
-    
-    poiVals_scanUp[poivi] = bkgf->getVal() ;
-    nllVals_scanUp[poivi] = weight_var->getVal() ;  // plot_var->getVal() ;
-    
-    if ( nllVals_scanUp[poivi] < minNllVal ) { minNllVal = nllVals_scanUp[poivi] ; }
-    
-    delete rfr ;
-        
-  } // poivi
-  
-  
-
-       double poiVals[1000] ;
-       double nllVals[1000] ;
-
-       int pointCount(0) ;
-       for ( int pi=0; pi<npoiPoints/2; pi++ ) {
-          poiVals[pi] = poiVals_scanDown[(npoiPoints/2-1)-pi] ;
-          nllVals[pi] = nllVals_scanDown[(npoiPoints/2-1)-pi] ;
-          pointCount++ ;
-       }
-       for ( int pi=1; pi<npoiPoints/2; pi++ ) {
-          poiVals[pointCount] = poiVals_scanUp[pi] ;
-          nllVals[pointCount] = nllVals_scanUp[pi] ;
-          pointCount++ ;
-       }
-       npoiPoints = pointCount ;
-
-       printf("\n\n --- TGraph arrays:\n") ;
-       for ( int i=0; i<npoiPoints; i++ ) {
-          printf("  %2d : poi = %6.1f, nll = %g\n", i, poiVals[i], nllVals[i] ) ;
-       }
-       printf("\n\n") ;
-
-       double nllDiffVals[1000] ;
-
-       double poiAtMinlnL(-1.) ;
-       double poiAtMinusDelta2(-1.) ;
-       double poiAtPlusDelta2(-1.) ;
-       for ( int poivi=0; poivi < npoiPoints ; poivi++ ) {
-          nllDiffVals[poivi] = 2.*(nllVals[poivi] - minNllVal) ;
-          double poiValue = poiMinVal + poivi*(poiMaxVal-poiMinVal)/(1.*npoiPoints) ;
-          if ( nllDiffVals[poivi] < 0.01 ) { poiAtMinlnL = poiValue ; }
-          if ( poiAtMinusDelta2 < 0. && nllDiffVals[poivi] < 2.5 ) { poiAtMinusDelta2 = poiValue ; }
-          if ( poiAtMinlnL > 0. && poiAtPlusDelta2 < 0. && nllDiffVals[poivi] > 2.0 ) { poiAtPlusDelta2 = poiValue ; }
-       } // poivi
-
-       printf("\n\n Estimates for poi at delta ln L = -2, 0, +2:  %g ,   %g ,   %g\n\n", poiAtMinusDelta2, poiAtMinlnL, poiAtPlusDelta2 ) ;
+    //----------------------------------------------------------------------------------------------
 
 
-  
+    double poiVals_scanDown[1000] ;
+    double nllVals_scanDown[1000] ;
 
-       ///////////////////////////////////////////////////////////////////
+    //-- Do scan down from best value.
 
+    printf("\n\n +++++ Starting scan down from best value.\n\n") ;
 
-       //--- Main canvas
+    double minNllVal(1.e9) ;
 
-       TCanvas* cscan = (TCanvas*) gDirectory->FindObject("cscan") ;
-       if ( cscan == 0x0 ) {
-          printf("\n Creating canvas.\n\n") ;
-          cscan = new TCanvas("cscan","Delta nll") ;
-       }
+    for ( int poivi=0; poivi < npoiPoints/2 ; poivi++ ) {
 
+        ////double poiValue = poiMinVal + poivi*(poiMaxVal-poiMinVal)/(1.*(npoiPoints-1)) ;
+        double poiValue = best_poi_val - poivi*(best_poi_val-poiMinVal)/(1.*(npoiPoints/2-1)) ;
 
-       char gname[1000] ;
+        b -> setVal( poiValue ) ;
+        b -> setConstant( kTRUE ) ;
 
-       TGraph* graph = new TGraph( npoiPoints, poiVals, nllDiffVals ) ;
-       sprintf( gname, "scan_%s", bkgf->GetName() ) ;
-       graph->SetName( gname ) ;
+        //+++++++++++++++++++++++++++++++++++
 
-       double poiBest(-1.) ;
-       double poiMinus1stdv(-1.) ;
-       double poiPlus1stdv(-1.) ;
-       double poiMinus2stdv(-1.) ;
-       double poiPlus2stdv(-1.) ;
-       double twoDeltalnLMin(1e9) ;
+        rminuit->migrad() ;
+        rminuit->hesse() ;
+        RooFitResult* rfr = rminuit->save() ;
 
-       int nscan(1000) ;
-       for ( int xi=0; xi<nscan; xi++ ) {
-
-          double x = poiVals[0] + xi*(poiVals[npoiPoints-1]-poiVals[0])/(nscan-1) ;
-
-          double twoDeltalnL = graph -> Eval( x, 0, "S" ) ;
-
-          if ( poiMinus1stdv < 0. && twoDeltalnL < 1.0 ) { poiMinus1stdv = x ; printf(" set m1 : %d, x=%g, 2dnll=%g\n", xi, x, twoDeltalnL) ;}
-          if ( poiMinus2stdv < 0. && twoDeltalnL < 4.0 ) { poiMinus2stdv = x ; printf(" set m2 : %d, x=%g, 2dnll=%g\n", xi, x, twoDeltalnL) ;}
-          if ( twoDeltalnL < twoDeltalnLMin ) { poiBest = x ; twoDeltalnLMin = twoDeltalnL ; }
-          if ( twoDeltalnLMin < 0.3 && poiPlus1stdv < 0. && twoDeltalnL > 1.0 ) { poiPlus1stdv = x ; printf(" set p1 : %d, x=%g, 2dnll=%g\n", xi, x, twoDeltalnL) ;}
-          if ( twoDeltalnLMin < 0.3 && poiPlus2stdv < 0. && twoDeltalnL > 4.0 ) { poiPlus2stdv = x ; printf(" set p2 : %d, x=%g, 2dnll=%g\n", xi, x, twoDeltalnL) ;}
-
-          if ( xi%100 == 0 ) { printf( " %4d : poi=%6.2f,  2DeltalnL = %6.2f\n", xi, x, twoDeltalnL ) ; }
-
-       }
-       printf("\n\n POI estimate :  %g  +%g  -%g    [%g,%g],   two sigma errors: +%g  -%g   [%g,%g]\n\n",
-               poiBest,
-               (poiPlus1stdv-poiBest), (poiBest-poiMinus1stdv), poiMinus1stdv, poiPlus1stdv,
-               (poiPlus2stdv-poiBest), (poiBest-poiMinus2stdv), poiMinus2stdv, poiPlus2stdv
-               ) ;
-
-       const char* new_poi_name = bkgf->GetName();
-
-       printf(" %s val,pm1sig,pm2sig: %7.2f  %7.2f  %7.2f  %7.2f  %7.2f\n",
-	      bkgf->GetName(), poiBest, (poiPlus1stdv-poiBest), (poiBest-poiMinus1stdv), (poiPlus2stdv-poiBest), (poiBest-poiMinus2stdv) ) ;
-
-       double ymax = 10.;
-       char htitle[1000] ;
-       sprintf(htitle, "%s profile likelihood scan: -2ln(L/Lm)", new_poi_name ) ;
-       TH1F* hscan = new TH1F("hscan", htitle, 10, poiMinVal, poiMaxVal ) ;
-       hscan->SetMinimum(0.) ;
-       hscan->SetMaximum(ymax) ;
+        //+++++++++++++++++++++++++++++++++++
 
 
-       hscan->DrawCopy() ;
-       graph->SetLineColor(4) ;
-       graph->SetLineWidth(3) ;
-       graph->Draw("CP") ;
-       gPad->SetGridx(1) ;
-       gPad->SetGridy(1) ;
-       cscan->Update() ;
+        //if ( verbLevel > 0 ) { rfr->Print("v") ; }
 
-       TLine* line = new TLine() ;
-       line->SetLineColor(2) ;
-       line->DrawLine(poiMinVal, 1., poiPlus1stdv, 1.) ;
-       line->DrawLine(poiMinus1stdv,0., poiMinus1stdv, 1.) ;
-       line->DrawLine(poiPlus1stdv ,0., poiPlus1stdv , 1.) ;
+        float fit_minuit_var_val = rfr->minNll() ;
 
-       TText* text = new TText() ;
-       text->SetTextSize(0.04) ;
-       char tstring[1000] ;
+        printf(" %02d : poi constraint = %.2f : allvars : MinuitVar, createNLL, PV, POI :    %.5f   %.5f   %.5f\n",
+                poivi, b->getVal(), fit_minuit_var_val, nll->getVal(), bkgf->getVal() ) ;
+        cout << flush ;
 
-       sprintf( tstring, "%s = %.1f +%.1f -%.1f", new_poi_name, poiBest, (poiPlus1stdv-poiBest), (poiBest-poiMinus1stdv) ) ;
-       text -> DrawTextNDC( 0.15, 0.85, tstring ) ;
+        poiVals_scanDown[poivi] = bkgf->getVal() ;
+        nllVals_scanDown[poivi] = weight_var->getVal() ; // plot_var->getVal() ;
 
-       sprintf( tstring, "68%% interval [%.1f,  %.1f]", poiMinus1stdv, poiPlus1stdv ) ;
-       text -> DrawTextNDC( 0.15, 0.78, tstring ) ;
+        if ( nllVals_scanDown[poivi] < minNllVal ) { minNllVal = nllVals_scanDown[poivi] ; }
+
+        delete rfr ;
+
+    } // poivi
 
 
-       char hname[1000] ;
-       sprintf( hname, "hscanout_%s", new_poi_name ) ;
-       TH1F* hsout = new TH1F( hname,"scan results",4,0.,4.) ;
-       double obsVal(-1.) ;
-       hsout->SetBinContent(1, obsVal ) ;
-       hsout->SetBinContent(2, poiPlus1stdv ) ;
-       hsout->SetBinContent(3, poiBest ) ;
-       hsout->SetBinContent(4, poiMinus1stdv ) ;
-       TAxis* xaxis = hsout->GetXaxis() ;
-       xaxis->SetBinLabel(1,"Observed val.") ;
-       xaxis->SetBinLabel(2,"Model+1sd") ;
-       xaxis->SetBinLabel(3,"Model") ;
-       xaxis->SetBinLabel(4,"Model-1sd") ;
+    printf("\n\n +++++ Resetting floats to best fit values.\n\n") ;
 
-       char outrootfile[10000] ;
-       sprintf( outrootfile, "scan-ff-bs-%s.root", new_poi_name ) ;
-
-       char outpdffile[10000] ;
-       sprintf( outpdffile, "scan-ff-bs-%s.pdf", new_poi_name ) ;
-
-       cscan->Update() ; cscan->Draw() ;
-
-       printf("\n Saving %s\n", outpdffile ) ;
-       cscan->SaveAs( outpdffile ) ;
+    for ( int pi=0; pi<nFloatParInitVal; pi++ ) {
+        RooRealVar* par = w->var( floatParName[pi] ) ;
+        par->setVal( floatParInitVal[pi] ) ;
+    } // pi.
 
 
 
-       //--- save in root file
 
-       printf("\n Saving %s\n", outrootfile ) ;
-       TFile fout(outrootfile,"recreate") ;
-       graph->Write() ;
-       hsout->Write() ;
-       fout.Close() ;
+    printf("\n\n +++++ Starting scan up from best value.\n\n") ;
+
+    //-- Now do scan up.
+
+    double poiVals_scanUp[1000] ;
+    double nllVals_scanUp[1000] ;
+
+    for ( int poivi=0; poivi < npoiPoints/2 ; poivi++ ) {
+
+        double poiValue = best_poi_val + poivi*(poiMaxVal-best_poi_val)/(1.*(npoiPoints/2-1)) ;
+
+        b -> setVal( poiValue ) ;
+        b -> setConstant( kTRUE ) ;
+
+
+        //+++++++++++++++++++++++++++++++++++
+
+        rminuit->migrad() ;
+        rminuit->hesse() ;
+        RooFitResult* rfr = rminuit->save() ;
+
+        //+++++++++++++++++++++++++++++++++++
+
+        float fit_minuit_var_val = rfr->minNll() ;
+
+        printf(" %02d : poi constraint = %.2f : allvars : MinuitVar, createNLL, PV, POI :   %.5f   %.5f   %.5f\n",
+                poivi, b->getVal(), fit_minuit_var_val, nll->getVal(), bkgf->getVal() ) ;
+        cout << flush ;
+
+        poiVals_scanUp[poivi] = bkgf->getVal() ;
+        nllVals_scanUp[poivi] = weight_var->getVal() ;  // plot_var->getVal() ;
+
+        if ( nllVals_scanUp[poivi] < minNllVal ) { minNllVal = nllVals_scanUp[poivi] ; }
+
+        delete rfr ;
+
+    } // poivi
+
+
+
+    double poiVals[1000] ;
+    double nllVals[1000] ;
+
+    int pointCount(0) ;
+    for ( int pi=0; pi<npoiPoints/2; pi++ ) {
+        poiVals[pi] = poiVals_scanDown[(npoiPoints/2-1)-pi] ;
+        nllVals[pi] = nllVals_scanDown[(npoiPoints/2-1)-pi] ;
+        pointCount++ ;
+    }
+    for ( int pi=1; pi<npoiPoints/2; pi++ ) {
+        poiVals[pointCount] = poiVals_scanUp[pi] ;
+        nllVals[pointCount] = nllVals_scanUp[pi] ;
+        pointCount++ ;
+    }
+    npoiPoints = pointCount ;
+
+    printf("\n\n --- TGraph arrays:\n") ;
+    for ( int i=0; i<npoiPoints; i++ ) {
+        printf("  %2d : poi = %6.1f, nll = %g\n", i, poiVals[i], nllVals[i] ) ;
+    }
+    printf("\n\n") ;
+
+    double nllDiffVals[1000] ;
+
+    double poiAtMinlnL(-1.) ;
+    double poiAtMinusDelta2(-1.) ;
+    double poiAtPlusDelta2(-1.) ;
+    for ( int poivi=0; poivi < npoiPoints ; poivi++ ) {
+        nllDiffVals[poivi] = 2.*(nllVals[poivi] - minNllVal) ;
+        double poiValue = poiMinVal + poivi*(poiMaxVal-poiMinVal)/(1.*npoiPoints) ;
+        if ( nllDiffVals[poivi] < 0.01 ) { poiAtMinlnL = poiValue ; }
+        if ( poiAtMinusDelta2 < 0. && nllDiffVals[poivi] < 2.5 ) { poiAtMinusDelta2 = poiValue ; }
+        if ( poiAtMinlnL > 0. && poiAtPlusDelta2 < 0. && nllDiffVals[poivi] > 2.0 ) { poiAtPlusDelta2 = poiValue ; }
+    } // poivi
+
+    printf("\n\n Estimates for poi at delta ln L = -2, 0, +2:  %g ,   %g ,   %g\n\n", poiAtMinusDelta2, poiAtMinlnL, poiAtPlusDelta2 ) ;
+
+
+
+
+    ///////////////////////////////////////////////////////////////////
+
+
+    //--- Main canvas
+
+    TCanvas* cscan = (TCanvas*) gDirectory->FindObject("cscan") ;
+    if ( cscan == 0x0 ) {
+        printf("\n Creating canvas.\n\n") ;
+        cscan = new TCanvas("cscan","Delta nll") ;
+    }
+
+
+    char gname[1000] ;
+
+    TGraph* graph = new TGraph( npoiPoints, poiVals, nllDiffVals ) ;
+    sprintf( gname, "scan_%s", bkgf->GetName() ) ;
+    graph->SetName( gname ) ;
+
+    double poiBest(-1.) ;
+    double poiMinus1stdv(-1.) ;
+    double poiPlus1stdv(-1.) ;
+    double poiMinus2stdv(-1.) ;
+    double poiPlus2stdv(-1.) ;
+    double twoDeltalnLMin(1e9) ;
+
+    int nscan(1000) ;
+    for ( int xi=0; xi<nscan; xi++ ) {
+
+        double x = poiVals[0] + xi*(poiVals[npoiPoints-1]-poiVals[0])/(nscan-1) ;
+
+        double twoDeltalnL = graph -> Eval( x, 0, "S" ) ;
+
+        if ( poiMinus1stdv < 0. && twoDeltalnL < 1.0 ) { poiMinus1stdv = x ; printf(" set m1 : %d, x=%g, 2dnll=%g\n", xi, x, twoDeltalnL) ;}
+        if ( poiMinus2stdv < 0. && twoDeltalnL < 4.0 ) { poiMinus2stdv = x ; printf(" set m2 : %d, x=%g, 2dnll=%g\n", xi, x, twoDeltalnL) ;}
+        if ( twoDeltalnL < twoDeltalnLMin ) { poiBest = x ; twoDeltalnLMin = twoDeltalnL ; }
+        if ( twoDeltalnLMin < 0.3 && poiPlus1stdv < 0. && twoDeltalnL > 1.0 ) { poiPlus1stdv = x ; printf(" set p1 : %d, x=%g, 2dnll=%g\n", xi, x, twoDeltalnL) ;}
+        if ( twoDeltalnLMin < 0.3 && poiPlus2stdv < 0. && twoDeltalnL > 4.0 ) { poiPlus2stdv = x ; printf(" set p2 : %d, x=%g, 2dnll=%g\n", xi, x, twoDeltalnL) ;}
+
+        if ( xi%100 == 0 ) { printf( " %4d : poi=%6.2f,  2DeltalnL = %6.2f\n", xi, x, twoDeltalnL ) ; }
+
+    }
+    printf("\n\n POI estimate :  %g  +%g  -%g    [%g,%g],   two sigma errors: +%g  -%g   [%g,%g]\n\n",
+            poiBest,
+            (poiPlus1stdv-poiBest), (poiBest-poiMinus1stdv), poiMinus1stdv, poiPlus1stdv,
+            (poiPlus2stdv-poiBest), (poiBest-poiMinus2stdv), poiMinus2stdv, poiPlus2stdv
+          ) ;
+
+    const char* new_poi_name = bkgf->GetName();
+
+    printf(" %s val,pm1sig,pm2sig: %7.2f  %7.2f  %7.2f  %7.2f  %7.2f\n",
+            bkgf->GetName(), poiBest, (poiPlus1stdv-poiBest), (poiBest-poiMinus1stdv), (poiPlus2stdv-poiBest), (poiBest-poiMinus2stdv) ) ;
+
+    double ymax = 10.;
+    char htitle[1000] ;
+    sprintf(htitle, "%s profile likelihood scan: -2ln(L/Lm)", new_poi_name ) ;
+    TH1F* hscan = new TH1F("hscan", htitle, 10, poiMinVal, poiMaxVal ) ;
+    hscan->SetMinimum(0.) ;
+    hscan->SetMaximum(ymax) ;
+
+
+    hscan->DrawCopy() ;
+    graph->SetLineColor(4) ;
+    graph->SetLineWidth(3) ;
+    graph->Draw("CP") ;
+    gPad->SetGridx(1) ;
+    gPad->SetGridy(1) ;
+    cscan->Update() ;
+
+    TLine* line = new TLine() ;
+    line->SetLineColor(2) ;
+    line->DrawLine(poiMinVal, 1., poiPlus1stdv, 1.) ;
+    line->DrawLine(poiMinus1stdv,0., poiMinus1stdv, 1.) ;
+    line->DrawLine(poiPlus1stdv ,0., poiPlus1stdv , 1.) ;
+
+    TText* text = new TText() ;
+    text->SetTextSize(0.04) ;
+    char tstring[1000] ;
+
+    sprintf( tstring, "%s = %.1f +%.1f -%.1f", new_poi_name, poiBest, (poiPlus1stdv-poiBest), (poiBest-poiMinus1stdv) ) ;
+    text -> DrawTextNDC( 0.15, 0.85, tstring ) ;
+
+    sprintf( tstring, "68%% interval [%.1f,  %.1f]", poiMinus1stdv, poiPlus1stdv ) ;
+    text -> DrawTextNDC( 0.15, 0.78, tstring ) ;
+
+
+    char hname[1000] ;
+    sprintf( hname, "hscanout_%s", new_poi_name ) ;
+    TH1F* hsout = new TH1F( hname,"scan results",4,0.,4.) ;
+    double obsVal(-1.) ;
+    hsout->SetBinContent(1, obsVal ) ;
+    hsout->SetBinContent(2, poiPlus1stdv ) ;
+    hsout->SetBinContent(3, poiBest ) ;
+    hsout->SetBinContent(4, poiMinus1stdv ) ;
+    TAxis* xaxis = hsout->GetXaxis() ;
+    xaxis->SetBinLabel(1,"Observed val.") ;
+    xaxis->SetBinLabel(2,"Model+1sd") ;
+    xaxis->SetBinLabel(3,"Model") ;
+    xaxis->SetBinLabel(4,"Model-1sd") ;
+
+    char outrootfile[10000] ;
+    sprintf( outrootfile, "scan-ff-bs-%s.root", new_poi_name ) ;
+
+    char outpdffile[10000] ;
+    sprintf( outpdffile, "scan-ff-bs-%s.pdf", new_poi_name ) ;
+
+    cscan->Update() ; cscan->Draw() ;
+
+    printf("\n Saving %s\n", outpdffile ) ;
+    cscan->SaveAs( outpdffile ) ;
+
+
+
+    //--- save in root file
+
+    printf("\n Saving %s\n", outrootfile ) ;
+    TFile fout(outrootfile,"recreate") ;
+    graph->Write() ;
+    hsout->Write() ;
+    fout.Close() ;
 }
 
 
-TString
+    TString
 Util::scanStrForFloats(const TString& toscan, const TString& format)
 {
     int narg1 = format.CountChar('%');
