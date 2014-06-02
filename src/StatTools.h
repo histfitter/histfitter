@@ -49,7 +49,9 @@ namespace RooStats
                 const char * modelSBName = "ModelConfig",
                 const char * modelBName = "",
                 const char * dataName = "obsData",                 
-                const char * nuisPriorName = 0) ;
+                const char * nuisPriorName = 0,
+                int nCPUs = 1
+                ) ;
 
     RooStats::HypoTestResult* DoHypoTest(RooWorkspace* w,
                 bool doUL = true, // true = exclusion, false = discovery

@@ -290,8 +290,8 @@ RooStats::HypoTestInverterResult* RooStats::DoHypoTestInversion(RooWorkspace* w,
         bool useNumberCounting ,
         const char * modelSBName ,
         const char * modelBName,
-        const char * dataName ,                 
-        const char * nuisPriorName )
+        const char * dataName , 
+        const char * nuisPriorName, int nCPUs)
 {
     /*
        Other Parameter to pass in tutorial
@@ -360,6 +360,11 @@ nToyRatio            ratio of S+B/B toys (default is 2)
        calc.SetParameter("ResultFileName",resultFileName);
        calc.SetParameter("RandomSeed",randomSeed);
        */
+    if (nCPUs > 1){
+        StatToolsLogger << kINFO << "setting use of PROOF to true, nCPUs=" << nCPUs << GEndl; 
+        calc.SetParameter("UseProof", true);
+        calc.SetParameter("NWorkers", nCPUs);
+    }
 
     HypoTestInverterResult* r = 0;  
     r = calc.RunHypoTestInverter( w, modelSBName, modelBName,
