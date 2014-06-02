@@ -768,12 +768,13 @@ LimitResult RooStats::get_Pvalue( const RooStats::HypoTestInverterResult* fResul
     qv[8]  = fResults->CLbError(0) ; //
     qv[10] = fResults->CLsplusbError(0) ; //
 
-    //jlorenz: dirty hack in order to avoid 0.000000 values in textfile
-    for (int k=0; k<=10; k++) { 
-        if (TMath::Abs(qv[k]) < 0.000001) { 
-            qv[k] = 0.000001; 
-        } 
-    }
+    ////jlorenz: dirty hack in order to avoid 0.000000 values in textfile
+    ////gbesjes: should not be needed anymore with %e, but leave in place for now. (2/6/2014)
+    //for (int k=0; k<=10; k++) { 
+        //if (TMath::Abs(qv[k]) < 0.000001) { 
+            //qv[k] = 0.000001; 
+        //} 
+    //}
 
     /// And pass on to limitresult object
     LimitResult result;
@@ -852,42 +853,6 @@ LimitResult RooStats::get_Pvalue(     RooWorkspace* w,
 //________________________________________________________________________________________________
 LimitResult RooStats::get_Pvalue( const RooStats::HypoTestResult* fResult, bool doUL )
 {
-    // // MB : code taken from HypoTestInverterPlot::MakeExpectedPlot()
-    // std::vector<double> qv;
-    // qv.resize(11,-1.0);
-
-    // LimitResult upperLimitResult;
-
-    // /// observed p-values
-    // qv[2]  = 0.5; // cls expected
-    // qv[5]  = fResult->CLs() ; //
-    // qv[6]  = fResult->CLsError() ; //
-    // qv[7]  = fResult->CLb() ; //
-    // qv[8]  = fResult->CLbError() ; //
-    // qv[9]  = fResult->CLsplusb() ; //
-    // qv[10] = fResult->CLsplusbError() ; //
-    // double p0 = fResult->NullPValue(); //
-
-    // //jlorenz: dirty hack in order to avoid 0.000000 values
-    // for (int k=0; k<=10; k++) { 
-    //     if (qv[k] < 0.000001) {
-    //         qv[k] = 0.000001; 
-    //     } 
-    // }
-
-    // /// And pass on to limitresult object
-    // LimitResult result;
-    // result.SetP0(     p0 );
-    // result.SetP1(     qv[9] );
-    // result.SetCLs(    qv[5] );
-    // result.SetCLsexp( qv[2] );
-    // result.SetCLsu1S( qv[3] );
-    // result.SetCLsd1S( qv[1] );
-    // result.SetCLsu2S( qv[4] );
-    // result.SetCLsd2S( qv[0] );  
-
-    // return result;
-
     RooStats::HypoTestInverterResult* hti = new RooStats::HypoTestInverterResult();
     if (doUL) { // exclusion test
         hti->Add( 1.0, *fResult );
