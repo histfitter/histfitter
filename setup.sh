@@ -2,7 +2,7 @@
 # check Root environment setup. Allow for external setup script.
 
 export BUILD="x86_64-slc6-gcc46-opt"
-export ROOTVERSION="5.34.11"
+export ROOTVERSION="5.34.18"
 export CERNPREFIX="/afs/cern.ch/"
 export PYTHONVERSION="2.7.3"
 export GCCVERSION="4.6"
@@ -30,9 +30,11 @@ if [ ! $ROOTSYS ]; then
   # setup corresponding root
   #cd $CERNPREFIX/atlas/offline/external/FullChainTest/tier0/test/mbaak/root/root-$ROOTVERSION/
   #cd $CERNPREFIX/sw/lcg/app/releases/ROOT/$ROOTVERSION/$BUILD/root/
-  cd $CERNPREFIX/atlas/offline/external/FullChainTest/tier0/test/mbaak/root/root-v5-34/
+  #cd $CERNPREFIX/atlas/offline/external/FullChainTest/tier0/test/mbaak/root/root-v5-34/
+  cd $CERNPREFIX/work/g/gbesjes/root-v5-34-patches
   source bin/thisroot.sh
   cd $CWD
+  
   # setup xrootd on top of this
   export PATH=$CERNPREFIX/sw/lcg/external/xrootd/3.1.0p2/$BUILD/bin:$PATH
   export LD_LIBRARY_PATH="$CERNPREFIX/sw/lcg/external/xrootd/3.1.0p2/$BUILD/lib64:$LD_LIBRARY_PATH"
