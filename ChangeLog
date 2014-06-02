@@ -1,3 +1,10 @@
+2014-06-02 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
+	* src/StatTools.cxx: switch on PROOF-lite when nCPUs>1
+	* src/Utils.cxx: indenting fix
+	
+	* src/LimitResult.cxx: write out with %e and not %f
+	* src/StatTools.cxx: remove the hack needed with %f 
+
 2014-05-14 Alex Koutsman <koutsman@cern.ch>
         * src/Utils.cxx
 	* fixing bug in ratio plot error 
