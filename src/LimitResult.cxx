@@ -81,17 +81,17 @@ void LimitResult::Summary() {
 
 TString  LimitResult::GetSummaryString() const {
     TString summary;
-    summary += Form(" %lf %lf %lf",GetP0(),GetP1(),GetCLs());
+    summary += Form(" %e %e %e",GetP0(),GetP1(),GetCLs());
     summary += Form(" %d %d",GetMode(),GetNExp());
     summary += Form(" %u",GetSeed());
-    summary += Form(" %lf",GetCLsexp());
-    summary += Form(" %d %lf %lf",GetfID(),GetSigma0(),GetSigma1());
+    summary += Form(" %e",GetCLsexp());
+    summary += Form(" %d %e %e",GetfID(),GetSigma0(),GetSigma1());
     // CLs bands:
-    summary += Form(" %lf %lf %lf %lf",GetCLsu1S(),GetCLsd1S(),GetCLsu2S(),GetCLsd2S());
+    summary += Form(" %e %e %e %e",GetCLsu1S(),GetCLsd1S(),GetCLsu2S(),GetCLsd2S());
     // p0 bands:
-    summary += Form(" %lf %lf %lf %lf %lf",GetP0exp(),GetP0u1S(),GetP0d1S(),GetP0u2S(),GetP0d2S());
+    summary += Form(" %e %e %e %e %e",GetP0exp(),GetP0u1S(),GetP0d1S(),GetP0u2S(),GetP0d2S());
     // upper limits:
-    summary += Form(" %lf %lf %lf %lf %lf %lf %lf -999007. -999007.",GetUpperLimit(),
+    summary += Form(" %e %e %e %e %e %e %e -999007. -999007.",GetUpperLimit(),
 		    GetUpperLimitEstimatedError(),GetExpectedUpperLimit(),GetExpectedUpperLimitPlus1Sig(),
 		    GetExpectedUpperLimitPlus2Sig(),GetExpectedUpperLimitMinus1Sig(),GetExpectedUpperLimitMinus2Sig());
 
