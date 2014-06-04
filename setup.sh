@@ -5,7 +5,7 @@ export BUILD="x86_64-slc6-gcc46-opt"
 export ROOTVERSION="5.34.18"
 export CERNPREFIX="/afs/cern.ch/"
 export PYTHONVERSION="2.7.3"
-export GCCVERSION="4.6"
+export GCCVERSION="4.7"
 
 # Must have gcc and python setup outside of ROOTSYS def for batch running!
 # This section here is cern specific.
