@@ -1902,7 +1902,7 @@ Util::GetPOI( const RooWorkspace* w  )
 
 //________________________________________________________________________________________________
     RooFitResult*
-Util::doFreeFit( RooWorkspace* w, RooDataSet* inputdata, const bool& verbose, const bool& resetAfterFit )
+Util::doFreeFit( RooWorkspace* w, RooDataSet* inputdata, const bool& verbose, const bool& resetAfterFit, Bool_t minos, TString minosPars )
 {
     // fit to reset the workspace
 
@@ -1957,6 +1957,21 @@ Util::doFreeFit( RooWorkspace* w, RooDataSet* inputdata, const bool& verbose, co
     const RooArgSet* globObs = mc->GetGlobalObservables();
 
     RooAbsReal* nll = (RooNLLVar*) pdf->createNLL(*data, RooFit::GlobalObservables(*globObs), RooFit::Offset(true)); //, RooFit::CloneData(kFALSE),RooFit::Constrain(*allParams));
+
+
+    // find parameters requested for Minos
+    RooArgSet* minosParams = new RooArgSet();
+    if(minosPars != "" && minos && minosPars != "all"  && minosPars != "ALL"){
+      std::vector<TString> parsVec = Tokens(minosPars,",");
+      for(unsigned int i=0; i<parsVec.size();i++){
+        RooRealVar* var = (RooRealVar*) w->var(parsVec[i]);
+        if(var==NULL)  Logger << kWARNING << " Util::doFreeFit()   could not find parameter(" << parsVec[i] << ") in workspace while setting up minos" << GEndl;
+        else{
+          minosParams->add(*var);
+        }
+      }
+    }
+
 
     int minimPrintLevel = verbose;
 
@@ -2015,10 +2030,22 @@ Util::doFreeFit( RooWorkspace* w, RooDataSet* inputdata, const bool& verbose, co
 
     RooFitResult * result = 0; 
     //double val(0);
-
+    
     if (status%100 == 0) { // ignore errors in Hesse or in Improve
-        result = minim.save();
-        //val = result->minNll();
+        // only calculate minos errors if fit with Migrad converged
+        if(minos && (minosPars == "all" || minosPars == "ALL")){
+            minim.hesse();
+            minim.minos();
+        }
+        else if(minos && minosPars!="" && minosParams->getSize()>0){
+            minim.hesse();
+            minim.minos(*minosParams);
+        }
+
+        // save fit result
+        // ignore errors in Hesse or in Improve	if minos option not activated
+        result  = minim.save();
+        //val = result ->minNll();
     }
     else { 
         Logger << kERROR << "FIT FAILED !- return a NaN NLL " << GEndl;
