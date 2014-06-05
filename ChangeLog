@@ -1,3 +1,7 @@
+2014-06-05 Jeanette Miriam Lorenz <jeanette.miriam.lorenz@cern.ch>
+        * setup.sh: pointing now to gcc 4.7 and Root 5.34.18 patch due to requirements by the CombinationTool package
+	* analysis/batchjobs/HypoTest.py: add a rescan for -l in case that the initial scna range was not sufficient. Store the result as debug_<point>.root in case of failures in -l
+
 2014-06-02 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
 	* src/StatTools.cxx: switch on PROOF-lite when nCPUs>1
 	* src/Utils.cxx: indenting fix
