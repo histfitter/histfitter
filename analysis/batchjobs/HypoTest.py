@@ -6,6 +6,9 @@ import shutil
 import glob
 
 from ROOT import gROOT,gSystem,gDirectory,RooAbsData,RooRandom,RooWorkspace,TFile,RooFitResult
+
+from math import fabs,isnan
+
 ## batch mode
 sys.argv.insert(1, '-b')
 gROOT.Reset()
@@ -14,6 +17,50 @@ del sys.argv[1]
 gSystem.Load("libSusyFitter.so")
 gROOT.Reset()
 
+def min_CLs(hypo):
+    CLs=1.
+    for i in range(0,hypo.ArraySize()):
+        if hypo.GetResult(i).CLs() < CLs: CLs = hypo.GetResult(i).CLs()
+    return CLs
+    
+def max_CLs(hypo):
+    Cls=0.
+    for i in range(0,hypo.ArraySize()):
+        if hypo.GetResult(i).CLs()>CLs: Cls = hypo.GetResult(i).CLs()
+    return CLs
+    
+
+def RedoScan(w,testStatType,hypo):
+    maxX=hypo.GetLastXValue()
+    #del hypo
+    #hypo=0
+    
+    n=hypo.ArraySize()
+    print "Available points: ",str(n)
+    print "Recalculate x"
+    if n>=2 and not isnan(hypo.GetResult(n-2).CLs()) and not isnan(hypo.GetLastResult().CLs()):
+        diffCLs=fabs(hypo.GetResult(n-2).CLs()-hypo.GetLastResult().CLs())
+        diffX=(maxX-hypo.GetXValue(n-2))
+        newX=maxX
+        newCLs=hypo.GetLastResult().CLs()
+        while newCLs>0.05:
+            newX+=diffX
+            newCLs-=diffCLs
+        newX = newX*1.2
+    else: newX=2.*maxX
+
+    del hypo
+    hypo=0
+    
+    print "Redo scan with a larger x range: 0, ",str(newX)
+    hypo = RooStats.DoHypoTestInversion(w,1,2,testStatType,True,20,0.,newX)
+    #if ( hypo!=0 ):
+    #    hypo.ExclusionCleanup()
+        #if hypo.GetLastResult().CLs()>0.05:
+        #    hypo = RedoScan(w,testStatType,hypo.GetLastXValue()) 
+    
+    return hypo   
+    
 
 def doHypoTest(fixSigXSec, SigXSecSysnsigma,sigSamples):
 
@@ -210,7 +257,7 @@ if __name__ == "__main__":
         outfile = TFile.Open("results/"+sigSamples[0]+"_upperlimit.root","UPDATE");
         if not outfile:
            print "ERROR TFile <"+ outfileName+"> could not be opened"
-	   #return
+           #return
 
         #inFile = "results/MyOneLeptonKtScaleFitR17_Sig_"+sigSamples[0]+"_combined_NormalMeasurement_model.root"
 #        inFile = TFile.Open("results/MyOneLeptonKtScaleFitR17_Sig_"+sigSamples[0]+"_combined_NormalMeasurement_model.root")
@@ -221,16 +268,16 @@ if __name__ == "__main__":
         if not inFile:
            print "ERROR TFile could not be opened"
            outfile.Close()
-	   #return
+          #return
 
         w = inFile.Get("combined")
-	
+
         #Util.ReadWorkspace(inFile,"combined")
         #w=gDirectory.Get("w")
         if not w:
            print "workspace 'combined' does not exist in file"
-	   #return	
-	
+           #return
+
         Util.SetInterpolationCode(w,4)
 
         # reset all nominal values
@@ -260,8 +307,23 @@ if __name__ == "__main__":
         hypo = RooStats.DoHypoTestInversion(w,1,2,testStatType,True,20,0,-1)
 
         # then reevaluate with proper settings
+
         if ( hypo!=0 ):
             hypo.ExclusionCleanup()
+    
+            i=0 
+            while (i<5):
+                if min_CLs(hypo)>0.05: 
+                    print "Starting rescan iteration: "+str(i)           
+                    hypo = RedoScan(w,testStatType,hypo)
+                    if ( hypo!=0 ):
+                        hypo.ExclusionCleanup()
+                else:
+                    break
+                i+=1    
+
+
+        if ( hypo!=0 ):
             eul2 = 1.10 * hypo.GetExpectedUpperLimit(2)
             del hypo
             hypo=0
@@ -278,7 +340,15 @@ if __name__ == "__main__":
         ##save complete hypotestinverterresult to file
         if(hypo!=0):
             outfile.cd()
-            hypName="hypo_"+sigSamples[0]
+            if hypo.ArraySize()>0 and min_CLs(hypo)>0.05 and max_CLs(hypo)>0.05:
+                print "ERROR Final CLs value not below threshold of 0.05 or initial CLs value not above threshold of 0.05 - upper limit scan most likely failed."
+                print "ERROR Will store result only for debugging purposes - do not use it in contour plots!"
+                hypName="debug_"+sigSamples[0]
+            elif hypo.ArraySize()==0:
+                print "ERROR All fits seem to have failed - cannot compute upper limit!"
+                hypName="debug_"+sigSamples[0]
+            else:
+                hypName="hypo_"+sigSamples[0]
             hypo.SetName(hypName)
             print ">>> Now storing HypoTestInverterResult <" +hypName+ ">"
             hypo.Write()
