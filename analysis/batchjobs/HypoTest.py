@@ -340,7 +340,7 @@ if __name__ == "__main__":
         ##save complete hypotestinverterresult to file
         if(hypo!=0):
             outfile.cd()
-            if hypo.ArraySize()>0 and min_CLs(hypo)>0.05 and max_CLs(hypo)<0.05:
+            if hypo.ArraySize()>0 and (min_CLs(hypo)>0.05 or max_CLs(hypo)<0.05):
                 print "ERROR Final CLs value not below threshold of 0.05 or initial CLs value not above threshold of 0.05 - upper limit scan most likely failed."
                 print "ERROR Will store result only for debugging purposes - do not use it in contour plots!"
                 hypName="debug_"+sigSamples[0]
