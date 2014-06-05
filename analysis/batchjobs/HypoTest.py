@@ -20,13 +20,13 @@ gROOT.Reset()
 def min_CLs(hypo):
     CLs=1.
     for i in range(0,hypo.ArraySize()):
-        if hypo.GetResult(i).CLs() < CLs: CLs = hypo.GetResult(i).CLs()
+        if hypo.GetResult(i).CLs()<CLs: CLs = hypo.GetResult(i).CLs()
     return CLs
     
 def max_CLs(hypo):
-    Cls=0.
+    CLs=0.
     for i in range(0,hypo.ArraySize()):
-        if hypo.GetResult(i).CLs()>CLs: Cls = hypo.GetResult(i).CLs()
+        if hypo.GetResult(i).CLs()>CLs: CLs = hypo.GetResult(i).CLs()
     return CLs
     
 
@@ -340,7 +340,7 @@ if __name__ == "__main__":
         ##save complete hypotestinverterresult to file
         if(hypo!=0):
             outfile.cd()
-            if hypo.ArraySize()>0 and min_CLs(hypo)>0.05 and max_CLs(hypo)>0.05:
+            if hypo.ArraySize()>0 and min_CLs(hypo)>0.05 and max_CLs(hypo)<0.05:
                 print "ERROR Final CLs value not below threshold of 0.05 or initial CLs value not above threshold of 0.05 - upper limit scan most likely failed."
                 print "ERROR Will store result only for debugging purposes - do not use it in contour plots!"
                 hypName="debug_"+sigSamples[0]
