@@ -31,7 +31,8 @@ if [ ! $ROOTSYS ]; then
   #cd $CERNPREFIX/atlas/offline/external/FullChainTest/tier0/test/mbaak/root/root-$ROOTVERSION/
   #cd $CERNPREFIX/sw/lcg/app/releases/ROOT/$ROOTVERSION/$BUILD/root/
   #cd $CERNPREFIX/atlas/offline/external/FullChainTest/tier0/test/mbaak/root/root-v5-34/
-  cd $CERNPREFIX/work/g/gbesjes/root-v5-34-patches
+  #cd $CERNPREFIX/work/g/gbesjes/root-v5-34-patches
+  cd $CERNPREFIX/atlas/offline/external/FullChainTest/tier0/test/mbaak/root/root-v5-34-trunk/
   source bin/thisroot.sh
   cd $CWD
   
