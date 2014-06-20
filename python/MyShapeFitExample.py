@@ -107,7 +107,7 @@ dataSample.setData()
 #**************
 
 #Fit config instance
-exclusionFitConfig = configMgr.addTopLevelXML("Exclusion")
+exclusionFitConfig = configMgr.addFitConfig("Exclusion")
 meas=exclusionFitConfig.addMeasurement(name="NormalMeasurement",lumi=1.0,lumiErr=0.039)
 meas.addPOI("mu_SIG")
 
@@ -133,5 +133,5 @@ exclusionFitConfig.addSamples(sigSample)
 exclusionFitConfig.setSignalSample(sigSample)
 
 #2nd cloned-copy just to accomodate -l option...
-exclusionFitClone = configMgr.addTopLevelXMLClone(exclusionFitConfig,"ExclusionFitClone")
+exclusionFitClone = configMgr.addFitConfigClone(exclusionFitConfig,"ExclusionFitClone")
 
