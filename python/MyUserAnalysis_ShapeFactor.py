@@ -71,7 +71,7 @@ dataSample.buildHisto(nDataCR,"CR","cuts")
 dataSample.buildHisto(nDataSR,"SR","cuts")
 
 # Define top-level
-ana = configMgr.addTopLevelXML("SPlusB")
+ana = configMgr.addfitConfig("SPlusB")
 ana.addSamples([bkgSample,ddSample,dataSample])
 
 # Define measurement
