@@ -102,7 +102,7 @@ dataSample.setData()
 #**************
 
 #Fit config instance
-discoveryFitConfig = configMgr.addTopLevelXML("Discovery")
+discoveryFitConfig = configMgr.addFitConfig("Discovery")
 meas=discoveryFitConfig.addMeasurement(name="NormalMeasurement",lumi=1.0,lumiErr=0.039)
 meas.addPOI("mu_SIG")
 
@@ -117,7 +117,7 @@ discoveryFitConfig.addSystematic(jes)
 #Channel
 srBin = discoveryFitConfig.addChannel("cuts",["SR"],1,0.5,1.5)
 discoveryFitConfig.setSignalChannels([srBin])
-srBin.addDiscoverySamples(["BLAH"],[1.],[0.],[100.],[kMagenta])
+srBin.addDiscoverySamples(["SIG"],[1.],[0.],[100.],[kMagenta])
 
 
 #**************
@@ -125,7 +125,7 @@ srBin.addDiscoverySamples(["BLAH"],[1.],[0.],[100.],[kMagenta])
 #**************
 
 #Fit config instance
-exclusionFitConfig = configMgr.addTopLevelXML("Exclusion")
+exclusionFitConfig = configMgr.addFitConfig("Exclusion")
 meas=exclusionFitConfig.addMeasurement(name="NormalMeasurement",lumi=1.0,lumiErr=0.039)
 meas.addPOI("mu_SIG")
 
