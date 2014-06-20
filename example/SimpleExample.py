@@ -1,19 +1,11 @@
-################################################################
-## In principle all you have to setup is defined in this file ##
-################################################################
+# An example HistFitter configuration with inputs set through variables
+
 from configManager import configMgr
-from ROOT import kBlack,kWhite,kGray,kRed,kPink,kMagenta,kViolet,kBlue,kAzure,kCyan,kTeal,kGreen,kSpring,kYellow,kOrange
 from configWriter import fitConfig,Measurement,Channel,Sample
 from systematic import Systematic
 from math import sqrt
 
 import os
-
-# Setup for ATLAS plotting
-from ROOT import gROOT
-gROOT.LoadMacro("./macros/AtlasStyle.C")
-import ROOT
-ROOT.SetAtlasStyle()
 
 ##########################
 
@@ -36,10 +28,10 @@ cors = Systematic("cor",configMgr.weights, [1.15],[0.85], "user","userHistoSys")
 ##########################
 
 # Setting the parameters of the hypothesis test
-#configMgr.nTOYs=5000
-configMgr.calculatorType=2 # 2=asymptotic calculator, 0=frequentist calculator
-configMgr.testStatType=3   # 3=one-sided profile likelihood test statistic (LHC default)
-configMgr.nPoints=20       # number of values scanned of signal-strength for upper-limit determination of signal strength.
+configMgr.calculatorType = 2 # 2=asymptotic calculator, 0=frequentist calculator
+configMgr.nTOYs = 5000       # number of toys used in the frequentist calculator
+configMgr.testStatType = 3   # 3=one-sided profile likelihood test statistic (LHC default)
+configMgr.nPoints = 20       # number of values scanned of signal-strength for upper-limit determination of signal strength.
 
 ##########################
 
@@ -54,42 +46,41 @@ configMgr.cutsDict["UserRegion"] = "1."
 configMgr.weights = "1."
 
 # Define samples
-bkgSample = Sample("Bkg",kGreen-9)
+bkgSample = Sample("Bkg", ROOT.kGreen-9)
 bkgSample.setStatConfig(True)
-bkgSample.buildHisto([nbkg],"UserRegion","cuts")
-bkgSample.buildStatErrors([nbkgErr],"UserRegion","cuts")
+bkgSample.buildHisto([nbkg], "UserRegion", "cuts")
+bkgSample.buildStatErrors([nbkgErr], "UserRegion", "cuts")
 bkgSample.addSystematic(corb)
 bkgSample.addSystematic(ucb)
 
-sigSample = Sample("Sig",kPink)
-sigSample.setNormFactor("mu_Sig",1.,0.,100.)
+sigSample = Sample("Sig", ROOT.kPink)
+sigSample.setNormFactor("mu_Sig", 1., 0., 100.)
 sigSample.setStatConfig(True)
 sigSample.setNormByTheory()
-sigSample.buildHisto([nsig],"UserRegion","cuts")
-sigSample.buildStatErrors([nsigErr],"UserRegion","cuts")
+sigSample.buildHisto([nsig], "UserRegion", "cuts")
+sigSample.buildStatErrors([nsigErr], "UserRegion", "cuts")
 sigSample.addSystematic(cors)
 sigSample.addSystematic(ucs)
 
-dataSample = Sample("Data",kBlack)
+dataSample = Sample("Data", ROOT.kBlack)
 dataSample.setData()
-dataSample.buildHisto([ndata],"UserRegion","cuts")
+dataSample.buildHisto([ndata], "UserRegion", "cuts")
 
 # Define top-level
 ana = configMgr.addFitConfig("SPlusB")
-ana.addSamples([bkgSample,sigSample,dataSample])
+ana.addSamples([bkgSample, sigSample, dataSample])
 ana.setSignalSample(sigSample)
 
 # Define measurement
-meas = ana.addMeasurement(name="NormalMeasurement",lumi=1.0,lumiErr=lumiError)
+meas = ana.addMeasurement(name="NormalMeasurement", lumi=1.0, lumiErr=lumiError)
 meas.addPOI("mu_Sig")
-#meas.addParamSetting("Lumi",True,1)
+#meas.addParamSetting("Lumi", True, 1)
 
 # Add the channel
-chan = ana.addChannel("cuts",["UserRegion"],1,0.,1.)
+chan = ana.addChannel("cuts", ["UserRegion"], 1, 0., 1.)
 ana.setSignalChannels([chan])
 
-# These lines are needed for the user analysis to run
 # Make sure file is re-made when executing HistFactory
 if configMgr.executeHistFactory:
-    if os.path.isfile("data/%s.root"%configMgr.analysisName):
-        os.remove("data/%s.root"%configMgr.analysisName) 
+    if os.path.isfile("data/%s.root" % configMgr.analysisName):
+        os.remove("data/%s.root" % configMgr.analysisName) 
