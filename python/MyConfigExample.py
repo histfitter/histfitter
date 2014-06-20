@@ -7,7 +7,7 @@
 ##   -JES (Tree-based) conservatively treated like an MC stat error
 ##   -Alpgen Kt scale (weight-based)
 ##
-## For the real complete implementation, see: python/MyOneLeptonKtScaleFit_mergerSoftLep.py
+## For the real complete implementation, see: HistFitterUser/MET_jets_leptons/python/MyOneLeptonKtScaleFit_mergerSoftLep.py
 
 from configManager import configMgr
 from ROOT import kBlack,kWhite,kGray,kRed,kPink,kMagenta,kViolet,kBlue,kAzure,kCyan,kTeal,kGreen,kSpring,kYellow,kOrange,kDashed,kSolid,kDotted
@@ -30,9 +30,7 @@ ROOT.SetAtlasStyle()
 # Flags to control which fit is executed
 #---------------------------------------
 useStat=True
-doValidation=True
-doDiscovery=False
-doExclusion=False
+doValidation=False #use or use not validation regions to check exptrapolation to signal regions
 
 #-------------------------------
 # Parameters for hypothesis test
@@ -64,7 +62,7 @@ sigFiles = []
 if configMgr.readFromTree:
     bgdFiles.append("samples/tutorial/SusyFitterTree_OneSoftEle_BG_v3.root")
     bgdFiles.append("samples/tutorial/SusyFitterTree_OneSoftMuo_BG_v3.root")
-    if doExclusion:
+    if myFitType==FitType.Exclusion:
         # 1-step simplified model
         sigFiles.append("samples/tutorial/SusyFitterTree_p832_GG-One-Step_soft_v1.root")
 else:
@@ -231,6 +229,82 @@ nJetWS.ATLASLabelY = 0.85
 nJetWS.ATLASLabelText = "Work in progress"
 
 
+#--------------------------------------------------------------
+# Validation regions - not necessarily statistically independent
+#--------------------------------------------------------------
+
+if doValidation:
+    # s1l2jT
+    srs1l2jTChannel = bkt.addChannel("cuts",["SR1sl2j"],srNBins,srBinLow,srBinHigh)
+    srs1l2jTChannel.addSystematic(jes)
+
+    # additional VRs if using soft lep CRs
+    nJetSLVR2 = bkt.addChannel("nJet",["SLVR2"],nJetBinHighTR-nJetBinLowSoft,nJetBinLowSoft,nJetBinHighTR)
+    nJetSLVR2.addSystematic(jes)
+    
+    #signal region treated as validation region for this case
+    mm2J = bkt.addChannel("met/meff2Jet",["SS"],6,0.1,0.7)
+    mm2J.useOverflowBin=True
+    mm2J.addSystematic(jes)
+    mm2J.remapSystChanName = 'metmeff2Jet_SSloose'
+
+    #signal region treated as validation region for this case
+    mm2Jl = bkt.addChannel("met/meff2Jet",["SSloose"],6,0.1,0.7)
+    mm2Jl.useOverflowBin=True
+    mm2Jl.addSystematic(jes)
+
+    #    bkt.setValidationChannels([nJetSLVR2,metSLVR2,meffSLVR2,nBJetSLVR2,metmeffSLVR2,mm2J,srs1l2jTChannel])
+    bkt.setValidationChannels([nJetSLVR2,srs1l2jTChannel,mm2J,mm2Jl])
+   
+   
+
+
+#**************
+# Discovery fit
+#**************
+
+if myFitType==FitType.Discovery:
+    discovery = configMgr.addFitConfigClone(bkt,"Discovery")
+    
+    # s1l2jT = signal region/channel
+    ssChannel = discovery.addChannel("cuts",["SS"],srNBins,srBinLow,srBinHigh)
+    ssChannel.addSystematic(jes)
+    ssChannel.addDiscoverySamples(["SS"],[1.],[0.],[100.],[kMagenta])
+    discovery.setSignalChannels([ssChannel])
+
+
+#-----------------------------
+# Exclusion fits (1-step simplified model in this case)
+#-----------------------------
+if myFitType==FitType.Exclusion:
+    sigSamples=["SM_GG_onestepCC_425_385_345"]
+                        
+    for sig in sigSamples:
+        myTopLvl = configMgr.addFitConfigClone(bkt,"Sig_%s"%sig)
+
+        sigSample = Sample(sig,kPink)
+        sigSample.setFileList(sigFiles)
+        sigSample.setNormByTheory()
+        sigSample.setStatConfig(useStat)
+        sigSample.setNormFactor("mu_SIG",1.,0.,5.)                    
+        myTopLvl.addSamples(sigSample)
+        myTopLvl.setSignalSample(sigSample)
+    
+
+        # s1l2j using met/meff
+        if doValidation:
+            mm2J = myTopLvl.getChannel("met/meff2Jet",["SS"])
+            iPop=myTopLvl.validationChannels.index("SS_metmeff2Jet")
+            myTopLvl.validationChannels.pop(iPop)
+        else:
+            mm2J = myTopLvl.addChannel("met/meff2Jet",["SS"],5,0.2,0.7)
+            mm2J.useOverflowBin=True
+            mm2J.addSystematic(jes)
+            pass
+        myTopLvl.setSignalChannels([mm2J])
+	
+	
+	
 # Create TLegend (AK: TCanvas is needed for that, but it gets deleted afterwards)
 c = TCanvas()
 compFillStyle = 1001 # see ROOT for Fill styles
@@ -269,83 +343,16 @@ entry = leg.AddEntry("","single top & diboson","lf")
 entry.SetLineColor(bgSample.color)
 entry.SetFillColor(bgSample.color)
 entry.SetFillStyle(compFillStyle)
+#
+if myFitType==FitType.Exclusion:
+    entry = leg.AddEntry("","signal","lf") 
+    entry.SetLineColor(kPink)
+    entry.SetFillColor(kPink)
+    entry.SetFillStyle(compFillStyle)
 
-# Set legend for TopLevelXML
+
+# Set legend for fitConfig
 bkt.tLegend = leg
+if myFitType==FitType.Exclusion:
+    myTopLvl.tLegend = leg
 c.Close()
-
-
-
-#--------------------------------------------------------------
-# Validation regions - not necessarily statistically independent
-#--------------------------------------------------------------
-
-if doValidation:
-    # s1l2jT
-    srs1l2jTChannel = bkt.addChannel("cuts",["SR1sl2j"],srNBins,srBinLow,srBinHigh)
-    srs1l2jTChannel.addSystematic(jes)
-
-    # additional VRs if using soft lep CRs
-    nJetSLVR2 = bkt.addChannel("nJet",["SLVR2"],nJetBinHighTR-nJetBinLowSoft,nJetBinLowSoft,nJetBinHighTR)
-    nJetSLVR2.addSystematic(jes)
-    
-    #signal region treated as validation region for this case
-    mm2J = bkt.addChannel("met/meff2Jet",["SS"],6,0.1,0.7)
-    mm2J.useOverflowBin=True
-    mm2J.addSystematic(jes)
-    mm2J.remapSystChanName = 'metmeff2Jet_SSloose'
-
-    #signal region treated as validation region for this case
-    mm2Jl = bkt.addChannel("met/meff2Jet",["SSloose"],6,0.1,0.7)
-    mm2Jl.useOverflowBin=True
-    mm2Jl.addSystematic(jes)
-
-    #    bkt.setValidationChannels([nJetSLVR2,metSLVR2,meffSLVR2,nBJetSLVR2,metmeffSLVR2,mm2J,srs1l2jTChannel])
-    bkt.setValidationChannels([nJetSLVR2,srs1l2jTChannel,mm2J,mm2Jl])
-   
-   
-
-
-#**************
-# Discovery fit
-#**************
-
-if doDiscovery:
-    discovery = configMgr.addTopLevelXMLClone(bkt,"Discovery")
-    
-    # s1l2jT = signal region/channel
-    ssChannel = discovery.addChannel("cuts",["SS"],srNBins,srBinLow,srBinHigh)
-    ssChannel.addSystematic(jes)
-    ssChannel.addDiscoverySamples(["SS"],[1.],[0.],[100.],[kMagenta])
-    discovery.setSignalChannels([ssChannel])
-
-
-#-----------------------------
-# Exclusion fits (1-step simplified model in this case)
-#-----------------------------
-if doExclusion:
-    sigSamples=["SM_GG_onestepCC_425_385_345"]
-                        
-    for sig in sigSamples:
-        myTopLvl = configMgr.addTopLevelXMLClone(bkt,"Sig_%s"%sig)
-
-        sigSample = Sample(sig,kPink)
-        sigSample.setFileList(sigFiles)
-        sigSample.setNormByTheory()
-        sigSample.setStatConfig(useStat)
-        sigSample.setNormFactor("mu_SIG",1.,0.,5.)                    
-        myTopLvl.addSamples(sigSample)
-        myTopLvl.setSignalSample(sigSample)
-    
-
-        # s1l2j using met/meff
-        if doValidation:
-            mm2J = myTopLvl.getChannel("met/meff2Jet",["SS"])
-            iPop=myTopLvl.validationChannels.index("SS_metmeff2Jet")
-            myTopLvl.validationChannels.pop(iPop)
-        else:
-            mm2J = myTopLvl.addChannel("met/meff2Jet",["SS"],5,0.2,0.7)
-            mm2J.useOverflowBin=True
-            mm2J.addSystematic(jes)
-            pass
-        myTopLvl.setSignalChannels([mm2J])
