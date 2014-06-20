@@ -36,6 +36,8 @@ configMgr.calculatorType=2
 configMgr.testStatType=3
 configMgr.nPoints=20
 
+configMgr.writeXML = True
+
 
 #-------------------------------------
 # Now we start to build the data model
