@@ -14,7 +14,7 @@
 
 <!DOCTYPE Combination  SYSTEM "HistFactorySchema.dtd">
 
-<Combination OutputFilePrefix="./results/example" Mode="comb" >
+<Combination OutputFilePrefix="./results/example" >
 
   <Input>./config/example_channel.xml</Input>
 
