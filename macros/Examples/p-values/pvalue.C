@@ -6,7 +6,7 @@ using namespace RooStats;
 void
 pvalue()
 {
-  int seed=0;            // 0 = cpu clock, so random 
+  int seed=1;            // 0 = cpu clock, so random 
   const char* fileprefix = "example";
   int  calculatorType=0; // 2=asymptotic approximation limit. 0=frequentist limit
   int  testStatType=3;   // one-sided test profile statistic (ATLAS standard)
