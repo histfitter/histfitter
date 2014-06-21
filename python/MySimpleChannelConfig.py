@@ -9,8 +9,9 @@ from configWriter import fitConfig,Measurement,Channel,Sample
 from systematic import Systematic
 
 ## First define HistFactory attributes
-configMgr.analysisName = "MySimpleChannelAnalysis"
-configMgr.outputFileName = "results/MySimpleChannelAnalysisOutput.root"
+configMgr.analysisName = "MySimpleChannelAnalysis2"
+configMgr.outputFileName = "results/" + configMgr.analysisName +".root"
+configMgr.histCacheFile = "data/"+configMgr.analysisName+".root"
 
 ## Scaling calculated by outputLumi / inputLumi
 configMgr.inputLumi = 20.0  # Luminosity of input TTree after weighting
@@ -24,8 +25,6 @@ configMgr.calculatorType=2 # 2=asymptotic calculator, 0=frequentist calculator
 configMgr.testStatType=3   # 3=one-sided profile likelihood test statistic (LHC default)
 configMgr.nPoints=20       # number of values scanned of signal-strength for upper-limit determination of signal strength.
 
-## Set the cache file
-configMgr.histCacheFile = "data/"+configMgr.analysisName+".root"
 
 ## Suffix of nominal tree
 configMgr.nomName = "_NoSys"
@@ -59,7 +58,7 @@ cutsBinLow = 0.0
 cutsBinHigh = 1.0
 
 ## Bkg-only fit
-bkgOnly = configMgr.addTopLevelXML("SimpleChannel_BkgOnly")
+bkgOnly = configMgr.addFitConfig("SimpleChannel_BkgOnly")
 bkgOnly.statErrThreshold=None #0.5
 bkgOnly.addSamples(commonSamples)
 bkgOnly.addSystematic(jes)
@@ -68,7 +67,7 @@ meas.addPOI("mu_SIG")
 cutsChannel = bkgOnly.addChannel("cuts",cutsRegions,cutsNBins,cutsBinLow,cutsBinHigh)
 
 ## Discovery fit
-#discovery = configMgr.addTopLevelXMLClone(bkgOnly,"SimpleChannel_Discovery")
+#discovery = configMgr.adFitConfigClone(bkgOnly,"SimpleChannel_Discovery")
 #discovery.clearSystematics()
 #sigSample = Sample("discoveryMode",kBlue)
 #sigSample.setNormFactor("mu_SIG",0.5,0.,1.)
@@ -82,11 +81,11 @@ sigSamples = ["SU_680_310_0_10","SU_440_145_0_10","SU_200_160_0_10","SU_440_340_
 
 
 for sig in sigSamples:
-    myTopLvl = configMgr.addTopLevelXMLClone(bkgOnly,"SimpleChannel_%s"%sig)
+    myTopLvl = configMgr.addFitConfigClone(bkgOnly,"SimpleChannel_%s"%sig)
     #myTopLvl.removeSystematic(jes)
     sigSample = Sample(sig,kBlue)
     sigSample.setNormFactor("mu_SIG",0.5,0.,1.)
-    sigXSSyst = Systematic("SigXSec",None,None,None,"user","overallSys")
+    sigXSSyst = Systematic("SigXSec",configMgr.weights,1.1,0.9,"user","overallSys")
     sigSample.addSystematic(sigXSSyst)
     #sigSample.addSystematic(jesSig)
     sigSample.setNormByTheory()
