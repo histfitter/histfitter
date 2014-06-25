@@ -269,6 +269,14 @@ void Util::SaveInitialSnapshot(RooWorkspace* w){
 
     // save snapshot before any fit has been done
     RooSimultaneous* pdf = (RooSimultaneous*) w->pdf("simPdf");
+    if(pdf==NULL){
+      pdf = (RooSimultaneous*) w->pdf("combPdf");
+    }
+    if(pdf==NULL){
+        Logger << kWARNING << "Util::SaveInitialSnapshot():   not saving the initial snapshot as cannot find pdf (simPdf or combPdf) in workspace" << GEndl;
+	return;
+    }
+      
     RooAbsData* data = (RooAbsData*) w->data("obsData");
     RooArgSet* params = (RooArgSet*) pdf->getParameters(*data) ;
     if(!w->loadSnapshot("snapshot_paramsVals_initial")) {
@@ -2145,7 +2153,7 @@ void Util::AddText(Double_t x,Double_t y,char* text,Color_t color)
 
 
 //_____________________________________________________________________________
-RooAbsReal* Util::GetComponent(RooWorkspace* w, TString component, TString region, bool exactRegionName){  //, unsigned int bin){
+RooAbsReal* Util::GetComponent(RooWorkspace* w, TString component, TString region, bool exactRegionName, TString rangeName){  //, unsigned int bin){
 
     std::vector<TString> componentVec = Tokens(component,",");
     if(componentVec.size() <1) { Logger << kWARNING << " componentVec.size() < 1, for components = " << component << GEndl; }
@@ -2218,7 +2226,15 @@ RooAbsReal* Util::GetComponent(RooWorkspace* w, TString component, TString regio
         Logger << kERROR << " Cannot create a RooRealSumPdf in Util::GetComponent() "<< GEndl;
         return NULL;
     }
-    RooAbsReal* compFunc = compRRS->createIntegral(RooArgSet(*regionVar));
+
+    RooAbsReal* compFunc;
+    if(rangeName==""){
+      compFunc = compRRS->createIntegral(RooArgSet(*regionVar));
+    }
+    else{
+      compFunc = compRRS->createIntegral(RooArgSet(*regionVar),rangeName);
+    }
+
 
     if(compFunc == NULL){
         Logger << kERROR << " compRooProduct not found for region(" << regionFullName << "), component(" << component << ")   RETURNING COMPONENTS WILL BE WRONG " << GEndl ;
@@ -2226,8 +2242,15 @@ RooAbsReal* Util::GetComponent(RooWorkspace* w, TString component, TString regio
     }
 
     RooFormulaVar* form_frac = new RooFormulaVar("form_fracError","@0",RooArgList(*compFunc));
-    form_frac->SetName(Form("form_frac_region_%s_%s",region.Data(),compName.Data()));
-    form_frac->SetTitle(Form("form_frac_region_%s_%s",region.Data(),compName.Data()));
+    if(rangeName==""){
+      form_frac->SetName(Form("form_frac_region_%s_%s",region.Data(),compName.Data()));
+      form_frac->SetTitle(Form("form_frac_region_%s_%s",region.Data(),compName.Data()));
+    }
+    else{
+      form_frac->SetName(Form("form_frac_region_%s_%s_%s",region.Data(),compName.Data(),rangeName.Data()));
+      form_frac->SetTitle(Form("form_frac_region_%s_%s_%s",region.Data(),compName.Data(),rangeName.Data()));
+    }
+
 
     Logger << kINFO << " Adding " << form_frac->GetName() << " to workspace" << GEndl;
     w->import( *form_frac,kTRUE);

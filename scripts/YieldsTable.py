@@ -12,10 +12,10 @@ from ROOT import gROOT,gSystem,gDirectory, PyConfig
 gSystem.Load("libSusyFitter.so")
 gROOT.Reset()
 
-from ROOT import TFile, RooWorkspace, TObject, TString, RooAbsReal, RooRealVar, RooFitResult, RooDataSet, RooAddition, RooArgSet, RooFormulaVar, RooAbsData, RooRandom, RooArgList 
+from ROOT import TFile, RooWorkspace, TObject, TString, RooAbsReal, RooRealVar, RooFitResult, RooDataSet, RooAddition, RooArgSet, RooFormulaVar, RooAbsData, RooRandom, RooArgList, RooBinningCategory
 from ROOT import Util, TMath, TMap, RooExpandedFitResult
 
-from cmdLineUtils import getPdfInRegions,getName
+from cmdLineUtils import getPdfInRegions,getName,getPdfInRegionsWithRangeName
 
 from YieldsTableTex import *
 import os
@@ -23,7 +23,7 @@ import sys
 
 # Main function calls are defined below.
 
-def latexfitresults(filename,regionList,sampleList,exactRegionNames=False,dataname='obsData',showSum=False, doAsym=True, blinded=False):
+def latexfitresults(filename,regionList,sampleList,exactRegionNames=False,dataname='obsData',showSum=False, doAsym=True, blinded=False, splitBins=False):
   workspacename = 'w'
   w = Util.GetWorkspaceFromFile(filename,'w')
 
@@ -47,10 +47,11 @@ def latexfitresults(filename,regionList,sampleList,exactRegionNames=False,datana
     sys.exit(1)
       
   regionCat = w.obj("channelCat")
-  data_set.table(regionCat).Print("v");
+  if not blinded:
+    data_set.table(regionCat).Print("v")
 
   regionFullNameList = [ Util.GetFullRegionName(regionCat, region) for region in regionList]
-  print regionFullNameList
+  #print " regionFullNameList = ", regionFullNameList
 
   ######
 
@@ -85,6 +86,7 @@ def latexfitresults(filename,regionList,sampleList,exactRegionNames=False,datana
     data.SetTitle("data_" + regionList[index])
     
   nobs_regionList = [ data.sumEntries() for data in regionDatasetList]
+
   #SUM
   sumNobs = 0.
   for nobs in nobs_regionList:
@@ -93,7 +95,7 @@ def latexfitresults(filename,regionList,sampleList,exactRegionNames=False,datana
   if showSum:
     nobs_regionList.append(sumNobs)
   tablenumbers['nobs'] = nobs_regionList
- 
+
   ######
   ######
   ######  FROM HERE ON OUT WE CALCULATE THE FITTED NUMBER OF EVENTS __AFTER__ THE FIT
@@ -103,17 +105,86 @@ def latexfitresults(filename,regionList,sampleList,exactRegionNames=False,datana
   # total pdf, not splitting in components
   pdfinRegionList = [ Util.GetRegionPdf(w, region)  for region in regionList]
   varinRegionList =  [ Util.GetRegionVar(w, region) for region in regionList]
+  
+  varNbinsInRegionList =  [] 
+  varBinLowInRegionList = []  
+  varBinHighInRegionList =  [] 
+  rangeNameBinsInRegionList = [] 
+  if splitBins:
+    varNbinsInRegionList = [Util.GetRegionVar(w, region).getBinning().numBins() for region in regionList]
+    varBinLowInRegionList = [[Util.GetRegionVar(w, region).getBinning((region+"binning")).binLow(ibin) for ibin in range(0, varNbinsInRegionList[idx]) ] for idx,region in enumerate(regionList)]
+    varBinHighInRegionList = [[Util.GetRegionVar(w, region).getBinning((region+"binning")).binHigh(ibin) for ibin in range(0, varNbinsInRegionList[idx]) ] for idx,region in enumerate(regionList)]
+    rangeNameBinsInRegionList = [[regionList[idx]+"_bin"+str(ibin) for ibin in range(0, varNbinsInRegionList[idx]) ] for idx,region in enumerate(regionList)]
+  #   print "varinRegionList =", varinRegionList
+  #   print "varNbinsInRegionList =", varNbinsInRegionList
+  #   print "varBinLowInRegionList =", varBinLowInRegionList
+  #   print "varBinHighInRegionList =", varBinHighInRegionList
+  #   print "rangeNameBinsInRegionList =", rangeNameBinsInRegionList
+  for index,region in enumerate(regionList):
+    if varNbinsInRegionList[index]==1:
+      print " \n YieldsTable.py: WARNING: you have called -P (= per-bin yields) but this region ", region, " has only 1 bin \n"
+
+  
+
+  regionListWithBins = []
+  if splitBins:
+    for index,region in enumerate(regionList):
+      regionListWithBins.append(region)
+      for ibin in range(0,varNbinsInRegionList[index]):
+        regionListWithBins.append(rangeNameBinsInRegionList[index][ibin])
+    tablenumbers['names'] = regionListWithBins
+  
+
+  # calcualte nObs per bin
+  nobs_regionListWithBins = []
+  if splitBins:
+    binFuncInRegionList = [RooBinningCategory("bin_"+region,"bin_"+region,varinRegionList[index]) for index,region in enumerate(regionList)]
+    #print "binFuncInRegionList= ", binFuncInRegionList
+    for index, data in enumerate(regionDatasetList):
+      # print "binFuncInRegionList= ", binFuncInRegionList[index].Print()
+      data.addColumn(binFuncInRegionList[index])
+      if not blinded:
+        data.table(binFuncInRegionList[index]).Print("v")
+      nobs_regionListWithBins.append(data.sumEntries())
+      for ibin in range(0,varNbinsInRegionList[index]):
+        nobs_regionListWithBins.append((data.reduce(binFuncInRegionList[index].GetName()+"=="+binFuncInRegionList[index].GetName()+"::"+varinRegionList[index].GetName()+"_bin"+str(ibin))).sumEntries())
+
+    # print "nobs_regionListWithBins =", nobs_regionListWithBins
+    tablenumbers['nobs'] = nobs_regionListWithBins
+
+  # set all regions to blinded
+  if blinded: 
+    for index, nobs in enumerate(nobs_regionListWithBins):
+      nobs_regionListWithBins[index] = -1
+    tablenumbers['nobs'] = nobs_regionListWithBins
+
+
+  #  print "\n regionList = ", regionList
+  #  print "regionListWithBins = ", regionListWithBins
+    
   rrspdfinRegionList = []
   for index,pdf in enumerate(pdfinRegionList):
-#    pdf.Print("t")
+    #    pdf.Print("t")
     prodList = pdf.pdfList()
     foundRRS = 0
     for idx in range(prodList.getSize()):
       #      if "BG" in prodList[idx].GetName():
       #        prodList[idx].Print("t")
       if prodList[idx].InheritsFrom("RooRealSumPdf"):
-        rrspdfInt =  prodList[idx].createIntegral(RooArgSet(varinRegionList[index]));
+        rrspdfInt =  prodList[idx].createIntegral(RooArgSet(varinRegionList[index]))
         rrspdfinRegionList.append(rrspdfInt)
+        if splitBins:
+          #print "before --> ", varinRegionList[index].Print()
+          origMin = varinRegionList[index].getMin()
+          origMax = varinRegionList[index].getMax()
+          for ibin in range(0,varNbinsInRegionList[index]):
+            rangeName = rangeNameBinsInRegionList[index][ibin]
+            varinRegionList[index].setRange(rangeName,varBinLowInRegionList[index][ibin],varBinHighInRegionList[index][ibin])
+           # print "bin:", ibin, " --> ", varinRegionList[index].Print()
+            rrspdfInt =  prodList[idx].createIntegral(RooArgSet(varinRegionList[index]),rangeName)
+            #           rrspdfInt.Print("v")
+            rrspdfinRegionList.append(rrspdfInt)
+          varinRegionList[index].setRange(origMin,origMax)
         foundRRS += 1
     if foundRRS >1 or foundRRS==0:
       print " \n\n WARNING: ", pdf.GetName(), " has ", foundRRS, " instances of RooRealSumPdf"
@@ -122,12 +193,16 @@ def latexfitresults(filename,regionList,sampleList,exactRegionNames=False,datana
   nFittedInRegionList =  [ pdf.getVal() for index, pdf in enumerate(rrspdfinRegionList)]
   pdfFittedErrInRegionList = [ Util.GetPropagatedError(pdf, resultAfterFit, doAsym) for pdf in rrspdfinRegionList]
 
+#  print " regionList =", regionList
+#  print " nFittedInRegionList =", nFittedInRegionList
+#  print " pdfFittedErrInRegionList =",  pdfFittedErrInRegionList
+
   if showSum:
     pdfInAllRegions = RooArgSet()
     for index, pdf in enumerate(rrspdfinRegionList):
       pdfInAllRegions.add(pdf)
     pdfSumInAllRegions = RooAddition( "pdf_AllRegions_AFTER", "pdf_AllRegions_AFTER", RooArgList(pdfInAllRegions))
-    pdfSumInAllRegions.Print()
+#    pdfSumInAllRegions.Print()
     nPdfSumVal = pdfSumInAllRegions.getVal()
     nPdfSumError = Util.GetPropagatedError(pdfSumInAllRegions, resultAfterFit, doAsym)
     nFittedInRegionList.append(nPdfSumVal)
@@ -136,11 +211,6 @@ def latexfitresults(filename,regionList,sampleList,exactRegionNames=False,datana
   tablenumbers['TOTAL_FITTED_bkg_events']    =  nFittedInRegionList
   tablenumbers['TOTAL_FITTED_bkg_events_err']    =  pdfFittedErrInRegionList
  
-  if blinded: 
-    nobs_regionList = [ data.sumEntries() for data in regionDatasetList]
-    nobs_regionList[-1] = -1
-    tablenumbers['nobs'] = nobs_regionList
-
   # components
   for isam, sample in enumerate(sampleList):
     sampleName=getName(sample)
@@ -153,7 +223,7 @@ def latexfitresults(filename,regionList,sampleList,exactRegionNames=False,datana
       sampleInRegionVal = 0.
       sampleInRegionError = 0.
       if not sampleInRegion==None:
-        sampleInRegion.Print()
+        #sampleInRegion.Print()
         sampleInRegionVal = sampleInRegion.getVal()
         sampleInRegionError = Util.GetPropagatedError(sampleInRegion, resultAfterFit, doAsym) 
         sampleInAllRegions.add(sampleInRegion)
@@ -161,17 +231,45 @@ def latexfitresults(filename,regionList,sampleList,exactRegionNames=False,datana
         print " \n YieldsTable.py: WARNING: sample =", sampleName, " non-existent (empty) in region =",region, "\n"
       nSampleInRegionVal.append(sampleInRegionVal)
       nSampleInRegionError.append(sampleInRegionError)
+
+      if splitBins:
+        #print "before --> ", varinRegionList[ireg].Print()
+        origMin = varinRegionList[ireg].getMin()
+        origMax = varinRegionList[ireg].getMax()
+        for ibin in range(0,varNbinsInRegionList[ireg]):
+          rangeName = rangeNameBinsInRegionList[ireg][ibin]
+          #varinRegionList[ireg].setRange(rangeName,varBinLowInRegionList[ireg][ibin],varBinHighInRegionList[ireg][ibin])
+          #w.var(varinRegionList[ireg].GetName()).setRange(rangeName,varBinLowInRegionList[ireg][ibin],varBinHighInRegionList[ireg][ibin])
+          #print "bin:", ibin, " --> ", varinRegionList[ireg].Print()
+          sampleInRegion=getPdfInRegionsWithRangeName(w,sample,region,rangeName)
+          sampleInRegionVal = 0.
+          sampleInRegionError = 0.
+          if not sampleInRegion==None:
+            varinRegionList[ireg].setRange(rangeName,varBinLowInRegionList[ireg][ibin],varBinHighInRegionList[ireg][ibin])
+            sampleInRegionVal = sampleInRegion.getVal()
+            sampleInRegionError = Util.GetPropagatedError(sampleInRegion, resultAfterFit, doAsym)
+          else:
+            print " \n YieldsTable.py: WARNING: sample =", sampleName, " non-existent (empty) in region=",region, " bin=",ibin, " \n"
+          nSampleInRegionVal.append(sampleInRegionVal)
+          nSampleInRegionError.append(sampleInRegionError)
+ 
+        varinRegionList[ireg].setRange(origMin,origMax)
+
     if showSum:
       sampleSumInAllRegions = RooAddition( (sampleName+"_AllRegions_FITTED"), (sampleName+"_AllRegions_FITTED"), RooArgList(sampleInAllRegions))
-      sampleSumInAllRegions.Print()
+#      sampleSumInAllRegions.Print()
       nSampleSumVal = sampleSumInAllRegions.getVal()
       nSampleSumError = Util.GetPropagatedError(sampleSumInAllRegions, resultAfterFit, doAsym)
       nSampleInRegionVal.append(nSampleSumVal)
       nSampleInRegionError.append(nSampleSumError)
     tablenumbers['Fitted_events_'+sampleName]   = nSampleInRegionVal
     tablenumbers['Fitted_err_'+sampleName]   = nSampleInRegionError
+    #    print "  tablenumbers{",sampleName," =", tablenumbers['Fitted_events_'+sampleName]
+    
+    # print tablenumbers
+  print "\n starting BEFORE-FIT calculations \n"
 
-  print tablenumbers
+
 
   ######
   ######
@@ -198,9 +296,22 @@ def latexfitresults(filename,regionList,sampleList,exactRegionNames=False,datana
     foundRRS = 0
     for idx in range(prodList.getSize()):
       if prodList[idx].InheritsFrom("RooRealSumPdf"):
-        prodList[idx].Print()
+#        prodList[idx].Print()
         rrspdfInt =  prodList[idx].createIntegral(RooArgSet(varinRegionList[index]))
         rrspdfinRegionList.append(rrspdfInt)
+#        rrspdfinRegionList.append(rrspdfInt)
+        if splitBins:
+          #print "before --> ", varinRegionList[index].Print()
+          origMin = varinRegionList[index].getMin()
+          origMax = varinRegionList[index].getMax()
+          for ibin in range(0,varNbinsInRegionList[index]):
+            rangeName = rangeNameBinsInRegionList[index][ibin]
+            varinRegionList[index].setRange(rangeName,varBinLowInRegionList[index][ibin],varBinHighInRegionList[index][ibin])
+            #print "bin:", ibin, " --> ", varinRegionList[index].Print()
+            rrspdfInt =  prodList[idx].createIntegral(RooArgSet(varinRegionList[index]),rangeName)
+            #rrspdfInt.Print()
+            rrspdfinRegionList.append(rrspdfInt)
+          varinRegionList[index].setRange(origMin,origMax)
         foundRRS += 1
     if foundRRS >1 or foundRRS==0:
       print " \n\n WARNING: ", pdf.GetName(), " has ", foundRRS, " instances of RooRealSumPdf"
@@ -240,6 +351,31 @@ def latexfitresults(filename,regionList,sampleList,exactRegionNames=False,datana
         print " \n WARNING: sample=", sampleName, " non-existent (empty) in region=",region
       nMCSampleInRegionVal.append(MCSampleInRegionVal)
       nMCSampleInRegionError.append(MCSampleInRegionError)
+      #nSampleInRegionError.append(sampleInRegionError)
+
+      if splitBins:
+        # print "before --> ", varinRegionList[ireg].Print()
+        origMin = varinRegionList[ireg].getMin()
+        origMax = varinRegionList[ireg].getMax()
+        for ibin in range(0,varNbinsInRegionList[ireg]):
+          rangeName = rangeNameBinsInRegionList[ireg][ibin]
+          #varinRegionList[ireg].setRange(rangeName,varBinLowInRegionList[ireg][ibin],varBinHighInRegionList[ireg][ibin])
+          #w.var(varinRegionList[ireg].GetName()).setRange(rangeName,varBinLowInRegionList[ireg][ibin],varBinHighInRegionList[ireg][ibin])
+          # print "bin:", ibin, " --> ", varinRegionList[ireg].Print()
+          MCSampleInRegion=getPdfInRegionsWithRangeName(w,sample,region,rangeName)
+          MCSampleInRegionVal = 0.
+          MCSampleInRegionError = 0.
+          if not MCSampleInRegion==None:
+            varinRegionList[ireg].setRange(rangeName,varBinLowInRegionList[ireg][ibin],varBinHighInRegionList[ireg][ibin])
+            MCSampleInRegionVal = MCSampleInRegion.getVal()
+            MCSampleInRegionError = Util.GetPropagatedError(MCSampleInRegion, resultBeforeFit, doAsym)
+          else:
+            print " \n YieldsTable.py: WARNING: sample =", sampleName, " non-existent (empty) in region=",region, " bin=",ibin, " \n"
+          nMCSampleInRegionVal.append(MCSampleInRegionVal)
+          nMCSampleInRegionError.append(MCSampleInRegionError)
+ 
+        varinRegionList[ireg].setRange(origMin,origMax)
+
     if showSum:
       MCSampleSumInAllRegions = RooAddition( (sampleName+"_AllRegions_MC"), (sampleName+"_AllRegions_MC"), RooArgList(MCSampleInAllRegions))
       nMCSampleSumVal = MCSampleSumInAllRegions.getVal()
@@ -291,6 +427,8 @@ if __name__ == "__main__":
     print "-L: full table label" 
     print "-u: arbitrary string propagated to the latex table caption"
     print "-t: arbitrary string defining the latex table name"
+    print "-P: calculate yields per bin for each region"
+
 
     print "\nFor example:"
     print "YieldsTable.py -c SR7jTEl,SR7jTMu -s WZ,Top -w /afs/cern.ch/user/k/koutsman/HistFitterUser/MET_jets_leptons/results/Combined_KFactorFit_5Channel_Validation_combined_BasicMeasurement_model_afterFit.root"
@@ -304,7 +442,7 @@ if __name__ == "__main__":
 
   wsFileName='/results/MyOneLeptonKtScaleFit_HardLepR17_BkgOnlyKt_combined_NormalMeasurement_model_afterFit.root'
   try:
-    opts, args = getopt.getopt(sys.argv[1:], "o:c:w:s:u:L:C:t:bBSagy")
+    opts, args = getopt.getopt(sys.argv[1:], "o:c:w:s:u:L:C:t:bBSagyP")
   except:
     usage()
   if len(opts)<2:
@@ -318,6 +456,7 @@ if __name__ == "__main__":
   ignoreLastChannel = False
   blinded = False
   doAsym = True
+  splitBins = False
   userString = ""
   tableName = "table.results.yields"
    
@@ -356,6 +495,8 @@ if __name__ == "__main__":
       ignoreLastChannel = True 
     elif opt == '-y':
       doAsym = True
+    elif opt == '-P':
+      splitBins = True
 
   mentionCh = ""
   if ignoreLastChannel:
@@ -381,7 +522,7 @@ if __name__ == "__main__":
     f.close()
   else:
     print "OPENING ROOTFIT WORKSPACE"
-    m3 = latexfitresults(wsFileName,chanList,sampleList,exactRegionNames,dataname,showSumAllRegions,doAsym, blinded)
+    m3 = latexfitresults(wsFileName,chanList,sampleList,exactRegionNames,dataname,showSumAllRegions,doAsym, blinded, splitBins)
     f = open(outputFileName.replace(".tex",".pickle"), 'w')
     pickle.dump(m3, f)
     f.close()

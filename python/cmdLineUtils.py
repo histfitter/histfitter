@@ -52,6 +52,21 @@ def getPdfInRegions(w,sample,region):
         pass
     return pdfInRegion
 
+def getPdfInRegionsWithRangeName(w,sample,region,rangeName):
+    if isinstance(sample,list):
+        sampleArgList = RooArgList()
+        sample_str="group"
+        for s in sample:
+            componentTmp = Util.GetComponent(w,s,region,True,rangeName)
+            sample_str=sample_str+"_"+s
+            sampleArgList.add(componentTmp)
+            pass
+        pdfInRegion = RooAddition(sample_str,sample_str,sampleArgList)
+    else:
+        pdfInRegion  = Util.GetComponent(w,sample,region,False,rangeName)
+        pass
+    return pdfInRegion
+
 def getName(obj):
     if isinstance(obj,str):
         return obj

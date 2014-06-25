@@ -79,7 +79,7 @@ namespace Util
 
   void SetInterpolationCode(RooWorkspace* w, Int_t code);
 
-  RooAbsReal* GetComponent(RooWorkspace* w, TString component, TString region, const bool exactRegionName=false);
+  RooAbsReal* GetComponent(RooWorkspace* w, TString component, TString region, const bool exactRegionName=false, TString rangeName="");
   RooAbsPdf* GetRegionPdf(RooWorkspace* w, TString region);
   RooRealVar* GetRegionVar(RooWorkspace* w, TString region);
   //  RooAbsReal* GetRegionPdfIntegral(RooWorkspace* w, TString region);

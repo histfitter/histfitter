@@ -1,3 +1,10 @@
+2014-06-25 Alex Koutsman <koutsman@cern.ch>
+	* python/cmdLineUtils.py
+	* src/Utils.cxx
+	* src/Utils.h
+	* scripts/YieldsTable.py
+	* Adding option to run YieldsTable.py script with bin-by-bin calculation option -P
+
 2014-06-13 Jeanette Miriam Lorenz <jeanette.miriam.lorenz@cern.ch>
         * setup.sh: pointing now to Root 5.34.18 patch version located in usual afs area
 
