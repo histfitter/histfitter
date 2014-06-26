@@ -552,13 +552,13 @@ void SUSY_m0_vs_m12_all_withBand_cls( TString fname1 = "mudat_list.root",  // th
   
   TGraph* msugra_noEWSB_curve(0);
   msugra_noEWSB_curve = msugra_noEWSB("contourmacros/noEWSB.txt");
-  msugra_noEWSB_curve->Draw("FSAME");
-  msugra_noEWSB_curve->Draw("LSAME");
+  //msugra_noEWSB_curve->Draw("FSAME");
+  //msugra_noEWSB_curve->Draw("LSAME");
   
   TGraph* msugra_stauLSP_curve(0);
   msugra_stauLSP_curve = msugra_stauLSP();
-  msugra_stauLSP_curve->Draw("FSAME");
-  msugra_stauLSP_curve->Draw("LSAME");  
+  //msugra_stauLSP_curve->Draw("FSAME");
+  //msugra_stauLSP_curve->Draw("LSAME");  
 
 
 /*  
@@ -588,8 +588,8 @@ void SUSY_m0_vs_m12_all_withBand_cls( TString fname1 = "mudat_list.root",  // th
     //leg->AddEntry( cdfgraph, "CDF #tilde{g}, #tilde{q}, tan#beta=5, #mu<0, 2 fb^{-1}","F" );
     //leg_old->Draw();
   }
-  leg->AddEntry( msugra_stauLSP_curve, "Stau LSP","F" );
-  leg->AddEntry( msugra_noEWSB_curve, "Theoretically excluded","F" );
+  //leg->AddEntry( msugra_stauLSP_curve, "Stau LSP","F" );
+  //leg->AddEntry( msugra_noEWSB_curve, "Theoretically excluded","F" );
   
   // legend
   Float_t textSizeOffset = +0.000;
