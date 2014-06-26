@@ -7,7 +7,7 @@ ROOT.CombinationGlob.Initialize()
 #execfile("summary_harvest_tree_description_SM.py")
 
 
-def limit_plot_SM( file_nominal, file_up=None, file_down=None , outputfilename='', prefix=None, lumi=21, drawFirstObs=False, allObs=False, firstOneSigma=False, upperlimit=True, printCLs=False ): 
+def limit_plot_SM( file_nominal, file_up=None, file_down=None , outputfilename='', prefix=None, lumi=21, drawFirstObs=False, allObs=False, firstOneSigma=False, upperlimit=False, printCLs=False, write_curves=False ): 
 
     #if not 'HiggsSU' in file_nominal:
     #    execfile("summary_harvest_tree_description_SM.py")
@@ -20,41 +20,88 @@ def limit_plot_SM( file_nominal, file_up=None, file_down=None , outputfilename='
         print_theo = False
         print "No up or down variations given! Proceed without them."
 
-    #Note: All curves loaded here are 1-2 lepton limits of previous analyses. Remove these lines or take them from the HistFitterUser/MET_jets_leptons/macros directory
+    #Note: All curves loaded here are 1-2 lepton limits of previous analyses. These are just examples. Take your own limits for comparison.
 
     if '_GG1stepx12' in file_nominal:
-        from contourmacros.GG2012x12 import exclusion_graph
-    elif '_GG1stepgridx' in file_nominal:
-        from contourmacros.GG2012gridx import exclusion_graph
-    elif '_SS1stepx12' in file_nominal:
-        from contourmacros.SS2012x12 import exclusion_graph
-    elif '_SS1stepgridx' in file_nominal:
-        from contourmacros.SS2012gridx import exclusion_graph	  
-    else: from contourmacros.GG2012gridx import exclusion_graph
+        #f=ROOT.TFile.Open("contour_GG1stepx12_version200613_unblindedcurves.root")
+        f=ROOT.TFile.Open("contourmacros/merge_GG1stepx12_050813curves.root")
+    #elif '_GG1stepgridx' in file_nominal:
+    #    f=ROOT.TFile.Open("contour_GG1stepgridx_version200613_unblindedcurves.root")
+    #elif '_SS1stepx12' in file_nominal:
+    #    #f=ROOT.TFile.Open("contour_SS1stepx12_version200613_unblindedcurves.root")
+    #    f=ROOT.TFile.Open("merge_SS1stepx12_050813curves.root")
+    #elif '_SS1stepgridx' in file_nominal:
+    #    f=ROOT.TFile.Open("contour_SS1stepgridx_version200613_unblindedcurves.root")  
+    #elif '_GG2CNsl' in file_nominal:
+    #    f=ROOT.TFile.Open("contour_GG2CNsl_version200613_unblindedcurves.root")
+    #elif '_GG2WWZZ' in file_nominal:
+    #    f=ROOT.TFile.Open("contour_GG2WWZZ_version200613_unblindedcurves.root")
+    #elif '_SS2CNsl' in file_nominal:
+    #    f=ROOT.TFile.Open("contour_SS2CNsl_version200613_unblindedcurves.root")
+    #elif '_SS2WWZZ' in file_nominal:
+    #    f=ROOT.TFile.Open("contour_SS2WWZZ_version200613_unblindedcurves.root")
+    #elif 'HiggsSU' in file_nominal:
+    #    f=ROOT.TFile.Open("contour_HiggsSU_version200613_unblindedcurves.root") 
+        #f=ROOT.TFile.Open("contour_HiggsSU_test3curves.root")#bug free
+    #else: f=ROOT.TFile.Open("contour_GG1stepx12_version200613_unblindedcurves.root")
     
+    graph=f.Get("firstObsH_graph")
+    if graph==None:
+        graph=f.Get("firstObsH_graph2")
+    if '_SS2WWZZ' in file_nominal:
+        graph=f.Get("firstObsH_graph")
+    print graph
+    graph.SetFillColor(0)
+    graph.SetLineWidth(2)
+    graph.SetLineColor(ROOT.kMagenta)    
+    graph.SetMarkerStyle(21)
+    graph.SetMarkerSize(0.3)
+    graph.SetFillStyle(1001)
+    
+    
+    #f2=ROOT.TFile.Open("contour_GG1stepx12_version090314_unblinded_cleanedcurves.root")
+    #graph_ref=f2.Get("firstObsH_graph")
+    #graph_ref.SetFillColor(0)
+    #graph_ref.SetLineWidth(2)
+    #graph_ref.SetLineColor(ROOT.kGreen)    
+    #graph_ref.SetMarkerStyle(21)
+    #graph_ref.SetMarkerSize(0.3)
+    #graph_ref.SetFillStyle(1001)   
+    
+
+    #if '_GG1stepx12' in file_nominal:
+    #    from contourmacros.GG2012x12 import exclusion_graph
+    #elif '_GG1stepgridx' in file_nominal:
+    #    from contourmacros.GG2012gridx import exclusion_graph
+    #elif '_SS1stepx12' in file_nominal:
+    #    from contourmacros.SS2012x12 import exclusion_graph
+    #elif '_SS1stepgridx' in file_nominal:
+    #    from contourmacros.SS2012gridx import exclusion_graph	  
+    #else: from contourmacros.GG2012gridx import exclusion_graph
+    #
     if 'HiggsSU' in file_nominal:
         ROOT.gROOT.LoadMacro("../../../HistFitterUser/common/ATLAS_EPS_contours.C")
 
-    print "Here"
-    twostepexclusion=ROOT.TGraph()
-    if 'SS2WWZZ' in file_nominal:
-        SS2WWZZ_file = ROOT.TFile.Open("contourmacros/Merged_Output_hypotest_SM_SS_twostep_ALL_Nominal__1_harvest_list.root_contours.root")
-        twostepexclusion_curve = SS2WWZZ_file.Get("gr_contour_obs")
-    elif 'GG2WWZZ' in file_nominal:
-        GG2WWZZ_file = ROOT.TFile.Open("contourmacros/Merged_Output_hypotest_SM_GG_twostep_ALL_Nominal__1_harvest_list.root_contours.root")
-        twostepexclusion_curve = GG2WWZZ_file.Get("gr_contour_obs")
-        twostepexclusion_curve.SetPoint(twostepexclusion_curve.GetN(),0.,0.)
-    if 'GG2WWZZ' in file_nominal or 'SS2WWZZ' in file_nominal:
-        twostepexclusion_curve.SetFillColor(18)
-        twostepexclusion_curve.SetLineWidth(2)
-        twostepexclusion_curve.SetMarkerStyle(21)
-        twostepexclusion_curve.SetMarkerSize(0.3)
-        twostepexclusion_curve.SetFillStyle(1001)
-        twostepexclusion_curve.SetLineColor(0)
+    #print "Here"
+    #twostepexclusion=ROOT.TGraph()
+    #if 'SS2WWZZ' in file_nominal:
+    #    SS2WWZZ_file = ROOT.TFile.Open("contourmacros/Merged_Output_hypotest_SM_SS_twostep_ALL_Nominal__1_harvest_list.root_contours.root")
+    #    twostepexclusion_curve = SS2WWZZ_file.Get("gr_contour_obs")
+    #elif 'GG2WWZZ' in file_nominal:
+    #    GG2WWZZ_file = ROOT.TFile.Open("contourmacros/Merged_Output_hypotest_SM_GG_twostep_ALL_Nominal__1_harvest_list.root_contours.root")
+    #    twostepexclusion_curve = GG2WWZZ_file.Get("gr_contour_obs")
+    #    twostepexclusion_curve.SetPoint(twostepexclusion_curve.GetN(),0.,0.)
+    #if 'GG2WWZZ' in file_nominal or 'SS2WWZZ' in file_nominal:
+    #    twostepexclusion_curve.SetFillColor(18)
+    #    twostepexclusion_curve.SetLineWidth(2)
+    #    twostepexclusion_curve.SetMarkerStyle(21)
+    #    twostepexclusion_curve.SetMarkerSize(0.3)
+    #    twostepexclusion_curve.SetFillStyle(1001)
+    #    twostepexclusion_curve.SetLineColor(0)
 
     
-    graph_pre = exclusion_graph()
-    graph = graph_pre.Clone()
+    #graph_pre = exclusion_graph()
+    #graph = graph_pre.Clone()
     #graph.SetDirectory(0)
 
     print 'Producing contour plot based on ', file_nominal
@@ -106,6 +153,19 @@ def limit_plot_SM( file_nominal, file_up=None, file_down=None , outputfilename='
     
     # set text style
     ROOT.gStyle.SetPaintTextFormat(".2g")
+    
+    if 'HiggsSU' in file_nominal:
+        staulsp = ROOT.TGraph()
+        noRGE = ROOT.TGraph()  
+        noEWSB = ROOT.TGraph() 
+        tachyon = ROOT.TGraph()   
+        negmasssq = ROOT.TGraph() 
+
+        pwd=ROOT.gDirectory
+        
+        ROOT.msugraThExcl("../../../HistFitterUser/common/msugra_status_tanb30.txt", staulsp, negmasssq, noRGE, noEWSB, tachyon, "../../../HistFitterUser/common/mSugraGridtanbeta30_charginoMasses.root")
+        
+        pwd.cd()
 
     # Start drawing
     c = ROOT.TCanvas('LimitPlot','A limit plot', 0 , 0 , ROOT.CombinationGlob.StandardCanvas[0] , ROOT.CombinationGlob.StandardCanvas[1] )
@@ -176,10 +236,10 @@ def limit_plot_SM( file_nominal, file_up=None, file_down=None , outputfilename='
  
     frame2.Draw()
     
-    if '1step' in file_nominal: 
-        graph.Draw("Fsame")     
-    if 'GG2WWZZ' in file_nominal or 'SS2WWZZ' in file_nominal:
-        twostepexclusion_curve.Draw("Fsame") 
+    #if '1step' in file_nominal: 
+    #graph.Draw("Fsame")     
+    #if 'GG2WWZZ' in file_nominal or 'SS2WWZZ' in file_nominal:
+    #    twostepexclusion_curve.Draw("Fsame") 
     
     # Set up the legend
     #leg = ROOT.TLegend(0.15,0.65,0.37,0.85)
@@ -187,7 +247,7 @@ def limit_plot_SM( file_nominal, file_up=None, file_down=None , outputfilename='
     if 'gridx' in file_nominal:
         leg = ROOT.TLegend(0.61,0.71,0.91,0.85)
     if 'HiggsSU' in file_nominal:
-        leg = ROOT.TLegend(0.65,0.7,0.92,0.915)
+        leg = ROOT.TLegend(0.61,0.65,0.92,0.85)
     leg.SetTextSize( ROOT.CombinationGlob.DescriptionTextSize );
     leg.SetTextSize( 0.03 );
     leg.SetTextFont( 42 );
@@ -195,7 +255,8 @@ def limit_plot_SM( file_nominal, file_up=None, file_down=None , outputfilename='
     leg.SetFillStyle(1001);
 
     if 'HiggsSU' in file_nominal:
-        f4 = ROOT.TFile.Open("../../../HistFitterUser/common/mSugraGridtanbeta30_gluinoSquarkMasses.root" , "READ" )
+        #f4 = ROOT.TFile.Open("../../../HistFitterUser/common/mSugraGridtanbeta30_gluinoSquarkMasses.root" , "READ" )
+        f4 = ROOT.TFile.Open("contourmacros/mSugraGridtanbeta30_gluinoSquarkMasses.root" , "READ" )
         histSq = f4.Get( "mSugraGrid_squarkMasses" )
         histGl = f4.Get( "mSugraGrid_gluinoMasses" )
         histSq.SetDirectory(0)
@@ -206,36 +267,37 @@ def limit_plot_SM( file_nominal, file_up=None, file_down=None , outputfilename='
 
         histSquarkMass   = FixAndSetBorders(file_nominal, histSq, "SquarkMass", "SquarkMass", 10000 )
         histGluinoMass   = FixAndSetBorders(file_nominal, histGl, "GluinoMass", "GluinoMass", 10000 )
-  
-        DrawContourMassLine( histSquarkMass, 1000.0 )  
+        
+        DrawContourMassLine( histSquarkMass, 800.0)
+        #DrawContourMassLine( histSquarkMass, 1000.0 )  
         DrawContourMassLine( histSquarkMass, 1200.0 , 17)    
-        DrawContourMassLine( histSquarkMass, 1400.0 )
-        DrawContourMassLine( histSquarkMass, 1600.0 , 17)
-        DrawContourMassLine( histSquarkMass, 1800.0 )
-        DrawContourMassLine( histSquarkMass, 2000.0 , 17)   
-        DrawContourMassLine( histSquarkMass, 2200.0 )      
-        DrawContourMassLine( histSquarkMass, 2400.0 , 17)
-        DrawContourMassLine( histSquarkMass, 2600.0 )
+        #DrawContourMassLine( histSquarkMass, 1400.0 )
+        DrawContourMassLine( histSquarkMass, 1600.0)	
+        #DrawContourMassLine( histSquarkMass, 1800.0 )	
+        DrawContourMassLine( histSquarkMass, 2000.0 , 17)  	
+        #DrawContourMassLine( histSquarkMass, 2200.0 )      
+        DrawContourMassLine( histSquarkMass, 2400.0)
+        #DrawContourMassLine( histSquarkMass, 2600.0 )
         DrawContourMassLine( histSquarkMass, 2800.0 , 17)
-        DrawContourMassLine( histSquarkMass, 3000.0 )   
-        DrawContourMassLine( histSquarkMass, 3200.0 , 17)       
-        DrawContourMassLine( histSquarkMass, 3400.0 )
+        #DrawContourMassLine( histSquarkMass, 3000.0 )   
+        DrawContourMassLine( histSquarkMass, 3200.0 )       
+        #DrawContourMassLine( histSquarkMass, 3400.0 )
         DrawContourMassLine( histSquarkMass, 3600.0 , 17)
-        DrawContourMassLine( histSquarkMass, 3800.0 )
-        DrawContourMassLine( histSquarkMass, 4000.0, 17 ) 
-        DrawContourMassLine( histSquarkMass, 4200.0 )       
+        #DrawContourMassLine( histSquarkMass, 3800.0 )
+        DrawContourMassLine( histSquarkMass, 4000.0) 
+        #DrawContourMassLine( histSquarkMass, 4200.0 )       
         DrawContourMassLine( histSquarkMass, 4400.0 , 17)
-        DrawContourMassLine( histSquarkMass, 4600.0 )
-        DrawContourMassLine( histSquarkMass, 4800.0, 17)
-        DrawContourMassLine( histSquarkMass, 5000.0 ) 
+        #DrawContourMassLine( histSquarkMass, 4600.0 )
+        DrawContourMassLine( histSquarkMass, 4800.0)
+        #DrawContourMassLine( histSquarkMass, 5000.0 ) 
         DrawContourMassLine( histSquarkMass, 5200.0 , 17)       
-        DrawContourMassLine( histSquarkMass, 5400.0 )
-        DrawContourMassLine( histSquarkMass, 5600.0 , 17)
-        DrawContourMassLine( histSquarkMass, 5800.0 )
+        #DrawContourMassLine( histSquarkMass, 5400.0 )
+        DrawContourMassLine( histSquarkMass, 5600.0)
+        #DrawContourMassLine( histSquarkMass, 5800.0 )
         DrawContourMassLine( histSquarkMass, 6000.0, 17 )                       
-        DrawContourMassLine( histSquarkMass, 6200.0 )       
-        DrawContourMassLine( histSquarkMass, 6400.0 , 17)
-        DrawContourMassLine( histSquarkMass, 6600.0 )
+        #DrawContourMassLine( histSquarkMass, 6200.0 )       
+        DrawContourMassLine( histSquarkMass, 6400.0)
+        #DrawContourMassLine( histSquarkMass, 6600.0 )
         DrawContourMassLine( histSquarkMass, 6800.0, 17)
 
         DrawContourMassLine( histGluinoMass, 800.0 )
@@ -257,19 +319,26 @@ def limit_plot_SM( file_nominal, file_up=None, file_down=None , outputfilename='
         s1000.SetTextAngle(-65)
         s1000.SetTextSize( 0.025 )
         s1000.SetTextColor( 16 )
-        s1000.Draw() 
+        #s1000.Draw() 
         s1400 = ROOT.TLatex( 960, 390, "#tilde{q} (1400 GeV)" )
         s1400.SetTextAlign( 11 )
         s1400.SetTextAngle(-77)
         s1400.SetTextSize( 0.025 )
         s1400.SetTextColor( 16 )
-        s1400.Draw()   
-        s1600 = ROOT.TLatex( 1440, 390, "#tilde{q} (1600 GeV)" )
+        #s1400.Draw()   
+        s1600 = ROOT.TLatex( 1450, 390, "#tilde{q} (1600 GeV)" )
         s1600.SetTextAlign( 11 )
         s1600.SetTextAngle(-82)
         s1600.SetTextSize( 0.025 )
         s1600.SetTextColor( 16 )
-        s1600.Draw()    
+        s1600.Draw()
+        s2400 = ROOT.TLatex( 2340, 390, "#tilde{q} (2400 GeV)" )
+        s2400.SetTextAlign( 11 )
+        s2400.SetTextAngle(-85)
+        s2400.SetTextSize( 0.025 )
+        s2400.SetTextColor( 16 )
+        s2400.Draw()	
+    
 
         g1000 = ROOT.TLatex( 850, 413, "#tilde{g} (1000 GeV)" );
         g1000.SetTextAlign( 11 )
@@ -301,6 +370,8 @@ def limit_plot_SM( file_nominal, file_up=None, file_down=None , outputfilename='
         grshadeExp = DrawExpectedBand( firstPOneSigmaG , firstMOneSigmaG , ROOT.CombinationGlob.c_DarkYellow , 1001 , 0).Clone()
         grshadeExp.Draw("Fsame")
 
+    ROOT.gPad.Update()
+
     colors = [ ROOT.CombinationGlob.c_DarkGreen, ROOT.CombinationGlob.c_DarkRed ,
                ROOT.CombinationGlob.c_DarkOrange , ROOT.CombinationGlob.c_DarkGray , ROOT.CombinationGlob.c_BlueT3, ROOT.CombinationGlob.c_DarkPink , ROOT.CombinationGlob.c_VDarkYellow, ROOT.CombinationGlob.c_HiggsGreen,
                ROOT.CombinationGlob.c_LightPink , ROOT.CombinationGlob.c_LightYellow, ROOT.CombinationGlob.c_Black ]
@@ -325,23 +396,26 @@ def limit_plot_SM( file_nominal, file_up=None, file_down=None , outputfilename='
             newHists += [anewhist]
 
     if drawFirstObs:
-        (leg,anewhist) = DrawContourLine95( leg, firstObsH, 'Observed limit (#pm1 #sigma^{SUSY}_{theory})', ROOT.CombinationGlob.c_DarkRed,1,4)
-        newHists += [anewhist]
+        (leg,anewhist00) = DrawContourLine95( leg, firstObsH, 'Observed limit (#pm1 #sigma^{SUSY}_{theory})', ROOT.CombinationGlob.c_DarkRed,1,4)
+        newHists += [anewhist00]
         #(leg,anewhist) = DummyLegendExpected( leg, 'Observed limit (#pm1 #sigma^{SUSY}_{theory})', c_myRed, 1001, ROOT.CombinationGlob.c_DarkRed, 1, 4 )
-        newHists += [anewhist]
+        #newHists += [anewhist]
 
     if firstOneSigma:
-        (leg,anewhist) = DrawContourLine95( leg, firstExpH, '', c_myExp, 6, 2 )
-        newHists += [anewhist]
+        (leg,anewhist11) = DrawContourLine95( leg, firstExpH, '', c_myExp, 6, 2 )
+        newHists += [anewhist11]
         (leg,anewhist) = DummyLegendExpected( leg, 'Expected limit (#pm1 #sigma_{exp})', ROOT.CombinationGlob.c_DarkYellow, 1001, c_myExp, 6, 2 )
         newHists += [anewhist]
     else:
         #(leg,anewhist) = DrawContourLine95( leg, firstExpH, file_nominal.split('_Higgsino')[0].split('MultiJet_')[1], ROOT.CombinationGlob.c_DarkBlueT3, 6 )
-        (leg,anewhist) = DrawContourLine95( leg, firstExpH, 'Expected', c_myExp, 6, 2 )
-        newHists += [anewhist]
+        (leg,anewhist11) = DrawContourLine95( leg, firstExpH, 'Expected', c_myExp, 6, 2 )
+        newHists += [anewhist11]
 
     c.cd()
     c.Update()
+    
+    graph.Draw("Lsame")
+    #graph_ref.Draw("Lsame")
     
     #if 'GG2WWZZ' in file_nominal or 'SS2WWZZ' in file_nominal:
     #    twostepexclusion_curve.Draw("Fsame") 
@@ -391,14 +465,7 @@ def limit_plot_SM( file_nominal, file_up=None, file_down=None , outputfilename='
     #leg.Draw( 'same' )
     
     if 'HiggsSU' in file_nominal:
-        staulsp = ROOT.TGraph()
-        noRGE = ROOT.TGraph()  
-        noEWSB = ROOT.TGraph() 
-        tachyon = ROOT.TGraph()   
-        negmasssq = ROOT.TGraph() 
-        
-        ROOT.msugraThExcl("../../../HistFitterUser/common/msugra_status_tanb30.txt", staulsp, negmasssq, noRGE, noEWSB, tachyon, "../../../HistFitterUser/common/mSugraGridtanbeta30_charginoMasses.root")
-        
+
         c.cd()
         
         staulsp.SetFillColor(ROOT.CombinationGlob.c_LightGreen)
@@ -464,19 +531,24 @@ def limit_plot_SM( file_nominal, file_up=None, file_down=None , outputfilename='
         gtt.Draw("same")    
         
               
-    leg2 = ROOT.TLegend(0.61,0.85,0.91,0.92)    
+    #leg2 = ROOT.TLegend(0.61,0.8,0.91,0.92) 
+    leg2 = ROOT.TLegend(0.61,0.85,0.91,0.92)  
     leg2.SetTextSize( ROOT.CombinationGlob.DescriptionTextSize );
     leg2.SetTextSize( 0.03 );
     leg2.SetTextFont( 42 );
     leg2.SetFillColor( 0 );
     leg2.SetFillStyle(1001);
     #leg2.AddEntry(graph,"#splitline{1-2 lepton(s)+ jets + E_{T}^{miss}}{arxiv:1208.4688}","F")
-    if '1step' in file_nominal:
-        leg2.AddEntry(graph,"PRD 86 (2012) 092002","F")
-    elif "WWZZ" in file_nominal:
-        leg2.AddEntry(twostepexclusion_curve,"PRD 86 (2012) 092002","F")
-    if '1step' in file_nominal or 'WWZZ' in file_nominal: 
-        leg2.Draw("same")
+    #if '1step' in file_nominal:
+        #leg2.AddEntry(graph,"PRD 86 (2012) 092002","F")
+    leg2.AddEntry(graph,"ATLAS-CONF-2013-062","L")
+    #leg2.AddEntry(graph_ref,"without removing points - asymptotic","L")
+    #leg2.AddEntry(graph,"buggy HiggsSU tree","F")
+    #elif "WWZZ" in file_nominal:
+        #leg2.AddEntry(twostepexclusion_curve,"PRD 86 (2012) 092002","F")
+       #leg2.AddEntry(twostepexclusion_curve,"ATLAS-CONF-2013-062","F")
+    #if '1step' in file_nominal or 'WWZZ' in file_nominal: 
+    leg2.Draw("same")
 
 
     # update the canvas
@@ -490,7 +562,7 @@ def limit_plot_SM( file_nominal, file_up=None, file_down=None , outputfilename='
     if not 'gridx' in file_nominal and not 'HiggsSU' in file_nominal:
         clslimits.DrawLatex(0.15,0.55,"All limits at 95% CL_{S}") 
     elif 'HiggsSU' in file_nominal:
-        clslimits.DrawLatex(0.7,0.65,"All limits at 95% CL_{S}")
+        clslimits.DrawLatex(0.7,0.6,"All limits at 95% CL_{S}")
     else:
         clslimits.DrawLatex(0.17,0.7,"All limits at 95% CL_{S}")  
 
@@ -502,7 +574,7 @@ def limit_plot_SM( file_nominal, file_up=None, file_down=None , outputfilename='
         if not 'gridx' in file_nominal and not 'HiggsSU' in file_nominal:
             obsPOneSigma.DrawLineNDC(0.149,0.715,0.187,0.715)
         elif 'HiggsSU' in file_nominal:
-            obsPOneSigma.DrawLineNDC(0.66,0.89,0.708,0.89)    
+            obsPOneSigma.DrawLineNDC(0.622,0.827,0.676,0.827)    
         else:
             obsPOneSigma.DrawLineNDC(0.6215,0.825,0.67445,0.825)
 
@@ -513,7 +585,7 @@ def limit_plot_SM( file_nominal, file_up=None, file_down=None , outputfilename='
         if not 'gridx' in file_nominal and not 'HiggsSU' in file_nominal:
             obsMOneSigma.DrawLineNDC(0.149,0.695,0.187,0.695)
         elif 'HiggsSU' in file_nominal:
-            obsMOneSigma.DrawLineNDC(0.66,0.87,0.708,0.87)
+            obsMOneSigma.DrawLineNDC(0.622,0.807,0.676,0.807)
         else: 
             obsMOneSigma.DrawLineNDC(0.6215,0.805,0.67445,0.805)
   
@@ -609,6 +681,16 @@ def limit_plot_SM( file_nominal, file_up=None, file_down=None , outputfilename='
     if allObs: outFileNom += '_OBS'
     else:      outFileNom += '_EXP'
     ROOT.CombinationGlob.imgconv( c, outFileNom );
+
+    if write_curves:
+        print anewhist11
+        files_curves = ROOT.TFile.Open(outputfilename+"curves.root","RECREATE")
+        if (drawFirstObs): 
+            obsgraph = converttoGraph(firstObsH,firstObsH.GetName()+"_graph")
+            obsgraph.Write()	
+        expgraph = converttoGraph(firstExpH,firstExpH.GetName()+"_graph")
+        expgraph.Write()
+        files_curves.Close()
 
     del leg
     del frame2
@@ -709,7 +791,40 @@ def DrawContourLine95( leg, hist, text='', linecolor=ROOT.kBlack, linestyle=2, l
     if text is not '': leg.AddEntry(h,text,'l')
     return leg,h
 
+def converttoGraph(hist,name):
+    gr0 = ROOT.TGraph()
+    h = hist.Clone()
+    gr = gr0.Clone(h.GetName())
+    h.SetContour(1)
+    
+    pval = ROOT.CombinationGlob.cl_percent[1]
+    signif = ROOT.TMath.NormQuantile(1-pval)
+    h.SetContourLevel( 0, signif )
+    h.Draw("CONT LIST")
+    h.SetDirectory(0)
+    ROOT.gPad.Update()
+ 
+    contours = ROOT.gROOT.GetListOfSpecials().FindObject("contours")
+    #print contours
+    list0 = contours[0]
+    #list0.Print()
+    #print list0.GetEntries()
+    if list0.GetEntries()==0:
+        return None
+        
+    #list.Print()
+    gr = list0[0]
+    #gr.Print()
+    #grTmp = ROOT.TGraph()
 
+    for k in xrange(list0.GetSize()):
+        if gr.GetN() < list0[k].GetN(): gr = list0[k]
+ 
+    gr.SetName(name)
+    return gr
+    
+    
+    
 def ContourGraph( hist ):
     gr0 = ROOT.TGraph()
     h = hist.Clone()
@@ -783,8 +898,8 @@ def DrawExpectedBand( gr1, gr2, fillColor, fillStyle, cut = 0):
         y2 += [float(yy1)]
     if gr2N < N:
         for i in xrange(gr2N,N):
-            x2 += [float( x2[gr1N-1]) ]
-            y2 += [ float(y2[gr1N-1]) ]
+            x2 += [float(x2[gr2N-1]) ]
+            y2 += [ float(y2[gr2N-1]) ]
             
     #print x1,x2,y1,y2
 
