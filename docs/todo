@@ -1,28 +1,27 @@
 HistFitter Todo list
 
-- Update tutorial to work with latest tag.
-  o Revision: the Tutorial/documentation could be a more practical-oriented.
-- Documentation: how to validate the fit? FAQ on failed fits. (stat forum)
-- Advertizement and examples for combination of workspaces.
+- Update tutorial to work with latest tag. ---> DONE
+  o Revision: the Tutorial/documentation could be a more practical-oriented. ---> To be followed up
+- Documentation: how to validate the fit? FAQ on failed fits. (stat forum) ---> To be followed up
+- Advertizement and examples for combination of workspaces. ---> Partially DONE
 
 
-- Advertize the 2 work packages in SUSY group.
-- Migration into ATLAS release
+- Advertize the 2 work packages in SUSY group. ---> DONE
+- Migration into ATLAS release ---> To be followed up
 
 
-- Harmonize the various plotting and batch/grid submission scripts.
+- Harmonize the various plotting and batch/grid submission scripts. ---> To be followed up
 
-- Publication
+- Publication ---> IN PROGRESS
 
 
 
 Open issues:
-- Migrate to uncapped p0 values.
+- Migrate to uncapped p0 values. ---> To be followed up.
 
-- Moritz: toys versus asymptotic
-- Roger Caminal.
+- Moritz: toys versus asymptotic ---> Not yet fully concluded.
+- Roger Caminal. ---> To be followed up.
 
-- Fix rotation schedule for HF support.
 
 
 -------------------------------------------------------------------
@@ -35,61 +34,62 @@ Prioritized todo-list:
 
 >>> Top priority: Crashes & fixes & documentation: 
 >>> (At a minimum, let's try to do this before the post-mortem)
+---> See above.
 
-- Update tutorial to work with latest tag. (GJ)
-- Root 5.34.03: RooPlot has problems with ratio plots (alex)
-- Bug in filling of weight based systematics (GJ, David)
-- Using minos in fit (Max)
-- Remove MC statistical fluctuations from systematics (Max)
-- Proper treatment of all bins with zero events by HistFactory? Check (See recent mail George Lewis)
+- Update tutorial to work with latest tag. (GJ) --->DONE
+- Root 5.34.03: RooPlot has problems with ratio plots (alex) --->DONE
+- Bug in filling of weight based systematics (GJ, David) --> To be followed up
+- Using minos in fit (Max) ---> DONE
+- Remove MC statistical fluctuations from systematics (Max) ---> To be followed up.
+- Proper treatment of all bins with zero events by HistFactory? Check (See recent mail George Lewis) ---> To be followed up.
 
 
 From 2012-11-12:
-- HistFitter running okay on Ubuntu?
-- Example of log-normal constraints (for low event statistics)
-- non-truncated p-value when deficit (check Zach's recent commits)
-- sigma values in list-file.
+- HistFitter running okay on Ubuntu? ---> Need to reformulate question: how to setup HistFitter with matching ROOT version, gcc and python version outside of lxplus and without afs access
+- Example of log-normal constraints (for low event statistics) ---> DONE
+- non-truncated p-value when deficit (check Zach's recent commits) ---> To be followed up.
+- sigma values in list-file. ---> To be followed up.
 
-- Move tutorial examples to HFUser?
-- document new systematic uncertainties (Max)
-- Absolute errors in case of nominal prediction with 0.0 events. Empty nominal, non-empty systematic (Marcello)
-- Hard-coded names, e.g. sig_xsection. Needs to be documented, or made flexible. (Jeanette?)
-- Contour scripts for plotting the new theoretical error. Properly available and documented? (Yu?)
-V Directory driven results structure (Zach)
-  o possibility to propagate cut-values to output files/dir (Jeanette)
-- better support for histogram-based running (Marcello)
-  o More debugging output. E.g. _correct_ list of input histograms to be used by histfactory
-- Memory leak for running toys (?) Need reproducable example. (Sigve)
-- Documentation needs cleanup. E.g Documentation of various available systematics. (David,Alex,Max)
-- Make tutorial uptodate with trunk. (David,Alex,Max)
-- Generalized scripts (Alex)
+- Move tutorial examples to HFUser? ---> Should be done
+- document new systematic uncertainties (Max) ---> To do: document all systematics types
+- Absolute errors in case of nominal prediction with 0.0 events. Empty nominal, non-empty systematic (Marcello) ---> See above.
+- Hard-coded names, e.g. sig_xsection. Needs to be documented, or made flexible. (Jeanette?) ---> To be followed up.
+- Contour scripts for plotting the new theoretical error. Properly available and documented? (Yu?) ---> DONE
+V Directory driven results structure (Zach) ---> DONE
+  o possibility to propagate cut-values to output files/dir (Jeanette) ---> Not required anymore, as possible with existing options 
+- better support for histogram-based running (Marcello) ---> Still necessary?
+  o More debugging output. E.g. _correct_ list of input histograms to be used by histfactory ---> DONE
+- Memory leak for running toys (?) Need reproducable example. (Sigve) ---> Still relevant?
+- Documentation needs cleanup. E.g Documentation of various available systematics. (David,Alex,Max) ---> To be followed up.
+- Make tutorial uptodate with trunk. (David,Alex,Max) --->DONE
+- Generalized scripts (Alex) --- for plotting in particular ---> To be followed up
 - Once tag without XML is public, remove XML methods for tag after that, and rewrite the internal
-  lists in sample.py to dictionaries instead of arrays (GJ)
+  lists in sample.py to dictionaries instead of arrays (GJ) ---> DONE
 
 >>> Next: Useful additions & Extra documentation:
 
 - FAQ
-  o FAQ on failed fits and how to handle them. Guideline on when a fit / grid-of-fits is okay. (All, Zach, Max)
-  V Better rejection of bad fits that make it into grid list file (Zach had some tricks for this - discuss) (Zach, Max)
+  o FAQ on failed fits and how to handle them. Guideline on when a fit / grid-of-fits is okay. (All, Zach, Max) ---> To be followed up.
+  V Better rejection of bad fits that make it into grid list file (Zach had some tricks for this - discuss) (Zach, Max) ---> Partly done.
 - Analysis script sharing (--> first: get overview: Jeanette, Sophie?)
   o Generalized scripts? E.g. for visible x-section limits (by Alex)
-  o e.g. script/option for p0 calculation, making pull plots, drawing pdf, contour plots. (Alex)
-- review and improve consistency and configurability of automatic error handling (David) 
-- Merging of configManager code (0-lepton) (G-J, Max, Yu)
-  o 0-lepton: switching between multiple signal regions. (python magic words)
-- Correct statistical treatment of fits to prescaled data. (Max)
-- Make HistFtter use proper logging (GJ)
+  o e.g. script/option for p0 calculation, making pull plots, drawing pdf, contour plots. (Alex) --->To be followed up.
+- review and improve consistency and configurability of automatic error handling (David) ---> Obsolete?
+- Merging of configManager code (0-lepton) (G-J, Max, Yu) ---> DONE
+  o 0-lepton: switching between multiple signal regions. (python magic words) ---> DONE
+- Correct statistical treatment of fits to prescaled data. (Max) ---> To be followed up.
+- Make HistFtter use proper logging (GJ) ---> DONE
 
->>> External: RooFit/RooStats bugs we are affected by:
+>>> External: RooFit/RooStats bugs we are affected by: (Obsolete)
 
 - RooFit toys crash (Wouter Verkerke)
 - VisualizeError() bug for single bin (Wouter Verkerke)
 
 >>> On slightly longer time-scale:
 
-- Manpower situation. Rotation of mailing-list help. (All)
-- Histogram recycle option with running with -t. (Do per channel?) (Who?)
-- Python code cleanup: implement polymorphic design for Systematic and Sample python config objects (Marcello)
+- Manpower situation. Rotation of mailing-list help. (All) ---> to be followed up.
+- Histogram recycle option with running with -t. (Do per channel?) (Who?) ---> DONE
+- Python code cleanup: implement polymorphic design for Systematic and Sample python config objects (Marcello) ---> To be followed up.
 
 =================================================================================================
 

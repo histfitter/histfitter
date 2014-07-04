@@ -1,0 +1,109 @@
+To-do-list HistFitter 4.July 2014
+
+############
+#All tasks:#
+############
+
+>>> URGENT:
+
+- follow up on problems with ROOT 5.34.18 patch version
+- investigate why many toys failing with latest ROOT versions
+
+
+>>> High priority:
+
+- Documentation on how to setup HistFitter and ROOT on different operating systems:
+ o give instructions on how to apply private patch to a self-compiled ROOT version
+- Move tutorial examples to HistFitter user and propagate updated tutorial examples in tutorial branch to trunk
+- Document different types of systematic uncertainties
+- Revision: the Tutorial/documentation could be a more practical-oriented. 
+ o Add more advanced topics to the tutorial: Fitting with MINOS, systematic types, interpretation of fit failures, update contour plot example
+ o Update FAQ and main HistFitter twiki pages
+- Documentation: how to validate the fit? FAQ on failed fits. (stat forum)
+- Advertizement and examples for combination of workspaces. ---> Partially DONE
+- Migration into ATLAS release
+- Harmonize the various plotting and batch/grid submission scripts. 
+- Publication ---> IN PROGRESS
+- Migrate to uncapped p0 values. 
+- toys versus asymptotic
+- FAQ on failed fits and how to handle them. Guideline on when a fit / grid-of-fits is okay.
+- Possibility to reproduce fits during the hypothesis tests also outside of '-l' and '-p'
+- Investigate 'method 3' from Higgs group for systematics tables
+
+>>>>>From old to-do list:
+- Bug in filling of weight based systematics --> Still valid?
+- Remove MC statistical fluctuations from systematics (Max) 
+- Proper treatment of all bins with zero events by HistFactory? Check (See recent mail George Lewis)
+- sigma values in list-file. 
+- Hard-coded names, e.g. sig_xsection. Needs to be documented, or made flexible. 
+- Documentation needs cleanup. E.g Documentation of various available systematics. (David,Alex,Max)
+- Generalized scripts --- for plotting in particular
+
+
+
+>>> Next: Useful additions & Extra documentation:
+
+- Analysis script sharing/generalization/
+  o in particular for contour plot scripts, also update those in the trunk
+  o add option to run contour plots to HistFitter.py
+- Correct statistical treatment of fits to prescaled data. 
+- Clean-up of C++ and python code (see work packages by statistics forum)
+- Add possibility to produce HEPData material
+- Add pull plot for parameters to HistFitter
+- Provide functions/tools to do fitting/plotting of arbitrary workspaces, also not following the naming convention by HistFitter
+
+>>> On slightly longer time-scale:
+
+- Manpower situation. Rotation of mailing-list help. 
+- Python code cleanup: implement polymorphic design for Systematic and Sample python config objects 
+
+
+
+
+
+
+
+
+
+
+
+
+###################
+#Tasks per person:#
+###################
+
+---------------------------
+
+Tasks for Jeanette:
+
+- ensure blinding also for only specific regions
+- move fix for upper limits also to C++ part
+- generalize contour plotting macros/add them as option to HistFitter.py
+- update tutorial
+- update main HistFitter page
+
+
+-------------------
+
+Tasks for Geert-Jan:
+
+- update tutorial
+
+
+-----------------------
+
+Tasks for Alex:
+
+- updating yields table/pull plot software
+
+-------------------
+
+Tasks for Max:
+
+- guideline/software tools for reproducing fits inside -p also outside
+
+
+----------------
+Tasks for Alex/Jeanette:
+
+- enable overlaying of signal point on CRs/VRs plots from background-only fit
