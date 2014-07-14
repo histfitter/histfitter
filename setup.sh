@@ -2,7 +2,7 @@
 # check Root environment setup. Allow for external setup script.
 
 export BUILD="x86_64-slc6-gcc47-opt"
-export ROOTVERSION="5.34.18"
+export ROOTVERSION="5.34.19"
 export CERNPREFIX="/afs/cern.ch/"
 export PYTHONVERSION="2.7.3"
 export GCCVERSION="4.7"
@@ -29,16 +29,16 @@ if [ ! $ROOTSYS ]; then
   export CWD=$PWD
   # setup corresponding root
   #cd $CERNPREFIX/atlas/offline/external/FullChainTest/tier0/test/mbaak/root/root-$ROOTVERSION/
-  #cd $CERNPREFIX/sw/lcg/app/releases/ROOT/$ROOTVERSION/$BUILD/root/
+  cd $CERNPREFIX/sw/lcg/app/releases/ROOT/$ROOTVERSION/$BUILD/root/
   #cd $CERNPREFIX/atlas/offline/external/FullChainTest/tier0/test/mbaak/root/root-v5-34/
   #cd $CERNPREFIX/work/g/gbesjes/root-v5-34-patches
-  cd $CERNPREFIX/atlas/offline/external/FullChainTest/tier0/test/mbaak/root/root-v5-34-trunk/
+  #cd $CERNPREFIX/atlas/offline/external/FullChainTest/tier0/test/mbaak/root/root-v5-34-trunk/
   source bin/thisroot.sh
   cd $CWD
   
   # setup xrootd on top of this
-  export PATH=$CERNPREFIX/sw/lcg/external/xrootd/3.1.0p2/$BUILD/bin:$PATH
-  export LD_LIBRARY_PATH="$CERNPREFIX/sw/lcg/external/xrootd/3.1.0p2/$BUILD/lib64:$LD_LIBRARY_PATH"
+  export PATH=$CERNPREFIX/sw/lcg/external/xrootd/3.2.7/$BUILD/bin:$PATH
+  export LD_LIBRARY_PATH="$CERNPREFIX/sw/lcg/external/xrootd/3.2.7/$BUILD/lib64:$LD_LIBRARY_PATH"
   # hack for xrootd: libNetx library from pre-installed root version
   export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$CERNPREFIX/sw/lcg/app/releases/ROOT/$ROOTVERSION/$BUILD/root/lib"
   # missing libraries on lxbatch machines
