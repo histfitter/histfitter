@@ -3043,7 +3043,7 @@ RooCurve* Util::MakePdfErrorRatioHist(RooWorkspace* w, RooAbsData* regionData, R
     regionData->plotOn(frame, RooFit::DataError(RooAbsData::Poisson));
 
     // normalize pdf to number of expected events, not to number of events in dataset
-    double normCount = regionPdf->expectedEvents(*regionVar);
+    //double normCount = regionPdf->expectedEvents(*regionVar);
     //regionPdf->plotOn(frame,Normalization(normCount,RooAbsReal::NumEvent),Precision(1e-5));
     regionPdf->plotOn(frame,Normalization(1,RooAbsReal::RelativeExpected),Precision(1e-5));
     RooCurve* curveNom = (RooCurve*) frame->findObject(curvename,RooCurve::Class()) ;

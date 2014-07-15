@@ -354,7 +354,7 @@ void ValidationUtils::PullPlot5(XtraValues* inValsEl, XtraValues* inValsMu, Xtra
 
    //static Int_t c_LightRed      = TColor::GetColor( "#ff3333" );
    //static Int_t c_DarkRed       = TColor::GetColor( "#800000" );
-   static Int_t c_LightYellow   = TColor::GetColor( "#ffff00" );
+   //static Int_t c_LightYellow   = TColor::GetColor( "#ffff00" );
    //static Int_t c_VLightYellow  = TColor::GetColor( "#ffffe0" );
    //static Int_t c_DarkYellow    = TColor::GetColor( "#ffd700" );
    static Int_t c_VDarkYellow   = TColor::GetColor( "#ffa500" );
@@ -365,7 +365,7 @@ void ValidationUtils::PullPlot5(XtraValues* inValsEl, XtraValues* inValsMu, Xtra
    Int_t    colMu = c_DarkBlue;
    Int_t    colMuL = c_LightBlue;
    Int_t    colEMu = c_VDarkYellow;
-   Int_t    colEMuL = c_LightYellow;
+   //Int_t    colEMuL = c_LightYellow;
    
 
    // ----------- now we can start the plotting -----------------------------
