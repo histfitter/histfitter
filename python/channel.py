@@ -23,7 +23,16 @@ class Channel(object):
         """
         Store configuration,  set unique channel name from variable,
         define cut region,  binning and open file
+
+        @param variableName The name of the variable to bin in
+        @param regions All regions used in the channel
+        @param prefix A prefix for XML files for the channel
+        @param nBins The number of bins to use
+        @param binLow Lower edge of the first bin
+        @param binHigh Upper edge of the last bin
+        @param statErrorThreshold Threshold for statistical errors
         """
+        
         regions.sort()
         self.regionString = "".join(regions)
         self.variableName = variableName
@@ -72,6 +81,7 @@ class Channel(object):
         return
 
     def initialize(self):
+        """ Initialize the channel """
         for sample in self.sampleList:
             pass
             # if not sample.isData and not sample.isQCD and not sample.isDiscovery:
@@ -82,6 +92,12 @@ class Channel(object):
             #             sample.addSystematic(syst)
 
     def Clone(self, prefix=""):
+        """ 
+        Clone into a new object
+
+        @param prefix Optional new prefix for the copied channel 
+        """
+
         if prefix == "":
             prefix = self.prefix
         # copies all properties prior to initialize
@@ -90,13 +106,23 @@ class Channel(object):
         return newChan
 
     def ConstructorInit(self, prefix):
+        """
+        Initialize prefix settings
+        
+        @param prefix The prefix to use
+        """
+
         self.prefix = prefix
         self.xmlFileName = "config/" + self.prefix + "_" + self.channelName + ".xml"
+        
         return
 
     def addSample(self, sample, index=-1):
         """
         Add Sample object to this channel
+
+        @param sample The sample to add
+        @param index The index to use; if -1, append at the end
         """
         if index == -1:
             index = len(self.sampleList)  # = end of list
@@ -119,6 +145,8 @@ class Channel(object):
     def getSample(self, name):
         """
         Get Sample object for this channel
+
+        @param name The name to sample to return
         """
         for s in self.sampleList:
             if s.name == name:
@@ -127,10 +155,11 @@ class Channel(object):
         raise Exception("Could not find sample with name %s in %s"
                         % (name, self.sampleList))
 
-
     def hasSample(self, name):
         """
-        Get Sample object for this channel
+        Check if sample exists for this channel
+
+        @param name The name of the sample to check
         """
         for s in self.sampleList:
             if s.name == name:
@@ -138,8 +167,13 @@ class Channel(object):
 
         return False
     
-
     def removeSample(self, sample):
+        """
+        Remove a sample from the channel
+
+        @param sample The sample to remove; can be either a sample object or a name
+        """
+
         if isinstance(sample, Sample):
             aSam = sample
         elif isinstance(sample,str):
@@ -159,6 +193,8 @@ class Channel(object):
         Set file list for this Channel.
         This will be used as default for samples that don't specify
         their own file list.
+
+        @param filelist The list to set
         """
         self.files = filelist
 
@@ -167,12 +203,16 @@ class Channel(object):
         Set file for this Sample directly
         This will be used as default for samples that don't specify
         their own file list.
+
+        @param file The file to set as filelist.
         """
         self.files = [file]
 
     def propagateFileList(self, fileList):
         """
-        Propagate the file list downwards.
+        Propagate the file list downwards to all owned samples. Only sets own file list if not previously given.
+
+        @param fileList List of filenames to propagate downwards.
         """
         #  if we don't have our own file list,  use the one given to us
         if not self.files:
@@ -186,6 +226,8 @@ class Channel(object):
         Set the weights for this channel - overrides previous weights
 
         Propagate to owned samples
+        
+        @param weights A list of weights
         """
         self.weights = deepcopy(weights)
 
@@ -198,6 +240,8 @@ class Channel(object):
     def addWeight(self, weight):
         """
         Add a single weight and propagate
+
+        @param weight Weight to append to the current list of weights
         """
         if not weight in self.weights:
             self.weights.append(weight)
@@ -220,7 +264,9 @@ class Channel(object):
 
     def removeWeight(self, weight):
         """
-        Remove a single weight and propagate
+        Remove a single weight and propagate: also remove from all samples
+
+        @param weight Weight to remove
         """
         if weight in self.weights:
             self.weights.remove(weight)
@@ -242,6 +288,12 @@ class Channel(object):
                             maxValList, colorList):
         """
         Add a sample to be used for discovery fits
+
+        @param srList List of signal regions to use
+        @param startValList List of starting values for each of the signal regions
+        @param minValList List of minimal values of the parameter used for each of the signal regions
+        @param maxValList List of maximal values of the parameter used for each of the signal regions
+        @param colorList List of colors to use when plotting each of the signal regions
         """
         self.hasDiscovery = True
         self.parentTopLvl.hasDiscovery = True
@@ -273,6 +325,8 @@ class Channel(object):
     def addData(self, dataName):
         """
         Add a prepared data histogram to this channel
+
+        @param dataName The histogram to add
         """
         if len(self.dataList):
             raise IndexError("Channel already has data " + str(self.dataList))
@@ -282,8 +336,9 @@ class Channel(object):
                       addInputHistoList, histoPath="", seed=None):
         """
         Add a pseudo data distribution to this channel
-
         !!! DEPRECATED, MAY NOT WORK !!!
+
+        @deprecated MAY NOT WORK
         """
         if len(self.dataList):
             raise IndexError("Channel already has data " + str(self.dataList))
@@ -301,7 +356,9 @@ class Channel(object):
     def addSystematic(self, syst):
         """
         Add a systematic to this channel.
-        This will be propagated to all owned samples
+        This will be propagated to all owned samples; exisiting systematics are not overwritten.
+
+        @param syst The systematic to add
         """
         if syst.name in self.systDict.keys():
             raise Exception("Attempt to overwrite systematic %s "
@@ -315,18 +372,32 @@ class Channel(object):
     def getSystematic(self, systName):
         """
         Find the systematic with the given name
+
+        @param systName The name of the systematic to find
         """
         try:
             return self.systDict[systName]
         except KeyError:
             raise KeyError("Could not find systematic %s "
-                           "in topLevel %s" % (systName, self.name))
+                           "in channel %s" % (systName, self.name))
 
     def setTreeName(self, treeName):
+        """
+        Set the input tree name
+
+        @param treeName The name to set
+        """
+
         self.treeName = treeName
         return
 
     def propagateTreeName(self, treeName):
+        """
+        Propagate the name of the tree down to any samples; also sets our own treename
+        
+        @param treeName The name to set
+        """
+        
         if self.treeName == '':
             self.treeName = treeName
         ##  MAB : Propagate down to samples
@@ -336,6 +407,10 @@ class Channel(object):
         return
 
     def createHistFactoryObject(self):
+        """
+        Create a HistFactory object for this Channel
+        """
+
         c = ROOT.RooStats.HistFactory.Channel( self.channelName, configMgr.histCacheFile )
         for d in self.dataList:
             #d should be array of form [inputFile, histoName, histoPath]
@@ -387,6 +462,12 @@ class Channel(object):
         return
 
     def compareChannelFormat(self, remapChan):
+        """
+        Compare the format of this channel to another one
+
+        @param remapChan The Channel to compare to
+        """
+
         if self.nBins != remapChan.nBins:
             log.warning("Cannot remap histoSys systematics from %s to channel %s as number of bins do not agree: %g versus %g" % (remapChan.name, self.name, float(self.nBins), float(remapChan.nBins)))
             return False
