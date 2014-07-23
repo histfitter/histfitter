@@ -1,12 +1,20 @@
-# David Cote, October 2013
-# Place-holder for functions to interpret complex command line arguments
-# common to HistFitter.py, YieldsTable.py, SysTable.py and other scripts.
+"""
+@file   cmdLineUtils.py
+@brief  Functions to interpret command line arguments
+
+Place-holder for functions to interpret complex command line arguments
+common to HistFitter.py, YieldsTable.py, SysTable.py and other scripts.
+"""
 
 from ROOT import Util,RooAddition,RooArgList 
 
 def cmdStringToListOfLists(inputString):
-    #This function expects an inputString of format:
-    # '[topZ,topW,ttbarHiggs,singleTopZ],[diBosonWZ,diBosonPowhegZZ,triBoson],fakes'
+    """
+    Convert a list of argument lists to a python structure
+
+    @param inputString A string of the format '[topZ,topW,ttbarHiggs,singleTopZ],[diBosonWZ,diBosonPowhegZZ,triBoson],fakes'
+    """
+
     rawList=inputString.split(",")
     finalList=[]
     openBlock=False
@@ -36,8 +44,13 @@ def cmdStringToListOfLists(inputString):
         pass
     return finalList
 
-
 def getPdfInRegions(w,sample,region):
+    """
+    Return the PDF in a region for a sample
+
+    @param sample The sample to find
+    @param region The region to use
+    """
     if isinstance(sample,list):
         sampleArgList = RooArgList()
         sample_str="group"
@@ -68,6 +81,11 @@ def getPdfInRegionsWithRangeName(w,sample,region,rangeName):
     return pdfInRegion
 
 def getName(obj):
+    """
+    Return a string representation of the object passed
+
+    @param obj The object
+    """
     if isinstance(obj,str):
         return obj
     elif isinstance(obj,list):
