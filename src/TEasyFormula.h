@@ -1,9 +1,19 @@
 // vim: ts=4:sw=4
 /**********************************************************************************
- * Class  : TEasyFormula                                                       *
+ * Project: HistFitter - A ROOT-based package for statistical data analysis       *
+ * Package: HistFitter                                                            *
+ * Class  : TEasyFormula                                                          *
  *                                                                                *
- * Authors (alphabetical):                                                        *
- *      Max Baak <mbaak@cern.ch> - CERN, Switzerland                              *
+ * Description:                                                                   *
+ *      Class for producing easy formalas based on arrays                         *
+ *      using ROOT's TFormula class.                                              *
+ *                                                                                *
+ * Authors:                                                                       *
+ *      Gfitter group                                                             *
+ *                                                                                *
+ * Redistribution and use in source and binary forms, with or without             *
+ * modification, are permitted according to the terms listed in the file          *
+ * LICENSE.                                                                       *
  **********************************************************************************/
 
 #ifndef __TEasyFormula__

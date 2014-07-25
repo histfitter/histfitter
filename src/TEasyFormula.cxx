@@ -1,4 +1,16 @@
 // vim: ts=4:sw=4
+/**********************************************************************************
+ * Project: HistFitter - A ROOT-based package for statistical data analysis       *
+ * Package: HistFitter                                                            *
+ * Class  : TEasyFormula                                                          *
+ *                                                                                *
+ * Description:                                                                   *
+ *      Implementation                                                            *
+ *                                                                                *
+ * See corresponding .h file for more description, author and license information *         
+ *                                                                                *
+ **********************************************************************************/
+
 #include "TEasyFormula.h"
 #include "TMsgLogger.h"
 
