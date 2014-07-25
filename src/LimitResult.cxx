@@ -5,7 +5,7 @@
  * Class  : LimitResult                                                           *
  *                                                                                *
  * Description:                                                                   *
- *      Implementation                                                            *
+ *      Implementation (see header for description)                               *
  *                                                                                *
  * See corresponding .h file for author and license information                   *         
  *                                                                                *
