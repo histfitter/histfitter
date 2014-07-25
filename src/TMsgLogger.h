@@ -1,9 +1,28 @@
 // vim: ts=4:sw=4
 /**********************************************************************************
+ * Project: HistFitter - A ROOT-based package for statistical data analysis       *  
+ * Package: HistFitter                                                            *
  * Class  : TMsgLogger                                                            *
  *                                                                                *
- * Authors (alphabetical):                                                        *
- *      Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch> - CERN, Switzerland   *
+ * Description:                                                                   *
+ *      Implementation (see header for description)                               *
+ *                                                                                *
+ *      Adapted from TMVA:MsgLogger. Original authors:                            *
+ *                                                                                *
+ *      Attila Krasznahorkay  <Attila.Krasznahorkay@cern.ch> - CERN, Switzerland  *
+ *      Andreas Hoecker       <Andreas.Hocker@cern.ch> - CERN, Switzerland        *
+ *      Joerg Stelzer         <stelzer@cern.ch>        - DESY, Germany            *
+ *      Eckhard v. Toerne     <evt@uni-bonn.de>        - U of Bonn, Germany       *
+ *                                                                                *
+ * Copyright (c) 2005-2011:                                                       *
+ *      CERN, Switzerland                                                         *
+ *      U. of Victoria, Canada                                                    *
+ *      MPI-K Heidelberg, Germany                                                 *
+ *      U. of Bonn, Germany                                                       *
+ *                                                                                *
+ *   http://root.cern.ch/root/htmldoc/src/TMVA__MsgLogger.h.html                  *
+ *                                                                                *
+ * (http://tmva.sourceforge.net/LICENSE)                                          *
  **********************************************************************************/
 
 #ifndef ROOT_TMsgLogger
