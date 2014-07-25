@@ -1,13 +1,26 @@
 // vim: ts=4:sw=4
+/**********************************************************************************
+ * Project: HistFitter - A ROOT-based package for statistical data analysis       *
+ * Package: HistFitter                                                            *
+ * Class  : TEasyFormula                                                          *
+ *                                                                                *
+ * Description:                                                                   *
+ *      Simple class for storing results from a hypothesis test.                  *
+ *                                                                                *
+ * Authors:                                                                       *
+ *      HistFitter group                                                          *
+ *                                                                                *
+ * Redistribution and use in source and binary forms, with or without             *
+ * modification, are permitted according to the terms listed in the file          *
+ * LICENSE.                                                                       *
+ **********************************************************************************/
+
 #ifndef LimitResult_hh
 #define LimitResult_hh
-
-// Simple class for holding results from a fit 
 
 #include <iostream>
 #include <map>
 #include "TString.h"
-
 
 class LimitResult {
     private:
@@ -42,6 +55,7 @@ class LimitResult {
         TString m_resultfilename;
         TString m_comments;
         std::map<TString,float> m_metadata;
+
     public:
         LimitResult(const TString &name=TString(""), const TString &title=TString(""));
 
@@ -129,6 +143,5 @@ class LimitResult {
         TString GetDescriptionString() const;
         void AddMetaData(const std::map<TString,float>& metadata); 
 };
-
 
 #endif

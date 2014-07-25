@@ -1,11 +1,27 @@
 // vim: ts=4:sw=4
+/**********************************************************************************
+ * Project: HistFitter - A ROOT-based package for statistical data analysis       *
+ * Package: HistFitter                                                            *
+ * Class  : LimitResult                                                           *
+ *                                                                                *
+ * Description:                                                                   *
+ *      Implementation                                                            *
+ *                                                                                *
+ * See corresponding .h file for author and license information                   *         
+ *                                                                                *
+ **********************************************************************************/
+
 #include "LimitResult.h"
 #include "Significance.h"
 
+
+//_____________________________________________________________________________
 LimitResult::~LimitResult()
 {
 }
 
+
+//_____________________________________________________________________________
 LimitResult::LimitResult(const TString &name, const TString &title) :
     m_p0(-1),
     m_p1(-1),
@@ -40,6 +56,8 @@ LimitResult::LimitResult(const TString &name, const TString &title) :
     tmp=name;
 };
 
+
+//_____________________________________________________________________________
 void LimitResult::Summary() {
     std::cout << " Printing data for object: " << this << std::endl ;
     std::cout << " | p0:               "<<    GetP0() << "      sigma: " << StatTools::GetSigma(   GetP0())<<std::endl ;
@@ -79,6 +97,7 @@ void LimitResult::Summary() {
 }
 
 
+//_____________________________________________________________________________
 TString  LimitResult::GetSummaryString() const {
     TString summary;
     summary += Form(" %e %e %e",GetP0(),GetP1(),GetCLs());
@@ -100,6 +119,8 @@ TString  LimitResult::GetSummaryString() const {
     return summary;
 }
 
+
+//_____________________________________________________________________________
 TString  LimitResult::GetDescriptionString() const {
     TString description;
     description += "p0:p1:CLs:"; //3
@@ -109,7 +130,9 @@ TString  LimitResult::GetDescriptionString() const {
     description += "fID:sigma0:sigma1:";   //3
     description += "clsu1s:clsd1s:clsu2s:clsd2s:"; //4
     description += "p0exp:p0u1s:p0d1s:p0u2s:p0d2s:"; //5
-    description += "upperLimit:upperLimitEstimatedError:expectedUpperLimit:expectedUpperLimitPlus1Sig:expectedUpperLimitPlus2Sig:expectedUpperLimitMinus1Sig:expectedUpperLimitMinus2Sig:xsec:excludedXsec"; //4
+    description += "upperLimit:upperLimitEstimatedError:expectedUpperLimit:expectedUpperLimitPlus1Sig:";
+    description += "expectedUpperLimitPlus2Sig:expectedUpperLimitMinus1Sig:expectedUpperLimitMinus2Sig:";
+    description += "xsec:excludedXsec"; //2
 
     std::map<TString,float>::const_iterator itr=m_metadata.begin(), end=m_metadata.end();
     for (; itr!=end; ++itr)
@@ -117,6 +140,8 @@ TString  LimitResult::GetDescriptionString() const {
     return description;
 }
 
+
+//_____________________________________________________________________________
 void LimitResult::AddMetaData(const std::map<TString,float>& metadata) {
     std::map<TString,float>::const_iterator itr=metadata.begin(), end=metadata.end();
     for (; itr!=end; ++itr) { m_metadata[itr->first]=itr->second; }
