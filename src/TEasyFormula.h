@@ -60,7 +60,7 @@ class TEasyFormula : public TFormula {
 
     protected:
 
-        // Interface to TFormula engine
+        /// Interface to TFormula engine
         virtual       Double_t DefinedValue(Int_t code) ;  // ROOT 4
         Int_t         DefinedVariable(TString& name) ;     // ROOT 3
         virtual Int_t DefinedVariable(TString& name, int& action) ;
