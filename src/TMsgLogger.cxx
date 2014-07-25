@@ -61,6 +61,7 @@ static const char* SUFFIX = ": ";
 TMsgLevel TMsgLogger::m_minLevel = kINFO;
 bool TMsgLogger::m_levelLock = false;
 
+//_____________________________________________________________________________
 TMsgLogger::TMsgLogger( const TObject* source, TMsgLevel minLevel )
    : m_objSource( source ), 
      m_strSource( "" ), 
@@ -72,6 +73,7 @@ TMsgLogger::TMsgLogger( const TObject* source, TMsgLevel minLevel )
     InitMaps();
 }
 
+//_____________________________________________________________________________
 TMsgLogger::TMsgLogger( const string& source, TMsgLevel minLevel )
    : m_objSource( 0 ),
      m_strSource( source ), 
@@ -83,6 +85,7 @@ TMsgLogger::TMsgLogger( const string& source, TMsgLevel minLevel )
     InitMaps();
 }
 
+//_____________________________________________________________________________
 TMsgLogger::TMsgLogger( TMsgLevel minLevel )
    : m_objSource( 0 ), 
      m_strSource( "Unknown" ), 
@@ -94,6 +97,7 @@ TMsgLogger::TMsgLogger( TMsgLevel minLevel )
     InitMaps();
 }
 
+//_____________________________________________________________________________
 TMsgLogger::TMsgLogger( const TMsgLogger& parent )
    : basic_ios< TMsgLogger::char_type, TMsgLogger::traits_type >( new TMsgLogger::__stringbuf_type() ),
      ostringstream(),
@@ -105,9 +109,11 @@ TMsgLogger::TMsgLogger( const TMsgLogger& parent )
     *this = parent;
 }
 
+//_____________________________________________________________________________
 TMsgLogger::~TMsgLogger() {
 }
 
+//_____________________________________________________________________________
 TMsgLogger& TMsgLogger::operator= ( const TMsgLogger& parent )  {
     m_objSource   = parent.m_objSource;
     m_strSource   = parent.m_strSource;
@@ -116,6 +122,7 @@ TMsgLogger& TMsgLogger::operator= ( const TMsgLogger& parent )  {
     return *this;
 }
 
+//_____________________________________________________________________________
 string TMsgLogger::GetFormattedSource() const {
     // make sure the source name is no longer than m_maxSourceSize:
     string source_name;
@@ -130,19 +137,15 @@ string TMsgLogger::GetFormattedSource() const {
     return source_name;
 }
 
+//_____________________________________________________________________________
 string TMsgLogger::GetPrintedSource() const { 
     // the full logger prefix
     string source_name = GetFormattedSource();
 
-    // we don't append extra whitespace; gbesjes 17/10/12
-    //if (source_name.size() < m_maxSourceSize) { 
-        //for (string::size_type i=source_name.size(); i<m_maxSourceSize; i++) 
-            //source_name.push_back( ' ' );
-    //}
-
     return m_prefix + source_name + m_suffix; 
 }
 
+//_____________________________________________________________________________
 void TMsgLogger::Send() {
     // activates the logger writer
 
@@ -174,6 +177,7 @@ void TMsgLogger::Send() {
     return;
 }
 
+//_____________________________________________________________________________
 void TMsgLogger::WriteMsg( TMsgLevel mlevel, const std::string& line ) const  {
     if (mlevel < GetMinLevel()) 
         return;
@@ -200,12 +204,14 @@ void TMsgLogger::WriteMsg( TMsgLevel mlevel, const std::string& line ) const  {
     }
 }
 
+//_____________________________________________________________________________
 TMsgLogger& TMsgLogger::endmsg( TMsgLogger& logger ) {
     // end line
     logger.Send();
     return logger;
 }
 
+//_____________________________________________________________________________
 TMsgLevel TMsgLogger::MapLevel( const TString& instr ) const {
     TString ins = instr; // need to copy
     ins.ToUpper();
@@ -225,6 +231,7 @@ TMsgLevel TMsgLogger::MapLevel( const TString& instr ) const {
     return kFATAL;
 }
 
+//_____________________________________________________________________________
 void TMsgLogger::InitMaps() {
     m_levelMap[kVERBOSE] = "VERBOSE";
     m_levelMap[kDEBUG]   = "DEBUG";
