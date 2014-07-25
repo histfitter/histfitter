@@ -1,8 +1,16 @@
 // vim: ts=4:sw=4
-////////////////////////////////////////////////////////////////////////
-// Creation: November 2012, Alex Koutsman (CERN)                          //
-// New class to set plot style for channel             
-////////////////////////////////////////////////////////////////////////
+/**********************************************************************************
+ * Project: HistFitter - A ROOT-based package for statistical data analysis       *
+ * Package: HistFitter                                                            *
+ * Class  : ChannelStyle                                                          *
+ * Created: November 2012
+ *                                                                                *
+ * Description:                                                                   *
+ *      Implementation (see header for description)                               *
+ *                                                                                *
+ * See corresponding .h file for author and license information                   *         
+ *                                                                                *
+ **********************************************************************************/
 
 #include <iostream>
 #include "ChannelStyle.h"
@@ -12,9 +20,12 @@ using namespace std;
 ClassImp(ChannelStyle);
 
 
+//_______________________________________________________________________________________
 ChannelStyle::ChannelStyle() : m_logger("ChannelStyle"){
 }
 
+
+//_______________________________________________________________________________________
 ChannelStyle::ChannelStyle(const TString& name) : m_logger("ChannelStyle") {
     m_name = name;
     m_title = "";
@@ -48,10 +59,13 @@ ChannelStyle::ChannelStyle(const TString& name) : m_logger("ChannelStyle") {
     m_textsize2 = 0.04;
 }
 
+
+//_______________________________________________________________________________________
 Int_t ChannelStyle::getSampleColor(const TString& sample){
   Bool_t sampleFound = kFALSE;
   for(unsigned int i = 0; i< m_sampleColors.size(); i++){
-    m_logger << kDEBUG << "getSampleColor:  requested sample name: "<<sample  << " , defined m_sampleNames[" << i << "]="<< m_sampleNames[i] << GEndl;
+    m_logger << kDEBUG << "getSampleColor:  requested sample name: "<<sample  
+	     << " , defined m_sampleNames[" << i << "]="<< m_sampleNames[i] << GEndl;
     TString target = "_"+m_sampleNames[i]+"_";
     if( sample.Contains(target.Data())){
       sampleFound = kTRUE;
@@ -60,7 +74,8 @@ Int_t ChannelStyle::getSampleColor(const TString& sample){
   }
   
   if(!sampleFound){
-    m_logger << kWARNING << "getSampleColor unknown sample name: "<<sample << ", will use default color and add this sample to ChannelStyle"<< GEndl;
+    m_logger << kWARNING << "getSampleColor unknown sample name: "<<sample 
+	     << ", will use default color and add this sample to ChannelStyle"<< GEndl;
     Int_t color = m_defaultSampleColor + m_defaultSampleCounter;
     addSample(sample, color);
     m_defaultSampleCounter++;
@@ -70,9 +85,12 @@ Int_t ChannelStyle::getSampleColor(const TString& sample){
   return 0;
 }
 
+
+//_______________________________________________________________________________________
 TString ChannelStyle::getSampleName(const TString& sample){
     for(unsigned int i = 0; i< m_sampleNames.size(); i++){
-      m_logger << kDEBUG << "getSampleName: requested sample name: "<<sample  << ", defined m_sampleNames[" << i << "]="<< m_sampleNames[i] << GEndl;
+      m_logger << kDEBUG << "getSampleName: requested sample name: "<<sample  
+	       << ", defined m_sampleNames[" << i << "]="<< m_sampleNames[i] << GEndl;
       TString target = "_"+m_sampleNames[i]+"_";
       if( sample.Contains(target.Data())){
             return m_sampleNames[i];
@@ -82,6 +100,8 @@ TString ChannelStyle::getSampleName(const TString& sample){
     return "";
 }
 
+
+//_______________________________________________________________________________________
 void ChannelStyle::Print(){
     m_logger << kINFO << "*** ChannelStyle: " << m_name << " ***" << GEndl;
         

@@ -1,7 +1,19 @@
-////////////////////////////////////////////////////////////////////////
-// Creation: November 2012, Alex Koutsman (CERN)                          //
-// New class to set plot style for channel                                           //
-////////////////////////////////////////////////////////////////////////
+/**********************************************************************************
+ * Project: HistFitter - A ROOT-based package for statistical data analysis       *
+ * Package: HistFitter                                                            *
+ * Class  : ChannelStyle                                                          *
+ * Created: November 2012                                                         *
+ *                                                                                *
+ * Description:                                                                   *
+ *      Class to set plot style for each channel                                  *
+ *                                                                                *
+ * Authors:                                                                       *
+ *      HistFitter group                                                          *
+ *                                                                                *
+ * Redistribution and use in source and binary forms, with or without             *
+ * modification, are permitted according to the terms listed in the file          *
+ * LICENSE.                                                                       *
+ **********************************************************************************/
 
 #ifndef CHANNELSTYLE_H
 #define CHANNELSTYLE_H
@@ -18,7 +30,7 @@ class ChannelStyle : public TObject{
   ChannelStyle(const TString& name);
   ~ChannelStyle(){}
 
-  ClassDef(ChannelStyle,1) // Container class for expanded fit result
+  ClassDef(ChannelStyle,1) 
 
   // per sample options
   std::vector<Int_t> m_sampleColors;
@@ -114,7 +126,8 @@ class ChannelStyle : public TObject{
 
 private:
   
-  TMsgLogger m_logger;  // per ChannelStyle options (in python equivalent to TopLevelXML)
+  TMsgLogger m_logger;  
+  // per ChannelStyle options (in python equivalent to TopLevelXML)
   TString m_name;
   TString m_title;
   Float_t m_lumi;

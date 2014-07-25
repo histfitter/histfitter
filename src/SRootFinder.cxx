@@ -29,7 +29,7 @@
 
 ClassImp(StatTools::SRootFinder)
 
-    //_______________________________________________________________________
+//_______________________________________________________________________
 StatTools::SRootFinder::SRootFinder( Double_t (*rootVal)( Double_t ),
         Double_t rootMin, 
         Double_t rootMax,

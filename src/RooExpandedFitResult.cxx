@@ -14,7 +14,6 @@
 
 #include "RooExpandedFitResult.h"
 
-//#include "RooFitResult.h"
 #include "RooRealVar.h"
 #include <iostream>
 using namespace std;

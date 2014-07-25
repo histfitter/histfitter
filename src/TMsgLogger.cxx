@@ -7,7 +7,7 @@
  * Description:                                                                   *
  *      Implementation (see header for description)                               *
  *                                                                                *
- *      Adapted from TMVA:MsgLogger. Original authors:                            *
+ *      Adapted from TMVA:MsgLogger, modified by us. Original authors:            *
  *                                                                                *
  *      Attila Krasznahorkay  <Attila.Krasznahorkay@cern.ch> - CERN, Switzerland  *
  *      Andreas Hoecker       <Andreas.Hocker@cern.ch> - CERN, Switzerland        *
