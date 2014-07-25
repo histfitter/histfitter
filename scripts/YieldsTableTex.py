@@ -42,11 +42,12 @@ def exampletable():
   return m
 
 
-""" 
-main function to transfer the set of numbers/names (=m provided by YieldsTable) into a LaTeX table
-""" 
-def tablefragment(m, channel, signalregionslist,sampleList,showBeforeFitError):
 
+def tablefragment(m, channel, signalregionslist,sampleList,showBeforeFitError):
+  """ 
+  main function to transfer the set of numbers/names (=m provided by YieldsTable) into a LaTeX table
+  """
+  
   tableline = ''
   
   tableline += '''
@@ -59,9 +60,9 @@ def tablefragment(m, channel, signalregionslist,sampleList,showBeforeFitError):
 \\noalign{\\smallskip}\\hline\\noalign{\\smallskip}
 {\\bf %s channel}          ''' %channel
 
-"""
-print the region names
-""" 
+  """
+  print the region names
+  """ 
   for region in m['names']:
     regionName = region.replace("_cuts", "").replace("_meffInc", "").replace('_','\_')
     tableline += " & " + regionName + "           "   
@@ -70,9 +71,9 @@ print the region names
 \\noalign{\\smallskip}\\hline\\noalign{\\smallskip}
 %%''' 
 
-"""
-print the number of observed events
-""" 
+  """
+  print the number of observed events
+  """ 
   tableline += '''
 Observed events         '''
   for n in m['nobs']:
@@ -83,10 +84,10 @@ Observed events         '''
 %%'''
 
 
-"""
-print the total fitted (after fit) number of events
-if the N_fit - N_error extends below 0, make the error physical , meaning extend to 0
-"""   
+  """
+  print the total fitted (after fit) number of events
+  if the N_fit - N_error extends below 0, make the error physical , meaning extend to 0
+  """   
   tableline += '''
 Fitted bkg events        '''
   for index, n in enumerate(m['TOTAL_FITTED_bkg_events']):
@@ -154,11 +155,11 @@ Fitted bkg events        '''
  \\noalign{\\smallskip}\\hline\\noalign{\\smallskip}
 %%'''
 
-"""
-print the total expected (before fit) number of events
-if the N_fit - N_error extends below 0, make the error physical , meaning extend to 0
-"""   
-
+  """
+  print the total expected (before fit) number of events
+  if the N_fit - N_error extends below 0, make the error physical , meaning extend to 0
+  """   
+  
   tableline += '''
 MC exp. SM events             '''
   for index, n in enumerate(m['TOTAL_MC_EXP_BKG_events']):

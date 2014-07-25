@@ -271,7 +271,6 @@ def latexfitresults(filename,regionList,sampleList,dataname='obsData',showSum=Fa
   """
   calculate the fitted number of events and propagated error for each requested sample, by splitting off each sample pdf
   """
-  # components
   for isam, sample in enumerate(sampleList):
     sampleName=getName(sample)
     nSampleInRegionVal = []
@@ -476,7 +475,9 @@ def latexfitresults(filename,regionList,sampleList,dataname='obsData',showSum=Fa
 ##################################
 ##################################
 
-#### Main function calls start here ....
+"""
+Main function calls start here ....
+"""
 
 if __name__ == "__main__":
   

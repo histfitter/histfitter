@@ -1,5 +1,25 @@
+"""
+ * Project : HistFitter - A ROOT-based package for statistical data analysis      *
+ * Package : HistFitter                                                           *
+ * Script  : SysTableTex.py                                                       *
+ *                                                                                *
+ * Description:                                                                   *
+ *      Script for producing LaTeX-files derived from systematics tables          *
+ *      produced  by SysTable.py script                                           *
+ *                                                                                *
+ * Authors:                                                                       *
+ *      HistFitter group                                                          *
+ *                                                                                *
+ * Redistribution and use in source and binary forms, with or without             *
+ * modification, are permitted according to the terms listed in the file          *
+ * LICENSE.                                                                       *
+"""
 
 def tablefragment(m,table,signalRegions,skiplist,chanStr,showPercent):
+  """ 
+  main function to transfer the set of numbers/names (=m provided by SysTable) into a LaTeX table
+  """
+  
   tableline = ''
 
   tableline += '''
@@ -8,14 +28,20 @@ def tablefragment(m,table,signalRegions,skiplist,chanStr,showPercent):
 \\setlength{\\tabcolsep}{0.0pc}
 \\begin{tabular*}{\\textwidth}{@{\\extracolsep{\\fill}}l'''
 
+  """
+  print the region names
+  """ 
   for region in signalRegions:
     tableline += "c"   
   tableline += '''}
 \\noalign{\\smallskip}\\hline\\noalign{\\smallskip}
 {\\bf Uncertainty of channel}                                   ''' 
 
+
+  """
+  print the total fitted (after fit) number of events
+  """   
   for region in signalRegions:
-    # tableline += " & " + region + "           "   
     tableline += " & " + region.replace('_','\_') + "           "   
 
   tableline += ''' \\\\
@@ -35,7 +61,9 @@ Total background expectation            '''
 %%'''
 
 
-
+  """
+  print sqrt(N_obs) - for comparison with total systematic
+  """   
   tableline += '''
 Total statistical $(\\sqrt{N_{\\rm exp}})$             '''
   for region in signalRegions:
@@ -43,6 +71,9 @@ Total statistical $(\\sqrt{N_{\\rm exp}})$             '''
   tableline += '''\\\\
 %%'''
 
+  """
+  print total systematic uncertainty
+  """   
   tableline += '''
 Total background systematic              '''
 
@@ -56,12 +87,10 @@ Total background systematic              '''
 %%''' 
 
 
-  doAsym=False
-  #m_listofkeys = m[signalRegions[0]].keys()
-  #m_listofkeys.sort()
-
+  """
+  print systematic uncertainty per floated parameter (or set of parameters, if requested)
+  """   
   d = m[signalRegions[0]] 
-
   m_listofkeys = sorted(d.iterkeys(), key=lambda k: d[k], reverse=True)
 
   for name in m_listofkeys:
@@ -72,13 +101,10 @@ Total background systematic              '''
       for index,region in enumerate(signalRegions):
         if index == 0:
           tableline += "\n" + printname + "      "
-
-        #if m[region][name]==0: continue # skip empty systematics
           
         if not showPercent:
           tableline += "   & $\\pm " + str(("%.2f" %m[region][name])) + "$       "
         else:
-#          percentage = m[region][name]/m[region]['totsyserr'] * 100.0
           percentage = m[region][name]/m[region]['nfitted'] * 100.0
           if percentage <1:
             tableline += "   & $\\pm " + str(("%.2f" %m[region][name])) + "\ [" + str(("%.2f" %percentage)) + "\\%] $       "
@@ -90,6 +116,9 @@ Total background systematic              '''
           tableline += '''\\\\
 %%'''
 
+  """
+  print table end with default Caption and Label
+  """   
 
   tableline += '''
 \\noalign{\\smallskip}\\hline\\noalign{\\smallskip}
