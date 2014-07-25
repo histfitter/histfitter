@@ -1,18 +1,24 @@
 /*****************************************************************************
- * Project: RooFit                                                           *
- * Package: RooFitCore                                                       *
- *    File: $Id$
- * Authors:                                                                  *
- *   WV, Wouter Verkerke, UC Santa Barbara, verkerke@slac.stanford.edu       *
- *   DK, David Kirkby,    UC Irvine,         dkirkby@uci.edu                 *
+ * Project: HistFitter - A ROOT-based package for statistical data analysis  *
+ * Package: HistFitter                                                       *
+ * Class  : RooPlot                                                          *
  *                                                                           *
- * Copyright (c) 2000-2005, Regents of the University of California          *
+ * Description:                                                              *
+ *      A RooHist is a graphical RooFit representation of binned data        *
+ *                                                                           *
+ *      Adapted from RooFit:RooPlot. Original authors:                       *
+ *                                                                           *
+ *      WV, Wouter Verkerke, UC Santa Barbara, verkerke@slac.stanford.edu    *
+ *      DK, David Kirkby,    UC Irvine,         dkirkby@uci.edu              *
+ *                                                                           *
+ * Copyright (c) 2000-2005: Regents of the University of California          *
  *                          and Stanford University. All rights reserved.    *
  *                                                                           *
- * Redistribution and use in source and binary forms,                        *
- * with or without modification, are permitted according to the terms        *
- * listed in LICENSE (http://roofit.sourceforge.net/license.txt)             *
+ * http://root.cern.ch/root/html534/src/RooHist.h.html                       *
+ *                                                                           *
+ * (http://roofit.sourceforge.net/license.txt)                               *
  *****************************************************************************/
+
 #ifndef ROO_HIST
 #define ROO_HIST
 
