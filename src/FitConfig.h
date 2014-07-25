@@ -1,8 +1,20 @@
 // vim: ts=4:sw=4
-////////////////////////////////////////////////////////////////////////
-// Creation: January 2011, David Cote (CERN)                          //
-// Simple C++ mirror of python TopLevelXML objects.                   //
-////////////////////////////////////////////////////////////////////////
+/**********************************************************************************
+ * Project: HistFitter - A ROOT-based package for statistical data analysis       *
+ * Package: HistFitter                                                            *
+ * Class  : FitConfig                                                             *
+ * Created: January 2011                                                          *
+ *                                                                                *
+ * Description:                                                                   *
+ *      C++ mirror class of python TopLevelXML objects.                           *
+ *                                                                                *
+ * Authors:                                                                       *
+ *      HistFitter group, CERN, Geneva                                            *
+ *                                                                                *
+ * Redistribution and use in source and binary forms, with or without             *
+ * modification, are permitted according to the terms listed in the file          *
+ * LICENSE.                                                                       *
+ **********************************************************************************/
 
 #ifndef FITCONFIG_H
 #define FITCONFIG_H
