@@ -23,8 +23,6 @@
 #include "RooDataSet.h"
 #include "RooArgSet.h"
 #include "RooAbsReal.h"
-#include "LimitResult.h"
-#include "profile_get_Pvalue.h"
 #include "toy_utils.h"
 
 

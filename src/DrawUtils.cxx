@@ -1,4 +1,18 @@
 // vim: ts=4:sw=4
+/**********************************************************************************
+ * Project: HistFitter - A ROOT-based package for statistical data analysis       *
+ * Package: HistFitter                                                            *
+ * Namespace: DrawUtil                                                            *
+ *                                                                                *
+ * Description:                                                                   *
+ *      Implementation (see header for description)                               *
+ *                                                                                *
+ * Authors:                                                                       *
+ *      HistFitter group, CERN, Geneva, Switzerland                               *
+ *                                                                                *
+ * See corresponding .h file for author and license information                   *
+ **********************************************************************************/
+
 #include "DrawUtils.h"
 #include "TMsgLogger.h"
 

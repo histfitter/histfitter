@@ -1,3 +1,17 @@
+/**********************************************************************************
+ * Project: HistFitter - A ROOT-based package for statistical data analysis       *
+ * Package: HistFitter                                                            *
+ * Namespace: ValidationUtils                                                     *
+ *                                                                                *
+ * Description:                                                                   *
+ *      Implementation (see header for description)                               *
+ *                                                                                *
+ * Authors:                                                                       *
+ *      HistFitter group, CERN, Geneva, Switzerland                               *
+ *                                                                                *
+ * See corresponding .h file for author and license information                   *
+ **********************************************************************************/
+
 #include "ValidationUtils.h"
 #include "Significance.h"
 #include <TFile.h>

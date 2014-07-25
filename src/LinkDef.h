@@ -44,10 +44,6 @@
 #pragma link C++ function MatchingCountingExperimentsVec;
 #pragma link C++ function ConstructCombinedModel;
 
-//profile_get_Pvalue.cxx
-#pragma link C++ function doFreeFit;
-#pragma link C++ function doFreeFitSave;
-
 //TEasyFormula.cxx
 #pragma link C++ class TEasyFormula ;
 

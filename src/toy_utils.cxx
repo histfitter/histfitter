@@ -1,4 +1,18 @@
 // vim: ts=4:sw=4
+/**********************************************************************************
+ * Project: HistFitter - A ROOT-based package for statistical data analysis       *
+ * Package: HistFitter                                                            *
+ * Namespace: -                                                                   *
+ *                                                                                *
+ * Description:                                                                   *
+ *      Implementation (see header for description)                               *
+ *                                                                                *
+ * Authors:                                                                       *
+ *      HistFitter group, CERN, Geneva, Switzerland                               *
+ *                                                                                *
+ * See corresponding .h file for author and license information                   *
+ **********************************************************************************/
+
 #include "toy_utils.h"
 #include "profile_get_Pvalue.h"
 #include "CombineWorkSpaces.h"
