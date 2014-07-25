@@ -5,7 +5,7 @@
  * Class  : SRootFinder                                                           *
  *                                                                                *
  * Description:                                                                   *
- *      RootFinder taken from TMVA implementation                                 *
+ *      RootFinder using Brents algorithm, taken from TMVA implementation         *
  *                                                                                *
  *      Adapted from TMVA:RootFinder. Original author(s):                         *
  *                                                                                *
@@ -25,15 +25,6 @@
 
 #ifndef StatTools_SRootFinder
 #define StatTools_SRootFinder
-
-//////////////////////////////////////////////////////////////////////////
-//                                                                      //
-// SRootFinder                                                          //
-//                                                                      //
-// Root finding using Brents algorithm                                  //
-// (translated from CERNLIB function RZERO)                             //
-//                                                                      //
-//////////////////////////////////////////////////////////////////////////
 
 #include "TMsgLogger.h"
 #include "TObject.h"
