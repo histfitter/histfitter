@@ -7,7 +7,7 @@
  * Description:                                                                   *
  *      Implementation                                                            *
  *                                                                                *
- * See corresponding .h file for description, author and license information      *         
+ * See corresponding .h file for author and license information                   *         
  *                                                                                *
  **********************************************************************************/
 
