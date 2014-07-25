@@ -1,8 +1,24 @@
 #!/usr/bin/env python
+"""
+ * Project : HistFitter - A ROOT-based package for statistical data analysis      *
+ * Package : HistFitter                                                           *
+ * Script  : UpperLimitTable.py                                                   *
+ *                                                                                *
+ * Description:                                                                   *
+ *      Script for calculating upper limits, based on model-independent signal    *
+ *      fit and producing publication-quality tables                              *
+ *                                                                                *
+ * Authors:                                                                       *
+ *      HistFitter group                                                          *
+ *                                                                                *
+ * Redistribution and use in source and binary forms, with or without             *
+ * modification, are permitted according to the terms listed in the file          *
+ * LICENSE.                                                                       *
+"""
+
 from ROOT import gROOT,gSystem,gDirectory
-#gSystem.Load("libCombinationTools")
 gSystem.Load("libSusyFitter.so")
-from ROOT import ConfigMgr,FitConfig #this module comes from gSystem.Load("libSusyFitter.so")
+from ROOT import ConfigMgr,FitConfig 
 gROOT.Reset()
 
 from ROOT import TFile, RooWorkspace, TObject, TString, RooAbsReal, RooRealVar, RooFitResult, RooDataSet, RooAddition, RooArgSet,RooAbsData,RooRandom 
@@ -15,20 +31,31 @@ import pickle
 import os
 import sys
 
-## MB instructions
-# The main functions are called at the bottom of this file.
-# This will probably require a bit more work to get to work nicely.
-
 def latexfitresults(filename, poiname='mu_SIG', lumiFB=1.0, nTOYS=3000, asimov=False, wname='combined'):
-
-  workspacename=wname
- 
-  w = Util.GetWorkspaceFromFile(filename,workspacename)
+  """
+  Calculate before/after-fit yields in all channels given
   
+  @param filename The filename containing afterFit workspace
+  @param poiname Name of ParameterOfInterest = POI (default='mu_SIG')
+  @param lumiFB Given lumi in fb-1 to translate upper limit on N_events into xsection limit (default='1.0')
+  @param nTOYS Number of toys to be run
+  @param asimov Boolean to run asimov or not (default=False)
+  @param wname RooWorkspace name in file (default='combined')
+  """
+
+  """
+  pick up workspace from file
+  """
+  workspacename=wname
+  w = Util.GetWorkspaceFromFile(filename,workspacename)
   if w==None:
     print "ERROR : Cannot open workspace : ", workspacename
     sys.exit(1) 
 
+    
+  """
+  Set the POI in ModelConfig
+  """
   if len(poiname)==0:
     print " "
   else:
@@ -40,6 +67,9 @@ def latexfitresults(filename, poiname='mu_SIG', lumiFB=1.0, nTOYS=3000, asimov=F
     modelConfig.SetParametersOfInterest(RooArgSet(poi))
     modelConfig.GetNuisanceParameters().remove(poi)
 
+  """
+  set some default values for nToys, calculator type and npoints to be scanned
+  """
   ntoys = 3000
   calctype = 0   # toys = 0, asymptotic (asimov) = 2
   npoints = 20
@@ -49,28 +79,29 @@ def latexfitresults(filename, poiname='mu_SIG', lumiFB=1.0, nTOYS=3000, asimov=F
   if asimov:
     calctype = 2
  
-  # hti_result = RooStats.MakeUpperLimitPlot(poiname,w,calctype,3,ntoys,True,npoints)
-  #   RooStats::MakeUpperLimitPlot(const char* fileprefix,
-  # 			     RooWorkspace* w,
-  # 			     int calculatorType ,                         # toys = 0, asymptotic (asimov) = 2
-  # 			     int testStatType , 
-  # 			     int ntoys,
-  # 			     bool useCLs ,  
-  # 			     int npoints )
-  
+  """
+  set the range of POI to be scanned and perform HypoTest inversion
+  """
   murangelow = 0.0
   murangehigh = 40.0
   hti_result = RooStats.DoHypoTestInversion(w,ntoys,calctype,3,True,npoints,murangelow,murangehigh)
 
+  """
+  save and print the HypoTest result
+  """
   outFileName = "./htiResult_poi_" + poiname + "_ntoys_" + str(ntoys) + "_calctype_" + str(calctype) + "_npoints_" + str(npoints) + ".root"
   hti_result.SaveAs(outFileName)
   hti_result.Print()
 
+  """
+  get the upper limit on N_obs out of hypotest result, and transform to limit on visible xsection
+  """
   uL_nobsinSR = hti_result.UpperLimit()
   uL_visXsec = uL_nobsinSR / lumiFB
-  # uL_visXsecErrorUp = uL_visXsec - uL_nobsinSR/(lumiFB * (1. + lumiRelUncert))
-  # uL_visXsecErrorDown = uL_nobsinSR/(lumiFB * (1. - lumiRelUncert)) - uL_visXsec
 
+  """
+  get the expected upper limit and one scan point up and down to calculate the error on upper limit
+  """
   uL_nexpinSR = hti_result.GetExpectedUpperLimit(0)
   uL_nexpinSR_P = hti_result.GetExpectedUpperLimit(1) 
   uL_nexpinSR_M = hti_result.GetExpectedUpperLimit(-1)
@@ -80,7 +111,9 @@ def latexfitresults(filename, poiname='mu_SIG', lumiFB=1.0, nTOYS=3000, asimov=F
   uL_nexpinSRerrP = hti_result.GetExpectedUpperLimit(1) - uL_nexpinSR
   uL_nexpinSRerrM = uL_nexpinSR - hti_result.GetExpectedUpperLimit(-1)
 
-  # find the CLB values at indexes above and below observed CLs p-value
+  """
+  find the CLB values at indexes above and below observed CLs p-value
+  """
   CLB_P = 0.
   CLB_M = 0.
   mu_P = 0.
@@ -98,39 +131,32 @@ def latexfitresults(filename, poiname='mu_SIG', lumiFB=1.0, nTOYS=3000, asimov=F
         CLB_M = hti_result.CLb(iresult-1)
         mu_M = hti_result.GetXValue(iresult-1)
         indexFound = True
-        #       print " \n   found the CLB values to interpolate"
-        #       print " CLB_M =", CLB_M, " CLB_P =", CLB_P, "  mu_P = ", mu_P, " mu_M = ", mu_M
-   
-  # interpolate the value of CLB to be exactly above upperlimit p-val
+
+  """
+  interpolate (linear) the value of CLB to be exactly above upperlimit p-val
+  """
   try:
     alpha_CLB = (CLB_P - CLB_M) / (mu_P - mu_M)
     beta_CLB = CLB_P - alpha_CLB*mu_P
-    # CLB is taken as the point on the CLB curve for the same poi value, as the observed upperlimit
     CLB = alpha_CLB * uL_nobsinSR + beta_CLB
   except ZeroDivisionError:
     print "WARNING ZeroDivisionError while calculating CLb. Setting CLb=0."
     CLB=0.0
-    # print " CLB = " , CLB
 
    
-  print "\n\n\n\n  ***---  now doing p-value calculation ---*** \n\n\n\n"
+  print "\n\n\n\n  ***---  now doing p-value (s=0) calculation ---*** \n\n\n\n"
+
+  """
+  reset parameter values and errors for p(s=0) calculation
+  """
   Util.resetAllValues(w)
   Util.resetAllErrors(w)
   Util.resetAllNominalValues(w)
-  
-  pval = RooStats.get_Presult(w,False,ntoys,calctype)
-  # get_Presult(  RooWorkspace* w,
-  #           		bool doUL, // = true, // true = exclusion, false = discovery
-  #             		int ntoys, //=1000,
-  #             		int calculatorType, // = 0,
-  #             		int testStatType, // = 3,  
-  #             		const char * modelSBName, // = "ModelConfig",
-  #             		const char * modelBName, // = "",
-  #             		const char * dataName, // = "obsData",
-  #             		bool useCLs, // = true ,   
-  #             		bool useNumberCounting, // = false,
-  #             		const char * nuisPriorName) // = 0 
 
+  """
+  calculate p(s=0) from the workspace given
+  """
+  pval = RooStats.get_Presult(w,False,ntoys,calctype)
   
   ulList = [uL_visXsec, uL_nobsinSR, uL_nexpinSR, uL_nexpinSRerrP, uL_nexpinSRerrM, CLB, pval ]
 
@@ -144,12 +170,17 @@ def latexfitresults(filename, poiname='mu_SIG', lumiFB=1.0, nTOYS=3000, asimov=F
 ##################################
 ##################################
 
-#### Main function calls start here ....
+"""
+Main function calls start here ....
+"""
 
 if __name__ == "__main__":
   
   import os, sys
   import getopt
+  """
+  Print out of usage, options and examples
+  """
   def usage():
     print "Usage:"
     print "UpperLimitTable.py [-c channels] [-w workspace] [-l lumi] [-n nTOYS] [-a asymptotic/Asimov] [-o outputFileName] [-p poiName] [-i]"
@@ -183,12 +214,19 @@ if __name__ == "__main__":
   if len(opts)<3:
     usage()
 
+  """
+  set some default options
+  """
   runInterpreter = False
   outputFileName = "default"
   lumiFB = -1
   useAsimovSet = False
   nTOYS = -1
   poiName = "default"
+
+  """
+  set options as given by the user call
+  """
   for opt,arg in opts:
     if opt == '-c':
       chanStr = arg.replace(",","_")
@@ -225,7 +263,10 @@ if __name__ == "__main__":
     print "Info: -a means you will use the Asimov dataset, no need to specify nTOYS (with -n) as it will not be used in this case"
     sys.exit(0)
   
-  # make a list of workspace (outputfile, poi) names, if multiple channels/regions are required. assumption is that the only difference in the wsname is the channel/region
+  """
+  make a list of workspace (outputfile, poi) names, if multiple channels/regions are required.
+  assumption is that the only difference in the wsname is the channel/region -- FIXME
+  """
   wsFileNameList = []
   outputFileNameList = []
   if poiName == "default":
@@ -254,16 +295,23 @@ if __name__ == "__main__":
   if len(chanList) != len(wsFileNameList):
     print " \n Warning: given list of channels has different size than created list of workspace names:  len(chanList) = ", len(chanList), "  len(wsFileNameList) = ", len(wsFileNameList)
 
+  """
+  call the function to calculate the upper limits
+  """
   upLim = {}
   for index,chan in enumerate(chanList):      
     poiNameChan = poiList[index]
     wsFileNameChan = wsFileNameList[index]
     outputFileNameChan = outputFileNameList[index]
       
-    # calculate upper limit
+    """
+    calculate upper limit
+    """
     ulMapChan = latexfitresults(wsFileNameChan, poiNameChan, lumiFB, nTOYS, useAsimovSet) #, chan)
     upLim[chan] = ulMapChan
-    # print file for every channel separately
+    """
+    print file for every channel separately
+    """
     if len(chanList)>1:
       upLimSingleChan = {}
       upLimSingleChan[chan] = ulMapChan
@@ -275,6 +323,9 @@ if __name__ == "__main__":
       print "\nResult written in:"
       print outputFileNameChan
 
+  """
+  write out LaTeX table by calling function from UpperLimitTableTex.py
+  """
   tablename = 'upperlimit.' + chanStr
   line_upLim = tablefragment(upLim,tablename)
   f = open(outputFileName,'w')

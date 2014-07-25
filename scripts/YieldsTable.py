@@ -32,8 +32,6 @@ from YieldsTableTex import *
 import os
 import sys
 
-# Main function calls are defined below.
-
 def latexfitresults(filename,regionList,sampleList,dataname='obsData',showSum=False, doAsym=True, blinded=False, splitBins=False):
   """
   Calculate before/after-fit yields in all channels given
@@ -112,7 +110,6 @@ def latexfitresults(filename,regionList,sampleList,dataname='obsData',showSum=Fa
   """
   if showSum=True define names for sum of all regions and add to regionList
   """
-  # SUM ALL REGIONS
   sumName = ""
   for index, reg in enumerate(regionList):
     if index == 0:
@@ -144,11 +141,9 @@ def latexfitresults(filename,regionList,sampleList,dataname='obsData',showSum=Fa
   """
   if showSum=True calculate the total number of observed events in all regions  
   """
-  #SUM
   sumNobs = 0.
   for nobs in nobs_regionList:
     sumNobs += nobs
-    ## print " \n XXX nobs = ", nobs, "    sumNobs = ", sumNobs
   if showSum:
     nobs_regionList.append(sumNobs)
   tablenumbers['nobs'] = nobs_regionList
@@ -161,7 +156,6 @@ def latexfitresults(filename,regionList,sampleList,dataname='obsData',showSum=Fa
   """
   get a list of pdf's and variables per region
   """
-  # total pdf, not splitting in components
   pdfinRegionList = [ Util.GetRegionPdf(w, region)  for region in regionList]
   varinRegionList =  [ Util.GetRegionVar(w, region) for region in regionList]
   

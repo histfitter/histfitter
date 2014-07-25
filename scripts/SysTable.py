@@ -42,7 +42,15 @@ def latexfitresults( filename, namemap, region='3jL', sample='', resultName="Roo
   """
   Method-1: set all parameters constant, except for the one you're interested in, 
            calculate the systematic/error propagated due to that parameter
- """
+
+  @param filename The filename containing afterFit workspace
+  @param namemap Defines whether any systematics need to be grouped in calculation (by default not defined, hence each parameter gets used one by one)
+  @param resultname The name of fit result (typically='RooExpandedFitResult_afterFit' or 'RooExpandedFitResult_beforeFit'
+  @param region The region to be used for systematics breakdown calculation
+  @param sample The sample to be used insted of total pdf (default='' not defined, hence total pdf used)
+  @param dataname The name of dataset (default='obsData')
+  @param doAsym Calculates asymmetric errors taken from MINOS (default=True)
+"""
 
   """
   pick up workspace from file
@@ -212,8 +220,16 @@ def latexfitresults_method2(filename,resultname='RooExpandedFitResult_afterFit',
   Method-2: set the parameter you're interested in constant,
   redo the fit with all other parameters floating,
   calculate the quadratic difference between default fit and your new model with parameter fixed
+
+  @param filename The filename containing afterFit workspace
+  @param resultname The name of fit result (typically='RooExpandedFitResult_afterFit' or 'RooExpandedFitResult_beforeFit'
+  @param region The region to be used for systematics breakdown calculation
+  @param sample The sample to be used insted of total pdf (default='' not defined, hence total pdf used)
+  @param fitregions Fit regions to perform the re-fit (default= 'WR,TR,S3,S4,SR3jT,SR4jT' but needs to be specified by user)
+  @param dataname The name of dataset (default='obsData')
+  @param doAsym Calculates asymmetric errors taken from MINOS (default=False) 
   """
-  
+
   """
   pick up workspace from file
   """
