@@ -1,6 +1,27 @@
+"""
+ * Project : HistFitter - A ROOT-based package for statistical data analysis      *
+ * Package : HistFitter                                                           *
+ * Script  : YieldsTableTex.py                                                    *
+ *                                                                                *
+ * Description:                                                                   *
+ *      Script for producing LaTeX-files derived from yields tables produced      *
+ *      by YieldsTable.py script                                                  *
+ *                                                                                *
+ * Authors:                                                                       *
+ *      HistFitter group                                                          *
+ *                                                                                *
+ * Redistribution and use in source and binary forms, with or without             *
+ * modification, are permitted according to the terms listed in the file          *
+ * LICENSE.                                                                       *
+"""
+
 import sys
 import pprint
 
+
+"""
+Outdated example of table -- FIXME
+"""
 def exampletable():
 
   m = {
@@ -21,7 +42,9 @@ def exampletable():
   return m
 
 
-
+""" 
+main function to transfer the set of numbers/names (=m provided by YieldsTable) into a LaTeX table
+""" 
 def tablefragment(m, channel, signalregionslist,sampleList,showBeforeFitError):
 
   tableline = ''
@@ -35,6 +58,10 @@ def tablefragment(m, channel, signalregionslist,sampleList,showBeforeFitError):
   tableline += '''}
 \\noalign{\\smallskip}\\hline\\noalign{\\smallskip}
 {\\bf %s channel}          ''' %channel
+
+"""
+print the region names
+""" 
   for region in m['names']:
     regionName = region.replace("_cuts", "").replace("_meffInc", "").replace('_','\_')
     tableline += " & " + regionName + "           "   
@@ -43,6 +70,9 @@ def tablefragment(m, channel, signalregionslist,sampleList,showBeforeFitError):
 \\noalign{\\smallskip}\\hline\\noalign{\\smallskip}
 %%''' 
 
+"""
+print the number of observed events
+""" 
   tableline += '''
 Observed events         '''
   for n in m['nobs']:
@@ -52,14 +82,17 @@ Observed events         '''
 \\noalign{\\smallskip}\\hline\\noalign{\\smallskip}
 %%'''
 
-  
-#########  #########
-########## fitted
-######### #########
-  
+
+"""
+print the total fitted (after fit) number of events
+if the N_fit - N_error extends below 0, make the error physical , meaning extend to 0
+"""   
   tableline += '''
 Fitted bkg events        '''
   for index, n in enumerate(m['TOTAL_FITTED_bkg_events']):
+    """
+    possible separation of regions with 1 or 2 digits - currently turned off in YieldsTable.py
+    """   
     if m['names'][index] in signalregionslist:
       if (n - m['TOTAL_FITTED_bkg_events_err'][index]) > 0. :
         tableline += " & $" + str(("%.2f" %n)) + " \\pm " + str(("%.2f" %m['TOTAL_FITTED_bkg_events_err'][index])) +  "$         "
@@ -67,20 +100,22 @@ Fitted bkg events        '''
         print "\n YieldsTableTex.py WARNING:   negative symmetric error after fit extends below 0. for total bkg pdf:  will print asymmetric error w/ truncated negative error reaching to 0."
         tableline += " & $" + str(("%.2f" %n)) + "_{-" + str(("%.2f"%n)) + "}^{+" + str(("%.2f" %m['TOTAL_FITTED_bkg_events_err'][index])) +  "}$         "
     else:
-      #tableline += " & $" + str(("%.2f" %n)) + " \\pm " + str(("%.2f" %m['TOTAL_FITTED_bkg_events_err'][index])) +  "$         "
       if (n - m['TOTAL_FITTED_bkg_events_err'][index]) > 0. :
-        tableline += " & $" + str(("%.2f" %n)) + " \\pm " + str(("%.2f" %m['TOTAL_FITTED_bkg_events_err'][index])) +  "$         "
+        tableline += " & $" + str(("%.1f" %n)) + " \\pm " + str(("%.1f" %m['TOTAL_FITTED_bkg_events_err'][index])) +  "$         "
       else:
         print "\n YieldsTableTex.py WARNING:   negative symmetric error extends below 0. for total bkg pdf:  will print asymmetric error w/ truncated negative error reaching to 0."
-        tableline += " & $" + str(("%.2f" %n)) + "_{-" + str(("%.2f"%n)) + "}^{+" + str(("%.2f" %m['TOTAL_FITTED_bkg_events_err'][index])) +  "}$         "
+        tableline += " & $" + str(("%.1f" %n)) + "_{-" + str(("%.1f"%n)) + "}^{+" + str(("%.1f" %m['TOTAL_FITTED_bkg_events_err'][index])) +  "}$         "
   tableline +='''     \\\\
 \\noalign{\\smallskip}\\hline\\noalign{\\smallskip}
 %%'''
 
 
   map_listofkeys = m.keys()
-#  map_listofkeys.sort()
 
+  """
+  print fitted number of events per sample
+  if the N_fit - N_error extends below 0, make the error physical , meaning extend to 0
+  """   
   for sample in sampleList:
     for name in map_listofkeys:
       if "Fitted_events_" in name: 
@@ -96,40 +131,37 @@ Fitted bkg events        '''
         tableline += sampleName
         tableline += ''' events        '''
         for index, n in enumerate(m[name]):
+          """
+          possible separation of regions with 1 or 2 digits - currently turned off in YieldsTable.py
+          """   
           if m['names'][index] in signalregionslist:
-            #print "\n XXX   n=", n, "  m['Fitted_err_'+sample][index] = ", m['Fitted_err_'+sample][index] , "  abs(n) =",  abs(n), "    abs(n) > 0.00001 =", abs(n) > 0.00001
             if ((n - m['Fitted_err_'+sample][index]) > 0.) or not abs(n) > 0.00001:
               tableline += " & $" + str(("%.2f" %n)) + " \\pm " + str(("%.2f" %m['Fitted_err_'+sample][index])) +  "$         "
             else:
               print "\n YieldsTableTex.py WARNING:   negative symmetric error after fit extends below 0. for sample", sample, "    will print asymmetric error w/ truncated negative error reaching to 0."
               tableline += " & $" + str(("%.2f" %n)) + "_{-" + str(("%.2f"%n)) + "}^{+" + str(("%.2f" %m['Fitted_err_'+sample][index])) +  "}$         "
           else:
-            ##tableline += " & $" + str(("%.2f" %n)) + " \\pm " + str(("%.2f" %m['Fitted_err_'+sample][index])) +  "$         "
             if ((n - m['Fitted_err_'+sample][index]) > 0.) or not abs(n) > 0.00001:
-              tableline += " & $" + str(("%.2f" %n)) + " \\pm " + str(("%.2f" %m['Fitted_err_'+sample][index])) +  "$         "
+              tableline += " & $" + str(("%.1f" %n)) + " \\pm " + str(("%.1f" %m['Fitted_err_'+sample][index])) +  "$         "
             else:
               print "\n YieldsTableTex.py WARNING:   negative symmetric error after fit extends below 0. for sample", sample, "    will print asymmetric error w/ truncated negative error reaching to 0."
-              tableline += " & $" + str(("%.2f" %n)) + "_{-" + str(("%.2f"%n)) + "}^{+" + str(("%.2f" %m['Fitted_err_'+sample][index])) +  "}$         "
+              tableline += " & $" + str(("%.1f" %n)) + "_{-" + str(("%.1f"%n)) + "}^{+" + str(("%.1f" %m['Fitted_err_'+sample][index])) +  "}$         "
         tableline +='''     \\\\
 %%'''
 
-
-  
-#########  #########
-########## expected
-######### #########
 
   tableline +='''     
  \\noalign{\\smallskip}\\hline\\noalign{\\smallskip}
 %%'''
 
+"""
+print the total expected (before fit) number of events
+if the N_fit - N_error extends below 0, make the error physical , meaning extend to 0
+"""   
 
   tableline += '''
 MC exp. SM events             '''
   for index, n in enumerate(m['TOTAL_MC_EXP_BKG_events']):
-    #if abs(n)<0.00001:
-    #  tableline += " & -- "
-    #  continue
     if showBeforeFitError:
       if ((n - m['TOTAL_MC_EXP_BKG_err'][index]) > 0.) or not abs(n) > 0.00001:
         tableline += " & $" + str(("%.2f" %n)) + " \\pm " + str(("%.2f" %m['TOTAL_MC_EXP_BKG_err'][index])) +  "$         "
@@ -142,11 +174,12 @@ MC exp. SM events             '''
 \\noalign{\\smallskip}\\hline\\noalign{\\smallskip}
 %%''' 
 
-
   map_listofkeys = m.keys()
-#  map_listofkeys.sort()
 
-
+  """
+  print expected number of events per sample
+  if the N_fit - N_error extends below 0, make the error physical , meaning extend to 0
+  """   
   for sample in sampleList:
     for name in map_listofkeys:
       if "MC_exp_events_" in name and sample in name:
@@ -167,9 +200,6 @@ MC exp. SM events             '''
         tableline += ''' events        '''
         for index, n in enumerate(m[name]):
           if m['names'][index] in signalregionslist:
-            #if abs(n)<0.00001:
-            #  tableline += " & -- "
-            #  continue
             if showBeforeFitError:
               if ((n - m['MC_exp_err_'+sample][index]) > 0.) or not abs(n) > 0.00001:
                 tableline += " & $" + str(("%.2f" %n)) + " \\pm " + str(("%.2f" %m['MC_exp_err_'+sample][index])) +  "$         "
@@ -187,10 +217,6 @@ MC exp. SM events             '''
                 tableline += " & $" + str(("%.2f" %n)) + "_{-" + str(("%.2f"%n)) + "}^{+" + str(("%.2f" %m['MC_exp_err_'+sample][index])) +  "}$         "
             else:
               tableline += " & $" + str(("%.2f" %n)) +  "$         "##           else:
-##             if showBeforeFitError:
-##               tableline += " & $" + str(("%.2f" %n)) + " \\pm " + str(("%.2f" %m['MC_exp_err_'+sample][index])) +  "$         "
-##             else:
-##               tableline += " & $" + str(("%.2f" %n)) +  "$         "
         tableline +='''     \\\\
 %%'''
 
@@ -203,11 +229,13 @@ MC exp. SM events             '''
   return tableline
 
 
-################
 
 
 def tablestart():
-
+  """
+  print tabel start for LaTeX table
+  """   
+ 
   start = '''
 
 \\begin{table}
@@ -219,6 +247,10 @@ def tablestart():
   return start
 
 def tableEndWithCaptionAndLabel(tableCaption, tableLabel):
+  """
+  print table end with Caption and Label given by user
+  """   
+ 
   end = '''%%
 }
 \\end{center}
@@ -230,6 +262,9 @@ def tableEndWithCaptionAndLabel(tableCaption, tableLabel):
   return end
 
 def tableend(signalregion='3+ jets, loose',suffix='sr3jl'):
+  """
+  print table end with Caption and Label used by default
+  """   
 
   end = '''%%
 }
@@ -251,6 +286,10 @@ where the negative error is truncated when reaching to zero event yield.
 
 
 def tableend2(signalregion='3+ jets, loose',suffix='sr3jl'):
+  """
+  print table end with Caption and Label used by default-2
+  """   
+ 
 
   end = '''%%
 }
@@ -274,6 +313,10 @@ where the negative error is truncated when reaching to zero event yield.
 
 
 def tableend3(suffix='sr3jl'):
+  """
+  print table end with Caption and Label used by default-3
+  """   
+ 
 
   end = '''%%
 }
@@ -295,6 +338,10 @@ where the negative error is truncated when reaching to zero event yield.
 
 
 def tableend4(rList, suffix='sr3jl', mentionCh=''):
+  """
+  print table end with Caption and Label used by default-4
+  """   
+ 
 
   regionsList = []
   for r in rList:
@@ -335,6 +382,5 @@ where the negative error is truncated when reaching to zero event yield.
 
   return end
 
-#print tablestart(), tableframent(m), tableend()
 
 

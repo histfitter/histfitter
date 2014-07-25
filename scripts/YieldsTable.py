@@ -1,8 +1,19 @@
 #!/usr/bin/env python
-
-# from sys import exit
-# from ROOT import gSystem
-# gSystem.Load("libCombinationTools")
+"""
+ * Project : HistFitter - A ROOT-based package for statistical data analysis      *
+ * Package : HistFitter                                                           *
+ * Script  : YieldsTable.py                                                       *
+ *                                                                                *
+ * Description:                                                                   *
+ *      Script for producing publication-quality yields tables                    *
+ *                                                                                *
+ * Authors:                                                                       *
+ *      HistFitter group                                                          *
+ *                                                                                *
+ * Redistribution and use in source and binary forms, with or without             *
+ * modification, are permitted according to the terms listed in the file          *
+ * LICENSE.                                                                       *
+""" 
 
 import ROOT
 ROOT.gROOT.SetBatch(True)
@@ -577,6 +588,10 @@ if __name__ == "__main__":
     outputFileName=sampleStr+"_inRegions_"+chanStr+'_YieldsTable.tex'
     pass
 
+
+  """
+  possible separation for LaTeX table to write one or two digits out, for now turned off
+  """
   regionsList_1Digit = chanList
   regionsList_2Digits = chanList
 
