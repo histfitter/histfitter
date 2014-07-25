@@ -55,9 +55,7 @@
 #pragma link C++ function CollectAndWriteHypoTestResults;
 #pragma link C++ function CollectHypoTestResults;
 
-//StatTools.cxx & SRootFinder.cxx
 #pragma link C++ namespace StatTools;
-#pragma link C++ class StatTools::SRootFinder;
 #pragma link C++ function StatTools::GetProbFromSigma;
 #pragma link C++ function StatTools::GetSigma;
 #pragma link C++ function StatTools::DmLogL_PA ;
