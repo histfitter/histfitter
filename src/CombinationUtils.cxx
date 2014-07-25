@@ -150,20 +150,4 @@ bool Util::findValueFromTree( TTree* tree, const std::string& searchpar, float& 
 }
 
 
-//_____________________________________________________________________________
-float 
-Util::getxsec(const int& id, const float& mp, const float& mlsp) {
-  TFile* file(0);
-  if      (id==0) { file = TFile::Open("xsecgg.root");   }
-  else if (id==1) { file = TFile::Open("xsecss.root");   }
-  else if (id==2) { file = TFile::Open("xsecstop.root"); }
-  else if (id==3) { file = TFile::Open("xsecued.root");  }
-
-  TTree* xstree = (TTree*)file->Get("xstree");
-  float val = Util::getValueFromTree(xstree,"xsec","mp",mp,"mlsp",mlsp);
-  file->Close();
-
-  return val;
-}
-
 

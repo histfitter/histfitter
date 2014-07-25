@@ -512,7 +512,6 @@ RooFitResult* Util::FitPdf( RooWorkspace* w, TString fitRegions, Bool_t lumiCons
 
         // save fit result	  
         r = minim.save();
-        //val = r->minNll();
     }
     else { 
         Logger << kERROR << "FIT FAILED !- return a NaN NLL " << GEndl;
@@ -1914,7 +1913,6 @@ Util::doFreeFit( RooWorkspace* w, RooDataSet* inputdata, const bool& verbose, co
     Logger << kINFO << "Util::doFreeFit()  ........ using " << minimizer << " / " << algorithm 
         << " with strategy  " << strategy << " and tolerance " << tol << GEndl;
 
-    //bool kickApplied(false);
     for (int tries = 1, maxtries = 4; tries <= maxtries; ++tries) {
         //	 status = minim.minimize(fMinimizer, ROOT::Math::MinimizerOptions::DefaultMinimizerAlgo().c_str());
         status = minim.minimize(minimizer, algorithm);  

@@ -52,7 +52,6 @@ namespace Util
 
   bool findValueFromTree( TTree* tree, const std::string& searchpar, float& searchval, const std::vector<std::string>& pnVec, const std::vector<float>& vVec, const float& defaultVal=-999. );
 
-  float getxsec(const int& id, const float& mp, const float& mlsp);
 }
 
 
