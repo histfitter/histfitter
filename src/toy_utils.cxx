@@ -4,7 +4,6 @@
 #include "CombineWorkSpaces.h"
 #include "Significance.h"
 #include "Utils.h"
-#include "SigmaLR.h"
 #include "StatTools.h"
 #include "TMsgLogger.h"
 #include "RooStats/HypoTestInverterResult.h"

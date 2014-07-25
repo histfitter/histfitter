@@ -6,8 +6,6 @@
 
 #pragma link C++ nestedclass;
 
-#pragma link C++ class SigmaLR;
-#pragma link C++ class Heaviside;
 #pragma link C++ class ConfigMgr;
 #pragma link C++ class FitConfig;
 #pragma link C++ class RooExpandedFitResult;

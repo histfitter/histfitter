@@ -5,7 +5,7 @@
  * Class  : TMsgLogger                                                            *
  *                                                                                *
  * Description:                                                                   *
- *      Implementation (see header for description)                               *
+ *      output logger class producing nicely formatted log messages               *
  *                                                                                *
  *      Adapted from TMVA:MsgLogger. Original authors:                            *
  *                                                                                *

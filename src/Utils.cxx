@@ -16,7 +16,6 @@
 #include "RooAbsArg.h"
 #include "RooFitResult.h"
 #include "RooRealVar.h"
-#include "SigmaLR.h"
 #include "RooWorkspace.h"
 #include "RooSimultaneous.h"
 #include "RooProdPdf.h"
