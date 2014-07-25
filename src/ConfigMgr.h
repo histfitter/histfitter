@@ -1,10 +1,22 @@
 // vim: ts=4:sw=4
-////////////////////////////////////////////////////////////////////////
-// Creation: December 2011, David Cote (CERN)                         //
-// Simple C++ mirror of the python configManager.                     //
-// Note that ConfigMgr is a singleton (like its python counter-part). //
-// Currently assumes uniform fit configuration for all TopLevelXMLs . //
-////////////////////////////////////////////////////////////////////////
+/**********************************************************************************
+ * Project: HistFitter - A ROOT-based package for statistical data analysis       *
+ * Package: HistFitter                                                            *
+ * Class  : ConfigMgr                                                             *
+ * Created: December 2011                                                         *
+ *                                                                                *
+ * Description:                                                                   *
+ * Simple C++ mirror of the python configManager.                                 *
+ * Note that ConfigMgr is a singleton (like its python counter-part).             * 
+ * Currently assumes uniform fit configuration for all TopLevelXMLs .             *
+ *                                                                                *
+ * Authors:                                                                       *
+ *      HistFitter group, CERN, Geneva                                            *
+ *                                                                                *
+ * Redistribution and use in source and binary forms, with or without             *
+ * modification, are permitted according to the terms listed in the file          *
+ * LICENSE.                                                                       *
+ **********************************************************************************/
 
 #ifndef CONFIGMGR_H
 #define CONFIGMGR_H

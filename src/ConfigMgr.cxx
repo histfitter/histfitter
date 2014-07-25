@@ -1,10 +1,20 @@
 // vim: ts=4:sw=4
-////////////////////////////////////////////////////////////////////////
-// Creation: December 2011, David Cote (CERN)                         //
-// Simple C++ mirror of the python configManager.                     //
-// Note that ConfigMgr is a singleton (like its python counter-part). //
-// Currently assumes uniform fit configuration for all TopLevelXMLs . //
-////////////////////////////////////////////////////////////////////////
+/**********************************************************************************
+ * Project: HistFitter - A ROOT-based package for statistical data analysis       *
+ * Package: HistFitter                                                            *
+ * Class  : ConfigMgr                                                             *
+ * Created: December 2011                                                         *
+ *                                                                                *
+ * Description:                                                                   *
+ *      Implementation (see header for description)                               *
+ *                                                                                *
+ * Authors:                                                                       *
+ *      HistFitter group, CERN, Geneva                                            *
+ *                                                                                *
+ * Redistribution and use in source and binary forms, with or without             *
+ * modification, are permitted according to the terms listed in the file          *
+ * LICENSE.                                                                       *
+ **********************************************************************************/
 
 //SusyFitter includes
 #include "TMsgLogger.h"
@@ -22,8 +32,11 @@
 #include "RooRandom.h"
 #include "RooRealIntegral.h"
 
+
 using namespace std;
 
+
+//_______________________________________________________________________________________
 ConfigMgr::ConfigMgr() : m_logger("ConfigMgrCPP") { 
     m_nToys = 1000;
     m_calcType = 0;
@@ -43,12 +56,16 @@ ConfigMgr::ConfigMgr() : m_logger("ConfigMgrCPP") {
     m_plotRatio="ratio"; //options: "ratio", "pull", "none"
 }
 
+
+//_______________________________________________________________________________________
 FitConfig* ConfigMgr::addFitConfig(const TString& name){
     FitConfig* fc = new FitConfig(name);
     m_fitConfigs.push_back(fc);
     return m_fitConfigs.at(m_fitConfigs.size()-1);
 }
 
+
+//_______________________________________________________________________________________
 FitConfig* ConfigMgr::getFitConfig(const TString& name){
     for(unsigned int i=0; i<m_fitConfigs.size(); i++) {
         if(m_fitConfigs.at(i)->m_name==name){
@@ -60,6 +77,7 @@ FitConfig* ConfigMgr::getFitConfig(const TString& name){
 }
 
 
+//_______________________________________________________________________________________
 Bool_t ConfigMgr::checkConsistency() {
     if(m_fitConfigs.size()==0) {
         m_status = "empty";
@@ -70,6 +88,8 @@ Bool_t ConfigMgr::checkConsistency() {
     return true;
 }
 
+
+//_______________________________________________________________________________________
 void ConfigMgr::initialize() {  
     if(m_saveTree || m_doHypoTest){
         if(m_outputFileName.Length()>0) {
@@ -82,6 +102,8 @@ void ConfigMgr::initialize() {
     return;
 }
 
+
+//_______________________________________________________________________________________
 void ConfigMgr::fitAll() {
     for(unsigned int i=0; i<m_fitConfigs.size(); i++) {
         fit ( m_fitConfigs.at(i) );
@@ -90,10 +112,14 @@ void ConfigMgr::fitAll() {
     return;
 }
 
+
+//_______________________________________________________________________________________
 void ConfigMgr::fit(int i) {
     return fit(m_fitConfigs.at(i));
 }
 
+
+//_______________________________________________________________________________________
 void ConfigMgr::fit(FitConfig* fc) {
     TString outfileName = m_outputFileName;
     outfileName.ReplaceAll(".root","_fitresult.root");
@@ -133,6 +159,8 @@ void ConfigMgr::fit(FitConfig* fc) {
     return;
 }
 
+
+//_______________________________________________________________________________________
 void ConfigMgr::doHypoTestAll(TString outdir, Bool_t doUL) {
     for(unsigned int i=0; i<m_fitConfigs.size(); i++) {
         doHypoTest( m_fitConfigs.at(i), outdir, 0., doUL );
@@ -146,10 +174,14 @@ void ConfigMgr::doHypoTestAll(TString outdir, Bool_t doUL) {
     return;
 }
 
+
+//_______________________________________________________________________________________
 void ConfigMgr::doHypoTest(int i , TString outdir, double SigXSecSysnsigma, Bool_t doUL) {
     return doHypoTest( m_fitConfigs.at(i), outdir, SigXSecSysnsigma, doUL );
 }
 
+
+//_______________________________________________________________________________________
 void ConfigMgr::doHypoTest(FitConfig* fc, TString outdir, double SigXSecSysnsigma, Bool_t doUL) {
     TString outfileName = m_outputFileName;
     TString suffix = "_hypotest.root";
@@ -179,7 +211,7 @@ void ConfigMgr::doHypoTest(FitConfig* fc, TString outdir, double SigXSecSysnsigm
         return; 
     }
 
-    // MB 20130408: overwrite default - change from piece-wise linear to 6th order poly interp + linear extrapolation (also used in Higgs group)
+    // piece-wise linear to 6th order poly interp + linear extrapolation (also used in Higgs group)
     Util::SetInterpolationCode(w,4); 
 
     m_logger << kINFO << "Processing analysis " << fc->m_signalSampleName << GEndl;
@@ -230,7 +262,6 @@ void ConfigMgr::doHypoTest(FitConfig* fc, TString outdir, double SigXSecSysnsigm
     }
 
     /// 2. the hypothesis test
-
     RooStats::HypoTestResult* htr(0);
     RooStats::HypoTestInverterResult* result(0);
 
@@ -248,7 +279,8 @@ void ConfigMgr::doHypoTest(FitConfig* fc, TString outdir, double SigXSecSysnsigm
     } else {  // b. discovery 
         // MB: Hack, needed for ProfileLikeliHoodTestStat to work properly.
         if (m_testStatType==3) { 
-            m_logger << kWARNING << "Discovery mode --> Need to change test-statistic type from one-sided to two-sided for RooStats to work." << GEndl; 
+            m_logger << kWARNING << "Discovery mode --> Need to change test-statistic type " 
+		     << "from one-sided to two-sided for RooStats to work." << GEndl; 
             m_logger << kWARNING << "(Note: test is still one-sided.)" << GEndl; 
             m_testStatType=2; 
         } 
@@ -297,6 +329,8 @@ void ConfigMgr::doHypoTest(FitConfig* fc, TString outdir, double SigXSecSysnsigm
     return;
 }
 
+
+//_______________________________________________________________________________________
 TString ConfigMgr::makeCorrectedBkgModelConfig( RooWorkspace* w, const char* modelSBName ) {
     TString bModelStr;
 
@@ -399,6 +433,7 @@ TString ConfigMgr::makeCorrectedBkgModelConfig( RooWorkspace* w, const char* mod
 }
 
 
+//_______________________________________________________________________________________
 void ConfigMgr::doUpperLimitAll() {
     for(unsigned int i=0; i<m_fitConfigs.size(); i++) {
         doUpperLimit( m_fitConfigs.at(i) );
@@ -406,10 +441,14 @@ void ConfigMgr::doUpperLimitAll() {
     return;
 }
 
+
+//_______________________________________________________________________________________
 void ConfigMgr::doUpperLimit(int i) {
     return doUpperLimit(m_fitConfigs.at(i));
 }
 
+
+//_______________________________________________________________________________________
 void ConfigMgr::doUpperLimit(FitConfig* fc) {
     TString outfileName = m_outputFileName;
     outfileName.ReplaceAll(".root","_upperlimit.root");
@@ -431,7 +470,7 @@ void ConfigMgr::doUpperLimit(FitConfig* fc) {
         return; 
     }
 
-    // MB 20130408: overwrite default - change from piece-wise linear to 6th order poly interp + linear extrapolation (also used in Higgs group)
+    // 6th order poly interp + linear extrapolation (also used in Higgs group)
     Util::SetInterpolationCode(w,4);
 
     // reset all nominal values
@@ -457,11 +496,10 @@ void ConfigMgr::doUpperLimit(FitConfig* fc) {
         double eul2 = 1.10 * hypo->GetExpectedUpperLimit(2);
         delete hypo; hypo=0;
 
-        //cout << "INFO grepme : " << m_nToys << " " << m_calcType << " " << m_testStatType << " " << m_useCLs << " " << m_nPoints << GEndl;
-
         hypo = RooStats::DoHypoTestInversion(w, m_nToys, m_calcType, m_testStatType, m_useCLs, m_nPoints, 0, eul2);
         int nPointsRemoved = hypo->ExclusionCleanup();
-        m_logger << kWARNING << "ExclusionCleanup() removed " << nPointsRemoved << " scan point(s) for hypo test inversion: " << hypo->GetName() << GEndl;
+        m_logger << kWARNING << "ExclusionCleanup() removed " << nPointsRemoved 
+		 << " scan point(s) for hypo test inversion: " << hypo->GetName() << GEndl;
     }
 
     /// store ul as nice plot ..
@@ -469,8 +507,6 @@ void ConfigMgr::doUpperLimit(FitConfig* fc) {
         TString outputPrefix = TString(gSystem->DirName(outfileName))+"/"+fc->m_signalSampleName.Data();
         RooStats::AnalyzeHypoTestInverterResult( hypo, m_calcType, m_testStatType, m_useCLs, m_nPoints, outputPrefix, ".eps") ;
     }
-
-    //cout << "h1" << GEndl;
 
     // save complete hypotestinverterresult to file
     if(hypo){	
@@ -493,6 +529,8 @@ void ConfigMgr::doUpperLimit(FitConfig* fc) {
     return;
 }
 
+
+//_______________________________________________________________________________________
 void ConfigMgr::runToysAll() {
     for(unsigned int i=1; i<m_fitConfigs.size(); i++) {
         runToys ( m_fitConfigs.at(i) );
@@ -500,10 +538,14 @@ void ConfigMgr::runToysAll() {
     return;
 }
 
+
+//_______________________________________________________________________________________
 void ConfigMgr::runToys(int i) {
     return runToys(m_fitConfigs.at(i));
 }
 
+
+//_______________________________________________________________________________________
 void ConfigMgr::runToys(FitConfig* fc) {
     TFile* inFile = TFile::Open(fc->m_inputWorkspaceFileName);
     if(!inFile){ 
@@ -532,9 +574,13 @@ void ConfigMgr::runToys(FitConfig* fc) {
     return;
 }
 
+
+//_______________________________________________________________________________________
 void ConfigMgr::finalize(){
     return;
 }
 
-// Initialization of singleton
+
+//_______________________________________________________________________________________
+/// Initialization of singleton
 ConfigMgr *ConfigMgr::_singleton = NULL;

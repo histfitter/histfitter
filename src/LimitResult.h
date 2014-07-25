@@ -8,7 +8,7 @@
  *      Simple class for storing results from a hypothesis test.                  *
  *                                                                                *
  * Authors:                                                                       *
- *      HistFitter group                                                          *
+ *      HistFitter group, CERN, Geneva                                            *
  *                                                                                *
  * Redistribution and use in source and binary forms, with or without             *
  * modification, are permitted according to the terms listed in the file          *
