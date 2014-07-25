@@ -7,7 +7,7 @@
  * Description:                                                                   *
  *      Implementation                                                            *
  *                                                                                *
- * See corresponding .h file for more description, author and license information *         
+ * See corresponding .h file for description, author and license information      *         
  *                                                                                *
  **********************************************************************************/
 
@@ -98,9 +98,10 @@ void TEasyFormula::SetValue(const TString& name, const double& value) {
 
 //_____________________________________________________________________________
 Double_t TEasyFormula::DefinedValue(Int_t code) {
-    // Interface to TFormula, return value defined by object with id 'code'
-    // Object ids are mapped from object names by method DefinedVariable()
-    // Return current value for variable indicated by internal reference code
+  /* Interface to TFormula, return value defined by object with id 'code'
+   * Object ids are mapped from object names by method DefinedVariable()
+   * Return current value for variable indicated by internal reference code
+   */
 
     if ( m_itos.find(code)==m_itos.end() ) { return 0.; }
     TString name = m_itos[code];
@@ -112,9 +113,10 @@ Double_t TEasyFormula::DefinedValue(Int_t code) {
 
 //_____________________________________________________________________________
 Int_t TEasyFormula::DefinedVariable(TString &name, int& action) {
-    // Interface to TFormula. If name passed by TFormula is recognized
-    // as one of our RooAbsArg servers, return a unique id integer
-    // that represent this variable.
+  /* Interface to TFormula. If name passed by TFormula is recognized
+   * as one of our RooAbsArg servers, return a unique id integer
+   * that represent this variable.
+   */
 
     Int_t ret = DefinedVariable(name) ;
     if (ret>=0) { action = kDefinedVariable; }
@@ -124,9 +126,10 @@ Int_t TEasyFormula::DefinedVariable(TString &name, int& action) {
 
 //_____________________________________________________________________________
 Int_t TEasyFormula::DefinedVariable(TString &name) {
-    // Interface to TFormula. If name passed by TFormula is recognized
-    // as one of our RooAbsArg servers, return a unique id integer
-    // that represent this variable.
+  /* Interface to TFormula. If name passed by TFormula is recognized
+   * as one of our RooAbsArg servers, return a unique id integer
+   * that represent this variable.
+   */
 
     if ( m_stod.find(name)==m_stod.end() ) {
         // variable not known, add it
