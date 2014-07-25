@@ -9,7 +9,7 @@
  *      using ROOT's TFormula class.                                              *
  *                                                                                *
  * Authors:                                                                       *
- *      Gfitter group                                                             *
+ *      HistFitter group                                                             *
  *                                                                                *
  * Redistribution and use in source and binary forms, with or without             *
  * modification, are permitted according to the terms listed in the file          *
