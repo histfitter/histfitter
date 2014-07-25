@@ -1,4 +1,20 @@
 // vim: ts=4:sw=4
+/**********************************************************************************
+ * Project: HistFitter - A ROOT-based package for statistical data analysis       *
+ * Package: HistFitter                                                            *
+ * Namespace: StatTools                                                           *
+ *                                                                                *
+ * Description:                                                                   *
+ *      Namespace for global statistics utility functions                         *
+ *      E.g. get correct p-value from significance and inverse                    *
+ *                                                                                *
+ * Authors:                                                                       *
+ *      Andreas Hoecker <Andreas.Hocker@cern.ch> - CERN, Switzerland              *
+ *      Till Eifert <Till.Eifert@cern.ch> - CERN, Switzerland                     *
+ *      HistFitter group, CERN, Geneva, Switzerland                               *
+ *                                                                                *
+ * See corresponding .h file for author and license information                   *
+ **********************************************************************************/
 
 #ifndef __Significance__
 #define __Significance__ 
@@ -11,7 +27,6 @@ class RooDataSet;
 
 namespace StatTools
 {
-    // for root finding
     Double_t GetProbFromSigma( Double_t );     // get p-value from significance [sigma]
     Double_t GetSigma( Double_t pValue );      // inverse of above: get significance [sigma] from p-value
 
