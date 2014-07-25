@@ -1,18 +1,24 @@
 /*****************************************************************************
- * Project: RooFit                                                           *
- * Package: RooFitCore                                                       *
- *    File: $Id$
- * Authors:                                                                  *
- *   WV, Wouter Verkerke, UC Santa Barbara, verkerke@slac.stanford.edu       *
- *   DK, David Kirkby,    UC Irvine,         dkirkby@uci.edu                 *
+ * Project: HistFitter - A ROOT-based package for statistical data analysis  *
+ * Package: HistFitter                                                       *
+ * Class  : RooPlot                                                          *
  *                                                                           *
- * Copyright (c) 2000-2005, Regents of the University of California          *
+ * Description:                                                              *
+ *      RooPlot is a RooFit plot frame and a container for graphics objects  *
+ *                                                                           *
+ *      Adapted from RooFit:RooPlot. Original authors:                       *
+ *                                                                           *
+ *      WV, Wouter Verkerke, UC Santa Barbara, verkerke@slac.stanford.edu    *
+ *      DK, David Kirkby,    UC Irvine,         dkirkby@uci.edu              *
+ *                                                                           *
+ * Copyright (c) 2000-2005: Regents of the University of California          *
  *                          and Stanford University. All rights reserved.    *
  *                                                                           *
- * Redistribution and use in source and binary forms,                        *
- * with or without modification, are permitted according to the terms        *
- * listed in LICENSE (http://roofit.sourceforge.net/license.txt)             *
+ * http://root.cern.ch/root/html534/src/RooPlot.h.html                       *
+ *                                                                           *
+ * (http://roofit.sourceforge.net/license.txt)                               *
  *****************************************************************************/
+
 #ifndef ROO_PLOT
 #define ROO_PLOT
 

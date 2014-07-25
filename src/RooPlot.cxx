@@ -1,46 +1,23 @@
 /*****************************************************************************
- * Project: RooFit                                                           *
- * Package: RooFitCore                                                       *
- * @(#)root/roofitcore:$Id$
- * Authors:                                                                  *
- *   WV, Wouter Verkerke, UC Santa Barbara, verkerke@slac.stanford.edu       *
- *   DK, David Kirkby,    UC Irvine,         dkirkby@uci.edu                 *
+ * Project: HistFitter - A ROOT-based package for statistical data analysis  *
+ * Package: HistFitter                                                       *
+ * Class  : RooPlot                                                          *
  *                                                                           *
- * Copyright (c) 2000-2005, Regents of the University of California          *
+ * Description:                                                              *
+ *      Implementation (see header for description)                          *
+ *                                                                           *
+ *      Adapted from RooFit:RooPlot. Original authors:                       *
+ *                                                                           *
+ *      WV, Wouter Verkerke, UC Santa Barbara, verkerke@slac.stanford.edu    *
+ *      DK, David Kirkby,    UC Irvine,         dkirkby@uci.edu              *
+ *                                                                           *
+ * Copyright (c) 2000-2005: Regents of the University of California          *
  *                          and Stanford University. All rights reserved.    *
  *                                                                           *
- * Redistribution and use in source and binary forms,                        *
- * with or without modification, are permitted according to the terms        *
- * listed in LICENSE (http://roofit.sourceforge.net/license.txt)             *
+ * http://root.cern.ch/root/html534/src/RooPlot.h.html                       *
+ *                                                                           *
+ * (http://roofit.sourceforge.net/license.txt)                               *
  *****************************************************************************/
-
-//////////////////////////////////////////////////////////////////////////////
-//
-// BEGIN_HTML
-// A RooPlot is a plot frame and a container for graphics objects
-// within that frame. As a frame, it provides the TH1-style public interface
-// for settting plot ranges, configuring axes, etc. As a container, it
-// holds an arbitrary set of objects that might be histograms of data,
-// curves representing a fit model, or text labels. Use the Draw()
-// method to draw a frame and the objects it contains. Use the various
-// add...() methods to add objects to be drawn.  In general, the
-// add...() methods create a private copy of the object you pass them
-// and return a pointer to this copy. The caller owns the input object
-// and this class owns the returned object.
-// <p>
-// All RooAbsReal and RooAbsData derived classes implement plotOn()
-// functions that facilitate to plot themselves on a given RooPlot, e.g.
-// <pre>
-// RooPlot *frame = x.frame() ;
-// data.plotOn(frame) ;
-// pdf.plotOn(frame) ;
-// </pre>
-// These high level functions also take care of any projections
-// or other mappings that need to be made to plot a multi-dimensional
-// object onto a one-dimensional plot.
-// END_HTML
-//
-
 
 #include "RooFit.h"
 
