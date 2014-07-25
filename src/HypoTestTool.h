@@ -1,9 +1,26 @@
 // vim: ts=4:sw=4
 /* -*- mode: c++ -*- */
-// Standard tutorial macro for performing an inverted  hypothesis test 
-//
-// This macro will perform a scan of tehe p-values for computing the limit
-// 
+
+/**********************************************************************************
+ * Project: HistFitter - A ROOT-based package for statistical data analysis       *
+ * Package: HistFitter                                                            *
+ * Class  : HypoTestTool                                                          *
+ *                                                                                *
+ * Description:                                                                   *
+ *      Class for performing one or a list of hypothesis tests.                   *
+ *      A list of tests can be inverted to derive an upper limit.                 *
+ *                                                                                *
+ *      Adapted from RooStats.StandardHypoTestInvDemo. Original author(s):        *
+ *                                                                                *
+ *      Lorenzo Moneta        <Lorenzo.Moneta@cern.ch> - CERN, Switzerland        *
+ *                                                                                *
+ * Copyright (c):                                                                 *
+ *      CERN, Switzerland                                                         *
+ *                                                                                *
+ * http://root.cern.ch/root/html534/tutorials/roostats/StandardHypoTestInvDemo.C.html 
+ *                                                                                *
+ * (http://root.cern.ch/drupal/content/license)                                   *
+ **********************************************************************************/
 
 #ifndef HypoTestTool_hh
 #define HypoTestTool_hh
@@ -102,7 +119,7 @@ namespace RooStats {
             double  mNToysRatio;
             double  mMaxPoi;
             std::string mMassValue;
-            std::string mMinimizerType;  // minimizer type (default is what is in ROOT::Math::MinimizerOptions::DefaultMinimizerType()
+            std::string mMinimizerType;  
             TString     mResultFileName; 
 
             bool mNoSystematics;

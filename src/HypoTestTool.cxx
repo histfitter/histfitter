@@ -1,9 +1,25 @@
 // vim: ts=4:sw=4
 /* -*- mode: c++ -*- */
-// Standard tutorial macro for performing an inverted  hypothesis test 
-//
-// This macro will perform a scan of tehe p-values for computing the limit
-// 
+
+/**********************************************************************************
+ * Project: HistFitter - A ROOT-based package for statistical data analysis       *
+ * Package: HistFitter                                                            *
+ * Class  : HypoTestTool                                                          *
+ *                                                                                *
+ * Description:                                                                   *
+ *      Implementation (see header for description)                               *
+ *                                                                                *
+ *      Adapted from RooStats.StandardHypoTestInvDemo. Original author(s):        *
+ *                                                                                *
+ *      Lorenzo Moneta        <Lorenzo.Moneta@cern.ch> - CERN, Switzerland        *
+ *                                                                                *
+ * Copyright (c):                                                                 *
+ *      CERN, Switzerland                                                         *
+ *                                                                                *
+ * http://root.cern.ch/root/html534/tutorials/roostats/StandardHypoTestInvDemo.C.html 
+ *                                                                                *
+ * (http://root.cern.ch/drupal/content/license)                                   *
+ **********************************************************************************/
 
 #include "HypoTestTool.h"
 #include "TMsgLogger.h"
@@ -41,33 +57,30 @@
 using namespace RooFit;
 using namespace RooStats;
 
-/*
+/* Options:
+ *  bool plotHypoTestResult = true;          // plot test statistic result at each point
+ *  bool writeResult = true;                 // write HypoTestInverterResult in a file 
+ *  TString resultFileName;                  // file with results (by default is built automatically using teh ws input file name)
+ *  bool optimize = true;                    // optmize evaluation of test statistic 
+ *  bool useVectorStore = true;              // convert data to use new roofit data store 
+ *  bool generateBinned = false;             // generate binned data sets 
+ *  bool noSystematics = false;              // force all systematics to be off (i.e. set all nuisance parameters as constat to their nominal values)
+ *  double nToysRatio = 2;                   // ratio Ntoys S+b/ntoysB
+ *  double maxPOI = -1;                      // max value used of POI (in case of auto scan) 
+ *  bool useProof = false;                    // use Proof Light when using toys (for freq or hybrid)
+ *  int nworkers = 4;                        // number of worker for Proof
+ *  bool rebuild = false;                    // re-do extra toys for computing expected limits and rebuild test stat
+ *  // distributions (N.B this requires much more CPU (factor is equivalent to nToyToRebuild)
+ *  int nToyToRebuild = 100;                 // number of toys used to rebuild 
+ *  int initialFit = -1;                     // do a first  fit to the model (-1 : default, 0 skip fit, 1 do always fit) 
+ *  int randomSeed = -1;                     // random seed (if = -1: use default value, if = 0 always random )
+ *  // NOTE: Proof uses automatically a random seed   
+ *  std::string massValue = "";              // extra string to tag output file of result 
+ *  std::string  minimizerType = "";         // minimizer type (default is what is in ROOT::Math::MinimizerOptions::DefaultMinimizerType()
+ *  int   printLevel = 0;                    // print level for debugging PL test statistics and calculators  
+ */
 
-   bool plotHypoTestResult = true;          // plot test statistic result at each point
-   bool writeResult = true;                 // write HypoTestInverterResult in a file 
-   TString resultFileName;                  // file with results (by default is built automatically using teh ws input file name)
-   bool optimize = true;                    // optmize evaluation of test statistic 
-   bool useVectorStore = true;              // convert data to use new roofit data store 
-   bool generateBinned = false;             // generate binned data sets 
-   bool noSystematics = false;              // force all systematics to be off (i.e. set all nuisance parameters as constat
-// to their nominal values)
-double nToysRatio = 2;                   // ratio Ntoys S+b/ntoysB
-double maxPOI = -1;                      // max value used of POI (in case of auto scan) 
-bool useProof = false;                    // use Proof Light when using toys (for freq or hybrid)
-int nworkers = 4;                        // number of worker for Proof
-bool rebuild = false;                    // re-do extra toys for computing expected limits and rebuild test stat
-// distributions (N.B this requires much more CPU (factor is equivalent to nToyToRebuild)
-int nToyToRebuild = 100;                 // number of toys used to rebuild 
-int initialFit = -1;                     // do a first  fit to the model (-1 : default, 0 skip fit, 1 do always fit) 
-int randomSeed = -1;                     // random seed (if = -1: use default value, if = 0 always random )
-// NOTE: Proof uses automatically a random seed
-
-std::string massValue = "";              // extra string to tag output file of result 
-std::string  minimizerType = "";         // minimizer type (default is what is in ROOT::Math::MinimizerOptions::DefaultMinimizerType()
-int   printLevel = 0;                    // print level for debugging PL test statistics and calculators  
-
-*/
-
+//_______________________________________________________________________________________
 RooStats::HypoTestTool::HypoTestTool() : m_hc(0), m_calc(0),
     mPlotHypoTestResult(true),
     mWriteResult(true),
@@ -93,7 +106,7 @@ RooStats::HypoTestTool::HypoTestTool() : m_hc(0), m_calc(0),
 }
 
 
-
+//_______________________________________________________________________________________
 void
 RooStats::HypoTestTool::SetParameter(const char * name, bool value){
     //
@@ -114,6 +127,7 @@ RooStats::HypoTestTool::SetParameter(const char * name, bool value){
 }
 
 
+//_______________________________________________________________________________________
 void
 RooStats::HypoTestTool::SetParameter(const char * name, int value){
     //
@@ -133,6 +147,7 @@ RooStats::HypoTestTool::SetParameter(const char * name, int value){
 
 
 
+//_______________________________________________________________________________________
 void
 RooStats::HypoTestTool::SetParameter(const char * name, double value){
     //
@@ -150,6 +165,7 @@ RooStats::HypoTestTool::SetParameter(const char * name, double value){
 
 
 
+//_______________________________________________________________________________________
 void
 RooStats::HypoTestTool::SetParameter(const char * name, const char * value){
     //
@@ -166,6 +182,7 @@ RooStats::HypoTestTool::SetParameter(const char * name, const char * value){
 }
 
 
+//_______________________________________________________________________________________
 void
 RooStats::HypoTestTool::AnalyzeResult( HypoTestInverterResult * r,
         int calculatorType,
@@ -207,10 +224,6 @@ RooStats::HypoTestTool::AnalyzeResult( HypoTestInverterResult * r,
         mResultFileName += mMassValue.c_str();
         mResultFileName += "_";
     }
-
-    ///TString name = fileNameBase; 
-    ///name.Replace(0, name.Last('/')+1, "");
-    ///resultFileName += name;
 
     if (mWriteResult) {
         TFile * fileOut = new TFile(mResultFileName,"RECREATE");
@@ -273,9 +286,11 @@ RooStats::HypoTestTool::AnalyzeResult( HypoTestInverterResult * r,
 }
 
 
-// internal routine to run the inverter
-// The inverter assumes to exclude the signal model
-    HypoTestInverterResult *
+//_______________________________________________________________________________________
+/* internal routine to run the inverter
+ * The inverter assumes to exclude the signal model
+ */
+HypoTestInverterResult *
 RooStats::HypoTestTool::RunHypoTestInverter(RooWorkspace * w,
         const char * modelSBName, const char * modelBName, 
         const char * dataName, int type,  int testStatType, 
@@ -292,7 +307,6 @@ RooStats::HypoTestTool::RunHypoTestInverter(RooWorkspace * w,
     }
 
     /// by now m_calc has been setup okay ...
-
     TStopwatch tw; 
     tw.Start();
     HypoTestInverterResult * r = m_calc->GetInterval();
@@ -312,7 +326,7 @@ RooStats::HypoTestTool::RunHypoTestInverter(RooWorkspace * w,
                 << limDist->InverseCDF(0.16) << "  " 
                 << limDist->InverseCDF(0.84) << "\n"; 
 
-            //update r to a new updated result object containing the rebuilt expected p-values distributions
+            // update r to a new updated result object containing the rebuilt expected p-values distributions
             // (it will not recompute the expected limit)
             if (r) delete r;  // need to delete previous object since GetInterval will return a cloned copy
             r = m_calc->GetInterval();
@@ -328,8 +342,9 @@ RooStats::HypoTestTool::RunHypoTestInverter(RooWorkspace * w,
 }
 
 
-// internal routine to run the hypothesis test
-    HypoTestResult*
+//_______________________________________________________________________________________
+/// internal routine to run the hypothesis test
+HypoTestResult*
 RooStats::HypoTestTool::RunHypoTest(RooWorkspace * w, bool doUL,
         const char * modelSBName, const char * modelBName, 
         const char * dataName, int type, int testStatType, 
@@ -360,7 +375,8 @@ RooStats::HypoTestTool::RunHypoTest(RooWorkspace * w, bool doUL,
 }
 
 
-    bool
+//_______________________________________________________________________________________
+bool
 RooStats::HypoTestTool::SetupHypoTestCalculator(RooWorkspace * w, bool doUL,
         const char * modelSBName, const char * modelBName, 
         const char * dataName, int type,  int testStatType, 
@@ -379,14 +395,6 @@ RooStats::HypoTestTool::SetupHypoTestCalculator(RooWorkspace * w, bool doUL,
     else 
         m_logger << kINFO << "Using data set " << dataName << GEndl;
 
-    //// MB : comment out for root 5.34, no longer works
-    //if (mUseVectorStore) { 
-    //    RooAbsData::defaultStorageType = RooAbsData::Vector;
-    //    data->convertToVectorStore() ;
-    //}
-
-    // get models from WS
-    // get the modelConfig out of the file
     ModelConfig* bModel = (ModelConfig*) w->obj(modelBName);
     ModelConfig* sbModel = (ModelConfig*) w->obj(modelSBName);
 
@@ -494,22 +502,6 @@ RooStats::HypoTestTool::SetupHypoTestCalculator(RooWorkspace * w, bool doUL,
     //poi->setRange(0,100);
 
     // fit the data first (need to use constraint )
-
-    /*
-       if (false) { // MB: old
-       Info( "HypoTestTool"," Doing a first fit to the observed data ");
-       if (mMinimizerType.size()==0) mMinimizerType = ROOT::Math::MinimizerOptions::DefaultMinimizerType();
-       else 
-       ROOT::Math::MinimizerOptions::SetDefaultMinimizer(mMinimizerType.c_str());
-       Info("HypoTestTool","Using %s as minimizer for computing the test statistic",
-       ROOT::Math::MinimizerOptions::DefaultMinimizerType().c_str() );
-       RooArgSet constrainParams;
-       if (sbModel->GetNuisanceParameters() ) constrainParams.add(*sbModel->GetNuisanceParameters());
-       RooStats::RemoveConstantParameters(&constrainParams);
-       }
-       */
-
-    // MB : new setup   
     bool doFit = mInitialFit;
     if (testStatType == 0 && mInitialFit == -1) doFit = false;  // case of LEP test statistic
     if (type == 3  && mInitialFit == -1) doFit = false;         // case of Asymptoticcalculator with nominal Asimov
@@ -577,7 +569,7 @@ RooStats::HypoTestTool::SetupHypoTestCalculator(RooWorkspace * w, bool doUL,
     // and reset poi
     poi->setVal(poihat);
 
-    // MB : build test statistics and hypotest calculators for running the inverter 
+    // build test statistics and hypotest calculators for running the inverter 
 
     // print a message in case of LEP test statistics because it affects result by doing or not doing a fit 
     if (testStatType == 0) {
@@ -603,9 +595,6 @@ RooStats::HypoTestTool::SetupHypoTestCalculator(RooWorkspace * w, bool doUL,
         RooArgSet altParams(*altModel->GetSnapshot());
         if (altModel->GetNuisanceParameters()) altParams.add(*altModel->GetNuisanceParameters());
         if (altModel->GetSnapshot()) slrts->SetAltParameters(altParams);
-
-        //if (nullModel->GetSnapshot()) slrts->SetNullParameters(*nullModel->GetSnapshot());
-        //if (altModel->GetSnapshot()) slrts->SetAltParameters(*altModel->GetSnapshot());
 
         slrts->SetReuseNLL(mOptimize);
     }  
@@ -766,7 +755,7 @@ RooStats::HypoTestTool::SetupHypoTestCalculator(RooWorkspace * w, bool doUL,
 }
 
 
-
+//_______________________________________________________________________________________
 bool
 RooStats::HypoTestTool::SetupHypoTestInverter(RooWorkspace * w,
         const char * modelSBName, const char * modelBName, 
@@ -804,7 +793,6 @@ RooStats::HypoTestTool::SetupHypoTestInverter(RooWorkspace * w,
 
     // get models from WS
     // get the modelConfig out of the file
-    ///ModelConfig* bModel = (ModelConfig*) w->obj(modelBName);
     ModelConfig* sbModel = (ModelConfig*) w->obj(modelSBName);
 
     if (!sbModel) {
@@ -840,15 +828,12 @@ RooStats::HypoTestTool::SetupHypoTestInverter(RooWorkspace * w,
             if (poimin>poihat) { poimin = poihat - 4 * poi->getError(); }
             if (poimin<0) { poimin = 0; }
             poimax = ( poihat +  20 * poi->getErrorHi() );
-            /// MB: got rid of int rounding
         }
         m_logger << kINFO << "Doing a fixed scan  in interval : " << poimin << " , " << poimax << GEndl;
         if ( poimax > poi->getMax() ) { poi->setMax( poimax ); }
         m_calc->SetFixedScan(npoints,poimin,poimax);
     }
     else { 
-        //poi->setMax(10*int( (poihat+ 10 *poi->getError() )/10 ) );
-        //if ( poimax > poi->getMax() ) { poi->setMax( poimax ); }
         m_logger << kINFO << "Doing an  automatic scan  in interval : " << poi->getMin() << " , " << poi->getMax() << GEndl;
     }
 
