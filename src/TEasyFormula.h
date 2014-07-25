@@ -5,7 +5,7 @@
  * Class  : TEasyFormula                                                          *
  *                                                                                *
  * Description:                                                                   *
- *      Class for producing easy formalas based on arrays,                        *
+ *      Class for producing formalas based on arrays, with easy interaction,      *
  *      using ROOT's TFormula class.                                              *
  *                                                                                *
  * Authors:                                                                       *
