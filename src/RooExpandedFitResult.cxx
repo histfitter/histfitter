@@ -1,9 +1,16 @@
 // vim: ts=4:sw=4 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Creation: March 2012, Alex Koutsman (CERN/TRIUMF)                               //
-// Class derived from RooFitResult, to be able to add more parameters       //
-//   for error propagation (calculation & visualization)                                    //
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/**********************************************************************************
+ * Project: HistFitter - A ROOT-based package for statistical data analysis       *
+ * Package: HistFitter                                                            *
+ * Class  : RooExpandedFitResult                                                  *
+ * Created: March 2012
+ *                                                                                *
+ * Description:                                                                   *
+ *      Implementation (see header for description)                               *
+ *                                                                                *
+ * See corresponding .h file for author and license information                   *         
+ *                                                                                *
+ **********************************************************************************/
 
 #include "RooExpandedFitResult.h"
 
@@ -189,5 +196,4 @@ RooExpandedFitResult::RooExpandedFitResult(RooArgList extraPars){
     }
 
     fillCorrMatrix(globalCC,corrs,covs) ;
-
 }
