@@ -1,13 +1,26 @@
 // vim: ts=4:sw=4
 /**********************************************************************************
- * Package : StatTools                                                            *
- * Class   : SRootFinder                                                          *
- * Creation: 27 Jan 2007                                                          *
+ * Project: HistFitter - A ROOT-based package for statistical data analysis       *
+ * Package: HistFitter                                                            *
+ * Class  : SRootFinder                                                           *
  *                                                                                *
- * Author : Andreas Hoecker <Andreas.Hoecker@cern.ch> - CERN, Switzerland         *
+ * Description:                                                                   *
+ *      Implementation (see header for description)                               *
  *                                                                                *
- * File and Version Information:                                                  *
- * $Id$    
+ *      Adapted from TMVA:RootFinder. Original author(s):                         *
+ *                                                                                *
+ *      Andreas Hoecker <Andreas.Hocker@cern.ch> - CERN, Switzerland              *
+ *      Helge Voss      <Helge.Voss@cern.ch>     - MPI-K Heidelberg, Germany      *
+ *      Kai Voss        <Kai.Voss@cern.ch>       - U. of Victoria, Canada         *
+ *                                                                                *
+ * Copyright (c) 2005:                                                            *
+ *      CERN, Switzerland                                                         * 
+ *      U. of Victoria, Canada                                                    * 
+ *      MPI-K Heidelberg, Germany                                                 *
+ *                                                                                *
+ *     http://root.cern.ch/root/html/src/TMVA__RootFinder.h.html                  * 
+ *                                                                                *
+ * (http://tmva.sourceforge.net/LICENSE)                                          *
  **********************************************************************************/
 
 #include "SRootFinder.h"
