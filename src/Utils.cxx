@@ -345,6 +345,11 @@ void Util::WriteWorkspace(RooWorkspace* w, TString outFileName, TString suffix){
 }
 
 
+/*
+ * The FitPdf() function is partially taken from the function RooStats::ProfileLikelihoodTestStat::GetMinNLL()
+ * See: http://root.cern.ch/root/html534/src/RooStats__ProfileLikelihoodTestStat.cxx.html
+ */
+
 //_____________________________________________________________________________
 RooFitResult* Util::FitPdf( RooWorkspace* w, TString fitRegions, Bool_t lumiConst, RooAbsData* inputData, TString suffix, Bool_t minos, TString minosPars)
 {
