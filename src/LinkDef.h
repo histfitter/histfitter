@@ -40,9 +40,6 @@
 #pragma link C++ function GetFitResultFromFile;
 #pragma link C++ function GetMCStudy;
 #pragma link C++ function ParseWorkspaceID;
-#pragma link C++ function MatchingCountingExperiments;
-#pragma link C++ function MatchingCountingExperimentsVec;
-#pragma link C++ function ConstructCombinedModel;
 
 //TEasyFormula.cxx
 #pragma link C++ class TEasyFormula ;

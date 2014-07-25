@@ -9,6 +9,8 @@
  *                                                                                *
  * Authors:                                                                       *
  *      HistFitter group, CERN, Geneva                                            *
+ *      Lorenzo Moneta, CERN, Geneva  <Lorenzo.Moneta@cern.h>
+ *      Wouter Verkerke, Nikhef, Amsterdam <verkerke@nikhef.nl>
  *                                                                                *
  * Redistribution and use in source and binary forms, with or without             *
  * modification, are permitted according to the terms listed in the file          *
