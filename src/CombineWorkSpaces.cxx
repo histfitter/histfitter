@@ -52,11 +52,8 @@ using namespace std;
 using namespace RooFit ;
 using namespace RooStats ;
 
-// -------------------------------
-// read the header for information
-// -------------------------------
-
 static TMsgLogger CombineWorkSpacesLogger("CombineWorkSpaces");
+
 
 //________________________________________________________________________________________________
 void clearVec( std::vector<RooWorkspace*>& wsVec ) {
@@ -71,10 +68,10 @@ void clearVec( std::vector<RooWorkspace*>& wsVec ) {
 
 
 //________________________________________________________________________________________________
-// This function retrieves workspaces from files as specified in fwnameMap, where
-// the key is the filename, and map[key] gives the identifyer of the workspace.
-// wid is the new names of the retrieved workspaces
-//
+/* This function retrieves workspaces from files as specified in fwnameMap, where
+ * the key is the filename, and map[key] gives the identifyer of the workspace.
+ * wid is the new names of the retrieved workspaces
+ */
 std::vector<RooWorkspace*> CollectWorkspaces( const std::map< TString,TString >& fwnameMap, const TString& wid ) {
     std::vector<RooWorkspace*> wsVec;
     std::map< TString,TString >::const_iterator wfItr=fwnameMap.begin(), wfEnd=fwnameMap.end();
@@ -102,9 +99,9 @@ std::vector<RooWorkspace*> CollectWorkspaces( const std::map< TString,TString >&
 
 
 //________________________________________________________________________________________________
-// this function categorizes all workspaces found in infile, whose names match the format 
-// string, eg. "muSUSY10_3j_20pb_SU_%f_%f_0_3", where %f and %f are mapped onto the parameters "m0:m12"
-//
+/* this function categorizes all workspaces found in infile, whose names match the format 
+ * string, eg. "muSUSY10_3j_20pb_SU_%f_%f_0_3", where %f and %f are mapped onto the parameters "m0:m12"
+ */
 std::map< TString,TString > GetMatchingWorkspaces( const TString& infile, const TString& theformat, const TString& interpretation, const TString& cutStr, const Int_t& fID, TTree* ORTree ) {
 
     CombineWorkSpacesLogger << kDEBUG   << " GetMatchingWorkspaces() : infile = " << infile << GEndl;
@@ -245,6 +242,7 @@ std::map< TString,TString > GetMatchingWorkspaces( const TString& infile, const 
     return wsidMap;
 }
 
+
 //________________________________________________________________________________________________
 RooWorkspace* GetWorkspaceFromFile( const TString& infile, const TString& wsname ) {
     TFile* file = TFile::Open(infile.Data(), "READ");
@@ -277,6 +275,7 @@ RooWorkspace* GetWorkspaceFromFile( const TString& infile, const TString& wsname
     //file->Close();
     return w;
 }
+
 
 //________________________________________________________________________________________________
 RooStats::HypoTestInverterResult* GetHypoTestResultFromFile( const TString& infile, const TString& wsname ) {
@@ -355,6 +354,7 @@ RooFitResult* GetFitResultFromFile( const TString& infile, const TString& fitnam
     return v;
 }
 
+
 //________________________________________________________________________________________________
 RooMCStudy* GetMCStudy( const RooWorkspace* w ) {
     if (w==0) {
@@ -424,8 +424,8 @@ std::map<TString,float> ParseWorkspaceID( const TString& wid ) {
 
 
 //________________________________________________________________________________________________
-// See MatchingCountingExperimentsVec
-//
+/* See MatchingCountingExperimentsVec
+ */
 bool 
 MatchingCountingExperiments ( const TString& of,  const TString& opref,
 			      const TString& if1, const TString& f1, const TString& i1, 
@@ -446,8 +446,8 @@ MatchingCountingExperiments ( const TString& of,  const TString& opref,
 
 
 //________________________________________________________________________________________________
-// See MatchingCountingExperimentsVec
-//
+/* See MatchingCountingExperimentsVec
+ */
 bool
 MatchingCountingExperiments ( const TString& of,  const TString& opref,
 			      const TString& if1, const TString& f1, const TString& i1,
@@ -466,8 +466,8 @@ MatchingCountingExperiments ( const TString& of,  const TString& opref,
 
 
 //________________________________________________________________________________________________
-// See MatchingCountingExperimentsVec
-//
+/* See MatchingCountingExperimentsVec
+ */
 bool 
 MatchingCountingExperiments ( const TString& of,     const TString& opref,
 			      const TString& if1,    const TString& f1,    const TString& i1,
@@ -483,8 +483,8 @@ MatchingCountingExperiments ( const TString& of,     const TString& opref,
 
 
 //________________________________________________________________________________________________
-// Select workspaces from single input file and store them in outputfile
-//
+/* Select workspaces from single input file and store them in outputfile
+ */
 bool 
 MatchingCountingExperiments( const TString& of,  const TString& opref, const TString& if1, const TString& f1, const TString& i1, const TString& cutStr )
 {
@@ -494,6 +494,7 @@ MatchingCountingExperiments( const TString& of,  const TString& opref, const TSt
 }
 
 
+//_____________________________________________________________________________
 bool
 MatchingCountingExperiments( const TString& outfile,  const TString& outws_prefix, 
                              const std::vector<TString>& infile1, const TString& f1, 
@@ -512,6 +513,7 @@ MatchingCountingExperiments( const TString& outfile,  const TString& outws_prefi
 }
 
 
+//_____________________________________________________________________________
 bool
 MatchingCountingExperiments( const TString& of,  const TString& opref, 
                              const std::vector<TString>& infile1, const TString& f1, 
@@ -538,9 +540,9 @@ MatchingCountingExperiments( const TString& of,  const TString& opref,
 
 
 //________________________________________________________________________________________________
-// This function searches for matching workspaces in the list of inputfiles, combines them,
-// and stores them in a new output file
-//
+/* This function searches for matching workspaces in the list of inputfiles, combines them,
+ * and stores them in a new output file
+ */
 bool 
 MatchingCountingExperimentsVec ( const TString& outfile, const TString& outws_prefix,
 				 const std::vector<TString>& infile, const std::vector<TString>& format, const std::vector<TString>& interpretation, 
@@ -624,7 +626,7 @@ MatchingCountingExperimentsVec ( const TString& outfile, const TString& outws_pr
 }
 
 
-
+//_____________________________________________________________________________
 RooWorkspace* 
 ConstructCombinedModel(RooWorkspace* ws1, const TString& correlateVarsStr) 
 {
@@ -634,6 +636,7 @@ ConstructCombinedModel(RooWorkspace* ws1, const TString& correlateVarsStr)
 }
 
 
+//_____________________________________________________________________________
 RooWorkspace* 
 ConstructCombinedModel(RooWorkspace* ws1, RooWorkspace* ws2, const TString& correlateVarsStr) 
 {
@@ -644,6 +647,7 @@ ConstructCombinedModel(RooWorkspace* ws1, RooWorkspace* ws2, const TString& corr
 }
 
 
+//_____________________________________________________________________________
 RooWorkspace* 
 ConstructCombinedModel(std::vector<RooWorkspace*> chs, const TString& correlateVarsStr) 
 {  
@@ -798,9 +802,7 @@ ConstructCombinedModel(std::vector<RooWorkspace*> chs, const TString& correlateV
   cout <<"full list of channels:"<<endl;
   cout << ss.str() << endl;
 
-
   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 
   cout << "\n\n------------------\n Entering workspace combination\n" << endl;
 

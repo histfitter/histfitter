@@ -1,4 +1,20 @@
 // vim: ts=4:sw=4
+/**********************************************************************************
+ * Project: HistFitter - A ROOT-based package for statistical data analysis       *
+ * Package: HistFitter                                                            *
+ * Namespace: -                                                                   *
+ *                                                                                *
+ * Description:                                                                   *
+ *      Utils functions for processing of multiple hypotest results               *
+ *                                                                                *
+ * Authors:                                                                       *
+ *      HistFitter group, CERN, Geneva                                            *
+ *                                                                                *
+ * Redistribution and use in source and binary forms, with or without             *
+ * modification, are permitted according to the terms listed in the file          *
+ * LICENSE.                                                                       *
+ **********************************************************************************/
+
 #ifndef toy_utilsDEF
 #define toy_utilsDEF 
 

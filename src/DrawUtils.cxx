@@ -25,10 +25,13 @@
 
 using namespace std;
 
+
 namespace DrawUtil {
     static TMsgLogger DrawUtilLogger("DrawUtil");
 }
 
+
+//________________________________________________________________________________________________
 TH2D* DrawUtil::triwsmooth( TTree* tree, const char* varstr, const char* name, const char* title, const char* cutstr, TH2D* inputHist){
     if (tree==NULL) 
         return 0;
@@ -75,6 +78,8 @@ TH2D* DrawUtil::triwsmooth( TTree* tree, const char* varstr, const char* name, c
     return hist; // note: caller owns histogram
 }
 
+
+//________________________________________________________________________________________________
 TH2F* DrawUtil::makesignificancehistos( TTree* tree, int mode,TString id1,TString id2,int   nbinsX,int nbinsY, float minX,float maxX, float minY, float maxY) {
     if (tree == NULL) 
         return 0;
@@ -129,6 +134,8 @@ TH2F* DrawUtil::makesignificancehistos( TTree* tree, int mode,TString id1,TStrin
     else return 0;
 }
 
+
+//________________________________________________________________________________________________
 TH2F* DrawUtil::linearsmooth(const TH2& hist, const char* name, const char* title) {
     int nbinsx = hist.GetNbinsX();
     int nbinsy = hist.GetNbinsY();

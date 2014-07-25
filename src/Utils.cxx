@@ -146,7 +146,6 @@ double Util::getNonQcdVal(const TString& proc, const TString& reg, TMap* map,con
 
 
 //_____________________________________________________________________________
-//void Util::GenerateFitAndPlot(TString fcName, Bool_t drawBeforeFit, Bool_t drawAfterFit, Bool_t plotCorrelationMatrix, Bool_t plotSeparateComponents, Bool_t plotNLL ){
 void Util::GenerateFitAndPlot(TString fcName, TString anaName, Bool_t drawBeforeFit, Bool_t drawAfterFit, Bool_t plotCorrelationMatrix, Bool_t plotSeparateComponents, Bool_t plotNLL, Bool_t minos, TString minosPars ){
 
 
@@ -500,22 +499,8 @@ RooFitResult* Util::FitPdf( RooWorkspace* w, TString fitRegions, Bool_t lumiCons
                 minimizer = "Minuit";
                 algorithm = "migradimproved";
             }
-            /*
-               if (tries == 4 && !kickApplied) {
-               Logger << kINFO << "    ----> trying fit with different starting values" << GEndl;
-               RooFitResult* tmpResult = minim.save();
-               const RooArgList& randList = tmpResult->randomizePars();
-             *allParams = randList;
-             delete tmpResult;
-             tries=0;          // reset the fit cycle
-             kickApplied=true; // do kick only once
-             }
-             */
         }
     }
-
-    //RooFitResult * result = 0; 
-    //double val(0);
 
     if (status%100 == 0) { // ignore errors in Hesse or in Improve
         // only calculate minos errors if fit with Migrad converged
@@ -565,7 +550,7 @@ RooFitResult* Util::FitPdf( RooWorkspace* w, TString fitRegions, Bool_t lumiCons
 
 
 //_____________________________________________________________________________
-    void 
+void 
 Util::SetInterpolationCode(RooWorkspace* w, Int_t code)
 {
     if(w==NULL){
@@ -588,7 +573,7 @@ Util::SetInterpolationCode(RooWorkspace* w, Int_t code)
 
 
 //_____________________________________________________________________________
-    RooAbsData* 
+RooAbsData* 
 Util::GetAsimovSet( RooWorkspace* inputws  )
 {
     RooWorkspace* w(0);
@@ -722,18 +707,6 @@ void Util::DecomposeWS(const char* infile, const char* wsname, const char* outfi
     std::vector<TString> regionsVec = GetRegionsVec(plotRegions, regionCat);
 
     unsigned  int numPlots = regionsVec.size();
-    //TCanvas* canVec[numPlots];
-    //  RooPlot* frameVec[numPlots];
-
-    //   RooAddPdf* combinedPdf = new RooAddPdf();
-    //   RooDataSet* combinedData = new RooDataSet();
-    //   RooRealVar* firstVar;
-    //   RooRealVar* replaceVar;
-    //   RooAbsPdf* firstPdf ;
-
-    //   RooAbsPdf* replacePdf ;
-    //   RooArgList* coefList;
-    //   RooArgList* pdfList;
 
     RooWorkspace* wcomb = new RooWorkspace(wsname);
 
@@ -768,8 +741,6 @@ void Util::DecomposeWS(const char* infile, const char* wsname, const char* outfi
 
         }
     }
-
-    //  cout << GEndl << GEndl;
 
     wcomb->writeToFile(outfile);
 
@@ -1577,14 +1548,6 @@ void Util::PlotNLL(RooWorkspace* w, RooFitResult* rFit, Bool_t plotPLL, TString 
                 }
             }	
 
-            // 	cout << " AFTER  curve->GetN() = " << curve->GetN() << endl;
-            // 	for(Int_t iBin=0;  iBin < curve->GetN(); iBin++){
-            //           Double_t xBin = 0.;
-            //           Double_t yBin = -1.;     
-            //           curve->GetPoint(iBin,xBin,yBin) ;
-            // 	  cout  << "  AFTER:   iBin = " << iBin << " xBin = " << xBin << " yBin = " << yBin << endl;		    
-            //         }	
-
             Int_t iBin = 1;
             Double_t xFirstBin = 0.;
             Double_t yFirstBin = -1.;	
@@ -2274,9 +2237,6 @@ RooAbsReal* Util::GetComponent(RooWorkspace* w, TString component, TString regio
 }
 
 
-
-
-
 //_____________________________________________________________________________
 Double_t Util::GetComponentFracInRegion(RooWorkspace* w, TString component, TString region){
 
@@ -2359,8 +2319,6 @@ Double_t Util::GetComponentFracInRegion(RooWorkspace* w, TString component, TStr
 }
 
 
-
-
 //_____________________________________________________________________________
 RooAbsPdf* Util::GetRegionPdf(RooWorkspace* w, TString region){  //, unsigned int bin){
 
@@ -2384,46 +2342,6 @@ RooAbsPdf* Util::GetRegionPdf(RooWorkspace* w, TString region){  //, unsigned in
     return regionPdf;
 
 }
-
-
-
-
-// //_____________________________________________________________________________
-// RooAbsReal* Util::GetRegionPdfIntegral(RooWorkspace* w, TString region){  //, unsigned int bin){
-
-//   if(w==NULL){ cout << GEndl << " Workspace not found, no GetRegionPdf performed" << endl << GEndl; return NULL; }
-
-//   RooCategory* regionCat = (RooCategory*) w->cat("channelCat");
-//   TString regionFullName = GetFullRegionName(regionCat, region);
-
-//   RooSimultaneous* pdf = (RooSimultaneous*) w->pdf("simPdf");
-//   RooAbsPdf* regionPdf = (RooAbsPdf*) pdf->getPdf(regionFullName.Data());
-
-//   RooAbsData* data = (RooAbsData*)w->data("obsData"); 
-//   TString dataCatLabel = Form("channelCat==channelCat::%s",regionFullName.Data());
-//   RooAbsData* regionData = (RooAbsData*) data->reduce(dataCatLabel.Data());
-
-//   if(regionPdf==NULL || regionData==NULL){ 
-//     cout << " Either the Pdf or the Dataset do not have an appropriate state for the region = " << region << ", check the Workspace file" << GEndl;
-//     cout << " regionPdf = " << regionPdf << "   regionData = " << regionData << GEndl;  
-//     return NULL; 
-//   }
-//   RooRealVar* regionVar =(RooRealVar*) ((RooArgSet*) regionPdf->getObservables(*regionData))->find(Form("obs_x_%s",regionFullName.Data()));
-
-//   RooAbsReal* regionPdfInt = regionPdf->createIntegral(RooArgSet(*regionVar));
-
-//   if(regionPdfInt == NULL){
-//     cout << " region pdf integral not found in region(" << regionFullName << ")   RETURNING COMPONENTS WILL BE WRONG " << GEndl ;
-//     return NULL;
-//   }
-
-//   cout << " Adding " << regionPdfInt->GetName() << " to workspace" << GEndl;
-//   w->import( *regionPdfInt,kTRUE);
-//   gDirectory->Add(regionPdfInt);
-
-//   return regionPdfInt;
-
-// }
 
 
 //_____________________________________________________________________________
@@ -2791,14 +2709,7 @@ Util::resetError( RooWorkspace* wspace, const RooArgList& parList, const RooArgL
             RooAbsReal* constraint = (RooAbsReal*) wspace->obj( (UncertaintyName+"_constraint").c_str() );
             std::string ConstraintType ="";
             if(constraint != 0){ ConstraintType=constraint->IsA()->GetName(); }
-            /*
-               cout << string(UncertaintyName) << endl;
-               cout << "here1" << endl;
-               cout << "constraint " << constraint << endl;
-               cout << "constraint->IsA() " << constraint->IsA() << endl;
-               cout << constraint->IsA()->GetName() << endl;
-               cout << "here2" << endl;
-               */
+
             if( ConstraintType == "" ) {
                 //cout << "Error: Strange constraint type for Stat Uncertainties " << ConstraintType << GEndl;
                 Logger << kINFO << "Assuming parameter :" << UncertaintyName << ": is a ShapeFactor and so unconstrained" << GEndl;
@@ -3012,8 +2923,6 @@ void Util::ImportInWorkspace( RooWorkspace* wspace, TObject* obj, TString name) 
 
 //________________________________________________________________________________________________________________________________________
 void Util::RemoveEmptyDataBins(RooWorkspace* w, RooPlot* frame){
-
-    //Logger << kINFO << " Util::RemoveEmptyDataBins() " << GEndl ;
 
     // histname=0 means that the last RooHist is taken from the RooPlot
     const char* histname = 0;

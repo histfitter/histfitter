@@ -17,6 +17,7 @@
 #include <TFile.h>
 
 
+//________________________________________________________________________________________________
 void ValidationUtils::Horizontal( TH1 *h, Int_t nbin, Bool_t kLINE, Int_t color, float yWidthScaleUp, float yWidthScaleDown)
 {
    // Draw histogram h horizontaly with bars
@@ -40,6 +41,8 @@ void ValidationUtils::Horizontal( TH1 *h, Int_t nbin, Bool_t kLINE, Int_t color,
    else         box->Draw("F");   
 }
 
+
+//________________________________________________________________________________________________
 void ValidationUtils::HorizontalElMu( TH1 *h, Int_t nbin, Bool_t kLINE, Int_t color, Int_t color2, float yWidthScale )
 {
    // Draw histogram h horizontaly with bars
@@ -61,13 +64,10 @@ void ValidationUtils::HorizontalElMu( TH1 *h, Int_t nbin, Bool_t kLINE, Int_t co
    box->SetLineColor( color );
    box->Draw("F"); 
 
-//    TGraph *box2 = new TGraph(5, x, y);
-//    box2->SetFillColor( color2 );
-//    box2->SetFillStyle( 3001 ); //3544
-//    box2->Draw("F"); 
-
 }
 
+
+//________________________________________________________________________________________________
 void ValidationUtils::SetCombinationStyle() 
 {
   TStyle *CombinationStyle = gROOT->GetStyle("Combination");
@@ -128,7 +128,8 @@ void ValidationUtils::SetCombinationStyle()
 }
 
 
-// set style and remove existing canvas'
+//________________________________________________________________________________________________
+/// set style and remove existing canvas'
 void ValidationUtils::Initialize( Bool_t useCombinationStyle )
 {
   // destroy canvas'
@@ -147,7 +148,9 @@ void ValidationUtils::Initialize( Bool_t useCombinationStyle )
   SetCombinationStyle();
 }
 
-// set frame styles
+
+//________________________________________________________________________________________________
+/// set frame styles
 void ValidationUtils::SetFrameStyle2D( TH1* frame, Float_t scale )
 {
   frame->SetLabelOffset( 0.012, "X" );// label offset on x axis
@@ -169,7 +172,7 @@ void ValidationUtils::SetFrameStyle2D( TH1* frame, Float_t scale )
 }
 
 
-
+//________________________________________________________________________________________________
 void ValidationUtils::PullPlot3(XtraValues* inValsEl, XtraValues* inValsMu, const TString& outFileNamePrefix)
 {
   // set style and remove existing canvas'
@@ -353,6 +356,8 @@ void ValidationUtils::PullPlot3(XtraValues* inValsEl, XtraValues* inValsMu, cons
    return;
 }
 
+
+//________________________________________________________________________________________________
 void ValidationUtils::PullPlot5(XtraValues* inValsEl, XtraValues* inValsMu, XtraValues* inValsEM, const TString& outFileNamePrefix)
 {
   // set style and remove existing canvas'
@@ -512,20 +517,7 @@ void ValidationUtils::PullPlot5(XtraValues* inValsEl, XtraValues* inValsMu, Xtra
    //Draw boxes   
    for (Int_t i=0; i<Npar; i++) {
      HorizontalElMu( hPullElMu, Npar-i, kFALSE, colEMu, 0.14, 0.14);
-     //HorizontalElMu( hPullElMu, Npar-i, kTRUE, colEMu, 0.14, 0.14);
-     //   cout << "done" << endl;
-     //   }
-//      else{
-//        Horizontal( hPullEl, Npar-i, kFALSE, hPullEl->GetFillColor(), 0.28, 0.0);
-//        Horizontal( hPullEl, Npar-i, kTRUE, hPullEl->GetLineColor(), 0.28, 0.0);
-//        Horizontal( hPullMu, Npar-i, kFALSE, hPullMu->GetFillColor(), 0.0, 0.28);
-//        Horizontal( hPullMu, Npar-i, kTRUE, hPullMu->GetLineColor(), 0.0, 0.28);
-//      }
    }
-
-//    cout << " hPullElMu->GetNEntries() = " << hPullElMu->GetEntries() << endl;
-//    cout << " hPullEl->GetNEntries() = " << hPullEl->GetEntries() << endl;
-//    cout << " hPullMu->GetNEntries() = " << hPullMu->GetEntries() << endl;
 
    TLegend* leg = new TLegend(xLeft-0.07,0.885,xLeft+0.43,0.96,"");
    leg->SetFillStyle(0);
@@ -548,8 +540,7 @@ void ValidationUtils::PullPlot5(XtraValues* inValsEl, XtraValues* inValsMu, Xtra
 }
 
 
-
-
+//________________________________________________________________________________________________
 void ValidationUtils::PullPlot4(XtraValues* inVals,const TString& outFileNamePrefix)
 {
   // set style and remove existing canvas'
@@ -666,13 +657,6 @@ void ValidationUtils::PullPlot4(XtraValues* inVals,const TString& outFileNamePre
 
    std::cout<<"Npar="<<Npar<<std::endl;
 
-/*
-      outVals.m_nObs.push_back(nObs)
-      outVals.m_nObs_eStat.push_back(nObsErr)
-      outVals.m_nPred.push_back(nPred)
-      outVals.m_nPred_eFit.push_back(nPred_eFit)
-*/
-
    //Fill values 
    for (Int_t i=0; i<Npar; i++) {
       Float_t delta = inVals->m_nObs.at(i) - inVals->m_nPred.at(i);
@@ -690,7 +674,6 @@ void ValidationUtils::PullPlot4(XtraValues* inVals,const TString& outFileNamePre
    }
 
  
-
    //Draw boxes
    for (Int_t i=0; i<Npar; i++) {
      Int_t ccll = 0;
@@ -725,8 +708,6 @@ void ValidationUtils::PullPlot4(XtraValues* inVals,const TString& outFileNamePre
        if (ccll == 43)   ccll = 36;
        if (ccll == 45)   ccll = 30;
      }
-     // Horizontal( hPull, Npar-i, kFALSE, hPull->GetFillColor(), 0.28, 0.0);
-     //Horizontal( hPull, Npar-i, kTRUE, hPull->GetLineColor(), 0.28, 0.0);
      Horizontal( hPull, Npar-i, kFALSE,ccll , 0.28, 0.0);
      Horizontal( hPull, Npar-i, kTRUE, ccll, 0.28, 0.0);
    

@@ -26,6 +26,7 @@
 
 using namespace std;
 
+
 //________________________________________________________________________________________________
 void resetFloatPars( const RooWorkspace* w, const RooFitResult* result ) {
     const RooArgList& floatParsInit = result->floatParsInit() ;
@@ -37,9 +38,12 @@ void resetFloatPars( const RooWorkspace* w, const RooFitResult* result ) {
     }
 }
 
+
+//_____________________________________________________________________________
 namespace Util {
     static TMsgLogger CombinationUtilsLogger("CombinationUtils");
 }
+
 
 //_____________________________________________________________________________
 float Util::getValueFromTree( TTree* tree, const std::string& searchpar,
@@ -78,6 +82,7 @@ float Util::getValueFromTree( TTree* tree, const std::string& searchpar, const s
 }
 
 
+//_____________________________________________________________________________
 bool Util::findValueFromTree( TTree* tree, const std::string& searchpar, float& searchval,
         const std::string& pn0, const float& v0, const std::string& pn1, const float& v1,
         const std::string& pn2, const float& v2, const std::string& pn3, const float& v3,
@@ -145,6 +150,7 @@ bool Util::findValueFromTree( TTree* tree, const std::string& searchpar, float& 
 }
 
 
+//_____________________________________________________________________________
 float 
 Util::getxsec(const int& id, const float& mp, const float& mlsp) {
   TFile* file(0);

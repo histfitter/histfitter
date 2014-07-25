@@ -1,8 +1,18 @@
- /***************************************************************************** 
-  * author johan lundberg                                                     * 
-  *                                                                           * 
-  * util functions for help with combinations and pdf constructions           *
-  *****************************************************************************/ 
+/**********************************************************************************
+ * Project: HistFitter - A ROOT-based package for statistical data analysis       *
+ * Package: HistFitter                                                            *
+ * Namespace: Util                                                                *
+ *                                                                                *
+ * Description:                                                                   *
+ *      Util functions, e.g. for help with combinations and pdf constructions     *
+ *                                                                                *
+ * Authors:                                                                       *
+ *      HistFitter group, CERN, Geneva                                            *
+ *                                                                                *
+ * Redistribution and use in source and binary forms, with or without             *
+ * modification, are permitted according to the terms listed in the file          *
+ * LICENSE.                                                                       *
+ **********************************************************************************/
 
 #ifndef CombinationUtils_H
 #define CombinationUtils_H

@@ -57,6 +57,7 @@ using namespace RooStats;
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 static TMsgLogger ToyUtilsLogger("toy_utils");
 
+
 //________________________________________________________________________________________________
 const char* CollectAndWriteHypoTestResults( const TString& infile, const TString& format, const TString& interpretation, const TString& cutStr, const bool rejectFailedPrefit, const TString& outDir, const TString& fileprefix  ){
     // outdir
@@ -362,13 +363,7 @@ const char* WriteResultSet( const std::list<LimitResult>& summary, const TString
 }
 
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////
-///
 /// Same code, but takes workspaces as input from which p-values are evaluated, then stored
-///
-/////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
 //________________________________________________________________________________________________
 const char* CollectAndWriteResultSet( const TString& infile, const TString& format, const TString& interpretation, const TString& cutStr, const int& mode, const int& n_toys, const int& in_doFreeFitFirst, const int& do_ul, const TString& outDir, const TString& fileprefix ) {
     // outdir
@@ -414,6 +409,7 @@ const char* CollectAndWriteResultSet( const TString& infile, const TString& form
     // store harvest in text file
     return WriteResultSet( summary, listname, outdir );
 }
+
 
 //________________________________________________________________________________________________
 std::list<LimitResult> CollectLimitResults( const TString& infile, const TString& format, const TString& interpretation, const TString& cutStr, const int& mode, const int& n_toys, const int& do_ul) {
