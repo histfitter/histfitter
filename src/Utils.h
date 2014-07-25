@@ -146,8 +146,6 @@ namespace Util
 
   RooAbsReal* CreateNLL( RooWorkspace* w, TString fitRegions, Bool_t lumiConst=false);
 
-  void PlotYieldPLL(RooWorkspace* w, RooAbsReal* nll, RooAbsReal* bkgf, RooFitResult* r=0);  
-
   TString scanStrForFloats(const TString& toscan, const TString& format);
 }
 
