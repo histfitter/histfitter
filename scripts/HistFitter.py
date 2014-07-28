@@ -1,4 +1,19 @@
 #!/usr/bin/env python
+"""
+ * Project : HistFitter - A ROOT-based package for statistical data analysis      *
+ * Package : HistFitter                                                           *
+ * Script  : HistFitter.py                                                        *
+ *                                                                                *
+ * Description:                                                                   *
+ *              Top-level control script for all commands/run-conditions          *                                                                                *
+ * Authors:                                                                       *
+ *      HistFitter group                                                          *
+ *                                                                                *
+ * Redistribution and use in source and binary forms, with or without             *
+ * modification, are permitted according to the terms listed in the file          *
+ * LICENSE.                                                                       *
+"""
+
 import ROOT
 ROOT.PyConfig.IgnoreCommandLineOptions = True
 
@@ -12,16 +27,21 @@ import argparse
 from logger import Logger
 log = Logger('HistFitter')
 
-#def enum(typename, field_names):
-#    """Create a new enumeration type"""
-#
-#    if isinstance(field_names, str):
-#        field_names = field_names.replace(',', ' ').split()
-#    d = dict((reversed(nv) for nv in enumerate(field_names)), __slots__ = ())
-#    return type(typename, (object,), d)()
-
-
 def GenerateFitAndPlotCPP(fc, anaName, drawBeforeFit, drawAfterFit, drawCorrelationMatrix, drawSeparateComponents, drawLogLikelihood, minos, minosPars):
+    """ 
+    function call to top-level C++ side function Util.GenerateFitAndPlot()
+
+    @param fc FitConfig name connected to fit and plot details
+    @param anaName Analysis name defined in config file, mainly used for output file/dir naming
+    @param drawBeforeFit Boolean deciding whether before-fit plots are produced
+    @param drawAfterFit Boolean deciding whether after-fit plots are produced
+    @param drawCorrelationMatrix Boolean deciding whether correlation matrix plot is produced
+    @param drawSeparateComponents Boolean deciding whether separate component (=sample) plots are produced
+    @param drawLogLikelihood Boolean deciding whether log-likelihood plots are produced
+    @param minos Boolean deciding whether asymmetric errors are calculated, eg whether MINOS is run
+    @param minosPars When minos is called, defining what parameters need asymmetric error calculation
+    """
+    
     from ROOT import Util
     
     log.debug('GenerateFitAndPlotCPP: anaName %s ' % anaName)
@@ -32,13 +52,20 @@ def GenerateFitAndPlotCPP(fc, anaName, drawBeforeFit, drawAfterFit, drawCorrelat
     log.debug("GenerateFitAndPlotCPP: drawLogLikelihood %s " % drawLogLikelihood)
     log.debug("GenerateFitAndPlotCPP: minos %s " % minos)
     log.debug("GenerateFitAndPlotCPP: minosPars %s " % minosPars)
-
+    
     Util.GenerateFitAndPlot(fc.name, anaName, drawBeforeFit, drawAfterFit, drawCorrelationMatrix,
                             drawSeparateComponents, drawLogLikelihood, minos, minosPars)
 
 if __name__ == "__main__":
+    """
+    Main function call starts here ....
+    """
+    
     from configManager import configMgr
-
+    
+    """
+    set some default options
+    """
     configMgr.readFromTree = False
     configMgr.executeHistFactory = False
     runInterpreter = False
@@ -63,6 +90,9 @@ if __name__ == "__main__":
     
     print "\n * * * Welcome to HistFitter * * *\n"
 
+    """
+    Definition of all options and defaults given as arguments
+    """
     parser = argparse.ArgumentParser()
     parser.add_argument("configFile", nargs="+", help="configuration file to execute")
     parser.add_argument("-L", "--log-level", help="set log level", choices=["VERBOSE", "DEBUG", "INFO", "WARNING", "ERROR", "FATAL", "ALWAYS"])
@@ -82,12 +112,14 @@ if __name__ == "__main__":
     parser.add_argument("-z", "--discovery-hypotest", help="run discovery hypothesis test", action="store_true", default=doDiscoveryHypoTests)
     parser.add_argument("-g", "--grid_points", help="grid points to process (comma-seperated)")
     parser.add_argument("-r", "--regions", help="signal regions to process (comma-seperated)", default="all")
-    
-    # note that we cannot make -d and -D the same due to http://bugs.python.org/issue9338
-    # if we do so, specifying -d without argument would, if -d is the last option, eat the configFile as draw option
-    # i.e. "HistFitter -f -d configFile.py" would fail, "HistFitter -d -f configFile.py" would work 
-    # (a workaround using "-f -d -- configFile.py" exists but it would confuse users)
-    # --GJ 14/11/2012 
+
+    """
+    note that we cannot make -d and -D the same due to http://bugs.python.org/issue9338
+    if we do so, specifying -d without argument would, if -d is the last option, eat the configFile as draw option
+    i.e. 'HistFitter -f -d configFile.py' would fail, 'HistFitter -d -f configFile.py' would work 
+    (a workaround using '-f -d -- configFile.py' exists but it would confuse users)
+    --GJ 14/11/2012
+    """
     parser.add_argument("-d", action="store_true", help="draw before/after plots")
     parser.add_argument("-D", "--draw", help="specify plots to draw, comma separated; choose from "+str(["allPlots", "before","after", "corrMatrix", "sepComponents", "likelihood"]))
     
@@ -101,7 +133,10 @@ if __name__ == "__main__":
     parser.add_argument("-P", "--run-profiling", help="Run a python profiler during main HistFitter execution", action="store_true")
 
     HistFitterArgs = parser.parse_args()
-   
+
+    """
+    process all the arguments/options
+    """
     if HistFitterArgs.fit_type == "bkg":
         myFitType = FitType.Background
     elif HistFitterArgs.fit_type == "excl":
@@ -232,16 +267,21 @@ if __name__ == "__main__":
 
     gROOT.SetBatch(not runInterpreter)
 
-    #mandatory user-defined configuration
+    """
+    mandatory user-defined configuration file
+    """
     execfile(HistFitterArgs.configFile[0]) #[0] since any extra arguments (sys.argv[-1], etc.) are caught here
 
-    #standard execution from now on.
+    """
+    standard execution from now on
+    """
     configMgr.initialize()
 
-    # initialize: set the toy seed
     RooRandom.randomGenerator().SetSeed(configMgr.toySeed)
 
-    #runs Trees->histos and/or histos->workspace according to specifications
+    """
+    runs Trees->histos and/or histos->workspace according to specifications
+    """
     if configMgr.readFromTree or configMgr.executeHistFactory:
         if doCodeProfiling:
             import cProfile
@@ -249,11 +289,13 @@ if __name__ == "__main__":
         else:
             configMgr.executeAll()
 
+    """
+    runs fitting and plotting, by calling C++ side functions
+    """
     if runFit:
         idx = 0
         if len(configMgr.fitConfigs) > 0:
            
-            #print args
             if HistFitterArgs.fitname != "": # user specified a fit name
                 fitFound = False
                 for (i, config) in enumerate(configMgr.fitConfigs):
@@ -273,6 +315,9 @@ if __name__ == "__main__":
         log.info("   where drawBeforeFit, drawAfterFit, drawCorrelationMatrix, drawSeparateComponents, drawLogLikelihood are booleans")
         pass
 
+    """
+    calculating and printing upper limits for model-(in)dependent signal fit configurations (aka Exclusion/Discovery fit setup)
+    """
     if printLimits:
         for fc in configMgr.fitConfigs:
             if len(fc.validationChannels) > 0:
@@ -281,6 +326,9 @@ if __name__ == "__main__":
         configMgr.cppMgr.doUpperLimitAll()
         pass
 
+    """
+    run exclusion or discovery hypotest
+    """
     if doHypoTests or doDiscoveryHypoTests:
         for fc in configMgr.fitConfigs:
             if len(fc.validationChannels) > 0 and not (fc.signalSample is None or 'Bkg' in fc.signalSample):
