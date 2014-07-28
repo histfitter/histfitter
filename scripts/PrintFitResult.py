@@ -1,7 +1,24 @@
 #!/usr/bin/env python
+"""
+ * Project : HistFitter - A ROOT-based package for statistical data analysis      *
+ * Package : HistFitter                                                           *
+ * Script  : PrintFitResult.py                                                    *
+ *                                                                                *
+ * Description:                                                                   *
+ *               Script to produce LaTeX table for fit result                     *
+ *                                                                                *
+ *                                                                                *
+ * Authors:                                                                       *
+ *      HistFitter group                                                          *
+ *                                                                                *
+ * Redistribution and use in source and binary forms, with or without             *
+ * modification, are permitted according to the terms listed in the file          *
+ * LICENSE.                                                                       *
+"""
+
 from ROOT import gROOT,gSystem,gDirectory
 gSystem.Load("libSusyFitter.so")
-from ROOT import ConfigMgr,FitConfig #this module comes from gSystem.Load("libSusyFitter.so")
+from ROOT import ConfigMgr,FitConfig 
 gROOT.Reset()
 
 from ROOT import TFile, RooWorkspace, TObject, TString, RooAbsReal, RooRealVar, RooFitResult, RooDataSet, RooAddition, RooArgSet,RooAbsData,RooRandom 
@@ -18,6 +35,9 @@ import pickle
 
 
 def getnamemap():
+  """
+  Function changing HitFactory naming-scheme into human-readable scheme (to be adjusted by each user, if wanted)
+  """
 
   namemap = {}
   namemap['alpha_JSig'] = 'Jet energy scale signal'
@@ -183,11 +203,20 @@ def getnamemap():
   
 
 def latexfitresults( filename, resultName="RooExpandedFitResult_afterFit", outName="test.tex" ):
-
+  """
+  Take out fit result and extract after/before-fit values and errors
+  
+  @param filename The filename containing afterFit workspace
+  @param resultname The name of fit result (typically='RooExpandedFitResult_afterFit' or 'RooExpandedFitResult_beforeFit'
+  @param outname Output file name
+  """
+  
   namemap = {}
   namemap = getnamemap()
 
-  ############################################
+  """
+  pick up workspace from file
+  """
   workspacename = 'w'
   w = Util.GetWorkspaceFromFile(filename,workspacename)
 
@@ -195,43 +224,22 @@ def latexfitresults( filename, resultName="RooExpandedFitResult_afterFit", outNa
     print "ERROR : Cannot open workspace : ", workspacename
     sys.exit(1) 
 
+  """
+  pick up RooExpandedFitResult from workspace with name resultName (either before or after fit)
+  """
   result = w.obj(resultName)
   if result==None:
     print "ERROR : Cannot open fit result ", resultName
     sys.exit(1)
 
-  #####################################################
-
   regSys = {}
 
-  # calculate error per parameter on  fitresult
+  """
+  extract all floating parameter values and error, both before and after fit
+  """
   fpf = result.floatParsFinal() 
   fpi = result.floatParsInit()
 
-  '''
-  // P r i n t   l a t ex   t a b l e   o f   p a r a m e t e r s   o f   p d f 
-  // --------------------------------------------------------------------------
-
-
-  // Print parameter list in LaTeX for (one column with names, one column with values)
-  params->printLatex() ;
-
-  // Print parameter list in LaTeX for (names values|names values)
-  params->printLatex(Columns(2)) ;
-
-  // Print two parameter lists side by side (name values initvalues)
-  params->printLatex(Sibling(*initParams)) ;
-
-  // Print two parameter lists side by side (name values initvalues|name values initvalues)
-  params->printLatex(Sibling(*initParams),Columns(2)) ;
-
-  // Write LaTex table to file
-  params->printLatex(Sibling(*initParams),OutputFile("rf407_latextables.tex")) ;
-  '''
-
-  ####fpf.printLatex(RooFit.Format("NE",RooFit.AutoPrecision(2),RooFit.VerbatimName()),RooFit.Sibling(fpi),RooFit.OutputFile(outName)) 
-
-  # set all floating parameters constant
   for idx in range(fpf.getSize()):
     parname = fpf[idx].GetName()
     ip = fpi[idx]
@@ -258,12 +266,18 @@ def latexfitresults( filename, resultName="RooExpandedFitResult_afterFit", outNa
 
 ##################################
 
-# MAIN
+"""
+Main function calls start here ....
+"""
+
 
 if __name__ == "__main__":
   
   import os, sys
   import getopt
+  """
+  Print out of usage, options and examples
+  """
   def usage():
     print "Usage:"
     print "PrintFitResult.py [-c channel] [-w workspace_afterFit] [-o outputFileName]\n"
@@ -271,6 +285,10 @@ if __name__ == "__main__":
     print "*** Options are: "
     print "-c <analysis name>: single name accepted only (OBLIGATORY) "
     print "-w <workspaceFileName>: single name accepted only (OBLIGATORY) ;   if multiple channels/regions given in -c, assumes the workspace file contains all channels/regions"
+
+    print "\nFor example:"
+    print "PrintFitResult.py -w MyName_combined_BasicMeasurement_model_afterFit.root  -c SR7j -o fitResultSR7j.tex"    
+
     sys.exit(0)        
 
   wsFileName='/results/MyOneLeptonKtScaleFit_HardLepR17_BkgOnlyKt_combined_NormalMeasurement_model_afterFit.root'
@@ -280,12 +298,19 @@ if __name__ == "__main__":
     usage()
   if len(opts)<1:
     usage()
-
+    
+  """
+  set some default options
+  """
   analysisName = ''
   outputFileName="default"
   method="1"
   showAfterFitError=True
   showPercent=False
+
+  """
+  set options as given by the user call
+  """
   for opt,arg in opts:
     if opt == '-c':
       analysisName=arg
@@ -296,12 +321,16 @@ if __name__ == "__main__":
   if not showAfterFitError:
     resultName =  'RooExpandedFitResult_beforeFit'
 
+  """
+  extract values/errors of parameters from fit result
+  """
   regSys = latexfitresults(wsFileName,resultName,outputFileName)
-
-  line_chanSysTight = tablefragment(regSys,analysisName)
-
-  outputFileName = "fitresult_" + analysisName + ".tex"
   
+  """
+  write out LaTeX table by calling function from PrintFitResultTex.py function tablefragment
+  """
+  line_chanSysTight = tablefragment(regSys,analysisName)
+  outputFileName = "fitresult_" + analysisName + ".tex"
   f = open(outputFileName, 'w')
   f.write( line_chanSysTight )
   f.close()

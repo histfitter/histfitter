@@ -1,5 +1,28 @@
+"""
+ * Project : HistFitter - A ROOT-based package for statistical data analysis      *
+ * Package : HistFitter                                                           *
+ * Script  : PrintFitResultTex.py                                                 *
+ *                                                                                *
+ * Description:                                                                   *
+ *      Script for producing LaTeX-files derived from fit result numbers          *
+ *      produced by PrintFitResult.py script                                      *
+ *                                                                                *
+ * Authors:                                                                       *
+ *      HistFitter group                                                          *
+ *                                                                                *
+ * Redistribution and use in source and binary forms, with or without             *
+ * modification, are permitted according to the terms listed in the file          *
+ * LICENSE.                                                                       *
+"""
 
 def tablefragment(m,sr):
+  """ 
+  main function to transfer the set of numbers/names (=m provided by PrintFitResult) into a LaTeX table
+
+  @param m Set of numbers/names provided by PrintFitResult
+  @param sr Name of region, used in caption and label of table
+  """
+
   tableline = ''
 
   tableline += '''
@@ -18,7 +41,10 @@ Parameter                                  '''
 %%'''
 
   m_listofkeys = m.keys()
-  #m_listofkeys.sort()
+
+  """
+  print the initial (before fit) and fitted (after fit) parameter values and errors
+  """   
   for name in m_listofkeys:
       printname = name
       printname = printname.replace('syserr_','')
