@@ -9,8 +9,10 @@
  *                                                                                *
  * Authors:                                                                       *
  *      HistFitter group, CERN, Geneva, Switzerland                               *
- *      Lorenzo Moneta, CERN, Geneva  <Lorenzo.Moneta@cern.h>
- *      Wouter Verkerke, Nikhef, Amsterdam <verkerke@nikhef.nl>
+ *      Lorenzo Moneta, CERN, Geneva  <Lorenzo.Moneta@cern.h>                     *
+ *           See: FitPdf()                                                        *
+ *      Wouter Verkerke, Nikhef, Amsterdam <verkerke@nikhef.nl>                   *
+ *           See: GetPropagatedError()                                            *
  *                                                                                *
  * See corresponding .h file for author and license information                   *
  **********************************************************************************/
@@ -346,8 +348,10 @@ void Util::WriteWorkspace(RooWorkspace* w, TString outFileName, TString suffix){
 
 
 /*
- * The FitPdf() function is partially taken from the function RooStats::ProfileLikelihoodTestStat::GetMinNLL()
+ * The FitPdf() function is (partially) taken from the function 
+ * RooStats::ProfileLikelihoodTestStat::GetMinNLL()
  * See: http://root.cern.ch/root/html534/src/RooStats__ProfileLikelihoodTestStat.cxx.html
+ * ((http://root.cern.ch/drupal/content/license))
  */
 
 //_____________________________________________________________________________
@@ -2373,6 +2377,14 @@ vector<double> Util::GetAllComponentFracInRegion(RooWorkspace* w, TString region
 
     return compFracVec;
 }
+
+
+/*
+ * Adopted from: RooAbsReal::GetPropagatedError()
+ * by Wouter Verkerke
+ * See: http://root.cern.ch/root/html534/src/RooAbsReal.h.html
+ * (http://roofit.sourceforge.net/license.txt)
+ */ 
 
 
 //_____________________________________________________________________________
