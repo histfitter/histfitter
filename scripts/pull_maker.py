@@ -29,6 +29,11 @@ ROOT.SetAtlasStyle()
 import sys, getopt
 
 def main(argv):
+    """
+    main function call
+
+    @param argv Arguments from user to define input file (-i <inputFile>) and output file name (-o <outputName>)
+    """
     inputfile = ''
     outputfile = 'test_out'
     try:
