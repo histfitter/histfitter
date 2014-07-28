@@ -43,9 +43,15 @@ def exampletable():
 
 
 
-def tablefragment(m, channel, signalregionslist,sampleList,showBeforeFitError):
+def tablefragment(m, tabname, signalregionslist,sampleList,showBeforeFitError):
   """ 
   main function to transfer the set of numbers/names (=m provided by YieldsTable) into a LaTeX table
+
+  @param m Set of names/numbers provided by YieldsTable.py
+  @param tabname Table name
+  @param signalregionslist List of channels/regions used
+  @param sampleList List of sample used
+  @param showBeforeFitError Boolean deciding whether to show before-fit errors
   """
   
   tableline = ''
@@ -58,7 +64,7 @@ def tablefragment(m, channel, signalregionslist,sampleList,showBeforeFitError):
   
   tableline += '''}
 \\noalign{\\smallskip}\\hline\\noalign{\\smallskip}
-{\\bf %s channel}          ''' %channel
+{\\bf %s channel}          ''' %tabname
 
   """
   print the region names

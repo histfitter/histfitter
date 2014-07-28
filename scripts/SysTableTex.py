@@ -15,9 +15,15 @@
  * LICENSE.                                                                       *
 """
 
-def tablefragment(m,table,signalRegions,skiplist,chanStr,showPercent):
+def tablefragment(m,signalRegions,skiplist,chanStr,showPercent):
   """ 
   main function to transfer the set of numbers/names (=m provided by SysTable) into a LaTeX table
+
+  @param m Set of numbers/names provided by SysTable
+  @param signalRegions List of channels/regions used
+  @param skiplist List of parameters/members of 'm' to be skipped (such as 'sqrtnobsa') when showing per-systematic errors
+  @param chanStr String of all channels used, to be used in label of table
+  @param showPercent Boolean deciding whether to show percentage for each systematic
   """
   
   tableline = ''

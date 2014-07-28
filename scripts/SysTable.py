@@ -574,7 +574,7 @@ if __name__ == "__main__":
   """
   write out LaTeX table by calling function from SysTableTex.py function tablefragment
   """
-  line_chanSysTight = tablefragment(chanSys,'Signal',chanList,skiplist,chanStr,showPercent)
+  line_chanSysTight = tablefragment(chanSys,chanList,skiplist,chanStr,showPercent)
   
   f = open(outputFileName, 'w')
   f.write( line_chanSysTight )
