@@ -95,7 +95,7 @@ def main(argv):
                 if uncRes[3][-1]<0.00001: uncRes[3][-1]=uncRes[2][-1]
  
     if len(uncRes[1])==0:
-        print 'Set inputfile=',inputfile,' failed - no errors found.  Continuing'
+        print 'Set inputfile=',inputfile,' failed - no errors found. Stopping here.'
         exit(1)
     
     from array import array
