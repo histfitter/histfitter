@@ -746,7 +746,7 @@ void Util::DecomposeWS(const char* infile, const char* wsname, const char* outfi
 
 
 //__________________________________________________________________________________________________________________________________________________________
-void Util::PlotPdfSumWithComponents(RooWorkspace* w, TString fcName, TString anaName, TString plotRegions, TString outputPrefix, RooFitResult* rFit, RooAbsData* inputData)
+void Util::PlotPdfSumWithComponents(RooWorkspace* w, TString fcName, TString /*anaName*/, TString plotRegions, TString outputPrefix, RooFitResult* /*rFit*/, RooAbsData* inputData)
 {
 
     Bool_t plotComponents=true;
@@ -1169,7 +1169,7 @@ void Util::PlotPdfWithComponents(RooWorkspace* w, FitConfig* fc, TString anaName
 }
 
 //_____________________________________________________________________________
-void Util::AddComponentsToPlot(RooWorkspace* w, FitConfig* fc, RooPlot* frame, RooAbsPdf* regionPdf, RooAbsData* regionData, RooRealVar* obsRegion, TString regionCatLabel, ChannelStyle style) {
+void Util::AddComponentsToPlot(RooWorkspace* w, FitConfig* fc, RooPlot* frame, RooAbsPdf* regionPdf, RooAbsData* /*regionData*/, RooRealVar* obsRegion, TString regionCatLabel, ChannelStyle style) {
 
     TString RRSPdfName = Form("%s_model",regionCatLabel.Data()); 
     RooRealSumPdf* RRSPdf = (RooRealSumPdf*) regionPdf->getComponents()->find(RRSPdfName);
@@ -1792,7 +1792,7 @@ RooWorkspace* Util::GetWorkspaceFromFile( const TString& infile, const TString& 
 
 
 //________________________________________________________________________________________________
-RooStats::ModelConfig* Util::GetModelConfig( const RooWorkspace* w, const TString& mcName, const bool& verbose  ) {
+RooStats::ModelConfig* Util::GetModelConfig( const RooWorkspace* w, const TString& mcName, const bool& /*verbose*/  ) {
     if (w==0) {
         Logger << kERROR << "Workspace is a null pointer." << GEndl;
         return NULL;
@@ -2838,7 +2838,7 @@ void Util::ImportInWorkspace( RooWorkspace* wspace, TObject* obj, TString name) 
 
 
 //________________________________________________________________________________________________________________________________________
-void Util::RemoveEmptyDataBins(RooWorkspace* w, RooPlot* frame){
+void Util::RemoveEmptyDataBins(RooWorkspace* /*w*/, RooPlot* frame){
 
     // histname=0 means that the last RooHist is taken from the RooPlot
     const char* histname = 0;
@@ -2867,7 +2867,7 @@ void Util::RemoveEmptyDataBins(RooWorkspace* w, RooPlot* frame){
 
 
 //________________________________________________________________________________________________________________________________________
-RooCurve* Util::MakePdfErrorRatioHist(RooWorkspace* w, RooAbsData* regionData, RooAbsPdf* regionPdf, RooRealVar* regionVar, RooFitResult* rFit, Double_t Nsigma){
+RooCurve* Util::MakePdfErrorRatioHist(RooWorkspace* /*w*/, RooAbsData* regionData, RooAbsPdf* regionPdf, RooRealVar* regionVar, RooFitResult* rFit, Double_t Nsigma){
 
     // curvename=0 means that the last RooCurve is taken from the RooPlot
     const char* curvename = 0;
@@ -2943,7 +2943,7 @@ RooCurve* Util::MakePdfErrorRatioHist(RooWorkspace* w, RooAbsData* regionData, R
 
 
 //_____________________________________________________________________________
-void Util::SetPdfParError(RooWorkspace* w, RooAbsPdf* regionPdf, double Nsigma){
+void Util::SetPdfParError(RooWorkspace* w, RooAbsPdf* /*regionPdf*/, double Nsigma){
 
     RooStats::ModelConfig* mc  = Util::GetModelConfig(w);
     if (mc==0) return;

@@ -43,7 +43,7 @@ void ValidationUtils::Horizontal( TH1 *h, Int_t nbin, Bool_t kLINE, Int_t color,
 
 
 //________________________________________________________________________________________________
-void ValidationUtils::HorizontalElMu( TH1 *h, Int_t nbin, Bool_t kLINE, Int_t color, Int_t color2, float yWidthScale )
+void ValidationUtils::HorizontalElMu( TH1 *h, Int_t nbin, Bool_t /*kLINE*/, Int_t color, Int_t /*color2*/, float yWidthScale )
 {
    // Draw histogram h horizontaly with bars
    TAxis *axis   = h->GetXaxis();
