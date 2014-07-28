@@ -908,7 +908,7 @@ RooStats::HypoTestResult* RooStats::get_htr(  RooWorkspace* w,
         const char * modelSBName, // = "ModelConfig",
         const char * modelBName, // = "",
         const char * dataName, // = "obsData",
-        bool useCLs, // = true ,   
+	bool /*useCLs*/, // = true ,   
         bool useNumberCounting, // = false,
         const char * nuisPriorName) // = 0 
 {

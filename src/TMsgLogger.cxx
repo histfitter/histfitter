@@ -62,7 +62,7 @@ TMsgLevel TMsgLogger::m_minLevel = kINFO;
 bool TMsgLogger::m_levelLock = false;
 
 //_____________________________________________________________________________
-TMsgLogger::TMsgLogger( const TObject* source, TMsgLevel minLevel )
+TMsgLogger::TMsgLogger( const TObject* source, TMsgLevel /*minLevel*/ )
    : m_objSource( source ), 
      m_strSource( "" ), 
      m_prefix( PREFIX ), 
@@ -74,7 +74,7 @@ TMsgLogger::TMsgLogger( const TObject* source, TMsgLevel minLevel )
 }
 
 //_____________________________________________________________________________
-TMsgLogger::TMsgLogger( const string& source, TMsgLevel minLevel )
+TMsgLogger::TMsgLogger( const string& source, TMsgLevel /*minLevel*/ )
    : m_objSource( 0 ),
      m_strSource( source ), 
      m_prefix( PREFIX ), 
@@ -86,7 +86,7 @@ TMsgLogger::TMsgLogger( const string& source, TMsgLevel minLevel )
 }
 
 //_____________________________________________________________________________
-TMsgLogger::TMsgLogger( TMsgLevel minLevel )
+TMsgLogger::TMsgLogger( TMsgLevel /*minLevel*/ )
    : m_objSource( 0 ), 
      m_strSource( "Unknown" ), 
      m_prefix( PREFIX ), 
