@@ -78,7 +78,7 @@ class TMsgLogger : public std::ostringstream, public TObject {
         TMsgLevel          GetMinLevel() const     { return m_minLevel; }
         const std::string& GetMinLevelStr() const  { return m_levelMap.find( m_minLevel )->second; }
 
-        const RooFit::MsgLevel GetRooFitMsgLevel() const {
+        RooFit::MsgLevel GetRooFitMsgLevel() const {
             if(m_minLevel == kVERBOSE)
                 return RooFit::DEBUG;
 
