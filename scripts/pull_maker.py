@@ -96,8 +96,8 @@ def main(argv):
  
     if len(uncRes[1])==0:
         print 'Set inputfile=',inputfile,' failed - no errors found.  Continuing'
-        break
-    
+        exit(1)
+
     from array import array
     y = array('d',uncRes[1])
     yep = array('d',uncRes[2])
