@@ -97,7 +97,7 @@ def main(argv):
     if len(uncRes[1])==0:
         print 'Set inputfile=',inputfile,' failed - no errors found.  Continuing'
         exit(1)
-
+    
     from array import array
     y = array('d',uncRes[1])
     yep = array('d',uncRes[2])
@@ -105,13 +105,13 @@ def main(argv):
     x = array('d', [ a for a in xrange( len(uncRes[1]) ) ] )
     xe = array('d', [ 0 for a in xrange( len(uncRes[1]) ) ] )
     
-    c = ROOT.TCanvas('Pulls_'+aset,'',1200,600)
+    c = ROOT.TCanvas('Pulls_'+outputfile,'',1200,600)
     c.SetBottomMargin(0.42)
     c.SetTopMargin(0.03)
     c.SetRightMargin(0.02)
     c.SetLeftMargin(0.06)
     
-    frame = ROOT.TH2D('frame_'+aset,'',len(uncRes[1]),-0.5,len(uncRes[1])-0.5,5,-3,3)
+    frame = ROOT.TH2D('frame_'+outputfile,'',len(uncRes[1]),-0.5,len(uncRes[1])-0.5,5,-3,3)
     frame.SetYTitle('Uncertainty After Fit')
     frame.SetXTitle('')
     frame.Draw()
