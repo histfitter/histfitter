@@ -811,7 +811,7 @@ void Util::PlotPdfWithComponents(RooWorkspace* w, FitConfig* fc, TString anaName
             regionData->plotOn(frame,RooFit::DataError(RooAbsData::Poisson),MarkerColor(style.getDataColor()),LineColor(style.getDataColor()));
             if(style.getRemoveEmptyBins()){
                 Logger << kINFO << "RemoveEmptyDataBins() removing empty bin points from data histogram on plot " << frame->GetName() << GEndl;
-                RemoveEmptyDataBins(w, frame);
+                RemoveEmptyDataBins(frame);
             }
 
             // normalize pdf to number of expected events, not to number of events in dataset
@@ -821,7 +821,7 @@ void Util::PlotPdfWithComponents(RooWorkspace* w, FitConfig* fc, TString anaName
 
             // plot components
             if(plotComponents)  
-                AddComponentsToPlot(w, fc, frame, regionPdf, regionData, regionVar, regionCatLabel.Data(),style);
+                AddComponentsToPlot(w, fc, frame, regionPdf, regionVar, regionCatLabel.Data(),style);
 
             // visualize error of fit
             if(rFit != NULL) { 	
@@ -832,8 +832,7 @@ void Util::PlotPdfWithComponents(RooWorkspace* w, FitConfig* fc, TString anaName
             regionPdf->plotOn(frame,Normalization(1,RooAbsReal::RelativeExpected),Precision(1e-5),LineColor(style.getTotalPdfColor()));
 
             regionData->plotOn(frame,RooFit::DataError(RooAbsData::Poisson),MarkerColor(style.getDataColor()),LineColor(style.getDataColor()));
-            if(style.getRemoveEmptyBins()) RemoveEmptyDataBins(w, frame);
-            //RemoveEmptyDataBins(w, frame);
+            if(style.getRemoveEmptyBins()) RemoveEmptyDataBins(frame);
 
             TString canName=Form("can_%s_%s",regionCatLabel.Data(),outputPrefix.Data());
             canVec[iVec] = new TCanvas(canName,canName, 700, 600);
@@ -859,9 +858,7 @@ void Util::PlotPdfWithComponents(RooWorkspace* w, FitConfig* fc, TString anaName
 
             if(style.getTitleX() != "")  
                 frame->GetXaxis()->SetTitle(style.getTitleX());
-            else  
-                frame->GetXaxis()->SetTitle(GetXTitle(regionVar));
-
+            
             pad1->Draw();
             if(plotRatio!="none"){ 
                 pad2->Draw(); 
@@ -966,7 +963,7 @@ void Util::PlotPdfWithComponents(RooWorkspace* w, FitConfig* fc, TString anaName
 
                 // Construct a histogram with the ratio of the pdf curve w.r.t the pdf curve +/- 1 sigma
                 RooCurve* hratioPdfError = new RooCurve;
-                if (rFit != NULL)  hratioPdfError = MakePdfErrorRatioHist(w, regionData, regionPdf, regionVar, rFit);
+                if (rFit != NULL)  hratioPdfError = MakePdfErrorRatioHist(regionData, regionPdf, regionVar, rFit);
                 hratioPdfError->SetFillColor(style.getErrorFillColor());
                 hratioPdfError->SetFillStyle(style.getErrorFillStyle());
                 hratioPdfError->SetLineColor(style.getErrorLineColor());
@@ -1056,8 +1053,6 @@ void Util::PlotPdfWithComponents(RooWorkspace* w, FitConfig* fc, TString anaName
 
                 if(style.getTitleX() != "")  
                     frame2->GetXaxis()->SetTitle(style.getTitleX());
-                else  
-                    frame2->GetXaxis()->SetTitle(GetXTitle(regionVar)); //Name());
 
                 if(style.getTitleY() != "")  
                     frame->GetYaxis()->SetTitle(style.getTitleY());
@@ -1087,7 +1082,7 @@ void Util::PlotPdfWithComponents(RooWorkspace* w, FitConfig* fc, TString anaName
 }
 
 //_____________________________________________________________________________
-void Util::AddComponentsToPlot(RooWorkspace* w, FitConfig* fc, RooPlot* frame, RooAbsPdf* regionPdf, RooAbsData* /*regionData*/, RooRealVar* obsRegion, TString regionCatLabel, ChannelStyle style) {
+void Util::AddComponentsToPlot(RooWorkspace* w, FitConfig* fc, RooPlot* frame, RooAbsPdf* regionPdf, RooRealVar* obsRegion, TString regionCatLabel, ChannelStyle style) {
 
     TString RRSPdfName = Form("%s_model",regionCatLabel.Data()); 
     RooRealSumPdf* RRSPdf = (RooRealSumPdf*) regionPdf->getComponents()->find(RRSPdfName);
@@ -1232,8 +1227,8 @@ void Util::PlotSeparateComponents(RooWorkspace* w,TString fcName, TString anaNam
                 double normCount = regionPdf->expectedEvents(*regionVar);
 
                 if (rFit != NULL) 
-                    regionPdf->plotOn(frame,Components(regionCompNameVec[iComp].Data()),VisualizeError(*rFit),FillColor(kCyan),Precision(1e-5),Normalization(regionCompFracVec[iComp]*normCount,RooAbsReal::NumEvent));
-
+                    regionPdf->plotOn(frame,Components(regionCompNameVec[iComp].Data()),VisualizeError(*rFit),FillColor(kCyan),Precision(1e-5),Normalization(1,RooAbsReal::RelativeExpected));
+    
                 regionPdf->plotOn(frame,Components(regionCompNameVec[iComp].Data()),LineColor(compPlotColor),Normalization(regionCompFracVec[iComp]*normCount,RooAbsReal::NumEvent),Precision(1e-5));
 
                 canVec[iVec]->cd(iComp+1);
@@ -1710,7 +1705,7 @@ RooWorkspace* Util::GetWorkspaceFromFile( const TString& infile, const TString& 
 
 
 //________________________________________________________________________________________________
-RooStats::ModelConfig* Util::GetModelConfig( const RooWorkspace* w, const TString& mcName, const bool& /*verbose*/  ) {
+RooStats::ModelConfig* Util::GetModelConfig( const RooWorkspace* w, const TString& mcName  ) {
     if (w==0) {
         Logger << kERROR << "Workspace is a null pointer." << GEndl;
         return NULL;
@@ -2756,7 +2751,7 @@ void Util::ImportInWorkspace( RooWorkspace* wspace, TObject* obj, TString name) 
 
 
 //________________________________________________________________________________________________________________________________________
-void Util::RemoveEmptyDataBins(RooWorkspace* /*w*/, RooPlot* frame){
+void Util::RemoveEmptyDataBins( RooPlot* frame){
 
     // histname=0 means that the last RooHist is taken from the RooPlot
     const char* histname = 0;
@@ -2785,7 +2780,7 @@ void Util::RemoveEmptyDataBins(RooWorkspace* /*w*/, RooPlot* frame){
 
 
 //________________________________________________________________________________________________________________________________________
-RooCurve* Util::MakePdfErrorRatioHist(RooWorkspace* /*w*/, RooAbsData* regionData, RooAbsPdf* regionPdf, RooRealVar* regionVar, RooFitResult* rFit, Double_t Nsigma){
+RooCurve* Util::MakePdfErrorRatioHist(RooAbsData* regionData, RooAbsPdf* regionPdf, RooRealVar* regionVar, RooFitResult* rFit, Double_t Nsigma){
 
     // curvename=0 means that the last RooCurve is taken from the RooPlot
     const char* curvename = 0;
@@ -2861,7 +2856,7 @@ RooCurve* Util::MakePdfErrorRatioHist(RooWorkspace* /*w*/, RooAbsData* regionDat
 
 
 //_____________________________________________________________________________
-void Util::SetPdfParError(RooWorkspace* w, RooAbsPdf* /*regionPdf*/, double Nsigma){
+void Util::SetPdfParError(RooWorkspace* w, double Nsigma){
 
     RooStats::ModelConfig* mc  = Util::GetModelConfig(w);
     if (mc==0) return;
@@ -2890,49 +2885,6 @@ void Util::SetPdfParError(RooWorkspace* w, RooAbsPdf* /*regionPdf*/, double Nsig
         par->setVal(cenVal + Nsigma * errVal);
 
     }
-}
-
-
-
-
-
-//_____________________________________________________________________________
-TString Util::GetXTitle(RooRealVar* regionVar){
-
-    TString varName = regionVar->GetName();
-    TString outName = varName;
-
-    if( varName.Contains("_met/meff")) outName = "E_{T}^{miss}/m_{eff}"; 
-    else if( varName.Contains("_met")) outName = "E_{T}^{miss} [GeV]";
-    else if( varName.Contains("_mt")) outName = "m_{T} [GeV]";
-    else if( varName.Contains("_cuts")) outName = "Region";
-    else if( varName.Contains("_nBJet50")) outName = "N b-jets (p_{T}>50 GeV)";
-    else if( varName.Contains("_nBJet30")) outName = "N b-jets (p_{T}>30 GeV)";
-    else if( varName.Contains("_nBJet")) outName = "N b-jets (p_{T}>20 GeV)";
-    else if( varName.Contains("_nJet50")) outName = "N jets (p_{T}>50 GeV)";
-    else if( varName.Contains("_nJet30")) outName = "N jets (p_{T}>30 GeV)";
-    else if( varName.Contains("_nJet")) outName = "N jets";
-    else if( varName.Contains("_MR")) outName = "M_{R}' [GeV]";
-    else if( varName.Contains("_mll")) outName = "m_{ll} [GeV]";
-    else if( varName.Contains("_Wpt")) outName = "p_{T}^{W} [GeV]";
-    else if( varName.Contains("_Zpt")) outName = "p_{T}^{Z} [GeV]";
-    else if( varName.Contains("_ht")) outName = "H_{T} [GeV]";
-    else if( varName.Contains("_meff6")) outName = "6-jet Effective Mass [GeV]";
-    else if( varName.Contains("_meff4")) outName = "4-jet Effective Mass [GeV]";
-    else if( varName.Contains("_meff")) outName = "m_{eff} [GeV]";
-    else if( varName.Contains("_R")) outName = "R";
-    else if(  varName.Contains("_Wpt")) outName = "p_{T}^{W} [GeV]"; 
-    else if(  varName.Contains("_Zpt")) outName = "p_{T}^{Z} [GeV]"; 
-    else if(  varName.Contains("_lep1Pt")) outName = "Leading lepton p_{T} [GeV]";
-    else if(  varName.Contains("_lep2Pt")) outName = "p_{T}^{lep2} [GeV]"; 
-    else if(  varName.Contains("_jet1Pt")) outName = "Leading jet p_{T} [GeV]";
-    else if(  varName.Contains("_jet2Pt")) outName = "p_{T}^{jet2} [GeV]"; 
-    else if(  varName.Contains("_jet3Pt")) outName = "p_{T}^{jet3} [GeV]"; 
-    else if(  varName.Contains("_jet4Pt")) outName = "p_{T}^{jet4} [GeV]"; 
-    else if(  varName.Contains("_jet5Pt")) outName = "p_{T}^{jet5} [GeV]"; 
-    else if(  varName.Contains("_jet6Pt")) outName = "p_{T}^{jet6} [GeV]"; 
-    else if(  varName.Contains("_jet7Pt")) outName = "p_{T}^{jet7} [GeV]";  
-    return outName;
 }
 
 

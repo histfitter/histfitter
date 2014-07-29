@@ -405,7 +405,7 @@ TString ConfigMgr::makeCorrectedBkgModelConfig( RooWorkspace* w, const char* mod
     }
 
     bModelStr = TString(modelSBName)+TString("_with_poi_0");
-    RooStats::ModelConfig* bModel = Util::GetModelConfig( w, bModelStr.Data(), false );
+    RooStats::ModelConfig* bModel = Util::GetModelConfig( w, bModelStr.Data() );
     if (bModel) { 
         m_logger << kERROR << "Bkg model config already defined. Return." << GEndl; 
         return bModelStr; 

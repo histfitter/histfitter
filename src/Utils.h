@@ -63,24 +63,62 @@ namespace Util
 {
  
   // Functions related to RooWorkspace
-
+  /**
+     Get RooWorkspace from file
+  */
   RooWorkspace* GetWorkspaceFromFile( const TString& infile, const TString& wsname );
+  /**
+     Wrute RooWorkspace to file
+  */ 
   void WriteWorkspace(RooWorkspace* w, TString outFileName="./results/BkgForumTest_combined_ComHistoSysOverConst_model.root", TString suffix = "");
+  /**
+     Load snapshot
+  */
   void LoadSnapshotInWorkspace(RooWorkspace* w, TString snapshot= "");
+  /**
+     Save initial snapshot of workspace
+  */
   void SaveInitialSnapshot(RooWorkspace* w);
+  /**
+     Import object (typically RooFitResult) into workspace and save snapshot associated to this object
+  */
   void ImportInWorkspace( RooWorkspace* wspace, TObject* obj=NULL, TString name="");
 
+  /**
+    Decompose RooWorkspace into a separate object for each region, mainly decomposing simultaneous PDF/data 
+  */
   void DecomposeWS(const char* infile, const char* wsname, const char* outfile);
-  void SetPdfParError(RooWorkspace* w, RooAbsPdf* regionPdf, double Nsigma = 0.);
-
+  
+  /**
+     Reset errors of all (nuisance/normalization) parameters in RooWorkspace to 'natural' values
+  */
   void resetAllErrors( RooWorkspace* wspace );
+  /**
+    Find the input parameter (systematic) with the given name and shift that parameter (systematic) by 1-sigma if given; otherwise set error to small number
+  */
   void resetError( RooWorkspace* wspace, const RooArgList& parList, const RooArgList& vetoList = RooArgList() ) ;
 
+  /**
+     Set all parameter values to initial values
+  */
   void resetAllValues( RooWorkspace* wspace );
+  /**
+     Set  parameter value to initial value
+  */
   void resetValue( RooWorkspace* wspace, const RooArgList& parList, const RooArgList& vetoList = RooArgList() ) ;
 
+  /**
+     Set all parameter values to nominal values -- FIXME (same functionality as resetAllValues()?)
+  */
   void resetAllNominalValues( RooWorkspace* wspace );
+  /**
+     Set parameters values to nominal values -- FIXME (same functionality as resetValue()?)
+  */
   void resetNominalValue( RooWorkspace* wspace, const RooArgSet& globSet ) ;
+  /**
+     Set parameter to value at nominal value + Nsigma * parameter error
+  */
+  void SetPdfParError(RooWorkspace* w, double Nsigma = 0.);
 
 
   // Plotting related functions
@@ -96,8 +134,8 @@ namespace Util
      @param minos Boolean deciding whether asymmetric errors are calculated, eg whether MINOS is run
      @param minosPars When minos is called, defining what parameters need asymmetric error calculation
   */  
-  void GenerateFitAndPlot(TString fcName, TString anaName, Bool_t drawBeforeFit, Bool_t drawAfterFit, Bool_t plotCorrelationMatrix, Bool_t plotSeparateComponents, Bool_t plotNLL, 
-			  Bool_t minos = kFALSE, TString minosPars="");
+  void GenerateFitAndPlot(TString fcName, TString anaName, Bool_t drawBeforeFit, Bool_t drawAfterFit, Bool_t plotCorrelationMatrix, 
+			  Bool_t plotSeparateComponents, Bool_t plotNLL,  Bool_t minos = kFALSE, TString minosPars="");
   
   /**
      Function to plot each region with data, pdf and pdf-components(=samples)  
@@ -126,12 +164,12 @@ namespace Util
      @param fc FitConfig pointer
      @param frame RooPlot pointer to which the components need to be added to
      @param regionPdf RooAbsPdf pointer to the total-pdf for this specific region
-     @param regionData RooAbsData pointer to the data for this region
      @param obsRegion RooRealVar pointer to the observable for this region
      @param regionCatLabel TString that defines this region in simultaneous pdf
      @param style Instance of ChannelStyle class defined for the FitConfig fc, that carries info on plot colors etc
   */
-  void AddComponentsToPlot(RooWorkspace* w,FitConfig* fc, RooPlot* frame, RooAbsPdf* regionPdf, RooAbsData* regionData, RooRealVar* obsRegion, TString regionCatLabel, ChannelStyle style);
+  void AddComponentsToPlot(RooWorkspace* w,FitConfig* fc, RooPlot* frame, RooAbsPdf* regionPdf, 
+			   RooRealVar* obsRegion, TString regionCatLabel, ChannelStyle style);
   
   /**
      Function to plot each component(=sample) separately in each region
@@ -173,51 +211,100 @@ namespace Util
      @param fitRegions Comma-separated input TString of regions used for the fit, hence also used to build the NLL/PLL (as also done in FitPdf())
      @param lumiConst Boolean deciding whether "Lumi" parameter (with a special treatment in HistFactory) is to be set constant or not (as also done in FitPdf())
   */
-  void PlotNLL(RooWorkspace* w, RooFitResult* rFit = NULL,  Bool_t plotPLL = false, TString anaName="Analysis", TString outputPrefix = "", RooAbsData* inputData=0, TString plotPars="", TString fitRegions="ALL", Bool_t lumiConst=false);
-
+  void PlotNLL(RooWorkspace* w, RooFitResult* rFit = NULL,  Bool_t plotPLL = false, TString anaName="Analysis", 
+	       TString outputPrefix = "", RooAbsData* inputData=0, TString plotPars="", TString fitRegions="ALL", Bool_t lumiConst=false);
+  
   /**
      Function to construct a band (RooCurve) with the ratio of the nominal pdf curve w.r.t the pdf curve +/- 1 sigma
-     @param w RooWorkspace pointer
      @param regionPdf RooAbsPdf pointer to the total-pdf for this specific region
      @param regionData RooAbsData pointer to the data for this region
      @param regionVar RooRealVar pointer to the observable for this region
      @param rFit RooFitResult pointer used to construct +/-1 sigma curves
      @param Nsigma Number of sigmas to be plotted, default= 1.
   */
-  RooCurve* MakePdfErrorRatioHist(RooWorkspace* w, RooAbsData* regionData, RooAbsPdf* regionPdf, RooRealVar* regionVar, RooFitResult* rFit, Double_t Nsigma = 1.);
+  RooCurve* MakePdfErrorRatioHist(RooAbsData* regionData, RooAbsPdf* regionPdf, 
+				  RooRealVar* regionVar, RooFitResult* rFit, Double_t Nsigma = 1.);
 
   /**
      Add ATLAS label to plot
-   */
+  */
   void ATLASLabel(Double_t x,Double_t y, const char* text=NULL,Color_t color=kBlack) ;
-
+  
   /**
      Add text to plot
-   */
+  */
   void AddText(Double_t x,Double_t y,char* text=NULL,Color_t color=kBlack) ;
   
   /**
-     Get human-readable title for x-axis -- OUTDATED, FIXME
+     Remove empty bins for data (otherwise a Poisson error on 0 observed events is shown)
+     @param frame RooPlot pointer for the frame that needs removing the empty bins
   */
-  TString GetXTitle(RooRealVar* regionVar);
+  void RemoveEmptyDataBins(RooPlot* frame);
   
 
-
   // Fitting related functions
+  /**
+     Function to fit PDF using regions given
+     @param w RooWorkspace pointer
+     @param fitRegions Comma-separated input TString of regions to be used for the fit, default="ALL" meaning all regions/channel in pdf
+     @param lumiConst Boolean deciding whether "Lumi" parameter (with a special treatment in HistFactory) is to be set constant or not
+     @param inputData RooAbsData pointer pointing to a toy/asimov-dataset, default='' meaning that it takes obsData from RooWorkspace
+     @param suffix Output prefix, used for RooFitResult naming
+     @param minos Boolean deciding whether asymmetric errors are calculated, eg whether MINOS is run, default=kFALSE
+     @param minosPars When minos is called, defining what parameters need asymmetric error calculation, default=''
+     @return RooFitResult pointer continaing the fit result
+  */
+  RooFitResult* FitPdf(RooWorkspace* w,  TString fitRegions="ALL", Bool_t lumiConst=false, RooAbsData* inputData=0, 
+		       TString suffix ="", Bool_t minos = kFALSE, TString minosPars="");
 
-  RooFitResult* FitPdf(RooWorkspace* w,  TString fitRegions="ALL", Bool_t lumiConst=false, RooAbsData* inputData=0, TString suffix ="", Bool_t minos = kFALSE, TString minosPars="");
-  double GetPropagatedError(RooAbsReal* var, const RooFitResult& fr, const bool& doAsym=false); //, RooArgList varlist=RooArgList() ) ; 
-  void RemoveEmptyDataBins(RooWorkspace* w, RooPlot* frame);
-
+  /**
+     Function to calculate the propagated error of given RooAbsReal
+     @param var RooAbsReal pointer for the object that the error gets calculated for
+     @param fr const RooFitResult reference used contaning the fit result and covariance matrix used for error propagation
+     @param doAsym Boolean deciding whether asymmetric (MINOS) errors on parameters get used in an averaged approximation
+     @return Returns the propagated error
+  */
+  double GetPropagatedError(RooAbsReal* var, const RooFitResult& fr, const bool& doAsym=false); 
+  
+  /**
+     Sets interpolation code  
+     @param w RooWorkspace pointer
+     @param code Typicaly set to code = 4, meaning parabolic interpolation (default now in RooStats). This avoids kinks in the likelihood curve. 
+   */
   void SetInterpolationCode(RooWorkspace* w, Int_t code);
+  /**
+     Get RooStats::ModelConfig out of RooWorkspace
+     @param w RooWorkspace pointer
+     @param mcName Optional name of ModelConfig, default='ModelConfig'
+     @return RooStats::ModelConfig pointer
+  */
+  RooStats::ModelConfig* GetModelConfig( const RooWorkspace* w, const TString& mcName="ModelConfig");
+  /**
+     Create log-likelihood (NLL) from workspace and fit-regions given
+     @param w RooWorkspace pointer
+     @param fitRegions Comma-separated input TString of regions to be used for the fit
+     @param lumiConst Boolean deciding whether "Lumi" parameter (with a special treatment in HistFactory) is to be set constant or not
+     @return RooAbsReal pointer to log-likelihood
+  */
+  RooAbsReal* CreateNLL( RooWorkspace* w, TString fitRegions, Bool_t lumiConst=false);
+  /**
+     Perform fit using PDF/data as stored in ModelCOnfig inside the workspace
+     @param w RooWorkspace pointer
+     @param inputData RooAbsData pointer pointing to a toy/asimov-dataset, default='' meaning that it takes obsData from RooWorkspace
+     @param verbose Boolean deciding whether addiotional print out info is given, default=false
+     @param resetAfterFit Coolean deciding whether the workspace parameters are set back to initial values after fit is performed, default=false
+     @param minos Boolean deciding whether asymmetric errors are calculated, eg whether MINOS is run, default=kFALSE
+     @param minosPars When minos is called, defining what parameters need asymmetric error calculation, default=''
+     @return RooFitResult pointer to fit result 
+  */
+  RooFitResult* doFreeFit( RooWorkspace* w, RooDataSet* inputdata=0, const bool& verbose=false, 
+			   const bool& resetAfterFit=false, Bool_t minos = kFALSE, TString minosPars="" );
 
-
-  // Simultaneous PDF related functions, to decompose PDF
-
+  
+  // Simultaneous PDF related functions, to (de)compose PDF and PDF components
   RooAbsReal* GetComponent(RooWorkspace* w, TString component, TString region, const bool exactRegionName=false, TString rangeName="");
   RooAbsPdf* GetRegionPdf(RooWorkspace* w, TString region);
   RooRealVar* GetRegionVar(RooWorkspace* w, TString region);
-  //  RooAbsReal* GetRegionPdfIntegral(RooWorkspace* w, TString region);
 
   Double_t GetComponentFrac(RooWorkspace* w, const char* Component, const char* RRSPdf, RooRealVar* observable, RooRealVar* binWidth);
   Double_t GetComponentFracInRegion(RooWorkspace* w, TString component, TString region);
@@ -243,8 +330,6 @@ namespace Util
  
   // Functions for toy generation with ToyMCSampler
 
-  RooStats::ModelConfig* GetModelConfig( const RooWorkspace* w, const TString& mcName="ModelConfig", const bool& verbose=true );
-  RooFitResult* doFreeFit( RooWorkspace* w, RooDataSet* inputdata=0, const bool& verbose=false, const bool& resetAfterFit=false, Bool_t minos = kFALSE, TString minosPars="" );
   RooRealVar* GetPOI( const RooWorkspace* w );
   RooMCStudy* GetMCStudy( const RooWorkspace* w );
 
@@ -253,7 +338,6 @@ namespace Util
 
   RooArgList getFloatParList( const RooAbsPdf& pdf, const RooArgSet& obsSet = RooArgSet() );
 
-  RooAbsReal* CreateNLL( RooWorkspace* w, TString fitRegions, Bool_t lumiConst=false);
 
 }
 
