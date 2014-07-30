@@ -195,9 +195,9 @@ void Util::GenerateFitAndPlot(TString fcName, TString anaName, Bool_t drawBefore
     }
 
     //hack to be fixed at HistFactory level (check again with ROOT 5.34)
-    Bool_t lumiConst = kTRUE;
+    // Bool_t lumiConst = kTRUE;
     //if (fc->m_signalChannels.size() > 0) 
-    lumiConst = kFALSE;
+    Bool_t lumiConst = kFALSE;
 
     //  fit toy MC if specified. When left None, data is fit by default
     RooAbsData* toyMC = NULL;
@@ -363,13 +363,11 @@ RooFitResult* Util::FitPdf( RooWorkspace* w, TString fitRegions, Bool_t lumiCons
 
     RooMsgService::instance().getStream(1).removeTopic(NumIntegration);
 
-    //RooWorkspace* w = (RooWorkspace*) gDirectory->Get("w");
     if(w==NULL){ 
         Logger << kERROR << "Workspace not found, no fitting performed" << GEndl;
         return NULL; 
     }
     RooSimultaneous* pdf = (RooSimultaneous*) w->pdf("simPdf");
-    // pdf->Print("t");
 
     RooAbsData* data = ( inputData!=0 ? inputData : (RooAbsData*)w->data("obsData") ); 
     RooCategory* regionCat = (RooCategory*) w->cat("channelCat");  
@@ -763,16 +761,15 @@ void Util::PlotPdfWithComponents(RooWorkspace* w, FitConfig* fc, TString anaName
     Logger << kINFO << " ------ Starting Plot with parameters:   analysisName = " << fc->m_name << " and " << anaName << GEndl; 
     Logger << kINFO << "    plotRegions = " <<  plotRegions <<  "  plotComponents = " << plotComponents << "  outputPrefix = " << outputPrefix  << GEndl;
 
+    // removing unnecessarily verbose output from RooFit
     RooMsgService::instance().getStream(1).removeTopic(NumIntegration);
     RooMsgService::instance().getStream(1).removeTopic(Plotting);
-
 
     if(w==NULL){ 
         Logger << kERROR << "Workspace not found, no plotting performed" << GEndl; 
         return; 
     }
     RooSimultaneous* pdf = (RooSimultaneous*) w->pdf("simPdf");
-    //pdf->Print("t");
 
     RooAbsData* data = ( inputData!=0 ? inputData : (RooAbsData*)w->data("obsData") ); 
 
@@ -815,8 +812,6 @@ void Util::PlotPdfWithComponents(RooWorkspace* w, FitConfig* fc, TString anaName
             }
 
             // normalize pdf to number of expected events, not to number of events in dataset
-            //  double normCount = regionPdf->expectedEvents(*regionVar);
-            //regionPdf->plotOn(frame,Normalization(normCount,RooAbsReal::NumEvent),Precision(1e-5),LineColor(style.getTotalPdfColor()));
             regionPdf->plotOn(frame,Normalization(1,RooAbsReal::RelativeExpected),Precision(1e-5),LineColor(style.getTotalPdfColor()));
 
             // plot components
@@ -894,7 +889,7 @@ void Util::PlotPdfWithComponents(RooWorkspace* w, FitConfig* fc, TString anaName
                 leg->SetFillStyle(0);
                 leg->SetFillColor(0);
                 leg->SetBorderSize(0);
-                TLegendEntry* entry=leg->AddEntry("","Data 2012 (#sqrt{s}=8 TeV)","p") ;
+                TLegendEntry* entry=leg->AddEntry("","Data","p") ;
                 entry->SetMarkerColor(style.getDataColor());
                 entry->SetMarkerStyle(20);
                 entry=leg->AddEntry("","Standard Model","lf") ;
@@ -915,27 +910,10 @@ void Util::PlotPdfWithComponents(RooWorkspace* w, FitConfig* fc, TString anaName
                     compNameVec.push_back(componentName);
                 }
 
-                char NP[10];
-                TString NP_str;
                 for( int iComp = (compNameVec.size()-1) ; iComp>-1; iComp--){
                     Int_t  compPlotColor    = ( (fc!=0) ? style.getSampleColor(compNameVec[iComp]) : iComp );
                     TString  compShortName  = ( (fc!=0) ? style.getSampleName(compNameVec[iComp])  : "" );
-
-                    TString legName = compShortName; //"";
-                    for (int inp=0; inp<6; inp++) {
-                        sprintf(NP,"Np%d",inp);
-                        NP_str = NP;
-                        if(compShortName.Contains("WZ") && compShortName.Contains(NP)) legName = "WZ+"+NP_str;
-                        if(compShortName.Contains("Top") && compShortName.Contains(NP)) legName = "t#bar{t}+"+NP_str;
-                    }
-                    if(compShortName.Contains("Discovery")) legName = "signal";
-                    if(compShortName.Contains("WZpT0GeV"))   legName = "W/Z (p_{T}^{V,Truth}=0-50GeV)";
-                    if(compShortName.Contains("WZpT50GeV"))  legName = "W/Z (p_{T}^{V,Truth}=50-100GeV)";
-                    if(compShortName.Contains("WZpT100GeV")) legName = "W/Z (p_{T}^{V,Truth}=100-150GeV)";
-                    if(compShortName.Contains("WZpT150GeV")) legName = "W/Z (p_{T}^{V,Truth}=150-200GeV)";
-                    if(compShortName.Contains("WZpT200GeV")) legName = "W/Z (p_{T}^{V,Truth}=200-250GeV)";
-                    if(compShortName.Contains("WZpT250GeV")) legName = "W/Z (p_{T}^{V,Truth}=250GeV-)";
-                    //
+                    TString legName = compShortName;
                     entry=leg->AddEntry("",legName.Data(),"f") ;
                     entry->SetLineColor(compPlotColor);
                     entry->SetFillColor(compPlotColor);
@@ -1278,8 +1256,6 @@ void Util::PlotNLL(RooWorkspace* w, RooFitResult* rFit, Bool_t plotPLL, TString 
     RooCategory* regionCat = (RooCategory*) w->cat("channelCat");
     data->table(*((RooAbsCategory*)regionCat))->Print("v");
 
-    ///////////////////////////////////////////////////////////////////
-
     if (lumiConst) {
         RooRealVar* lumi = (RooRealVar*) w->var("Lumi");
         if (lumi!=NULL) lumi->setConstant(lumiConst); 
@@ -1331,7 +1307,6 @@ void Util::PlotNLL(RooWorkspace* w, RooFitResult* rFit, Bool_t plotPLL, TString 
         }
     }
 
-    /////////////////////////////////////////////////////////////////
 
     // find parameters requested for plotting
     RooArgSet* plotParams = new RooArgSet();
@@ -1401,7 +1376,6 @@ void Util::PlotNLL(RooWorkspace* w, RooFitResult* rFit, Bool_t plotPLL, TString 
 
         const char* curvename = 0;
         RooCurve* curve = (RooCurve*) frame->findObject(curvename,RooCurve::Class()) ;
-        //  frame->remove();
         Double_t curveMax = curve->getYAxisMax();
         // safety for weird RooPlots where curve goes to infinity in first/last bin(s)
         if (curveMax > 0. && !std::isinf(curveMax) && !std::isnan(curveMax) )  { ; } // frame->SetMaximum(curveMax * 2.); 
@@ -1435,7 +1409,6 @@ void Util::PlotNLL(RooWorkspace* w, RooFitResult* rFit, Bool_t plotPLL, TString 
             while ( (yLastBin < 0 || std::isinf(yLastBin) || std::isnan(yLastBin) ) && iBin >0){
                 iBin--;
                 curve->GetPoint(iBin,xLastBin,yLastBin) ; 
-                //	  cout << endl << " iBin = " << iBin << " xLastBin = " << xLastBin << " yLastBin = " << yLastBin << endl;		    
                 if(std::isinf(yLastBin)  || std::isnan(yLastBin)){
                     curve->RemovePoint(iBin);
                     Logger << kWARNING << " Removing bin = " << iBin  << " as it was either inf or nan from NLL plot for parameter = " << parName<< GEndl;
@@ -1465,7 +1438,6 @@ void Util::PlotNLL(RooWorkspace* w, RooFitResult* rFit, Bool_t plotPLL, TString 
             pll->plotOn(frame,LineColor(kRed),LineStyle(kDashed),NumCPU(4)); 
         }
 
-        cout << " frame->GetMaximum() = " << frame->GetMaximum() << " frame->GetMinimum() = " << frame->GetMinimum() << endl;
 
         TString canName=Form("can_NLL_%s_%s_%s",outputPrefix.Data(),rFit->GetName(),parName.Data());
         canVec[iPar] = new TCanvas(canName,canName,600,600); 
@@ -1596,19 +1568,6 @@ TH2D* Util::GetCorrelations(RooFitResult* rFit, double threshold, TString anaNam
     return h_corr;
 } 
 
-
-//_____________________________________________________________________________
-TString Util::GetShortCompName(TString compName) {
-
-    TString shortCompName = "empty";
-    if(compName.Contains("WZ")) shortCompName = "WZ";
-    else if(compName.Contains("Top"))   shortCompName = "Top";
-    else if(compName.Contains("SU")) shortCompName = "SUSY"; 
-
-    if(shortCompName == "empty"){ Logger << kWARNING << " component(" << compName << ")  in GetCompName not recognized " << GEndl; }
-
-    return shortCompName;
-}
 
 
 //_____________________________________________________________________________
@@ -1970,7 +1929,7 @@ void Util::AddText(Double_t x,Double_t y,char* text,Color_t color)
 
 
 //_____________________________________________________________________________
-RooAbsReal* Util::GetComponent(RooWorkspace* w, TString component, TString region, bool exactRegionName, TString rangeName){  //, unsigned int bin){
+RooAbsReal* Util::GetComponent(RooWorkspace* w, TString component, TString region, bool exactRegionName, TString rangeName){ 
 
     std::vector<TString> componentVec = Tokens(component,",");
     if(componentVec.size() <1) { Logger << kWARNING << " componentVec.size() < 1, for components = " << component << GEndl; }
@@ -2547,7 +2506,6 @@ Util::resetError( RooWorkspace* wspace, const RooArgList& parList, const RooArgL
             if(constraint != 0){ ConstraintType=constraint->IsA()->GetName(); }
 
             if( ConstraintType == "" ) {
-                //cout << "Error: Strange constraint type for Stat Uncertainties " << ConstraintType << GEndl;
                 Logger << kINFO << "Assuming parameter :" << UncertaintyName << ": is a ShapeFactor and so unconstrained" << GEndl;
                 continue;
             }

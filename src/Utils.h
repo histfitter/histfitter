@@ -119,6 +119,10 @@ namespace Util
      Set parameter to value at nominal value + Nsigma * parameter error
   */
   void SetPdfParError(RooWorkspace* w, double Nsigma = 0.);
+  /**
+     Get list of floating parameters associated to given pdf
+  */
+  RooArgList getFloatParList( const RooAbsPdf& pdf, const RooArgSet& obsSet = RooArgSet() );
 
 
   // Plotting related functions
@@ -299,23 +303,59 @@ namespace Util
   */
   RooFitResult* doFreeFit( RooWorkspace* w, RooDataSet* inputdata=0, const bool& verbose=false, 
 			   const bool& resetAfterFit=false, Bool_t minos = kFALSE, TString minosPars="" );
-
+  /**
+     Get asimovData dataset from workspace
+  */
+  RooAbsData* GetAsimovSet( RooWorkspace* inputws=0 ) ;
+  /**
+     Generate and return a toyMC set based on the PDF/obsData contained in ModelConfig in workspace. Number of generated events is equal to number of events in obsData.
+  */
+  RooAbsData* GetToyMC( RooWorkspace* inputws=0 ) ;
+  
+ 
   
   // Simultaneous PDF related functions, to (de)compose PDF and PDF components
+  /**
+     Get component (sample or mutiple samples as comma-separated string) in region.
+     Returns the integral of recomposed RooRealSumPdf (top-level region PDF in HistFactory); only in a specific range, if rangeName is given. 
+  */
   RooAbsReal* GetComponent(RooWorkspace* w, TString component, TString region, const bool exactRegionName=false, TString rangeName="");
+  /**
+     Get PDF in region
+  */
   RooAbsPdf* GetRegionPdf(RooWorkspace* w, TString region);
+  /**
+     Get observable in region
+  */
   RooRealVar* GetRegionVar(RooWorkspace* w, TString region);
 
+  /**
+     Get component (sample or multiple sample) fraction, called by  GetComponentFracInRegion()
+  */
   Double_t GetComponentFrac(RooWorkspace* w, const char* Component, const char* RRSPdf, RooRealVar* observable, RooRealVar* binWidth);
+  /**
+     Get component (sample or multiple samples) fraction in region
+  */
   Double_t GetComponentFracInRegion(RooWorkspace* w, TString component, TString region);
   
+  /**
+     Get a vector of region names
+  */
   std::vector<TString> GetRegionsVec(TString regions="ALL", RooCategory* regionCat = NULL);
+  /**
+     Get all component (sample) names in region
+  */
   std::vector<TString> GetAllComponentNamesInRegion(TString region, RooAbsPdf* regionPdf);
+  /**
+    Get all component (sample) fractions in region  
+  */
   std::vector<double> GetAllComponentFracInRegion(RooWorkspace* w, TString region, RooAbsPdf* regionPdf, RooRealVar* obsRegion, RooRealVar* binWidth);
   
+  /**
+     Get region name as used in RooCategory of the simultaneous PDF
+  */
   TString GetFullRegionName(RooCategory* regionCat,  TString regionShortName);
-  TString GetShortCompName(TString compName);
-  
+
 
   // Helper functions - to be moved
   double looseToTightVal(const TString& reg, TMap* map);
@@ -329,14 +369,14 @@ namespace Util
 
  
   // Functions for toy generation with ToyMCSampler
-
+  /**
+     Get parameter of interest (POI) out of ModelConfig in workspace
+  */
   RooRealVar* GetPOI( const RooWorkspace* w );
+  /**
+     Get RooMCStudy based on PDF contained in ModelConfig of the workspace
+  */
   RooMCStudy* GetMCStudy( const RooWorkspace* w );
-
-  RooAbsData* GetToyMC( RooWorkspace* inputws=0 ) ;
-  RooAbsData* GetAsimovSet( RooWorkspace* inputws=0 ) ;
-
-  RooArgList getFloatParList( const RooAbsPdf& pdf, const RooArgSet& obsSet = RooArgSet() );
 
 
 }
