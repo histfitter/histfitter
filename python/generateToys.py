@@ -1,3 +1,22 @@
+"""
+ **********************************************************************************
+ * Project: HistFitter - A ROOT-based package for statistical data analysis       *
+ * Package: HistFitter                                                            *
+ * Class  : GenerateToys                                                          *
+ * Created: November 2012                                                         *
+ *                                                                                *
+ * Description:                                                                   *
+ *      Function to generate toyMC RooDataSet                                     *
+ *                                                                                *
+ * Authors:                                                                       *
+ *      HistFitter group, CERN, Geneva                                            *
+ *                                                                                *
+ * Redistribution and use in source and binary forms, with or without             *
+ * modification, are permitted according to the terms listed in the file          *
+ * LICENSE.                                                                       *
+ **********************************************************************************
+"""
+
 from ROOT import TH1D,RooRealVar,RooArgList,RooArgSet,RooFit,RooDataHist,RooHistPdf
 
 def generate(histList,varName,varLow,varHigh,histSig="",weightSig=0.):

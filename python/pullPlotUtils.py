@@ -1,3 +1,22 @@
+"""
+ **********************************************************************************
+ * Project: HistFitter - A ROOT-based package for statistical data analysis       *
+ * Package: HistFitter                                                            *
+ * Class  : PullPlotUtils                                                         *
+ * Created: November 2012                                                         *
+ *                                                                                *
+ * Description:                                                                   *
+ *      Functions to make pull plots                                              *
+ *                                                                                *
+ * Authors:                                                                       *
+ *      HistFitter group, CERN, Geneva                                            *
+ *                                                                                *
+ * Redistribution and use in source and binary forms, with or without             *
+ * modification, are permitted according to the terms listed in the file          *
+ * LICENSE.                                                                       *
+ **********************************************************************************
+"""
+
 import ROOT
 from ROOT import *
 ROOT.PyConfig.IgnoreCommandLineOptions = True

@@ -1,4 +1,23 @@
 """
+ **********************************************************************************
+ * Project: HistFitter - A ROOT-based package for statistical data analysis       *
+ * Package: HistFitter                                                            *
+ * Class  : cmdLineUtils                                                          *
+ * Created: November 2012                                                         *
+ *                                                                                *
+ * Description:                                                                   *
+ *        Functions to interpret command line arguments                           *
+ *                                                                                *
+ * Authors:                                                                       *
+ *      HistFitter group, CERN, Geneva                                            *
+ *                                                                                *
+ * Redistribution and use in source and binary forms, with or without             *
+ * modification, are permitted according to the terms listed in the file          *
+ * LICENSE.                                                                       *
+ **********************************************************************************
+"""
+
+"""
 @file   cmdLineUtils.py
 @brief  Functions to interpret command line arguments
 

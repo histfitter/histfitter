@@ -1,3 +1,22 @@
+"""
+ **********************************************************************************
+ * Project: HistFitter - A ROOT-based package for statistical data analysis       *
+ * Package: HistFitter                                                            *
+ * Class  : PrepareHistos                                                         *
+ * Created: November 2012                                                         *
+ *                                                                                *
+ * Description:                                                                   *
+ *      Class to define histogram preparation methods                             *
+ *                                                                                *
+ * Authors:                                                                       *
+ *      HistFitter group, CERN, Geneva                                            *
+ *                                                                                *
+ * Redistribution and use in source and binary forms, with or without             *
+ * modification, are permitted according to the terms listed in the file          *
+ * LICENSE.                                                                       *
+ **********************************************************************************
+"""
+
 from ROOT import gROOT,TFile,TH1F,Double,gDirectory,TChain,TObject
 from math import sqrt
 from logger import Logger
