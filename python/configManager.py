@@ -1,3 +1,23 @@
+"""
+ **********************************************************************************
+ * Project: HistFitter - A ROOT-based package for statistical data analysis       *
+ * Package: HistFitter                                                            *
+ * Class  : ConfigManager                                                         *
+ * Created: November 2012                                                         *
+ *                                                                                *
+ * Description:                                                                   *
+ *      Class to define a config-manager (singleton class) that manages           *
+ *        fitConfig instances. Has a C++ counter-part.                            *
+ *                                                                                *
+ * Authors:                                                                       *
+ *      HistFitter group, CERN, Geneva                                            *
+ *                                                                                *
+ * Redistribution and use in source and binary forms, with or without             *
+ * modification, are permitted according to the terms listed in the file          *
+ * LICENSE.                                                                       *
+ **********************************************************************************
+"""
+
 from ROOT import THStack,TLegend,TCanvas,TFile,std,TH1F
 from ROOT import ConfigMgr,FitConfig,ChannelStyle #this module comes from gSystem.Load("libSusyFitter.so")
 from prepareHistos import PrepareHistos
@@ -16,10 +36,6 @@ def mkdir_p(path):
         os.makedirs(path)
     except:
         pass
-    #except OSError as exc: # Python >2.5
-        #if exc.errno == errno.EEXIST and os.path.isdir(path):
-            #pass
-        #else: raise
 
 def replaceSymbols(s):
     s = s.replace("/","").replace("*","").replace("(","").replace(")","")

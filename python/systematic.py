@@ -1,3 +1,22 @@
+"""
+ **********************************************************************************
+ * Project: HistFitter - A ROOT-based package for statistical data analysis       *
+ * Package: HistFitter                                                            *
+ * Class  : Systematic                                                            *
+ * Created: November 2012                                                         *
+ *                                                                                *
+ * Description:                                                                   *
+ *      Class to define a systematic                                              *
+ *                                                                                *
+ * Authors:                                                                       *
+ *      HistFitter group, CERN, Geneva                                            *
+ *                                                                                *
+ * Redistribution and use in source and binary forms, with or without             *
+ * modification, are permitted according to the terms listed in the file          *
+ * LICENSE.                                                                       *
+ **********************************************************************************
+"""
+
 from ROOT import THStack,TLegend,TCanvas,TFile,TH1F
 from ROOT import ConfigMgr,FitConfig  #from gSystem.Load("libSusyFitter.so")
 from histogramsManager import histMgr

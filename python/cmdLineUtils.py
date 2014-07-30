@@ -47,6 +47,7 @@ def cmdStringToListOfLists(inputString):
 def getPdfInRegions(w,sample,region):
     """
     Return the PDF in a region for a sample
+    Should be moved to $HF/src/Utils.h -- FIXME
 
     @param sample The sample to find
     @param region The region to use
@@ -66,6 +67,9 @@ def getPdfInRegions(w,sample,region):
     return pdfInRegion
 
 def getPdfInRegionsWithRangeName(w,sample,region,rangeName):
+    """
+    Should be moved to $HF/src/Utils.h -- FIXME
+    """
     if isinstance(sample,list):
         sampleArgList = RooArgList()
         sample_str="group"

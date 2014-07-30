@@ -1,4 +1,21 @@
-# Author: Steven J. Bethard <steven.bethard@gmail.com>.
+"""
+ **********************************************************************************
+ * Project: HistFitter - A ROOT-based package for statistical data analysis       *
+ * Package: HistFitter                                                            *
+ * Class  : argparse                                                              *
+ * Created: November 2012                                                         *
+ *                                                                                *
+ * Description:                                                                   *
+ *      Command-line parsing library                                              *
+ *                                                                                *
+ * Authors:                                                                       *
+ *       Steven J. Bethard <steven.bethard@gmail.com>                             *            
+ *                                                                                *
+ * Redistribution and use in source and binary forms, with or without             *
+ * modification, are permitted according to the terms listed in the file          *
+ * LICENSE.                                                                       *
+ **********************************************************************************
+"""
 
 """Command-line parsing library
 
