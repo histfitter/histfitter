@@ -873,6 +873,7 @@ void Util::PlotPdfWithComponents(RooWorkspace* w, FitConfig* fc, TString anaName
             frame->Draw();
 
             // add cosmetics
+	    // ATLAS specific - FIXME ; remove for public release
             if( (fabs(style.getATLASLabelX() + 1.) > 0.000001) &&  (fabs(style.getATLASLabelY() + 1.) > 0.000001) ){
                 ATLASLabel(style.getATLASLabelX(),style.getATLASLabelY(),style.getATLASLabelText()) ; //"for approval");
             }
@@ -1884,6 +1885,7 @@ Util::GetMCStudy( const RooWorkspace* w )
 
 
 //________________________________________________________________________________________________
+// ATLAS specific - FIXME ; remove for public release
 void Util::ATLASLabel(Double_t x,Double_t y,const char* text,Color_t color) 
 {
 

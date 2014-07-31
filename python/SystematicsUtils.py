@@ -47,6 +47,7 @@ def addWeight(oldList, newWeight):
     return newList
 
 
+# ATLAS specific - FIXME ; remove for public release
 def getISRerr(sig):
     errisr = 0.
     if "slepton" in sig:
@@ -70,7 +71,7 @@ def getISRerr(sig):
 
     return errisr
 
-
+# ATLAS specific - FIXME ; remove for public release
 def getISRSyst(sig):
     errisr = getISRerr(sig)
 
@@ -82,13 +83,14 @@ def getISRSyst(sig):
     return isrUnc
 
 
+# ATLAS specific - FIXME ; remove for public release
 def getISRWeightsHigh(sig):
     errisr = getISRerr(sig)
 
     isrHighWeights = addWeight(configMgr.weights, str(1 + errisr))
     return isrHighWeights
 
-
+# ATLAS specific - FIXME ; remove for public release
 def getISRWeightsLow(sig):
     errisr = getISRerr(sig)
 
@@ -96,6 +98,7 @@ def getISRWeightsLow(sig):
     return isrLowWeights
 
 
+# ATLAS specific - FIXME ; remove for public release
 def hadroSys(CRval, SRval, sample, observable):
     if CRval > SRval:
         raise RuntimeError("Unsupported case: CRval=%f is "
@@ -131,6 +134,7 @@ def hadroSys(CRval, SRval, sample, observable):
     return syst
 
 
+# ATLAS specific - FIXME ; remove for public release
 def hadroSysBins(CRval, SRNBins, SRBinLow, SRBinHigh, sample, observable):
     weights_up = []
     weights_down = []
@@ -143,6 +147,7 @@ def hadroSysBins(CRval, SRNBins, SRBinLow, SRBinHigh, sample, observable):
     return weights_up, weights_down
 
 
+# ATLAS specific - FIXME ; remove for public release
 def addHadronizationSyst(chan, topSyst, WZSyst):
     for s in chan.sampleList:
         if s.name.startswith("Top"):

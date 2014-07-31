@@ -231,6 +231,8 @@ namespace Util
 
   /**
      Add ATLAS label to plot
+     # ATLAS specific - FIXME ; remove for public release
+
   */
   void ATLASLabel(Double_t x,Double_t y, const char* text=NULL,Color_t color=kBlack) ;
   
