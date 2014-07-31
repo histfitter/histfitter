@@ -3,6 +3,7 @@
  * Project : HistFitter - A ROOT-based package for statistical data analysis      *
  * Package : HistFitter                                                           *
  * Script  : YieldsTable.py                                                       *
+ * Created : November 2012                                                        *
  *                                                                                *
  * Description:                                                                   *
  *      Script for producing publication-quality yields tables                    *

@@ -3,6 +3,7 @@
  * Project : HistFitter - A ROOT-based package for statistical data analysis      *
  * Package : HistFitter                                                           *
  * Script  : UpperLimitTable.py                                                   *
+ * Created : November 2012                                                        *
  *                                                                                *
  * Description:                                                                   *
  *      Script for calculating upper limits, based on model-independent signal    *

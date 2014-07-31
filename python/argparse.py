@@ -2,7 +2,7 @@
  **********************************************************************************
  * Project: HistFitter - A ROOT-based package for statistical data analysis       *
  * Package: HistFitter                                                            *
- * Class  : argparse                                                              *
+ * Script: argparse.py                                                            *
  * Created: November 2012                                                         *
  *                                                                                *
  * Description:                                                                   *
@@ -18,8 +18,8 @@
  * was licensed under the Python license. Same license applies to all files in    *
  * the argparse package project.                                                  *
  *                                                                                *
- * For details about the Python License, please see docs/Python-License.txt.      *
- *                                                                                *
+ * For details about the Python License, please see                               *
+ * https://code.google.com/p/argparse/source/browse/doc/source/Python-License.txt *
  * Redistribution and use in source and binary forms, with or without             *
  * modification, are permitted according to the terms listed in the file          *
  * LICENSE.                                                                       *

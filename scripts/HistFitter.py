@@ -3,6 +3,7 @@
  * Project : HistFitter - A ROOT-based package for statistical data analysis      *
  * Package : HistFitter                                                           *
  * Script  : HistFitter.py                                                        *
+ * Created : November 2012                                                        *
  *                                                                                *
  * Description:                                                                   *
  *              Top-level control script for all commands/run-conditions          *                                                                                *

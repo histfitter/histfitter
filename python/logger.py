@@ -1,4 +1,33 @@
-from ROOT import TMsgLogger
+"""
+ **********************************************************************************
+ * Project: HistFitter - A ROOT-based package for statistical data analysis       *  
+ * Package: HistFitter                                                            *
+ * Class  : logger                                                                *
+ *                                                                                *
+ * Description:                                                                   *
+ *      output logger class producing nicely formatted log messages, import       *
+ *            from C++ counter-part.                                              *  
+ *                                                                                *
+ *      Adapted from TMVA:MsgLogger. Original authors:                            *
+ *                                                                                *
+ *      Attila Krasznahorkay  <Attila.Krasznahorkay@cern.ch> - CERN, Switzerland  *
+ *      Andreas Hoecker       <Andreas.Hocker@cern.ch> - CERN, Switzerland        *
+ *      Joerg Stelzer         <stelzer@cern.ch>        - DESY, Germany            *
+ *      Eckhard v. Toerne     <evt@uni-bonn.de>        - U of Bonn, Germany       *
+ *                                                                                *
+ * Copyright (c) 2005-2011:                                                       *
+ *      CERN, Switzerland                                                         *
+ *      U. of Victoria, Canada                                                    *
+ *      MPI-K Heidelberg, Germany                                                 *
+ *      U. of Bonn, Germany                                                       *
+ *                                                                                *
+ *   http://root.cern.ch/root/htmldoc/src/TMVA__MsgLogger.h.html                  *
+ *                                                                                *
+ * (http://tmva.sourceforge.net/LICENSE)                                          *
+ **********************************************************************************/
+"""
+
+ from ROOT import TMsgLogger
 
 # maps 1-on-1 to names used in TMsgLogger.h
 VERBOSE = 1
