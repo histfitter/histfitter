@@ -11,6 +11,15 @@
  * Authors:                                                                       *
  *       Steven J. Bethard <steven.bethard@gmail.com>                             *            
  *                                                                                *
+ * https://code.google.com/p/argparse/                                            *
+ * argparse is (c) 2006-2009 Steven J. Bethard <steven.bethard@gmail.com>.        *
+ *                                                                                *
+ * The argparse module was contributed to Python as of Python 2.7 and thus        *
+ * was licensed under the Python license. Same license applies to all files in    *
+ * the argparse package project.                                                  *
+ *                                                                                *
+ * For details about the Python License, please see docs/Python-License.txt.      *
+ *                                                                                *
  * Redistribution and use in source and binary forms, with or without             *
  * modification, are permitted according to the terms listed in the file          *
  * LICENSE.                                                                       *
