@@ -172,9 +172,9 @@ def latexfitresults(filename,regionList,sampleList,dataname='obsData',showSum=Fa
     varBinLowInRegionList = [[Util.GetRegionVar(w, region).getBinning((region+"binning")).binLow(ibin) for ibin in range(0, varNbinsInRegionList[idx]) ] for idx,region in enumerate(regionList)]
     varBinHighInRegionList = [[Util.GetRegionVar(w, region).getBinning((region+"binning")).binHigh(ibin) for ibin in range(0, varNbinsInRegionList[idx]) ] for idx,region in enumerate(regionList)]
     rangeNameBinsInRegionList = [[regionList[idx]+"_bin"+str(ibin) for ibin in range(0, varNbinsInRegionList[idx]) ] for idx,region in enumerate(regionList)]
-  for index,region in enumerate(regionList):
-    if varNbinsInRegionList[index]==1:
-      print " \n YieldsTable.py: WARNING: you have called -P (= per-bin yields) but this region ", region, " has only 1 bin \n"
+    for index,region in enumerate(regionList):
+      if varNbinsInRegionList[index]==1:
+        print " \n YieldsTable.py: WARNING: you have called -P (= per-bin yields) but this region ", region, " has only 1 bin \n"
 
   
 
@@ -414,7 +414,7 @@ def latexfitresults(filename,regionList,sampleList,dataname='obsData',showSum=Fa
       nMCSampleInRegionVal.append(MCSampleInRegionVal)
       nMCSampleInRegionError.append(MCSampleInRegionError)
 
-       """
+      """
       if splitBins=True calculate numbers of fitted events plus error per bin      
       """ 
       if splitBins:
@@ -610,12 +610,24 @@ if __name__ == "__main__":
     pickle.dump(m3, f)
     f.close()
 
+
+
+  """
+  when multiple samples to be evaluated together (for example [SingleTop,ttbarV] when calling with -s 'TTbar,[SingleTop,ttbarV]')
+  the names need to re-specified, as a set of samples produces only one number
+  """
+  sampleList_decoded = []
+  for isam, sample in enumerate(sampleList):
+    sampleName=getName(sample)
+    sampleList_decoded.append(sampleName)
+
+     
   """
   write out LaTeX table by calling function from YieldsTableTex.py
   """
   f = open(outputFileName, 'w')
   f.write( tablestart() )
-  f.write( tablefragment(m3, tableName, regionsList_2Digits,sampleList,showBeforeFitError) )
+  f.write( tablefragment(m3, tableName, regionsList_2Digits,sampleList_decoded,showBeforeFitError) )
   if tableCaption != "" or tableLabel != "":
       f.write( tableEndWithCaptionAndLabel(tableCaption, tableLabel) )
   else:
