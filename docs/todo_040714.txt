@@ -6,8 +6,8 @@ To-do-list HistFitter 4.July 2014
 
 >>> URGENT:
 
-- follow up on problems with ROOT 5.34.18 patch version
 - investigate why many toys failing with latest ROOT versions
+- public release of HistFitter
 
 
 >>> High priority:
@@ -29,6 +29,7 @@ To-do-list HistFitter 4.July 2014
 - FAQ on failed fits and how to handle them. Guideline on when a fit / grid-of-fits is okay.
 - Possibility to reproduce fits during the hypothesis tests also outside of '-l' and '-p'
 - Investigate 'method 3' from Higgs group for systematics tables
+- Memory issue reported for loading many histograms at the grid by Katharina Behr
 
 >>>>>From old to-do list:
 - Bug in filling of weight based systematics --> Still valid?
@@ -51,6 +52,8 @@ To-do-list HistFitter 4.July 2014
 - Add possibility to produce HEPData material
 - Add pull plot for parameters to HistFitter
 - Provide functions/tools to do fitting/plotting of arbitrary workspaces, also not following the naming convention by HistFitter
+- feature request: Need to change the buildHisto functionality to not providing a default starting value for the lowest bin, 
+  as current default 0.0 is wrong for 'cuts' case. Instead, nBins, min, max should be given in future. Add in addition an if statement to catch unreasonable lower and upper bin values    for the 'cuts' case.
 
 >>> On slightly longer time-scale:
 
