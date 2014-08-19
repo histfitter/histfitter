@@ -148,16 +148,18 @@ def latexfitresults(filename, poiname='mu_SIG', lumiFB=1.0, nTOYS=3000, asimov=F
   print "\n\n\n\n  ***---  now doing p-value (s=0) calculation ---*** \n\n\n\n"
 
   """
-  reset parameter values and errors for p(s=0) calculation
+  reset parameter values and errors for p(s=0) calculation by reopening workspace
   """
-  Util.resetAllValues(w)
-  Util.resetAllErrors(w)
-  Util.resetAllNominalValues(w)
-
+  w2 = Util.GetWorkspaceFromFile(filename,workspacename) 
+  
+  if w2==None:
+    print "ERROR : Cannot open workspace : ", workspacename
+    sys.exit(1) 
+        
   """
   calculate p(s=0) from the workspace given
   """
-  pval = RooStats.get_Presult(w,False,ntoys,calctype)
+  pval = RooStats.get_Presult(w2,False,ntoys,calctype)
   
   ulList = [uL_visXsec, uL_nobsinSR, uL_nexpinSR, uL_nexpinSRerrP, uL_nexpinSRerrM, CLB, pval ]
 
