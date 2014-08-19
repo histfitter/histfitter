@@ -1,3 +1,8 @@
+2014-08-19 Jeanette Miriam Lorenz <jeanette.miriam.lorenz@cern.ch>
+        M scripts/UpperLimitTable.py
+        * resetting of signal strength parameter not done correctly for calculation of discovery p-value. 
+        * Fixed by explicit reopening of the workspace before the calculation of discovery p-value.
+
 2014-07-23 Jeanette Miriam Lorenz <jeanette.miriam.lorenz@cern.ch>
         * Tagging HistFitter-00-00-40
 
