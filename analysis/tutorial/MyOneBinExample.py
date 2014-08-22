@@ -104,6 +104,7 @@ dataSample.setData()
 discoveryFitConfig = configMgr.addFitConfig("Discovery")
 meas=discoveryFitConfig.addMeasurement(name="NormalMeasurement",lumi=1.0,lumiErr=0.039)
 meas.addPOI("mu_SIG")
+#meas.addParamSetting("Lumi",True,1)
 
 #Samples
 discoveryFitConfig.addSamples([topSample,wzSample,dataSample])
@@ -117,6 +118,7 @@ discoveryFitConfig.addSystematic(jes)
 srBin = discoveryFitConfig.addChannel("cuts",["SR"],1,0.5,1.5)
 discoveryFitConfig.setSignalChannels([srBin])
 srBin.addDiscoverySamples(["SIG"],[1.],[0.],[100.],[kMagenta])
+discoveryFitConfig.getSample("DiscoveryMode_SIG").setNormByTheory()
 
 
 #**************
@@ -146,4 +148,7 @@ sigSample.setNormByTheory()
 sigSample.setNormFactor("mu_SIG",1.,0.,5.)                    
 exclusionFitConfig.addSamples(sigSample)
 exclusionFitConfig.setSignalSample(sigSample)
+
+
+
 

@@ -335,8 +335,8 @@ class Channel(object):
             self.getSample("DiscoveryMode_%s" % sr).setHistoName(histoName)
 
             configMgr.hists[histoName] = TH1F(histoName, histoName,
-                                              len(srList), 0.0,
-                                              float(len(srList)))
+                                              len(srList), 0.5,
+                                              float(len(srList))+0.5)
             configMgr.hists[histoName].SetBinContent(iSR+1, startValList[iSR])
 
         return

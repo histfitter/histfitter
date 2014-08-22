@@ -338,6 +338,7 @@ class fitConfig(object):
         Find the channel with the given name
         """
         for chan in self.channels:
+            print "\n chan.name =", chan.name
             if chan.name == name:
                 return chan
 
@@ -399,6 +400,12 @@ class fitConfig(object):
         for s in self.sampleList:
             if s.name == name:
                 return s
+
+        for c in self.channels:
+            for s in c.sampleList:
+                if s.name == name:
+                    return s
+ 
         raise Exception("Sample with name %s not found in TopLevel %s" % (name, self.name))
 
     def setWeights(self, weights):
