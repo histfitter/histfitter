@@ -81,7 +81,7 @@ configMgr.cutsDict["SR1sl2j"] = configMgr.cutsDict["SS"]+"&& met/meff2Jet>0.3"
 
 
 # Tuples of nominal weights without and with b-jet selection
-configMgr.weights = ("genWeight","eventWeight","leptonWeight","triggerWeight","truthWptWeight","bTagWeight2Jet")
+configMgr.weights = ("genWeight","eventWeight","leptonWeight","triggerWeight","truthWptWeight","bTagWeight2Jet","1.3")
 
 ktScaleWHighWeights = ("genWeight","eventWeight","ktfacUpWeightW","bTagWeight2Jet")
 ktScaleWLowWeights = ("genWeight","eventWeight","ktfacDownWeightW","bTagWeight2Jet")

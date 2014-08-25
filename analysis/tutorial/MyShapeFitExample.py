@@ -107,33 +107,35 @@ dataSample.setData()
 #**************
 # Exclusion fit
 #**************
+if myFitType==FitType.Exclusion:
+    
+    # Fit config instance
+    exclusionFitConfig = configMgr.addFitConfig("Exclusion")
+    meas=exclusionFitConfig.addMeasurement(name="NormalMeasurement",lumi=1.0,lumiErr=0.039)
+    meas.addPOI("mu_SIG")
 
-#Fit config instance
-exclusionFitConfig = configMgr.addFitConfig("Exclusion")
-meas=exclusionFitConfig.addMeasurement(name="NormalMeasurement",lumi=1.0,lumiErr=0.039)
-meas.addPOI("mu_SIG")
+    # Samples
+    exclusionFitConfig.addSamples([topSample,wzSample,dataSample])
 
-#Samples
-exclusionFitConfig.addSamples([topSample,wzSample,dataSample])
+    # Systematics
+    exclusionFitConfig.getSample("Top").addSystematic(topKtScale)
+    exclusionFitConfig.getSample("WZ").addSystematic(wzKtScale)
+    exclusionFitConfig.addSystematic(jes)
 
-# Systematics
-exclusionFitConfig.getSample("Top").addSystematic(topKtScale)
-exclusionFitConfig.getSample("WZ").addSystematic(wzKtScale)
-exclusionFitConfig.addSystematic(jes)
+    # Channel
+    srBin = exclusionFitConfig.addChannel("met/meff2Jet",["SR"],6,0.1,0.7)
+    srBin.useOverflowBin=True
+    srBin.useUnderflowBin=True
+    exclusionFitConfig.setSignalChannels([srBin])
 
-#Channel
-srBin = exclusionFitConfig.addChannel("met/meff2Jet",["SR"],6,0.1,0.7)
-srBin.useOverflowBin=True
-srBin.useUnderflowBin=True
-exclusionFitConfig.setSignalChannels([srBin])
+    sigSample = Sample("SM_GG_onestepCC_425_385_345",kPink)
+    sigSample.setFileList(["samples/tutorial/SusyFitterTree_p832_GG-One-Step_soft_v1.root"])
+    sigSample.setNormByTheory()
+    sigSample.setNormFactor("mu_SIG",1.,0.,5.)                    
+    exclusionFitConfig.addSamples(sigSample)
+    exclusionFitConfig.setSignalSample(sigSample)
 
-sigSample = Sample("SM_GG_onestepCC_425_385_345",kPink)
-sigSample.setFileList(["samples/tutorial/SusyFitterTree_p832_GG-One-Step_soft_v1.root"])
-sigSample.setNormByTheory()
-sigSample.setNormFactor("mu_SIG",1.,0.,5.)                    
-exclusionFitConfig.addSamples(sigSample)
-exclusionFitConfig.setSignalSample(sigSample)
-
-#2nd cloned-copy just to accomodate -l option...
-exclusionFitClone = configMgr.addFitConfigClone(exclusionFitConfig,"ExclusionFitClone")
+    # Cosmetics
+    srBin.minY = 0.0001
+    srBin.maxY = 80.
 

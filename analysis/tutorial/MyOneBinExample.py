@@ -97,58 +97,36 @@ dataSample.setData()
 
 
 #**************
-# Discovery fit
-#**************
-
-#Fit config instance
-discoveryFitConfig = configMgr.addFitConfig("Discovery")
-meas=discoveryFitConfig.addMeasurement(name="NormalMeasurement",lumi=1.0,lumiErr=0.039)
-meas.addPOI("mu_SIG")
-#meas.addParamSetting("Lumi",True,1)
-
-#Samples
-discoveryFitConfig.addSamples([topSample,wzSample,dataSample])
-
-# Systematics
-discoveryFitConfig.getSample("Top").addSystematic(topKtScale)
-discoveryFitConfig.getSample("WZ").addSystematic(wzKtScale)
-discoveryFitConfig.addSystematic(jes)
-
-#Channel
-srBin = discoveryFitConfig.addChannel("cuts",["SR"],1,0.5,1.5)
-discoveryFitConfig.setSignalChannels([srBin])
-srBin.addDiscoverySamples(["SIG"],[1.],[0.],[100.],[kMagenta])
-discoveryFitConfig.getSample("DiscoveryMode_SIG").setNormByTheory()
-
-
-#**************
 # Exclusion fit
 #**************
+if myFitType==FitType.Exclusion:
 
-#Fit config instance
-exclusionFitConfig = configMgr.addFitConfig("Exclusion")
-meas=exclusionFitConfig.addMeasurement(name="NormalMeasurement",lumi=1.0,lumiErr=0.039)
-meas.addPOI("mu_SIG")
+    # Fit config instance
+    exclusionFitConfig = configMgr.addFitConfig("Exclusion")
+    meas=exclusionFitConfig.addMeasurement(name="NormalMeasurement",lumi=1.0,lumiErr=0.039)
+    meas.addPOI("mu_SIG")
+    
+    # Samples
+    exclusionFitConfig.addSamples([topSample,wzSample,dataSample])
+    
+    # Systematics
+    exclusionFitConfig.getSample("Top").addSystematic(topKtScale)
+    exclusionFitConfig.getSample("WZ").addSystematic(wzKtScale)
+    exclusionFitConfig.addSystematic(jes)
+    
+    # Channel
+    srBin = exclusionFitConfig.addChannel("cuts",["SR"],1,0.5,1.5)
+    exclusionFitConfig.setSignalChannels([srBin])
+    
+    sigSample = Sample("SM_GG_onestepCC_425_385_345",kPink)
+    sigSample.setFileList(["samples/tutorial/SusyFitterTree_p832_GG-One-Step_soft_v1.root"])
+    sigSample.setNormByTheory()
+    sigSample.setNormFactor("mu_SIG",1.,0.,5.)                    
+    exclusionFitConfig.addSamples(sigSample)
+    exclusionFitConfig.setSignalSample(sigSample)
 
-#Samples
-exclusionFitConfig.addSamples([topSample,wzSample,dataSample])
-
-# Systematics
-exclusionFitConfig.getSample("Top").addSystematic(topKtScale)
-exclusionFitConfig.getSample("WZ").addSystematic(wzKtScale)
-exclusionFitConfig.addSystematic(jes)
-
-#Channel
-srBin = exclusionFitConfig.addChannel("cuts",["SR"],1,0.5,1.5)
-exclusionFitConfig.setSignalChannels([srBin])
-
-sigSample = Sample("SM_GG_onestepCC_425_385_345",kPink)
-sigSample.setFileList(["samples/tutorial/SusyFitterTree_p832_GG-One-Step_soft_v1.root"])
-sigSample.setNormByTheory()
-sigSample.setNormFactor("mu_SIG",1.,0.,5.)                    
-exclusionFitConfig.addSamples(sigSample)
-exclusionFitConfig.setSignalSample(sigSample)
-
-
+    # Cosmetics
+    srBin.minY = 0.0001
+    srBin.maxY = 40.
 
 
