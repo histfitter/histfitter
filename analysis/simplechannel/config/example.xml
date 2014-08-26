@@ -14,13 +14,13 @@
 
 <!DOCTYPE Combination  SYSTEM "HistFactorySchema.dtd">
 
-<Combination OutputFilePrefix="./results/example" Mode="comb" >
+<Combination OutputFilePrefix="./results/example"> <!-- Mode="comb" > -->
 
   <Input>./config/example_channel.xml</Input>
 
   <Measurement Name="GaussExample" Lumi="1." LumiRelErr="0.1" BinLow="0" BinHigh="2" Mode="comb" >
     <POI>SigXsecOverSM</POI>
-    <ParamSetting Const="True">Lumi alpha_syst1</ParamSetting>
+<!--    <ParamSetting Const="True">Lumi alpha_syst1</ParamSetting> -->
     <!-- don't need <ConstraintTerm> default is Gaussian-->
   </Measurement>
 

@@ -36,6 +36,7 @@ cors = Systematic("cor",configMgr.weights, [1.15],[0.85], "user","userHistoSys")
 ##########################
 
 # Setting the parameters of the hypothesis test
+configMgr.doExclusion=True # True=exclusion, False=discovery
 #configMgr.nTOYs=5000
 configMgr.calculatorType=2 # 2=asymptotic calculator, 0=frequentist calculator
 configMgr.testStatType=3   # 3=one-sided profile likelihood test statistic (LHC default)
@@ -58,7 +59,7 @@ configMgr.weights = "1."
 # Define samples
 bkgSample = Sample("Bkg",kGreen-9)
 bkgSample.setStatConfig(True)
-bkgSample.buildHisto([nbkg],"UserRegion","cuts")
+bkgSample.buildHisto([nbkg],"UserRegion","cuts",0.5)
 bkgSample.buildStatErrors([nbkgErr],"UserRegion","cuts")
 bkgSample.addSystematic(corb)
 bkgSample.addSystematic(ucb)
@@ -67,14 +68,14 @@ sigSample = Sample("Sig",kPink)
 sigSample.setNormFactor("mu_Sig",1.,0.,100.)
 sigSample.setStatConfig(True)
 sigSample.setNormByTheory()
-sigSample.buildHisto([nsig],"UserRegion","cuts")
+sigSample.buildHisto([nsig],"UserRegion","cuts",0.5)
 sigSample.buildStatErrors([nsigErr],"UserRegion","cuts")
 sigSample.addSystematic(cors)
 sigSample.addSystematic(ucs)
 
 dataSample = Sample("Data",kBlack)
 dataSample.setData()
-dataSample.buildHisto([ndata],"UserRegion","cuts")
+dataSample.buildHisto([ndata],"UserRegion","cuts",0.5)
 
 # Define top-level
 ana = configMgr.addFitConfig("SPlusB")
@@ -87,7 +88,7 @@ meas.addPOI("mu_Sig")
 #meas.addParamSetting("Lumi",True,1)
 
 # Add the channel
-chan = ana.addChannel("cuts",["UserRegion"],1,0.,1.)
+chan = ana.addChannel("cuts",["UserRegion"],1,0.5,1.5)
 ana.setSignalChannels([chan])
 
 # These lines are needed for the user analysis to run

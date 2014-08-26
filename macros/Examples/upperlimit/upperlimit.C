@@ -28,7 +28,7 @@ upperlimit()
   // set random seed for toy generation
   RooRandom::randomGenerator()->SetSeed(seed);
 
-  // option to turn of the luminosity and signal uncertainty.
+  // option to turn off the luminosity and signal uncertainty.
   if (false) { 
     w->exportToCint();
     using namespace channel1;

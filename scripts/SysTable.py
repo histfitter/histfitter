@@ -181,11 +181,14 @@ def latexfitresults( filename, namemap, region='3jL', sample='', resultName="Roo
     par = w.var(parname)
     par.setConstant()
 
-  if len(namemap)>0: 
   """
   if several systematatic/parameters are pre-defined in namemap, they will be floated together
   or in other words, one will get the error due to all pre-defined systematics
   """
+  """
+  else, float each parameter one by one and calculate the error due to it
+  """
+  if len(namemap)>0: 
     for key in namemap.keys():
       print namemap[key]
       for parname in namemap[key]:
@@ -200,9 +203,6 @@ def latexfitresults( filename, namemap, region='3jL', sample='', resultName="Roo
         par.setConstant()
         pass
   else: 
-   """
-   else, float each parameter one by one and calculate the error due to it
-   """
     for idx in range(fpf.getSize()):
       parname = fpf[idx].GetName()
       par = w.var(parname)
