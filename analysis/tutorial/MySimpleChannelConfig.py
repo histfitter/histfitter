@@ -9,7 +9,7 @@ from configWriter import fitConfig,Measurement,Channel,Sample
 from systematic import Systematic
 
 ## First define HistFactory attributes
-configMgr.analysisName = "MySimpleChannelAnalysis2"
+configMgr.analysisName = "MySimpleChannelAnalysis"
 configMgr.outputFileName = "results/" + configMgr.analysisName +".root"
 configMgr.histCacheFile = "data/"+configMgr.analysisName+".root"
 
