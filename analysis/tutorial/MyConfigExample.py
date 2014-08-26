@@ -179,6 +179,7 @@ bkt.getSample("WZ").addSystematic(wzKtScale)
 meas=bkt.addMeasurement(name="NormalMeasurement",lumi=1.0,lumiErr=0.039)
 meas.addPOI("mu_SIG")
 meas.addParamSetting("mu_BG",True,1)
+meas.addParamSetting("Lumi",True,1)
 
 #-------------------------------------------------
 # Constraining regions - statistically independent
