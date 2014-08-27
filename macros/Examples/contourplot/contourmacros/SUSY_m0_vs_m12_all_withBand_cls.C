@@ -14,7 +14,7 @@
 //#include "contourmacros/1leptonOR_smooth_list_contour_obscls.C"
 
 #include "contourmacros/ATLAS10_1lepton.C"
-#include "../../analysis/common/ATLAS_EPS_contours.C"
+#include "contourmacros/ATLAS_EPS_contours.C"
 
 void SUSY_m0_vs_m12_all_withBand_cls( TString fname1 = "mudat_list.root",  // this is the expected limit
                                   TString fname2 = "",
@@ -31,7 +31,7 @@ void SUSY_m0_vs_m12_all_withBand_cls( TString fname1 = "mudat_list.root",  // th
 				TString hname3 = "sigclsu1s",
 				TString hname5 = "sigclsd1s",
 				TString hname6 = "sigp1ref",
-				TString fnameMass= "../../analysis/common/mSugraGridtanbeta10_gluinoSquarkMasses.root",
+				TString fnameMass= "contourmacros/mSugraGridtanbeta10_gluinoSquarkMasses.root",
                    )
 {
   // set style and remove existing canvas'
@@ -60,7 +60,9 @@ void SUSY_m0_vs_m12_all_withBand_cls( TString fname1 = "mudat_list.root",  // th
     if (histocls!=0) histocls->SetDirectory(0);
   }
 
-  TFile* f2 = TFile::Open( fname2, "READ" );
+  
+  TFile* f2 = NULL;
+  if (fname2!="") f2 = TFile::Open( fname2, "READ" );  
   TH2F* histe(0);
   if (f2) { histe = (TH2F*)f2->Get( hname0 ); }
   TH2F* histe_u1s(0);
@@ -219,6 +221,7 @@ void SUSY_m0_vs_m12_all_withBand_cls( TString fname1 = "mudat_list.root",  // th
 
   // add squark, gluino mass contour lines HERE (TILL)
   TFile* f1 = TFile::Open( fnameMass, "READ" );
+
   TH2F* histSq = (TH2F*)f1->Get( "mSugraGrid_squarkMasses" );
   TH2F* histGl = (TH2F*)f1->Get( "mSugraGrid_gluinoMasses" );
   histSq->SetDirectory(0);
@@ -533,7 +536,7 @@ void SUSY_m0_vs_m12_all_withBand_cls( TString fname1 = "mudat_list.root",  // th
     //lep2char = ol2();
     //d0o = ol3();
     //lep2slep = ol2();
-    lep2char = msugra_lepchrg("../../analysis/common/mSugraGridtanbeta10_charginoMasses.root"); //ol1();
+    lep2char = msugra_lepchrg("contourmacros/mSugraGridtanbeta10_charginoMasses.root"); //ol1();
     lep2char->Draw("FSAME");
     lep2char->Draw("LSAME");
     //d0graph = d0tanb3muneg();
@@ -551,7 +554,7 @@ void SUSY_m0_vs_m12_all_withBand_cls( TString fname1 = "mudat_list.root",  // th
   }
   
   TGraph* msugra_noEWSB_curve(0);
-  msugra_noEWSB_curve = msugra_noEWSB("../../analysis/common/noEWSB.txt");
+  msugra_noEWSB_curve = msugra_noEWSB("contourmacros/noEWSB.txt");
   msugra_noEWSB_curve->Draw("FSAME");
   msugra_noEWSB_curve->Draw("LSAME");
   

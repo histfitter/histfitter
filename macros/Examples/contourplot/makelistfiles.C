@@ -11,7 +11,7 @@ void makelistfiles()
   const char* inputfile  = "$HISTFITTER/results/MySimpleChannelAnalysis_fixSigXSecNominal_hypotest.root"; //MySimpleChannelAnalysisOutput_hypotest.root" ;
   // search for objects labelled
   const char* format     = "hypo_SU_%f_%f_0_10";
-  // interpret %f's above respectively as (seperated by ':')
+  // interpret %f's above respectively as two variables of interest (separated by ':')
   const char* interpretation = "m0:m12";
   // cut string on m0 and m12 value, eg "m0>1200"
   const char* cutStr = "1"; // accept everything
