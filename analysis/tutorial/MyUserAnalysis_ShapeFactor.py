@@ -3,7 +3,7 @@
 ################################################################
 from configManager import configMgr
 from ROOT import kBlack,kWhite,kGray,kRed,kPink,kMagenta,kViolet,kBlue,kAzure,kCyan,kTeal,kGreen,kSpring,kYellow,kOrange
-from configWriter import TopLevelXML,Measurement,ChannelXML,Sample
+from configWriter import Measurement,Sample
 from systematic import Systematic
 from math import sqrt
 
@@ -52,8 +52,8 @@ configMgr.weights = "1."
 # Define samples
 bkgSample = Sample("Bkg",kGreen-9)
 bkgSample.setNormByTheory(True)
-bkgSample.buildHisto(nBkgCR,"CR","cuts")
-bkgSample.buildHisto(nBkgSR,"SR","cuts")
+bkgSample.buildHisto(nBkgCR,"CR","cuts",0.5)
+bkgSample.buildHisto(nBkgSR,"SR","cuts",0.5)
 bkgSample.addSystematic(bg1xsec)
 
 ddSample = Sample("DataDriven",kGreen+2)
@@ -61,17 +61,17 @@ ddSample.addShapeFactor("DDShape")
 
 sigSample = Sample("Sig",kPink)
 sigSample.setNormFactor("mu_Sig",1.,0.2,1.5)
-sigSample.buildHisto(nSigSR,"SR","cuts")
+sigSample.buildHisto(nSigSR,"SR","cuts",0.5)
 sigSample.setNormByTheory(True)
 sigSample.addSystematic(sigxsec)
 
 dataSample = Sample("Data",kBlack)
 dataSample.setData()
-dataSample.buildHisto(nDataCR,"CR","cuts")
-dataSample.buildHisto(nDataSR,"SR","cuts")
+dataSample.buildHisto(nDataCR,"CR","cuts",0.5)
+dataSample.buildHisto(nDataSR,"SR","cuts",0.5)
 
 # Define top-level
-ana = configMgr.addfitConfig("SPlusB")
+ana = configMgr.addFitConfig("SPlusB")
 ana.addSamples([bkgSample,ddSample,dataSample])
 
 # Define measurement
@@ -80,9 +80,9 @@ meas.addPOI("mu_Sig")
 meas.addParamSetting("Lumi",True)
 
 # Add the channels
-chanCR = ana.addChannel("cuts",["CR"],2,0.,2.)
+chanCR = ana.addChannel("cuts",["CR"],2,0.5,2.5)
 
-chanSR = ana.addChannel("cuts",["SR"],2,0.,2.)
+chanSR = ana.addChannel("cuts",["SR"],2,0.5,2.5)
 chanSR.addSample(sigSample)
 chanSR.getSample("DataDriven").addSystematic(xtrap)
 
