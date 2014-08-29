@@ -1,143 +1,160 @@
 #include "contourmacros/CombinationGlob.C"
 #include "TColor.h"
+#include <algorithm>
 
-//#include "../Tevatron/msugra_oldlim.C"
-#include "contourmacros/ol1.C"
-#include "contourmacros/ol2.C"
-#include "contourmacros/ol3.C"
-
-//#include "cmsoff.C" // cms alpha-T prl official contour (not yet used)
-#include "contourmacros/cms.C"      // cms alpha-T prelim contour
 #include "contourmacros/cdftanb5.C"
 #include "contourmacros/d0tanb3muneg.C"
-#include "contourmacros/stautanb3.C"
-//#include "contourmacros/1leptonOR_smooth_list_contour_obscls.C"
-
 #include "contourmacros/ATLAS10_1lepton.C"
 #include "contourmacros/ATLAS_EPS_contours.C"
 
-void SUSY_m0_vs_m12_all_withBand_cls( TString fname1 = "mudat_list.root",  // this is the expected limit
-                                  TString fname2 = "",
-				const char* prefix="test",
-				const float& lumi = 20,
-				bool showsig = true,
-				int discexcl = 1,
-				int showtevatron = 0,
-                                int showcms = 0,
-				int showOneSigmaExpBand = 0,
-                                int channel = -1,
-				TString hname0 = "sigp1clsf",
-				TString hname1 = "sigp1expclsf",
-				TString hname3 = "sigclsu1s",
-				TString hname5 = "sigclsd1s",
-				TString hname6 = "sigp1ref",
-				TString fnameMass= "contourmacros/mSugraGridtanbeta10_gluinoSquarkMasses.root",
-                   )
+void SUSY_m0_vs_m12_all_withBand_cls( TString fname0 = "mudat_list.root",// nominal
+                                      TString fname1 = "",               // Up
+                                      TString fname2 = "",               // Down  
+                                      TString fname3 = "", // external expection
+                                      const char* prefix="test",
+                                      const float& lumi = 20,
+                                      bool showsig = true,
+                                      int discexcl = 1,
+                                      int showtevatron = 0,
+                                      int showcms = 0,
+                                      int showOneSigmaExpBand = 0,
+                                      int showfixSigXSecBand = 0,
+                                      int channel = -1,
+                                      TString hname0 = "sigp1clsf",
+                                      TString hname1 = "sigp1expclsf",
+                                      TString hname3 = "sigclsu1s",
+                                      TString hname5 = "sigclsd1s",
+                                      TString hname6 = "sigp1ref",
+                                      TString fnameMass= "contourmacros/mSugraGridtanbeta10_gluinoSquarkMasses.root")
 {
-  // set style and remove existing canvas'
-  CombinationGlob::Initialize();
-  
-  cout << "--- Plotting m0 versus m12 " << endl;
-  
-  // --- prepare
-  
-  // open reference files, and retrieve histogram
-  cout << "--- Reading root base file: " << fname1 << endl;
-  TFile* f0 = TFile::Open( fname1, "READ" );
+   // set style and remove existing canvas'
+   CombinationGlob::Initialize();
+   
+   cout << "--- Plotting m0 versus m12 " << endl;
+   
+   // --- prepare
+   // open reference files, and retrieve histogram
+   cout << "--- Reading root base file: " << fname0 << endl;
+   TFile* f0 = TFile::Open( fname0, "READ" );
+   if (!f0) {
+      cout << "*** Error: could not retrieve histogram: " << hname0 << " in file: " << f0->GetName() 
+           << " ==> abort macro execution" << endl;
+      return;
+   }
+   
+   TFile* f1;
+   TFile* f2;
+   if(showfixSigXSecBand){
+      cout << "--- Reading root base file: " << fname1 << endl;
+      f1 = TFile::Open( fname1, "READ" );
+      cout << "--- Reading root base file: " << fname2 << endl;
+      f2 = TFile::Open( fname2, "READ" );
 
-  if (!f0) {
-    cout << "*** Error: could not retrieve histogram: " << hname0 << " in file: " << f0->GetName() 
-	 << " ==> abort macro execution" << endl;
-    return;
-  }
-
-  TH2F* histecls = (TH2F*)f0->Get( "sigp1expclsf" ); 
-  TH2F* histocls = (TH2F*)f0->Get( "sigp1clsf" ); 
-  if (histecls!=0) histecls->SetDirectory(0);
-  if (histocls!=0) histocls->SetDirectory(0);
-  else {
-    histocls = (TH2F*)f0->Get( "sigp1clsf" );
-    if (histocls!=0) histocls->SetDirectory(0);
-  }
-
-  
-  TFile* f2 = NULL;
-  if (fname2!="") f2 = TFile::Open( fname2, "READ" );  
-  TH2F* histe(0);
-  if (f2) { histe = (TH2F*)f2->Get( hname0 ); }
-  TH2F* histe_u1s(0);
-  if (f2) { histe_u1s = (TH2F*)f2->Get( hname3 ); }
-  TH2F* histe_d1s(0);
-  if (f2) { histe_d1s = (TH2F*)f2->Get( hname5 ); }
-
-  if (f2) {
+      if(!f1 || !f2){
+         cout << "*** Error: could not open in files: " << f1->GetName() <<" or "<< f2->GetName() 
+              << " ==> abort macro execution" << endl;
+         return;
+      }
+   }
+   
+   TH2F* histecls = (TH2F*)f0->Get( "sigp1expclsf" ); 
+   TH2F* histocls = (TH2F*)f0->Get( "sigp1clsf" ); 
+   if (histecls!=0) histecls->SetDirectory(0);
+   if (histocls!=0) histocls->SetDirectory(0);
+   
+   // in case we use external expectation!
+   TFile* f3 = TFile::Open( fname3, "READ" );
+   TH2F* histe(0);
+   if (f3) { histe = (TH2F*)f3->Get( hname0 ); }
+   TH2F* histe_u1s(0);
+   if (f3) { histe_u1s = (TH2F*)f3->Get( hname3 ); }
+   TH2F* histe_d1s(0);
+   if (f3) { histe_d1s = (TH2F*)f3->Get( hname5 ); }
+   
+   if (f3) {
       if (histecls!=0) { delete histecls; histecls=0; }
-      histecls = (TH2F*)f2->Get( "sigp1expcls" );
+      histecls = (TH2F*)f3->Get( "sigp1expcls" );
       if (histecls!=0) histecls->SetDirectory(0);
       else {
-        histecls = (TH2F*)f2->Get( "sigp1expclsf" );
+        histecls = (TH2F*)f3->Get( "sigp1expclsf" );
         if (histecls!=0) histecls->SetDirectory(0);
       }
-  }
+   }
+   
+   bool extExpectation = (f3!=0) ;
+   
+   TH2F* hist0 = (TH2F*)f0->Get( hname0 );
+   TH2F* hist1 = (TH2F*)f0->Get( hname1 );
+   TH2F* hist3 = (TH2F*)f0->Get( hname3 );
+   TH2F* hist5 = (TH2F*)f0->Get( hname5 );
+   TH2F* hist6 = (TH2F*)f0->Get( hname6 );
+   
+   if (hist0!=0) hist0->SetDirectory(0);
+   if (hist1!=0) hist1->SetDirectory(0);
+   if (hist3!=0) hist3->SetDirectory(0);
+   if (hist5!=0) hist5->SetDirectory(0);
+   if (hist6!=0) hist6->SetDirectory(0);
+   f0->Close();
 
-  bool extExpectation = (f2!=0) ;
+   TH2F* histe_esigxsp1s = (TH2F*)f1->Get( hname0 ); 
+   TH2F* histe_esigxsm1s = (TH2F*)f2->Get( hname0 ); 
 
-  TH2F* hist0 = (TH2F*)f0->Get( hname0 );
-  TH2F* hist1 = (TH2F*)f0->Get( hname1 );
-  TH2F* hist3 = (TH2F*)f0->Get( hname3 );
-  TH2F* hist5 = (TH2F*)f0->Get( hname5 );
-  TH2F* hist6 = (TH2F*)f0->Get( hname6 );
- 
-  if (hist0!=0) hist0->SetDirectory(0);
-  if (hist1!=0) hist1->SetDirectory(0);
-  if (hist3!=0) hist3->SetDirectory(0);
-  if (hist5!=0) hist5->SetDirectory(0);
-  if (hist6!=0) hist6->SetDirectory(0);
-  f0->Close();
-  
-  
-  TH2F* contour         = ( hist1!=0 ? FixAndSetBorders( *hist1, "contour", "contour", 0 ) : 0);
-  TH2F* contour_obs     = ( hist0!=0 ? FixAndSetBorders( *hist0, "contour_obs", "contour_obs") : 0 );
+   if (histe_esigxsp1s!=0) histe_esigxsp1s->SetDirectory(0);
+   if (histe_esigxsm1s!=0) histe_esigxsm1s->SetDirectory(0);
 
-  TH2F* contour_ep1s    = ( hist3!=0 ? FixAndSetBorders( *hist3, "contour", "contour", 0 ) : 0 );
-  TH2F* contour_em1s    = ( hist5!=0 ? FixAndSetBorders( *hist5, "contour", "contour", 0 ) : 0 );
+   //calculation of all contours
+   TH2F* contour_esigxsp1s
+      = ( histe_esigxsp1s!=0 ? FixAndSetBorders( *histe_esigxsp1s, "contour_esigxsp1s", "contour_esigxsp1s", 0 ) : 0);
+   TH2F* contour_esigxsm1s
+      = ( histe_esigxsm1s!=0 ? FixAndSetBorders( *histe_esigxsm1s, "contour_esigxsm1s", "contour_esigxsm1s", 0 ) : 0);
+   
+   TH2F* contour         = ( hist1!=0 ? FixAndSetBorders( *hist1, "contour", "contour", 0 ) : 0);
+   TH2F* contour_obs     = ( hist0!=0 ? FixAndSetBorders( *hist0, "contour_obs", "contour_obs") : 0 );
+   
+   TH2F* contour_ep1s    = ( hist3!=0 ? FixAndSetBorders( *hist3, "contour", "contour", 0 ) : 0 );
+   TH2F* contour_em1s    = ( hist5!=0 ? FixAndSetBorders( *hist5, "contour", "contour", 0 ) : 0 );
 
-  TH2F* contour_exp(0);
-  if (histe!=0)     { contour_exp     = FixAndSetBorders( *histe, "contour_exp", "contour_exp", 0 ); } 
-  TH2F* contour_au1s(0);
-  if (histe_u1s!=0) {  contour_au1s   = FixAndSetBorders( *histe_u1s, "contour", "contour", 0 ); }
-  TH2F* contour_ad1s(0);
-  if (histe_d1s!=0) {  contour_ad1s   = FixAndSetBorders( *histe_d1s, "contour", "contour", 0 ); }
+   // For Band
+   TGraph* gr_contour_ep1s = ( contour_ep1s!=0 ? ContourGraph( contour_ep1s )->Clone() : 0 ); //ContourGraph( contour_ep1s )->Clone(); 
+   TGraph* gr_contour_em1s = ( contour_em1s!=0 ? ContourGraph( contour_em1s )->Clone() : 0 ); //ContourGraph( contour_em1s )->Clone(); 
+   
+   TH2F* contour_exp(0);
+   if (histe!=0)     { contour_exp     = FixAndSetBorders( *histe, "contour_exp", "contour_exp", 0 ); } 
+   TH2F* contour_au1s(0);
+   if (histe_u1s!=0) {  contour_au1s   = FixAndSetBorders( *histe_u1s, "contour", "contour", 0 ); }
+   TH2F* contour_ad1s(0);
+   if (histe_d1s!=0) {  contour_ad1s   = FixAndSetBorders( *histe_d1s, "contour", "contour", 0 ); }
+   
+   
+   TH2F* contour_expcls(0);
+   if (histecls!=0)     { contour_expcls     = FixAndSetBorders( *histecls, "contour_expcls", "contour_expcls", 0 ); }
+   TH2F* contour_obscls(0);
+   if (histocls!=0)     { contour_obscls     = FixAndSetBorders( *histocls, "contour_obscls", "contour_obscls", 0 ); }
+
+   if (contour_obs==0) { 
+      cout << "contour is zero" << endl;
+      return;
+   }
 
 
-  TH2F* contour_expcls(0);
-  if (histecls!=0)     { contour_expcls     = FixAndSetBorders( *histecls, "contour_expcls", "contour_expcls", 0 ); }
-  TH2F* contour_obscls(0);
-  if (histocls!=0)     { contour_obscls     = FixAndSetBorders( *histocls, "contour_obscls", "contour_obscls", 0 ); }
-
-
-
-  if (contour_obs==0) { 
-    cout << "contour is zero" << endl;
-    return;
-  }
-
-  // set text style
-  gStyle->SetPaintTextFormat(".2g");
-  if (hist1!=0) hist1->SetMarkerStyle(21);
-  if (hist1!=0) hist1->SetMarkerSize(1.5);
-  Float_t nsigmax(0)
-  if (hist1!=0) nsigmax = hist1->GetMaximum();
-  
-  // --- draw
-  
-  // create canvas
-  TCanvas* c = new TCanvas( "c", "A scan of m_{0} versus m_{12}", 0, 0, 
-			    CombinationGlob::StandardCanvas[0], CombinationGlob::StandardCanvas[1] );  
+   
+   // set text style
+   gStyle->SetPaintTextFormat(".2g");
+   if (hist1!=0) hist1->SetMarkerStyle(21);
+   if (hist1!=0) hist1->SetMarkerSize(1.5);
+   Float_t nsigmax(0)
+      if (hist1!=0) nsigmax = hist1->GetMaximum();
+   
+   // --- draw
+   
+   //starting with style settings
+   // create canvas
+   TCanvas* c = new TCanvas( "c", "A scan of m_{0} versus m_{12}", 0, 0, 
+                             CombinationGlob::StandardCanvas[0], CombinationGlob::StandardCanvas[1] );  
   //c->SetGrayscale();
   
   // create and draw the frame
-  TH2F *frame = new TH2F("frame", "m_{0} vs m_{12} - ATLAS work in progress", 100, 100., 1400., 100, 115., 500. );
+  TH2F *frame = new TH2F("frame", "m_{0} vs m_{12} - ATLAS work in progress", 100, 100., 1400., 100, 150., 500. );
   //TH2F *frame = new TH2F("frame", "m_{0} vs m_{12} - ATLAS work in progress", 100, 100., 3750., 100, 115., 700. );
   //TH2F *frame = new TH2F("frame", "m_{0} vs m_{12} - ATLAS work in progress", 100, 100., 600., 100, 240., 500. );
   
@@ -171,103 +188,42 @@ void SUSY_m0_vs_m12_all_withBand_cls( TString fname1 = "mudat_list.root",  // th
   TString basecolor="yellow";
   Int_t nsigma=2;
 
-  //  TLegend *leg = new TLegend(0.7,0.77,0.95,0.915);
-  TLegend *leg = new TLegend(0.59,0.47,0.92,0.915);//(0.565,0.47,0.925,0.915);//(0.59,0.47,0.92,0.915);
+    TLegend *leg = new TLegend(0.6,0.77,0.92,0.915);
+  //TLegend *leg = new TLegend(0.59,0.47,0.92,0.915);//(0.565,0.47,0.925,0.915);//(0.59,0.47,0.92,0.915);
 
   leg->SetTextSize( CombinationGlob::DescriptionTextSize );
   leg->SetTextFont( 42 );
   leg->SetFillColor( 0 );
   leg->SetFillStyle(1001);
-
-/*
-  // plot tevatron limits
-  TGraph* lep2slep(0);
-  TGraph* lep2char(0);
-  TGraph* d0o(0);
-  TGraph* d0graph(0);
-  TGraph* cdfgraph(0);
-  TGraph* atlas(0);
-  TGraph* atlasexp(0);
-
-  if (showtevatron==1 && discexcl==1) {
-    //lep2slep = ol1();
-    //lep2char = ol2();
-    //d0o = ol3();
-    //lep2slep = ol2();
-    lep2char = msugra_lepchrg(); //ol1();
-    lep2char->Draw("FSAME");
-    lep2char->Draw("LSAME");
-    d0graph = d0tanb3muneg();
-    cdfgraph = cdftanb5();
-    //atlas = ATLAS10_1lepton();
-    //atlasexp = ATLAS10_1leptonexp();
-  }
-
-  //:w(void) stautanb3();
-
-  TGraph* cmscurve(0);
-  if (showcms==1) { 
-    //cmscurve = cmsoff();
-    cmscurve = cms();
-  }
   
-  TGraph* msugra_noEWSB_curve(0);
-  msugra_noEWSB_curve = msugra_noEWSB();
-  msugra_noEWSB_curve->Draw("FSAME");
-  msugra_noEWSB_curve->Draw("LSAME");
-
-  //gPad->RedrawAxis();
-*/
-
-  // add squark, gluino mass contour lines HERE (TILL)
-  TFile* f1 = TFile::Open( fnameMass, "READ" );
-
-  TH2F* histSq = (TH2F*)f1->Get( "mSugraGrid_squarkMasses" );
-  TH2F* histGl = (TH2F*)f1->Get( "mSugraGrid_gluinoMasses" );
+  /*
+  // add squark, gluino mass contour lines -- we comment this here for the tutorial, uncomment if required
+  TFile* f4 = TFile::Open( fnameMass, "READ" );
+  TH2F* histSq = (TH2F*)f4->Get( "mSugraGrid_squarkMasses" );
+  TH2F* histGl = (TH2F*)f4->Get( "mSugraGrid_gluinoMasses" );
   histSq->SetDirectory(0);
   histGl->SetDirectory(0);
-  f1->Close();
+  f4->Close();
 
   TH2F* histSquarkMass   = FixAndSetBorders( *histSq, "SquarkMass", "SquarkMass", 10000 );
   TH2F* histGluinoMass   = FixAndSetBorders( *histGl, "GluinoMass", "GluinoMass", 10000 );
-
-//  DrawContourMassLine( histSquarkMass, 400.0 );
-//  DrawContourMassLine( histSquarkMass, 500.0 );
+  
   DrawContourMassLine( histSquarkMass, 600.0 );
-//  DrawContourMassLine( histSquarkMass, 700.0 );
   DrawContourMassLine( histSquarkMass, 800.0 , 17);
-//  DrawContourMassLine( histSquarkMass, 900.0 );
-  DrawContourMassLine( histSquarkMass, 1000.0 );  
-//  DrawContourMassLine( histSquarkMass, 1100.0 ); 
-  DrawContourMassLine( histSquarkMass, 1200.0 , 17);
-//  DrawContourMassLine( histSquarkMass, 1300.0 );    
+  DrawContourMassLine( histSquarkMass, 1000.0 );   
+  DrawContourMassLine( histSquarkMass, 1200.0 , 17);    
   DrawContourMassLine( histSquarkMass, 1400.0 );
-//  DrawContourMassLine( histSquarkMass, 1500.0 );
   DrawContourMassLine( histSquarkMass, 1600.0 , 17);
-//  DrawContourMassLine( histSquarkMass, 1700.0 );
-  DrawContourMassLine( histSquarkMass, 1800.0 );
-//  DrawContourMassLine( histSquarkMass, 1900.0 );
-  DrawContourMassLine( histSquarkMass, 2000.0 , 17);  
-//  DrawContourMassLine( histSquarkMass, 2100.0 ); 
-  DrawContourMassLine( histSquarkMass, 2200.0 );  
-//  DrawContourMassLine( histSquarkMass, 2300.0 );     
+  DrawContourMassLine( histSquarkMass, 1800.0); 
+  DrawContourMassLine( histSquarkMass, 2000.0 , 17);   
+  DrawContourMassLine( histSquarkMass, 2200.0 );       
   DrawContourMassLine( histSquarkMass, 2400.0 , 17);
-//  DrawContourMassLine( histSquarkMass, 2500.0 );
   DrawContourMassLine( histSquarkMass, 2600.0 );
-//  DrawContourMassLine( histSquarkMass, 2700.0 );
   DrawContourMassLine( histSquarkMass, 2800.0 , 17);
-//  DrawContourMassLine( histSquarkMass, 2900.0 );
   DrawContourMassLine( histSquarkMass, 3000.0 );   
-//  DrawContourMassLine( histSquarkMass, 3100.0 ); 
-  DrawContourMassLine( histSquarkMass, 3200.0 , 17);  
-//  DrawContourMassLine( histSquarkMass, 2300.0 );     
+  DrawContourMassLine( histSquarkMass, 3200.0 , 17);      
   DrawContourMassLine( histSquarkMass, 3400.0 );
-//  DrawContourMassLine( histSquarkMass, 3500.0 );
-//  DrawContourMassLine( histSquarkMass, 3600.0 , 17);
-//  DrawContourMassLine( histSquarkMass, 3700.0 );
-//  DrawContourMassLine( histSquarkMass, 3800.0 );
-//  DrawContourMassLine( histSquarkMass, 3900.0 );
-//  DrawContourMassLine( histSquarkMass, 4000.0 );        
+       
 
   DrawContourMassLine( histGluinoMass, 400.0 );
   DrawContourMassLine( histGluinoMass, 500.0 , 17);
@@ -282,94 +238,13 @@ void SUSY_m0_vs_m12_all_withBand_cls( TString fname1 = "mudat_list.root",  // th
   DrawContourMassLine( histGluinoMass, 1400.0 );
   DrawContourMassLine( histGluinoMass, 1500.0 , 17);
   DrawContourMassLine( histGluinoMass, 1600.0 );
-//  DrawContourMassLine( histGluinoMass, 1700.0 );
-//  DrawContourMassLine( histGluinoMass, 1800.0 );
-//  DrawContourMassLine( histGluinoMass, 1900.0 );
-//  DrawContourMassLine( histGluinoMass, 2000.0 );  
-//  DrawContourMassLine( histGluinoMass, 2100.0 );     
 
-  // find gluino ~ squark mass exclusion limit
-  //DrawContourMassLine( histSquarkMass, 820.0 );
-  //DrawContourMassLine( histGluinoMass, 820.0 );
-  
- /* 
-  // plot tevatron limits
-  TGraph* lep2slep(0);
-  TGraph* lep2char(0);
-  TGraph* d0o(0);
-  TGraph* d0graph(0);
-  TGraph* cdfgraph(0);
-  TGraph* atlas(0);
-  TGraph* atlasexp(0);
-
-  if (showtevatron==1 && discexcl==1) {
-    //lep2slep = ol1();
-    //lep2char = ol2();
-    //d0o = ol3();
-    //lep2slep = ol2();
-    lep2char = msugra_lepchrg(); //ol1();
-    lep2char->Draw("FSAME");
-    lep2char->Draw("LSAME");
-    d0graph = d0tanb3muneg();
-    cdfgraph = cdftanb5();
-    //atlas = ATLAS10_1lepton();
-    //atlasexp = ATLAS10_1leptonexp();
-  }
-
-  //:w(void) stautanb3();
-
-  TGraph* cmscurve(0);
-  if (showcms==1) { 
-    //cmscurve = cmsoff();
-    cmscurve = cms();
-  }
-  
-  TGraph* msugra_noEWSB_curve(0);
-  msugra_noEWSB_curve = msugra_noEWSB();
-  msugra_noEWSB_curve->Draw("FSAME");
-  msugra_noEWSB_curve->Draw("LSAME");
-  
-  TGraph* msugra_stauLSP_curve(0);
-  msugra_stauLSP_curve = msugra_stauLSP();
-  msugra_stauLSP_curve->Draw("FSAME");
-  msugra_stauLSP_curve->Draw("LSAME");  
-
-  //gPad->RedrawAxis();
-*/
-  if (false) {
-  } else {
-/*  TLatex * s400 = new TLatex( 140, 167 , "#tilde{q} (400 GeV)" );
-  s400->SetTextAlign( 11 );
-  s400->SetTextSize( 0.025 );
-  s400->SetTextColor( TColor::GetColor("#dddddd") );
-  s400->Draw();*/
-/*  TLatex * s500 = new TLatex( 150, 220, "#tilde{q} (500 GeV)" );
-  s500->SetTextAlign( 11 );
-  s500->SetTextSize( 0.025 );
-  s500->SetTextColor( TColor::GetColor("#dddddd") );
-  s500->Draw();*/
   TLatex * s600 = new TLatex( 340, 230, "#tilde{q} (600 GeV)" );
   s600->SetTextAlign( 11 );
   s600->SetTextAngle(-60);
   s600->SetTextSize( 0.025 );
   s600->SetTextColor( 16 ); //12
   s600->Draw();
-  /*TLatex * s700 = new TLatex( 545, 315, "#tilde{q} (700 GeV)" );
-  s700->SetTextAlign( 11 );
-  s700->SetTextSize( 0.025 );
-  s700->SetTextColor( TColor::GetColor("#dddddd") );
-  s700->Draw();*/
-  /*TLatex * s800 = new TLatex( 250, 270, "#tilde{q} (800 GeV)" );
-  s800->SetTextAlign( 11 );
-  s800->SetTextSize( 0.025 );
-  s800->SetTextColor( 203 );
-  s800->Draw();*/
-  /*
-  TLatex * s900 = new TLatex( 330, 400, "#tilde{q} (900 GeV)" );
-  s900->SetTextAlign( 11 );
-  s900->SetTextSize( 0.025 );
-  s900->SetTextColor( TColor::GetColor("#dddddd") );
-  s900->Draw();*/
    TLatex * s1000 = new TLatex( 550, 408, "#tilde{q} (1000 GeV)" );
   s1000->SetTextAlign( 11 );
   s1000->SetTextAngle(-60);
@@ -382,35 +257,17 @@ void SUSY_m0_vs_m12_all_withBand_cls( TString fname1 = "mudat_list.root",  // th
   s1400->SetTextSize( 0.025 );
   s1400->SetTextColor( 16 );
   s1400->Draw();   
-  
-  }
 
-  /*TLatex * g400 = new TLatex( 1100, 140, "#tilde{g} (400 GeV)" );
-  g400->SetTextAlign( 11 );
-  g400->SetTextSize( 0.025 );
-  g400->SetTextColor( 203 );
-  g400->Draw();*/
-  /*TLatex * g500 = new TLatex( 1000, 185, "#tilde{g} (500 GeV)" );
-  g500->SetTextAlign( 11 );
-  g500->SetTextSize( 0.025 );
-  g500->SetTextColor( TColor::GetColor("#dddddd") );
-  g500->Draw();*/
   TLatex * g600 = new TLatex( 1100, 225, "#tilde{g} (600 GeV)" );
   g600->SetTextAlign( 11 );
   g600->SetTextAngle(-4);
   g600->SetTextSize( 0.025 );
   g600->SetTextColor( 16 );
   g600->Draw();
-  /*TLatex * g900 = new TLatex( 550, 380, "#tilde{g} (900 GeV)" );
-  g900->SetTextAlign( 11 );
-  g900->SetTextSize( 0.025 );
-  g900->SetTextColor( TColor::GetColor("#dddddd") );
-  g900->Draw();*/
   TLatex * g800 = new TLatex( 690, 330, "#tilde{g} (800 GeV)" );
   g800->SetTextAlign( 11 );
   g800->SetTextSize( 0.025 );
   g800->SetTextColor( 16 );
-  //g800->Draw();
   TLatex * g1000 = new TLatex( 1400, 399, "#tilde{g} (1000 GeV)" );
   g1000->SetTextAlign( 11 );
   g1000->SetTextAngle(-5); 
@@ -421,100 +278,55 @@ void SUSY_m0_vs_m12_all_withBand_cls( TString fname1 = "mudat_list.root",  // th
   g1200->SetTextAlign( 11 );
   g1200->SetTextAngle(-6); 
   g1200->SetTextSize( 0.025 );
-  g1200->SetTextColor( 16 );
-  //g1200->Draw();  
+  g1200->SetTextColor( 16 );  
   TLatex * g1400 = new TLatex( 1650, 582, "#tilde{g} (1400 GeV)" );
   g1400->SetTextAlign( 11 );
   g1400->SetTextAngle(-6); 
   g1400->SetTextSize( 0.025 );
   g1400->SetTextColor( 16 );
-  g1400->Draw();    
+  g1400->Draw();
+  */
 
 
-  // island hacks
-  if (true && channel==4) { // muon fixes 
-    cout << "removing islands in muon channel ..." << endl;
-    // contour line is drawn for values at 1.64485
-    TAxis* ax = contour_obs->GetXaxis();
-    TAxis* ay = contour_obs->GetYaxis();
-
-    TH2F* contour_fix = contour_em1s;
-
-    for (int xbin = 1; xbin <= contour_fix->GetNbinsX(); xbin++) {
-      for (int ybin = 1; ybin <= contour_fix->GetNbinsY(); ybin++) {
-	// island 1
-	if ( ax->GetBinCenter( xbin) > 1350.  && ax->GetBinCenter( xbin) < 1500. && ay->GetBinCenter( ybin) < 130. && ay->GetBinCenter( ybin) > 89. ) {
-	  cout << "Found spot here: " << xbin << " (" << ax->GetBinCenter( xbin)  << "), "
-	       << ybin << " (" << ay->GetBinCenter( ybin) << "), "
-	       << " value: " << contour_fix->GetBinContent(xbin,ybin) <<   endl;
-	  cout << "   HACK : Setting above point by hand to 1.65 (!)" << endl;
-	  if (contour_fix->GetBinContent(xbin,ybin)<1.65) contour_fix->SetBinContent(xbin, ybin, 1.66);
-	}
-
-      }
-    }
-
-  } 
-  if (false && channel==1) { // electron
-
-    cout << "removing islands in electron channel ..." << endl;
-    // contour line is drawn for values at 1.64485
-    TAxis* ax = contour_obs->GetXaxis();
-    TAxis* ay = contour_obs->GetYaxis();
-
-    contour_em1s
-
-    for (int xbin = 1; xbin <= contour_obs->GetNbinsX(); xbin++) {
-      for (int ybin = 1; ybin <= contour_obs->GetNbinsY(); ybin++) {
-	// island 2
-	if ( ax->GetBinCenter( xbin) > 420. && ax->GetBinCenter( xbin) < 480. &&
-	     ay->GetBinCenter( ybin) > 140. && ay->GetBinCenter( ybin) < 160. ) {
-	  cout << "Found spot here: " << xbin << " (" << ax->GetBinCenter( xbin)  << "), "
-	       << ybin << " (" << ay->GetBinCenter( ybin) << "), "
-	       << " value: " << contour->GetBinContent(xbin,ybin) <<   endl;
-	  cout << "   HACK : Setting above point by hand to 1.50 (!)" << endl;
-	  contour->SetBinContent(xbin, ybin, 1.50);
-	}
-      }
-    }
-
-  }
-
-  if (false && channel==2) { // combined
-    cout << "removing islands in combined channel ..." << endl;
-  }
-
+  Int_t c_myYellow   = TColor::GetColor("#ffe938"); 
+  TGraph* grshadeExp = ( (gr_contour_ep1s!=0 && gr_contour_em1s!=0) ? DrawExpectedBand( gr_contour_ep1s, gr_contour_em1s, CombinationGlob::c_DarkYellow , 1001   , 0) : 0 ); //DrawExpectedBand( gr_contour_ep1s, gr_contour_em1s, CombinationGlob::c_DarkYellow , 1001   , 0)->Clone();
+  
   if (discexcl==1) {
-
-    //if (contour_obs!=0) DrawContourLine95( leg, contour_obs, "Observed PCL 95% CL", 2, 1, 3 );
-
-    if (!extExpectation) { // expectation from toys
-      //if (contour!=0) DrawContourLine95( leg, contour, "Expected PCL", CombinationGlob::c_DarkBlueT3, 6 );
-
-      if (contour_obscls!=0) DrawContourLine95( leg, contour_obscls, "Observed CL_{S} 95% CL", 2,1,3); //4, 3 );
-      if (contour_expcls!=0) DrawContourLine95( leg, contour_expcls, "Expected CL_{S}", CombinationGlob::c_DarkBlueT3, 6 );// CombinationGlob::c_DarkGreen, 3 );
-
-      if (true) {
-        if (showOneSigmaExpBand) {
-          if (contour_ep1s!=0) DrawContourLine95( leg, contour_ep1s, "Expected CL_{S} #pm1#sigma", CombinationGlob::c_DarkBlueT3, 3 );
-          if (contour_em1s!=0) DrawContourLine95( leg, contour_em1s, "", CombinationGlob::c_DarkBlueT3, 3 );
-        } else {
-          if (contour!=0) DrawContourLine68( leg, contour, "exp. limit 68% CL", CombinationGlob::c_DarkBlueT3, 2 );
-          if (contour!=0) DrawContourLine99( leg, contour, "exp. limit 99% CL", CombinationGlob::c_DarkBlueT3, 3 );
+     //if (contour_obs!=0) DrawContourLine95( leg, contour_obs, "Observed PCL 95% CL", 2, 1, 3 );
+     if (!extExpectation) { // expectation from toys
+        //if (contour!=0) DrawContourLine95( leg, contour, "Expected PCL", CombinationGlob::c_DarkBlueT3, 6 );
+        
+        if (showfixSigXSecBand) {
+           if (contour_esigxsp1s!=0) DrawContourLine95( leg, contour_esigxsp1s, "", CombinationGlob::c_DarkRed, 3, 2 );
         }
-      }
+        if (contour_obscls!=0) DrawContourLine95( leg, contour_obscls, "Observed limit (#pm1 #sigma^{SUSY}_{theory})", CombinationGlob::c_DarkRed, 1, 4);
+        if (showfixSigXSecBand) {
+           if (contour_esigxsm1s!=0) DrawContourLine95( leg, contour_esigxsm1s, "", CombinationGlob::c_DarkRed, 3, 2 );
+        }
 
-    } else { // expectation from asimov
-      if (contour_exp!=0) DrawContourLine95( leg, contour_exp, "Median expected limit", CombinationGlob::c_DarkBlueT3, 6);
-      if (showOneSigmaExpBand) {
-        if (contour_au1s!=0) DrawContourLine95( leg, contour_au1s, "Expected limit #pm1#sigma", CombinationGlob::c_DarkBlueT3, 3 );
-        if (contour_ad1s!=0) DrawContourLine95( leg, contour_ad1s, "", CombinationGlob::c_DarkBlueT3, 3 );
-      }    
-    }
-
+        if (contour_expcls!=0) DrawContourLine95( leg, contour_expcls, "", CombinationGlob::c_DarkBlueT3, 6 ); 
+        
+        if (showOneSigmaExpBand) {
+           if (contour_ep1s!=0) DrawContourLine95( leg, contour_ep1s, "", CombinationGlob::c_DarkYellow, 1 );
+           if (contour_em1s!=0) DrawContourLine95( leg, contour_em1s, "", CombinationGlob::c_DarkYellow, 1 );
+           DummyLegendExpected(leg, "Expected limit (#pm1 #sigma_{exp})", CombinationGlob::c_DarkYellow, 1001, CombinationGlob::c_DarkBlueT3, 6, 2);
+        } else {
+           if (contour!=0) DrawContourLine68( leg, contour, "exp. limit 68% CL", CombinationGlob::c_DarkBlueT3, 2 );
+           if (contour!=0) DrawContourLine99( leg, contour, "exp. limit 99% CL", CombinationGlob::c_DarkBlueT3, 3 );
+        }
+        
+     } else { // expectation from asimov
+        if (contour_exp!=0) DrawContourLine95( leg, contour_exp, "Median expected limit", CombinationGlob::c_DarkBlueT3, 6);
+        if (showOneSigmaExpBand) {
+           if (contour_au1s!=0) DrawContourLine95( leg, contour_au1s, "Expected limit #pm1#sigma", CombinationGlob::c_DarkBlueT3, 3 );
+           if (contour_ad1s!=0) DrawContourLine95( leg, contour_ad1s, "", CombinationGlob::c_DarkBlueT3, 3 );
+        }
+     }
   }
+  
 
-  // plot tevatron limits
+  // plot tevatron limits -- comment this for the tutorial, uncomment when required
+  /*
   TGraph* lep2slep(0);
   TGraph* lep2char(0);
   TGraph* d0o(0);
@@ -522,21 +334,20 @@ void SUSY_m0_vs_m12_all_withBand_cls( TString fname1 = "mudat_list.root",  // th
   TGraph* cdfgraph(0);
   TGraph* atlas(0);
   TGraph* atlasexp(0);
+  
+  TGraph * staulsp = new TGraph();
+  TGraph * noRGE = new TGraph();  
+  TGraph * noEWSB = new TGraph(); 
+  TGraph * tachyon = new TGraph();   
+  TGraph * negmasssq = new TGraph(); 
 
-  bool drawOld1Lepton(false);
-  TGraph* old1lepton_curve(0);
-  if (drawOld1Lepton) {   
-    old1lepton_curve = graph_old1lepton();
-    old1lepton_curve->Draw("FSAME");
-    old1lepton_curve->Draw("LSAME"); 
-  }
 
   if (showtevatron==1 && discexcl==1) {
-    //lep2slep = ol1();
-    //lep2char = ol2();
-    //d0o = ol3();
-    //lep2slep = ol2();
+    //lep2char = ol1();
     lep2char = msugra_lepchrg("contourmacros/mSugraGridtanbeta10_charginoMasses.root"); //ol1();
+    //lep2char->Print();
+    c->cd();  
+    lep2char->SetFillColor(CombinationGlob::c_BlueT3);  
     lep2char->Draw("FSAME");
     lep2char->Draw("LSAME");
     //d0graph = d0tanb3muneg();
@@ -544,56 +355,74 @@ void SUSY_m0_vs_m12_all_withBand_cls( TString fname1 = "mudat_list.root",  // th
     //atlas = ATLAS10_1lepton();
     //atlasexp = ATLAS10_1leptonexp();
   }
+  
 
-  //:w(void) stautanb3();
-
+  msugraThExcl("contourmacros/msugra_status.txt", staulsp, negmasssq, noRGE, noEWSB, tachyon, "contourmacros/mSugraGridtanbeta10_charginoMasses.root");  
+  
+/*
   TGraph* cmscurve(0);
   if (showcms==1) { 
     //cmscurve = cmsoff();
     cmscurve = cms();
   }
-  
+
   TGraph* msugra_noEWSB_curve(0);
-  msugra_noEWSB_curve = msugra_noEWSB("contourmacros/noEWSB.txt");
+  msugra_noEWSB_curve = msugra_noEWSB("../../../HistFitterUser/common/noEWSB.txt");
+  c->cd();
+  //msugra_noEWSB_curve->Print();
   msugra_noEWSB_curve->Draw("FSAME");
   msugra_noEWSB_curve->Draw("LSAME");
   
   TGraph* msugra_stauLSP_curve(0);
   msugra_stauLSP_curve = msugra_stauLSP();
+  //msugra_stauLSP_curve->Print();
   msugra_stauLSP_curve->Draw("FSAME");
-  msugra_stauLSP_curve->Draw("LSAME");  
-
-
-/*  
-  TGraph* ATLAS_EPS_m0m12_curve(0); 
-  ATLAS_EPS_m0m12_curve = ATLAS_EPS_m0m12();
-  ATLAS_EPS_m0m12_curve->Draw("FSAME");
-  ATLAS_EPS_m0m12_curve->Draw("LSAME");  
-*/  
-
-  //gPad->RedrawAxis();
-
-  if (showcms==1 && discexcl==1) {
-    //leg->AddEntry(cmscurve,"CMS #alpha_{T}, 35 pb^{-1}","l");
-    leg->AddEntry(cmscurve,"CMS jets (#alpha_{T}), 35 pb^{-1}","l");
-  }
-
-  // re-draw TLegend for old exclusions
-  if (showtevatron==1 && discexcl==1) {
-
-    //leg->AddEntry( atlas,    "Obs. 2010 (35/pb)", "l" );
-    //leg->AddEntry( atlasexp, "Exp. 2010 (35/pb)", "l" );
-    //leg->AddEntry( lep2slep, "LEP2 #tilde{l}^{ #pm}","F");
-    if ( drawOld1Lepton ) leg->AddEntry( old1lepton_curve, "1-lepton, L^{int} = 1.04 fb^{-1}","F");    
-    leg->AddEntry( lep2char, "LEP2 #tilde{#chi}^{#pm}_{1}","F");
-    //leg->AddEntry( d0o,      "D0 #tilde{#chi}^{#pm}_{1}, #tilde{#chi}^{0}_{2}","F");
-    //leg->AddEntry( d0graph,  "D0 #tilde{g}, #tilde{q}, tan#beta=3, #mu<0, 2.1 fb^{-1}","F" );
-    //leg->AddEntry( cdfgraph, "CDF #tilde{g}, #tilde{q}, tan#beta=5, #mu<0, 2 fb^{-1}","F" );
-    //leg_old->Draw();
-  }
-  leg->AddEntry( msugra_stauLSP_curve, "Stau LSP","F" );
-  leg->AddEntry( msugra_noEWSB_curve, "Theoretically excluded","F" );
+  msugra_stauLSP_curve->Draw("LSAME");
+  c->cd();  
   
+  
+   
+  staulsp->SetFillColor(CombinationGlob::c_LightGreen);
+  staulsp->Draw("FSAME");
+  staulsp->Draw("LSAME"); 
+  
+  //negmasssq->SetFillColor(kAzure+2);
+  negmasssq->Draw("FSAME");
+  negmasssq->Draw("LSAME");  
+  
+  noRGE->SetFillColor(CombinationGlob::c_DarkBlueT5);
+  noRGE->Draw("FSAME");
+  noRGE->Draw("LSAME"); 
+  
+  //noEWSB->SetFillColor(CombinationGlob::c_DarkGreen)
+  noEWSB->Draw("FSAME");
+  noEWSB->Draw("LSAME");   
+  
+  tachyon->Draw("FSAME");
+  tachyon->Draw("LSAME");     
+  
+  c->cd();      
+  c->Update();  
+    */
+    
+  if (showcms==1 && discexcl==1) {
+     leg->AddEntry(cmscurve,"CMS jets (#alpha_{T}), 35 pb^{-1}","l");
+  }
+  
+  // re-draw TLegend for old exclusions
+/*
+  if (showtevatron==1 && discexcl==1) {
+     leg->AddEntry( lep2char, "LEP2 #tilde{#chi}^{#pm}_{1}","F");
+     //leg->AddEntry( d0graph,  "D0 #tilde{g}, #tilde{q}, tan#beta=3, #mu<0, 2.1 fb^{-1}","F" );
+     //leg->AddEntry( cdfgraph, "CDF #tilde{g}, #tilde{q}, tan#beta=5, #mu<0, 2 fb^{-1}","F" );
+  }
+*/  
+/*
+  leg->AddEntry( staulsp, "Stau LSP","F" );
+  leg->AddEntry( noEWSB, "No EW SB","F" );
+  leg->AddEntry( noRGE, "Non-convergent RGE","F" );  
+  leg->AddEntry( negmasssq, "negmasssq","F" ); 
+  */
   // legend
   Float_t textSizeOffset = +0.000;
   Double_t xmax = frame->GetXaxis()->GetXmax();
@@ -628,11 +457,6 @@ void SUSY_m0_vs_m12_all_withBand_cls( TString fname1 = "mudat_list.root",  // th
   text1b->SetTextSize( CombinationGlob::DescriptionTextSize  );
   text1c->SetTextSize( CombinationGlob::DescriptionTextSize  );
   
-  // text1a->AppendPad();      
-  //text1b->AppendPad();     
-  //if (nbkg>0 && showsig) { text1c->AppendPad(); }
-  
-  //TLatex *Leg0 = new TLatex( xmin, ymax + dy*0.025, "Minimal SuperGravity:" );
   TLatex *Leg0 = new TLatex( xmin, ymax + dy*0.025, "MSUGRA/CMSSM: tan#beta = 10, A_{0}= 0, #mu>0" );
   Leg0->SetTextAlign( 11 );
   Leg0->SetTextFont( 42 );
@@ -660,6 +484,8 @@ void SUSY_m0_vs_m12_all_withBand_cls( TString fname1 = "mudat_list.root",  // th
     Leg2->AppendPad(); 
   }
 
+  /*
+  //uncomment when createing an ATLAS plot
   TLatex *atlasLabel = new TLatex();
   atlasLabel->SetNDC();
   atlasLabel->SetTextFont( 72 );
@@ -667,6 +493,7 @@ void SUSY_m0_vs_m12_all_withBand_cls( TString fname1 = "mudat_list.root",  // th
   atlasLabel->SetTextSize( 0.05 );
   atlasLabel->DrawLatex(0.15,0.87, "ATLAS"); // 0.15,0.87
   atlasLabel->AppendPad();
+  */
 
   //// draw number of signal events
   if (nsigmax>0 && showsig) {  hist1->Draw("textsame"); }
@@ -709,13 +536,12 @@ void SUSY_m0_vs_m12_all_withBand_cls( TString fname1 = "mudat_list.root",  // th
   
   // create plots
   // store histograms to output file
-  TObjArray* arr = fname1.Tokenize("/");
+  TObjArray* arr = fname0.Tokenize("/");
   TObjString* objstring = (TObjString*)arr->At( arr->GetEntries()-1 );
-  //TString outfile = TString(Form("%dinvfb_",lumi)) + TString(Form("wband%d_",showOneSigmaExpBand)) + TString(Form("showcms%d_",showcms)) + objstring->GetString().ReplaceAll(".root","");
-  TString outfile = TString(Form("wband%d_",showOneSigmaExpBand)) + TString(Form("showcms%d_",showcms)) + objstring->GetString().ReplaceAll(".root","");
+  TString outfile = TString(Form("wband%d_",showOneSigmaExpBand)) + TString(Form("wfixSigXSecband%d_",showfixSigXSecBand)) + TString(Form("showcms%d_",showcms)) + objstring->GetString().ReplaceAll(".root","");
   delete arr;
 
-  TString prefixsave = TString(prefix).ReplaceAll(" ","_") + Form("%dinvfb_",lumi) + Form("wband%d_",showOneSigmaExpBand);
+  TString prefixsave = TString(prefix).ReplaceAll(" ","_")+ Form("wband%d_",showOneSigmaExpBand);
   CombinationGlob::imgconv( c, Form("plots/atlascls_m0m12_%s",outfile.Data()) );   
 
 /*
@@ -733,9 +559,9 @@ void SUSY_m0_vs_m12_all_withBand_cls( TString fname1 = "mudat_list.root",  // th
   CombinationGlob::imgconv( c, Form("plots/m0m12cls_%s",outfile.Data()) );   
 */
 
-  delete leg;
-  if (contour!=0) delete contour;
-  delete frame;
+  ////delete leg;
+  ////if (contour!=0) delete contour;
+  ////delete frame;
 }
 
 
@@ -1074,5 +900,149 @@ DrawContourLine68( TLegend *leg, TH2F* hist, const TString& text="", Int_t linec
   h->Draw( "samecont3" );
 
   if (!text.IsNull()) leg->AddEntry(h,text.Data(),"l");
+}
+
+
+TGraph*
+ContourGraph( TH2F* hist)
+{
+   TGraph* gr0 = new TGraph();
+   TH2F* h = (TH2F*)hist->Clone();
+   h->GetYaxis()->SetRangeUser(0,700);
+   h->GetXaxis()->SetRangeUser(50,4000);
+   gr = (TGraph*)gr0->Clone(h->GetName());
+   //  cout << "==> Will dumb histogram: " << h->GetName() << " into a graph" <<endl;
+   h->SetContour( 1 );
+   double pval = CombinationGlob::cl_percent[1];
+   double signif = TMath::NormQuantile(1-pval);
+   h->SetContourLevel( 0, signif );
+   h->Draw("CONT LIST");
+   h->SetDirectory(0);
+   gPad->Update();
+   TObjArray *contours = gROOT->GetListOfSpecials()->FindObject("contours");
+   Int_t ncontours     = contours->GetSize();
+   TList *list = (TList*)contours->At(0);
+   Int_t number_of_lists = list->GetSize();
+   gr = (TGraph*)list->At(0);
+   TGraph* grTmp = new TGraph();
+   for (int k = 0 ; k<number_of_lists ; k++){
+      grTmp = (TGraph*)list->At(k);
+      Int_t N = gr->GetN();
+      Int_t N_tmp = grTmp->GetN();
+      if(N < N_tmp) gr = grTmp;
+      //    mg->Add((TGraph*)list->At(k));
+   }
+
+   gr->SetName(hist->GetName());
+   int N = gr->GetN();
+   double x0, y0;
+
+   //for(int j=0; j<N; j++) {
+   //    gr->GetPoint(j,x0,y0);
+   //    cout << j << " : " << x0 << " : "<<y0 << endl;
+   // }
+     
+   //  //  gr->SetMarkerSize(2.0);
+   //  gr->SetMarkerSize(2.0);
+   //  gr->SetMarkerStyle(21);
+   //  gr->Draw("LP");
+   //  cout << "Generated graph " << gr << " with name " << gr->GetName() << endl;
+   return gr;
+}
+
+
+TGraph*
+DrawExpectedBand( TGraph* gr1,  TGraph* gr2, Int_t fillColor, Int_t fillStyle, Int_t cut = 0)
+{
+   //  TGraph* gr1 = new TGraph( *graph1 );
+   //  TGraph* gr2 = new TGraph( *graph2 );
+   
+   int number_of_bins = max(gr1->GetN(),gr2->GetN());
+   
+   const Int_t gr1N = gr1->GetN();
+   const Int_t gr2N = gr2->GetN();
+
+   const Int_t N = number_of_bins;
+   Double_t x1[N], y1[N], x2[N], y2[N];
+   
+   Double_t xx0, yy0;
+    
+   for(int j=0; j<gr1N; j++) {
+      gr1->GetPoint(j,xx0,yy0);
+      x1[j] = xx0;
+      y1[j] = yy0;
+   }
+   if (gr1N < N) {
+      for(int i=gr1N; i<N; i++) {
+         x1[i] = x1[gr1N-1];
+         y1[i] = y1[gr1N-1];
+      }
+   }   
+   Double_t xx1, yy1;
+   
+   for(int j=0; j<gr2N; j++) {
+      gr2->GetPoint(j,xx1,yy1);
+      x2[j] = xx1;
+      y2[j] = yy1;
+   }
+   if (gr2N < N) {
+      for(int i=gr2N; i<N; i++) {
+         x2[i] = x2[gr2N-1];
+         y2[i] = y2[gr2N-1];
+      }
+   }
+ 
+
+   TGraph *grshade = new TGraphAsymmErrors(2*N);
+   for (int i=0;i<N;i++) {
+      if (x1[i] > cut){
+         grshade->SetPoint(i,x1[i],y1[i]);
+         }
+      if (x2[N-i-1] > cut){
+         grshade->SetPoint(N+i,x2[N-i-1],y2[N-i-1]);
+         }
+   }
+   
+   // Apply the cut in the shade plot if there is something that doesn't look good...
+   int Nshade = grshade->GetN();
+   double x0, y0;
+   double x00, y00;
+   
+   for(int j=0; j<Nshade; j++) {
+      grshade->GetPoint(j,x0,y0);
+      if ((x0 != 0) && (y0 != 0)) {
+         x00 = x0;
+         y00 = y0;
+         break;
+      }
+   } 
+
+   for(int j=0; j<Nshade; j++) {
+      grshade->GetPoint(j,x0,y0);
+      if ((x0 == 0) && (y0 == 0))
+         grshade->SetPoint(j,x00,y00);
+   }
+   
+   // Now draw the plot...
+   grshade->SetFillStyle(fillStyle);
+   grshade->SetFillColor(fillColor);
+   grshade->SetMarkerStyle(21);
+   grshade->Draw("F");
+
+   return grshade;
+}
+
+
+void
+DummyLegendExpected(TLegend* leg, TString what,  Int_t fillColor, Int_t fillStyle, Int_t lineColor, Int_t lineStyle, Int_t lineWidth)
+{
+
+   TGraph* gr = new TGraph();
+   gr->SetFillColor(fillColor);
+   gr->SetFillStyle(fillStyle);
+   gr->SetLineColor(lineColor);
+   gr->SetLineStyle(lineStyle);
+   gr->SetLineWidth(lineWidth);
+   leg->AddEntry(gr,what,"LF");
 }
 
