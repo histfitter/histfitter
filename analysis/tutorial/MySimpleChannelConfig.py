@@ -91,3 +91,5 @@ for sig in sigSamples:
     sigSample.setNormByTheory()
     myTopLvl.addSamples(sigSample)
     myTopLvl.setSignalSample(sigSample)
+    ch = myTopLvl.getChannel("cuts",cutsRegions)
+    myTopLvl.setSignalChannels(ch)
