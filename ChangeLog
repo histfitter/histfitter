@@ -1,3 +1,8 @@
+2014-09-02 Alex Koutsman <alex.koutsman@cern.ch>
+	* Several updates to make the tutorial work with HF trunk
+	* Also the HF tutorial twiki is updated (in time for HF tutorial at TRIUMF, 10-12 Sept 2014)
+	* Tagging HistFitter-00-00-41
+
 2014-08-19 Jeanette Miriam Lorenz <jeanette.miriam.lorenz@cern.ch>
         M scripts/UpperLimitTable.py
         * resetting of signal strength parameter not done correctly for calculation of discovery p-value. 
