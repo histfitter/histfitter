@@ -1,3 +1,8 @@
+2014-09-08 Alex Koutsman <alex.koutsman@cern.ch>
+	* setup.sh: several updates to make the setup script non CERN specific (working after setting up localRootSetup)
+	* Might possibly need to be changed again for the public code release
+	* Tagging HistFitter-00-00-42 (for HF tutorial at TRIUMF)
+
 2014-09-02 Alex Koutsman <alex.koutsman@cern.ch>
 	* Several updates to make the tutorial work with HF trunk
 	* Also the HF tutorial twiki is updated (in time for HF tutorial at TRIUMF, 10-12 Sept 2014)
