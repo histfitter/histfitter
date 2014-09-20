@@ -1,11 +1,40 @@
+/**********************************************************************************
+ * Project: HistFitter - A ROOT-based package for statistical data analysis       *
+ * Package: HistFitter                                                            *
+ * Macro  : pvalue.C                                                              *
+ * Created:                                                         *
+ *                                                                                *
+ * Description:                                                                   *
+ *      To determine the CLs p-values (observed, expected, +/-1 sigma             *
+ *      uncertainties) of the "simple channel"                                    *
+ *      counting experiment created at :                                          *
+ *      analysis/simplechannel/                                                   *
+ *      The p-values are printed on the screen.                                   *
+ *      Options (e.g. exclusion or discovery) can be set in the macro.            *
+ *                                                                                *
+ *      Run with: root -b -q pvalue.C                                             *
+ *                                                                                *
+ * Authors:                                                                       *
+ *      HistFitter group, CERN, Geneva                                            *
+ *                                                                                *
+ * Redistribution and use in source and binary forms, with or without             *
+ * modification, are permitted according to the terms listed in the file          *
+ * LICENSE.                                                                       *
+ **********************************************************************************/
+
+//include RooRandom for toy generation later
 #include "RooRandom.h"
 
+//using RoFit and RooStats tools further down
 using namespace RooFit;
 using namespace RooStats;
 
+
+//only function
 void
 pvalue()
 {
+  //definition of variables
   int seed=0;            // 0 = cpu clock, so random 
   const char* fileprefix = "example";
   int  calculatorType=0; // 2=asymptotic approximation limit. 0=frequentist limit
@@ -13,9 +42,11 @@ pvalue()
   int  ntoys=5000;
   bool doUL = true;      // true = exclusion, false = discovery
 
-  // open the workspace
+  // load the linaray of HistFitter
   gSystem->Load("libSusyFitter.so");
 
+
+  // open workspace containing the statistical model
   //TFile *file = TFile::Open("example_channel1_GaussExample_model.root");
   //RooWorkspace* w = (RooWorkspace *)file->Get("channel1"); 
  
@@ -29,6 +60,7 @@ pvalue()
   LimitResult result = RooStats::get_Pvalue( w, doUL, ntoys, calculatorType, testStatType );
   result.Summary();
 
+  //close the file containing the workspace
   file->Close();
 }
 

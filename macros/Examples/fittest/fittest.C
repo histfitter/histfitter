@@ -1,3 +1,23 @@
+/**********************************************************************************
+ * Project: HistFitter - A ROOT-based package for statistical data analysis       *
+ * Package: HistFitter                                                            *
+ * Macro  : fittest.C                                                             *
+ * Created:                                                         *
+ *                                                                                *
+ * Description:                                                                   *
+ *      To fit the "simple channel" counting experiment created at :              *
+ *      analysis/simplechannel/                                                   *
+ *      To run:                                                                   *
+ *      root -b -q fittest.C                                                      *
+ *                                                                                *
+ * Authors:                                                                       *
+ *      HistFitter group, CERN, Geneva                                            *
+ *                                                                                *
+ * Redistribution and use in source and binary forms, with or without             *
+ * modification, are permitted according to the terms listed in the file          *
+ * LICENSE.                                                                       *
+ **********************************************************************************/
+
 using namespace RooFit;
 using namespace RooStats;
 
@@ -7,6 +27,7 @@ fittest()
   // Load the HistFitter library 
   gSystem->Load("libSusyFitter.so");
 
+  //Open file containing workspace and retrieve workspace
   TFile *file = TFile::Open("example_channel1_GaussExample_model.root");
   file->ls();
   RooWorkspace* w = (RooWorkspace *)file->Get("channel1"); 
@@ -20,7 +41,7 @@ fittest()
 
   // --- CUT ---
 
-  // some printout on interesting objects in the workspace
+  // some printout on interesting objects in the workspace - rpplace false by true to see
   if (false) {
     SigXsecOverSM.Print();
     asimovData.Print("v");
@@ -31,6 +52,7 @@ fittest()
   // first fit the asimov dataset. Are the fit results as expected?
   model_channel1.fitTo(obsData);
 
+  //allow a floating luminosity and systematic uncertainty
   alpha_syst1.setConstant(false);
   Lumi.setConstant(false);
 

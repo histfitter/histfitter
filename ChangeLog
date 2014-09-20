@@ -1,3 +1,6 @@
+2014-09-19 Jeanette Miriam Lorenz <jeanette.miriam.lorenz@cern.ch>
+        * starting to comment macro directory - to be continued
+
 2014-09-08 Alex Koutsman <alex.koutsman@cern.ch>
 	* setup.sh: several updates to make the setup script non CERN specific (working after setting up localRootSetup)
 	* Might possibly need to be changed again for the public code release
