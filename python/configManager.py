@@ -32,17 +32,32 @@ gROOT.SetBatch(True)
 log = Logger('ConfigManager')
 
 def mkdir_p(path):
+    """
+    Equivalent of mkdir -p on the commandline; wrapper around os.makedirs
+
+    @param path The path to create
+    """
     try:
         os.makedirs(path)
     except:
         pass
 
 def replaceSymbols(s):
+    """
+    Strip a string from /, *, ( and )
+
+    @param s The string to remove the symbols from
+    """
     s = s.replace("/","").replace("*","").replace("(","").replace(")","")
     return s
     
 def enum(typename, field_names):
-    """Create a new enumeration type"""
+    """
+    Create a new enumeration type
+    
+    @param typename Type to use for the enum
+    @param field_names Names of the fields to create
+    """
 
     if isinstance(field_names, str):
         field_names = field_names.replace(',', ' ').split()
@@ -137,6 +152,11 @@ class ConfigManager(object):
         return
 
     def setLumiUnits(self,unit):
+        """
+        Set units for integretaed luminosity to use
+
+        @param unit The unit: fb, pb, fb-1 or pb-1 (fb and pb are automatically treated as inverse)
+        """
         # 1=fb-1, 1000=pb-1, etc.
         if unit == "fb-1" or unit == "fb":
             self.lumiUnits = 1.0
@@ -147,10 +167,21 @@ class ConfigManager(object):
         return
 
     def addTopLevelXML(self, input, name=""):
+        """
+        Deprecated method; use addFitConfig
+        """
+
         log.warning("addTopLevelXML() is deprecated and has been renamed addFitConfig()")
         return self.addFitConfig(input, name)
 
     def addFitConfig(self, input, name=""):
+        """
+        Add a fit configuration to this configManager
+
+        @param input The configuration to add
+        @param name The name for the fit configuration
+        """
+        
         from fitConfig import fitConfig
         if len(name) > 0:
             newName = name
@@ -184,18 +215,35 @@ class ConfigManager(object):
         return self.fitConfigs[len(self.fitConfigs)-1]
 
     def addTopLevelXMLClone(self, obj, name):
+        """
+        Deprecated in favour of addFitConfigClone()
+        """
         log.warning("addTopLevelXMLClone() has been deprecated and is now addFitConfigClone()")
         return self.addFitConfigClone(obj, name)
 
     def addFitConfigClone(self, obj, name):
+        """
+        Add a clone of a fit configuration
+
+        @param obj The configuration to clone
+        @param name The name for the new configuration
+        """
         return self.addFitConfig(obj, name)
 
     def removeTopLevelXML(self, name):
+        """
+        Deprecated in favour of removeFitConfig()
+        """
         log.warning("removeTopLevelXML() has been deprecated and is now removeFitConfig()")
         self.removeFitConfig(name)
         return
 
     def removeFitConfig(self, name):
+        """
+        Remove fit configuration
+
+        @param name Name of the configuration to remove
+        """
         for i in xrange(0,len(self.fitConfigs)):
             tl = self.fitConfigs[i]
             if tl.name == name:
@@ -205,10 +253,18 @@ class ConfigManager(object):
         return
 
     def getTopLevelXML(self, name):
+        """
+        Deprecated in favour of getFitConfig()
+        """
         log.warning("getTopLevelXML() has been deprecated and is now getFitConfig()")
         return self.getFitConfig(name)
 
     def getFitConfig(self, name):
+        """
+        Find a fit configuration by name
+
+        @param name Name of the configuration to find
+        """
         for tl in self.fitConfigs:
             if tl.name == name:
                 return tl
@@ -216,6 +272,10 @@ class ConfigManager(object):
         return 0
 
     def initialize(self):
+        """
+        Initializes the configuration manager by propagating setting down to channels, samples, etc.
+        """
+        
         log.info("Initializing...")
         if self.histCacheFile == '':
             tmpName = "data/%s.root" % self.analysisName
@@ -379,6 +439,10 @@ class ConfigManager(object):
         return
 
     def initializeCppMgr(self):
+        """
+        Initialise the C++ side copy of the configuration manager and set its properties
+        """
+
         # settings for hypothesis test
         self.cppMgr.m_doHypoTest = self.doHypoTest
         self.cppMgr.setNToys( self.nTOYs )
@@ -476,6 +540,10 @@ class ConfigManager(object):
         return
 
     def Print(self):
+        """
+        Print a summary of the settings defined in this configuration manager
+        """
+
         log.info("*-------------------------------------------------*")
         log.info("              Summary of ConfigMgr\n")
         log.info("analysisName: %s" % self.analysisName)
@@ -512,6 +580,9 @@ class ConfigManager(object):
         return
 
     def printHists(self):
+        """
+        Print all the histograms defined in the manager
+        """
         histList = self.hists.keys()
         histList.sort()
         for hist in histList:
@@ -519,6 +590,9 @@ class ConfigManager(object):
         return
 
     def printChains(self):
+        """
+        Print all the ROOT TChains defined in the manager
+        """
         chainList = self.chains.keys()
         chainList.sort()
         for chain in chainList:
@@ -526,6 +600,9 @@ class ConfigManager(object):
         return
 
     def printFiles(self):
+        """
+        Print all the input files used for the various fit configurations
+        """
         log.debug("ConfigManager:")
         log.debug(str(self.fileList))
 
@@ -548,6 +625,9 @@ class ConfigManager(object):
         return
 
     def printTreeNames(self):
+        """
+        Print the names of all the ROOT TTrees used in the fit configurations defined
+        """
         if str(self.treeName).strip() == "":
             log.debug("No tree used")
             return
@@ -578,6 +658,8 @@ class ConfigManager(object):
         Set file list for config manager.
         This will be used as default for top level xmls that don't specify
         their own file list.
+
+        @param filelist A list of filenames
         """
         self.fileList = filelist
 
@@ -586,6 +668,8 @@ class ConfigManager(object):
         Set file list for config manager.
         This will be used as default for top level xmls that don't specify
         their own file list.
+
+        @param file A filename to set as a list
         """
         self.fileList = [file]
 
@@ -600,23 +684,36 @@ class ConfigManager(object):
             fc.propagateFileList(self.fileList)
 
     def setTreeName(self,treeName):
+        """
+        Set the treename
+
+        @param treeName The name of the tree to use
+        """
         self.treeName = treeName
         return
 
     def propagateTreeName(self):
+        """
+        Propogate the tree name down to all owned fit configurations
+        """
         for fc in self.fitConfigs:
             fc.propagateTreeName(self.treeName)
             pass
         return
 
     def executeAll(self):
+        """
+        Execute all fit configurations owned
+        """
         for tl in self.fitConfigs:
             self.execute(tl)
         return
 
     def execute(self, fitConfig):
         """
-        Make or get the histograms and generate the XML
+        Execute a particular fit configuration
+
+        @param fitConfig The configuration to execute
         """
         log.info("Preparing histograms and/or workspace for fitConfig %s\n"%fitConfig.name)
 
@@ -803,9 +900,6 @@ class ConfigManager(object):
                         log.info("Merged systematic : %s %f %f" % (keepName,1+highErr,1-lowErr))
                         sam.addOverallSys(keepName,1.0+highErr,1.0-lowErr)
                 
-                 
-                
-
         # Build blinded histograms here
         for (iChan, chan) in enumerate(fitConfig.channels):
             for sam in chan.sampleList:
@@ -847,6 +941,14 @@ class ConfigManager(object):
                 fitConfig.writeWorkspaces()       
 
     def appendSystinChanInfoDict(self, chan, sam, systName, syst):
+        """
+        Append a systematic to a particular sample and channel
+
+        @param chan The channel to add systematics to
+        @param sam The sample in the channel to add systematics to
+        @param systName The name of the new systematic
+        @param syst The systematic to add
+        """
         log.debug("appendSystinChanInfoDict: appending info:")
         log.debug("  CHAN %s" % chan.name)
         log.debug("  SAM %s" % sam.name)
@@ -1012,6 +1114,13 @@ class ConfigManager(object):
             raise Exception("Incorrect systematic method specified for QCD: %s" % getSample(sam.name).qcdSyst)
 
     def setWeightsCutsVariable(self, chan, sam, regionString):
+        """
+        Generate the string of weights applied to a sample
+
+        @param chan The channel to use
+        @param sam The sample to use
+        @param regionString Internal string to use in the dictionary of cuts
+        """
         if not sam.isData and not sam.isQCD and not sam.isDiscovery:
             self.prepare.weights = str(self.lumiUnits*self.outputLumi/self.inputLumi)
             self.prepare.weights += " * " + " * ".join(sam.weights)
@@ -1043,6 +1152,16 @@ class ConfigManager(object):
         return
 
     def addSampleSpecificHists(self,fitConfig,chan,sam,regionString,normRegions,normString,normCuts):
+        """
+        Add histograms to a specific sample
+
+        @param fitConfig The fit configuration
+        @param chan The channel
+        @param sam The sample
+        @param regionString String for the region to use
+        @param normRegions Regions to normalise histograms in (optional)
+        @param normCuts Cuts to apply in the normalisation
+        """
         log.debug('addSampleSpecificHists()')
         histoName = "h%s_%s_obs_%s" % (sam.name, regionString, replaceSymbols(chan.variableName) )
 
@@ -1181,6 +1300,13 @@ class ConfigManager(object):
 
     
     def buildBlindedHistos(self, fitConfig, chan, sam):
+        """
+        Build blinded histograms for a fit configuration
+
+        @param fitConfig The fit configuratio
+        @param chan The channel
+        @param sam The sample
+        """
         if (self.blindSR and (chan.channelName in fitConfig.signalChannels)) or \
            (self.blindCR and chan.channelName in fitConfig.bkgConstrainChannels) or \
            (self.blindVR and (chan.channelName in fitConfig.validationChannels)) or \
@@ -1194,6 +1320,12 @@ class ConfigManager(object):
         return
     
     def makeDicts(self, fitConfig, chan):
+        """
+        Prepare various internal dictionaries for a channel in a fit configuration
+
+        @param fitConfig The fit configuration
+        @param chan The channel
+        """
         regString = "".join(chan.regions)
 
         canDict = {}
@@ -1310,6 +1442,9 @@ class ConfigManager(object):
             self.stackList.append(stackDict[info])
     
     def outputRoot(self):
+        """
+        Write out the histograms defined in the analysis to a data file
+        """
         outputRootFile = None
         if self.readFromTree:
             outputRootFile = TFile(self.histCacheFile,"RECREATE")
