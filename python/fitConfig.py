@@ -36,6 +36,11 @@ from copy import deepcopy
 from configManager import configMgr
 
 def mkdir_p(path):
+    """
+    Equivalent of mkdir -p on the commandline; wrapper around os.makedirs
+
+    @param path The path to create
+    """
     try:
         os.makedirs(path)
     except:
@@ -85,6 +90,11 @@ class fitConfig(object):
         self.hypoTestName = ""
 
     def Clone(self, newName=""):
+        """
+        Clone configuration into a new one
+
+        @param name Optional name for the new configuration; if empty, copy the name too
+        """
         if newName == "":
             newName = self.name
         #copies all properties prior to initialize
@@ -95,6 +105,12 @@ class fitConfig(object):
         return newTLX
 
     def ConstructorInit(self, name):
+        """
+        Initialisation method for the constructor and Clone()
+
+        @param name Name to set
+        """
+
         #shared method between __init__ and Clone
         self.name = name
         mkdir_p('./results/%s' % configMgr.analysisName)
@@ -106,6 +122,9 @@ class fitConfig(object):
         return
 
     def initialize(self):
+        """
+        Initialise internal variables
+        """
         self.xmlFileName = "config/"+self.prefix+".xml"
         
         #Note: wsFileName is an educated guess of the workspace
@@ -174,6 +193,9 @@ class fitConfig(object):
         return
 
     def writeWorkspaces(self):
+        """
+        Write out RooFit workspaces for this configuration
+        """
         channelObjects = []
         for chan in self.channels:
             c = chan.createHistFactoryObject()
@@ -204,23 +226,40 @@ class fitConfig(object):
         return
 
     def addMeasurement(self, name, lumi, lumiErr):
+        """
+        Add measurement to this configuration
+
+        @param name Name of measurement
+        @param lumi Luminosity to use
+        @param lumiErr Error on the luminosity to use
+        """
+
         #verify that this name is not already used
         for meas in self.measurements:
             if meas.name == name:
-                raise RuntimeError("Measurement %s already exists in TopLevelXML %s. Please use a different name." % (name, self.name))
+                raise RuntimeError("Measurement %s already exists in fitConfig %s. Please use a different name." % (name, self.name))
             pass
+        
         #add measurement to the list
         self.measurements.append(Measurement(name, lumi, lumiErr))
         return self.measurements[len(self.measurements) - 1]
 
     def addMeasurementObj(self, obj):
+        """
+        Add measurement to this configuration
+
+        @param obj The object to add
+        """
+        
         if not isinstance(obj, Measurement):
             raise RuntimeError("addMeasurement does not support input of type '%s'." % (type(obj)))
+        
         #verify that this name is not already used
         for meas in self.measurements:
             if meas.name == obj.name:
                 raise RuntimeError("Measurement %s already exists in TopLevelXML %s. Please use a different name." % (obj.name, self.name))
             pass
+        
         #add measurement clone to the list
         self.measurements.append(obj.Clone())
         return self.measurements[len(self.measurements) - 1]
@@ -228,6 +267,8 @@ class fitConfig(object):
     def getMeasurement(self, name):
         """
         Find the measurement object with given name
+        
+        @param name Name to search for
         """
         for m in self.measurements:
             if m.name == name:
@@ -238,6 +279,8 @@ class fitConfig(object):
     def statStatErrorType(self, t):
         """
         Set stat error type for config, and propagate down to channels
+        
+        @param t Type to use
         """
         self.statErrorType = t
         for chan in self.channels:
@@ -245,7 +288,13 @@ class fitConfig(object):
 
     def addChannel(self, variableName, regions, nBins, binLow, binHigh):
         """
-        Build a channel object from this TopLevel
+        Build a channel object from this fitConfig
+
+        @param variableName The variable name to use in this channel
+        @param regions Region to use
+        @param nBins Number of bins
+        @param binLow Left edge of lower bin
+        @param binHight Right edge of upper bin
         """
         if variableName == "cuts":
             nBins = len(regions)
@@ -288,6 +337,8 @@ class fitConfig(object):
     def addChannelObj(self, obj):
         """
         Add channel as a pre-built object
+
+        @param obj The object to add
         """
         if not isinstance(obj, Channel):
             raise RuntimeError("addChannel does not support input of type '%s'." % (type(obj)))
@@ -326,7 +377,7 @@ class fitConfig(object):
     def addValidationChannel(self, variableName, regions, nBins,
                              binLow, binHigh):
         """
-        Create a channel and give it a validation flag
+        Create a channel and give it a validation flag. See addChannel() for parameters.
         """
         ch = self.addChannel(variableName, regions, nBins, binLow, binHigh)
         self.setValidationChannels(ch)
@@ -336,6 +387,8 @@ class fitConfig(object):
     def getChannelByName(self, name):
         """
         Find the channel with the given name
+
+        @param name The name to search for
         """
         for chan in self.channels:
             if chan.name == name:
@@ -347,6 +400,9 @@ class fitConfig(object):
     def getChannel(self, variableName, regions):
         """
         Find the channel with the given variable and regions
+
+        @param variableName The variable to use in finding the channel
+        @param regions The regions used to find the channel
         """
         for chan in self.channels:
             if chan.variableName == variableName and chan.regions == regions:
@@ -356,7 +412,9 @@ class fitConfig(object):
 
     def addSamples(self, input):
         """
-        Add list (or single object) of pre-built samples to this TopLevel
+        Add list (or single object) of pre-built samples to this fitConfig
+
+        @param input List of samples to add
         """
         if isinstance(input, list):
             sampleList = input
@@ -395,6 +453,8 @@ class fitConfig(object):
     def getSample(self, name):
         """
         Find the sample with the given name
+
+        @param name Name of the sample to search for
         """
         for s in self.sampleList:
             if s.name == name:
@@ -411,6 +471,8 @@ class fitConfig(object):
         """
         Set the weights
         This overrides all previously defined weights
+
+        @param weights The weights to set
         """
         self.weights = deepcopy(weights)
 
@@ -430,6 +492,8 @@ class fitConfig(object):
     def addWeight(self, weight):
         """
         Add a single weight
+
+        @param weight Weight to add
         """
         if not weight in self.weights:
             self.weights.append(weight)
@@ -460,6 +524,8 @@ class fitConfig(object):
     def removeWeight(self, weight):
         """
         Remove a single weight
+
+        @param weight Weight to remove
         """
         if weight in self.weights:
             self.weights.remove(weight)
@@ -489,6 +555,8 @@ class fitConfig(object):
     def setSignalSample(self, sig):
         """
         Flag the signal sample
+
+        @param sig The sample to flag as signal
         """
         if isinstance(sig, Sample):
             self.signalSample = sig.name
@@ -520,6 +588,8 @@ class fitConfig(object):
     def setSignalChannels(self, channels):
         """
         Set the channels to be treated as signal (SRs)
+
+        @param channels List of channels
         """
         self.appendStrChanOrListToList(channels, self.signalChannels)
         return
@@ -527,6 +597,8 @@ class fitConfig(object):
     def setBkgConstrainChannels(self, channels):
         """
         Set the channels to be treated as constraining regions (CRs)
+        
+        @param channels List of channels
         """
         self.appendStrChanOrListToList(channels, self.bkgConstrainChannels)
         return
@@ -535,24 +607,30 @@ class fitConfig(object):
         #TODO should be renamed appendValidationChannels !
         """
         Set the channels to be treated as validation regions (VRs)
+        
+        @param channels List of channels
         """
         self.appendStrChanOrListToList(channels, self.validationChannels)
         return
 
     def setFileList(self, filelist):
         """
-        Set file list for this top level xml.
+        Set file list for this fitConfig 
         This will be used as default for channels that don't specify
         their own file list.
+        
+        @param filelist List of filenames
         """
         self.files = filelist
         return
 
     def setFile(self, file):
         """
-        Set file for this top level xml.
+        Set file for this fitConfig 
         This will be used as default for channels that don't specify
         their own file list.
+
+        @param file Name of the input file
         """
         self.files = [file]
         return
@@ -560,6 +638,8 @@ class fitConfig(object):
     def propagateFileList(self, fileList):
         """
         Propagate the file list downwards.
+
+        @param fileList List of files
         """
         # if we don't have our own file list, use the one given to us
         if not self.files:
@@ -575,6 +655,8 @@ class fitConfig(object):
         """
         Add a systematic to this object.
         This will be propagated to all owned samples
+
+        @param syst Systematic to add
         """
         if syst.name in self.systDict.keys():
             raise RuntimeError("Attempt to overwrite systematic %s in TopLevel %s" % (syst.name, self.name))
@@ -593,6 +675,8 @@ class fitConfig(object):
     def getSystematic(self, systName):
         """
         Find the systematic with given name
+
+        @param systName Name of the systematic to find
         """
         # protection against strange people who pass a systematic to this function
         name = systName
@@ -606,14 +690,16 @@ class fitConfig(object):
 
     def clearSystematics(self):
         """
-        Remove all systematics from this TopLevel
+        Remove all systematics from this fitConfig
         """
         self.systDict.clear()
         return
 
     def removeSystematic(self, systName):
         """
-        Remove a single systematic from this TopLevel
+        Remove a single systematic from this fitConfig
+
+        @param systName Name of the systematic to remove
         """
 
         # allow removal using the object too
@@ -626,7 +712,9 @@ class fitConfig(object):
 
     def setTreeName(self, treeName):
         """
-        Set the tree name
+        Set the tree nae
+        
+        @param treeName Name of the tree
         """
         self.treeName = treeName
         return
@@ -634,6 +722,8 @@ class fitConfig(object):
     def propagateTreeName(self, treeName):
         """
         Propagate the tree name
+        
+        @param treeName Name of the tree
         """
         if self.treeName == '':
             self.treeName = treeName
@@ -682,6 +772,8 @@ class fitConfig(object):
     def executehist2workspace(self, option=""):
         """
         Run hist2workspace binary for the XML file for this fitConfig
+
+        @param option Options to pass to the hist2workspace binary
         """
         cmd = "hist2workspace "
         if len(option):
