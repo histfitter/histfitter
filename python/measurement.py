@@ -28,13 +28,17 @@ from copy import deepcopy
 
 class Measurement(object):
     """
-    Class to define measurements in the top-level xml
+    Class to define measurements in a fit configuration
     """
 
     def __init__(self, name, lumi, lumiErr):
         """
         Store configuration, add to top level list of measurements,
         specify lumi parameters and if run in exportOnly mode
+
+        @param name Name of the measurement
+        @param lumi Luminosity to use
+        @param lumiError Relative error on the luminosity
         """
         self.name = name
         self.lumi = lumi
@@ -48,6 +52,11 @@ class Measurement(object):
         self.paramSettingDict = {}
 
     def Clone(self, newName=""):
+        """
+        Copy the measurement to a new one
+
+        @param newName Optional new name; if empty, the current name is used
+        """
         if newName == "":
             newName = self.name
         newMeas = deepcopy(self)
@@ -57,22 +66,38 @@ class Measurement(object):
     def addPOI(self, poi):
         """
         Add a parameter of interest
+
+        @param poi The parameter to add
         """
         self.poiList.append(poi)
 
     def addParamSetting(self, paramName, const, val=None):
         """
         Define the settings for a parameter
+
+        @param paramName Name of the parameter
+        @param const Boolean that determines whether the parameter is constant or not
+        @param val The default value of the parameter
         """
         self.paramSettingDict[paramName] = (const, val)
 
-    def addConstraintTerm(self,paramName,type,relUnc=None):
+    def addConstraintTerm(self, paramName, type, relUnc=None):
         """
         Define the constraint term for a parameter
+
+        @param paramName Name of the parameter
+        @param type Type of constraint
+        @param relUnc Relative uncertainty to add
         """
         self.constraintTermDict[paramName] = (type,relUnc)
 
     def createHistFactoryObject(self, prefix):
+        """
+        Create a HistFactory object for this measurement
+        
+        @param prefix Output prefix to use; will use "./results/<prefix>" to store output files
+        """
+
         m = ROOT.RooStats.HistFactory.Measurement(self.name)
         m.SetOutputFilePrefix("./results/%s" % prefix)
         m.SetPOI(self.poiList[0])
