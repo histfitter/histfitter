@@ -56,11 +56,21 @@ _levelNames = {
 }
 
 def getLevelName(level):
+    """
+    Find the name for a level
+
+    @param level The level to return the name for
+    """
     if isinstance(level, str):
         return level
     return _levelNames.get(level, ("%s" % level)) 
 
 def _checkLevel(level):
+    """
+    Determine whether a level exists for the given number or name
+
+    @param level The level to search for
+    """
     if isinstance(level, int):
         rv = level
     elif str(level) == level:
@@ -73,13 +83,24 @@ def _checkLevel(level):
 
 class Logger(object):
 
-    def __init__(self,name):
+    def __init__(self, name):
+        """
+        Initialise a logger 
+
+        @param name The name of the logger to initialise
+        """
         self._log = TMsgLogger()
         self._log.SetSource(name)
         self._log.SetMinLevel(INFO)
         self._levelLock = False
 
     def setLevel(self, level, lock=False):
+        """
+        Set the level for the logger
+
+        @param level The level to set
+        @param lock Boolean that determines whether this method may be called again
+        """
         if(self._log.GetLevelLock() ):
             self.warning("Cannot set log level again, current setting is %s" % self._log.GetMinLevelStr())
             return
@@ -90,23 +111,58 @@ class Logger(object):
             self.always("This log level is the final setting") 
 
     def verbose(self, msg):
+        """
+        Write out a message at the verbose level
+
+        @param msg The message to write out
+        """
         self._log.writeLogMessage(VERBOSE, msg)
     
     def debug(self, msg):
+        """
+        Write out a message at the debug level
+
+        @param msg The message to write out
+        """
         self._log.writeLogMessage(DEBUG, msg)
     
     def info(self, msg):
+        """
+        Write out a message at the info level
+
+        @param msg The message to write out
+        """
         self._log.writeLogMessage(INFO, msg)
     
     def warning(self, msg):
+        """
+        Write out a message at the warning level
+
+        @param msg The message to write out
+        """
         self._log.writeLogMessage(WARNING, msg)
     
     def error(self, msg):
+        """
+        Write out a message at the error level
+
+        @param msg The message to write out
+        """
         self._log.writeLogMessage(ERROR, msg)
     
     def fatal(self, msg):
+        """
+        Write out a message at the fatal level
+
+        @param msg The message to write out
+        """
         self._log.writeLogMessage(FATAL, msg)
     
     def always(self, msg):
+        """
+        Write out a message at the always level
+
+        @param msg The message to write out
+        """
         self._log.writeLogMessage(ALWAYS, msg)
 
