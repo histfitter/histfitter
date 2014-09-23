@@ -7,6 +7,8 @@
  * Description:                                                                   *
  *      Implementation (see header for description)                               *
  *                                                                                *
+ *      Authors: the HistFitter team                                              *
+ *                                                                                *
  *      Adapted from TMVA:MsgLogger, modified by us. Original authors:            *
  *                                                                                *
  *      Attila Krasznahorkay  <Attila.Krasznahorkay@cern.ch> - CERN, Switzerland  *
@@ -14,7 +16,7 @@
  *      Joerg Stelzer         <stelzer@cern.ch>        - DESY, Germany            *
  *      Eckhard v. Toerne     <evt@uni-bonn.de>        - U of Bonn, Germany       *
  *                                                                                *
- * Copyright (c) 2005-2011:                                                       *
+ * Copyright (c) 2005-2014:                                                       *
  *      CERN, Switzerland                                                         *
  *      U. of Victoria, Canada                                                    *
  *      MPI-K Heidelberg, Germany                                                 *
