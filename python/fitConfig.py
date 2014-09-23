@@ -257,7 +257,7 @@ class fitConfig(object):
         #verify that this name is not already used
         for meas in self.measurements:
             if meas.name == obj.name:
-                raise RuntimeError("Measurement %s already exists in TopLevelXML %s. Please use a different name." % (obj.name, self.name))
+                raise RuntimeError("Measurement %s already exists in fitConfig %s. Please use a different name." % (obj.name, self.name))
             pass
         
         #add measurement clone to the list
@@ -310,7 +310,7 @@ class fitConfig(object):
                 log.info("Not gonna add the region, because it exists in fitConfig --> channel-List follows:" )
                 for chan in self.channels:
                     print "      chan.name = ", chan.name
-                raise RuntimeError("Channel %s already exists in TopLevelXML %s. Please use a different name." % (chanObj.name, self.name))
+                raise RuntimeError("Channel %s already exists in fitConfig %s. Please use a different name." % (chanObj.name, self.name))
 
         #set channel parent
         chanObj.parentTopLvl = self
@@ -325,7 +325,7 @@ class fitConfig(object):
         for (systName, syst) in self.systDict.items():
             chanObj.addSystematic(syst)
 
-        # Put samples owned by this TopLevel into the channel
+        # Put samples owned by this fitConfig into the channel
         for s in self.sampleList:
             chanObj.addSample(s.Clone())
 
@@ -346,7 +346,7 @@ class fitConfig(object):
         # Verify that this name is not already used
         for chan in self.channels:
             if chan.name == obj.name:
-                raise RuntimeError("Channel %s already exists in TopLevelXML %s. Please use a different name." % (obj.name, self.name))
+                raise RuntimeError("Channel %s already exists in fitConfig %s. Please use a different name." % (obj.name, self.name))
 
         # Create a copy
         newObj = deepcopy(obj)
@@ -365,7 +365,7 @@ class fitConfig(object):
             if not systName in newObj.systDict.keys():
                 newObj.addSystematic(syst)
 
-        # Put samples owned by this TopLevel into the channel
+        # Put samples owned by this fitConfig into the channel
         for s in self.sampleList:
             if not s.name in [sam.name for sam in newObj.sampleList]:
                 newObj.addSample(s)
@@ -423,7 +423,7 @@ class fitConfig(object):
             pass
 
         for s in sampleList:
-            # If the sample doesn't exist in TopLevel already then add it,
+            # If the sample doesn't exist in fitConfig already then add it,
             # else something has gone wrong
             if not s.name in [sam.name for sam in self.sampleList]:
 
@@ -442,7 +442,7 @@ class fitConfig(object):
                             self.sampleList[-1].addSystematic(syst)
 
             else:
-                raise RuntimeError("Sample %s already defined in TopLevel %s" % (s.name, self.name))
+                raise RuntimeError("Sample %s already defined in fitConfig %s" % (s.name, self.name))
 
             # Propagate to channels that are already owned as well
             for c in self.channels:
@@ -465,7 +465,7 @@ class fitConfig(object):
                 if s.name == name:
                     return s
  
-        raise Exception("Sample with name %s not found in TopLevel %s" % (name, self.name))
+        raise Exception("Sample with name %s not found in fitConfig %s" % (name, self.name))
 
     def setWeights(self, weights):
         """
@@ -530,7 +530,7 @@ class fitConfig(object):
         if weight in self.weights:
             self.weights.remove(weight)
         else:
-            raise RuntimeError("Weight %s does not exist in TopLevel %s" % (weight, self.name))
+            raise RuntimeError("Weight %s does not exist in fitConfig %s" % (weight, self.name))
 
         # Propagate to owned channels
         for c in self.channels:
@@ -659,7 +659,7 @@ class fitConfig(object):
         @param syst Systematic to add
         """
         if syst.name in self.systDict.keys():
-            raise RuntimeError("Attempt to overwrite systematic %s in TopLevel %s" % (syst.name, self.name))
+            raise RuntimeError("Attempt to overwrite systematic %s in fitConfig %s" % (syst.name, self.name))
         else:
             self.systDict[syst.name] = syst.Clone()
 
@@ -686,7 +686,7 @@ class fitConfig(object):
         try:
             return self.systDict[name]
         except KeyError:
-            raise KeyError("Could not find systematic %s in topLevel %s" % (name, self.name))
+            raise KeyError("Could not find systematic %s in fitConfig %s" % (name, self.name))
 
     def clearSystematics(self):
         """
