@@ -168,7 +168,7 @@ class ConfigManager(object):
 
     def addTopLevelXML(self, input, name=""):
         """
-        Deprecated method; use addFitConfig
+        @deprecated Deprecated method; use addFitConfig
         """
 
         log.warning("addTopLevelXML() is deprecated and has been renamed addFitConfig()")
@@ -216,7 +216,7 @@ class ConfigManager(object):
 
     def addTopLevelXMLClone(self, obj, name):
         """
-        Deprecated in favour of addFitConfigClone()
+        @deprecated Deprecated in favour of addFitConfigClone()
         """
         log.warning("addTopLevelXMLClone() has been deprecated and is now addFitConfigClone()")
         return self.addFitConfigClone(obj, name)
@@ -232,7 +232,7 @@ class ConfigManager(object):
 
     def removeTopLevelXML(self, name):
         """
-        Deprecated in favour of removeFitConfig()
+        @deprecated Deprecated in favour of removeFitConfig()
         """
         log.warning("removeTopLevelXML() has been deprecated and is now removeFitConfig()")
         self.removeFitConfig(name)
