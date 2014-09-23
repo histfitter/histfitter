@@ -31,7 +31,10 @@ class PrepareHistos(object):
 
     def __init__(self, useCache=False, useCacheToTreeFallback=False):
         """
-        All implementations initialized the same
+        Initialise the preparation object
+
+        @param useCache Read out histograms from the cache file rather than trees
+        @param useCacheToTreeFallBack If reading from histograms, fall back to trees in case they are not found
         """
         from configManager import configMgr
         
@@ -64,11 +67,19 @@ class PrepareHistos(object):
         if self.cache2File != None: self.cache2File.Close()
    
     def setUseCacheToTreeFallback(useCacheToTreeFallback):
+        """
+        Set the use of fallback to trees to the argument
+
+        @param useCacheToTreeFallback Boolean to determine fallback
+        """
         self.useCacheToTreeFallback = useCacheToTreeFallback
 
     def setHistoPaths(self, filepath, file2path=''):
         """
-        Set histogram paths, second is optional
+        Set histogram paths
+
+        @param filepath Name of the cache file
+        @param file2path Optional path of extra file (used in conjunction with fallback)
         """
         self.cacheFileName = filepath
         self.cache2FileName = file2path
@@ -91,7 +102,12 @@ class PrepareHistos(object):
 
     def checkTree(self, treeName, fileList):
         """
-        Check existence of tree. True=ok, False=none. 
+        Check existence of a tree in a list of files
+
+        @param treeName Name of the tree
+        @param fileList List of files
+
+        @retval Returns true if the tree has been found
         """
         if self.useCache and not self.useCacheToTreeFallback:
             log.debug("Not using cache or cache fallback: no trees")
@@ -121,7 +137,10 @@ class PrepareHistos(object):
 
     def read(self, treeName, fileList):
         """
-        Read in the root object that will make histograms
+        Read in the root object that will make histograms and set the TChain objects in ConfigManager
+
+        @param treeName Name of the tree to use
+        @param fileList List of files to use
         """
         if self.useCache and not self.useCacheToTreeFallback and treeName == '':
             log.info("Not using trees, will read histograms from %s" % (fileList))
@@ -153,6 +172,19 @@ class PrepareHistos(object):
     def addHisto(self, name, nBins=0, binLow=0., binHigh=0., nBinsY=0, binLowY=0., binHighY=0., useOverflow=False, useUnderflow=False, forceNoFallback=False):
         """
         Make histogram and add it to the dictionary of prepared histograms
+        
+        @param name Name of the histogram
+        @param nBins Number of X bins
+        @param binLow Lower edge of left X bin
+        @param binHigh Higher edge of rigth X bin
+        @param nBinsY Number of Y bins
+        @param binLowY Lower edge of left Y bin
+        @param binHighY Higher edge of right Y bin
+        @param useOverflow Use the overflow bins or not? 
+        @param useUnderflow Use the underflow bins or not ?
+        @param forceNoFallBack If true, never use the fallback mechanism for this histogram
+        
+        @retval The constructed histogram
         """
         if self.useCache:
             return self.__addHistoFromCache(name, nBins, binLow, binHigh, useOverflow, useUnderflow, forceNoFallback)
@@ -162,8 +194,19 @@ class PrepareHistos(object):
     def __addHistoFromTree(self, name, nBins=0, binLow=0., binHigh=0., nBinsY=0, binLowY=0., binHighY=0., useOverflow=False, useUnderflow=False):
         """
         Use the TTree::Draw method to create the histograms for var from cuts and weights defined in instance
-
         Recover from ROOT memory and add to dictionary of histograms
+        
+        @param name Name of the histogram
+        @param nBins Number of X bins
+        @param binLow Lower edge of left X bin
+        @param binHigh Higher edge of rigth X bin
+        @param nBinsY Number of Y bins
+        @param binLowY Lower edge of left Y bin
+        @param binHighY Higher edge of right Y bin
+        @param useOverflow Use the overflow bins or not? 
+        @param useUnderflow Use the underflow bins or not ?
+        
+        @retval The constructed histogram
         """
         if self.var == "cuts":
             if self.configMgr.hists[name] is None:
@@ -264,6 +307,10 @@ class PrepareHistos(object):
     def addQCDHistos(self, sample, useOverflow=False, useUnderflow=False):
         """
         Make the nominal QCD histogram and its errors 
+
+        @param sample The sample to use
+        @param useOverflow Use the overflow bins or not
+        @param useUnderflow Use the underflow bins or not
         """
         if self.useCache:
             return self.__addQCDHistosFromCache(sample, useOverflow, useUnderflow)
@@ -273,6 +320,10 @@ class PrepareHistos(object):
     def __addQCDHistosFromTree(self, sample, useOverflow=False, useUnderflow=False):
         """
         Make the nominal QCD histogram and its up and down fluctuations
+        
+        @param sample The sample to use
+        @param useOverflow Use the overflow bins or not
+        @param useUnderflow Use the underflow bins or not
         """
         regString = "".join(self.channel.regions)
 
@@ -422,6 +473,10 @@ class PrepareHistos(object):
         #Note: useOverflow and useUnderflow has no effect. It's there just for symmetry with TreePrepare above.
         """
         Read the nominal, high and low QCD histograms. Fallback only in case nominals not present.
+        
+        @param sample The sample to use
+        @param useOverflow Use the overflow bins or not. Note: has no effect, only present for symmetry with TreePrepare
+        @param useUnderflow Use the underflow bins or not. Note: has no effect, only present for symmetry with TreePrepare
         """
         regString = "".join(self.channel.regions)
 
@@ -451,6 +506,14 @@ class PrepareHistos(object):
         return self.configMgr.hists[prefixNom], self.configMgr.hists[prefixLow], self.configMgr.hists[prefixHigh]
 
     def updateHistBin(self, h, binIn, binOver):
+        """
+        Update a histogram bin with the overflow information
+
+        @param h The histogram
+        @param binIn The bin to add the content to
+        @param binOver The overflow bin touse
+        """
+
         newVal = h.GetBinContent(binIn) + h.GetBinContent(binOver)
         h.SetBinContent(binIn,newVal)
         h.SetBinContent(binOver,0.0)
@@ -462,6 +525,13 @@ class PrepareHistos(object):
         return
 
     def updateOverflowBins(self, h, useOverflow, useUnderflow):
+        """
+        Update all underflow and overflow bins for the histogram depending on the parameters. Calls updateHistBin().
+
+        @param h The histogram
+        @param useOverflow Use the overflow bin? 
+        @param useUnderflow Use the underflow bin?
+        """
         if useOverflow:
             binIn = h.GetNbinsX()
             binOver = binIn+1
