@@ -33,14 +33,17 @@ from configManager import configMgr
 
 class Sample(object):
     """
-    Defines a Sample in a channel XML file
+    Defines a Sample belonging to a Channel
     """
 
     def __init__(self, name, color=1):
         """
-        Store configuration,  set sample name,  and if to normalize by theory
+        Store configuration, set sample name, and if to normalize by theory
 
         Scales histograms to luminosity set in configuration
+
+        @param name Name of the sample
+        @param colour Colour of the sample used in before/after plotting
         """
         self.name = name
         self.color = color
@@ -80,6 +83,11 @@ class Sample(object):
     def buildHisto(self, binValues, region, var, binLow=0.0):
         """
         Allow user to give bin values eg. for checking stats in papers
+
+        @param binValues Values in the bins
+        @param region Region to add the histogram to 
+        @param var The variable to bin in
+        @param binLow Lower bin edge (default 0.0)
         """
         try:
             self.binValues[(region, var)] = binValues
