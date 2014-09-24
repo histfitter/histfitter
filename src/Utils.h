@@ -155,9 +155,8 @@ namespace Util
 			     TString outputPrefix = "", RooFitResult* rFit = NULL, RooAbsData* inputData=0);
   /**
      Function to plot each region with data, pdf and pdf-components(=samples) 
-     @param w RooWorkspace pointer
-     @param fc FitConfig pointer
      @sa PlotPdfWithComponents() 
+
   */ 
   void PlotPdfWithComponents(RooWorkspace* w, FitConfig* fc,  TString anaName="Analysis", TString plotRegions= "ALL", TString outputPrefix = "", 
 			     RooFitResult* rFit= NULL, RooAbsData* inputData=0 );

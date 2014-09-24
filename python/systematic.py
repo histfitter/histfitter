@@ -38,6 +38,11 @@ log = Logger('Systematic')
 ###############################################
 
 def replaceSymbols(s):
+    """
+    Strip a string from /, *, ( and )
+
+    @param s The string to remove the symbols from
+    """
     s = s.replace("/", "").replace("*", "").replace("(", "").replace(")", "")
     return s
 
@@ -75,6 +80,11 @@ class SystematicBase:
                              % (self.method, allowedSys))
 
     def Clone(self, name=""):
+        """ 
+        Copy the systematic
+
+        @param name An optional new name. If empty, the current name is used
+        """
         newSyst = deepcopy(self)
         if not name == "":
             newSyst.name = name
@@ -104,6 +114,9 @@ class SystematicBase:
     def setFileList(self, sample, filelist):
         """
         Set file list for this Systematic directly
+
+        @param sample The Sample to set the files for
+        @param filelist A list of filenames
         """
         self.filesLo[sample] = filelist
         self.filesHi[sample] = filelist
@@ -111,33 +124,60 @@ class SystematicBase:
     def setFile(self, sample, file):
         """
         Set a file for this Systematic directly
+        
+        @param sample The Sample to set the file for
+        @param filelist A filename
         """
         self.filesLo[sample] = [file]
         self.filesHi[sample] = [file]
 
     def setTreeName(self, sampleName, treeName):
+        """
+        Set name of the tree for a sample
+        
+        @param sampleName Name of the sample
+        @param treeName Tree name to set for the sample
+        """
         self.treeLoName[sampleName] = treeName
         self.treeHiName[sampleName] = treeName
         return
 
     def setLoTreeName(self, sampleName, treeName):
+        """
+        Set name of the tree for a sample for -1 sigma variations only
+        
+        @param sampleName Name of the sample
+        @param treeName Tree name to set for the sample
+        """
         self.treeLoName[sampleName] = treeName
         return
 
     def setHiTreeName(self, sampleName, treeName):
+        """
+        Set name of the tree for a sample for +1 sigma variations only
+        
+        @param sampleName Name of the sample
+        @param treeName Tree name to set for the sample
+        """
         self.treeHiName[sampleName] = treeName
         return
 
     def setHiFileList(self, sample, filelist):
         """
-        Set file list for this Systematic directly
+        Set file list for +1 sigma variations only
+        
+        @param sampleName Name of the sample
+        @param treeName Tree name to set for the sample
         """
         self.filesHi[sample] = filelist
         return
 
     def setLoFileList(self, sample, filelist):
         """
-        Set file list for this Systematic directly
+        Set file list for -1 sigma variations only
+        
+        @param sampleName Name of the sample
+        @param treeName Tree name to set for the sample
         """
         self.filesLo[sample] = filelist
         return

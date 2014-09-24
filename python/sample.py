@@ -45,32 +45,58 @@ class Sample(object):
         @param name Name of the sample
         @param colour Colour of the sample used in before/after plotting
         """
+        
+        ## Name of the sample
         self.name = name
-        self.color = color
+        ## Colour used in before/after fit plots
+        self.color = color 
+        ## Flag indicating whether the sample is data
         self.isData = False
+        ## Flag indicating whether the sample is QCD
         self.isQCD = False
+        ## Flag indicating whether the sample is a discovery sample
         self.isDiscovery = False
         self.write = True
+        ## Normalise the sample to various regions or not
         self.normByTheory = False
+        ## Use HistFactory statConfig for the channel
         self.statConfig = False
+        ## Internal list of histogram-based systematics
         self.histoSystList = []
+        ## Internal list of shape systematics
         self.shapeSystList = []
+        ## Internal list of overall systematics
         self.overallSystList = []
+        ## Internal list of shape factors
         self.shapeFactorList = []
+        ## Internal list of all systematics
         self.systList = []
+        ## Internal list of weights
         self.weights = []
+        ## Internal list of sample-specific weights
         self.tempWeights = []
+        ## Internal dictionary of systematics
         self.systDict = {}
+        ## Internal list of normalisation factors
         self.normFactor = []
         self.qcdSyst = None
+        ## Units used for the sample
         self.unit = "GeV"
+        ## Dictionary of cuts placed on the sample in various regions
         self.cutsDict = {}
+        ## List of input files
         self.files = []
+        ## Name of input tree
         self.treeName = ""
+        ## Nominal cross-section weight for signal samples
         self.xsecWeight = None
+        ## +1 sigma variation of cross-section weight
         self.xsecUp = None
+        ## -1 sigma variation of cross-section weight
         self.xsecDown = None
+        ## List of regions to normalise the samples to
         self.normRegions = None
+        ## Remap sample to another one in normalisation
         self.normSampleRemap = ''
         self.noRenormSys = True
         self.parentChannel = None
@@ -724,7 +750,7 @@ class Sample(object):
         @param const Boolean that indicates whether the factor is constant or not
         """
         self.normFactor = []
-        self.normFactor.append( (name, val, high, low, const) )
+        self.eormFactor.append( (name, val, high, low, const) )
         if not name in configMgr.normList:
             configMgr.normList.append(name)
         return
