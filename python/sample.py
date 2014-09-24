@@ -109,6 +109,10 @@ class Sample(object):
     def buildStatErrors(self, binStatErrors, region, var):
         """
         Allow user to give bin stat errors eg. for checking stats in papers
+        
+        @param binStatErrors Statistical errors for the bins
+        @param region Region to add the errors to
+        @param var The variable the region is binned in; 'cuts' for a cut-and-count analysis
         """
         try:
             self.binStatErrors[(region, var)] = binStatErrors
@@ -131,33 +135,55 @@ class Sample(object):
                 raise Exception("Errors specified without building histogram!")
 
     def Clone(self):
+        """
+        Copy a the sample into a new instance
+        """
         newInst = deepcopy(self)
         #for (key, val) in self.systDict.items():
         #    newInst.systDict[key] = val
         return newInst
 
     def setUnit(self, unit):
+        """
+        Set the units units for this sample
+
+        @param unit String representing the unit
+        """
         self.unit = unit
         return
 
     def setCutsDict(self, cutsDict):
+        """
+        Set cuts dictionary for the sample
+
+        @param cutsDict A dictionary of regions to cuts
+        """
         self.cutsDict = cutsDict
         return
 
     def setData(self, isData=True):
+        """
+        Flag the sample as a data sample
+
+        @param isData A boolean indicating whether the sample contains data or not
+        """
         self.isData = isData
         return
 
     def setWeights(self, weights):
         """
         Set the weights for this sample - overrides
+        
+        @param weights List of weights to set
         """
         self.weights = deepcopy(weights)
         return
 
     def addSampleSpecificWeight(self, weight):
         """
-        Add a sample-specific weight to this sample, and propagate to systematics
+        Add a sample-specific weight to this sample
+
+        @param weight The weight to append to the list of weights
         """
         if not weight in self.tempWeights:
             self.tempWeights.append(weight)
@@ -169,6 +195,8 @@ class Sample(object):
     def addWeight(self, weight):
         """
         Add a weight to this sample and propagate
+
+        @param weight The weight to append ot the various lists of weights. High/low values will be ignored if already present; if the nominal value is present, a RunTimeError is thrown.
         """
         if not weight in self.weights:
             self.weights.append(weight)
@@ -184,6 +212,11 @@ class Sample(object):
         return
 
     def removeWeight(self, weight):
+        """
+        Remove a weight from the sample and the associated systematics
+
+        @param weight The weight to remove
+        """
         if weight in self.weights:
             self.weights.remove(weight)
         for syst in self.systDict.values():
@@ -195,19 +228,40 @@ class Sample(object):
         return
     
     def setQCD(self, isQCD=True, qcdSyst="uncorr"):
+        """
+        Set a flag that the sample is QCD
+
+        @param isQCD A boolean
+        @param qcdSyst A string to indicate the systematic
+        """
         self.isQCD = isQCD
         self.qcdSyst = qcdSyst
         return
 
     def setDiscovery(self, isDiscovery=True):
+        """
+        Flag the sample as a discovery sample
+
+        @param isDiscovery Boolean to set (default True)
+        """
         self.isDiscovery = isDiscovery
         return
 
     def setNormByTheory(self, normByTheory=True):
+        """
+        Flag the sample as normalised by the luminosity
+
+        @param normByTheory Boolean to set (default True)
+        """
         self.normByTheory = normByTheory
         return
 
     def setStatConfig(self, statConfig):
+        """
+        Set the stat configuration for this sample (see HistFactory documentation)
+
+        @param statConfig String to indicate the configuration 
+        """
         self.statConfig = statConfig
         return
 
@@ -218,23 +272,40 @@ class Sample(object):
     def setHistoName(self, histoName):
         """
         Set the name of the nominal histogram for this sample
+        
+        @param histoName Name of the histogram
         """
         self.histoName = histoName
         return
 
     def setTreeName(self, treeName):
+        """
+        Set the tree name used for this sample
+
+        @param treeName Name of the tree
+        """
         self.treeName = treeName
         return
 
     def setNormRegions(self, normRegions):
+        """
+        Normalise the sample in various regions
+
+        @param normRegions A list of regions used to constrain the sample normalisation
+        """
         self.normRegions = normRegions
         self.noRenormSys = False
         return
 
     def propagateTreeName(self, treeName):
+        """
+        Propagate the tree name
+
+        @param treeName The tree name to set and propagate down
+        """
         if self.treeName == '':
             self.treeName = treeName
-        ### MAB: Propagate treeName down to systematics of sample
+        # MAB: Propagate treeName down to systematics of sample
         #for (systName, systList) in self.systDict.items():
            #for syst in systList:
                #syst.propagateTreeName(self.treeName)
@@ -248,6 +319,18 @@ class Sample(object):
         If includeOverallSys then extract scale factors
 
         If normalizeSys then normalize shapes to nominal
+
+        @param systName Name of the systematic
+        @param nomName Nominal name for the systematic
+        @param highName Name of the +1sigma systematic value
+        @param lowName Name of the -1sigma systematic value
+        @param includeOverallSys Include an overallSys for the systematic uncertainty
+        @param normalizeSys Normalize the systematic to the normRegions set through setNormRegions()
+        @param symmetrize Boolean to indicate whether the low value has to be taken from the high value (default false)
+        @param oneSide Boolean to indicate whether the uncertainty is one-sided (default False)
+        @param samName Name of the sample
+        @param normString String to append to the name of renormalised samples (default empty)
+        @param nomSysName Name of the nominal systematic to generate high/low from (optional use (see source); default empty)
         """
 
         ### usecase of different tree from nominal histogram in case of 
@@ -494,6 +577,12 @@ class Sample(object):
     def addShapeSys(self, systName, nomName, highName, lowName, constraintType="Gaussian"):
         """
         Add a ShapeSys entry using the nominal,  high and low histograms
+
+        @param systName Name of the systematic
+        @param nomName Nominal name of the systematic
+        @param highName Name of the systematic corresponding to +1sigma
+        @param lowName Name of the systematic corresponding to -1sigma
+        @param constraintType Type of the constraint in a string (default 'Gaussian')
         """
 
         highHistName = highName + "Norm"
@@ -540,6 +629,11 @@ class Sample(object):
     def addShapeStat(self, systName, nomName, constraintType="Gaussian", statErrorThreshold=None):
         """
         Add a ShapeStat entry using the nominal histogram
+
+        @param systName Name of the systematic
+        @param nomName Name of the nominal histogram for the systematic
+        @param constraintType String indicating the type of costraint (default Gaussian)
+        @param statErrorThreshold Optional threshold for size of the error; any bins for which the error is below this ratio are ignored
         """
         histName = nomName + "Norm"
         configMgr.hists[histName]  = configMgr.hists[nomName].Clone(histName)
@@ -564,6 +658,10 @@ class Sample(object):
     def addOverallSys(self, systName, high, low):
         """
         Add an OverallSys entry using the high and low values
+        
+        @param systName Name of the systematic
+        @param high Value at +1sigma
+        @param low Value at -1sigma
         """
         if high==1.0 and low==1.0:
             log.warning("    addOverallSys for %s high==1.0 and low==1.0. Systematic is removed from fit" % systName)
@@ -602,7 +700,13 @@ class Sample(object):
 
     def addNormFactor(self, name, val, high, low, const=False):
         """
-        Add a normlization factor
+        Add a normalization factor
+
+        @param name Name of normalisation factor
+        @param val Nominal value
+        @param high Value at +1sigma
+        @param low Value at -1sigma
+        @param const Boolean that indicates whether the factor is constant or not
         """
         self.normFactor.append( (name, val, high, low, const) )
         if not name in configMgr.normList:
@@ -612,6 +716,12 @@ class Sample(object):
     def setNormFactor(self, name, val, low, high, const=False):
         """
         Set normalization factor
+        
+        @param name Name of normalisation factor
+        @param val Nominal value
+        @param high Value at +1sigma
+        @param low Value at -1sigma
+        @param const Boolean that indicates whether the factor is constant or not
         """
         self.normFactor = []
         self.normFactor.append( (name, val, high, low, const) )
@@ -622,18 +732,24 @@ class Sample(object):
     def setFileList(self, filelist):
         """
         Set file list for this Sample directly
+
+        @param filelist A list of filenames
         """
         self.files = filelist
 
     def setFile(self, file):
         """
         Set file for this Sample directly
+
+        @param file a filename
         """
         self.files = [file]
 
     def propagateFileList(self,  fileList):
         """
         Propagate the file list downwards.
+        
+        @param filelist A list of filenames
         """
         # if we don't have our own file list,  use the one given to us
         if not self.files:
@@ -644,12 +760,16 @@ class Sample(object):
     def addShapeFactor(self, name):
         """
         Bin-by-bin factors to build histogram eg. for data-driven estimates
+
+        @param name Name of the shape factor
         """
         self.shapeFactorList.append(name)
 
     def addSystematic(self, syst):
         """
-        Add a systematic to this Sample directly
+        Add a systematic to this Sample directly. Will not overwrite existing systematics.
+
+        @param syst An object of type Systematic
         """
         if syst.name in self.systDict.keys():
             raise Exception("Attempt to overwrite systematic %s in Sample %s" % (syst.name, self.name))
@@ -659,15 +779,19 @@ class Sample(object):
 
     def getOverallSys(self, name):
         """
-        Get overall systematic
+        Get overall systematic by name
+
+        @param name Name of the systematic to return
         """
         for syst in self.overallSystList:
-            if name==syst[0]: return syst
+            if name == syst[0]: return syst
         return None
 
     def replaceOverallSys(self, rsyst):
         """
-        replace overall systematic
+        Replace overall systematic based on name. If no systematic of the name exists, nothing is replaced.
+
+        @param rsyst Systematic object to replace the systematic with the same name
         """
         for idx in xrange(len(self.overallSystList)):
             syst = self.overallSystList[idx]
@@ -677,7 +801,9 @@ class Sample(object):
 
     def getHistoSys(self, name):
         """
-        Get histo systematic
+        Return the systematic associated to the name
+
+        @param name Name of the histoSys systematic
         """
         for syst in self.histoSystList:
             if name==syst[0]: return syst
@@ -685,7 +811,9 @@ class Sample(object):
 
     def replaceHistoSys(self, rsyst):
         """
-        replace histo systematic
+        Replace histo systematic based on name. If no systematic of the name exists, nothing is replaced.
+
+        @param rsyst Systematic object to replace the systematic with the same name
         """
         for idx in xrange(len(self.histoSystList)):
             syst = self.histoSystList[idx]
@@ -695,7 +823,9 @@ class Sample(object):
 
     def removeOverallSys(self, systName):
         """
-        replace overall systematic
+        Remove overall systematic
+
+        @param systName Name of the overall systematic to remove
         """
         for idx in xrange(len(self.overallSystList)):
             syst = self.overallSystList[idx]
@@ -707,9 +837,11 @@ class Sample(object):
     def getSystematic(self, systName):
         """
         Get systematic from internal storage
+
+        @param systName Name of the systematic to return
         """
 
-        #protection against strange people who use getSystematic 
+        # protection against strange people who use getSystematic 
         # with the object they want to retrieve
         name = systName
         if isinstance(systName, SystematicBase):
@@ -724,6 +856,8 @@ class Sample(object):
     def removeSystematic(self, systName):
         """
         Remove a systematic
+        
+        @param systName Name of the systematic to remove
         """
         # do we get a name or a Systematic passed?
         name = systName
@@ -734,12 +868,15 @@ class Sample(object):
 
     def clearSystematics(self):
         """
-        Remove a systematic
+        Remove all systematics from the sample
         """
         self.systDict.clear()
   
     # TODO: it would be nice to change the internal lists to dictionaries instead of arrays in a next iteration
     def createHistFactoryObject(self):
+        """
+        Construct the HistFactory object for this sample
+        """
         s = ROOT.RooStats.HistFactory.Sample(self.name, self.histoName, configMgr.histCacheFile)
         s.SetNormalizeByTheory(self.normByTheory)
         if self.statConfig:
