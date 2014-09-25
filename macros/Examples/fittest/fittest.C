@@ -2,7 +2,7 @@
  * Project: HistFitter - A ROOT-based package for statistical data analysis       *
  * Package: HistFitter                                                            *
  * Macro  : fittest.C                                                             *
- * Created:                                                         *
+ * Created: 12 June 2012                                                          *
  *                                                                                *
  * Description:                                                                   *
  *      To fit the "simple channel" counting experiment created at :              *
@@ -21,6 +21,11 @@
 using namespace RooFit;
 using namespace RooStats;
 
+/**
+To fit the "simple channel" counting experiment created at analysis/simplechannel.
+Extracts workspace, fits the datasets in the workspace and plots the dataset and pdf.
+Run with root -b -q fittest.C
+*/
 void
 fittest()
 {

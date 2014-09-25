@@ -1,27 +1,29 @@
-/*
-Author: Aaron Armbruster
-Date:   2012-06-01
-Email:  armbrusa@umich.edu
-Description: 
-
-Compute statistical significance with profile likelihood test stat. 
-Option for uncapped test stat is added (doUncap), as well as an option
-to choose which mu value to profile observed data at before generating expected
-
-
-USAGE:
-
-.L compute_p0.C+
-compute_p0( "../../../results/MyMinimalFit_Discovery/BkgOnlyFit_combined_NormalMeasurement_model.root" );
-
-NOTE:
-
-Should be performed with DISCOVERY fits, with one bin signal regions, otherwise a p-value does not make sense.
-The p-value and significance otherwise depends on the shape of the signal.
-
-*/
-
-
+/*****************************************************************************************************************
+ * Project: HistFitter - A ROOT-based package for statistical data analysis                                      *
+ * Package: HistFitter                                                                                           *
+ * Macro  : compute_p0.C                                                                                         *
+ * Created: 01 June 2012                                                                                         *
+ *                                                                                                               *
+ * Description:                                                                                                  *
+ *     Compute statistical significance with profile likelihood test stat.                                       *
+ *     Option for uncapped test stat is added (doUncap), as well as an option                                    *
+ *     to choose which mu value to profile observed data at before                                               *
+ *     generating expected                                                                                       *
+ *     To run:                                                                                                   *
+ *     .L compute_p0.C+                                                                                          *
+ *     compute_p0( "../../../results/MyMinimalFit_Discovery/BkgOnlyFit_combined_NormalMeasurement_model.root" ); *
+ *                                                                                                               *
+ *     Note: Should be performed with DISCOVERY fits, with one bin signal regions,                               *
+ *     otherwise a p-value does not make sense.                                                                  *
+ *     The p-value and significance otherwise depends on the shape of the signal.                                *
+ *                                                                                                               *
+ * Author:                                                                                                       *
+ *      Aaron Armbruster, armbrusa@umich.edu                                                                     *
+ *                                                                                                               *
+ * Redistribution and use in source and binary forms, with or without                                            *
+ * modification, are permitted according to the terms listed in the file                                         *
+ * LICENSE.                                                                                                      *
+ *****************************************************************************************************************/
 
 
 #include "RooWorkspace.h"

@@ -2,10 +2,10 @@
  * Project: HistFitter - A ROOT-based package for statistical data analysis       *
  * Package: HistFitter                                                            *
  * Macro  : pvalue.C                                                              *
- * Created:                                                         *
+ * Created: 12 June 2012                                                          *
  *                                                                                *
  * Description:                                                                   *
- *      To determine the CLs p-values (observed, expected, +/-1 sigma             *
+ *      To determine the CLs/p-values (observed, expected, +/-1 sigma             *
  *      uncertainties) of the "simple channel"                                    *
  *      counting experiment created at :                                          *
  *      analysis/simplechannel/                                                   *
@@ -30,7 +30,14 @@ using namespace RooFit;
 using namespace RooStats;
 
 
-//only function
+/**
+This function determines the CLs/p-values (observed, expected, +/-1 sigma
+uncertainties) of the "simple channel" counting experiment created 
+at: analysis/simplechannel/
+The p-values are printed on the screen.
+Options (e.g. exclusion or discovery) can be set in the macro.
+Run with: root -b -q pvalue.C
+*/
 void
 pvalue()
 {
