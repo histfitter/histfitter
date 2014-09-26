@@ -1,8 +1,50 @@
+/**********************************************************************************
+ * Project: HistFitter - A ROOT-based package for statistical data analysis       *
+ * Package: HistFitter                                                            *
+ * Macro  : upperlimit.C                                                          *
+ * Created: 12 June 2012                                                          *
+ *                                                                                *
+ * Description:                                                                   *
+ *      Calculates the upper limit for the "simple channel" workspcaes taken      *
+ *      from HistFitter/analysis/simplechannel/README and produces an upper limit *
+ *      plot                                                                      *                               
+ *                                                                                *
+ * Authors:                                                                       *
+ *      HistFitter group, CERN, Geneva                                            *
+ *                                                                                *
+ * Redistribution and use in source and binary forms, with or without             *
+ * modification, are permitted according to the terms listed in the file          *
+ * LICENSE.                                                                       *
+ **********************************************************************************/
+
 #include "RooRandom.h"
 
 using namespace RooFit;
 using namespace RooStats;
 
+/**
+1. Execute:
+root -b -q upperlimit.C
+
+... to produce a nice upper limit plot based on the "simple channel" workspace taken from :
+HistFitter/analysis/simplechannel/README
+
+2. This produces two files:
+The plot: upperlimit_cls_poi_example_Asym_CLs_grid_ts3.root.eps
+The hypothesis test results that can be used to recreate the plot:
+example_Asym_CLs_grid_ts3.root
+
+3. Run the macro with:
+
+int calculatorType=2;  // frequentist
+int npoints=6; 
+
+and again:
+
+root -l upperlimit.C
+
+to see the actual test statistic distributions used to determine the upper limit!
+*/
 void
 upperlimit()
 {
