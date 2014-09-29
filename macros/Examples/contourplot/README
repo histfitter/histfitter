@@ -5,7 +5,7 @@
 ##     then move the root files here.
 
 ## For example
-HistFitter.py -w python/MySimpleChannelConfig.py
+HistFitter.py -w analysis/tutorial/MySimpleChannelConfig.py
 
 ## 2. Determing the exclusion CLs-value for all workspaces in each root file
 ##    (one workspace corresponds to one grid point)
@@ -13,7 +13,7 @@ HistFitter.py -w python/MySimpleChannelConfig.py
 ##    In particular there 's the setting : configMgr.calculatorType=2
 ##    where 0 = toys, and 2 = asymptotic limits
 
-HistFitter.py -p python/MySimpleChannelConfig.py
+HistFitter.py -p analysis/tutorial/MySimpleChannelConfig.py
 
 ##    This produces a root file with hypothesis test results, at:
 ##    results/MySimpleChannelAnalysisOutput_hypotest.root
@@ -39,67 +39,3 @@ root -b -q makecontourplots.C
 
 ## --> The underlying script to make the plots is : contourmacros/SUSY_m0_vs_m12_all_withBand_cls.C
 ## the plots are stored under plots/
-
-
-###################################################################
-# Instructions to make simplified model plots #####################
-###################################################################
-
-
-### A: create contour plot files ----------------------------------
-
-##1. create list files for contour lines:
-
-HistFitter.py -t -w -p python/MySoftOneLeptonKtScaleFitMetMeff.py  #make sure that the line #sigSamples=[..all points..] is uncommented
-cd macros/Examples/contourplots
-root -b -q makelistfiles_SM.C  # make sure to add the right roofit result file, e.g.: const char* inputfile  = "../../results/MySoftOneLeptonKtScaleFitMetMeffR17_Output_hypotest.root" ;
-
-##2. create contour hists
-root -b -q makesmoothcontourhists.C  # make sure to add the right list file, e.g. const char* o2histfile = m0_vs_m12_nofloat("MySoftOneLeptonKtScaleFitMetMeffR17_Output_hypotest__1_harvest_list");
-
-##3. create contour graphs
-root -b -q atlasprintcontour.C # make sure you add the right root file, e.g.   SUSY_m0_vs_m12_all_withBand("MySoftOneLeptonKtScaleFitMetMeffR17_Output_hypotest__1_harvest_list.root", ""/*"1lexp_list.root"*/, "1 lepton, 3+ jets",   35, showsignal, discexcl=1, showtevatron, showcms,       doOneSigmaBand, channel=2 );
-
---------------------------------------------------------------------
-
-
-### B: create excluded cross section hists at 95% C.L. plot files -
-
-##1. create list files
-
-HistFitter.py -t -w -l python/MySoftOneLeptonKtScaleFitMetMeff.py  # it is advised to run one job per point to speed up things. Ask Moritz for some batch scripts if you need them.
-								   # each job will give you an output file like: MySoftOneLeptonKtScaleFitMetMeff_SM_GG_onestepCC_325_245_165R17_Output_upperlimit.root
-
-# hadd all thes files together, e.g. like this
-cd result
-hadd  MySoftOneLeptonKtScaleFitMetMeff_SM_GG_onestepCC_R17_Output_upperlimit.root *SM_GG_onestepCC*upper* # make sure that only the files of interest and no old leftovers are hadded
-
-root -b -q makelistfiles_SM.C  #make sure to add the right roofit result file e.g.:  const char* inputfile  = "../../results/MySoftOneLeptonKtScaleFitMetMeff_SM_GG_onestepCC_R17_Output_upperlimit.root" ;
-
-
-##2. add cross section values to list files
-python addXSecToListFiles.py  # make sure the correct cross section input file is used, e.g. '/afs/cern.ch/atlas/groups/susy/SignalCrossSectionsUncert/SimplModels/SignalUncertainties-SM_GG_onestep_Moriond2012_v0.root'
-
-##3. create colour hists: 
-root -b -q makecontourhists.C # make sure that the right list file is specified, e.g.: MySoftOneLeptonKtScaleFitMetMeff_SM_GG_onestepCC_R17_Output_upperlimit__1_harvest_list
-
---------------------------------------------------------------------
-
-
-### C: make nice plots :-) -----------------------------------------
-
-python makePrettyPlots.py
-
-# make sure you adjust the input pile from step A and B accordingly, in my case:
-# xsecFile = ROOT.TFile.Open("/afs/cern.ch/atlas/project/cern/susy/users/mbackes/SusyFitterDev/macros/Examples/contourplot/MySoftOneLeptonKtScaleFitMetMeff_SM_GG_onestepCC_R17_Output_upperlimit__1_harvest_list.root")
-# exclFile3jl = ROOT.TFile.Open('/afs/cern.ch/atlas/project/cern/susy/users/mbackes/SusyFitterDev/macros/Examples/contourplot/MySoftOneLeptonKtScaleFitMetMeffR17_Output_hypotest__1_harvest_list_graphs.root')
-# please check if the grid description is up to date for your model
-
---------------------------------------------------------------------
-
-
-
-
-
-
-
