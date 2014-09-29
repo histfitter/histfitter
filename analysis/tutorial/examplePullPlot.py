@@ -1,3 +1,22 @@
+"""
+ **********************************************************************************
+ * Project: HistFitter - A ROOT-based package for statistical data analysis       *
+ * Package: HistFitter                                                            *
+ *                                                                                *
+ * Description:                                                                   *
+ *      Example pull plot based on the pullPlotUtils module. Adapt to create      *
+ *      your own style of pull plot. Illustrates all functions to redefine to     *
+ *      change labels, colours, etc.                                              * 
+ *                                                                                *
+ * Authors:                                                                       *
+ *      HistFitter group, CERN, Geneva                                            *
+ *                                                                                *
+ * Redistribution and use in source and binary forms, with or without             *
+ * modification, are permitted according to the terms listed in the file          *
+ * LICENSE.                                                                       *
+ **********************************************************************************
+"""
+
 #!/usr/bin/env python
 
 import ROOT

@@ -1,3 +1,20 @@
+"""
+ **********************************************************************************
+ * Project: HistFitter - A ROOT-based package for statistical data analysis       *
+ * Package: HistFitter                                                            *
+ *                                                                                *
+ * Description:                                                                   *
+ *      Simple example configuration with seperate MC stat errors                 *
+ *                                                                                *
+ * Authors:                                                                       *
+ *      HistFitter group, CERN, Geneva                                            *
+ *                                                                                *
+ * Redistribution and use in source and binary forms, with or without             *
+ * modification, are permitted according to the terms listed in the file          *
+ * LICENSE.                                                                       *
+ **********************************************************************************
+"""
+
 ## MB: This config file is similar to MyConfigExample.py, but the usual summed-up MC statistical errors for W and top 
 ## are replaced by individual MC stat errors per sample
 
