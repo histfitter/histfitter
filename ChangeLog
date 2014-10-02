@@ -1,5 +1,7 @@
 2014-20-02 Jeanette Miriam Lorenz <jeanette.miriam.lorenz@cern.ch>
         * moving macros/contourplot and analysis/batchjobs directories to HistFitter User
+        * add licences to files in macro directory
+        * remove ATLAS specific stuff in macro directory
         D macros/AtlasStyle.C and macros/AtlasStyle.h
 
 2014-09-19 Jeanette Miriam Lorenz <jeanette.miriam.lorenz@cern.ch>

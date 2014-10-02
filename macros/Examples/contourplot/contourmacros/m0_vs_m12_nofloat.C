@@ -1,13 +1,36 @@
+/**********************************************************************************
+ * Project: HistFitter - A ROOT-based package for statistical data analysis       *
+ * Package: HistFitter                                                            *
+ * Macro  : m0_vs_m12_nofloat.C                                                   *
+ * Created: 12 June 2012                                                          *
+ *                                                                                *
+ * Description:                                                                   *
+ *      make contour histograms based on the list text files produced by          *
+ *      makelistfiles - underlying macro                                          *                              
+ *                                                                                *
+ * Authors:                                                                       *
+ *      HistFitter group, CERN, Geneva                                            *
+ *                                                                                *
+ * Redistribution and use in source and binary forms, with or without             *
+ * modification, are permitted according to the terms listed in the file          *
+ * LICENSE.                                                                       *
+ **********************************************************************************/
+
 #include "contourmacros/CombinationGlob.C"
 #include "TROOT.h"
 #include "TColor.h"
 
+/**
+Initialzing the macro: loading the description of the list text file from summary_harvest_tree_description.h
+*/
 void initialize() {
   gROOT->ProcessLine(".L summary_harvest_tree_description.h+");
   gSystem->Load("libSusyFitter.so");
 }
 
-
+/**
+Convert the text lists into ROOT histograms by interpolating between the discrete points 
+*/
 const char*
 m0_vs_m12_nofloat(const char* textfile = 0, TH2D* inputHist = 0, const char* rootfile = "m0m12_nofloat.root", TString id1="m0",TString id2="m12", int   nbinsX=21,int nbinsY=17, float minX=20,float maxX=860, float minY=92.5, float maxY=347.5)
 {
