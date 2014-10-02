@@ -1,3 +1,20 @@
+/**********************************************************************************
+ * Project: HistFitter - A ROOT-based package for statistical data analysis       *
+ * Package: HistFitter                                                            *
+ * Macro  : CombinationConf.C                                                     *
+ * Created: 12 June 2012                                                          *
+ *                                                                                *
+ * Description:                                                                   *
+ *      some useful definitions for the contour plots                             *                              
+ *                                                                                *
+ * Authors:                                                                       *
+ *      HistFitter group, CERN, Geneva                                            *
+ *                                                                                *
+ * Redistribution and use in source and binary forms, with or without             *
+ * modification, are permitted according to the terms listed in the file          *
+ * LICENSE.                                                                       *
+ **********************************************************************************/
+
 // some defintions
 #ifndef Combination_CombinationConf
 #define Combination_CombinationConf

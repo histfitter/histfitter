@@ -1,12 +1,29 @@
+/**********************************************************************************
+ * Project: HistFitter - A ROOT-based package for statistical data analysis       *
+ * Package: HistFitter                                                            *
+ * Macro  : SUSY_m0_vs_m12_all_withBand_cls.C                                     *
+ * Created: 12 June 2012                                                          *
+ *                                                                                *
+ * Description:                                                                   *
+ *      make contour plots - underlying macro for makecontourplots.C              *                   
+ *                                                                                *
+ * Authors:                                                                       *
+ *      HistFitter group, CERN, Geneva                                            *
+ *                                                                                *
+ * Redistribution and use in source and binary forms, with or without             *
+ * modification, are permitted according to the terms listed in the file          *
+ * LICENSE.                                                                       *
+ **********************************************************************************/
+
 #include "contourmacros/CombinationGlob.C"
 #include "TColor.h"
 #include <algorithm>
 
-#include "contourmacros/cdftanb5.C"
-#include "contourmacros/d0tanb3muneg.C"
-#include "contourmacros/ATLAS10_1lepton.C"
-#include "contourmacros/ATLAS_EPS_contours.C"
 
+/**
+make contour plots based on the histograms produced by makecontourhists.C
+- underlying macro for makecontourplots.C
+*/
 void SUSY_m0_vs_m12_all_withBand_cls( TString fname0 = "mudat_list.root",// nominal
                                       TString fname1 = "",               // Up
                                       TString fname2 = "",               // Down  
@@ -25,7 +42,7 @@ void SUSY_m0_vs_m12_all_withBand_cls( TString fname0 = "mudat_list.root",// nomi
                                       TString hname3 = "sigclsu1s",
                                       TString hname5 = "sigclsd1s",
                                       TString hname6 = "sigp1ref",
-                                      TString fnameMass= "contourmacros/mSugraGridtanbeta10_gluinoSquarkMasses.root")
+                                      TString fnameMass= "")
 {
    // set style and remove existing canvas'
    CombinationGlob::Initialize();
@@ -154,9 +171,9 @@ void SUSY_m0_vs_m12_all_withBand_cls( TString fname0 = "mudat_list.root",// nomi
   //c->SetGrayscale();
   
   // create and draw the frame
-  TH2F *frame = new TH2F("frame", "m_{0} vs m_{12} - ATLAS work in progress", 100, 100., 1400., 100, 150., 500. );
-  //TH2F *frame = new TH2F("frame", "m_{0} vs m_{12} - ATLAS work in progress", 100, 100., 3750., 100, 115., 700. );
-  //TH2F *frame = new TH2F("frame", "m_{0} vs m_{12} - ATLAS work in progress", 100, 100., 600., 100, 240., 500. );
+  TH2F *frame = new TH2F("frame", "m_{0} vs m_{12}", 100, 100., 1400., 100, 150., 500. );
+  //TH2F *frame = new TH2F("frame", "m_{0} vs m_{12}", 100, 100., 3750., 100, 115., 700. );
+  //TH2F *frame = new TH2F("frame", "m_{0} vs m_{12}", 100, 100., 600., 100, 240., 500. );
   
   // set common frame style
   CombinationGlob::SetFrameStyle2D( frame, 1.0 ); // the size (scale) is 1.0
@@ -196,98 +213,6 @@ void SUSY_m0_vs_m12_all_withBand_cls( TString fname0 = "mudat_list.root",// nomi
   leg->SetFillColor( 0 );
   leg->SetFillStyle(1001);
   
-  /*
-  // add squark, gluino mass contour lines -- we comment this here for the tutorial, uncomment if required
-  TFile* f4 = TFile::Open( fnameMass, "READ" );
-  TH2F* histSq = (TH2F*)f4->Get( "mSugraGrid_squarkMasses" );
-  TH2F* histGl = (TH2F*)f4->Get( "mSugraGrid_gluinoMasses" );
-  histSq->SetDirectory(0);
-  histGl->SetDirectory(0);
-  f4->Close();
-
-  TH2F* histSquarkMass   = FixAndSetBorders( *histSq, "SquarkMass", "SquarkMass", 10000 );
-  TH2F* histGluinoMass   = FixAndSetBorders( *histGl, "GluinoMass", "GluinoMass", 10000 );
-  
-  DrawContourMassLine( histSquarkMass, 600.0 );
-  DrawContourMassLine( histSquarkMass, 800.0 , 17);
-  DrawContourMassLine( histSquarkMass, 1000.0 );   
-  DrawContourMassLine( histSquarkMass, 1200.0 , 17);    
-  DrawContourMassLine( histSquarkMass, 1400.0 );
-  DrawContourMassLine( histSquarkMass, 1600.0 , 17);
-  DrawContourMassLine( histSquarkMass, 1800.0); 
-  DrawContourMassLine( histSquarkMass, 2000.0 , 17);   
-  DrawContourMassLine( histSquarkMass, 2200.0 );       
-  DrawContourMassLine( histSquarkMass, 2400.0 , 17);
-  DrawContourMassLine( histSquarkMass, 2600.0 );
-  DrawContourMassLine( histSquarkMass, 2800.0 , 17);
-  DrawContourMassLine( histSquarkMass, 3000.0 );   
-  DrawContourMassLine( histSquarkMass, 3200.0 , 17);      
-  DrawContourMassLine( histSquarkMass, 3400.0 );
-       
-
-  DrawContourMassLine( histGluinoMass, 400.0 );
-  DrawContourMassLine( histGluinoMass, 500.0 , 17);
-  DrawContourMassLine( histGluinoMass, 600.0 );
-  DrawContourMassLine( histGluinoMass, 700.0 , 17);
-  DrawContourMassLine( histGluinoMass, 800.0 );
-  DrawContourMassLine( histGluinoMass, 900.0 , 17);
-  DrawContourMassLine( histGluinoMass, 1000.0 );  
-  DrawContourMassLine( histGluinoMass, 1100.0 , 17);  
-  DrawContourMassLine( histGluinoMass, 1200.0 );  
-  DrawContourMassLine( histGluinoMass, 1300.0 , 17);      
-  DrawContourMassLine( histGluinoMass, 1400.0 );
-  DrawContourMassLine( histGluinoMass, 1500.0 , 17);
-  DrawContourMassLine( histGluinoMass, 1600.0 );
-
-  TLatex * s600 = new TLatex( 340, 230, "#tilde{q} (600 GeV)" );
-  s600->SetTextAlign( 11 );
-  s600->SetTextAngle(-60);
-  s600->SetTextSize( 0.025 );
-  s600->SetTextColor( 16 ); //12
-  s600->Draw();
-   TLatex * s1000 = new TLatex( 550, 408, "#tilde{q} (1000 GeV)" );
-  s1000->SetTextAlign( 11 );
-  s1000->SetTextAngle(-60);
-  s1000->SetTextSize( 0.025 );
-  s1000->SetTextColor( 16 );
-  s1000->Draw(); 
-   TLatex * s1400 = new TLatex( 790, 580, "#tilde{q} (1400 GeV)" );
-  s1400->SetTextAlign( 11 );
-  s1400->SetTextAngle(-60);
-  s1400->SetTextSize( 0.025 );
-  s1400->SetTextColor( 16 );
-  s1400->Draw();   
-
-  TLatex * g600 = new TLatex( 1100, 225, "#tilde{g} (600 GeV)" );
-  g600->SetTextAlign( 11 );
-  g600->SetTextAngle(-4);
-  g600->SetTextSize( 0.025 );
-  g600->SetTextColor( 16 );
-  g600->Draw();
-  TLatex * g800 = new TLatex( 690, 330, "#tilde{g} (800 GeV)" );
-  g800->SetTextAlign( 11 );
-  g800->SetTextSize( 0.025 );
-  g800->SetTextColor( 16 );
-  TLatex * g1000 = new TLatex( 1400, 399, "#tilde{g} (1000 GeV)" );
-  g1000->SetTextAlign( 11 );
-  g1000->SetTextAngle(-5); 
-  g1000->SetTextSize( 0.025 );
-  g1000->SetTextColor( 16 );
-  g1000->Draw();
-  TLatex * g1200 = new TLatex( 1550, 489, "#tilde{g} (1200 GeV)" );
-  g1200->SetTextAlign( 11 );
-  g1200->SetTextAngle(-6); 
-  g1200->SetTextSize( 0.025 );
-  g1200->SetTextColor( 16 );  
-  TLatex * g1400 = new TLatex( 1650, 582, "#tilde{g} (1400 GeV)" );
-  g1400->SetTextAlign( 11 );
-  g1400->SetTextAngle(-6); 
-  g1400->SetTextSize( 0.025 );
-  g1400->SetTextColor( 16 );
-  g1400->Draw();
-  */
-
-
   Int_t c_myYellow   = TColor::GetColor("#ffe938"); 
   TGraph* grshadeExp = ( (gr_contour_ep1s!=0 && gr_contour_em1s!=0) ? DrawExpectedBand( gr_contour_ep1s, gr_contour_em1s, CombinationGlob::c_DarkYellow , 1001   , 0) : 0 ); //DrawExpectedBand( gr_contour_ep1s, gr_contour_em1s, CombinationGlob::c_DarkYellow , 1001   , 0)->Clone();
   
@@ -324,105 +249,6 @@ void SUSY_m0_vs_m12_all_withBand_cls( TString fname0 = "mudat_list.root",// nomi
      }
   }
   
-
-  // plot tevatron limits -- comment this for the tutorial, uncomment when required
-  /*
-  TGraph* lep2slep(0);
-  TGraph* lep2char(0);
-  TGraph* d0o(0);
-  TGraph* d0graph(0);
-  TGraph* cdfgraph(0);
-  TGraph* atlas(0);
-  TGraph* atlasexp(0);
-  
-  TGraph * staulsp = new TGraph();
-  TGraph * noRGE = new TGraph();  
-  TGraph * noEWSB = new TGraph(); 
-  TGraph * tachyon = new TGraph();   
-  TGraph * negmasssq = new TGraph(); 
-
-
-  if (showtevatron==1 && discexcl==1) {
-    //lep2char = ol1();
-    lep2char = msugra_lepchrg("contourmacros/mSugraGridtanbeta10_charginoMasses.root"); //ol1();
-    //lep2char->Print();
-    c->cd();  
-    lep2char->SetFillColor(CombinationGlob::c_BlueT3);  
-    lep2char->Draw("FSAME");
-    lep2char->Draw("LSAME");
-    //d0graph = d0tanb3muneg();
-    //cdfgraph = cdftanb5();
-    //atlas = ATLAS10_1lepton();
-    //atlasexp = ATLAS10_1leptonexp();
-  }
-  
-
-  msugraThExcl("contourmacros/msugra_status.txt", staulsp, negmasssq, noRGE, noEWSB, tachyon, "contourmacros/mSugraGridtanbeta10_charginoMasses.root");  
-  
-/*
-  TGraph* cmscurve(0);
-  if (showcms==1) { 
-    //cmscurve = cmsoff();
-    cmscurve = cms();
-  }
-
-  TGraph* msugra_noEWSB_curve(0);
-  msugra_noEWSB_curve = msugra_noEWSB("../../../HistFitterUser/common/noEWSB.txt");
-  c->cd();
-  //msugra_noEWSB_curve->Print();
-  msugra_noEWSB_curve->Draw("FSAME");
-  msugra_noEWSB_curve->Draw("LSAME");
-  
-  TGraph* msugra_stauLSP_curve(0);
-  msugra_stauLSP_curve = msugra_stauLSP();
-  //msugra_stauLSP_curve->Print();
-  msugra_stauLSP_curve->Draw("FSAME");
-  msugra_stauLSP_curve->Draw("LSAME");
-  c->cd();  
-  
-  
-   
-  staulsp->SetFillColor(CombinationGlob::c_LightGreen);
-  staulsp->Draw("FSAME");
-  staulsp->Draw("LSAME"); 
-  
-  //negmasssq->SetFillColor(kAzure+2);
-  negmasssq->Draw("FSAME");
-  negmasssq->Draw("LSAME");  
-  
-  noRGE->SetFillColor(CombinationGlob::c_DarkBlueT5);
-  noRGE->Draw("FSAME");
-  noRGE->Draw("LSAME"); 
-  
-  //noEWSB->SetFillColor(CombinationGlob::c_DarkGreen)
-  noEWSB->Draw("FSAME");
-  noEWSB->Draw("LSAME");   
-  
-  tachyon->Draw("FSAME");
-  tachyon->Draw("LSAME");     
-  
-  c->cd();      
-  c->Update();  
-    */
-    
-  if (showcms==1 && discexcl==1) {
-     leg->AddEntry(cmscurve,"CMS jets (#alpha_{T}), 35 pb^{-1}","l");
-  }
-  
-  // re-draw TLegend for old exclusions
-/*
-  if (showtevatron==1 && discexcl==1) {
-     leg->AddEntry( lep2char, "LEP2 #tilde{#chi}^{#pm}_{1}","F");
-     //leg->AddEntry( d0graph,  "D0 #tilde{g}, #tilde{q}, tan#beta=3, #mu<0, 2.1 fb^{-1}","F" );
-     //leg->AddEntry( cdfgraph, "CDF #tilde{g}, #tilde{q}, tan#beta=5, #mu<0, 2 fb^{-1}","F" );
-  }
-*/  
-/*
-  leg->AddEntry( staulsp, "Stau LSP","F" );
-  leg->AddEntry( noEWSB, "No EW SB","F" );
-  leg->AddEntry( noRGE, "Non-convergent RGE","F" );  
-  leg->AddEntry( negmasssq, "negmasssq","F" ); 
-  */
   // legend
   Float_t textSizeOffset = +0.000;
   Double_t xmax = frame->GetXaxis()->GetXmax();
@@ -484,17 +310,6 @@ void SUSY_m0_vs_m12_all_withBand_cls( TString fname0 = "mudat_list.root",// nomi
     Leg2->AppendPad(); 
   }
 
-  /*
-  //uncomment when createing an ATLAS plot
-  TLatex *atlasLabel = new TLatex();
-  atlasLabel->SetNDC();
-  atlasLabel->SetTextFont( 72 );
-  atlasLabel->SetTextColor( 1 );
-  atlasLabel->SetTextSize( 0.05 );
-  atlasLabel->DrawLatex(0.15,0.87, "ATLAS"); // 0.15,0.87
-  atlasLabel->AppendPad();
-  */
-
   //// draw number of signal events
   if (nsigmax>0 && showsig) {  hist1->Draw("textsame"); }
   //else {
@@ -543,21 +358,6 @@ void SUSY_m0_vs_m12_all_withBand_cls( TString fname0 = "mudat_list.root",// nomi
 
   TString prefixsave = TString(prefix).ReplaceAll(" ","_")+ Form("wband%d_",showOneSigmaExpBand);
   CombinationGlob::imgconv( c, Form("plots/atlascls_m0m12_%s",outfile.Data()) );   
-
-/*
-  TLatex *prel = new TLatex();
-  prel->SetNDC();
-  prel->SetTextFont( 42 );
-  prel->SetTextColor( 1 );
-  prel->SetTextSize( 0.04 );
-  //prel->DrawLatex(0.15, 0.81, "Preliminary");   // 0.27,0.87
-  //prel->DrawLatex(0.13, 0.81, "work in progress");   // 0.27,0.87
-  prel->DrawLatex(0.13, 0.83, "for approval");   // 0.27,0.87
-  prel->AppendPad();
-
-  TString prefixsave = TString(prefix).ReplaceAll(" ","_") + Form("%dinvfb_",lumi) + Form("wband%d_",showOneSigmaExpBand);
-  CombinationGlob::imgconv( c, Form("plots/m0m12cls_%s",outfile.Data()) );   
-*/
 
   ////delete leg;
   ////if (contour!=0) delete contour;
