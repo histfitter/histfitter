@@ -873,11 +873,6 @@ void Util::PlotPdfWithComponents(RooWorkspace* w, FitConfig* fc, TString anaName
             frame->Draw();
 
             // add cosmetics
-	    // ATLAS specific - FIXME ; remove for public release
-            if( (fabs(style.getATLASLabelX() + 1.) > 0.000001) &&  (fabs(style.getATLASLabelY() + 1.) > 0.000001) ){
-                ATLASLabel(style.getATLASLabelX(),style.getATLASLabelY(),style.getATLASLabelText()) ; //"for approval");
-            }
-
             if( style.getShowLumi() ){
                 Float_t lumi =  style.getLumi(); 
                 AddText(0.175,0.775,Form("#int Ldt = %.1f fb^{-1}",lumi));
@@ -1881,33 +1876,6 @@ Util::GetMCStudy( const RooWorkspace* w )
 }
 
 
-
-
-
-//________________________________________________________________________________________________
-// ATLAS specific - FIXME ; remove for public release
-void Util::ATLASLabel(Double_t x,Double_t y,const char* text,Color_t color) 
-{
-
-    TLatex l; 
-    l.SetNDC();
-    l.SetTextFont(72);
-    l.SetTextColor(color);
-
-    double delx = 0.115*696*gPad->GetWh()/(472*gPad->GetWw());
-
-    l.DrawLatex(x,y,"ATLAS");
-    if (text) {
-        TLatex p; 
-        p.SetNDC();
-        p.SetTextFont(42);
-        p.SetTextColor(color);
-        p.DrawLatex(x+delx,y,text);
-        //    p.DrawLatex(x,y,"#sqrt{s}=900GeV");
-    }
-}
-
-
 //________________________________________________________________________________________________
 void Util::AddText(Double_t x,Double_t y,char* text,Color_t color) 
 {
@@ -1927,8 +1895,6 @@ void Util::AddText(Double_t x,Double_t y,char* text,Color_t color)
         p.DrawLatex(x+delx,y,text);
     }
 }
-
-
 
 //_____________________________________________________________________________
 RooAbsReal* Util::GetComponent(RooWorkspace* w, TString component, TString region, bool exactRegionName, TString rangeName){ 

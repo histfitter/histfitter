@@ -44,9 +44,6 @@ ChannelStyle::ChannelStyle(const TString& name) : m_logger("ChannelStyle") {
     m_titleX = "";
     m_titleY = "";
     m_logY = kFALSE;
-    m_ATLASLabelX = -1.;
-    m_ATLASLabelY = -1.;
-    m_ATLASLabelText = "";
     m_showLumi = kFALSE;
     m_lumi = -1.;
 
