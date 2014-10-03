@@ -9,7 +9,7 @@ MAKEFLAGS = --no-print-directory -r -s --pedantic -Wall
 include ../src/Makefile.arch
 
 # Internal configuration
-PACKAGE=SusyFitter
+PACKAGE=HistFitter
 LD_LIBRARY_PATH:=.:../lib:$(ROOTSYS)/lib:$(LD_LIBRARY_PATH)
 OBJDIR=obj
 DEPDIR=$(OBJDIR)/dep
@@ -33,7 +33,7 @@ UNAME = $(shell uname)
 
 LINKLIBSIN = -L$(ROOTSYS)/lib -lCore -lCint -lRIO -lNet -lHist -lGraf -lGraf3d -lGpad -lTree -lRint -lPostscript -lMatrix -lPhysics -lGui -lRooFit -lRooStats -lHistFactory -lXMLParser -pthread -lRooFitCore -lm -ldl -lFoam -lMinuit -L../lib 
 
-LINKLIBS = $(LINKLIBSIN) -lSusyFitter
+LINKLIBS = $(LINKLIBSIN) -lHistFitter
 
 default: shlib 
 
@@ -148,7 +148,7 @@ bin:	shlib
 	mkdir -p $(BINDIR)
 	for ex in $(BINLIST); do \
 		echo "Linking $(BINDIR)/$${ex}"; \
-		$(CXX) $(CXXFLAGS) -g $(INCLUDES) $(LINKLIBS) -lSusyFitter -o $(BINDIR)/$${ex} $${ex}$(BinSuf); \
+		$(CXX) $(CXXFLAGS) -g $(INCLUDES) $(LINKLIBS) -lHistFitter -o $(BINDIR)/$${ex} $${ex}$(BinSuf); \
 	done
 
 .PHONY : winlib shlib lib default clean distclean includeinst bin
