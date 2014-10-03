@@ -19,7 +19,7 @@
 """
 
 from ROOT import THStack,TLegend,TCanvas,TFile,std,TH1F
-from ROOT import ConfigMgr,FitConfig,ChannelStyle #this module comes from gSystem.Load("libSusyFitter.so")
+from ROOT import ConfigMgr,FitConfig,ChannelStyle #this module comes from gSystem.Load("libHistFitter.so")
 from prepareHistos import PrepareHistos
 from copy import deepcopy
 from histogramsManager import histMgr

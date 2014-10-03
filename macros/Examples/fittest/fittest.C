@@ -30,7 +30,7 @@ void
 fittest()
 {
   // Load the HistFitter library 
-  gSystem->Load("libSusyFitter.so");
+  gSystem->Load("libHistFitter.so");
 
   //Open file containing workspace and retrieve workspace
   TFile *file = TFile::Open("example_channel1_GaussExample_model.root");

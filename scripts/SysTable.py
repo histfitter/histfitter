@@ -17,8 +17,8 @@
 """
 
 from ROOT import gROOT,gSystem,gDirectory
-gSystem.Load("libSusyFitter.so")
-from ROOT import ConfigMgr,FitConfig #this module comes from gSystem.Load("libSusyFitter.so")
+gSystem.Load("libHistFitter.so")
+from ROOT import ConfigMgr,FitConfig #this module comes from gSystem.Load("libHistFitter.so")
 gROOT.Reset()
 
 from ROOT import TFile, RooWorkspace, TObject, TString, RooAbsReal, RooRealVar, RooFitResult, RooDataSet, RooAddition, RooArgSet,RooAbsData,RooRandom,RooArgList 
