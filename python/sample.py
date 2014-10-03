@@ -750,7 +750,7 @@ class Sample(object):
         @param const Boolean that indicates whether the factor is constant or not
         """
         self.normFactor = []
-        self.eormFactor.append( (name, val, high, low, const) )
+        self.normFactor.append( (name, val, high, low, const) )
         if not name in configMgr.normList:
             configMgr.normList.append(name)
         return
