@@ -26,11 +26,8 @@ from math import sqrt
 
 import os
 
-# Setup for ATLAS plotting
 from ROOT import gROOT
-gROOT.LoadMacro("./macros/AtlasStyle.C")
 import ROOT
-ROOT.SetAtlasStyle()
 
 ##########################
 

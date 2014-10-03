@@ -37,9 +37,7 @@ from systematic import Systematic
 from math import sqrt
 
 from ROOT import gROOT, TLegend, TLegendEntry, TCanvas
-gROOT.LoadMacro("./macros/AtlasStyle.C")
 import ROOT
-ROOT.SetAtlasStyle()
 
 #---------------------------------------------------------------------------------------------
 # Some flags for overridding normal execution and telling ROOT to shut up... use with caution!
@@ -264,10 +262,6 @@ nJetWS.maxY = 5000
 nJetWS.titleX = "n jets"
 nJetWS.titleY = "Entries"
 nJetWS.logY = True
-nJetWS.ATLASLabelX = 0.25
-nJetWS.ATLASLabelY = 0.85
-nJetWS.ATLASLabelText = "Work in progress"
-
 
 # Create TLegend (AK: TCanvas is needed for that, but it gets deleted afterwards)
 c = TCanvas()
