@@ -495,12 +495,6 @@ class ConfigManager(object):
                      style.setTitleY(c.titleY)
                  if not c.logY is None:
                      style.setLogY(c.logY)
-                 if not c.ATLASLabelX is None:
-                     style.setATLASLabelX(c.ATLASLabelX)
-                 if not c.ATLASLabelY is None:
-                     style.setATLASLabelY(c.ATLASLabelY)
-                 if not c.ATLASLabelX is None:
-                     style.setATLASLabelText(c.ATLASLabelText)
                  if not c.showLumi is None:
                      style.setShowLumi(c.showLumi)     
                  if not self.outputLumi is None:
