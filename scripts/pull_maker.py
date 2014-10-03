@@ -22,9 +22,6 @@
 import ROOT,os
 ROOT.SetSignalPolicy( ROOT.kSignalFast )
 ROOT.gROOT.SetBatch(True)
-ROOT.gROOT.LoadMacro("%s/macros/AtlasStyle.C" % os.environ['HISTFITTER'])
-ROOT.SetAtlasStyle()
-
 
 import sys, getopt
 
