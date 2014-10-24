@@ -106,14 +106,15 @@ class Sample(object):
         if self.name[0].isdigit():
             log.warning("Sample name %s starts with a digit - this can confuse HistFactory internals" % self.name)
 
-    def buildHisto(self, binValues, region, var, binLow=0.0):
+    def buildHisto(self, binValues, region, var, binLow=0.5, binWidth=1.):
         """
         Allow user to give bin values eg. for checking stats in papers
 
         @param binValues Values in the bins
         @param region Region to add the histogram to 
         @param var The variable to bin in
-        @param binLow Lower bin edge (default 0.0)
+        @param binLow Lower bin edge (default 0.5)
+        @param binWidth Widths of the bins (default 1.)	
         """
         try:
             self.binValues[(region, var)] = binValues
@@ -126,7 +127,7 @@ class Sample(object):
         else:
             self.histoName = "h"+self.name+"_"+region+"_obs_"+var
 
-        configMgr.hists[self.histoName] = TH1F(self.histoName, self.histoName, len(self.binValues[(region, var)]), binLow, float(len(self.binValues[(region, var)]))+binLow)
+        configMgr.hists[self.histoName] = TH1F(self.histoName, self.histoName, len(self.binValues[(region, var)]), binLow, float(len(self.binValues[(region, var)]))*binWidth+binLow)
         for (iBin, val) in enumerate(self.binValues[(region, var)]):
             configMgr.hists[self.histoName].SetBinContent(iBin+1, val)
 

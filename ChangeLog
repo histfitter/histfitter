@@ -1,4 +1,8 @@
-2014-20-02 Jeanette Miriam Lorenz <jeanette.miriam.lorenz@cern.ch>
+2014-10-24 Jeanette Miriam Lorenz <jeanette.miriam.lorenz@cern.ch>
+        * fixing buildHisto in python/sample.py: default lower edge of histograms now 0.5 as required for the 'cuts' case (previously buggy)
+        * added the functionality to define a width of the bins - formerly alsways 1., now variable. Default is 1. to ensure backward compatibility.
+
+2014-10-02 Jeanette Miriam Lorenz <jeanette.miriam.lorenz@cern.ch>
         * moving macros/contourplot and analysis/batchjobs directories to HistFitter User
         * add licences to files in macro directory
         * remove ATLAS specific stuff in macro directory
