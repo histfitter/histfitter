@@ -44,10 +44,10 @@ pvalue()
   //definition of variables
   int seed=0;            // 0 = cpu clock, so random 
   const char* fileprefix = "example";
-  int  calculatorType=0; // 2=asymptotic approximation limit. 0=frequentist limit
+  int  calculatorType=2; // 2=asymptotic approximation limit. 0=frequentist limit
   int  testStatType=3;   // one-sided test profile statistic (ATLAS standard)
   int  ntoys=5000;
-  bool doUL = true;      // true = exclusion, false = discovery
+  bool doUL = false;      // true = exclusion, false = discovery
 
   // load the linaray of HistFitter
   gSystem->Load("libSusyFitter.so");
@@ -57,11 +57,20 @@ pvalue()
   //TFile *file = TFile::Open("example_channel1_GaussExample_model.root");
   //RooWorkspace* w = (RooWorkspace *)file->Get("channel1"); 
  
-  TFile *file = TFile::Open("MyUserAnalysis_SPlusB_combined_NormalMeasurement_model.root");
+  //TFile *file = TFile::Open("/afs/cern.ch/user/k/koutsman/HistFitterTrunk/results/Fit_Combined_softhard_SM_GG1step_1025_545_65_combined_BasicMeasurement_model.root");
+  //TFile *file = TFile::Open("/afs/cern.ch/user/j/jlorenz/public/Fit_Combined_softhard_SM_GG1step_1025_545_65_combined_BasicMeasurement_model.root");
+  TFile* file = TFile::Open("/afs/cern.ch/atlas/project/cern/susy/users/jlorenz/Combination_softhard3_GG1stepx12/Fit_Combined_softhard_SM_GG1step_825_705_585_combined_BasicMeasurement_model.root");
+  //TFile *file = TFile::Open("/afs/cern.ch/user/j/jlorenz/public/Fit_Combined_softhard_SM_GG1step_1025_865_705_combined_BasicMeasurement_model.root");
+
+  //TFile* file = TFile::Open("SPlusB_combined_NormalMeasurement_model.root");
   RooWorkspace* w = (RooWorkspace *)file->Get("combined");
  
+  if (w->var("Lumi")!=NULL) { w->var("Lumi")->setConstant(); }
+
   // set random seed for toy generation
   RooRandom::randomGenerator()->SetSeed(seed);
+
+  //Util::doFreeFit(w);
 
   // do hypothesis test and get p-value
   LimitResult result = RooStats::get_Pvalue( w, doUL, ntoys, calculatorType, testStatType );
