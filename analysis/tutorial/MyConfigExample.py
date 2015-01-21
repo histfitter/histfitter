@@ -33,9 +33,9 @@ from systematic import Systematic
 from math import sqrt
 
 from ROOT import gROOT, TLegend, TLegendEntry, TCanvas
-gROOT.LoadMacro("./macros/AtlasStyle.C")
+#gROOT.LoadMacro("./macros/AtlasStyle.C")
 import ROOT
-ROOT.SetAtlasStyle()
+#ROOT.SetAtlasStyle()
 
 #---------------------------------------------------------------------------------------------
 # Some flags for overridding normal execution and telling ROOT to shut up... use with caution!

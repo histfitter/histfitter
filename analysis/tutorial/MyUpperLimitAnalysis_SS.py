@@ -11,9 +11,9 @@ import os
 
 # Setup for ATLAS plotting
 from ROOT import gROOT
-gROOT.LoadMacro("./macros/AtlasStyle.C")
+#gROOT.LoadMacro("./macros/AtlasStyle.C")
 import ROOT
-ROOT.SetAtlasStyle()
+#ROOT.SetAtlasStyle()
 
 ##########################
 
@@ -88,7 +88,7 @@ meas.addPOI("mu_SS")
 meas.addParamSetting("Lumi",True)
 
 # Add the channel
-chan = ana.addChannel("cuts",["UserRegion"],1,0.,1.)
+chan = ana.addChannel("cuts",["UserRegion"],1,0.5,1.5)
 ana.setSignalChannels([chan])
 
 # These lines are needed for the user analysis to run

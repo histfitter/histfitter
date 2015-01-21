@@ -267,7 +267,7 @@ def MakeHistPullPlot(samples, regionList, outFileNamePrefix, hresults, renamedRe
     hbkgDown.SetLineStyle(2)
     
     hbkgComponents = []
-    for sam in samples.split(", "):
+    for sam in samples.split(","):
         h = TH1F("hbkg"+sam, "hbkg"+sam, Npar, 0, Npar)
         h.SetFillColor(getSampleColor(sam))
         hbkgComponents.append(h)

@@ -33,9 +33,9 @@ from systematic import Systematic
 from math import sqrt
 
 from ROOT import gROOT
-gROOT.LoadMacro("./macros/AtlasStyle.C")
+#gROOT.LoadMacro("./macros/AtlasStyle.C")
 import ROOT
-ROOT.SetAtlasStyle()
+#ROOT.SetAtlasStyle()
 
 
 #-------------------------------
