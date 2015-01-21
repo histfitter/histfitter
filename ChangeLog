@@ -1,7 +1,7 @@
 2015-01-21 Jeanette Miriam Lorenz <jeanette.miriam.lorenz@cern.ch>
         * multiple smaller modifications for the tutorial, mostly commenting any usage of the ATLAS plotting style, but also adding the file MyUpperLimitAnalysis_SS.py back
         * updating setup_afs.sh to Root 5.34.23
-        * tagging HistFitter-00-00-43
+        * tagging HistFitter-00-00-44
 
 2014-10-24 Jeanette Miriam Lorenz <jeanette.miriam.lorenz@cern.ch>
         * fixing buildHisto in python/sample.py: default lower edge of histograms now 0.5 as required for the 'cuts' case (previously buggy)
