@@ -1,21 +1,14 @@
-To-do-list HistFitter 4.July 2014
+To-do-list HistFitter 17. February 2015
 
 ############
 #All tasks:#
 ############
 
->>> URGENT:
-
-- investigate why many toys failing with latest ROOT versions
-- public release of HistFitter
-
 
 >>> High priority:
 
-- Documentation on how to setup HistFitter and ROOT on different operating systems:
- o give instructions on how to apply private patch to a self-compiled ROOT version
-- Move tutorial examples to HistFitter user and propagate updated tutorial examples in tutorial branch to trunk
-- Document different types of systematic uncertainties
+- Documentation on how to setup HistFitter and ROOT on different operating systems
+- Document different types of systematic uncertainties (e.g. in tutorial and move material of talks to tutorial as well)
 - Revision: the Tutorial/documentation could be a more practical-oriented. 
  o Add more advanced topics to the tutorial: Fitting with MINOS, systematic types, interpretation of fit failures, update contour plot example
  o Update FAQ and main HistFitter twiki pages
