@@ -16,7 +16,7 @@ To-do-list HistFitter 17. February 2015
 - Advertizement and examples for combination of workspaces. ---> Partially DONE
 - Migration into ATLAS release
 - Harmonize the various plotting and batch/grid submission scripts. 
-- Publication ---> IN PROGRESS
+- Publication ---> Mostly done.
 - Migrate to uncapped p0 values. 
 - toys versus asymptotic
 - FAQ on failed fits and how to handle them. Guideline on when a fit / grid-of-fits is okay.
@@ -46,8 +46,8 @@ To-do-list HistFitter 17. February 2015
 - Add pull plot for parameters to HistFitter
 - Provide functions/tools to do fitting/plotting of arbitrary workspaces, also not following the naming convention by HistFitter
 - feature request: Need to change the buildHisto functionality to not providing a default starting value for the lowest bin, 
-  as current default 0.0 is wrong for 'cuts' case. Instead, nBins, min, max should be given in future. Add in addition an if statement to catch unreasonable lower and upper bin values    for the 'cuts' case.
-- feature request: generalization of pull plot macro, possible basedo n pickle format as in Geert-Jan's example macro
+  as current default 0.0 is wrong for 'cuts' case. Instead, nBins, min, max should be given in future. Add in addition an if statement to catch unreasonable lower and upper bin values    for the 'cuts' case. ---> DONE.
+- feature request: generalization of pull plot macro, possible based on pickle format as in Geert-Jan's example macro
 
 >>> On slightly longer time-scale:
 
