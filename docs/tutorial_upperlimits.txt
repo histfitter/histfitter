@@ -1,0 +1,59 @@
+Modifying the scan range of the upper limit scan 
+
+Although the scan range in an upper limit scan is automatically determined when running -l, there are cases where the user wants to modify the scan range. In this example we illustrate on how to do this easily.
+We will work on a typical example where the user does not get reasonable results back without modifying the scan range.
+
+1. Rewriting the config file such that we can give a signal point via the command line.
+
+In this example we work again with the config file analysis/tutorial/MySimpleChannelConfig.py which we used in the tutorial part 1 to produce a contour plot.
+
+Let's open this file with you favorite text editor, e.g.
+
+nedit analysis/tutorial/MySimpleChannelConfig.py &
+
+Scrolling down to line 80 you see all the different signal models that were tested in -p yesterday:
+
+sigSamples = ["SU_680_310_0_10","SU_440_145_0_10","SU_200_160_0_10","SU_440_340_0_10","SU_440_100_0_10","SU_120_130_0_10","SU_600_280_0_10","SU_320_115_0_10","SU_360_175_0_10","SU_920_310_0_10","SU_280_205_0_10","SU_1080_340_0_10","SU_40_280_0_10","SU_760_160_0_10","SU_200_115_0_10","SU_280_280_0_10","SU_40_160_0_10","SU_520_280_0_10","SU_120_220_0_10","SU_680_220_0_10","SU_40_115_0_10","SU_920_190_0_10","SU_320_130_0_10","SU_440_280_0_10","SU_360_100_0_10","SU_120_160_0_10","SU_1080_190_0_10","SU_840_250_0_10","SU_120_100_0_10","SU_120_340_0_10","SU_840_280_0_10","SU_80_115_0_10","SU_840_130_0_10","SU_320_175_0_10","SU_120_205_0_10","SU_520_100_0_10","SU_400_130_0_10","SU_360_310_0_10","SU_160_115_0_10","SU_1000_310_0_10","SU_40_220_0_10","SU_440_130_0_10","SU_1000_190_0_10","SU_80_220_0_10","SU_840_160_0_10","SU_120_145_0_10","SU_440_175_0_10","SU_360_280_0_10","SU_320_145_0_10","SU_400_160_0_10","SU_1000_340_0_10","SU_600_310_0_10","SU_320_190_0_10","SU_840_310_0_10","SU_200_220_0_10","SU_440_205_0_10","SU_360_205_0_10","SU_120_280_0_10","SU_1080_130_0_10","SU_160_145_0_10","SU_520_250_0_10","SU_840_100_0_10","SU_160_220_0_10","SU_120_190_0_10","SU_40_205_0_10","SU_280_250_0_10","SU_80_145_0_10","SU_200_175_0_10","SU_840_190_0_10","SU_240_145_0_10","SU_160_205_0_10","SU_400_115_0_10","SU_440_250_0_10","SU_600_340_0_10","SU_80_100_0_10","SU_520_190_0_10","SU_1160_190_0_10","SU_80_130_0_10","SU_400_190_0_10","SU_400_175_0_10","SU_600_130_0_10","SU_1080_100_0_10","SU_200_340_0_10","SU_1160_310_0_10","SU_440_160_0_10","SU_240_220_0_10","SU_200_100_0_10","SU_240_130_0_10","SU_360_130_0_10","SU_1000_250_0_10","SU_920_130_0_10","SU_240_190_0_10","SU_520_340_0_10","SU_40_175_0_10","SU_240_100_0_10","SU_400_145_0_10","SU_40_145_0_10","SU_240_205_0_10","SU_1080_280_0_10","SU_600_250_0_10","SU_360_145_0_10","SU_520_130_0_10","SU_1000_130_0_10","SU_440_310_0_10","SU_600_160_0_10","SU_920_280_0_10","SU_760_280_0_10","SU_280_190_0_10","SU_280_175_0_10","SU_120_310_0_10","SU_440_220_0_10","SU_1000_220_0_10","SU_1160_250_0_10","SU_400_205_0_10","SU_160_160_0_10","SU_1000_280_0_10","SU_1000_160_0_10","SU_400_100_0_10","SU_760_190_0_10","SU_680_160_0_10","SU_840_220_0_10","SU_360_340_0_10","SU_1080_220_0_10","SU_360_250_0_10","SU_760_130_0_10","SU_440_115_0_10","SU_240_160_0_10","SU_200_310_0_10","SU_200_145_0_10","SU_600_220_0_10","SU_280_130_0_10","SU_520_220_0_10","SU_1080_160_0_10","SU_40_190_0_10","SU_1160_160_0_10","SU_280_310_0_10","SU_920_160_0_10","SU_80_190_0_10","SU_40_310_0_10","SU_1160_130_0_10","SU_40_250_0_10","SU_40_100_0_10","SU_400_220_0_10","SU_40_340_0_10","SU_1000_100_0_10","SU_120_175_0_10","SU_280_220_0_10","SU_760_340_0_10","SU_240_115_0_10","SU_440_190_0_10","SU_1160_340_0_10","SU_600_100_0_10","SU_200_250_0_10","SU_280_145_0_10","SU_200_190_0_10","SU_200_205_0_10","SU_760_250_0_10","SU_120_250_0_10","SU_80_175_0_10","SU_40_130_0_10","SU_920_250_0_10","SU_80_160_0_10","SU_240_175_0_10","SU_280_100_0_10","SU_1080_310_0_10","SU_920_340_0_10","SU_120_115_0_10","SU_1160_100_0_10","SU_280_340_0_10","SU_1160_220_0_10","SU_200_130_0_10","SU_160_175_0_10","SU_360_220_0_10"]
+
+Hard-coding all the signal models may work if you work with only O(100) signal models, but it gets quite cumbersome and the config file quite to difficult to read if you use O(1000) models. We can do better. 
+
+Below line 80 you find a commented part:
+
+#if not 'sigSamples' in dir():
+#    sigSamples=["SU_680_310_0_10"]
+
+(which is much shorter).
+
+Uncomment these two lines and comment line 80.
+
+When you are now running '-l' like:
+
+HistFitter.py -l analysis/tutorial/MySimpleChannelConfig.py
+
+you will only evaluate the upper limit for the signal model SU_680_310_0_10 (and not for all the other points that you run over yesterday with '-p'). (If you have not done the exercise 'Part 5: Making a complete exclusion contour plot (*)' before, please go back to this exercise first before running the command.)
+
+Run now over a different signal model using the '-g' option and safe the output into some log file:
+
+HistFitter.py -l -g SU_360_220_0_10 analysis/tutorial/MySimpleChannelConfig.py 2>&1 | tee out.log
+
+(You could also run over multiple signal models by giving a comma-separated list, e.g. SU_160_175_0_10,SU_360_220_0_10.)
+
+You will find some worrisome output:
+
+<INFO> HypoTestTool: The computed upper limit is: 14.4325 +/- 0
+<INFO> HypoTestTool:  expected limit (median) 0
+<INFO> HypoTestTool:  expected limit (-1 sig) 0
+<INFO> HypoTestTool:  expected limit (+1 sig) 0
+<INFO> HypoTestTool:  expected limit (-2 sig) 0
+<INFO> HypoTestTool:  expected limit (+2 sig) 0
+TROOT::Append:0: RuntimeWarning: Replacing existing TH1: CLs_observed (Potential memory leak).
+Error in <TGraphPainter::PaintGraph>: illegal number of points (0)
+
+This tells you that the upper limit scan failed and you have not gotten any result. In the next step we will study the log file to understand what happened.
+
+2. Reading the log file
+
+It case that a upper limit scan is not successful it is helpful to study the output log file first before debugging the problem. In this exercise we explain the different parts of the log file and how the upper scan is set up in HistFitter internally.
+
+
+
