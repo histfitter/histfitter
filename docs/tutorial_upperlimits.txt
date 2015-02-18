@@ -55,5 +55,51 @@ This tells you that the upper limit scan failed and you have not gotten any resu
 
 It case that a upper limit scan is not successful it is helpful to study the output log file first before debugging the problem. In this exercise we explain the different parts of the log file and how the upper scan is set up in HistFitter internally.
 
+So, let's have a look:
+
+less out.log
+
+You see the following parts: (also search for the line indicated by using /):
+
+a) At the beginning you have a lot of messages from the ConfigMgr, like:
+
+   <INFO> ConfigManager: analysisName: MySimpleChannelAnalysis
+
+  This tells you that HistFitter is reading in the configuration that you provided.
+
+b) Starting from the following line:
+
+   <INFO> HypoTestTool: >>> Running HypoTestInverter on the workspace combined
+
+   The part of '-l' itself starts. You see there a lot of messages indicating the configuration of '-l' and that HistFitter copies the background and the background+signal model from an object called 'ModelConfig'. (The ModelConfig object holds the PDF with associated information as e.g. the parameter of interest in a RooFit workspace. For more information on this consult a RooFit/RooStats tutorial.)
+
+c) The next you see is that a free fit of the background + signal model is performed:
+ 
+   Info in <StandardHypoTestInvDemo>:  Doing a first fit to the observed data
+
+   ... and further below ...
+
+   <INFO> HypoTestTool: StandardHypoTestInvDemo - Best Fit value : mu_SIG = 0.00105946 +/- 0.721623
+
+   The tool has thus determined the best fitted value of the signal strength. Based on this we determine the scan range for a first upper limit scan as:
+
+   <INFO> HypoTestTool: Doing a fixed scan  in interval : 0 , 14.4325
+
+   The lower value 0 just corresponds to a signal strength of 0, and the upper value is calculated as (fitted value of the signal strength + 20 * the error on the fitted signal strength)
+
+d) You see in the following a number of hypothesis tests performed, starting with a signal strength of 0, and going up to the upper value of the scan range in equidistant steps. The number of steps was given by you in the config file, line 26: 
+
+   configMgr.nPoints=20       # number of values scanned of signal-strength for upper-limit determination of signal strength.
+
+   At the end of all these hypothesis tests you see (again in the log file):
+
+   <INFO> HypoTestTool: Time to perform limit scan 
+   <INFO> HypoTestTool: >>> Done running HypoTestInverter on the workspace combined
+   [#0] WARNING:Eval -- HypoTestInverterResult::FindInterpolatedLimit - not enough points to get the inverted interval - return 1
+   [#0] ERROR:Eval -- HypoTestInverterResult::GetLimitDistribution not  enought points -  return 0 
+
+   
+
+
 
 
