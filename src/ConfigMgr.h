@@ -86,6 +86,8 @@ class ConfigMgr {
 
         void setCLs(const bool& cls=true) { m_useCLs=cls; }
         bool getCLs() { return m_useCLs; }
+        
+        void setScanRange(const bool useScanRange, const float min=-1, const float max=-1) { m_useScanRange=useScanRange; m_scanRangeMin=min; m_scanRangeMax=max; }
 
         void setfixSigXSec(const bool& fix=true) { m_fixSigXSec = fix; }
         bool getfixSigXSec() { return m_fixSigXSec; }
@@ -105,8 +107,8 @@ class ConfigMgr {
         void setMuValGen(const double& val) { m_muValGen = val; }
         double getMuValGen() { return m_muValGen; }
 
-       void setUseAsimovSet(const bool& useAsimov=false) { m_useAsimovSet=useAsimov; }
-       bool getUseAsimovSet() { return m_useAsimovSet; }
+        void setUseAsimovSet(const bool& useAsimov=false) { m_useAsimovSet=useAsimov; }
+        bool getUseAsimovSet() { return m_useAsimovSet; }
 
         void SetBkgCorrVal(const double& val) { m_bkgCorrValVec.clear(); m_bkgCorrValVec.push_back(val); }
         void SetBkgParName(const char* par)   { m_bkgParNameVec.clear(); m_bkgParNameVec.push_back(par); }
@@ -144,6 +146,9 @@ class ConfigMgr {
         int  m_calcType;
         int  m_testStatType;
         bool m_useCLs;
+        bool m_useScanRange;
+        float m_scanRangeMin;
+        float m_scanRangeMax; 
         bool m_fixSigXSec;
         bool m_runOnlyNominalXSec;
         bool m_doUL;

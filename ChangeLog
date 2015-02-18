@@ -1,3 +1,9 @@
+2015-02-18 Jeanette Miriam Lorenz <jeanette.miriam.lorenz@cern.ch>
+        M       python/configManager.py
+        M       src/ConfigMgr.cxx
+        M       src/ConfigMgr.h
+	* allow the user to specify the scan ranges for the second scan in -l - addition sugested by Daniela Boerner
+
 2015-01-21 Jeanette Miriam Lorenz <jeanette.miriam.lorenz@cern.ch>
         * multiple smaller modifications for the tutorial, mostly commenting any usage of the ATLAS plotting style, but also adding the file MyUpperLimitAnalysis_SS.py back
         * updating setup_afs.sh to Root 5.34.23

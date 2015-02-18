@@ -112,7 +112,7 @@ class ConfigManager(object):
         self.useSignalInBlindedData = False
         self.FitType = enum('FitType','Discovery , Exclusion , Background') # to distinguish between background, exclusion and discovery fit
         self.myFitType = None #propagted from HistFitter.py
-
+        self.scanRange = None # possibility to define a scan range with a tuple (min, max) (when the first fit fails)
         self.normList = [] # List of normalization factors
         self.outputFileName = None # Output file name used to store fit results
         self.stackList = [] # List of stacks for plotting
@@ -461,6 +461,11 @@ class ConfigManager(object):
         if self.outputFileName:
             self.cppMgr.m_outputFileName = self.outputFileName
             self.cppMgr.m_saveTree=True
+            
+        if self.scanRange:
+            self.cppMgr.setScanRange(True, self.scanRange[0], self.scanRange[1])
+        else:
+            self.cppMgr.setScanRange(False)
 
         #Fill FitConfigs from TopLevelXMLs
         for fc in self.fitConfigs:

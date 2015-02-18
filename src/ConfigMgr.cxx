@@ -45,6 +45,9 @@ ConfigMgr::ConfigMgr() : m_logger("ConfigMgrCPP") {
     m_saveTree=false;
     m_doHypoTest=false;
     m_useCLs=true;
+    m_useScanRange=false;
+    m_scanRangeMin=-1;
+    m_scanRangeMax=-1;
     m_fixSigXSec=false;
     m_runOnlyNominalXSec=false;
     m_doUL=true;
@@ -485,22 +488,42 @@ void ConfigMgr::doUpperLimit(FitConfig* fc) {
     }
 
     /// here we go ...
-
-    /// first asumptotic limit, to get a quick but reliable estimate for the upper limit
-    /// dynamic evaluation of ranges
-    RooStats::HypoTestInverterResult* hypo = RooStats::DoHypoTestInversion(w, 1, 2, m_testStatType, m_useCLs, 20, 0, -1);  
+    
+    RooStats::HypoTestInverterResult* hypo = nullptr;
+    if (!m_useScanRange) {
+        /// first asymptotic limit, to get a quick but reliable estimate for the upper limit
+        /// dynamic evaluation of ranges
+        hypo = RooStats::DoHypoTestInversion(w, 1, 2, m_testStatType, m_useCLs, 20, 0, -1); 
+    }
 
     /// then reevaluate with proper settings
-    if ( hypo!=0 ) { 
-        (void) hypo->ExclusionCleanup(); 
-        double eul2 = 1.10 * hypo->GetExpectedUpperLimit(2);
-        delete hypo; hypo=0;
-
-        hypo = RooStats::DoHypoTestInversion(w, m_nToys, m_calcType, m_testStatType, m_useCLs, m_nPoints, 0, eul2);
+    if ( hypo!=0 || m_useScanRange) {
+        double minRange = -1;
+        double maxRange = -1;
+        if (m_useScanRange) { // next fit is done between the user defined values
+            minRange = m_scanRangeMin;
+            maxRange = m_scanRangeMax;
+        }
+        else { // next fit is done between 0 and the expected upper limit + 2 sigma
+            (void) hypo->ExclusionCleanup(); 
+            minRange = 0;
+            maxRange = 1.10 * hypo->GetExpectedUpperLimit(2);
+            delete hypo; hypo=0;
+        }
+        
+        hypo = RooStats::DoHypoTestInversion(w, m_nToys, m_calcType, m_testStatType, m_useCLs, m_nPoints, minRange, maxRange);
         int nPointsRemoved = hypo->ExclusionCleanup();
         m_logger << kWARNING << "ExclusionCleanup() removed " << nPointsRemoved 
-		 << " scan point(s) for hypo test inversion: " << hypo->GetName() << GEndl;
-    }
+                << " scan point(s) for hypo test inversion: " << hypo->GetName() << GEndl;
+
+        if (m_useScanRange) {
+            if ((1.2 * hypo->GetExpectedUpperLimit(2)) > m_scanRangeMax) {
+                m_logger << kWARNING << "Scan Range is too near to the upper limit! (calc exp limit: " << hypo->GetExpectedUpperLimit(2)
+                 << ", set range: " << m_scanRangeMax << ")" << GEndl;
+            }
+        }
+    }       
+        
 
     /// store ul as nice plot ..
     if ( hypo!=0 ) {
