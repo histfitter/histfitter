@@ -299,7 +299,7 @@ class PrepareHistos(object):
                         log.info("Could not find histogram <"+name+"> in "+self.cacheFileName+", trying from tree ")
                         
                         self.configMgr.hists[name] = None
-                        return self.__addHistoFromTree(name, nBins, binLow, binHigh, useOverflow, useUnderflow)
+                        return self.__addHistoFromTree(name, nBins, binLow, binHigh, nBins, binLow, binHigh, useOverflow, useUnderflow)
 
         self.name = name
         return self.configMgr.hists[name]
