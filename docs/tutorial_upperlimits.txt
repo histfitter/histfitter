@@ -128,6 +128,15 @@ f) The ERROR messages at the end of the log file want to tell you that there was
 
 3. Recovering the failed upper limit scan.
 
+   Obviously, the scan range that was determined automatically in a free fit of the signal+background model was much too large. 
+   HistFitter provides the possibility to fix the scan range of the second upper limit scan by hand.
+
+   Open again the configuration file:
+
+   nedit analysis/tutorial/MySimpleChannelConfig.py &
+
+   
+
   
 
 
