@@ -28,7 +28,7 @@
 #include "TTree.h"
 #include "RooMCStudy.h"
 #include "RooFitResult.h"
-#include "RooStats/HypoTestInverterResult.h"
+//#include "RooStats/HypoTestInverterResult.h"
 #include "RooRandom.h"
 #include "RooRealIntegral.h"
 
@@ -505,7 +505,18 @@ void ConfigMgr::doUpperLimit(FitConfig* fc) {
             maxRange = m_scanRangeMax;
         }
         else { // next fit is done between 0 and the expected upper limit + 2 sigma
-            (void) hypo->ExclusionCleanup(); 
+            (void) hypo->ExclusionCleanup();             
+            
+            int i=0; 
+            while (i<5) {
+                if (min_CLs(hypo)>0.05) { 
+                    m_logger << kINFO << "Starting rescan iteration: " << i << GEndl;           
+                    hypo = RedoScan(w,hypo);
+                    if ( hypo!=0 ) { (void) hypo->ExclusionCleanup(); }
+                }
+                else { break; }
+                i+=1;
+            }
             minRange = 0;
             maxRange = 1.10 * hypo->GetExpectedUpperLimit(2);
             delete hypo; hypo=0;
@@ -532,9 +543,27 @@ void ConfigMgr::doUpperLimit(FitConfig* fc) {
     }
 
     // save complete hypotestinverterresult to file
-    if(hypo){	
+    if(hypo){
         outfile->cd();
-        TString hypName="hypo_"+fc->m_signalSampleName;
+        TString hypName; //="hypo_"+fc->m_signalSampleName;
+        if (hypo->ArraySize()>0 && min_CLs(hypo)>0.05) {
+                m_logger << kERROR << "Final CLs value not below threshold of 0.05  - upper limit scan most likely failed." << GEndl;
+                m_logger << kERROR << "Will store result only for debugging purposes - do not use it in contour plots!" << GEndl;
+                hypName="debug_"+fc->m_signalSampleName;
+        }
+        else if (hypo->ArraySize()>0 && max_CLs(hypo)<0.05) {
+                m_logger << kERROR << "Initial CLs value not above threshold of 0.05 - upper limit scan most likely failed." << GEndl;
+                m_logger << kERROR << "Will store result only for debugging purposes - do not use it in contour plots!" << GEndl;
+                if (!isnan(hypo->GetResult(0)->CLs())) { m_logger << kINFO << "Try rescan in range (0," << hypo->GetXValue(0) << ")" << GEndl; }             
+                hypName="debug_"+fc->m_signalSampleName;
+        }        
+        else if (hypo->ArraySize()==0) {
+                m_logger << kERROR << "All fits seem to have failed - cannot compute upper limit!" << GEndl;
+                hypName="debug_"+fc->m_signalSampleName;
+        }
+        else {
+                hypName="hypo_"+fc->m_signalSampleName;
+        }
         hypo->SetName(hypName);
         m_logger << kINFO << "Now storing HypoTestInverterResult <" << hypName << ">" << GEndl;
         hypo->Write();
@@ -597,7 +626,54 @@ void ConfigMgr::runToys(FitConfig* fc) {
     return;
 }
 
+//_______________________________________________________________________________________
+double ConfigMgr::min_CLs(RooStats::HypoTestInverterResult* hypo) {
+    double CLs=1.;
+    for (int i=0; i<hypo->ArraySize(); i++) {
+        if (hypo->GetResult(i)->CLs()<CLs) { CLs = hypo->GetResult(i)->CLs();}
+    }
+    return CLs;    
+}
 
+//_______________________________________________________________________________________
+double ConfigMgr::max_CLs(RooStats::HypoTestInverterResult* hypo) {
+    double CLs=1.;
+    for (int i=0; i<hypo->ArraySize(); i++) {
+        if (hypo->GetResult(i)->CLs()>CLs) { CLs = hypo->GetResult(i)->CLs();}
+    }
+    return CLs;    
+}
+
+//_______________________________________________________________________________________
+RooStats::HypoTestInverterResult* ConfigMgr::RedoScan(RooWorkspace* w, RooStats::HypoTestInverterResult* hypo) {
+    double maxX=hypo->GetLastXValue();
+    double newX = maxX;
+    
+    int n=hypo->ArraySize();
+    m_logger << kINFO << "Available points: " << n << GEndl;
+    m_logger << kINFO << "Recalculate x" << GEndl;
+    if (n>=2 && !isnan(hypo->GetResult(n-2)->CLs()) && !isnan(hypo->GetLastResult()->CLs())) {
+        double diffCLs = fabs(hypo->GetResult(n-2)->CLs()-hypo->GetLastResult()->CLs());
+        double diffX = maxX-hypo->GetXValue(n-2);
+        double newCLs = hypo->GetLastResult()->CLs();
+        while (newCLs>0.05) {
+            newX += diffX;
+            newCLs -= diffCLs;
+        }
+        newX = newX*1.2;
+    }
+    else {
+        newX=2.*maxX;
+    }
+    
+    delete hypo; hypo=0;
+    
+    m_logger << kINFO <<  "Redo scan with a larger x range: 0, " << newX << GEndl;
+    hypo = RooStats::DoHypoTestInversion(w,1,2,m_testStatType,true,20,0.,newX);
+    
+    return hypo;  
+}
+    
 //_______________________________________________________________________________________
 void ConfigMgr::finalize(){
     return;

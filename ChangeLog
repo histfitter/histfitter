@@ -1,3 +1,9 @@
+2015-03-06 Jeanette Miriam Lorenz <jeanette.miriam.lorenz@cern.ch>
+        A       scripts/HypoTest.py
+        M       src/ConfigMgr.cxx
+        M       src/ConfigMgr.h
+        * added dynamic rescan for upper limit calculation
+
 2015-02-18 Jeanette Miriam Lorenz <jeanette.miriam.lorenz@cern.ch>
         M       python/configManager.py
         M       src/ConfigMgr.cxx

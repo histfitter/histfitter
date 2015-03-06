@@ -28,6 +28,9 @@
 
 #include "FitConfig.h"
 
+//Root/RooFit/RooStats includes
+#include "RooStats/HypoTestInverterResult.h"
+
 class RooWorkspace;
 
 class ConfigMgr {
@@ -65,6 +68,11 @@ class ConfigMgr {
         void doUpperLimit(FitConfig* fc);
         void runToys(int i);
         void runToys(FitConfig* fc);
+        
+        //functions to allow the rescan for -l
+        double min_CLs(RooStats::HypoTestInverterResult* hypo);
+        double max_CLs(RooStats::HypoTestInverterResult* hypo);
+        RooStats::HypoTestInverterResult* RedoScan(RooWorkspace* w, RooStats::HypoTestInverterResult* hypo);
 
         void finalize();
         Bool_t checkConsistency();
