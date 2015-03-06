@@ -13,7 +13,10 @@ nedit analysis/tutorial/MySimpleChannelConfig.py &
 
 Scrolling down to line 80 you see all the different signal models that were tested in -p yesterday:
 
-sigSamples = ["SU_680_310_0_10","SU_440_145_0_10","SU_200_160_0_10","SU_440_340_0_10","SU_440_100_0_10","SU_120_130_0_10","SU_600_280_0_10","SU_320_115_0_10","SU_360_175_0_10","SU_920_310_0_10","SU_280_205_0_10","SU_1080_340_0_10","SU_40_280_0_10","SU_760_160_0_10","SU_200_115_0_10","SU_280_280_0_10","SU_40_160_0_10","SU_520_280_0_10","SU_120_220_0_10","SU_680_220_0_10","SU_40_115_0_10","SU_920_190_0_10","SU_320_130_0_10","SU_440_280_0_10","SU_360_100_0_10","SU_120_160_0_10","SU_1080_190_0_10","SU_840_250_0_10","SU_120_100_0_10","SU_120_340_0_10","SU_840_280_0_10","SU_80_115_0_10","SU_840_130_0_10","SU_320_175_0_10","SU_120_205_0_10","SU_520_100_0_10","SU_400_130_0_10","SU_360_310_0_10","SU_160_115_0_10","SU_1000_310_0_10","SU_40_220_0_10","SU_440_130_0_10","SU_1000_190_0_10","SU_80_220_0_10","SU_840_160_0_10","SU_120_145_0_10","SU_440_175_0_10","SU_360_280_0_10","SU_320_145_0_10","SU_400_160_0_10","SU_1000_340_0_10","SU_600_310_0_10","SU_320_190_0_10","SU_840_310_0_10","SU_200_220_0_10","SU_440_205_0_10","SU_360_205_0_10","SU_120_280_0_10","SU_1080_130_0_10","SU_160_145_0_10","SU_520_250_0_10","SU_840_100_0_10","SU_160_220_0_10","SU_120_190_0_10","SU_40_205_0_10","SU_280_250_0_10","SU_80_145_0_10","SU_200_175_0_10","SU_840_190_0_10","SU_240_145_0_10","SU_160_205_0_10","SU_400_115_0_10","SU_440_250_0_10","SU_600_340_0_10","SU_80_100_0_10","SU_520_190_0_10","SU_1160_190_0_10","SU_80_130_0_10","SU_400_190_0_10","SU_400_175_0_10","SU_600_130_0_10","SU_1080_100_0_10","SU_200_340_0_10","SU_1160_310_0_10","SU_440_160_0_10","SU_240_220_0_10","SU_200_100_0_10","SU_240_130_0_10","SU_360_130_0_10","SU_1000_250_0_10","SU_920_130_0_10","SU_240_190_0_10","SU_520_340_0_10","SU_40_175_0_10","SU_240_100_0_10","SU_400_145_0_10","SU_40_145_0_10","SU_240_205_0_10","SU_1080_280_0_10","SU_600_250_0_10","SU_360_145_0_10","SU_520_130_0_10","SU_1000_130_0_10","SU_440_310_0_10","SU_600_160_0_10","SU_920_280_0_10","SU_760_280_0_10","SU_280_190_0_10","SU_280_175_0_10","SU_120_310_0_10","SU_440_220_0_10","SU_1000_220_0_10","SU_1160_250_0_10","SU_400_205_0_10","SU_160_160_0_10","SU_1000_280_0_10","SU_1000_160_0_10","SU_400_100_0_10","SU_760_190_0_10","SU_680_160_0_10","SU_840_220_0_10","SU_360_340_0_10","SU_1080_220_0_10","SU_360_250_0_10","SU_760_130_0_10","SU_440_115_0_10","SU_240_160_0_10","SU_200_310_0_10","SU_200_145_0_10","SU_600_220_0_10","SU_280_130_0_10","SU_520_220_0_10","SU_1080_160_0_10","SU_40_190_0_10","SU_1160_160_0_10","SU_280_310_0_10","SU_920_160_0_10","SU_80_190_0_10","SU_40_310_0_10","SU_1160_130_0_10","SU_40_250_0_10","SU_40_100_0_10","SU_400_220_0_10","SU_40_340_0_10","SU_1000_100_0_10","SU_120_175_0_10","SU_280_220_0_10","SU_760_340_0_10","SU_240_115_0_10","SU_440_190_0_10","SU_1160_340_0_10","SU_600_100_0_10","SU_200_250_0_10","SU_280_145_0_10","SU_200_190_0_10","SU_200_205_0_10","SU_760_250_0_10","SU_120_250_0_10","SU_80_175_0_10","SU_40_130_0_10","SU_920_250_0_10","SU_80_160_0_10","SU_240_175_0_10","SU_280_100_0_10","SU_1080_310_0_10","SU_920_340_0_10","SU_120_115_0_10","SU_1160_100_0_10","SU_280_340_0_10","SU_1160_220_0_10","SU_200_130_0_10","SU_160_175_0_10","SU_360_220_0_10"]
+sigSamples = ["SU_680_310_0_10","SU_440_145_0_10","SU_200_160_0_10","SU_440_340_0_10","SU_440_100_0_10","SU_120_130_0_10","SU_600_280_0_10","SU_320_115_0_10","SU_360_175_0_10","SU_920_310_0_10","SU_280_205_0_10","SU_1080_340_0_10","SU_40_280_0_10","SU_760_160_0_10","SU_200_115_0_10","SU_280_280_0_10","SU_40_160_0_10","SU_520_280_0_10","SU_120_220_0_10","SU_680_220_0_10","SU_40_115_0_10","SU_920_190_0_10","SU_320_130_0_10","SU_440_280_0_10","SU_360_100_0_10","SU_120_160_0_10","SU_1080_190_0_10","SU_840_250_0_10","SU_120_100_0_10","SU_120_340_0_10","SU_840_280_0_10","SU_80_115_0_10","SU_840_130_0_10","SU_320_175_0_10","SU_120_205_0_10","SU_520_100_0_10","SU_400_130_0_10","SU_360_310_0_10","SU_160_115_0_10","SU_1000_310_0_10","SU_40_220_0_10","SU_440_130_0_10","SU_1000_190_0_10","SU_80_220_0_10","SU_840_160_0_10","SU_120_145_0_10","SU_440_175_0_10","SU_360_280_0_10","SU_320_145_0_10","SU_400_160_0_10","SU_1000_340_0_10","SU_600_310_0_10","SU_320_190_0_10","SU_840_310_0_10","SU_200_220_0_10","SU_440_205_0_10",
+"SU_360_205_0_10","SU_120_280_0_10","SU_1080_130_0_10","SU_160_145_0_10","SU_520_250_0_10","SU_840_100_0_10","SU_160_220_0_10","SU_120_190_0_10","SU_40_205_0_10","SU_280_250_0_10","SU_80_145_0_10","SU_200_175_0_10","SU_840_190_0_10","SU_240_145_0_10","SU_160_205_0_10","SU_400_115_0_10","SU_440_250_0_10","SU_600_340_0_10","SU_80_100_0_10","SU_520_190_0_10","SU_1160_190_0_10","SU_80_130_0_10","SU_400_190_0_10","SU_400_175_0_10","SU_600_130_0_10","SU_1080_100_0_10","SU_200_340_0_10","SU_1160_310_0_10","SU_440_160_0_10","SU_240_220_0_10","SU_200_100_0_10","SU_240_130_0_10","SU_360_130_0_10","SU_1000_250_0_10","SU_920_130_0_10","SU_240_190_0_10","SU_520_340_0_10","SU_40_175_0_10","SU_240_100_0_10","SU_400_145_0_10","SU_40_145_0_10","SU_240_205_0_10","SU_1080_280_0_10","SU_600_250_0_10","SU_360_145_0_10","SU_520_130_0_10","SU_1000_130_0_10","SU_440_310_0_10","SU_600_160_0_10","SU_920_280_0_10","SU_760_280_0_10","SU_280_190_0_10","SU_280_175_0_10","SU_120_310_0_10","SU_440_220_0_10","SU_1000_220_0_10","SU_1160_250_0_10",
+"SU_400_205_0_10","SU_160_160_0_10","SU_1000_280_0_10","SU_1000_160_0_10","SU_400_100_0_10","SU_760_190_0_10","SU_680_160_0_10","SU_840_220_0_10","SU_360_340_0_10","SU_1080_220_0_10","SU_360_250_0_10","SU_760_130_0_10","SU_440_115_0_10","SU_240_160_0_10","SU_200_310_0_10","SU_200_145_0_10","SU_600_220_0_10","SU_280_130_0_10","SU_520_220_0_10","SU_1080_160_0_10","SU_40_190_0_10","SU_1160_160_0_10","SU_280_310_0_10","SU_920_160_0_10","SU_80_190_0_10","SU_40_310_0_10","SU_1160_130_0_10","SU_40_250_0_10","SU_40_100_0_10","SU_400_220_0_10","SU_40_340_0_10","SU_1000_100_0_10","SU_120_175_0_10","SU_280_220_0_10","SU_760_340_0_10","SU_240_115_0_10","SU_440_190_0_10","SU_1160_340_0_10","SU_600_100_0_10","SU_200_250_0_10","SU_280_145_0_10","SU_200_190_0_10","SU_200_205_0_10","SU_760_250_0_10","SU_120_250_0_10","SU_80_175_0_10","SU_40_130_0_10","SU_920_250_0_10","SU_80_160_0_10","SU_240_175_0_10","SU_280_100_0_10","SU_1080_310_0_10","SU_920_340_0_10","SU_120_115_0_10","SU_1160_100_0_10","SU_280_340_0_10",
+"SU_1160_220_0_10","SU_200_130_0_10","SU_160_175_0_10","SU_360_220_0_10"]
 
 Hard-coding all the signal models may work if you work with only O(100) signal models, but it gets quite cumbersome and the config file quite to difficult to read if you use O(1000) models. We can do better. 
 
@@ -48,6 +51,13 @@ You will find some worrisome output:
 <INFO> HypoTestTool:  expected limit (+2 sig) 0
 TROOT::Append:0: RuntimeWarning: Replacing existing TH1: CLs_observed (Potential memory leak).
 Error in <TGraphPainter::PaintGraph>: illegal number of points (0)
+<INFO> HypoTestTool:  writing result plot to results/upperlimit_cls_poi_SU_360_220_0_10_Asym_CLs_grid_ts3.root.eps
+Error in <TGraphPainter::PaintGraph>: illegal number of points (0)
+Info in <TCanvas::Print>: eps file results/upperlimit_cls_poi_SU_360_220_0_10_Asym_CLs_grid_ts3.root.eps has been created
+<ERROR> ConfigMgrCPP: All fits seem to have failed - cannot compute upper limit!
+<INFO> ConfigMgrCPP: Now storing HypoTestInverterResult <debug_SU_360_220_0_10>
+<INFO> ConfigMgrCPP: Done. Stored upper limit in file <results/MySimpleChannelAnalysis_upperlimit.root>
+<INFO> HistFitter: Leaving HistFitter... Bye!
 
 This tells you that the upper limit scan failed and you have not gotten any result. In the next step we will study the log file to understand what happened.
 
@@ -55,7 +65,7 @@ This tells you that the upper limit scan failed and you have not gotten any resu
 
 It case that a upper limit scan is not successful it is helpful to study the output log file first before debugging the problem. In this exercise we explain the different parts of the log file and how the upper scan is set up in HistFitter internally.
 
-So, let's have a look:
+Let's have a look at the log file:
 
 less out.log
 
@@ -96,9 +106,29 @@ d) You see in the following a number of hypothesis tests performed, starting wit
    <INFO> HypoTestTool: Time to perform limit scan 
    <INFO> HypoTestTool: >>> Done running HypoTestInverter on the workspace combined
    [#0] WARNING:Eval -- HypoTestInverterResult::FindInterpolatedLimit - not enough points to get the inverted interval - return 1
-   [#0] ERROR:Eval -- HypoTestInverterResult::GetLimitDistribution not  enought points -  return 0 
+   [#0] ERROR:Eval -- HypoTestInverterResult::GetLimitDistribution not  enough points -  return 0 
 
-   
+   This tells you that it was not possible to evaluate the upper limit in this first scan. In this particular case the reason is that none of the tested signal strengths resulted in a CLs value above 0.05. (We need to have at least one CLs value above and one below 0.05 in the upper limit scan such that we can determine the signal strength matching the crossing point of the upper limit curve with the line at 0.05.)
+
+   To understand this a bit better, go back to the beginning of the log file and search for 'CLs      ='. You will find the results of all hypothesis tests done. 
+
+e) After the first upper limit scan, a second upper limit scan is started. You find it when looking for the second occurrence of 
+
+   <INFO> HypoTestTool: >>> Running HypoTestInverter on the workspace combined
+
+  The purpose of this second upper limit scan is to re-evaluate the upper limit obtained in first scan more precisely by restricting the scan range to [0, 1.2 * (expected upper limit of first scan + 2 sigma)]
+
+  In this case, the second scan is failing completely, as the upper limit in the first scan could not be evaluated.
+
+f) The ERROR messages at the end of the log file want to tell you that there was a problem:
+
+   <ERROR> ConfigMgrCPP: All fits seem to have failed - cannot compute upper limit!
+
+  You should not use the result of this scan for any physics interpretations. Therefore, the result is stored with a special name: debug_SU_360_220_0_10 to give you an hint that you should use the output only to debug the result.
+
+3. Recovering the failed upper limit scan.
+
+  
 
 
 
