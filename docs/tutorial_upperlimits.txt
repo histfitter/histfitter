@@ -1,17 +1,17 @@
 Modifying the scan range of the upper limit scan 
 
-Although the scan range in an upper limit scan is automatically determined when running -l, there are cases where the user wants to modify the scan range. In this example we illustrate on how to do this easily.
+Although the scan range in an upper limit scan is automatically determined when running '-l' there are cases where the user wants to modify the scan range. In this example we illustrate on how to do this easily.
 We will work on a typical example where the user does not get reasonable results back without modifying the scan range.
 
 1. Rewriting the config file such that we can give a signal point via the command line.
 
 In this example we work again with the config file analysis/tutorial/MySimpleChannelConfig.py which we used in the tutorial part 1 to produce a contour plot.
 
-Let's open this file with you favorite text editor, e.g.
+Let's open this file with your favorite text editor, e.g.
 
 nedit analysis/tutorial/MySimpleChannelConfig.py &
 
-Scrolling down to line 80 you see all the different signal models that were tested in -p yesterday:
+Scrolling down to line 82 you see all the different signal models that were tested in '-p' yesterday:
 
 sigSamples = ["SU_680_310_0_10","SU_440_145_0_10","SU_200_160_0_10","SU_440_340_0_10","SU_440_100_0_10","SU_120_130_0_10","SU_600_280_0_10","SU_320_115_0_10","SU_360_175_0_10","SU_920_310_0_10","SU_280_205_0_10","SU_1080_340_0_10","SU_40_280_0_10","SU_760_160_0_10","SU_200_115_0_10","SU_280_280_0_10","SU_40_160_0_10","SU_520_280_0_10","SU_120_220_0_10","SU_680_220_0_10","SU_40_115_0_10","SU_920_190_0_10","SU_320_130_0_10","SU_440_280_0_10","SU_360_100_0_10","SU_120_160_0_10","SU_1080_190_0_10","SU_840_250_0_10","SU_120_100_0_10","SU_120_340_0_10","SU_840_280_0_10","SU_80_115_0_10","SU_840_130_0_10","SU_320_175_0_10","SU_120_205_0_10","SU_520_100_0_10","SU_400_130_0_10","SU_360_310_0_10","SU_160_115_0_10","SU_1000_310_0_10","SU_40_220_0_10","SU_440_130_0_10","SU_1000_190_0_10","SU_80_220_0_10","SU_840_160_0_10","SU_120_145_0_10","SU_440_175_0_10","SU_360_280_0_10","SU_320_145_0_10","SU_400_160_0_10","SU_1000_340_0_10","SU_600_310_0_10","SU_320_190_0_10","SU_840_310_0_10","SU_200_220_0_10","SU_440_205_0_10",
 "SU_360_205_0_10","SU_120_280_0_10","SU_1080_130_0_10","SU_160_145_0_10","SU_520_250_0_10","SU_840_100_0_10","SU_160_220_0_10","SU_120_190_0_10","SU_40_205_0_10","SU_280_250_0_10","SU_80_145_0_10","SU_200_175_0_10","SU_840_190_0_10","SU_240_145_0_10","SU_160_205_0_10","SU_400_115_0_10","SU_440_250_0_10","SU_600_340_0_10","SU_80_100_0_10","SU_520_190_0_10","SU_1160_190_0_10","SU_80_130_0_10","SU_400_190_0_10","SU_400_175_0_10","SU_600_130_0_10","SU_1080_100_0_10","SU_200_340_0_10","SU_1160_310_0_10","SU_440_160_0_10","SU_240_220_0_10","SU_200_100_0_10","SU_240_130_0_10","SU_360_130_0_10","SU_1000_250_0_10","SU_920_130_0_10","SU_240_190_0_10","SU_520_340_0_10","SU_40_175_0_10","SU_240_100_0_10","SU_400_145_0_10","SU_40_145_0_10","SU_240_205_0_10","SU_1080_280_0_10","SU_600_250_0_10","SU_360_145_0_10","SU_520_130_0_10","SU_1000_130_0_10","SU_440_310_0_10","SU_600_160_0_10","SU_920_280_0_10","SU_760_280_0_10","SU_280_190_0_10","SU_280_175_0_10","SU_120_310_0_10","SU_440_220_0_10","SU_1000_220_0_10","SU_1160_250_0_10",
@@ -20,14 +20,14 @@ sigSamples = ["SU_680_310_0_10","SU_440_145_0_10","SU_200_160_0_10","SU_440_340_
 
 Hard-coding all the signal models may work if you work with only O(100) signal models, but it gets quite cumbersome and the config file quite to difficult to read if you use O(1000) models. We can do better. 
 
-Below line 80 you find a commented part:
+Below line 82 you find a commented part:
 
 #if not 'sigSamples' in dir():
 #    sigSamples=["SU_680_310_0_10"]
 
 (which is much shorter).
 
-Uncomment these two lines and comment line 80.
+Uncomment these two lines and comment line 82.
 
 When you are now running '-l' like:
 
@@ -128,16 +128,33 @@ f) The ERROR messages at the end of the log file want to tell you that there was
 
 3. Recovering the failed upper limit scan.
 
-   Obviously, the scan range that was determined automatically in a free fit of the signal+background model was much too large. 
+   Obviously, the scan range that was automatically determined in a free fit of the signal+background model was much too large. 
    HistFitter provides the possibility to fix the scan range of the second upper limit scan by hand.
 
    Open again the configuration file:
 
    nedit analysis/tutorial/MySimpleChannelConfig.py &
 
-   
+   and uncomment line 29:
 
-  
+   ## set scan range for the upper limit
+   configMgr.scanRange = (0., 1.)
+
+   Now rerun 
+
+   HistFitter.py -l -g SU_360_220_0_10 analysis/tutorial/MySimpleChannelConfig.py 2>&1 | tee out2.log
+
+   This results in some meaningful result:
+
+   <INFO> HypoTestTool: The computed upper limit is: 0.363536 +/- 0
+   <INFO> HypoTestTool:  expected limit (median) 0.373768
+   <INFO> HypoTestTool:  expected limit (-1 sig) 0.257714
+   <INFO> HypoTestTool:  expected limit (+1 sig) 0.562129
+   <INFO> HypoTestTool:  expected limit (-2 sig) 0.190629
+   <INFO> HypoTestTool:  expected limit (+2 sig) 0.832839
+
+   Note: if the scan range set by the user is too small, i.e. the smaller than the expected upper limit + 2 sigma, the user will see a WARNING at the end of the output.
+
 
 
 

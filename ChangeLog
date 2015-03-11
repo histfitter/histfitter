@@ -1,3 +1,11 @@
+2015-03-11 Jeanette Miriam Lorenz <jeanette.miriam.lorenz@cern.ch>
+        M       src/ConfigMgr.cxx
+        M       analysis/tutorial/MySimpleChannelConfig.py
+        M       docs/tutorial_upperlimits.txt
+        * completed upper limit tutorial
+        * tagging HistFitter-00-00-45
+
+
 2015-03-06 Jeanette Miriam Lorenz <jeanette.miriam.lorenz@cern.ch>
         A       scripts/HypoTest.py
         M       src/ConfigMgr.cxx

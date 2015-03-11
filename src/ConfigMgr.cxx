@@ -473,6 +473,13 @@ void ConfigMgr::doUpperLimit(FitConfig* fc) {
         return; 
     }
 
+    if ((fc->m_signalSampleName).Contains("Bkg") || (fc->m_signalSampleName) == "") {
+        m_logger << kINFO << "No hypothesis test performed for background fits." << GEndl;
+        inFile->Close();  
+        outfile->Close(); 
+        return;
+    }
+
     // 6th order poly interp + linear extrapolation (also used in Higgs group)
     Util::SetInterpolationCode(w,4);
 
@@ -529,7 +536,7 @@ void ConfigMgr::doUpperLimit(FitConfig* fc) {
 
         if (m_useScanRange) {
             if ((1.2 * hypo->GetExpectedUpperLimit(2)) > m_scanRangeMax) {
-                m_logger << kWARNING << "Scan Range is too near to the upper limit! (calc exp limit: " << hypo->GetExpectedUpperLimit(2)
+                m_logger << kWARNING << "Scan Range is too near to the upper limit + 2 sigma! (calc exp limit + 2 sigma: " << hypo->GetExpectedUpperLimit(2)
                  << ", set range: " << m_scanRangeMax << ")" << GEndl;
             }
         }
