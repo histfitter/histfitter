@@ -561,7 +561,7 @@ void ConfigMgr::doUpperLimit(FitConfig* fc) {
         else if (hypo->ArraySize()>0 && max_CLs(hypo)<0.05) {
                 m_logger << kERROR << "Initial CLs value not above threshold of 0.05 - upper limit scan most likely failed." << GEndl;
                 m_logger << kERROR << "Will store result only for debugging purposes - do not use it in contour plots!" << GEndl;
-                if (!isnan(hypo->GetResult(0)->CLs())) { m_logger << kINFO << "Try rescan in range (0," << hypo->GetXValue(0) << ")" << GEndl; }             
+                if (!std::isnan(hypo->GetResult(0)->CLs())) { m_logger << kINFO << "Try rescan in range (0," << hypo->GetXValue(0) << ")" << GEndl; }             
                 hypName="debug_"+fc->m_signalSampleName;
         }        
         else if (hypo->ArraySize()==0) {
@@ -659,7 +659,7 @@ RooStats::HypoTestInverterResult* ConfigMgr::RedoScan(RooWorkspace* w, RooStats:
     int n=hypo->ArraySize();
     m_logger << kINFO << "Available points: " << n << GEndl;
     m_logger << kINFO << "Recalculate x" << GEndl;
-    if (n>=2 && !isnan(hypo->GetResult(n-2)->CLs()) && !isnan(hypo->GetLastResult()->CLs())) {
+    if (n>=2 && !std::isnan(hypo->GetResult(n-2)->CLs()) && !std::isnan(hypo->GetLastResult()->CLs())) {
         double diffCLs = fabs(hypo->GetResult(n-2)->CLs()-hypo->GetLastResult()->CLs());
         double diffX = maxX-hypo->GetXValue(n-2);
         double newCLs = hypo->GetLastResult()->CLs();
