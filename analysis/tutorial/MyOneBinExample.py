@@ -42,8 +42,8 @@ import ROOT
 # Parameters for hypothesis test
 #-------------------------------
 #configMgr.doHypoTest=False
-#configMgr.nTOYs=1000
-configMgr.calculatorType=2
+configMgr.nTOYs=5000
+configMgr.calculatorType=0
 configMgr.testStatType=3
 configMgr.nPoints=20
 
@@ -112,6 +112,28 @@ wzSample = Sample("WZ",kAzure+1)
 dataSample = Sample("Data",kBlack)
 dataSample.setData()
 
+#**************
+# Discovery fit
+#**************
+
+if myFitType==FitType.Discovery:
+ 
+   #Fit config instance
+   discoveryFitConfig = configMgr.addTopLevelXML("Discovery")
+   meas=discoveryFitConfig.addMeasurement(name="NormalMeasurement",lumi=1.0,lumiErr=0.039)
+   meas.addPOI("mu_Discovery")
+ 
+   #Samples
+   discoveryFitConfig.addSamples([topSample,wzSample,dataSample])
+
+   #Systematics
+   discoveryFitConfig.getSample("Top").addSystematic(topKtScale)
+   discoveryFitConfig.getSample("WZ").addSystematic(wzKtScale)
+   discoveryFitConfig.addSystematic(jes)
+   #Channel
+   srBin = discoveryFitConfig.addChannel("cuts",["SR"],1,0.5,1.5)
+   discoveryFitConfig.setSignalChannels([srBin])
+   srBin.addDiscoverySamples(["Discovery"],[1.],[0.],[10000.],[kMagenta])
 
 #**************
 # Exclusion fit
