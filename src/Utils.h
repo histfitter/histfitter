@@ -137,9 +137,11 @@ namespace Util
      @param drawLogLikelihood Boolean deciding whether log-likelihood plots are produced
      @param minos Boolean deciding whether asymmetric errors are calculated, eg whether MINOS is run
      @param minosPars When minos is called, defining what parameters need asymmetric error calculation
+     @param doFixParameters Boolean deciding if some parameters are fixed to a value given or not, default=kFALSE
+     @param fixedPars String of parameter1:value1,parameter2:value2 giving information on which parameter to fix to which value if dofixParameter == kTRUE, default='' 
   */  
   void GenerateFitAndPlot(TString fcName, TString anaName, Bool_t drawBeforeFit, Bool_t drawAfterFit, Bool_t plotCorrelationMatrix, 
-			  Bool_t plotSeparateComponents, Bool_t plotNLL,  Bool_t minos = kFALSE, TString minosPars="");
+			  Bool_t plotSeparateComponents, Bool_t plotNLL,  Bool_t minos = kFALSE, TString minosPars="", Bool_t doFixParameters = kFALSE, TString fixedPars="");
   
   /**
      Function to plot each region with data, pdf and pdf-components(=samples)  
@@ -257,10 +259,12 @@ namespace Util
      @param suffix Output prefix, used for RooFitResult naming
      @param minos Boolean deciding whether asymmetric errors are calculated, eg whether MINOS is run, default=kFALSE
      @param minosPars When minos is called, defining what parameters need asymmetric error calculation, default=''
+     @param doFixParameters Boolean deciding if some parameters are fixed to a value given or not, default=kFalse
+     @param fixedPars String of parameter1:value1,parameter2:value2 giving information on which parameter to fix to which value if dofixParameter == kTrue, default=''    
      @return RooFitResult pointer continaing the fit result
   */
   RooFitResult* FitPdf(RooWorkspace* w,  TString fitRegions="ALL", Bool_t lumiConst=false, RooAbsData* inputData=0, 
-		       TString suffix ="", Bool_t minos = kFALSE, TString minosPars="");
+		       TString suffix ="", Bool_t minos = kFALSE, TString minosPars="", Bool_t doFixParameters = kFALSE, TString fixedPars="");
 
   /**
      Function to calculate the propagated error of given RooAbsReal

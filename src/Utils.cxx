@@ -151,7 +151,8 @@ double Util::getNonQcdVal(const TString& proc, const TString& reg, TMap* map,con
 
 //_____________________________________________________________________________
 void Util::GenerateFitAndPlot(TString fcName, TString anaName, Bool_t drawBeforeFit, Bool_t drawAfterFit, Bool_t plotCorrelationMatrix, 
-			      Bool_t plotSeparateComponents, Bool_t plotNLL, Bool_t minos, TString minosPars ){
+			      Bool_t plotSeparateComponents, Bool_t plotNLL, Bool_t minos, TString minosPars,
+                              Bool_t doFixParameters, TString fixedPars ){
 
     ConfigMgr* mgr = ConfigMgr::getInstance();
     FitConfig* fc = mgr->getFitConfig(fcName);
@@ -165,6 +166,8 @@ void Util::GenerateFitAndPlot(TString fcName, TString anaName, Bool_t drawBefore
     Logger << kINFO << "     plotNLL = " << plotNLL << GEndl;
     Logger << kINFO << "     minos = " << minos << GEndl;
     Logger << kINFO << "     minosPars = " << minosPars << GEndl;
+    Logger << kINFO << "     doFixParameters = " << doFixParameters << GEndl;
+    Logger << kINFO << "     fixedPars = " << fixedPars << GEndl;    
 
     RooWorkspace* w = GetWorkspaceFromFile(fc->m_inputWorkspaceFileName, "combined");
     if(w==NULL){
@@ -231,7 +234,7 @@ void Util::GenerateFitAndPlot(TString fcName, TString anaName, Bool_t drawBefore
         PlotPdfWithComponents(w, fc->m_name, anaName, plotChannels, "beforeFit", expResultBefore, toyMC);
 
     //fit of all regions
-    RooFitResult*  result = FitPdf(w, fitChannels, lumiConst, toyMC, "", minos, minosPars);
+    RooFitResult*  result = FitPdf(w, fitChannels, lumiConst, toyMC, "", minos, minosPars, doFixParameters, fixedPars);
 
     if (result==NULL) return;
 
@@ -355,11 +358,11 @@ void Util::WriteWorkspace(RooWorkspace* w, TString outFileName, TString suffix){
  */
 
 //_____________________________________________________________________________
-RooFitResult* Util::FitPdf( RooWorkspace* w, TString fitRegions, Bool_t lumiConst, RooAbsData* inputData, TString suffix, Bool_t minos, TString minosPars)
+RooFitResult* Util::FitPdf( RooWorkspace* w, TString fitRegions, Bool_t lumiConst, RooAbsData* inputData, TString suffix, Bool_t minos, TString minosPars, Bool_t doFixParameters, TString fixedPars)
 {
 
     Logger << kINFO << " ------ Starting FitPdf with parameters:    fitRegions = " <<  fitRegions << GEndl;
-    Logger << kINFO <<  "    inputData = " << inputData << "  suffix = " << suffix  << "  minos = " << minos << "  minosPars = " << minosPars  << GEndl;
+    Logger << kINFO <<  "    inputData = " << inputData << "  suffix = " << suffix  << "  minos = " << minos << "  minosPars = " << minosPars  << " doFixParameters = " << doFixParameters << " fixedPars = " << fixedPars << GEndl;
 
     RooMsgService::instance().getStream(1).removeTopic(NumIntegration);
 
@@ -376,6 +379,26 @@ RooFitResult* Util::FitPdf( RooWorkspace* w, TString fitRegions, Bool_t lumiCons
     if (lumiConst) {
         RooRealVar* lumi = (RooRealVar*) w->var("Lumi");
         if (lumi!=NULL) lumi->setConstant(lumiConst); 
+    }
+    
+    //fixing parameters to certain values
+    if (doFixParameters && fixedPars != "") {
+     std::vector<TString> fixedParsVector = Tokens(fixedPars,",");
+     for (unsigned int j=0; j<fixedParsVector.size(); j++) {
+         std::vector<TString> fixedParsPair = Tokens(fixedParsVector[j],":");
+         if (fixedParsPair.size() != 2) { 
+             Logger << kERROR << " Util::FitPdf() fixing parameters to constant: wrong arguments given: " <<  fixedParsVector[j] << GEndl;
+             Logger << kERROR << " Util::FitPdf() Ignore this and continue." << GEndl;
+             continue;
+         }
+         RooRealVar* var = (RooRealVar*) w->var(fixedParsPair[0]);
+         if(var==NULL)  Logger << kWARNING << " Util::FitPdf()   could not find parameter(" << fixedParsPair[0] << ") in workspace while trying to fix this parameter" << GEndl;
+         else {
+             Logger << kINFO << " Util::FitPdf() Setting parameter " <<  fixedParsPair[0] << " to constant value " << fixedParsPair[1].Atof() << GEndl;
+             var->setVal(fixedParsPair[1].Atof());
+             var->setConstant(kTRUE);
+         }
+     }        
     }
 
     // Construct an empty simultaneous pdf using category regionCat as index

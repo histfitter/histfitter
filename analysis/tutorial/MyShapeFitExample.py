@@ -55,6 +55,14 @@ configMgr.nPoints=20
 
 configMgr.writeXML = True
 
+#---------------------------------------------------
+# Specify the default signal point
+# Others to be given via option -g via command line
+#---------------------------------------------------
+
+if not 'sigSamples' in dir():
+    sigSamples=["SM_GG_onestepCC_425_385_345"]
+
 
 #-------------------------------------
 # Now we start to build the data model
@@ -85,7 +93,7 @@ configMgr.cutsDict["SR"] = "((lep1Pt < 20 && lep2Pt<10 && met>250 && mt>100 && j
 
 
 # Tuples of nominal weights without and with b-jet selection
-configMgr.weights = ("genWeight","eventWeight","leptonWeight","triggerWeight","truthWptWeight","bTagWeight2Jet")
+configMgr.weights = ["genWeight","eventWeight","leptonWeight","triggerWeight","truthWptWeight","bTagWeight2Jet"]
     
 # QCD weights without and with b-jet selection
 configMgr.weightsQCD = "qcdWeight"
@@ -126,33 +134,36 @@ dataSample.setData()
 #**************
 if myFitType==FitType.Exclusion:
     
+    # loop over all signal points
+    for sig in sigSamples:
     # Fit config instance
-    exclusionFitConfig = configMgr.addFitConfig("Exclusion")
-    meas=exclusionFitConfig.addMeasurement(name="NormalMeasurement",lumi=1.0,lumiErr=0.039)
-    meas.addPOI("mu_SIG")
+       exclusionFitConfig = configMgr.addFitConfig("Exclusion_"+sig)
+       meas=exclusionFitConfig.addMeasurement(name="NormalMeasurement",lumi=1.0,lumiErr=0.039)
+       meas.addPOI("mu_SIG")
 
-    # Samples
-    exclusionFitConfig.addSamples([topSample,wzSample,dataSample])
+       # Samples
+       exclusionFitConfig.addSamples([topSample,wzSample,dataSample])
 
-    # Systematics
-    exclusionFitConfig.getSample("Top").addSystematic(topKtScale)
-    exclusionFitConfig.getSample("WZ").addSystematic(wzKtScale)
-    exclusionFitConfig.addSystematic(jes)
+       # Systematics
+       exclusionFitConfig.getSample("Top").addSystematic(topKtScale)
+       exclusionFitConfig.getSample("WZ").addSystematic(wzKtScale)
+       exclusionFitConfig.addSystematic(jes)
 
-    # Channel
-    srBin = exclusionFitConfig.addChannel("met/meff2Jet",["SR"],6,0.1,0.7)
-    srBin.useOverflowBin=True
-    srBin.useUnderflowBin=True
-    exclusionFitConfig.setSignalChannels([srBin])
+       # Channel
+       srBin = exclusionFitConfig.addChannel("met/meff2Jet",["SR"],6,0.1,0.7)
+       srBin.useOverflowBin=True
+       srBin.useUnderflowBin=True
+       exclusionFitConfig.setSignalChannels([srBin])
 
-    sigSample = Sample("SM_GG_onestepCC_425_385_345",kPink)
-    sigSample.setFileList(["samples/tutorial/SusyFitterTree_p832_GG-One-Step_soft_v1.root"])
-    sigSample.setNormByTheory()
-    sigSample.setNormFactor("mu_SIG",1.,0.,5.)                    
-    exclusionFitConfig.addSamples(sigSample)
-    exclusionFitConfig.setSignalSample(sigSample)
+       sigSample = Sample(sig,kPink)
+       sigSample.setFileList(["samples/tutorial/SusyFitterTree_p832_GG-One-Step_soft_v1.root"])
+       sigSample.setNormByTheory()
+       sigSample.setNormFactor("mu_SIG",1.,0.,5.)    
+       #sigSample.addSampleSpecificWeight("0.001")                
+       exclusionFitConfig.addSamples(sigSample)
+       exclusionFitConfig.setSignalSample(sigSample)
 
-    # Cosmetics
-    srBin.minY = 0.0001
-    srBin.maxY = 80.
+       # Cosmetics
+       srBin.minY = 0.0001
+       srBin.maxY = 80.
 

@@ -28,7 +28,7 @@ import argparse
 from logger import Logger
 log = Logger('HistFitter')
 
-def GenerateFitAndPlotCPP(fc, anaName, drawBeforeFit, drawAfterFit, drawCorrelationMatrix, drawSeparateComponents, drawLogLikelihood, minos, minosPars):
+def GenerateFitAndPlotCPP(fc, anaName, drawBeforeFit, drawAfterFit, drawCorrelationMatrix, drawSeparateComponents, drawLogLikelihood, minos, minosPars, doFixParameters, fixedPars):
     """ 
     function call to top-level C++ side function Util.GenerateFitAndPlot()
 
@@ -41,6 +41,8 @@ def GenerateFitAndPlotCPP(fc, anaName, drawBeforeFit, drawAfterFit, drawCorrelat
     @param drawLogLikelihood Boolean deciding whether log-likelihood plots are produced
     @param minos Boolean deciding whether asymmetric errors are calculated, eg whether MINOS is run
     @param minosPars When minos is called, defining what parameters need asymmetric error calculation
+    @param doFixParameters Boolean deciding if some parameters are fixed to a value given or not
+    @param fixedPars String of parameter1:value1,parameter2:value2 giving information on which parameter to fix to which value if dofixParameter == True
     """
     
     from ROOT import Util
@@ -53,9 +55,11 @@ def GenerateFitAndPlotCPP(fc, anaName, drawBeforeFit, drawAfterFit, drawCorrelat
     log.debug("GenerateFitAndPlotCPP: drawLogLikelihood %s " % drawLogLikelihood)
     log.debug("GenerateFitAndPlotCPP: minos %s " % minos)
     log.debug("GenerateFitAndPlotCPP: minosPars %s " % minosPars)
+    log.debug("GenerateFitAndPlotCPP: doFixParameters %s " % doFixParameters)
+    log.debug("GenerateFitAndPlotCPP: fixedPars %s " % fixedPars)    
     
     Util.GenerateFitAndPlot(fc.name, anaName, drawBeforeFit, drawAfterFit, drawCorrelationMatrix,
-                            drawSeparateComponents, drawLogLikelihood, minos, minosPars)
+                            drawSeparateComponents, drawLogLikelihood, minos, minosPars, doFixParameters, fixedPars)
 
 if __name__ == "__main__":
     """
@@ -84,6 +88,8 @@ if __name__ == "__main__":
     runMinos = False
     minosPars = ""
     doCodeProfiling = False
+    doFixParameters = False
+    fixedPars = ""
     
     FitType = configMgr.FitType #enum('FitType','Discovery , Exclusion , Background')
     myFitType=FitType.Background
@@ -132,7 +138,8 @@ if __name__ == "__main__":
     parser.add_argument("-u", "--userArg", help="arbitrary user argument(s)", default="")
     parser.add_argument("-A", "--use-archive-histfile", help="use backup histogram cache file", action="store_true")
     parser.add_argument("-P", "--run-profiling", help="Run a python profiler during main HistFitter execution", action="store_true")
-
+    parser.add_argument("-C", "--constant", help="Set parameters to constant in the fit, Give list of parameters and their values as parameter1:value1,parameter2:value2:...", metavar="PARAM")
+    
     HistFitterArgs = parser.parse_args()
 
     """
@@ -261,6 +268,11 @@ if __name__ == "__main__":
                 minosArgs[idx] = "all"
 
         minosPars = ",".join(minosArgs)
+        
+    if HistFitterArgs.constant:
+        doFixParameters = True
+        fixedPars =  HistFitterArgs.constant
+        
 
     if HistFitterArgs.cmd:
         log.info("Python commands executed: %s" % HistFitterArgs.cmd)
@@ -310,9 +322,9 @@ if __name__ == "__main__":
                     log.fatal("Unable to find fitConfig with name %s, bailing out" % HistFitterArgs.fitname)
 
             log.info("Running on fitConfig %s" % configMgr.fitConfigs[idx].name)
-            r = GenerateFitAndPlotCPP(configMgr.fitConfigs[idx], configMgr.analysisName, drawBeforeFit, drawAfterFit, drawCorrelationMatrix, drawSeparateComponents, drawLogLikelihood, runMinos, minosPars)
+            r = GenerateFitAndPlotCPP(configMgr.fitConfigs[idx], configMgr.analysisName, drawBeforeFit, drawAfterFit, drawCorrelationMatrix, drawSeparateComponents, drawLogLikelihood, runMinos, minosPars, doFixParameters, fixedPars)
             pass
-        log.info(" GenerateFitAndPlotCPP(configMgr.fitConfigs[%d], configMgr.analysisName, drawBeforeFit, drawAfterFit, drawCorrelationMatrix, drawSeparateComponents, drawLogLikelihood)" % idx)
+        log.info(" GenerateFitAndPlotCPP(configMgr.fitConfigs[%d], configMgr.analysisName, drawBeforeFit, drawAfterFit, drawCorrelationMatrix, drawSeparateComponents, drawLogLikelihood, runMinos, minosPars, doFixParameters, fixedPars)" % idx)
         log.info("   where drawBeforeFit, drawAfterFit, drawCorrelationMatrix, drawSeparateComponents, drawLogLikelihood are booleans")
         pass
 

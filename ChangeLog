@@ -1,10 +1,18 @@
+2015-03-14 Jeanette Miriam Lorenz <jeanette.miriam.lorenz@cern.ch>
+        M       analysis/tutorial/MyShapeFitExample.py
+        M       analysis/tutorial/MySimpleChannelConfig.py
+        M       scripts/HistFitter.py
+        M       src/Utils.cxx
+        M       src/Utils.h
+        * allow for fixing certain parameters in a fit by using the command line option -C parameter1:value1,parameter2:value2,...
+        * various small additions to tutorial examples
+
 2015-03-11 Jeanette Miriam Lorenz <jeanette.miriam.lorenz@cern.ch>
         M       src/ConfigMgr.cxx
         M       analysis/tutorial/MySimpleChannelConfig.py
         M       docs/tutorial_upperlimits.txt
         * completed upper limit tutorial
         * tagging HistFitter-00-00-45
-
 
 2015-03-06 Jeanette Miriam Lorenz <jeanette.miriam.lorenz@cern.ch>
         A       scripts/HypoTest.py
