@@ -277,6 +277,7 @@ class PrepareHistos(object):
         Add this histogram to the dictionary of histograms.
         """
         #Note: useOverflow and useUnderflow has no effect. It's there just for symmetry with TreePrepare above.
+
         if self.configMgr.hists[name] is None:
             try:
                 self.configMgr.hists[name] = self.cache2File.Get(name)
@@ -300,6 +301,15 @@ class PrepareHistos(object):
                         
                         self.configMgr.hists[name] = None
                         return self.__addHistoFromTree(name, nBins, binLow, binHigh, nBins, binLow, binHigh, useOverflow, useUnderflow)
+
+        if not (self.configMgr.hists[name] is None):
+            if not (self.channel.nBins == self.configMgr.hists[name].GetNbinsX()) or \
+               not (self.channel.binHigh == self.configMgr.hists[name].GetXaxis().GetBinUpEdge(self.configMgr.hists[name].GetNbinsX())) or \
+               not (self.channel.binLow == self.configMgr.hists[name].GetBinLowEdge(1)):
+                log.info("Histogram has different binning <"+name+"> in "+self.cacheFileName+", trying from tree ")
+                log.debug("addHistoFromCache: required binning %d,%f,%f, while histo has %d,%f,%f" % (self.channel.nBins,self.channel.binLow,self.channel.binHigh,self.configMgr.hists[name].GetNbinsX(), self.configMgr.hists[name].GetBinLowEdge(1),self.configMgr.hists[name].GetXaxis().GetBinUpEdge(self.configMgr.hists[name].GetNbinsX())))
+                self.configMgr.hists[name] = None
+                return self.__addHistoFromTree(name, self.channel.nBins, self.channel.binLow, self.channel.binHigh, nBins, binLow, binHigh, useOverflow, useUnderflow)
 
         self.name = name
         return self.configMgr.hists[name]
