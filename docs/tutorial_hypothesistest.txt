@@ -1,6 +1,6 @@
-Details on the output pf -p
+Details on the output of -p
 
-In this example we will look more closely at the output of the hypothesis tests we run in the last example in order to understand better what -p is doing. Understanding the output of -p is very helpful in case there are problems. 
+In this example we will look more closely at the output of the hypothesis tests we just run in order to understand better what '-p' is doing. Understanding the output of '-p' is very helpful in case there are problems. 
 
 Let's look at the log file:
 
@@ -32,7 +32,7 @@ which concludes with the fit result:
   gamma_stat_UserRegion_cuts_bin_0    1.0002e+00 +/-  2.22e-01
                 mu_Sig    4.0056e-01 +/-  6.67e-01
 
-This first fit is done using the FreeFit function in src/Utils.cxx. This function executes a slightly simplified fit in comparison to the standard '-f' option. The main difference is that all channels included in the workspace will be fitted, regardless if control, validation or signal region. The purpose of first executing some free fit of the background + signal model is to give the user some indication on if the hypothesis tests following might be affected by fit failures or not. We can store the result of the free fit in an external file for later use. (These fit results are in fact used in the step 'Creating a list file' in Part 5 below.)
+This first fit is done using the FreeFit function in src/Utils.cxx. This function executes a slightly simplified fit in comparison to the standard '-f' option. The main difference is that all channels included in the workspace will be fitted, regardless if control, validation or signal region. The purpose of first executing some free fit of the background + signal model is to give the user some indication on if the hypothesis tests following might be affected by fit failures or not. We can store the result of the free fit in an external file for later use. (Similar fit results are in fact used in the step 'Creating a list file' in Part 5 below.)
 
 2. Hypothesis tests
 
@@ -71,7 +71,7 @@ This can be summarized as:
 
 * Part 1: Setting up the asymptotic calculator and building the Asimov dataset:
 
-a) Evaluate the unconditional nll for the full model on the  observed data
+a) Evaluate the unconditional NLL for the full model on observed data
 
   In the log file this part starts with
 
@@ -81,7 +81,7 @@ a) Evaluate the unconditional nll for the full model on the  observed data
 
   [#0] PROGRESS:Eval -- Best fitted POI value = 0.401324 +/- 0.667405
 
-b) Compute Asimov data set for the background (alt poi ) value
+b) Compute the Asimov data set for the background hypothesis
 
   This part starts with 
 
@@ -89,7 +89,7 @@ b) Compute Asimov data set for the background (alt poi ) value
 
   and evaluates the best-fitted values for the nuisance parameters and a signal strength of 0.
 
-c) Evaluate  the likelihood on Asimov data
+c) Evaluate the likelihood on Asimov data just built
 
   This part starts with 
 
@@ -105,17 +105,17 @@ Part 2 starts with the message:
 
 <INFO> HypoTestTool: Doing a fixed scan  in interval : 1 , 1
 
-(telling us that we will only test a signal strength of 1 but no other one. This is the main difference to the upper limit calculation in which multiple signal strengths are considered.)
+(telling us that we will only test a signal strength of 1 but no other one. This is the main difference to the upper limit calculation in which multiple signal strengths are considered. Apart from this the upper limit calculation with '-l' is really pretty similar.)
 Again, we have various parts:
 
-d) make conditional fit on null snapshot of poi and evaluate the conditional NLL on the observed data for the snapshot value
+d) Make a conditional fit of background+signal model on observed data.
 
   You see this in the log file after the message:
 
   [#1] INFO:Eval -- AsymptoticCalculator::GetHypoTest: - perform  an hypothesis test for  POI ( mu_Sig ) = 1
   [#0] PROGRESS:Eval -- AsymptoticCalculator::GetHypoTest -  Find  best conditional NLL on OBSERVED data set .....
 
-e) create an HypoTest result but where the sampling distributions are set to zero
+e) Now we do a similar fit on the Asimov data set.
   
   You see this part starting from 
 
@@ -140,12 +140,12 @@ We have seen in 'Details on the output pf -p' that various fits are performed wh
 - a fit with the signal strength fixed to 0
 
 If one or multiple of these fits fail, no or no reliable CLs value can be calculated. Typical problems that lead to failures are:
-- the background + signal model is very complicated and there are instabilities related to systematic uncertainties,
+- the background + signal model is very complicated and there are (fit) instabilities related to systematic uncertainties,
 - the signal contribution is very large in comparison to a very small background prediction and very little observed data.
 
 When the calculation of the CLs value is failing it is mandatory for the user to check first the log file to understand which of the fits done in '-p' is really failing. Afterwards, the user can try to rebuild this fit, using the functionalities HistFitter provides for '-f'. For technical reasons '-f' can provide a little bit more verbose output than '-p', which is helpful for debugging any problematic fit. In addition, the user can make before- and after-fit plots and correlations matrices which can also give some hints.
 
-We don't have really complicated background+signal models in the tutorial and we also tried to make sure that none of our examples is failing. (Although this depends a little bit on the actual Root version used.) Therefore, in the following we will try to reproduce the fits done in the example 'Details on the output pf -p' to illustrate on how to rebuild fits outside of '-p'.
+We don't have really complicated background+signal models in the tutorial and we also tried to make sure that none of our examples is failing. (Although this depends a little bit on the actual Root version used.) Therefore, in the following we will try to reproduce the fits done in the example 'Details on the output pf -p' to illustrate on how to rebuild fits outside of '-p'. Of course, you can also take one of your private problematic models and try to debug this along the lines described in this exercise. (Your tutor is happy to help you with any questions regarding problems appearing there.)
 
 If you have not done so yesterday, please create the log file of the example 'Details on the output pf -p':
 
@@ -158,6 +158,8 @@ We will use this log file to check the results we get in the fits rebuilt.
 This option allows to fix certain parameters to a values provided by the user in a fit done with '-f'. The syntax is
 
 -C parameter1:value1,parameter2:value2,... etc.
+
+Also see the examples below.
 
 2. Reproducing a fit of '-p' with the signal strength fixed to 0.
 
@@ -191,7 +193,7 @@ The fit result of this is:
   gamma_stat_UserRegion_cuts_bin_0    1.0000e+00    1.0614e+00 +/-  1.98e-01  0.190423
 
 
-Comparing to out.log, you see that this fit result is pretty similar to the fit done in b) and c), although not identical. The reason for the small differences are small differences in the fit options that are used in '-f' and in '-p'. Most importantly, the luminosity was fixed and did not change in '-f'. If you are interested in the other more subtle differences, don't hesitate to ask the tutors. For the common practice, the two fit results are close enough.
+Comparing to out.log, you see that this fit result is pretty similar to the fit done in b) and c), although not identical. The reason for the small differences are small differences in the fit options that are used in '-f' and in '-p'. Most importantly, the luminosity was fixed and did not change in '-f'. If you are interested in the other more subtle differences, don't hesitate to ask your tutor. For the common practice, the two fit results are close enough.
 
 3. Reproducing a fit of '-p' with the signal strength set to 1.
 
@@ -229,5 +231,7 @@ Comparing to out.log you see that this is pretty similar to the result obtained 
 The fit in f) uses an Asimov set and also a signal strength of 1. Also this fit can be rebuild, essentially using the HistFitter option '-a', but it is a little bit more tricky. Ask your tutor in case you're interested.
 
 The other fits in '-p' are free fits of the background+signal model and can be easily rebuild by using the standard '-f' option without using the option '-C'.
+
+For all these examples you can also create plots and correlation matrices etc. using the options '-d' and '-D'.
 
 

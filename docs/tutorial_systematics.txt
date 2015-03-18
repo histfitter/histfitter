@@ -1,0 +1,44 @@
+---+++ Possible types for systematic uncertainties in HistFitter
+
+We discussed already in the first part of this tutorial [[HistFitterTutorial#Systematic_uncertainties]] that HistFitter allows to implement systematic uncertainties as different types, depending on the effect the systematic uncertainty should have. In particular we introduced the types
+
+   * =overallSys= if a systematic uncertainty only varies the scale of the nominal histogram
+   * =histoSys= if the systematic uncertainty varies both the shape and the scale of a nominal histogram
+   * =normHistoSys= if the systematic uncertainty only varies the shape of a nominal histogram
+
+HistFitter provides much more possibilities to implement systematic uncertainties. The most common types (more types, in particular also user defined systematic uncertainties, exist) are:
+
+| *Basic systematic methods in HistFactory* ||
+| =overallSys= | uncertainty of the global normalization, not affecting the shape |
+| =histoSys= | correlated uncertainty of shape and normalization |
+| =shapeSys= | uncertainty of statistical nature applied to a sum of samples, bin by bin |
+| *Additional systematic methods in HistFitter* ||
+| =overallNormSys= | =overallSys= constrained to conserve total event count in a list of region(s) |
+| =normHistoSys= | =histoSys= constrained to conserve total event count in a list of region(s) |
+| =normHistoSysOneSide= | one-sided =normHistoSys= uncertainty built from tree-based |
+| ^ | or weight-based inputs|
+| =normHistoSysOneSideSym= | symmetrized =normHistoSysOneSide= |
+| =overallHistoSys= | factorized normalization shape and uncertainty; described with |
+| ^ | =overallSys= and =histoSys= respectively |
+| =overallNormHistoSys= | =overallHistoSys= in which the shape uncertainty is modeled with a =normHistoSys= |
+| ^ | and the global normalization uncertainty is modeled with an =overallSys= |
+| =shapeStat= | =shapeSys= applied to an individual sample |
+
+(This table is extracted from the HistFitter paper: http://arxiv.org/abs/1410.1280 )
+
+
+
+---+++ Which systematics type should be used?
+
+Given these rather large amount of systematics types, one could get confused which type should be used in a certain situation. Alex Koutsman made a nice flowchart to illustrate the decision process.
+
+<picture>
+
+
+---+++ "Normalized" systematic uncertainties and the transfer factor approach
+
+---++++ The concept of transfer factors
+
+---++++ The usage of "normalized" systematic uncertainties
+
+---++++ Behind the scenes: internal construction of systematic uncertainties
