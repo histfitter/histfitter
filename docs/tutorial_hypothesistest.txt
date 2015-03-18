@@ -71,7 +71,7 @@ This can be summarized as:
 
 * Part 1: Setting up the asymptotic calculator and building the Asimov dataset:
 
-- Evaluate the unconditional nll for the full model on the  observed data
+a) Evaluate the unconditional nll for the full model on the  observed data
 
   In the log file this part starts with
 
@@ -81,7 +81,7 @@ This can be summarized as:
 
   [#0] PROGRESS:Eval -- Best fitted POI value = 0.401324 +/- 0.667405
 
-- Compute Asimov data set for the background (alt poi ) value
+b) Compute Asimov data set for the background (alt poi ) value
 
   This part starts with 
 
@@ -89,7 +89,7 @@ This can be summarized as:
 
   and evaluates the best-fitted values for the nuisance parameters and a signal strength of 0.
 
-- Evaluate  the likelihood on Asimov data
+c) Evaluate  the likelihood on Asimov data
 
   This part starts with 
 
@@ -108,14 +108,14 @@ Part 2 starts with the message:
 (telling us that we will only test a signal strength of 1 but no other one. This is the main difference to the upper limit calculation in which multiple signal strengths are considered.)
 Again, we have various parts:
 
-- make conditional fit on null snapshot of poi and evaluate the conditional NLL on the observed data for the snapshot value
+d) make conditional fit on null snapshot of poi and evaluate the conditional NLL on the observed data for the snapshot value
 
   You see this in the log file after the message:
 
   [#1] INFO:Eval -- AsymptoticCalculator::GetHypoTest: - perform  an hypothesis test for  POI ( mu_Sig ) = 1
   [#0] PROGRESS:Eval -- AsymptoticCalculator::GetHypoTest -  Find  best conditional NLL on OBSERVED data set .....
 
-- create an HypoTest result but where the sampling distributions are set to zero
+e) create an HypoTest result but where the sampling distributions are set to zero
   
   You see this part starting from 
 
@@ -132,6 +132,102 @@ If there is a failure in '-p' it is important to understand which of the six (!)
 
 
 
+Rebuilding fits of '-p'
 
+We have seen in 'Details on the output pf -p' that various fits are performed when running hypothesis tests with '-p', among those:
+- a free fit of the background + signal model
+- a fit with the signal strength fixed to 1
+- a fit with the signal strength fixed to 0
+
+If one or multiple of these fits fail, no or no reliable CLs value can be calculated. Typical problems that lead to failures are:
+- the background + signal model is very complicated and there are instabilities related to systematic uncertainties,
+- the signal contribution is very large in comparison to a very small background prediction and very little observed data.
+
+When the calculation of the CLs value is failing it is mandatory for the user to check first the log file to understand which of the fits done in '-p' is really failing. Afterwards, the user can try to rebuild this fit, using the functionalities HistFitter provides for '-f'. For technical reasons '-f' can provide a little bit more verbose output than '-p', which is helpful for debugging any problematic fit. In addition, the user can make before- and after-fit plots and correlations matrices which can also give some hints.
+
+We don't have really complicated background+signal models in the tutorial and we also tried to make sure that none of our examples is failing. (Although this depends a little bit on the actual Root version used.) Therefore, in the following we will try to reproduce the fits done in the example 'Details on the output pf -p' to illustrate on how to rebuild fits outside of '-p'.
+
+If you have not done so yesterday, please create the log file of the example 'Details on the output pf -p':
+
+HistFitter.py -p analysis/tutorial/MyUserAnalysis.py 2>&1 | tee out.log
+
+We will use this log file to check the results we get in the fits rebuilt.
+
+1. The option '-C' in HistFitter
+
+This option allows to fix certain parameters to a values provided by the user in a fit done with '-f'. The syntax is
+
+-C parameter1:value1,parameter2:value2,... etc.
+
+2. Reproducing a fit of '-p' with the signal strength fixed to 0.
+
+For this just run:
+
+HistFitter.py -f -C "mu_Sig:0." analysis/tutorial/MyUserAnalysis.py
+
+The fit result of this is:
+
+  RooFitResult: minimized FCN value: -0.273073, estimated distance to minimum: 0.00027612
+                covariance matrix quality: Full, accurate covariance matrix
+                Status : MINIMIZE=0 HESSE=0 
+
+    Constant Parameter    Value     
+  --------------------  ------------
+  binWidth_obs_x_UserRegion_cuts_0    1.0000e+00
+  binWidth_obs_x_UserRegion_cuts_1    1.0000e+00
+                mu_Sig    0.0000e+00
+         nom_alpha_cor    0.0000e+00
+         nom_alpha_ucb    0.0000e+00
+         nom_alpha_ucs    0.0000e+00
+  nom_gamma_stat_UserRegion_cuts_bin_0    1.0000e+00
+           nominalLumi    1.0000e+00
+
+    Floating Parameter  InitialValue    FinalValue +/-  Error     GblCorr.
+  --------------------  ------------  --------------------------  --------
+                  Lumi    1.0000e+00    1.0000e+00 +/-  3.88e-02  0.000000
+             alpha_cor    0.0000e+00    1.5405e-01 +/-  9.69e-01  0.122812
+             alpha_ucb    0.0000e+00    2.4486e-01 +/-  9.00e-01  0.185254
+             alpha_ucs    0.0000e+00    0.0000e+00 +/-  9.93e-01  0.000000
+  gamma_stat_UserRegion_cuts_bin_0    1.0000e+00    1.0614e+00 +/-  1.98e-01  0.190423
+
+
+Comparing to out.log, you see that this fit result is pretty similar to the fit done in b) and c), although not identical. The reason for the small differences are small differences in the fit options that are used in '-f' and in '-p'. Most importantly, the luminosity was fixed and did not change in '-f'. If you are interested in the other more subtle differences, don't hesitate to ask the tutors. For the common practice, the two fit results are close enough.
+
+3. Reproducing a fit of '-p' with the signal strength set to 1.
+
+Run:
+
+HistFitter.py -f -C "mu_Sig:1." analysis/tutorial/MyUserAnalysis.py
+
+You should get the following result:
+
+  RooFitResult: minimized FCN value: -0.35802, estimated distance to minimum: 9.17589e-06
+                covariance matrix quality: Full, accurate covariance matrix
+                Status : MINIMIZE=0 HESSE=0 
+
+    Constant Parameter    Value     
+  --------------------  ------------
+  binWidth_obs_x_UserRegion_cuts_0    1.0000e+00
+  binWidth_obs_x_UserRegion_cuts_1    1.0000e+00
+                mu_Sig    1.0000e+00
+         nom_alpha_cor    0.0000e+00
+         nom_alpha_ucb    0.0000e+00
+         nom_alpha_ucs    0.0000e+00
+  nom_gamma_stat_UserRegion_cuts_bin_0    1.0000e+00
+           nominalLumi    1.0000e+00
+
+    Floating Parameter  InitialValue    FinalValue +/-  Error     GblCorr.
+  --------------------  ------------  --------------------------  --------
+                  Lumi    1.0000e+00    9.9878e-01 +/-  3.88e-02  0.038996
+             alpha_cor    0.0000e+00   -2.1561e-01 +/-  9.67e-01  0.230151
+             alpha_ucb    0.0000e+00   -1.7437e-01 +/-  9.85e-01  0.196699
+             alpha_ucs    0.0000e+00   -8.2217e-02 +/-  9.93e-01  0.099913
+  gamma_stat_UserRegion_cuts_bin_0    1.0000e+00    9.0940e-01 +/-  1.94e-01  0.282557
+
+Comparing to out.log you see that this is pretty similar to the result obtained in e).
+
+The fit in f) uses an Asimov set and also a signal strength of 1. Also this fit can be rebuild, essentially using the HistFitter option '-a', but it is a little bit more tricky. Ask your tutor in case you're interested.
+
+The other fits in '-p' are free fits of the background+signal model and can be easily rebuild by using the standard '-f' option without using the option '-C'.
 
 
