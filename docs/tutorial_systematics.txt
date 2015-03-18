@@ -37,6 +37,16 @@ Given these rather large amount of systematics types, one could get confused whi
 
 ---+++ "Normalized" systematic uncertainties and the transfer factor approach
 
+A basic ingredient in many analyses is the extrapolation from control to signal or validation regions for estimated a major background in a semi-data-driven way. The idea is to fix a background (model) in a fit to data in control regions that were specifically designed for the specific backgrounds. Using then Monte Carlo simulations, this background model is extrapolated to signal regions in order to obtain a background estimate in them. This extrapolation from control to signal regions is only possible if the kinematic variables used in the extrapolation are well described by Monte Carlo simulation. This assumption can be check in validation regions kinematically close to the signal regions, but usually containing a lower signal contamination.
+
+This analysis strategy is illustrated in the two plots taken from the HistFitter paper (http://arxiv.org/abs/1410.1280) - look into this paper if you are not familiar to this concept of extrapolation!
+
+A schematic view of an analysis strategy with multiple control, validation and signal regions. All regions can have single- or multiple bins, as illustrated by the dashed lines. The extrapolation from the control to the signal regions is verified in the validation regions that lie in the extrapolation phase space.
+
+A typical analysis strategy flow with HistFitter.
+
+
+
 ---++++ The concept of transfer factors
 
 ---++++ The usage of "normalized" systematic uncertainties
