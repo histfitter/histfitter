@@ -115,12 +115,15 @@ configMgr.weightsQCDWithB = "qcdBWeight"
 #--------------------
 
 # KtScale uncertainty as histoSys - two-sided, no additional normalization
-topKtScale = Systematic("KtScaleTop",configMgr.weights,ktScaleTopHighWeights,ktScaleTopLowWeights,"weight","overallNormHistoSys")
-wzKtScale = Systematic("KtScaleWZ",configMgr.weights,ktScaleWHighWeights,ktScaleWLowWeights,"weight","overallNormHistoSys")
+topKtScale = Systematic("KtScaleTop",configMgr.weights,ktScaleTopHighWeights,ktScaleTopLowWeights,"weight","histoSys")
+wzKtScale = Systematic("KtScaleWZ",configMgr.weights,ktScaleWHighWeights,ktScaleWLowWeights,"weight","histoSys")
+#topKtScale = Systematic("KtScaleTop",configMgr.weights,ktScaleTopHighWeights,ktScaleTopLowWeights,"weight","overallNormHistoSys")
+#wzKtScale = Systematic("KtScaleWZ",configMgr.weights,ktScaleWHighWeights,ktScaleWLowWeights,"weight","overallNormHistoSys")
 
 
 # JES uncertainty as shapeSys - one systematic per region (combine WR and TR), merge samples
-jes = Systematic("JES","_NoSys","_JESup","_JESdown","tree","overallNormHistoSys")
+jes = Systematic("JES","_NoSys","_JESup","_JESdown","tree","histoSys")
+#jes = Systematic("JES","_NoSys","_JESup","_JESdown","tree","overallNormHistoSys")
 
 statWRwz  = Systematic("SLWR_wz", "_NoSys","","","tree","shapeStat")
 statWRtop = Systematic("SLWR_top","_NoSys","","","tree","shapeStat")
@@ -273,8 +276,7 @@ if doValidation:
 
     #    bkt.setValidationChannels([nJetSLVR2,metSLVR2,meffSLVR2,nBJetSLVR2,metmeffSLVR2,mm2J,srs1l2jTChannel])
     bkt.setValidationChannels([nJetSLVR2,srs1l2jTChannel,mm2J,mm2Jl])
-   
-   
+     
 
 
 #**************
@@ -320,7 +322,7 @@ if myFitType==FitType.Exclusion:
             mm2J.addSystematic(jes)
             pass
         myTopLvl.setSignalChannels([mm2J])
-	
+
 	
 	
 # Create TLegend (AK: TCanvas is needed for that, but it gets deleted afterwards)
