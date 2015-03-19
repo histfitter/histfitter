@@ -306,10 +306,19 @@ class PrepareHistos(object):
             if not (self.channel.nBins == self.configMgr.hists[name].GetNbinsX()) or \
                not (self.channel.binHigh == self.configMgr.hists[name].GetXaxis().GetBinUpEdge(self.configMgr.hists[name].GetNbinsX())) or \
                not (self.channel.binLow == self.configMgr.hists[name].GetBinLowEdge(1)):
-                log.info("Histogram has different binning <"+name+"> in "+self.cacheFileName+", trying from tree ")
-                log.debug("addHistoFromCache: required binning %d,%f,%f, while histo has %d,%f,%f" % (self.channel.nBins,self.channel.binLow,self.channel.binHigh,self.configMgr.hists[name].GetNbinsX(), self.configMgr.hists[name].GetBinLowEdge(1),self.configMgr.hists[name].GetXaxis().GetBinUpEdge(self.configMgr.hists[name].GetNbinsX())))
-                self.configMgr.hists[name] = None
-                return self.__addHistoFromTree(name, self.channel.nBins, self.channel.binLow, self.channel.binHigh, nBins, binLow, binHigh, useOverflow, useUnderflow)
+                if forceNoFallback or not self.useCacheToTreeFallback:
+                    self.configMgr.hists[name] = None
+                    if forceReturn: # used for QCD histograms
+                        log.info("Could not find histogram <"+name+"> in "+self.cacheFileName+" ! Force return.")
+                        return None
+                    log.debug("__addHistoFromCache(): forceNoFallback=%s useCacheToTreeFallback=%s" % (forceNoFallback, self.useCacheToTreeFallback))
+                    log.error("Could not find histogram <"+name+"> in "+self.cacheFileName+" ! ")
+                    raise #Exception("Could not find histogram <"+name+"> in "+self.cacheFileName)
+                else:
+                    log.info("Histogram has different binning <"+name+"> in "+self.cacheFileName+", trying from tree ")
+                    log.debug("addHistoFromCache: required binning %d,%f,%f, while histo has %d,%f,%f" % (self.channel.nBins,self.channel.binLow,self.channel.binHigh,self.configMgr.hists[name].GetNbinsX(), self.configMgr.hists[name].GetBinLowEdge(1),self.configMgr.hists[name].GetXaxis().GetBinUpEdge(self.configMgr.hists[name].GetNbinsX())))
+                    self.configMgr.hists[name] = None
+                    return self.__addHistoFromTree(name, self.channel.nBins, self.channel.binLow, self.channel.binHigh, nBins, binLow, binHigh, useOverflow, useUnderflow)
 
         self.name = name
         return self.configMgr.hists[name]
