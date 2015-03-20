@@ -148,4 +148,31 @@ kompare systable_SS.tex  systable_SS_2.tex
 Indeed you find that the three uncertainties JES, KtScaleWZ, KtScaleTop are reduced if using the systematics type =overallNormHistoSys= with normalization regions.
 
 
----++++ Behind the scenes: internal construction of systematic uncertainties
+---++++ Behind the scenes: internal construction of "normalized" systematic uncertainties
+
+The construction of the normalized histograms contains multiple steps and this thus not necessarily very intuitive. For this reason, we illustrate specifically for the systematics type =overallNormHistoSys= on how the original input histograms are modified. 
+
+Various normalization steps are carried out as follows:
+   * Temporary histograms are built containing the sum of the yields in all normalization regions (this is done for the nominal, the up and the down histogram).
+   * First normalization step: Up and down temporary histograms are scaled to the yield in the nominal temporary histogram.
+   * The obtained scaling factor is applied to the original up and down histograms.
+   * If the systematics type contains an =overall= in the name - second normalization step: Up and down histograms are scaled to the yields in the nominal histogram. The resulting histograms are internally used with an =histoSys= type, the scaling factor with a =overallSys= type.
+
+
+*Caution:* Care must be taken when applying =Norm= type systematics, as only samples that carry a normalization factor =mu_...= in the fit
+can be used. Otherwise the uncertainty on the total event count or normalization is not taken into account for this sample, which
+can lead to underestimation of the sample uncertainty in the signal region.
+
+*Exercise:* 
+
+In the data file data/MyConfigExample.root we have stored both the original, unnormalized histograms and the normalized histograms. Open this file:
+
+root data/MyConfigExample.root
+
+And list the histograms with =.ls=. Histograms like =hWZNom_SLTR_obs_nJet= or =hWZJESHigh_SLTR_obs_nJet= are the unnormalized, original histograms (syntax: =h=+ sample + Nom or systematics + region + =_obs_= + variable). Histograms like =hTopJESHigh_SLWRSLTRNorm= or =hTopNom_SLWRSLTRNorm= (so with a region string identifying the normalization region =SLWRSLTR= and an additional =Norm=) are the temporary histograms used in the first bullet point above. Finally, histograms like =hWZJESHigh_SLTR_obs_nJetNorm= are the final, normalized histograms that are used further (they differ from the name of the original histogram only by a =Norm= at the end).
+
+
+
+
+
+
