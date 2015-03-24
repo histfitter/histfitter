@@ -1,0 +1,2 @@
+Visualizing systematic variations as input by the user is often a very helpful procedure to immediately see where systematic uncertainties look unexpected with respect to a nominal histogram. Weird systematic variations may lead to unstable fits or too a large, unexpected reduction of the originally put uncertainties. For these reasons, we introduce in this example two very simple (and in fact not yet very sophisticated) macros helping the user to visualize the impact of a systematic uncertainty with respect to a nominal histogram.
+
