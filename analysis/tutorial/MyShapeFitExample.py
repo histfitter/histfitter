@@ -55,6 +55,17 @@ configMgr.nPoints=20
 
 configMgr.writeXML = True
 
+#------------------------------------------------------------------------------------------------------
+# Possibility to blind the control, validation and signal regions.
+# We only have one signal region in this config file, thus only blinding the signal region makes sense.
+# the other two commands are only given for information here.
+#------------------------------------------------------------------------------------------------------
+
+configMgr.blindSR = False # Blind the SRs (default is False)
+configMgr.blindCR = False # Blind the CRs (default is False)
+configMgr.blindVR = False # Blind the VRs (default is False)
+#configMgr.useSignalInBlindedData = True
+
 #---------------------------------------------------
 # Specify the default signal point
 # Others to be given via option -g via command line
@@ -73,10 +84,18 @@ configMgr.analysisName = "MyShapeFitExample"
 configMgr.histCacheFile = "data/"+configMgr.analysisName+".root"
 configMgr.outputFileName = "results/"+configMgr.analysisName+"_Output.root"
 
+#activate using of background histogram cache file to speed up processes
+#configMgr.useCacheToTreeFallback = True # enable the fallback to trees
+#configMgr.useHistBackupCacheFile = True # enable the use of an alternate data file
+#configMgr.histBackupCacheFile =  "data/MyShapeFitExample_template.root" # the data file of your previous fit (= the backup cache file)
+
+
 # Scaling calculated by outputLumi / inputLumi
 configMgr.inputLumi = 0.001 # Luminosity of input TTree after weighting
 configMgr.outputLumi = 4.713 # Luminosity required for output histograms
 configMgr.setLumiUnits("fb-1")
+
+
 
 # Set the files to read from
 bgdFiles = []
@@ -96,8 +115,9 @@ configMgr.cutsDict["SR"] = "((lep1Pt < 20 && lep2Pt<10 && met>250 && mt>100 && j
 configMgr.weights = ["genWeight","eventWeight","leptonWeight","triggerWeight","truthWptWeight","bTagWeight2Jet"]
     
 # QCD weights without and with b-jet selection
-configMgr.weightsQCD = "qcdWeight"
-configMgr.weightsQCDWithB = "qcdBWeight"
+# we turn the QCD background of for the tutorial as we do not want to use ATLAS data
+#configMgr.weightsQCD = "qcdWeight"
+#configMgr.weightsQCDWithB = "qcdBWeight"
 
 #--------------------
 # List of systematics
@@ -127,7 +147,8 @@ wzSample = Sample("WZ",kAzure+1)
 #wzSample.setNormFactor("mu_WZ",1.,0.,5.)
 dataSample = Sample("Data",kBlack)
 dataSample.setData()
-
+dataSample.buildHisto([1.,1.,5.,15.,4.,0.],"SR","metmeff2Jet",0.1,0.1)
+dataSample.buildStatErrors([1.,1.,2.4,3.9,2.,0.],"SR","metmeff2Jet")
 
 #**************
 # Exclusion fit

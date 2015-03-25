@@ -1319,8 +1319,10 @@ class ConfigManager(object):
             if not self.hists[sam.blindedHistName]:
                 self.hists[sam.blindedHistName] = TH1F(sam.blindedHistName,sam.blindedHistName,chan.nBins,chan.binLow,chan.binHigh)
 
+                log.info("Blinding with samples:")
                 for s in chan.sampleList:
                     if (not s.isData) and (self.useSignalInBlindedData or s.name!=fitConfig.signalSample):
+                        log.info(s.name)			
                         self.hists[sam.blindedHistName].Add(self.hists[s.histoName])
         return
     
