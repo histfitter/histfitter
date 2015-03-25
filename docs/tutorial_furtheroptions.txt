@@ -1,0 +1,116 @@
+---+ Further important options or features in HistFitter
+
+In this section we discuss further important options that are available in HistFitter and simplify life. ;-)
+
+---++ Build histograms from user input
+
+This functionality is very useful if you just want to quickly define or build some histogram, e.g. to test what happens if the observed data were at that specific value and not at that other value...
+
+You see an example for this again in =analysis/tutorial/MyShapeFitExample.py=:
+
+
+dataSample = Sample("Data",kBlack)
+dataSample.setData()
+dataSample.buildHisto([1.,1.,5.,15.,4.,0.],"SR","metmeff2Jet",0.1,0.1)
+dataSample.buildStatErrors([1.,1.,2.4,3.9,2.,0.],"SR","metmeff2Jet")
+
+The first command 
+
+dataSample.buildHisto([1.,1.,5.,15.,4.,0.],"SR","metmeff2Jet",0.1,0.1)
+
+builds a data histogram with 6 bins with the bin content =[1.,1.,5.,15.,4.,0.]= in the region =SR= for the distribution =metmeff2Jet=. The last two numbers indicate the lower bin edge of the lowest bin and the bin width.
+
+The second command 
+
+dataSample.buildStatErrors([1.,1.,2.4,3.9,2.,0.],"SR","metmeff2Jet")
+
+builds statistical errors on the histogram created by =buildHisto=.
+
+When you run 
+
+HistFitter.py -t -F excl analysis/tutorial/MyShapeFitExample.py
+
+and open the file
+
+root data/MyShapeFitExample.root
+
+You can have a look how the histogram built looks like
+
+hData_SR_obs_metmeff2Jet->Draw()
+
+This usual option has been used in this tutorial quite often, as it allows us to avoid using real ATLAS data. 
+
+---++ Blinding of signal, control and validation regions
+
+When you do not want to use real data an alternative to the example above of building some fake data is to *blind* the data. Blinding the data means that the data will be assumed to be equal to the total background estimate *before* the fit.
+
+This possibility is usually used when you design an analysis and are only interested in looking at the expected sensitivity, but do not want to bias yourself with the knowledge about the real data.
+
+Looking again at =analysis/tutorial/MyShapeFitExample.py= you find the lines:
+
+configMgr.blindSR = False # Blind the SRs (default is False)
+configMgr.blindCR = False # Blind the CRs (default is False)
+configMgr.blindVR = False # Blind the VRs (default is False)
+
+In this case our configuration file has only one signal region, but no control or validation regions. It thus does only make sense to blind the signal region. Try this by modifying the following line:
+
+configMgr.blindSR = True # Blind the SRs (default is False)
+
+Running now 
+
+HistFitter.py -t -w -F excl -f -m "all" analysis/tutorial/MyShapeFitExample.py
+
+and producing a yields table:
+
+YieldsTable.py -s Top,WZ,SM_GG_onestepCC_425_385_345 -c SR_metmeff2Jet -w results/MyShapeFitExample/Exclusion_SM_GG_onestepCC_425_385_345_combined_NormalMeasurement_model_afterFit.root -o MyYieldsTable.tex
+
+Looking at =MyYieldsTable.tex= you find indeed that the observed data corresponds to the yields of the =Top= + =WZ= backgrounds.
+
+You will notice that the blinding did only use the background yields, but not the signal yield. If you want to add the signal yield as well to the 'fake' observed data, activate the option:
+
+configMgr.useSignalInBlindedData = True
+
+Exercise: convince yourself that now indeed the 'fake' observed data corresponds to =Top= + =WZ= + signal.
+
+---++ Recycling already built histograms
+
+This very useful option allows you to reuse histograms that you have already built some time ago and to only build the histograms you really don't have from trees using =-t=.
+
+To illustrate how it works please run again 
+
+HistFitter.py -t -F excl analysis/tutorial/MyShapeFitExample.py
+
+This will - as you know - produce the =.root= file =data/MyShapeFitExample.root=. Rename this file, e.g. as =data/MyShapeFitExample_template.root=
+
+Now uncomment the following lines in the configuration file =analysis/tutorial/MyShapeFitExample.py=:
+
+#activate using of background histogram cache file to speed up processes
+configMgr.useCacheToTreeFallback = True # enable the fallback to trees
+configMgr.useHistBackupCacheFile = True # enable the use of an alternate data file
+configMgr.histBackupCacheFile =  "data/MyShapeFitExample_template.root" # the data file of your previous fit (= the backup cache file)
+
+To illustrate the benefits of these lines, let's now run over another signal model, e.g. =SM_GG_onestepCC_505_305_105=:
+
+HistFitter.py -w -g SM_GG_onestepCC_505_305_105 analysis/tutorial/MyShapeFitExample.py
+
+Note: it's very important to run only =-w= and not =-t=! If running =-t= you will reproduce all histograms, like this only the histograms you don't have in =data/MyShapeFitExample_template.root=.
+
+Lines like this:
+
+<INFO> ConfigManager:   Sample: SM_GG_onestepCC_505_305_105
+<INFO> PrepareHistos: Could not get histogram <hSM_GG_onestepCC_505_305_105Nom_SR_obs_metmeff2Jet> from backupCacheFile data/MyShapeFitExample_template.root, trying cacheFile
+<INFO> PrepareHistos: Could not find histogram <hSM_GG_onestepCC_505_305_105Nom_SR_obs_metmeff2Jet> in data/MyShapeFitExample.root, trying from tree
+
+inform you that for the signal point =SM_GG_onestepCC_505_305_105= no histogram could be found in the file =data/MyShapeFitExample_template.root= and neither in the file =data/MyShapeFitExample.root=. The required histogram will thus be produced from tree.
+
+This option is very helpful if creating tons of different workspaces with different signal models in a very fast and efficient way.
+
+---++ Setting sample specific weights
+
+In some situations it is necessary to give a specific background or signal sample a specific weight - e.g. when you want to test just a tenth of the signal model that you have implemented or if you have derived some reweighting procedure for some background and want to apply it to just that background etc.
+
+For such cases we have the option
+
+sigSample.addSampleSpecificWeight("0.001") #set whatever weight you want, but it needs to be given as string
+
+Looking at our configuration file analysis/tutorial/MyShapeFitExample.py you can find this line and uncomment it to study its effect on the result. (You certainly know by now how to do this :-) )
