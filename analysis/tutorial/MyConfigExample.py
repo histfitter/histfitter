@@ -282,8 +282,10 @@ if doValidation:
     #    bkt.setValidationChannels([nJetSLVR2,metSLVR2,meffSLVR2,nBJetSLVR2,metmeffSLVR2,mm2J,srs1l2jTChannel])
     bkt.setValidationChannels([nJetSLVR2,srs1l2jTChannel,mm2J,mm2Jl])
      
-    dataSample.buildHisto([1.,6.,16.,3.,0.],"SS","metmeff2Jet",0.2)
-    
+    dataSample.buildHisto([0.,1.,6.,16.,3.,0.],"SS","metmeff2Jet",0.1,0.1)
+    dataSample.buildHisto([25.],"SR1sl2j","cuts",0.5)
+    dataSample.buildHisto([1.,6.,24.,37.,7.,0.],"SSloose","metmeff2Jet",0.1,0.1)   
+    dataSample.buildHisto([403.,202.,93.,39.,11.,10.,4.,1.],"SLVR2","nJet",2)
 
 #**************
 # Discovery fit
@@ -297,7 +299,7 @@ if myFitType==FitType.Discovery:
     ssChannel.addSystematic(jes)
     ssChannel.addDiscoverySamples(["SS"],[1.],[0.],[100.],[kMagenta])
     discovery.setSignalChannels([ssChannel])
-
+    dataSample.buildHisto([26.],"SS","cuts",0.5)
 
 #-----------------------------
 # Exclusion fits (1-step simplified model in this case)
