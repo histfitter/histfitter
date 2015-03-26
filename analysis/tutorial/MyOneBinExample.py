@@ -111,6 +111,7 @@ wzSample = Sample("WZ",kAzure+1)
 #wzSample.setNormFactor("mu_WZ",1.,0.,5.)
 dataSample = Sample("Data",kBlack)
 dataSample.setData()
+dataSample.buildHisto([3.],"SR","cuts",0.5)
 
 #**************
 # Discovery fit

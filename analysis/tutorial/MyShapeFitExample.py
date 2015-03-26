@@ -147,8 +147,8 @@ wzSample = Sample("WZ",kAzure+1)
 #wzSample.setNormFactor("mu_WZ",1.,0.,5.)
 dataSample = Sample("Data",kBlack)
 dataSample.setData()
-dataSample.buildHisto([1.,1.,5.,15.,4.,0.],"SR","metmeff2Jet",0.1,0.1)
-dataSample.buildStatErrors([1.,1.,2.4,3.9,2.,0.],"SR","metmeff2Jet")
+dataSample.buildHisto([0.,1.,5.,15.,4.,0.],"SR","metmeff2Jet",0.1,0.1)
+#dataSample.buildStatErrors([1.,1.,2.4,3.9,2.,0.],"SR","metmeff2Jet")
 
 #**************
 # Exclusion fit

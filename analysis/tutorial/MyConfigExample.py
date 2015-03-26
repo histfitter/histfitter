@@ -47,7 +47,7 @@ import ROOT
 # Flags to control which fit is executed
 #---------------------------------------
 useStat=True
-doValidation=True #use or use not validation regions to check exptrapolation to signal regions
+doValidation=False #use or use not validation regions to check exptrapolation to signal regions
 
 #-------------------------------
 # Parameters for hypothesis test
@@ -57,6 +57,8 @@ doValidation=True #use or use not validation regions to check exptrapolation to 
 configMgr.calculatorType=2
 configMgr.testStatType=3
 configMgr.nPoints=20
+#configMgr.scanRange = (0., 2.)
+
 #--------------------------------
 # Now we start to build the model
 #--------------------------------
@@ -144,15 +146,18 @@ bgSample = Sample("BG",kYellow-3)
 bgSample.setNormFactor("mu_BG",1.,0.,5.)
 bgSample.setStatConfig(useStat)
 bgSample.setNormRegions([("SLWR","nJet"),("SLTR","nJet")])
+#
 qcdSample = Sample("QCD",kGray+1)
 qcdSample.setQCD(True,"histoSys")
 qcdSample.setStatConfig(useStat)
+#
 dataSample = Sample("Data",kBlack)
 dataSample.setData()
-
+dataSample.buildHisto([86.,66.,62.,35.,11.,7.,2.,0.],"SLTR","nJet",2)
+dataSample.buildHisto([1092.,426.,170.,65.,27.,9.,4.,1.],"SLWR","nJet",2)
 
 # set the file from which the samples should be taken
-for sam in [topSample, wzSample, bgSample, qcdSample, dataSample]:
+for sam in [topSample, wzSample, qcdSample, bgSample, dataSample]:
         sam.setFileList(bgdFiles)
 
 #Binnings
@@ -190,7 +195,7 @@ if useStat:
     bkt.statErrThreshold=0.05 
 else:
     bkt.statErrThreshold=None
-bkt.addSamples([topSample,wzSample,qcdSample,bgSample,dataSample])
+bkt.addSamples([topSample,wzSample,bgSample,qcdSample,dataSample])
 
 # Systematics to be applied globally within this topLevel
 bkt.getSample("Top").addSystematic(topKtScale)
@@ -277,7 +282,8 @@ if doValidation:
     #    bkt.setValidationChannels([nJetSLVR2,metSLVR2,meffSLVR2,nBJetSLVR2,metmeffSLVR2,mm2J,srs1l2jTChannel])
     bkt.setValidationChannels([nJetSLVR2,srs1l2jTChannel,mm2J,mm2Jl])
      
-
+    dataSample.buildHisto([1.,6.,16.,3.,0.],"SS","metmeff2Jet",0.2)
+    
 
 #**************
 # Discovery fit
@@ -297,8 +303,9 @@ if myFitType==FitType.Discovery:
 # Exclusion fits (1-step simplified model in this case)
 #-----------------------------
 if myFitType==FitType.Exclusion:
-    sigSamples=["SM_GG_onestepCC_425_385_345"]
-                        
+    sigSamples=["SM_GG_onestepCC_425_385_345"] 
+    dataSample.buildHisto([1.,6.,16.,3.,0.],"SS","metmeff2Jet",0.2,0.1) 
+    
     for sig in sigSamples:
         myTopLvl = configMgr.addFitConfigClone(bkt,"Sig_%s"%sig)
 
