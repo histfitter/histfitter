@@ -37,9 +37,9 @@ from systematic import Systematic
 from math import sqrt
 
 from ROOT import gROOT, TLegend, TLegendEntry, TCanvas
-gROOT.LoadMacro("./macros/AtlasStyle.C")
+#gROOT.LoadMacro("./macros/AtlasStyle.C")
 import ROOT
-ROOT.SetAtlasStyle()
+#ROOT.SetAtlasStyle()
 
 #---------------------------------------------------------------------------------------------
 # Some flags for overridding normal execution and telling ROOT to shut up... use with caution!
@@ -149,7 +149,8 @@ qcdSample.setQCD(True,"histoSys")
 qcdSample.setStatConfig(useStat)
 dataSample = Sample("Data",kBlack)
 dataSample.setData()
-
+dataSample.buildHisto([86.,66.,62.,35.,11.,7.,2.,0.],"SLTR","nJet",2)
+dataSample.buildHisto([1092.,426.,170.,65.,27.,9.,4.,1.],"SLWR","nJet",2)
 
 # set the file from which the samples should be taken
 for sam in [topSample, wzSample, bgSample, qcdSample, dataSample]:
@@ -335,9 +336,10 @@ if doValidation:
 
     #    bkt.setValidationChannels([nJetSLVR2,metSLVR2,meffSLVR2,nBJetSLVR2,metmeffSLVR2,mm2J,srs1l2jTChannel])
     bkt.setValidationChannels([nJetSLVR2,srs1l2jTChannel,mm2J])
-   
-   
-
+     
+    dataSample.buildHisto([0.,1.,6.,16.,3.,0.],"SS","metmeff2Jet",0.1,0.1)
+    dataSample.buildHisto([25.],"SR1sl2j","cuts",0.5) 
+    dataSample.buildHisto([403.,202.,93.,39.,11.,10.,4.,1.],"SLVR2","nJet",2)
 
 #**************
 # Discovery fit
@@ -351,14 +353,15 @@ if doDiscovery:
     ssChannel.addSystematic(jes)
     ssChannel.addDiscoverySamples(["SS"],[1.],[0.],[100.],[kMagenta])
     discovery.setSignalChannels([ssChannel])
-
+    dataSample.buildHisto([26.],"SS","cuts",0.5)
 
 #-----------------------------
 # Exclusion fits (1-step simplified model in this case)
 #-----------------------------
 if doExclusion:
     sigSamples=["SM_GG_onestepCC_425_385_345"]
-                        
+    dataSample.buildHisto([1.,6.,16.,3.,0.],"SS","metmeff2Jet",0.2,0.1)   
+             
     for sig in sigSamples:
         myTopLvl = configMgr.addTopLevelXMLClone(bkt,"Sig_%s"%sig)
 
