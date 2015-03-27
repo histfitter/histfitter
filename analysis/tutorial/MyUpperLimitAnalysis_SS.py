@@ -1,3 +1,20 @@
+"""
+ **********************************************************************************
+ * Project: HistFitter - A ROOT-based package for statistical data analysis       *
+ * Package: HistFitter                                                            *
+ *                                                                                *
+ * Description:                                                                   *
+ *      Configuration file to calculate upper limits                              * 
+ *                                                                                *
+ * Authors:                                                                       *
+ *      HistFitter group, CERN, Geneva                                            *
+ *                                                                                *
+ * Redistribution and use in source and binary forms, with or without             *
+ * modification, are permitted according to the terms listed in the file          *
+ * LICENSE.                                                                       *
+ **********************************************************************************
+"""
+
 ################################################################
 ## In principle all you have to setup is defined in this file ##
 ################################################################
@@ -9,11 +26,8 @@ from math import sqrt
 
 import os
 
-# Setup for ATLAS plotting
 from ROOT import gROOT
-#gROOT.LoadMacro("./macros/AtlasStyle.C")
 import ROOT
-#ROOT.SetAtlasStyle()
 
 ##########################
 

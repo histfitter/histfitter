@@ -19,13 +19,6 @@
 ## In principle all you have to setup is defined in this file ##
 ################################################################
 
-## This configuration performs a simplified version of the "soft lepton" fits documented in ATLAS-CONF-2012-041.
-## Only two systematics are considered:
-##   -JES (Tree-based) conservatively treated like an MC stat error
-##   -Alpgen Kt scale (weight-based)
-##
-## For the real complete implementation, see: HistFitterUser/MET_jets_leptons/python/MyOneLeptonKtScaleFit_mergerSoftLep.py
-
 from configManager import configMgr
 from ROOT import kBlack,kWhite,kGray,kRed,kPink,kMagenta,kViolet,kBlue,kAzure,kCyan,kTeal,kGreen,kSpring,kYellow,kOrange,kDashed,kSolid,kDotted
 from configWriter import fitConfig,Measurement,Channel,Sample
@@ -33,9 +26,7 @@ from systematic import Systematic
 from math import sqrt
 
 from ROOT import gROOT, TLegend, TLegendEntry, TCanvas
-#gROOT.LoadMacro("./macros/AtlasStyle.C")
 import ROOT
-#ROOT.SetAtlasStyle()
 
 #---------------------------------------------------------------------------------------------
 # Some flags for overridding normal execution and telling ROOT to shut up... use with caution!
@@ -250,11 +241,6 @@ nJetWS.maxY = 5000
 nJetWS.titleX = "n jets"
 nJetWS.titleY = "Entries"
 nJetWS.logY = True
-nJetWS.ATLASLabelX = 0.25
-nJetWS.ATLASLabelY = 0.85
-nJetWS.ATLASLabelText = "Work in progress"
-
-
 #--------------------------------------------------------------
 # Validation regions - not necessarily statistically independent
 #--------------------------------------------------------------

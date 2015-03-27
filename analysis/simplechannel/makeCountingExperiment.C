@@ -1,8 +1,15 @@
-// Originally by Daniel Whiteson, 
-// see: https://twiki.cern.ch/twiki/bin/viewauth/AtlasProtected/ExoticsStatisticsTutorial
-// modified by Max Baak
+/**********************************************************************************
+ * Project: HistFitter - A ROOT-based package for statistical data analysis       *
+ * Package: HistFitter                                                            *
+ *                                                                                *
+ * Authors:                                                                       *
+ *      HistFitter group, CERN, Geneva                                            *
+ *                                                                                *
+ * Redistribution and use in source and binary forms, with or without             *
+ * modification, are permitted according to the terms listed in the file          *
+ * LICENSE.                                                                       *
+ **********************************************************************************/
 
-//#include "OneSidedFrequentistUpperLimitWithBands.C"
 #include "TFile.h"
 #include "TH1.h"
 #include "TSystem.h"

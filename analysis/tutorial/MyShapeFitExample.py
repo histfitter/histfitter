@@ -35,9 +35,7 @@ import logger
 from logger import Logger
 
 from ROOT import gROOT
-#gROOT.LoadMacro("./macros/AtlasStyle.C")
 import ROOT
-#ROOT.SetAtlasStyle()
 
 log = Logger("MyShapeFitExample")
 log.setLevel(logger.INFO) #should have no effect if -L is used

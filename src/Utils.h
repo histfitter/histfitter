@@ -231,13 +231,6 @@ namespace Util
 				  RooRealVar* regionVar, RooFitResult* rFit, Double_t Nsigma = 1.);
 
   /**
-     Add ATLAS label to plot
-     # ATLAS specific - FIXME ; remove for public release
-
-  */
-  void ATLASLabel(Double_t x,Double_t y, const char* text=NULL,Color_t color=kBlack) ;
-  
-  /**
      Add text to plot
   */
   void AddText(Double_t x,Double_t y,char* text=NULL,Color_t color=kBlack) ;

@@ -86,9 +86,6 @@ class Channel(object):
         self.titleX = None
         self.titleY = None
         self.logY = None
-        self.ATLASLabelX = None
-        self.ATLASLabelY = None
-        self.ATLASLabelText = None
         self.showLumi = None
         self.lumi = None
         self.remapSystChanName = ""

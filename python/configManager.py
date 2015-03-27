@@ -19,7 +19,7 @@
 """
 
 from ROOT import THStack,TLegend,TCanvas,TFile,std,TH1F
-from ROOT import ConfigMgr,FitConfig,ChannelStyle #this module comes from gSystem.Load("libSusyFitter.so")
+from ROOT import ConfigMgr,FitConfig,ChannelStyle #this module comes from gSystem.Load("libHistFitter.so")
 from prepareHistos import PrepareHistos
 from copy import deepcopy
 from histogramsManager import histMgr
@@ -500,12 +500,6 @@ class ConfigManager(object):
                      style.setTitleY(c.titleY)
                  if not c.logY is None:
                      style.setLogY(c.logY)
-                 if not c.ATLASLabelX is None:
-                     style.setATLASLabelX(c.ATLASLabelX)
-                 if not c.ATLASLabelY is None:
-                     style.setATLASLabelY(c.ATLASLabelY)
-                 if not c.ATLASLabelX is None:
-                     style.setATLASLabelText(c.ATLASLabelText)
                  if not c.showLumi is None:
                      style.setShowLumi(c.showLumi)     
                  if not self.outputLumi is None:

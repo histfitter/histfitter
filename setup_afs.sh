@@ -28,22 +28,11 @@ if [ ! $ROOTSYS ]; then
   echo "With build ${BUILD} ..."
   export CWD=$PWD
   # setup corresponding root
-  cd $CERNPREFIX/atlas/offline/external/FullChainTest/tier0/test/mbaak/root/root_v$ROOTVERSION/
-  #cd $CERNPREFIX/sw/lcg/app/releases/ROOT/$ROOTVERSION/$BUILD/root/
-  ###cd $CERNPREFIX/atlas/offline/external/FullChainTest/tier0/test/mbaak/root/root-v5-34/
-  ###cd $CERNPREFIX/work/g/gbesjes/root-v5-34-patches
-  #cd $CERNPREFIX/atlas/offline/external/FullChainTest/tier0/test/mbaak/root/root-v5-34-trunk/
+  cd $CERNPREFIX/sw/lcg/app/releases/ROOT/$ROOTVERSION/$BUILD/root/
   source bin/thisroot.sh
   cd $CWD
   # xrootd setup
   source /afs/cern.ch/sw/lcg/app/releases/ROOT/$ROOTVERSION/$BUILD/root/bin/setxrd.sh /afs/cern.ch/sw/lcg/external/xrootd/3.2.7/$BUILD
-  ## setup xrootd on top of this
-  #export PATH=$CERNPREFIX/sw/lcg/external/xrootd/3.2.7/$BUILD/bin:$PATH
-  #export LD_LIBRARY_PATH="$CERNPREFIX/sw/lcg/external/xrootd/3.2.7/$BUILD/lib64:$LD_LIBRARY_PATH"
-  ## hack for xrootd: libNetx library from pre-installed root version
-  #export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$CERNPREFIX/sw/lcg/app/releases/ROOT/$ROOTVERSION/$BUILD/root/lib"
-  ## missing libraries on lxbatch machines
-  #export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$CERNPREFIX/atlas/offline/external/FullChainTest/tier0/test/mbaak/root/extlibs64"
 fi
 
 # check Root environment setup 
@@ -67,11 +56,6 @@ export PATH=$HISTFITTER/bin:$HISTFITTER/scripts:${PATH}
 export LD_LIBRARY_PATH=$HISTFITTER/lib:${LD_LIBRARY_PATH}
 # PYTHONPATH contains all directories that are used for 'import bla' commands
 export PYTHONPATH=$HISTFITTER/python:$HISTFITTER/scripts:$HISTFITTER/macros:$HISTFITTER/lib:$PYTHONPATH
-
-# set SVN path to defaults
-export SVNTEST="svn+ssh://svn.cern.ch/reps/atlastest"
-export SVNROOT="svn+ssh://svn.cern.ch/reps/atlasoff"
-export SVNPHYS="svn+ssh://svn.cern.ch/reps/atlasphys"
 
 # Hack for ssh from mac 
 export LC_ALL=C 

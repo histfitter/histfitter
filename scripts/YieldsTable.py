@@ -21,7 +21,7 @@ ROOT.gROOT.SetBatch(True)
 ROOT.PyConfig.IgnoreCommandLineOptions = True
 
 from ROOT import gROOT,gSystem,gDirectory, PyConfig
-gSystem.Load("libSusyFitter.so")
+gSystem.Load("libHistFitter.so")
 gROOT.Reset()
 
 from ROOT import TFile, RooWorkspace, TObject, TString, RooAbsReal, RooRealVar, RooFitResult, RooDataSet, RooAddition, RooArgSet, RooFormulaVar, RooAbsData, RooRandom, RooArgList, RooBinningCategory

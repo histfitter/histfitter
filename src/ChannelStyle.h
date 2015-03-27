@@ -90,15 +90,6 @@ class ChannelStyle : public TObject{
   Bool_t getLogY() { return m_logY; }
   void setLogY(Bool_t doLogy = kFALSE) { m_logY = doLogy; }
 
-  Double_t getATLASLabelX() { return m_ATLASLabelX;}
-  void setATLASLabelX(Double_t x) { m_ATLASLabelX = x; }
-
-  Double_t getATLASLabelY() { return m_ATLASLabelY;}
-  void setATLASLabelY(Double_t y) { m_ATLASLabelY = y; }
-
-  TString getATLASLabelText() { return m_ATLASLabelText;}
-  void setATLASLabelText(const TString&  text) { m_ATLASLabelText = text; }
-
   Bool_t getShowLumi() { return m_showLumi;}
   void setShowLumi(Bool_t showLumi = kFALSE) { m_showLumi = showLumi; }
 
@@ -148,9 +139,6 @@ private:
   TString m_titleX;
   TString m_titleY;
   Bool_t m_logY;
-  Double_t m_ATLASLabelX;
-  Double_t m_ATLASLabelY;
-  TString m_ATLASLabelText;
   Bool_t m_showLumi;        
 
   Int_t m_defaultSampleColor;

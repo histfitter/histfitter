@@ -253,13 +253,6 @@ void ValidationUtils::PullPlot3(XtraValues* inValsEl, XtraValues* inValsMu, cons
    frame->Draw();   
 
    Float_t xLeft=0.4;
-   TLatex *atlasLabel = new TLatex();
-   atlasLabel->SetNDC();
-   atlasLabel->SetTextFont( 72 );
-   atlasLabel->SetTextColor( 1 );
-   atlasLabel->SetTextSize( 0.05 );
-   atlasLabel->DrawLatex(xLeft,0.97, "ATLAS");
-   atlasLabel->AppendPad();
    
    TLatex *prel = new TLatex();
    prel->SetNDC();
@@ -438,13 +431,6 @@ void ValidationUtils::PullPlot5(XtraValues* inValsEl, XtraValues* inValsMu, Xtra
    frame->Draw();   
 
    Float_t xLeft=0.4;
-   TLatex *atlasLabel = new TLatex();
-   atlasLabel->SetNDC();
-   atlasLabel->SetTextFont( 72 );
-   atlasLabel->SetTextColor( 1 );
-   atlasLabel->SetTextSize( 0.05 );
-   atlasLabel->DrawLatex(xLeft,0.97, "ATLAS");
-   atlasLabel->AppendPad();
    
    TLatex *prel = new TLatex();
    prel->SetNDC();
@@ -611,13 +597,6 @@ void ValidationUtils::PullPlot4(XtraValues* inVals,const TString& outFileNamePre
    frame->Draw();   
  
    Float_t xLeft=0.4;
-   TLatex *atlasLabel = new TLatex();
-   atlasLabel->SetNDC();
-   atlasLabel->SetTextFont( 72 );
-   atlasLabel->SetTextColor( 1 );
-   atlasLabel->SetTextSize( 0.05 );
-   atlasLabel->DrawLatex(xLeft,0.97, "ATLAS");
-   atlasLabel->AppendPad();
    
    TLatex *prel = new TLatex();
    prel->SetNDC();

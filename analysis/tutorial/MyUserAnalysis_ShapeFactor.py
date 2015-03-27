@@ -7,11 +7,8 @@ from configWriter import Measurement,Sample
 from systematic import Systematic
 from math import sqrt
 
-# Setup for ATLAS plotting
 from ROOT import gROOT
-gROOT.LoadMacro("./macros/AtlasStyle.C")
 import ROOT
-ROOT.SetAtlasStyle()
 
 ##########################
 

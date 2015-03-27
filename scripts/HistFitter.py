@@ -19,7 +19,7 @@ import ROOT
 ROOT.PyConfig.IgnoreCommandLineOptions = True
 
 from ROOT import gROOT,gSystem,gDirectory,RooAbsData,RooRandom,RooWorkspace
-gSystem.Load("libSusyFitter.so")
+gSystem.Load("libHistFitter.so")
 from ROOT import ConfigMgr
 gROOT.Reset()
 import os
