@@ -1,5 +1,6 @@
 2015-03-27 Jeanette Miriam Lorenz <jeanette.miriam.lorenz@cern.ch>
         * update of multiple tutorial macros to not using ATLAS data
+        * tagging HistFitter-00-00-46 for tutorial at DESY
 
 2015-03-14 Jeanette Miriam Lorenz <jeanette.miriam.lorenz@cern.ch>
         M       analysis/tutorial/MyShapeFitExample.py
