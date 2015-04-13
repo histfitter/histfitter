@@ -304,8 +304,8 @@ class PrepareHistos(object):
 
         if not (self.configMgr.hists[name] is None):
             if not (int(self.channel.nBins) == int(self.configMgr.hists[name].GetNbinsX())) or \
-               ( abs(self.channel.binLow/self.configMgr.hists[name].GetBinLowEdge(1)-1)>0.00001 ) or \
-               ( abs(self.channel.binHigh/self.configMgr.hists[name].GetXaxis().GetBinUpEdge(self.configMgr.hists[name].GetNbinsX()) -1) > 0.00001):
+               ( abs(self.channel.binLow - self.configMgr.hists[name].GetBinLowEdge(1))>0.00001 ) or \
+               ( abs(self.channel.binHigh - self.configMgr.hists[name].GetXaxis().GetBinUpEdge(self.configMgr.hists[name].GetNbinsX())) > 0.00001):
                 if forceNoFallback or not self.useCacheToTreeFallback:
                     self.configMgr.hists[name] = None
                     if forceReturn: # used for QCD histograms

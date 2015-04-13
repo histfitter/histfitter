@@ -13,8 +13,8 @@ HistFitter Group <atlas-phys-susy-histfitter@cern.ch>
 
 Setup:
 ------
-source setup.sh     (from lxplus)
-source setup5.sh    (from lxplus5)
+source setup.sh     (from lxplus, using cvmfs)
+source setup_afs.sh    (from lxplus, using afs)
 
 Recommended Root version:
 -------------------------
@@ -50,16 +50,16 @@ src	     ## source code to make workspaces, do toys.
 
 WebSVN:
 -------
-https://svnweb.cern.ch/trac/atlasphys/browser/Physics/SUSY/Analyses/HistFitter/trunk
+https://svnweb.cern.ch/trac/atlasphys-susy/browser/Physics/SUSY/Analyses/HistFitter/trunk
 
 svn package tips:
 -----------------
 1. At CERN:
-export SVNPHYS="svn+ssh://svn.cern.ch/reps/atlasphys"
+export SVNPHYS="svn+ssh://svn.cern.ch/reps/atlasphys-susy"
 svn co $SVNPHYS/Physics/SUSY/Analyses/HistFitter/trunk HistFitter
 
 2. To checkout with a different username (e.g. on your lapton), do:
-export SVNPHYS="svn+ssh://CERNUSERNAME@svn.cern.ch/reps/atlasphys"
+export SVNPHYS="svn+ssh://CERNUSERNAME@svn.cern.ch/reps/atlasphys-susy"
 svn co $SVNPHYS/Physics/SUSY/Analyses/HistFitter/trunk HistFitter
 
 ... where CERNUSERNAMEHERE is your CERN username.
