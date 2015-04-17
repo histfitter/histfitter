@@ -29,6 +29,8 @@
 class TH1;
 class RooCurve ;
 
+using namespace std;
+
 class RooHist : public TGraphAsymmErrors, public RooPlotable {
 public:
   RooHist() ;

@@ -320,9 +320,9 @@ if __name__ == "__main__":
                         
                 if not fitFound:
                     log.fatal("Unable to find fitConfig with name %s, bailing out" % HistFitterArgs.fitname)
-
-            log.info("Running on fitConfig %s" % configMgr.fitConfigs[idx].name)
-            r = GenerateFitAndPlotCPP(configMgr.fitConfigs[idx], configMgr.analysisName, drawBeforeFit, drawAfterFit, drawCorrelationMatrix, drawSeparateComponents, drawLogLikelihood, runMinos, minosPars, doFixParameters, fixedPars)
+            for idx in range(len(configMgr.fitConfigs)):
+                log.info("Running on fitConfig %s" % configMgr.fitConfigs[idx].name)
+                r = GenerateFitAndPlotCPP(configMgr.fitConfigs[idx], configMgr.analysisName, drawBeforeFit, drawAfterFit, drawCorrelationMatrix, drawSeparateComponents, drawLogLikelihood, runMinos, minosPars, doFixParameters, fixedPars)
             pass
         log.info(" GenerateFitAndPlotCPP(configMgr.fitConfigs[%d], configMgr.analysisName, drawBeforeFit, drawAfterFit, drawCorrelationMatrix, drawSeparateComponents, drawLogLikelihood, runMinos, minosPars, doFixParameters, fixedPars)" % idx)
         log.info("   where drawBeforeFit, drawAfterFit, drawCorrelationMatrix, drawSeparateComponents, drawLogLikelihood are booleans")
