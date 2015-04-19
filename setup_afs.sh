@@ -71,7 +71,7 @@ export PYTHONPATH=$HISTFITTER/python:$HISTFITTER/scripts:$HISTFITTER/macros:$HIS
 # set SVN path to defaults
 export SVNTEST="svn+ssh://svn.cern.ch/reps/atlastest"
 export SVNROOT="svn+ssh://svn.cern.ch/reps/atlasoff"
-export SVNPHYS="svn+ssh://svn.cern.ch/reps/atlasphys"
+export SVNPHYS="svn+ssh://svn.cern.ch/reps/atlasphys-susy"
 
 # Hack for ssh from mac 
 export LC_ALL=C 
