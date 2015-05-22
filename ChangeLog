@@ -1,6 +1,12 @@
+2015-05-22 Jeanette Miriam Lorenz <jeanette.miriam.lorenz@cern.ch>
+        * update to Root 5.34.30 in setup_afs.sh
+        * remove reference to external xrootd libaries in setup_afs.sh
+        * tag HistFitter-00-00-48
+
 2015-04-13 Jeanette Miriam Lorenz <jeanette.miriam.lorenz@cern.ch>
         * update README to latest svn path
         * fix a bug (potential division by 0) in python/prepareHistos.py
+        * tagging HistFitter-00-00-47
 
 2015-03-27 Jeanette Miriam Lorenz <jeanette.miriam.lorenz@cern.ch>
         * update of multiple tutorial macros to not using ATLAS data
