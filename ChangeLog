@@ -1,3 +1,10 @@
+2015-06-16 Jeanette Miriam Lorenz <jeanette.miriam.lorenz@cern.ch>
+        M       src/TEasyFormula.cxx
+        M       setup_afs.sh
+        * changing setup_afs.sh for update to Root 6.04
+        * small modification in src/TEasyFormula.cxx to accommodate new design of TFormula in Root 6.04
+
+
 2015-04-13 Jeanette Miriam Lorenz <jeanette.miriam.lorenz@cern.ch>
         * update README to latest svn path
         * fix a bug (potential division by 0) in python/prepareHistos.py

@@ -119,7 +119,7 @@ Int_t TEasyFormula::DefinedVariable(TString &name, int& action) {
    */
 
     Int_t ret = DefinedVariable(name) ;
-    if (ret>=0) { action = kDefinedVariable; }
+    if (ret>=0) { action = 150; }
     return ret ;
 }
 
