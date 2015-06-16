@@ -28,7 +28,7 @@ import argparse
 from logger import Logger
 log = Logger('HistFitter')
 
-def GenerateFitAndPlotCPP(fc, anaName, drawBeforeFit, drawAfterFit, drawCorrelationMatrix, drawSeparateComponents, drawLogLikelihood, minos, minosPars, doFixParameters, fixedPars):
+def GenerateFitAndPlotCPP(fc, anaName, drawBeforeFit, drawAfterFit, drawCorrelationMatrix, drawSeparateComponents, drawLogLikelihood, minos, minosPars, doFixParameters, fixedPars, ReduceCorrMatrix):
     """ 
     function call to top-level C++ side function Util.GenerateFitAndPlot()
 
@@ -43,6 +43,7 @@ def GenerateFitAndPlotCPP(fc, anaName, drawBeforeFit, drawAfterFit, drawCorrelat
     @param minosPars When minos is called, defining what parameters need asymmetric error calculation
     @param doFixParameters Boolean deciding if some parameters are fixed to a value given or not
     @param fixedPars String of parameter1:value1,parameter2:value2 giving information on which parameter to fix to which value if dofixParameter == True
+    @ReduceCorrMatrix Boolean deciding whether reduced correlation matrix plot is produced
     """
     
     from ROOT import Util
@@ -56,10 +57,11 @@ def GenerateFitAndPlotCPP(fc, anaName, drawBeforeFit, drawAfterFit, drawCorrelat
     log.debug("GenerateFitAndPlotCPP: minos %s " % minos)
     log.debug("GenerateFitAndPlotCPP: minosPars %s " % minosPars)
     log.debug("GenerateFitAndPlotCPP: doFixParameters %s " % doFixParameters)
-    log.debug("GenerateFitAndPlotCPP: fixedPars %s " % fixedPars)    
+    log.debug("GenerateFitAndPlotCPP: fixedPars %s " % fixedPars)
+    log.debug("GenerateFitAndPlotCPP: ReduceCorrMatrix %s " % ReduceCorrMatrix)
     
     Util.GenerateFitAndPlot(fc.name, anaName, drawBeforeFit, drawAfterFit, drawCorrelationMatrix,
-                            drawSeparateComponents, drawLogLikelihood, minos, minosPars, doFixParameters, fixedPars)
+                            drawSeparateComponents, drawLogLikelihood, minos, minosPars, doFixParameters, fixedPars, ReduceCorrMatrix)
 
 if __name__ == "__main__":
     """
@@ -292,6 +294,8 @@ if __name__ == "__main__":
 
     RooRandom.randomGenerator().SetSeed(configMgr.toySeed)
 
+    ReduceCorrMatrix = configMgr.ReduceCorrMatrix
+
     """
     runs Trees->histos and/or histos->workspace according to specifications
     """
@@ -322,10 +326,10 @@ if __name__ == "__main__":
                     log.fatal("Unable to find fitConfig with name %s, bailing out" % HistFitterArgs.fitname)
 
             log.info("Running on fitConfig %s" % configMgr.fitConfigs[idx].name)
-            r = GenerateFitAndPlotCPP(configMgr.fitConfigs[idx], configMgr.analysisName, drawBeforeFit, drawAfterFit, drawCorrelationMatrix, drawSeparateComponents, drawLogLikelihood, runMinos, minosPars, doFixParameters, fixedPars)
+            r = GenerateFitAndPlotCPP(configMgr.fitConfigs[idx], configMgr.analysisName, drawBeforeFit, drawAfterFit, drawCorrelationMatrix, drawSeparateComponents, drawLogLikelihood, runMinos, minosPars, doFixParameters, fixedPars, ReduceCorrMatrix)
             pass
-        log.info(" GenerateFitAndPlotCPP(configMgr.fitConfigs[%d], configMgr.analysisName, drawBeforeFit, drawAfterFit, drawCorrelationMatrix, drawSeparateComponents, drawLogLikelihood, runMinos, minosPars, doFixParameters, fixedPars)" % idx)
-        log.info("   where drawBeforeFit, drawAfterFit, drawCorrelationMatrix, drawSeparateComponents, drawLogLikelihood are booleans")
+        log.info(" GenerateFitAndPlotCPP(configMgr.fitConfigs[%d], configMgr.analysisName, drawBeforeFit, drawAfterFit, drawCorrelationMatrix, drawSeparateComponents, drawLogLikelihood, runMinos, minosPars, doFixParameters, fixedPars, ReduceCorrMatrix)" % idx)
+        log.info("   where drawBeforeFit, drawAfterFit, drawCorrelationMatrix, drawSeparateComponents, drawLogLikelihood, ReduceCorrMatrix are booleans")
         pass
 
     """

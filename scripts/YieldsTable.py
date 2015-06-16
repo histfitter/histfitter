@@ -25,7 +25,7 @@ gSystem.Load("libSusyFitter.so")
 gROOT.Reset()
 
 from ROOT import TFile, RooWorkspace, TObject, TString, RooAbsReal, RooRealVar, RooFitResult, RooDataSet, RooAddition, RooArgSet, RooFormulaVar, RooAbsData, RooRandom, RooArgList, RooBinningCategory
-from ROOT import Util, TMath, TMap, RooExpandedFitResult
+from ROOT import TMath, TMap, RooExpandedFitResult, Util
 
 from cmdLineUtils import getPdfInRegions,getName,getPdfInRegionsWithRangeName
 

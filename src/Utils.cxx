@@ -152,7 +152,7 @@ double Util::getNonQcdVal(const TString& proc, const TString& reg, TMap* map,con
 //_____________________________________________________________________________
 void Util::GenerateFitAndPlot(TString fcName, TString anaName, Bool_t drawBeforeFit, Bool_t drawAfterFit, Bool_t plotCorrelationMatrix, 
 			      Bool_t plotSeparateComponents, Bool_t plotNLL, Bool_t minos, TString minosPars,
-                              Bool_t doFixParameters, TString fixedPars ){
+                              Bool_t doFixParameters, TString fixedPars, bool ReduceCorrMatrix ){
 
     ConfigMgr* mgr = ConfigMgr::getInstance();
     FitConfig* fc = mgr->getFitConfig(fcName);
@@ -167,7 +167,8 @@ void Util::GenerateFitAndPlot(TString fcName, TString anaName, Bool_t drawBefore
     Logger << kINFO << "     minos = " << minos << GEndl;
     Logger << kINFO << "     minosPars = " << minosPars << GEndl;
     Logger << kINFO << "     doFixParameters = " << doFixParameters << GEndl;
-    Logger << kINFO << "     fixedPars = " << fixedPars << GEndl;    
+    Logger << kINFO << "     fixedPars = " << fixedPars << GEndl;
+    Logger << kINFO << "     ReduceCorrMatrix = " << ReduceCorrMatrix << GEndl;
 
     RooWorkspace* w = GetWorkspaceFromFile(fc->m_inputWorkspaceFileName, "combined");
     if(w==NULL){
@@ -255,7 +256,7 @@ void Util::GenerateFitAndPlot(TString fcName, TString anaName, Bool_t drawBefore
 
     //plot correlation matrix for result
     if(plotCorrelationMatrix)  
-        PlotCorrelationMatrix(result, anaName);
+        PlotCorrelationMatrix(result, anaName, ReduceCorrMatrix);
 
     // plot likelihood
     Bool_t plotPLL = minos;
@@ -1503,7 +1504,7 @@ void Util::PlotNLL(RooWorkspace* w, RooFitResult* rFit, Bool_t plotPLL, TString 
 }
 
 //_____________________________________________________________________________
-TH2D* Util::PlotCorrelationMatrix(RooFitResult* rFit, TString anaName){
+TH2D* Util::PlotCorrelationMatrix(RooFitResult* rFit, TString anaName,  bool ReduceMatrix){
 
 
     if(rFit==NULL){ 
@@ -1534,8 +1535,60 @@ TH2D* Util::PlotCorrelationMatrix(RooFitResult* rFit, TString anaName){
     else if(numPars<40)    gStyle->SetMarkerSize(0.5);
     else     gStyle->SetMarkerSize(0.25);
 
-
     TH2D* h_corr = (TH2D*) rFit->correlationHist(Form("h_corr_%s",rFit->GetName())); 
+
+    if (ReduceMatrix) {
+      // Cleanup corrMattrix from rows and columns with content less then corrThres
+      vector <int> rm_idx; rm_idx.clear();
+      double corrThresh[3] = {0.005,0.015,0.025}; // rounding to 2 digits gives 0.01
+      int nbins = h_corr->GetNbinsX();
+      int index_x=0, index_y=0, Thresh1Counter;//, Thresh0Counter, Thresh2Counter;
+      bool fillHistY, fillHistX;
+
+      // Look for rows and columns indices to remove
+      for (int ix=1; ix<nbins+1; ix++) {
+        //Thresh0Counter = 0;
+        Thresh1Counter = 0;
+        //Thresh2Counter = 0;
+        for (int iy=1; iy<nbins+1; iy++) {
+          if (ix==((nbins+1)-iy)) continue;
+          //if (fabs(h_corr->GetBinContent(ix,iy))>=corrThresh[0]) Thresh0Counter++;
+          if (fabs(h_corr->GetBinContent(ix,iy))>=corrThresh[1]) Thresh1Counter++;
+          //if (fabs(h_corr->GetBinContent(ix,iy))>=corrThresh[2]) Thresh2Counter++;
+        }
+        //if ( Thresh0Counter<(nbins+1)/5. && Thresh1Counter<(nbins+1)/10. && Thresh2Counter==0 ) rm_idx.push_back(ix);
+        if ( Thresh1Counter==0 ) rm_idx.push_back(ix);
+      }
+
+      int nrm_idx = rm_idx.size();
+      int newSize = numPars-nrm_idx;
+      TH2D* h_corr_reduced = new TH2D("h_corr_reduced","h_corr_reduced",newSize,0,newSize,newSize,0,newSize);
+
+      // Copy original matrix to the new without empty rows and columns
+      for (int ix=1; ix<nbins+1; ix++) {
+        index_y=0;
+        fillHistX=false;
+        for (int iy=1; iy<nbins+1; iy++) {
+          fillHistY=true;
+          for (int irm=0; irm<nrm_idx; irm++) {
+            if ( ix==rm_idx.at(irm) || iy==((nbins+1)-rm_idx.at(irm)) ) fillHistY=false;
+          }
+          if (fillHistY) {
+            h_corr_reduced->Fill(index_x,index_y,h_corr->GetBinContent(ix,iy));
+            index_y++;
+            if (ix==1) h_corr_reduced->GetYaxis()->SetBinLabel(index_y,h_corr->GetYaxis()->GetBinLabel(iy));
+            fillHistX=true;
+          }
+        }
+        if (fillHistX) {
+          index_x++;
+          h_corr_reduced->GetXaxis()->SetBinLabel(index_x,h_corr->GetXaxis()->GetBinLabel(ix));
+        }
+      }
+
+      h_corr = h_corr_reduced;
+      numPars = newSize;
+    }
 
     Double_t labelSize = orig_LabelSize;
     if(numPars<5) labelSize = 0.05;
@@ -1546,6 +1599,7 @@ TH2D* Util::PlotCorrelationMatrix(RooFitResult* rFit, TString anaName){
 
     h_corr->GetXaxis()->SetLabelSize(labelSize);
     h_corr->GetYaxis()->SetLabelSize(labelSize);
+    h_corr->GetXaxis()->LabelsOption("v");
 
     gPad->SetLeftMargin(0.18);
     gPad->SetRightMargin(0.13);

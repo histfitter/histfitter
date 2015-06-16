@@ -141,7 +141,7 @@ namespace Util
      @param fixedPars String of parameter1:value1,parameter2:value2 giving information on which parameter to fix to which value if dofixParameter == kTRUE, default='' 
   */  
   void GenerateFitAndPlot(TString fcName, TString anaName, Bool_t drawBeforeFit, Bool_t drawAfterFit, Bool_t plotCorrelationMatrix, 
-			  Bool_t plotSeparateComponents, Bool_t plotNLL,  Bool_t minos = kFALSE, TString minosPars="", Bool_t doFixParameters = kFALSE, TString fixedPars="");
+			  Bool_t plotSeparateComponents, Bool_t plotNLL,  Bool_t minos = kFALSE, TString minosPars="", Bool_t doFixParameters = kFALSE, TString fixedPars="", bool ReduceCorrMatrix = true);
   
   /**
      Function to plot each region with data, pdf and pdf-components(=samples)  
@@ -194,7 +194,7 @@ namespace Util
      @param rFit RooFitResult pointer to get the correlation matrix for
      @param anaName Analysis name defined in config file, mainly used for output file/dir naming
   */
-  TH2D* PlotCorrelationMatrix(RooFitResult* rFit = NULL, TString anaName="Analysis");
+  TH2D* PlotCorrelationMatrix(RooFitResult* rFit = NULL, TString anaName="Analysis", bool ReduceMatrix = true);
 
   /**
      Function to scan correlation matrix for high correlations, set by threshhold

@@ -137,6 +137,7 @@ class ConfigManager(object):
         self.writeXML = False # Boolean to chose whether to write HistFactory XML files by hand
         self.printHistoNames = False # Print out the names of generated histograms
         self.doHypoTest = False
+        self.ReduceCorrMatrix = True # Boolean to make a reduced correlation matrix
 
         self.fitConfigs = [] # fitConfig object
         self.prepare = None # PrepareHistos object
