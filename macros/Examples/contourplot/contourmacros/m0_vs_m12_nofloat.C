@@ -19,12 +19,15 @@
 #include "contourmacros/CombinationGlob.C"
 #include "TROOT.h"
 #include "TColor.h"
+#include "DrawUtils.h"
+#include "StatTools.h"
+#include "summary_harvest_tree_description.h"
 
 /**
 Initialzing the macro: loading the description of the list text file from summary_harvest_tree_description.h
 */
 void initialize() {
-  gROOT->ProcessLine(".L summary_harvest_tree_description.h+");
+  //gROOT->ProcessLine(".L summary_harvest_tree_description.h+");
   gSystem->Load("libSusyFitter.so");
 }
 
@@ -43,7 +46,7 @@ m0_vs_m12_nofloat(const char* textfile = 0, TH2D* inputHist = 0, const char* roo
    TTree* tree = harvesttree( textfile!=0 ? textfile : 0 );
    if (tree==0) { 
      cout << "Cannot open list file. Exit." << endl;
-     return;
+     return "ERROR";
    }
 
    // store histograms to output file
@@ -60,12 +63,14 @@ m0_vs_m12_nofloat(const char* textfile = 0, TH2D* inputHist = 0, const char* roo
    cout << "Histograms being written to : " << outfile << endl;
    TFile* output = TFile::Open(outfile,"RECREATE");
    output->cd();
+
+   TH2D* hist;
    
    if (inputHist!=NULL){
      TH2D *clonehclPmin2=(TH2D*)inputHist->Clone();
-     TH2D* hist = DrawUtil::triwsmooth( tree, "p1:m12:m0", "hclPmin2" , "Observed CLsplusb", "p1>=0 && p1<=1", clonehclPmin2 );}
+     hist = DrawUtil::triwsmooth( tree, "p1:m12:m0", "hclPmin2" , "Observed CLsplusb", "p1>=0 && p1<=1", clonehclPmin2 );}
    else{
-     TH2D* hist = DrawUtil::triwsmooth( tree, "p1:m12:m0", "hclPmin2" , "Observed CLsplusb", "p1>=0 && p1<=1", inputHist);}
+     hist = DrawUtil::triwsmooth( tree, "p1:m12:m0", "hclPmin2" , "Observed CLsplusb", "p1>=0 && p1<=1", inputHist);}
 
 
    if (hist!=0) {
@@ -76,13 +81,13 @@ m0_vs_m12_nofloat(const char* textfile = 0, TH2D* inputHist = 0, const char* roo
    }
 
 
-
+   TH2D* sigp1;
 
    if (inputHist!=NULL){
      TH2D *clonesigp1=(TH2D*)inputHist->Clone();
-     TH2D* sigp1 = DrawUtil::triwsmooth( tree, "StatTools::GetSigma(p1):m12:m0", "sigp1" , "One-sided significance of CLsplusb", "(p1>0 && p1<=1)", clonesigp1 );}
+     sigp1 = DrawUtil::triwsmooth( tree, "StatTools::GetSigma(p1):m12:m0", "sigp1" , "One-sided significance of CLsplusb", "(p1>0 && p1<=1)", clonesigp1 );}
    else{
-     TH2D* sigp1 = DrawUtil::triwsmooth( tree, "StatTools::GetSigma(p1):m12:m0", "sigp1" , "One-sided significance of CLsplusb", "(p1>0 && p1<=1)", inputHist );}
+     sigp1 = DrawUtil::triwsmooth( tree, "StatTools::GetSigma(p1):m12:m0", "sigp1" , "One-sided significance of CLsplusb", "(p1>0 && p1<=1)", inputHist );}
 
    if (sigp1!=0) {
      sigp1->Write();
@@ -95,11 +100,13 @@ m0_vs_m12_nofloat(const char* textfile = 0, TH2D* inputHist = 0, const char* roo
 
    // cls:clsexp:clsu1s:clsd1s
 
+   TH2D* p1clsf;
+
    if (inputHist!=NULL){
      TH2D *clonep1clsf=(TH2D*)inputHist->Clone();
-     TH2D* p1clsf = DrawUtil::triwsmooth( tree, "CLs:m12:m0", "sigp1clsf" , "Observed CLs", "p1>0 && p1<=1", clonep1clsf );}
+     p1clsf = DrawUtil::triwsmooth( tree, "CLs:m12:m0", "sigp1clsf" , "Observed CLs", "p1>0 && p1<=1", clonep1clsf );}
    else{
-     TH2D* p1clsf = DrawUtil::triwsmooth( tree, "CLs:m12:m0", "sigp1clsf" , "Observed CLs", "p1>0 && p1<=1", inputHist );
+     p1clsf = DrawUtil::triwsmooth( tree, "CLs:m12:m0", "sigp1clsf" , "Observed CLs", "p1>0 && p1<=1", inputHist );
    }
 
 
@@ -110,12 +117,13 @@ m0_vs_m12_nofloat(const char* textfile = 0, TH2D* inputHist = 0, const char* roo
      cout << "Cannot make smoothed significance histogram. Exit." << endl;
    }
 
+   TH2D* sigp1clsf;
 
    if (inputHist!=NULL){
      TH2D *clonesigp1clsf=(TH2D*)inputHist->Clone();
-     TH2D* sigp1clsf = DrawUtil::triwsmooth( tree, "StatTools::GetSigma( CLs ):m12:m0", "sigp1clsf" , "One-sided significalce of observed CLs", "p1>0 && p1<=1",clonesigp1clsf );}
+     sigp1clsf = DrawUtil::triwsmooth( tree, "StatTools::GetSigma( CLs ):m12:m0", "sigp1clsf" , "One-sided significalce of observed CLs", "p1>0 && p1<=1",clonesigp1clsf );}
    else{
-     TH2D* sigp1clsf = DrawUtil::triwsmooth( tree, "StatTools::GetSigma( CLs ):m12:m0", "sigp1clsf" , "One-sided significalce of observed CLs", "p1>0 && p1<=1", inputHist );}
+     sigp1clsf = DrawUtil::triwsmooth( tree, "StatTools::GetSigma( CLs ):m12:m0", "sigp1clsf" , "One-sided significalce of observed CLs", "p1>0 && p1<=1", inputHist );}
 
 
    if (sigp1clsf!=0) {
@@ -125,11 +133,13 @@ m0_vs_m12_nofloat(const char* textfile = 0, TH2D* inputHist = 0, const char* roo
      cout << "Cannot make smoothed significance histogram. Exit." << endl;
    }
 
+   TH2D* sigp1expclsf;
+
    if (inputHist!=NULL){
      TH2D *clonesigp1expclsf=(TH2D*)inputHist->Clone();
-     TH2D* sigp1expclsf = DrawUtil::triwsmooth( tree, "StatTools::GetSigma( CLsexp ):m12:m0", "sigp1expclsf" , "One-sided significalce of expected CLs", "p1>0 && p1<=1", clonesigp1expclsf );}
+     sigp1expclsf = DrawUtil::triwsmooth( tree, "StatTools::GetSigma( CLsexp ):m12:m0", "sigp1expclsf" , "One-sided significalce of expected CLs", "p1>0 && p1<=1", clonesigp1expclsf );}
    else{
-     TH2D* sigp1expclsf = DrawUtil::triwsmooth( tree, "StatTools::GetSigma( CLsexp ):m12:m0", "sigp1expclsf" , "One-sided significalce of expected CLs", "p1>0 && p1<=1", inputHist );}
+     sigp1expclsf = DrawUtil::triwsmooth( tree, "StatTools::GetSigma( CLsexp ):m12:m0", "sigp1expclsf" , "One-sided significalce of expected CLs", "p1>0 && p1<=1", inputHist );}
    
 
    if (sigp1expclsf!=0) {
@@ -139,11 +149,13 @@ m0_vs_m12_nofloat(const char* textfile = 0, TH2D* inputHist = 0, const char* roo
      cout << "Cannot make smoothed significance histogram. Exit." << endl;
    }
 
+   TH2D* sigclsu1s;
+
    if (inputHist!=NULL){
      TH2D *clonesigclsu1s=(TH2D*)inputHist->Clone();
-     TH2D* sigclsu1s = DrawUtil::triwsmooth( tree, "StatTools::GetSigma(clsu1s):m12:m0", "sigclsu1s" , "One-sided significalce of expected CLs (+1 sigma)", "clsu1s>0", clonesigclsu1s );}
+     sigclsu1s = DrawUtil::triwsmooth( tree, "StatTools::GetSigma(clsu1s):m12:m0", "sigclsu1s" , "One-sided significalce of expected CLs (+1 sigma)", "clsu1s>0", clonesigclsu1s );}
    else{
-     TH2D* sigclsu1s = DrawUtil::triwsmooth( tree, "StatTools::GetSigma(clsu1s):m12:m0", "sigclsu1s" , "One-sided significalce of expected CLs (+1 sigma)", "clsu1s>0", inputHist );}
+     sigclsu1s = DrawUtil::triwsmooth( tree, "StatTools::GetSigma(clsu1s):m12:m0", "sigclsu1s" , "One-sided significalce of expected CLs (+1 sigma)", "clsu1s>0", inputHist );}
 
    if (sigclsu1s!=0) {
      sigclsu1s->Write();
@@ -152,11 +164,13 @@ m0_vs_m12_nofloat(const char* textfile = 0, TH2D* inputHist = 0, const char* roo
      cout << "Cannot make smoothed significance histogram. Exit." << endl;
    }
 
+  TH2D* sigclsd1s;
+
   if (inputHist!=NULL){
      TH2D *clonesigclsd1s=(TH2D*)inputHist->Clone();
-     TH2D* sigclsd1s = DrawUtil::triwsmooth( tree , "StatTools::GetSigma(clsd1s):m12:m0", "sigclsd1s" , "One-sided significalce of expected CLs (-1 sigma)", "clsd1s>0",clonesigclsd1s );}
+     sigclsd1s = DrawUtil::triwsmooth( tree , "StatTools::GetSigma(clsd1s):m12:m0", "sigclsd1s" , "One-sided significalce of expected CLs (-1 sigma)", "clsd1s>0",clonesigclsd1s );}
    else{
-     TH2D* sigclsd1s = DrawUtil::triwsmooth( tree, "StatTools::GetSigma(clsd1s):m12:m0", "sigclsd1s" , "One-sided significalce of expected CLs (-1 sigma)", "clsd1s>0", inputHist );}
+     sigclsd1s = DrawUtil::triwsmooth( tree, "StatTools::GetSigma(clsd1s):m12:m0", "sigclsd1s" , "One-sided significalce of expected CLs (-1 sigma)", "clsd1s>0", inputHist );}
    if (sigclsd1s!=0) {
      sigclsd1s->Write();
      delete sigclsd1s; sigclsd1s=0;
@@ -167,11 +181,13 @@ m0_vs_m12_nofloat(const char* textfile = 0, TH2D* inputHist = 0, const char* roo
 
    ///////////////////////////////////////////////////// upper limit * cross section plots
 
+  TH2D* UpperLimit;
+
   if (inputHist!=NULL){
      TH2D *cloneupperlimit=(TH2D*)inputHist->Clone();
-     TH2D* UpperLimit = DrawUtil::triwsmooth( tree, "upperLimit:m12:m0", "upperLimit" , "upperlimit","1", cloneupperlimit);}
+     UpperLimit = DrawUtil::triwsmooth( tree, "upperLimit:m12:m0", "upperLimit" , "upperlimit","1", cloneupperlimit);}
    else{
-     TH2D* UpperLimit = DrawUtil::triwsmooth( tree, "upperLimit:m12:m0", "upperLimit" , "upperlimit","1", inputHist);}
+     UpperLimit = DrawUtil::triwsmooth( tree, "upperLimit:m12:m0", "upperLimit" , "upperlimit","1", inputHist);}
 
 
    if (UpperLimit!=0) {
@@ -182,11 +198,13 @@ m0_vs_m12_nofloat(const char* textfile = 0, TH2D* inputHist = 0, const char* roo
    }
 
 
+  TH2D* xsec;
+
   if (inputHist!=NULL){
      TH2D *clonexsec=(TH2D*)inputHist->Clone();
-     TH2D* xsec = DrawUtil::triwsmooth( tree, "xsec:m12:m0", "xsec" , "xsec","1", clonexsec);}   
+     xsec = DrawUtil::triwsmooth( tree, "xsec:m12:m0", "xsec" , "xsec","1", clonexsec);}   
    else{
-     TH2D* xsec = DrawUtil::triwsmooth( tree, "xsec:m12:m0", "xsec" , "xsec","1", inputHist);}
+     xsec = DrawUtil::triwsmooth( tree, "xsec:m12:m0", "xsec" , "xsec","1", inputHist);}
 
 
    if (xsec!=0) {
@@ -195,12 +213,14 @@ m0_vs_m12_nofloat(const char* textfile = 0, TH2D* inputHist = 0, const char* roo
    } else {
      cout << "Cannot make smoothed significance histogram. Exit." << endl;
    }
+
+  TH2D* excludedXsec;
    
   if (inputHist!=NULL){
      TH2D *cloneexcludedXsec=(TH2D*)inputHist->Clone();
-     TH2D* excludedXsec = DrawUtil::triwsmooth( tree, "excludedXsec:m12:m0", "excludedXsec" , "excludedXsec","1", cloneexcludedXsec);}
+     excludedXsec = DrawUtil::triwsmooth( tree, "excludedXsec:m12:m0", "excludedXsec" , "excludedXsec","1", cloneexcludedXsec);}
    else{
-     TH2D* excludedXsec = DrawUtil::triwsmooth( tree, "excludedXsec:m12:m0", "excludedXsec" , "excludedXsec","1", inputHist);}
+     excludedXsec = DrawUtil::triwsmooth( tree, "excludedXsec:m12:m0", "excludedXsec" , "excludedXsec","1", inputHist);}
 
 
    if (excludedXsec!=0) {
