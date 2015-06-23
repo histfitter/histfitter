@@ -16,8 +16,7 @@ DEPDIR=$(OBJDIR)/dep
 VPATH= $(OBJDIR)
 INCLUDES += -I../include -I$(ROOTSYS)/include 
 ROOTSYS  ?= ERROR_RootSysIsNotDefined
-
-CINTFLAGS = 
+ 
 DICTHEAD  = $(PACKAGE)_Dict.h
 DICTFILE  = $(PACKAGE)_Dict.C
 DICTOBJ   = $(PACKAGE)_Dict.o
@@ -27,7 +26,10 @@ SKIPHLIST    =  $(DICTHEAD) $(DICTLDEF)
 LIBFILE   = ../lib/lib$(PACKAGE).a
 SHLIBFILE = ../lib/lib$(PACKAGE).so
 DLLIBFILE = ../lib/lib$(PACKAGE).dll
+ROOTMAPFILE = ../lib/lib$(PACKAGE).rootmap
 HEADERDEST = ../include/
+LIBDEST = ../lib/
+PCMFILE = ../lib/lib$(PACKAGE)_rdict.pcm
 
 UNAME = $(shell uname)
 
@@ -60,7 +62,7 @@ BINLIST=$(basename $(wildcard *$(BinSuf)))
 # Rule to make the dictionary
 $(DICTFILE):  $(DICTHLIST) $(DICTLDEF)
 	@echo "Generating dictionary $@" 
-	$(ROOTSYS)/bin/rootcint -f $(DICTFILE) -c $(INCLUDES) $(CINTFLAGS) $^
+	$(ROOTSYS)/bin/rootcling -f $(DICTFILE) -s $(SHLIBFILE) -rml lib$(PACKAGE).so -rmf $(ROOTMAPFILE) -c $(INCLUDES) $^
 
 $(OBJDIR)/$(DICTOBJ): $(DICTFILE)
 	@echo "Compiling $<"
@@ -125,6 +127,8 @@ clean:
 	rm -f $(LIBFILE)
 	rm -f $(SHLIBFILE)
 	rm -f $(DLLIBFILE)
+	rm -f $(PCMFILE)
+	rm -f $(ROOTMAPFILE)
 	for ex in $(BINLIST); do \
 		rm -f $(BINDIR)/$${ex}; \
 	done
@@ -134,10 +138,13 @@ distclean:
 	rm -rf obj 
 	rm -f *~
 	rm -f *_Dict*
+	rm -f ../lib/*_Dict*
 	rm -f $(SHLIBFILE)
 	rm -f $(LIBFILE)
 	rm -f $(SHLIBFILE)
 	rm -f $(DLLIBFILE)
+	rm -f $(PCMFILE)
+	rm -f $(ROOTMAPFILE)
 	touch ../lib/libdummy ../include/dummy.h
 	rm -rf ../lib/lib* ../include/*.h
 	for ex in $(BINLIST); do \
