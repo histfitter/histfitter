@@ -20,6 +20,487 @@
 #include <algorithm>
 
 
+void
+MirrorBorders( TH2& hist )
+{
+  int numx = hist.GetNbinsX();
+  int numy = hist.GetNbinsY();
+  
+  Float_t val;
+  // corner points
+  hist.SetBinContent(0,0,hist.GetBinContent(1,1));
+  hist.SetBinContent(numx+1,numy+1,hist.GetBinContent(numx,numy));
+  hist.SetBinContent(numx+1,0,hist.GetBinContent(numx,1));
+  hist.SetBinContent(0,numy+1,hist.GetBinContent(1,numy));
+  
+  for(int i=1; i<=numx; i++){
+    hist.SetBinContent(i,0,	   hist.GetBinContent(i,1));
+    hist.SetBinContent(i,numy+1, hist.GetBinContent(i,numy));
+  }
+  for(int i=1; i<=numy; i++) {
+    hist.SetBinContent(0,i,      hist.GetBinContent(1,i));
+    hist.SetBinContent(numx+1,i, hist.GetBinContent(numx,i));
+  }
+}
+
+
+TH2F*
+AddBorders( const TH2& hist, const char* name=0, const char* title=0)
+{
+  int nbinsx = hist.GetNbinsX();
+  int nbinsy = hist.GetNbinsY();
+  
+  double xbinwidth = ( hist.GetXaxis()->GetBinCenter(nbinsx) - hist.GetXaxis()->GetBinCenter(1) ) / double(nbinsx-1);
+  double ybinwidth = ( hist.GetYaxis()->GetBinCenter(nbinsy) - hist.GetYaxis()->GetBinCenter(1) ) / double(nbinsy-1);
+  
+  double xmin = hist.GetXaxis()->GetBinCenter(0) - xbinwidth/2. ;
+  double xmax = hist.GetXaxis()->GetBinCenter(nbinsx+1) + xbinwidth/2. ;
+  double ymin = hist.GetYaxis()->GetBinCenter(0) - ybinwidth/2. ;
+  double ymax = hist.GetYaxis()->GetBinCenter(nbinsy+1) + ybinwidth/2. ;
+  
+  TH2F* hist2 = new TH2F(name, title, nbinsx+2, xmin, xmax, nbinsy+2, ymin, ymax);
+  
+  for (Int_t ibin1=0; ibin1 <= hist.GetNbinsX()+1; ibin1++) {
+    for (Int_t ibin2=0; ibin2 <= hist.GetNbinsY()+1; ibin2++)
+      hist2->SetBinContent( ibin1+1, ibin2+1, hist.GetBinContent(ibin1,ibin2) );
+  }
+  
+  return hist2;
+}
+
+
+void SetBorders( TH2 &hist, Double_t val=0 )
+{
+  int numx = hist.GetNbinsX();
+  int numy = hist.GetNbinsY();
+  
+  for(int i=0; i <= numx+1 ; i++){
+    hist.SetBinContent(i,0,val);
+    hist.SetBinContent(i,numy+1,val);
+  }
+  for(int i=0; i <= numy+1 ; i++) {
+    hist.SetBinContent(0,i,val);
+    hist.SetBinContent(numx+1,i,val);
+  }
+}
+
+
+TH2F* 
+FixAndSetBorders( const TH2& hist, const char* name=0, const char* title=0, Double_t val=0 )
+{
+  TH2F* hist0 = (TH2F*)hist.Clone(); // histogram we can modify
+  
+  MirrorBorders( *hist0 );    // mirror values of border bins into overflow bins
+  
+  TH2F* hist1 = AddBorders( *hist0, "hist1", "hist1" );   
+  // add new border of bins around original histogram,
+  // ... so 'overflow' bins become normal bins
+  SetBorders( *hist1, val );                              
+  // set overflow bins to value 1
+  
+  TH2F* histX = AddBorders( *hist1, "histX", "histX" );   
+  // add new border of bins around original histogram,
+  // ... so 'overflow' bins become normal bins
+  
+  TH2F* hist3 = (TH2F*)histX->Clone();
+  hist3->SetName( name!=0 ? name : "hist3" );
+  hist3->SetTitle( title!=0 ? title : "hist3" );
+  
+  delete hist0; delete hist1; delete histX;
+  return hist3; // this can be used for filled contour histograms
+}
+
+
+void 
+DrawContourSameColor( TLegend *leg, TH2F* hist, Int_t nsigma, TString color, Bool_t second=kFALSE, TH2F* inverse=0, Bool_t linesOnly=kFALSE, Bool_t isnobs=kFALSE )
+{
+  if (nsigma < 1 || nsigma > 3) {
+    cout << "*** Error in CombinationGlob::DrawContour: nsigma out of range: " << nsigma 
+	 << "==> abort" << endl;
+    exit(1);
+  }
+  nsigma--; // used as array index
+  
+  Int_t lcol_sigma;
+  Int_t fcol_sigma[3];
+  Int_t lstyle = 1;
+  if( color == "pink" ){
+    lcol_sigma    = CombinationGlob::c_VDarkPink;
+    fcol_sigma[0] = CombinationGlob::c_LightPink;
+    fcol_sigma[1] = CombinationGlob::c_LightPink;
+    fcol_sigma[2] = CombinationGlob::c_LightPink;
+  }
+  else if( color == "green" ){ // HF
+    lcol_sigma    = CombinationGlob::c_VDarkGreen;
+    fcol_sigma[0] = CombinationGlob::c_DarkGreen;
+    fcol_sigma[1] = CombinationGlob::c_LightGreen;
+    fcol_sigma[2] = CombinationGlob::c_VLightGreen;
+  } 
+  else if( color == "yellow" ){
+    lcol_sigma    = CombinationGlob::c_VDarkYellow;
+    fcol_sigma[0] = CombinationGlob::c_DarkYellow;
+    fcol_sigma[1] = CombinationGlob::c_DarkYellow;
+    fcol_sigma[2] = CombinationGlob::c_White; //c_DarkYellow;
+    lstyle = 2;
+  }
+  else if( color == "orange" ){
+    lcol_sigma    = CombinationGlob::c_VDarkOrange;
+    fcol_sigma[0] = CombinationGlob::c_DarkOrange;
+    fcol_sigma[1] = CombinationGlob::c_LightOrange; // c_DarkOrange
+    fcol_sigma[2] = CombinationGlob::c_VLightOrange;
+  }
+  else if( color == "gray" ){
+    lcol_sigma    = CombinationGlob::c_VDarkGray;
+    fcol_sigma[0] = CombinationGlob::c_LightGray;
+    fcol_sigma[1] = CombinationGlob::c_LightGray;
+    fcol_sigma[2] = CombinationGlob::c_LightGray;
+  }
+  else if( color == "blue" ){
+    lcol_sigma    = CombinationGlob::c_DarkBlueT1;
+    fcol_sigma[0] = CombinationGlob::c_BlueT5;
+    fcol_sigma[1] = CombinationGlob::c_BlueT3;
+    fcol_sigma[2] = CombinationGlob::c_White;  //CombinationGlob::c_BlueT2;
+
+  }
+  
+  // contour plot
+  TH2F* h = new TH2F( *hist );
+  h->SetContour( 1 );
+  double pval = CombinationGlob::cl_percent[1];
+  double signif = TMath::NormQuantile(1-pval);
+  double dnsigma = double(nsigma)-1.;
+  double dsignif = signif + dnsigma;
+  h->SetContourLevel( 0, dsignif );
+
+  if( !second ){
+    h->SetFillColor( fcol_sigma[nsigma] );
+    
+    if (!linesOnly) h->Draw( "samecont0" );
+  }
+
+  h->SetLineColor( nsigma==1? 1 : lcol_sigma );
+   if (isnobs)h->SetLineColor( nsigma==1? 2 : lcol_sigma );
+  //h->SetLineStyle( 4 );
+  h->SetLineWidth( 2 );
+  h->SetLineStyle( lstyle );
+  h->Draw( "samecont3" );
+  
+  if (linesOnly&&!isnobs)
+    if(nsigma==1){ leg->AddEntry(h,"exp. 95% CL limit","l");}
+  if (isnobs)
+    if(nsigma==1){ leg->AddEntry(h,"obs. 95% CL limit","l");}  
+  if (!linesOnly) {
+  if(nsigma==0){ leg->AddEntry(h,"- 1 #sigma expectation","l"); }
+  if(nsigma==2){ leg->AddEntry(h,"+ 1 #sigma expectation","l");}
+  } 
+}
+
+
+void 
+DrawContourSameColorDisc( TLegend *leg, TH2F* hist, Double_t nsigma, TString color, Bool_t second=kFALSE, TH2F* inverse=0, Bool_t linesOnly=kFALSE )
+{
+  if (nsigma < 0.5 || nsigma > 10.5 ) {
+    cout << "*** Error in CombinationGlob::DrawContour: nsigma out of range: " << nsigma 
+	 << "==> abort" << endl;
+    exit(1);
+  }
+  
+  Int_t lcol_sigma;
+  Int_t fcol_sigma[3];
+
+  if( color == "pink" ){
+    lcol_sigma    = CombinationGlob::c_VDarkPink;
+    fcol_sigma[0] = CombinationGlob::c_LightPink;
+    fcol_sigma[1] = CombinationGlob::c_LightPink;
+    fcol_sigma[2] = CombinationGlob::c_LightPink;
+  }
+  else if( color == "green" ){ // HF
+    lcol_sigma    = CombinationGlob::c_VDarkGreen;
+    fcol_sigma[0] = CombinationGlob::c_DarkGreen;
+    fcol_sigma[1] = CombinationGlob::c_LightGreen;
+    fcol_sigma[2] = CombinationGlob::c_VLightGreen;
+  } 
+  else if( color == "yellow" ){
+    lcol_sigma    = CombinationGlob::c_VDarkYellow;
+    fcol_sigma[0] = CombinationGlob::c_DarkYellow;
+    fcol_sigma[1] = CombinationGlob::c_DarkYellow;
+    fcol_sigma[2] = CombinationGlob::c_White; //c_DarkYellow;
+  }
+  else if( color == "orange" ){
+    lcol_sigma    = CombinationGlob::c_VDarkOrange;
+    fcol_sigma[0] = CombinationGlob::c_DarkOrange;
+    fcol_sigma[1] = CombinationGlob::c_LightOrange; // c_DarkOrange
+    fcol_sigma[2] = CombinationGlob::c_VLightOrange;
+  }
+  else if( color == "gray" ){
+    lcol_sigma    = CombinationGlob::c_VDarkGray;
+    fcol_sigma[0] = CombinationGlob::c_LightGray;
+    fcol_sigma[1] = CombinationGlob::c_LightGray;
+    fcol_sigma[2] = CombinationGlob::c_LightGray;
+  }
+  else if( color == "blue" ){
+    lcol_sigma    = CombinationGlob::c_DarkBlueT1;
+    fcol_sigma[0] = CombinationGlob::c_BlueT5;
+    fcol_sigma[1] = CombinationGlob::c_BlueT3;
+    fcol_sigma[2] = CombinationGlob::c_BlueT2;
+  }
+
+  // contour plot
+  TH2F* h = new TH2F( *hist );
+  h->SetContour( 1 );
+  double dsignif = double (nsigma);
+  h->SetContourLevel( 0, dsignif );
+
+  Int_t mycolor = (nsigma==5   ? 0 : 2);
+  mycolor = (nsigma==2.5 ? 1 : 2);
+
+  if( !second ){
+    h->SetFillColor( fcol_sigma[mycolor] );
+    if (!linesOnly) h->Draw( "samecont0" );
+  }
+
+  h->SetLineColor( (nsigma==2.5) ? 2 : lcol_sigma );
+
+  h->SetLineStyle( nsigma==5 || nsigma==2.5 ? 1 : 2 );
+  h->SetLineWidth( nsigma==5 || nsigma==2.5 ? 2 : 1 );
+
+  h->Draw( "samecont3" );
+
+  if(nsigma==5)   { leg->AddEntry(h,"5 #sigma discovery","l"); }
+  if(nsigma==6)   { leg->AddEntry(h,"N (int) #sigma discovery","l"); }
+  if(nsigma==2.5) { leg->AddEntry(h,"2.5 #sigma discovery","l"); }
+}
+
+
+
+
+void
+DrawContourMassLine(TH2F* hist, Double_t mass, int color=14 ) //color=TColor::GetColor("#dddddd") ) // 204^= TColor::GetColor("#dddddd"); original was int color=14 
+{
+
+  // contour plot
+  TH2F* h = new TH2F( *hist );
+
+  //  Double_t contours[5] = {500, 1000, 1500, 2000, 2500}
+  h->SetContour( 1 );
+  //h->SetContour( 5, contours )
+  //  h->SetContourLevel( 0, contours );
+  h->SetContourLevel( 0, mass );
+
+  h->SetLineColor( color );
+  h->SetLineStyle( 7 );
+  h->SetLineWidth( 1 );
+  h->Draw( "samecont3" );
+
+}
+
+
+
+
+
+void 
+DrawContourLine95( TLegend *leg, TH2F* hist, const TString& text="", Int_t linecolor=CombinationGlob::c_VDarkGray, Int_t linestyle=2, Int_t linewidth=2 )
+{
+  // contour plot
+  TH2F* h = new TH2F( *hist );
+  h->SetContour( 1 );
+  double pval = CombinationGlob::cl_percent[1];
+  double signif = TMath::NormQuantile(1-pval);
+  //cout << "signif: " <<signif << endl;
+  h->SetContourLevel( 0, signif );
+
+  h->SetLineColor( linecolor );
+  h->SetLineWidth( linewidth );
+  h->SetLineStyle( linestyle );
+  h->Draw( "samecont3" );
+  
+  if (!text.IsNull()) leg->AddEntry(h,text.Data(),"l"); 
+}
+
+
+void
+DrawContourLine99( TLegend *leg, TH2F* hist, const TString& text="", Int_t linecolor=CombinationGlob::c_VDarkGray, Int_t linestyle=2 )
+{
+  // contour plot
+  TH2F* h = new TH2F( *hist );
+  h->SetContour( 1 );
+  double pval = CombinationGlob::cl_percent[2];
+  double signif = TMath::NormQuantile(1-pval);
+
+  h->SetContourLevel( 0, signif );
+
+  h->SetLineColor( linecolor );
+  h->SetLineWidth( 2 );
+  h->SetLineStyle( linestyle );
+  h->Draw( "samecont3" );
+
+  if (!text.IsNull()) leg->AddEntry(h,text.Data(),"l");
+}
+
+
+void
+DrawContourLine68( TLegend *leg, TH2F* hist, const TString& text="", Int_t linecolor=CombinationGlob::c_VDarkGray, Int_t linestyle=2 )
+{
+  // contour plot
+  TH2F* h = new TH2F( *hist );
+  h->SetContour( 1 );
+  double pval = CombinationGlob::cl_percent[0];
+  double signif = TMath::NormQuantile(1-pval);
+
+  h->SetContourLevel( 0, signif );
+
+  h->SetLineColor( linecolor );
+  h->SetLineWidth( 2 );
+  h->SetLineStyle( linestyle );
+  h->Draw( "samecont3" );
+
+  if (!text.IsNull()) leg->AddEntry(h,text.Data(),"l");
+}
+
+
+TGraph*
+ContourGraph( TH2F* hist)
+{
+   TGraph* gr0 = new TGraph();
+   TH2F* h = (TH2F*)hist->Clone();
+   h->GetYaxis()->SetRangeUser(0,700);
+   h->GetXaxis()->SetRangeUser(50,4000);
+   gr = (TGraph*)gr0->Clone(h->GetName());
+   //  cout << "==> Will dumb histogram: " << h->GetName() << " into a graph" <<endl;
+   h->SetContour( 1 );
+   double pval = CombinationGlob::cl_percent[1];
+   double signif = TMath::NormQuantile(1-pval);
+   h->SetContourLevel( 0, signif );
+   h->Draw("CONT LIST");
+   h->SetDirectory(0);
+   gPad->Update();
+   TObjArray *contours = (TObjArray*)gROOT->GetListOfSpecials()->FindObject("contours");
+   Int_t ncontours     = contours->GetSize();
+   TList *list = (TList*)contours->At(0);
+   Int_t number_of_lists = list->GetSize();
+   gr = (TGraph*)list->At(0);
+   TGraph* grTmp = new TGraph();
+   for (int k = 0 ; k<number_of_lists ; k++){
+      grTmp = (TGraph*)list->At(k);
+      Int_t N = gr->GetN();
+      Int_t N_tmp = grTmp->GetN();
+      if(N < N_tmp) gr = grTmp;
+      //    mg->Add((TGraph*)list->At(k));
+   }
+
+   gr->SetName(hist->GetName());
+   int N = gr->GetN();
+   double x0, y0;
+
+   //for(int j=0; j<N; j++) {
+   //    gr->GetPoint(j,x0,y0);
+   //    cout << j << " : " << x0 << " : "<<y0 << endl;
+   // }
+     
+   //  //  gr->SetMarkerSize(2.0);
+   //  gr->SetMarkerSize(2.0);
+   //  gr->SetMarkerStyle(21);
+   //  gr->Draw("LP");
+   //  cout << "Generated graph " << gr << " with name " << gr->GetName() << endl;
+   return gr;
+}
+
+
+TGraph*
+DrawExpectedBand( TGraph* gr1,  TGraph* gr2, Int_t fillColor, Int_t fillStyle, Int_t cut = 0)
+{
+   //  TGraph* gr1 = new TGraph( *graph1 );
+   //  TGraph* gr2 = new TGraph( *graph2 );
+   
+   int number_of_bins = max(gr1->GetN(),gr2->GetN());
+   
+   const Int_t gr1N = gr1->GetN();
+   const Int_t gr2N = gr2->GetN();
+
+   const Int_t N = number_of_bins;
+   Double_t x1[N], y1[N], x2[N], y2[N];
+   
+   Double_t xx0, yy0;
+    
+   for(int j=0; j<gr1N; j++) {
+      gr1->GetPoint(j,xx0,yy0);
+      x1[j] = xx0;
+      y1[j] = yy0;
+   }
+   if (gr1N < N) {
+      for(int i=gr1N; i<N; i++) {
+         x1[i] = x1[gr1N-1];
+         y1[i] = y1[gr1N-1];
+      }
+   }   
+   Double_t xx1, yy1;
+   
+   for(int j=0; j<gr2N; j++) {
+      gr2->GetPoint(j,xx1,yy1);
+      x2[j] = xx1;
+      y2[j] = yy1;
+   }
+   if (gr2N < N) {
+      for(int i=gr2N; i<N; i++) {
+         x2[i] = x2[gr2N-1];
+         y2[i] = y2[gr2N-1];
+      }
+   }
+ 
+
+   TGraph *grshade = new TGraphAsymmErrors(2*N);
+   for (int i=0;i<N;i++) {
+      if (x1[i] > cut){
+         grshade->SetPoint(i,x1[i],y1[i]);
+         }
+      if (x2[N-i-1] > cut){
+         grshade->SetPoint(N+i,x2[N-i-1],y2[N-i-1]);
+         }
+   }
+   
+   // Apply the cut in the shade plot if there is something that doesn't look good...
+   int Nshade = grshade->GetN();
+   double x0, y0;
+   double x00, y00;
+   
+   for(int j=0; j<Nshade; j++) {
+      grshade->GetPoint(j,x0,y0);
+      if ((x0 != 0) && (y0 != 0)) {
+         x00 = x0;
+         y00 = y0;
+         break;
+      }
+   } 
+
+   for(int j=0; j<Nshade; j++) {
+      grshade->GetPoint(j,x0,y0);
+      if ((x0 == 0) && (y0 == 0))
+         grshade->SetPoint(j,x00,y00);
+   }
+   
+   // Now draw the plot...
+   grshade->SetFillStyle(fillStyle);
+   grshade->SetFillColor(fillColor);
+   grshade->SetMarkerStyle(21);
+   grshade->Draw("F");
+
+   return grshade;
+}
+
+
+void
+DummyLegendExpected(TLegend* leg, TString what,  Int_t fillColor, Int_t fillStyle, Int_t lineColor, Int_t lineStyle, Int_t lineWidth)
+{
+
+   TGraph* gr = new TGraph();
+   gr->SetFillColor(fillColor);
+   gr->SetFillStyle(fillStyle);
+   gr->SetLineColor(lineColor);
+   gr->SetLineStyle(lineStyle);
+   gr->SetLineWidth(lineWidth);
+   leg->AddEntry(gr,what,"LF");
+}
+
 /**
 make contour plots based on the histograms produced by makecontourhists.C
 - underlying macro for makecontourplots.C
@@ -132,8 +613,8 @@ void SUSY_m0_vs_m12_all_withBand_cls( TString fname0 = "mudat_list.root",// nomi
    TH2F* contour_em1s    = ( hist5!=0 ? FixAndSetBorders( *hist5, "contour", "contour", 0 ) : 0 );
 
    // For Band
-   TGraph* gr_contour_ep1s = ( contour_ep1s!=0 ? ContourGraph( contour_ep1s )->Clone() : 0 ); //ContourGraph( contour_ep1s )->Clone(); 
-   TGraph* gr_contour_em1s = ( contour_em1s!=0 ? ContourGraph( contour_em1s )->Clone() : 0 ); //ContourGraph( contour_em1s )->Clone(); 
+   TGraph* gr_contour_ep1s = (TGraph*)( contour_ep1s!=0 ? ContourGraph( contour_ep1s )->Clone() : 0 ); //ContourGraph( contour_ep1s )->Clone(); 
+   TGraph* gr_contour_em1s = (TGraph*)( contour_em1s!=0 ? ContourGraph( contour_em1s )->Clone() : 0 ); //ContourGraph( contour_em1s )->Clone(); 
    
    TH2F* contour_exp(0);
    if (histe!=0)     { contour_exp     = FixAndSetBorders( *histe, "contour_exp", "contour_exp", 0 ); } 
@@ -159,8 +640,8 @@ void SUSY_m0_vs_m12_all_withBand_cls( TString fname0 = "mudat_list.root",// nomi
    gStyle->SetPaintTextFormat(".2g");
    if (hist1!=0) hist1->SetMarkerStyle(21);
    if (hist1!=0) hist1->SetMarkerSize(1.5);
-   Float_t nsigmax(0)
-      if (hist1!=0) nsigmax = hist1->GetMaximum();
+   Float_t nsigmax(0);
+   if (hist1!=0) nsigmax = hist1->GetMaximum();
    
    // --- draw
    
@@ -365,484 +846,4 @@ void SUSY_m0_vs_m12_all_withBand_cls( TString fname0 = "mudat_list.root",// nomi
 }
 
 
-void
-MirrorBorders( TH2& hist )
-{
-  int numx = hist.GetNbinsX();
-  int numy = hist.GetNbinsY();
-  
-  Float_t val;
-  // corner points
-  hist.SetBinContent(0,0,hist.GetBinContent(1,1));
-  hist.SetBinContent(numx+1,numy+1,hist.GetBinContent(numx,numy));
-  hist.SetBinContent(numx+1,0,hist.GetBinContent(numx,1));
-  hist.SetBinContent(0,numy+1,hist.GetBinContent(1,numy));
-  
-  for(int i=1; i<=numx; i++){
-    hist.SetBinContent(i,0,	   hist.GetBinContent(i,1));
-    hist.SetBinContent(i,numy+1, hist.GetBinContent(i,numy));
-  }
-  for(int i=1; i<=numy; i++) {
-    hist.SetBinContent(0,i,      hist.GetBinContent(1,i));
-    hist.SetBinContent(numx+1,i, hist.GetBinContent(numx,i));
-  }
-}
-
-
-TH2F*
-AddBorders( const TH2& hist, const char* name=0, const char* title=0)
-{
-  int nbinsx = hist.GetNbinsX();
-  int nbinsy = hist.GetNbinsY();
-  
-  double xbinwidth = ( hist.GetXaxis()->GetBinCenter(nbinsx) - hist.GetXaxis()->GetBinCenter(1) ) / double(nbinsx-1);
-  double ybinwidth = ( hist.GetYaxis()->GetBinCenter(nbinsy) - hist.GetYaxis()->GetBinCenter(1) ) / double(nbinsy-1);
-  
-  double xmin = hist.GetXaxis()->GetBinCenter(0) - xbinwidth/2. ;
-  double xmax = hist.GetXaxis()->GetBinCenter(nbinsx+1) + xbinwidth/2. ;
-  double ymin = hist.GetYaxis()->GetBinCenter(0) - ybinwidth/2. ;
-  double ymax = hist.GetYaxis()->GetBinCenter(nbinsy+1) + ybinwidth/2. ;
-  
-  TH2F* hist2 = new TH2F(name, title, nbinsx+2, xmin, xmax, nbinsy+2, ymin, ymax);
-  
-  for (Int_t ibin1=0; ibin1 <= hist.GetNbinsX()+1; ibin1++) {
-    for (Int_t ibin2=0; ibin2 <= hist.GetNbinsY()+1; ibin2++)
-      hist2->SetBinContent( ibin1+1, ibin2+1, hist.GetBinContent(ibin1,ibin2) );
-  }
-  
-  return hist2;
-}
-
-
-void SetBorders( TH2 &hist, Double_t val=0 )
-{
-  int numx = hist.GetNbinsX();
-  int numy = hist.GetNbinsY();
-  
-  for(int i=0; i <= numx+1 ; i++){
-    hist.SetBinContent(i,0,val);
-    hist.SetBinContent(i,numy+1,val);
-  }
-  for(int i=0; i <= numy+1 ; i++) {
-    hist.SetBinContent(0,i,val);
-    hist.SetBinContent(numx+1,i,val);
-  }
-}
-
-
-TH2F* 
-FixAndSetBorders( const TH2& hist, const char* name=0, const char* title=0, Double_t val=0 )
-{
-  TH2F* hist0 = hist.Clone(); // histogram we can modify
-  
-  MirrorBorders( *hist0 );    // mirror values of border bins into overflow bins
-  
-  TH2F* hist1 = AddBorders( *hist0, "hist1", "hist1" );   
-  // add new border of bins around original histogram,
-  // ... so 'overflow' bins become normal bins
-  SetBorders( *hist1, val );                              
-  // set overflow bins to value 1
-  
-  TH2F* histX = AddBorders( *hist1, "histX", "histX" );   
-  // add new border of bins around original histogram,
-  // ... so 'overflow' bins become normal bins
-  
-  TH2F* hist3 = histX->Clone();
-  hist3->SetName( name!=0 ? name : "hist3" );
-  hist3->SetTitle( title!=0 ? title : "hist3" );
-  
-  delete hist0; delete hist1; delete histX;
-  return hist3; // this can be used for filled contour histograms
-}
-
-
-void 
-DrawContourSameColor( TLegend *leg, TH2F* hist, Int_t nsigma, TString color, Bool_t second=kFALSE, TH2F* inverse=0, Bool_t linesOnly=kFALSE, Bool_t isnobs=kFALSE )
-{
-  if (nsigma < 1 || nsigma > 3) {
-    cout << "*** Error in CombinationGlob::DrawContour: nsigma out of range: " << nsigma 
-	 << "==> abort" << endl;
-    exit(1);
-  }
-  nsigma--; // used as array index
-  
-  Int_t lcol_sigma;
-  Int_t fcol_sigma[3];
-  Int_t lstyle = 1;
-  if( color == "pink" ){
-    lcol_sigma    = CombinationGlob::c_VDarkPink;
-    fcol_sigma[0] = CombinationGlob::c_LightPink;
-    fcol_sigma[1] = CombinationGlob::c_LightPink;
-    fcol_sigma[2] = CombinationGlob::c_LightPink;
-  }
-  else if( color == "green" ){ // HF
-    lcol_sigma    = CombinationGlob::c_VDarkGreen;
-    fcol_sigma[0] = CombinationGlob::c_DarkGreen;
-    fcol_sigma[1] = CombinationGlob::c_LightGreen;
-    fcol_sigma[2] = CombinationGlob::c_VLightGreen;
-  } 
-  else if( color == "yellow" ){
-    lcol_sigma    = CombinationGlob::c_VDarkYellow;
-    fcol_sigma[0] = CombinationGlob::c_DarkYellow;
-    fcol_sigma[1] = CombinationGlob::c_DarkYellow;
-    fcol_sigma[2] = CombinationGlob::c_White; //c_DarkYellow;
-    lstyle = 2;
-  }
-  else if( color == "orange" ){
-    lcol_sigma    = CombinationGlob::c_VDarkOrange;
-    fcol_sigma[0] = CombinationGlob::c_DarkOrange;
-    fcol_sigma[1] = CombinationGlob::c_LightOrange; // c_DarkOrange
-    fcol_sigma[2] = CombinationGlob::c_VLightOrange;
-  }
-  else if( color == "gray" ){
-    lcol_sigma    = CombinationGlob::c_VDarkGray;
-    fcol_sigma[0] = CombinationGlob::c_LightGray;
-    fcol_sigma[1] = CombinationGlob::c_LightGray;
-    fcol_sigma[2] = CombinationGlob::c_LightGray;
-  }
-  else if( color == "blue" ){
-    lcol_sigma    = CombinationGlob::c_DarkBlueT1;
-    fcol_sigma[0] = CombinationGlob::c_BlueT5;
-    fcol_sigma[1] = CombinationGlob::c_BlueT3;
-    fcol_sigma[2] = CombinationGlob::c_White;  //CombinationGlob::c_BlueT2;
-
-  }
-  
-  // contour plot
-  TH2F* h = new TH2F( *hist );
-  h->SetContour( 1 );
-  double pval = CombinationGlob::cl_percent[1];
-  double signif = TMath::NormQuantile(1-pval);
-  double dnsigma = double(nsigma)-1.;
-  double dsignif = signif + dnsigma;
-  h->SetContourLevel( 0, dsignif );
-
-  if( !second ){
-    h->SetFillColor( fcol_sigma[nsigma] );
-    
-    if (!linesOnly) h->Draw( "samecont0" );
-  }
-
-  h->SetLineColor( nsigma==1? 1 : lcol_sigma );
-   if (isnobs)h->SetLineColor( nsigma==1? 2 : lcol_sigma );
-  //h->SetLineStyle( 4 );
-  h->SetLineWidth( 2 );
-  h->SetLineStyle( lstyle );
-  h->Draw( "samecont3" );
-  
-  if (linesOnly&&!isnobs)
-    if(nsigma==1){ leg->AddEntry(h,"exp. 95% CL limit","l");}
-  if (isnobs)
-    if(nsigma==1){ leg->AddEntry(h,"obs. 95% CL limit","l");}  
-  if (!linesOnly) {
-  if(nsigma==0){ leg->AddEntry(h,"- 1 #sigma expectation","l"); }
-  if(nsigma==2){ leg->AddEntry(h,"+ 1 #sigma expectation","l");}
-  } 
-}
-
-
-void 
-DrawContourSameColorDisc( TLegend *leg, TH2F* hist, Double_t nsigma, TString color, Bool_t second=kFALSE, TH2F* inverse=0, Bool_t linesOnly=kFALSE )
-{
-  if (nsigma < 0.5 || nsigma > 10.5 ) {
-    cout << "*** Error in CombinationGlob::DrawContour: nsigma out of range: " << nsigma 
-	 << "==> abort" << endl;
-    exit(1);
-  }
-  
-  Int_t lcol_sigma;
-  Int_t fcol_sigma[3];
-
-  if( color == "pink" ){
-    lcol_sigma    = CombinationGlob::c_VDarkPink;
-    fcol_sigma[0] = CombinationGlob::c_LightPink;
-    fcol_sigma[1] = CombinationGlob::c_LightPink;
-    fcol_sigma[2] = CombinationGlob::c_LightPink;
-  }
-  else if( color == "green" ){ // HF
-    lcol_sigma    = CombinationGlob::c_VDarkGreen;
-    fcol_sigma[0] = CombinationGlob::c_DarkGreen;
-    fcol_sigma[1] = CombinationGlob::c_LightGreen;
-    fcol_sigma[2] = CombinationGlob::c_VLightGreen;
-  } 
-  else if( color == "yellow" ){
-    lcol_sigma    = CombinationGlob::c_VDarkYellow;
-    fcol_sigma[0] = CombinationGlob::c_DarkYellow;
-    fcol_sigma[1] = CombinationGlob::c_DarkYellow;
-    fcol_sigma[2] = CombinationGlob::c_White; //c_DarkYellow;
-  }
-  else if( color == "orange" ){
-    lcol_sigma    = CombinationGlob::c_VDarkOrange;
-    fcol_sigma[0] = CombinationGlob::c_DarkOrange;
-    fcol_sigma[1] = CombinationGlob::c_LightOrange; // c_DarkOrange
-    fcol_sigma[2] = CombinationGlob::c_VLightOrange;
-  }
-  else if( color == "gray" ){
-    lcol_sigma    = CombinationGlob::c_VDarkGray;
-    fcol_sigma[0] = CombinationGlob::c_LightGray;
-    fcol_sigma[1] = CombinationGlob::c_LightGray;
-    fcol_sigma[2] = CombinationGlob::c_LightGray;
-  }
-  else if( color == "blue" ){
-    lcol_sigma    = CombinationGlob::c_DarkBlueT1;
-    fcol_sigma[0] = CombinationGlob::c_BlueT5;
-    fcol_sigma[1] = CombinationGlob::c_BlueT3;
-    fcol_sigma[2] = CombinationGlob::c_BlueT2;
-  }
-
-  // contour plot
-  TH2F* h = new TH2F( *hist );
-  h->SetContour( 1 );
-  double dsignif = double (nsigma);
-  h->SetContourLevel( 0, dsignif );
-
-  Int_t mycolor = (nsigma==5   ? 0 : 2);
-  Int_t mycolor = (nsigma==2.5 ? 1 : 2);
-
-  if( !second ){
-    h->SetFillColor( fcol_sigma[mycolor] );
-    if (!linesOnly) h->Draw( "samecont0" );
-  }
-
-  h->SetLineColor( (nsigma==2.5) ? 2 : lcol_sigma );
-
-  h->SetLineStyle( nsigma==5 || nsigma==2.5 ? 1 : 2 );
-  h->SetLineWidth( nsigma==5 || nsigma==2.5 ? 2 : 1 );
-
-  h->Draw( "samecont3" );
-
-  if(nsigma==5)   { leg->AddEntry(h,"5 #sigma discovery","l"); }
-  if(nsigma==6)   { leg->AddEntry(h,"N (int) #sigma discovery","l"); }
-  if(nsigma==2.5) { leg->AddEntry(h,"2.5 #sigma discovery","l"); }
-}
-
-
-
-
-void
-DrawContourMassLine(TH2F* hist, Double_t mass, int color=14 ) //color=TColor::GetColor("#dddddd") ) // 204^= TColor::GetColor("#dddddd"); original was int color=14 
-{
-
-  // contour plot
-  TH2F* h = new TH2F( *hist );
-
-  //  Double_t contours[5] = {500, 1000, 1500, 2000, 2500}
-  h->SetContour( 1 );
-  //h->SetContour( 5, contours )
-  //  h->SetContourLevel( 0, contours );
-  h->SetContourLevel( 0, mass );
-
-  h->SetLineColor( color );
-  h->SetLineStyle( 7 );
-  h->SetLineWidth( 1 );
-  h->Draw( "samecont3" );
-
-}
-
-
-
-
-
-void 
-DrawContourLine95( TLegend *leg, TH2F* hist, const TString& text="", Int_t linecolor=CombinationGlob::c_VDarkGray, Int_t linestyle=2, Int_t linewidth=2 )
-{
-  // contour plot
-  TH2F* h = new TH2F( *hist );
-  h->SetContour( 1 );
-  double pval = CombinationGlob::cl_percent[1];
-  double signif = TMath::NormQuantile(1-pval);
-  //cout << "signif: " <<signif << endl;
-  h->SetContourLevel( 0, signif );
-
-  h->SetLineColor( linecolor );
-  h->SetLineWidth( linewidth );
-  h->SetLineStyle( linestyle );
-  h->Draw( "samecont3" );
-  
-  if (!text.IsNull()) leg->AddEntry(h,text.Data(),"l"); 
-}
-
-
-void
-DrawContourLine99( TLegend *leg, TH2F* hist, const TString& text="", Int_t linecolor=CombinationGlob::c_VDarkGray, Int_t linestyle=2 )
-{
-  // contour plot
-  TH2F* h = new TH2F( *hist );
-  h->SetContour( 1 );
-  double pval = CombinationGlob::cl_percent[2];
-  double signif = TMath::NormQuantile(1-pval);
-
-  h->SetContourLevel( 0, signif );
-
-  h->SetLineColor( linecolor );
-  h->SetLineWidth( 2 );
-  h->SetLineStyle( linestyle );
-  h->Draw( "samecont3" );
-
-  if (!text.IsNull()) leg->AddEntry(h,text.Data(),"l");
-}
-
-
-void
-DrawContourLine68( TLegend *leg, TH2F* hist, const TString& text="", Int_t linecolor=CombinationGlob::c_VDarkGray, Int_t linestyle=2 )
-{
-  // contour plot
-  TH2F* h = new TH2F( *hist );
-  h->SetContour( 1 );
-  double pval = CombinationGlob::cl_percent[0];
-  double signif = TMath::NormQuantile(1-pval);
-
-  h->SetContourLevel( 0, signif );
-
-  h->SetLineColor( linecolor );
-  h->SetLineWidth( 2 );
-  h->SetLineStyle( linestyle );
-  h->Draw( "samecont3" );
-
-  if (!text.IsNull()) leg->AddEntry(h,text.Data(),"l");
-}
-
-
-TGraph*
-ContourGraph( TH2F* hist)
-{
-   TGraph* gr0 = new TGraph();
-   TH2F* h = (TH2F*)hist->Clone();
-   h->GetYaxis()->SetRangeUser(0,700);
-   h->GetXaxis()->SetRangeUser(50,4000);
-   gr = (TGraph*)gr0->Clone(h->GetName());
-   //  cout << "==> Will dumb histogram: " << h->GetName() << " into a graph" <<endl;
-   h->SetContour( 1 );
-   double pval = CombinationGlob::cl_percent[1];
-   double signif = TMath::NormQuantile(1-pval);
-   h->SetContourLevel( 0, signif );
-   h->Draw("CONT LIST");
-   h->SetDirectory(0);
-   gPad->Update();
-   TObjArray *contours = gROOT->GetListOfSpecials()->FindObject("contours");
-   Int_t ncontours     = contours->GetSize();
-   TList *list = (TList*)contours->At(0);
-   Int_t number_of_lists = list->GetSize();
-   gr = (TGraph*)list->At(0);
-   TGraph* grTmp = new TGraph();
-   for (int k = 0 ; k<number_of_lists ; k++){
-      grTmp = (TGraph*)list->At(k);
-      Int_t N = gr->GetN();
-      Int_t N_tmp = grTmp->GetN();
-      if(N < N_tmp) gr = grTmp;
-      //    mg->Add((TGraph*)list->At(k));
-   }
-
-   gr->SetName(hist->GetName());
-   int N = gr->GetN();
-   double x0, y0;
-
-   //for(int j=0; j<N; j++) {
-   //    gr->GetPoint(j,x0,y0);
-   //    cout << j << " : " << x0 << " : "<<y0 << endl;
-   // }
-     
-   //  //  gr->SetMarkerSize(2.0);
-   //  gr->SetMarkerSize(2.0);
-   //  gr->SetMarkerStyle(21);
-   //  gr->Draw("LP");
-   //  cout << "Generated graph " << gr << " with name " << gr->GetName() << endl;
-   return gr;
-}
-
-
-TGraph*
-DrawExpectedBand( TGraph* gr1,  TGraph* gr2, Int_t fillColor, Int_t fillStyle, Int_t cut = 0)
-{
-   //  TGraph* gr1 = new TGraph( *graph1 );
-   //  TGraph* gr2 = new TGraph( *graph2 );
-   
-   int number_of_bins = max(gr1->GetN(),gr2->GetN());
-   
-   const Int_t gr1N = gr1->GetN();
-   const Int_t gr2N = gr2->GetN();
-
-   const Int_t N = number_of_bins;
-   Double_t x1[N], y1[N], x2[N], y2[N];
-   
-   Double_t xx0, yy0;
-    
-   for(int j=0; j<gr1N; j++) {
-      gr1->GetPoint(j,xx0,yy0);
-      x1[j] = xx0;
-      y1[j] = yy0;
-   }
-   if (gr1N < N) {
-      for(int i=gr1N; i<N; i++) {
-         x1[i] = x1[gr1N-1];
-         y1[i] = y1[gr1N-1];
-      }
-   }   
-   Double_t xx1, yy1;
-   
-   for(int j=0; j<gr2N; j++) {
-      gr2->GetPoint(j,xx1,yy1);
-      x2[j] = xx1;
-      y2[j] = yy1;
-   }
-   if (gr2N < N) {
-      for(int i=gr2N; i<N; i++) {
-         x2[i] = x2[gr2N-1];
-         y2[i] = y2[gr2N-1];
-      }
-   }
- 
-
-   TGraph *grshade = new TGraphAsymmErrors(2*N);
-   for (int i=0;i<N;i++) {
-      if (x1[i] > cut){
-         grshade->SetPoint(i,x1[i],y1[i]);
-         }
-      if (x2[N-i-1] > cut){
-         grshade->SetPoint(N+i,x2[N-i-1],y2[N-i-1]);
-         }
-   }
-   
-   // Apply the cut in the shade plot if there is something that doesn't look good...
-   int Nshade = grshade->GetN();
-   double x0, y0;
-   double x00, y00;
-   
-   for(int j=0; j<Nshade; j++) {
-      grshade->GetPoint(j,x0,y0);
-      if ((x0 != 0) && (y0 != 0)) {
-         x00 = x0;
-         y00 = y0;
-         break;
-      }
-   } 
-
-   for(int j=0; j<Nshade; j++) {
-      grshade->GetPoint(j,x0,y0);
-      if ((x0 == 0) && (y0 == 0))
-         grshade->SetPoint(j,x00,y00);
-   }
-   
-   // Now draw the plot...
-   grshade->SetFillStyle(fillStyle);
-   grshade->SetFillColor(fillColor);
-   grshade->SetMarkerStyle(21);
-   grshade->Draw("F");
-
-   return grshade;
-}
-
-
-void
-DummyLegendExpected(TLegend* leg, TString what,  Int_t fillColor, Int_t fillStyle, Int_t lineColor, Int_t lineStyle, Int_t lineWidth)
-{
-
-   TGraph* gr = new TGraph();
-   gr->SetFillColor(fillColor);
-   gr->SetFillStyle(fillStyle);
-   gr->SetLineColor(lineColor);
-   gr->SetLineStyle(lineStyle);
-   gr->SetLineWidth(lineWidth);
-   leg->AddEntry(gr,what,"LF");
-}
 
