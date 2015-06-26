@@ -1540,7 +1540,7 @@ TH2D* Util::PlotCorrelationMatrix(RooFitResult* rFit, TString anaName,  bool Red
     if (ReduceMatrix) {
       // Cleanup corrMattrix from rows and columns with content less then corrThres
       vector <int> rm_idx; rm_idx.clear();
-      double corrThresh[3] = {0.005,0.015,0.025}; // rounding to 2 digits gives 0.01
+      double corrThresh[3] = {0.01,0.1,0.2}; 
       int nbins = h_corr->GetNbinsX();
       int index_x=0, index_y=0, Thresh1Counter;//, Thresh0Counter, Thresh2Counter;
       bool fillHistY, fillHistX;
@@ -1576,7 +1576,7 @@ TH2D* Util::PlotCorrelationMatrix(RooFitResult* rFit, TString anaName,  bool Red
           if (fillHistY) {
             h_corr_reduced->Fill(index_x,index_y,h_corr->GetBinContent(ix,iy));
             index_y++;
-            if (ix==1) h_corr_reduced->GetYaxis()->SetBinLabel(index_y,h_corr->GetYaxis()->GetBinLabel(iy));
+            if (index_x==0) h_corr_reduced->GetYaxis()->SetBinLabel(index_y,h_corr->GetYaxis()->GetBinLabel(iy));
             fillHistX=true;
           }
         }

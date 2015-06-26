@@ -1,3 +1,6 @@
+2015-06-26 Jeanette Miriam Lorenz <jeanette.miriam.lorenz@cern.ch
+        * Evgeny added the possibility of a reduced correlation matrix. Changes mostlyin Utils.cxx, but also in some other files. See: https://its.cern.ch/jira/browse/HISTFITTER-4
+
 2015-05-22 Jeanette Miriam Lorenz <jeanette.miriam.lorenz@cern.ch>
         * update to Root 5.34.30 in setup_afs.sh
         * remove reference to external xrootd libaries in setup_afs.sh
