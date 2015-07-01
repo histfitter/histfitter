@@ -11,9 +11,18 @@
  *                                                                                *
  **********************************************************************************/
 
+#include <iostream>
+#include <sstream>
+#include <iomanip>
+
 #include "LimitResult.h"
 #include "Significance.h"
 
+template <typename T> std::string to_string_scientific(const T& t) { 
+   std::ostringstream os; 
+   os << std::scientific << std::setprecision(6) << t; 
+   return os.str(); 
+} 
 
 //_____________________________________________________________________________
 LimitResult::~LimitResult()
@@ -119,6 +128,49 @@ TString  LimitResult::GetSummaryString() const {
     return summary;
 }
 
+JSON LimitResult::GetJSONData() const {
+    JSON summary = JSON::Object();
+    
+    summary["p0"] = GetP0(); 
+    summary["p1"] = GetP1();
+    summary["CLs"] = GetCLs();
+
+    summary["mode"] = GetMode();
+    summary["nexp"] = GetNExp();
+    summary["seed"] = GetSeed();
+    
+    summary["CLsexp"] = GetCLsexp();
+    summary["fID"] = GetfID();
+    summary["sigma0"] = GetSigma0();
+    summary["sigma1"] = GetSigma1();
+    
+    summary["clsu1s"] = GetCLsu1S(); 
+    summary["clsd1s"] = GetCLsd1S(); 
+    summary["clsu2s"] = GetCLsu2S(); 
+    summary["clsd2s"] = GetCLsd2S(); 
+    
+    summary["p0exp"] = GetP0exp();
+    summary["p0u1s"] = GetP0u1S();
+    summary["p0d1s"] = GetP0d1S();
+    summary["p0u2s"] = GetP0u2S();
+    summary["p0d2s"] = GetP0d2S();
+    
+    summary["upperLimit"] = GetUpperLimit();
+    summary["upperLimitEstimatedError"] = GetUpperLimitEstimatedError();
+    summary["expectedUpperLimit"] = GetExpectedUpperLimit();
+    summary["expectedUpperLimitPlus1Sig"] = GetExpectedUpperLimitPlus1Sig(); 
+    summary["expectedUpperLimitPlus2Sig"] = GetExpectedUpperLimitPlus2Sig(); 
+    summary["expectedUpperLimitMinus1Sig"] = GetExpectedUpperLimitMinus1Sig(); 
+    summary["expectedUpperLimitMinus2Sig"] = GetExpectedUpperLimitMinus2Sig(); 
+    summary["xsec"] = -999007.;
+    summary["excludedXsec"] = -999007.;
+
+    std::map<TString,float>::const_iterator itr=m_metadata.begin(), end=m_metadata.end();
+    for (; itr!=end; ++itr)
+        summary[itr->first.Data()] = itr->second;
+    
+    return summary;
+}
 
 //_____________________________________________________________________________
 TString  LimitResult::GetDescriptionString() const {

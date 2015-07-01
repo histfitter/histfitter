@@ -20,6 +20,7 @@
 #include "StatTools.h"
 #include "TMsgLogger.h"
 #include "RooStats/HypoTestInverterResult.h"
+#include "json.h"
 
 #include "TTree.h"
 #include "TFile.h"
@@ -100,7 +101,8 @@ const char* CollectAndWriteHypoTestResults( const TString& infile, const TString
     std::list<LimitResult> summary = CollectHypoTestResults( infile, format, interpretation, cutStr, rejectFailedPrefit ); 
 
     // store harvest in text file
-    return WriteResultSet( summary, listname, outdir );
+    //return WriteResultSet( summary, listname, outdir );
+    return WriteResultSetJSON( summary, listname, outdir );
 }
 
 
@@ -235,6 +237,45 @@ std::list<LimitResult> CollectHypoTestResults( const TString& infile, const TStr
     return limres;
 }
 
+
+//________________________________________________________________________________________________
+const char* WriteResultSetJSON( const std::list<LimitResult>& summary, const TString& listname, const TString& outDir ){
+    if (summary.empty()) 
+        return 0;
+
+    ToyUtilsLogger << kINFO << "Storing results of " << summary.size() << " scan points as JSON" << GEndl;
+
+    TString outdir = gSystem->pwd(); 
+    if ( !gSystem->cd( outDir.Data() ) ) {
+        ToyUtilsLogger << kERROR << "output dir <" << outDir << "> does not exist. Return." << GEndl;
+        return 0;
+    } else {
+        TString fulloutdir = gSystem->pwd();
+        gSystem->cd( outdir.Data() ); // back to original dir
+        outdir = fulloutdir;
+    }
+    outdir = ( outdir.EndsWith("/") ? outdir : outdir+"/" );
+
+    TString outfile = outdir + listname + "_harvest_list.json" ;
+
+    JSON limresJSON = JSON::Array();
+    for(auto l: summary) { limresJSON.asVector().push_back( l.GetJSONData()); }
+
+    // write out files
+    ofstream fout;
+    fout.open(outfile.Data());
+    if (!fout.is_open()) {
+        ToyUtilsLogger << kERROR << "Error opening file <" << outfile <<">" << GEndl;
+        return 0;
+    }
+    limresJSON.print(fout);
+    fout.close();
+
+    ToyUtilsLogger << kINFO << "JSON list file stored as <" << outfile << ">" << GEndl;
+
+    return outfile.Data();
+
+}
 
 //________________________________________________________________________________________________
 const char* WriteResultSet( const std::list<LimitResult>& summary, const TString& listname, const TString& outDir ){
@@ -406,7 +447,8 @@ const char* CollectAndWriteResultSet( const TString& infile, const TString& form
     std::list<LimitResult> summary = CollectLimitResults( infile, format, interpretation, cutStr, mode, n_toys, do_ul ); 
 
     // store harvest in text file
-    return WriteResultSet( summary, listname, outdir );
+    //return WriteResultSet( summary, listname, outdir );
+    return WriteResultSetJSON( summary, listname, outdir );
 }
 
 

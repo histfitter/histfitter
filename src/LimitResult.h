@@ -20,6 +20,7 @@
 
 #include <iostream>
 #include <map>
+#include "json.h"
 #include "TString.h"
 
 class LimitResult {
@@ -46,11 +47,11 @@ class LimitResult {
         double m_expectedUpperLimitMinus1Sig;
         double m_expectedUpperLimitMinus2Sig;
 
-	double m_p0exp;
-	double m_p0u1S;
-	double m_p0d1S;
-	double m_p0u2S;
-	double m_p0d2S;
+        double m_p0exp;
+        double m_p0u1S;
+        double m_p0d1S;
+        double m_p0u2S;
+        double m_p0d2S;
 
         TString m_resultfilename;
         TString m_comments;
@@ -139,6 +140,7 @@ class LimitResult {
         inline void SetComments(const TString & val) 	{ m_comments = val; }   
 
         void Summary();
+        JSON GetJSONData() const; 
         TString GetSummaryString() const; 
         TString GetDescriptionString() const;
         void AddMetaData(const std::map<TString,float>& metadata); 
