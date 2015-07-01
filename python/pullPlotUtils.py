@@ -267,6 +267,7 @@ def MakeHistPullPlot(samples, regionList, outFileNamePrefix, hresults, renamedRe
     hbkgDown.SetLineStyle(2)
     
     hbkgComponents = []
+    samples.replace(" ","") #remove spaces, and split by comma => don't split by ", " 
     for sam in samples.split(","):
         h = TH1F("hbkg"+sam, "hbkg"+sam, Npar, 0, Npar)
         h.SetFillColor(getSampleColor(sam))
@@ -402,4 +403,6 @@ def makePullPlot(pickleFilename, regionList, samples, renamedRegions, outputPref
 
     #pull
     MakeHistPullPlot(samples, regionList, outputPrefix, results1, renamedRegions, doBlind)
-
+    
+    # return the results array in case you want to use this somewhere else
+    return results1

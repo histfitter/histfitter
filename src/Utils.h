@@ -301,13 +301,14 @@ namespace Util
      @param w RooWorkspace pointer
      @param inputData RooAbsData pointer pointing to a toy/asimov-dataset, default='' meaning that it takes obsData from RooWorkspace
      @param verbose Boolean deciding whether addiotional print out info is given, default=false
-     @param resetAfterFit Coolean deciding whether the workspace parameters are set back to initial values after fit is performed, default=false
+     @param resetAfterFit Boolean deciding whether the workspace parameters are set back to initial values after fit is performed, default=false
+     @param hesse Boolean deciding whether to run HESSE or not; default=false
      @param minos Boolean deciding whether asymmetric errors are calculated, eg whether MINOS is run, default=kFALSE
      @param minosPars When minos is called, defining what parameters need asymmetric error calculation, default=''
      @return RooFitResult pointer to fit result 
   */
   RooFitResult* doFreeFit( RooWorkspace* w, RooDataSet* inputdata=0, const bool& verbose=false, 
-			   const bool& resetAfterFit=false, Bool_t minos = kFALSE, TString minosPars="" );
+			   const bool& resetAfterFit=false, bool hesse=false, Bool_t minos = kFALSE, TString minosPars="" );
   /**
      Get asimovData dataset from workspace
   */

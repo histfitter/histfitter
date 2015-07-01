@@ -29,6 +29,8 @@ SHLIBFILE = ../lib/lib$(PACKAGE).so
 DLLIBFILE = ../lib/lib$(PACKAGE).dll
 HEADERDEST = ../include/
 
+CXXFLAGS = -std=c++11 -fPIC
+
 UNAME = $(shell uname)
 
 LINKLIBSIN = -L$(ROOTSYS)/lib -lCore -lCint -lRIO -lNet -lHist -lGraf -lGraf3d -lGpad -lTree -lRint -lPostscript -lMatrix -lPhysics -lGui -lRooFit -lRooStats -lHistFactory -lXMLParser -pthread -lRooFitCore -lm -ldl -lFoam -lMinuit -L../lib 

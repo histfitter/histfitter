@@ -17,6 +17,8 @@
  * See corresponding .h file for author and license information                   *
  **********************************************************************************/
 
+#include <memory>
+
 #include "Utils.h"
 #include "ConfigMgr.h"
 #include "TMsgLogger.h"
@@ -1788,7 +1790,7 @@ Util::GetPOI( const RooWorkspace* w  )
 
 //________________________________________________________________________________________________
     RooFitResult*
-Util::doFreeFit( RooWorkspace* w, RooDataSet* inputdata, const bool& verbose, const bool& resetAfterFit, Bool_t minos, TString minosPars )
+Util::doFreeFit( RooWorkspace* w, RooDataSet* inputdata, const bool& verbose, const bool& resetAfterFit, bool hesse, Bool_t minos, TString minosPars )
 {
     // fit to reset the workspace
 
@@ -1866,48 +1868,75 @@ Util::doFreeFit( RooWorkspace* w, RooDataSet* inputdata, const bool& verbose, co
     minim.setPrintLevel(minimPrintLevel-1);
     int status = -1;
     minim.optimizeConst(2);
-    TString minimizer = ROOT::Math::MinimizerOptions::DefaultMinimizerType(); 
+    TString minimizer = "Minuit2"; //ROOT::Math::MinimizerOptions::DefaultMinimizerType(); 
     TString algorithm = ROOT::Math::MinimizerOptions::DefaultMinimizerAlgo(); 
+
+    // require covQual = 3 from any fit while retrying?
+    bool requireGoodCovQual = true;
 
     Logger << kINFO << "Util::doFreeFit()  ........ using " << minimizer << " / " << algorithm 
         << " with strategy  " << strategy << " and tolerance " << tol << GEndl;
 
-    for (int tries = 1, maxtries = 4; tries <= maxtries; ++tries) {
+    for (int tries = 1, maxtries = 5; tries <= maxtries; ++tries) {
         //	 status = minim.minimize(fMinimizer, ROOT::Math::MinimizerOptions::DefaultMinimizerAlgo().c_str());
-        status = minim.minimize(minimizer, algorithm);  
+        status = minim.minimize(minimizer, algorithm); 
+
         if (status%1000 == 0) {  // ignore erros from Improve 
-            break;
-        } else { 
-            if (tries == 1) {
-                Logger << kINFO << "    ----> Doing a re-scan first" << GEndl;
-                minim.minimize(minimizer,"Scan");
+            
+            // if desired, is the covariance matrix OK?
+            std::unique_ptr<RooFitResult> res(minim.save());
+            if(!requireGoodCovQual || res->covQual() == 3){
+                break;
+            } else {
+                Logger << kINFO << " status OK but covariance matrix not at full accuracy, retrying" << GEndl;
             }
-            if (tries == 2) {
-                if (ROOT::Math::MinimizerOptions::DefaultStrategy() == 0 ) { 
-                    Logger << kINFO << "    ----> trying with strategy = 1" << GEndl;
-                    minim.setStrategy(1);
-                }
-                else 
-                    tries++; // skip this trial if stratehy is already 1 
+        } 
+            
+        if (tries == 1) {
+            Logger << kINFO << "    ----> Doing a re-scan first" << GEndl;
+            minim.minimize(minimizer,"Scan");
+        } else if (tries == 2) {
+            if (strategy == 0) {
+                Logger << kINFO << "    ----> trying with strategy = 1" << GEndl;
+                strategy = 1;
+                minim.setStrategy(strategy);
+            } else { 
+                tries++; // skip this trial if stratehy is already 1 
             }
-            if (tries == 3) {
-                Logger << kINFO << "    ----> trying with improve" << GEndl;
-                minimizer = "Minuit";
-                algorithm = "migradimproved";
+        } else if (tries == 3) {
+            if (strategy == 1) {
+                Logger << kINFO << "    ----> trying with strategy = 2" << GEndl;
+                strategy = 2;
+                minim.setStrategy(strategy);
+            } else { 
+                tries++; // skip this trial if stratehy is already 2 
             }
+        } else if (tries == 4) {
+            Logger << kINFO << "    ----> trying with improve" << GEndl;
+            minimizer = "Minuit";
+            algorithm = "migradimproved";
         }
+    }
+    
+    std::unique_ptr<RooFitResult> res(minim.save());
+    if( requireGoodCovQual && res->covQual() != 3 && !hesse ) {
+        Logger << kINFO << "status OK but covariance matrix not at full accuracy, will retry with HESSE to improve" << GEndl;
+        hesse = true;
     }
 
     RooFitResult * result = 0; 
     
-    if (status%100 == 0) { // ignore errors in Hesse or in Improve
+    if (status%100 == 0 ) { // ignore errors in Hesse or in Improve
         // only calculate minos errors if fit with Migrad converged
-        if(minos && (minosPars == "all" || minosPars == "ALL")){
+        Logger << kINFO <<  "status: " << status << ", hesse = " << hesse <<" minos = " << minos << " minosPars = " << minosPars << GEndl;
+
+        if(hesse || minos ) {
             minim.hesse();
-            minim.minos();
         }
-        else if(minos && minosPars!="" && minosParams->getSize()>0){
-            minim.hesse();
+
+        if(minos && (minosPars == "all" || minosPars == "ALL")) {
+            minim.minos();
+        } else if(minos && minosPars != "" && minosParams->getSize() > 0) {
             minim.minos(*minosParams);
         }
 
