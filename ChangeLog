@@ -1,3 +1,22 @@
+2015-07-02 Jeanette Miriam Lorenz <jeanette.miriam.lorenz@cern.ch>
+        M       macros/Examples/contourplot/contourmacros/CombinationGlob.C
+        M       macros/Examples/contourplot/contourmacros/SUSY_m0_vs_m12_all_withBand_cls.C
+        M       macros/Examples/contourplot/contourmacros/m0_vs_m12_nofloat.C
+        M       macros/Examples/contourplot/makecontourplots.C
+        M       macros/Examples/contourplot/makelistfiles.C
+        M       macros/Examples/p-values/pvalue.C
+        M       python/prepareHistos.py
+        M       setup.sh
+        M       setup_afs.sh
+        M       src/LinkDef.h
+        M       src/Makefile
+        M       src/Makefile.arch
+        M       src/RooHist.h
+        M       src/RooPlot.h
+        M       src/TEasyFormula.cxx
+        * switching to Root 6.04
+
+
 2015-07-02 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
         * List files now outputted in JSON by default
         * Intermediate plain-text list file still needed to run makeContourHists.C

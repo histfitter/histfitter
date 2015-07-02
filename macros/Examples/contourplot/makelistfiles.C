@@ -16,6 +16,7 @@
  **********************************************************************************/
 
 #include "TString.h"
+#include "toy_utils.h"
 
 /**
 Convert the root file with hypo test results into a readable 'list' file.

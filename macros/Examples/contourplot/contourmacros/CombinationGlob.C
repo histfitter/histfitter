@@ -825,7 +825,7 @@ namespace CombinationGlob {
       // use bold lines and markers
       CombinationStyle->SetMarkerStyle(21);
       CombinationStyle->SetMarkerSize(0.3);
-      CombinationStyle->SetHistLineWidth(1.85);
+      CombinationStyle->SetHistLineWidth(2);
       CombinationStyle->SetLineStyleString(2,"[12 12]"); // postscript dashes
 
       // do not display any of the standard histogram decorations

@@ -44,6 +44,8 @@ class TClass ;
 class TAxis;
 class TBrowser ;
 
+using namespace std;
+
 class RooPlot : public TNamed, public RooPrintable {
 public:
   RooPlot() ;

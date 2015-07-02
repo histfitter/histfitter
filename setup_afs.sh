@@ -2,7 +2,7 @@
 # check Root environment setup. Allow for external setup script.
 
 export BUILD="x86_64-slc6-gcc49-opt"
-export ROOTVERSION="5.34.30"
+export ROOTVERSION="6.04.00"
 export CERNPREFIX="/afs/cern.ch/"
 export PYTHONVERSION="2.7.3"
 export GCCVERSION="4.9"
@@ -67,6 +67,7 @@ export PATH=$HISTFITTER/bin:$HISTFITTER/scripts:${PATH}
 export LD_LIBRARY_PATH=$HISTFITTER/lib:${LD_LIBRARY_PATH}
 # PYTHONPATH contains all directories that are used for 'import bla' commands
 export PYTHONPATH=$HISTFITTER/python:$HISTFITTER/scripts:$HISTFITTER/macros:$HISTFITTER/lib:$PYTHONPATH
+export ROOT_INCLUDE_PATH=$HISTFITTER/include:${ROOT_INCLUDE_PATH}
 
 # set SVN path to defaults
 export SVNTEST="svn+ssh://svn.cern.ch/reps/atlastest"

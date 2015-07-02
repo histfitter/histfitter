@@ -1,12 +1,12 @@
 # setup ROOT
 # check Root environment setup. Allow for external setup script.
 
-export BUILD="x86_64-slc6-gcc47-opt"
-export ROOTVERSION="5.34.19"
+export BUILD="x86_64-slc6-gcc49-opt"
+export ROOTVERSION="6.04.00"
 #export CERNPREFIX="/afs/cern.ch/"
 export HF_CERNPREFIX="cvmfs/atlas.cern.ch/repo"
 export PYTHONVERSION="2.7.3"
-export GCCVERSION="4.7"
+export GCCVERSION="4.9"
 
 # AK (08/09/2014): not necessary when using localRootSetup
 
@@ -69,6 +69,7 @@ export PATH=$HISTFITTER/bin:$HISTFITTER/scripts:${PATH}
 export LD_LIBRARY_PATH=$HISTFITTER/lib:${LD_LIBRARY_PATH}
 # PYTHONPATH contains all directories that are used for 'import bla' commands
 export PYTHONPATH=$HISTFITTER/python:$HISTFITTER/scripts:$HISTFITTER/macros:$HISTFITTER/lib:$PYTHONPATH
+export ROOT_INCLUDE_PATH=$HISTFITTER/include:${ROOT_INCLUDE_PATH}
 
 # set SVN path to defaults
 export SVNTEST="svn+ssh://svn.cern.ch/reps/atlastest"

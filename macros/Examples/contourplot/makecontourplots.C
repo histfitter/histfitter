@@ -33,7 +33,7 @@ void makecontourplots()
   int applyfix(0);
 
   // simple channel contour plot
-  SUSY_m0_vs_m12_all_withBand_cls("MySimpleChannelAnalysis_fixSigXSecNominal_hypotest__1_harvest_list.root","MySimpleChannelAnalysis_fixSigXSecUp_hypotest__1_harvest_list.root","MySimpleChannelAnalysis_fixSigXSecDown_hypotest__1_harvest_list.root", "", "Tutorial contour", 4.7, showsignal, discexcl=1, showtevatron, showcms, doOneSigmaBand, showfixSigXSecBand, channel=2 );
+  SUSY_m0_vs_m12_all_withBand_cls("MySimpleChannelAnalysis_fixSigXSecNominal_hypotest__1_harvest_list.root","MySimpleChannelAnalysis_fixSigXSecUp_hypotest__1_harvest_list.root","MySimpleChannelAnalysis_fixSigXSecDown_hypotest__1_harvest_list.root", "", "Tutorial contour", 4.7, showsignal, 1, showtevatron, showcms, doOneSigmaBand, showfixSigXSecBand, 2 );
 
 }
 
