@@ -5,6 +5,7 @@
         * Added method to LimitResult.cxx
         * New intermediate script GenerateTreeDescriptionFromJSON.py
         * Updated README and comments
+        * NOTE: C++11 supported is now required!
 
 2015-06-26 Jeanette Miriam Lorenz <jeanette.miriam.lorenz@cern.ch
         * Evgeny added the possibility of a reduced correlation matrix. Changes mostlyin Utils.cxx, but also in some other files. See: https://its.cern.ch/jira/browse/HISTFITTER-4
