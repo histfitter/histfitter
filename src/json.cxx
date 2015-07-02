@@ -24,6 +24,7 @@ along with Bit Powder Libraries.  If not, see <http://www.gnu.org/licenses/>.
 #include <ostream>
 #include <iostream>
 #include <iomanip>
+#include <cmath>
 
 #include "json.h"
 
@@ -129,8 +130,13 @@ void JSON::print(std::ostream& out) const {
         out << (b ? "true" : "false");
     if (type == JSONLongNumber)
         out << std::fixed << number;
-    if (type == JSONNumber)
+    
+    if (type == JSONNumber and !(std::isinf(number) or std::isnan(number))) {
         out << std::scientific << std::setprecision(6) << number;
+    } else if (type == JSONNumber) {
+        out << '"' << number << '"';
+    }
+    
     if (type == JSONString)
         out << '"' << str << '"';
     if (type == JSONArray) {
