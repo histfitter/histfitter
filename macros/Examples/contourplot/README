@@ -23,8 +23,19 @@ HistFitter.py -p analysis/tutorial/MySimpleChannelConfig.py
 cd macros/Examples/contourplots
 root -b -q makelistfiles.C
 
-##    this example produces two list text files with p-values, that can be read in in root
-##    by doing : root -l summary_harvest_tree_description.h
+##    this example produces two json files with p-values, that can be read in python using the module json easily. 
+##    it is a self-descriptive file with all your outputs. 
+##    since ROOT cannot read JSON, we convert it into a plain-text file with a header:
+
+GenerateTreeDescriptionFromJSON.py -f <your_json_file>
+
+##    this will output the same file, minus the .json extension, plus two headers: summary_harvest_tree_description.{h,py}
+##    these files allow your to convert the newly created space-separated file into a ROOT tree
+
+##    (NB: previously, HistFitter would output these directly, but it means that once you lose the summary_harvest_tree_description.h file, 
+##           it's unclear what is in your output file!  
+
+##    Now read the files ROOT by doing : root -l summary_harvest_tree_description.h
 ##    which gives you a tree with the results
 
 ## 4. make contour histograms based on these list files

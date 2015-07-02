@@ -41,7 +41,14 @@ void makelistfiles()
   //  TString outputfile = Combination::CollectAndWriteHypoTestResults( inputfile, format, interpretation, cutStr ) ;
   TString outputfile = CollectAndWriteHypoTestResults( inputfile, format, interpretation, cutStr ) ;
 
-  // load the listfile in root with:
+  
+  // you now have the information from your fits in JSON. In python you can easily import this information using the default module 'json'.
+  // to be able to make histograms, convert the file using:
+  
+  // GenerateTreeDescriptionFromJSON.py -f <your_json_file> 
+  // its default output is the same file minus the '.json' extension and two files summary_harvest_tree_description.{h,py}
+
+  // load the listfile in root with (ROOT cannot read JSON files, hence this intermediate step):
   // root -l summary_harvest_tree_description.h
   // or look directly at the outputfile in vi.
 }
