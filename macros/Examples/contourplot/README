@@ -1,5 +1,7 @@
 ## To make contour plots, do the following:
 
+## (Note: it can help to write a little script that executes all these steps for you!)
+
 ## 1. make root files containing the workspaces for grid point you want to assess.
 ## --> Follow readme file in scripts/README
 ##     then move the root files here.
