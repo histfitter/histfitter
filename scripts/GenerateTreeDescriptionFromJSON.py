@@ -27,6 +27,15 @@ def checkArgs(args):
 def generateHeaderFiles(keys):
     print "%s: generating header files" % (scriptName)
 
+def sanitizeData(data):
+    # 'NaN' is a string in JSON. Fix it. 
+    for d in data[0]:
+        for key in d:
+            if isinstance(d[key], float): continue
+            d[key] = float(d[key])
+
+    return data
+
 def readInputFile(filename):
     data = []
     with open(filename) as f:
@@ -34,7 +43,7 @@ def readInputFile(filename):
             data.append(json.loads(line))
 
     print "%s: read input data" % (scriptName)
-    return data
+    return sanitizeData(data)
 
 def getKeys(data):
     first = True
@@ -123,7 +132,7 @@ def writeHeaderFiles(keys, filename):
     cppHeader = t.substitute({"outfile": os.path.abspath(args.output_filename), "description": description })
 
     # will have to go in same dir as input filename
-    outputDir = os.path.dirname(args.filename)
+    outputDir = os.path.dirname(os.path.abspath(args.filename))
     
     # write the python header
     outputFilename = "%s/summary_harvest_tree_description.py" % outputDir
