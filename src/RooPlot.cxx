@@ -42,7 +42,7 @@
 #include "TDirectory.h"
 #include "TDirectoryFile.h"
 
-#include "Riostream.h"
+#include <iostream>
 #include <string.h>
 #include <assert.h>
 
@@ -506,7 +506,7 @@ void RooPlot::Draw(Option_t *options)
 
 
 //_____________________________________________________________________________
-void RooPlot::printName(ostream& os) const
+void RooPlot::printName(std::ostream& os) const
 {
   // Print frame name
   os << GetName() ;
@@ -514,7 +514,7 @@ void RooPlot::printName(ostream& os) const
 
 
 //_____________________________________________________________________________
-void RooPlot::printTitle(ostream& os) const
+void RooPlot::printTitle(std::ostream& os) const
 {
   // Print frame title
   os << GetTitle() ;
@@ -522,7 +522,7 @@ void RooPlot::printTitle(ostream& os) const
 
 
 //_____________________________________________________________________________
-void RooPlot::printClassName(ostream& os) const
+void RooPlot::printClassName(std::ostream& os) const
 {
   // Print frame class name
   os << IsA()->GetName() ;
@@ -531,7 +531,7 @@ void RooPlot::printClassName(ostream& os) const
 
 
 //_____________________________________________________________________________
-void RooPlot::printArgs(ostream& os) const
+void RooPlot::printArgs(std::ostream& os) const
 {
   if (_plotVarClone) {
     os << "[" ;
@@ -543,7 +543,7 @@ void RooPlot::printArgs(ostream& os) const
 
 
 //_____________________________________________________________________________
-void RooPlot::printValue(ostream& os) const
+void RooPlot::printValue(std::ostream& os) const
 {
   // Print frame arguments
   os << "(" ;
@@ -571,7 +571,7 @@ void RooPlot::printValue(ostream& os) const
 
 
 //_____________________________________________________________________________
-void RooPlot::printMultiline(ostream& os, Int_t /*content*/, Bool_t verbose, TString indent) const
+void RooPlot::printMultiline(std::ostream& os, Int_t /*content*/, Bool_t verbose, TString indent) const
 {
   // Frame detailed printing
 
