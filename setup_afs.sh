@@ -1,11 +1,11 @@
 # setup ROOT
 # check Root environment setup. Allow for external setup script.
 
-export BUILD="x86_64-slc6-gcc48-opt"
+export BUILD="x86_64-slc6-gcc49-opt"
 export ROOTVERSION="5.34.30"
 export CERNPREFIX="/afs/cern.ch/"
 export PYTHONVERSION="2.7.3"
-export GCCVERSION="4.8"
+export GCCVERSION="4.9"
 
 # Must have gcc and python setup outside of ROOTSYS def for batch running!
 # This section here is cern specific.
