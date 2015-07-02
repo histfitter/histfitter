@@ -1,3 +1,11 @@
+2015-07-02 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
+        * List files now outputted in JSON by default
+        * Intermediate plain-text list file still needed to run makeContourHists.C
+        * Added src/json.cxx, src/json.h
+        * Added method to LimitResult.cxx
+        * New intermediate script GenerateTreeDescriptionFromJSON.py
+        * Updated README and comments
+
 2015-06-26 Jeanette Miriam Lorenz <jeanette.miriam.lorenz@cern.ch
         * Evgeny added the possibility of a reduced correlation matrix. Changes mostlyin Utils.cxx, but also in some other files. See: https://its.cern.ch/jira/browse/HISTFITTER-4
 
