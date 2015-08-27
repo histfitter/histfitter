@@ -85,6 +85,7 @@ if __name__ == "__main__":
     drawCorrelationMatrix = False
     drawSeparateComponents = False
     drawLogLikelihood = False
+    drawSystematics = False
     pickedSRs = []
     runToys = False
     runMinos = False
@@ -130,7 +131,8 @@ if __name__ == "__main__":
     --GJ 14/11/2012
     """
     parser.add_argument("-d", action="store_true", help="draw before/after plots")
-    parser.add_argument("-D", "--draw", help="specify plots to draw, comma separated; choose from "+str(["allPlots", "before","after", "corrMatrix", "sepComponents", "likelihood"]))
+    parser.add_argument("-D", "--draw", help="specify plots to draw, comma separated; choose from "+str(["allPlots", "before","after", "corrMatrix", "sepComponents", "likelihood","systematics"]))
+    parser.add_argument("-syst", "--systematics", help="specify the systematics to be considered with '-D systematics' option, comma separated;")
     
     parser.add_argument("-b", "--background", help="when doing hypotest, set background levels to values, form of bkgParName,value")
     parser.add_argument("-0", "--no-empty", help="do not draw empty bins when drawing", action="store_true")
@@ -207,6 +209,7 @@ if __name__ == "__main__":
             drawCorrelationMatrix = True
             drawSeparateComponents = True
             drawLogLikelihood = True
+            drawSystematics = True
         elif len(drawArgs)>0:
             for drawArg in drawArgs:
                 if drawArg == "before":
@@ -219,6 +222,8 @@ if __name__ == "__main__":
                     drawSeparateComponents = True
                 elif drawArg == "likelihood":
                     drawLogLikelihood = True
+                elif drawArg == "systematics":
+                    drawSystematics = True
                 else:
                     log.fatal("Wrong draw argument: %s\n  Possible draw arguments are 'allPlots' or comma separated 'before after corrMatrix sepComponents likelihood'" % drawArg) 
 
@@ -305,6 +310,31 @@ if __name__ == "__main__":
             cProfile.run('configMgr.executeAll()')
         else:
             configMgr.executeAll()
+
+    """
+    shows systematics
+    """
+    if drawSystematics:
+       from ROOT import Util
+       if not os.path.isdir("./plots"): 
+          log.info("no directory 'plots' found.... creating one")
+          os.mkdir("./plots")
+       for fC in configMgr.fitConfigs:
+           for chan in fC.channels:
+               for sam in chan.sampleList:
+                if not sam.isData:
+                  if HistFitterArgs.systematics:
+                      Systs = HistFitterArgs.systematics
+                  else:
+                      log.info("no systematic has been specified.... all the systematics will be considered")
+                      print sam.systDict
+                      Systs = ""
+                      for i in sam.systDict.keys(): 
+                          Systs+=i
+                          if 'Norm' in sam.systDict[i].method: Systs+="Norm"
+                          Systs+=","
+                      if Systs!="": Systs=Systs[:-1]
+                  if Systs != "": Util.plotUpDown(configMgr.histCacheFile,sam.name,Systs,chan.regionString,chan.variableName)
 
     """
     runs fitting and plotting, by calling C++ side functions
