@@ -61,21 +61,24 @@ BINLIST=$(basename $(wildcard *$(BinSuf)))
 	#@echo $(CXX) $(CXXFLAGS) -g -c $< -o $(OBJDIR)/$(notdir $@) $(INCLUDES) 
 	@$(CXX) $(CXXFLAGS) -g -c $< -o $(OBJDIR)/$(notdir $@) $(INCLUDES)
 
-# Rule to make the dictionary
+ifeq ($(shell [ $(ROOTMAJOR) -lt 6 ] && echo true), true)
+# ROOT5 rule to make the dictionary
 $(DICTFILE):  $(DICTHLIST) $(DICTLDEF)
 	@echo "Generating dictionary $@"
-	if [[ $(shell [ $(ROOTMAJOR) -lt 6 ] && echo true) ]]; then \
-		$(ROOTSYS)/bin/rootcint -f $(DICTFILE) -c $(INCLUDES) $(CINTFLAGS) $^;\
-	else \
-		$(ROOTSYS)/bin/rootcling -f $(DICTFILE) -s $(SHLIBFILE) -rml lib$(PACKAGE).so -rmf $(ROOTMAPFILE) -c $(INCLUDES) $^;\
-	fi
+	$(ROOTSYS)/bin/rootcint -f $(DICTFILE) -c $(INCLUDES) $(CINTFLAGS) $^
+endif
+
+ifneq ($(shell [ $(ROOTMAJOR) -lt 6 ] && echo true), true)
+# ROOT6 rule to make the dictionary
+$(DICTFILE):  $(DICTHLIST) $(DICTLDEF)
+	@echo "Generating dictionary $@"
+	$(ROOTSYS)/bin/rootcling -f $(DICTFILE) -s $(SHLIBFILE) -rml lib$(PACKAGE).so -rmf $(ROOTMAPFILE) -c $(INCLUDES) $^
+endif
 
 $(OBJDIR)/$(DICTOBJ): $(DICTFILE)
 	@echo "Compiling $<"
 	@mkdir -p $(OBJDIR)
 	@$(CXX) $(CXXFLAGS) -g -c $(INCLUDES) -o $@ $<
-
-
 
 ##############################
 # The dependencies section   
