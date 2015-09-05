@@ -63,8 +63,12 @@ BINLIST=$(basename $(wildcard *$(BinSuf)))
 
 # Rule to make the dictionary
 $(DICTFILE):  $(DICTHLIST) $(DICTLDEF)
-	@echo "Generating dictionary $@" 
-	$(ROOTSYS)/bin/rootcling -f $(DICTFILE) -s $(SHLIBFILE) -rml lib$(PACKAGE).so -rmf $(ROOTMAPFILE) -c $(INCLUDES) $^
+	@echo "Generating dictionary $@"
+	if [[ $(shell [ $(ROOTMAJOR) -lt 6 ] && echo true) ]]; then \
+		$(ROOTSYS)/bin/rootcint -f $(DICTFILE) -c $(INCLUDES) $(CINTFLAGS) $^;\
+	else \
+		$(ROOTSYS)/bin/rootcling -f $(DICTFILE) -s $(SHLIBFILE) -rml lib$(PACKAGE).so -rmf $(ROOTMAPFILE) -c $(INCLUDES) $^;\
+	fi
 
 $(OBJDIR)/$(DICTOBJ): $(DICTFILE)
 	@echo "Compiling $<"
@@ -87,7 +91,7 @@ endif
 endif
 
 $(DEPDIR)/%.d: %.$(SrcSuf)
-	@mkdir -p $(DEPDIR)
+	@@mkdir -p $(DEPDIR)
 	if test -f $< ; then \
 		echo "Making $(@F)"; \
 		$(SHELL) -ec '$(CPP) -MM $(CXXFLAGS) $(INCLUDES) $< | sed '\''/Cstd\/rw/d'\'' > $@'; \

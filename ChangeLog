@@ -1,3 +1,11 @@
+2015-09-02 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
+	* Patch to TMsgLogger.cxx to work on OS X
+	* Patch to Makefile.arch to detect ROOT versions
+	* Patch to Makefile to use rootcint or rootcling, depending on the version
+	* Improvements to several files to make explicit what cout/endl/ostream are used to prevent compilation errors
+	* Fix a double->int conversion warning in ValidationUtils.cxx
+	* NOTE: ROOT5 compatibility is not guaranteed. This version still works, future versions might break.
+
 2015-07-02 Jeanette Miriam Lorenz <jeanette.miriam.lorenz@cern.ch>
         M       macros/Examples/contourplot/contourmacros/CombinationGlob.C
         M       macros/Examples/contourplot/contourmacros/SUSY_m0_vs_m12_all_withBand_cls.C

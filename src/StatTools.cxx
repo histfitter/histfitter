@@ -577,7 +577,7 @@ RooStats::HypoTestInverterResult* RooStats::MakeUpperLimitPlot(const char* filep
     if ( hypo!=0 ) { 
         double eul2 = 1.10 * hypo->GetExpectedUpperLimit(2);
         delete hypo; hypo=0;
-        //cout << "INFO grepme : nToys=" << ntoys << " calcType=" << calculatorType << " testStatType=" << testStatType << " useCLs=" << useCLs << " nPoints=" << npoints << " eul2=" << eul2 << endl;
+        //cout << "INFO grepme : nToys=" << ntoys << " calcType=" << calculatorType << " testStatType=" << testStatType << " useCLs=" << useCLs << " nPoints=" << npoints << " eul2=" << eul2 << std::endl;
         hypo = RooStats::DoHypoTestInversion(w, ntoys, calculatorType, testStatType, useCLs, npoints, 0, eul2); 
     }
 
@@ -748,7 +748,7 @@ LimitResult RooStats::get_Pvalue( const RooStats::HypoTestInverterResult* fResul
                 ts[j] = values[idx[j]];	      
                 oneresult->SetTestStatisticData( ts[j] );
                 qv[j] = oneresult->NullPValue() ;
-                //cout << idx[j] << " " << ts[j] << " " << pexp[j] << endl;
+                //cout << idx[j] << " " << ts[j] << " " << pexp[j] << std::endl;
                 // for storage later
             }
 

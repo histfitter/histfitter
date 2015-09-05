@@ -101,7 +101,8 @@ TMsgLogger::TMsgLogger( TMsgLevel /*minLevel*/ )
 
 //_____________________________________________________________________________
 TMsgLogger::TMsgLogger( const TMsgLogger& parent )
-   : basic_ios< TMsgLogger::char_type, TMsgLogger::traits_type >( new TMsgLogger::__stringbuf_type() ),
+   //: basic_ios< TMsgLogger::char_type, TMsgLogger::traits_type >( new TMsgLogger::__stringbuf_type() ),
+   : basic_ios< TMsgLogger::char_type, TMsgLogger::traits_type >( new std::basic_stringbuf< TMsgLogger::char_type >() ),
      ostringstream(),
      TObject(),
      m_prefix( PREFIX ), 
@@ -190,18 +191,19 @@ void TMsgLogger::WriteMsg( TMsgLevel mlevel, const std::string& line ) const  {
 
     //we do print names for kINFO - gbesjes 17/10/12
 #ifdef USE_COLORED_CONSOLE
-    cout << m_colorMap.find( mlevel )->second << m_prefix << "<" << slevel->second << "> " << line;  // << "\033[0m" << endl;
-    if (mlevel == kINFO) 
-      cout << endl;
-    else
-      cout << "\033[0m" << endl;
+    std::cout << m_colorMap.find( mlevel )->second << m_prefix << "<" << slevel->second << "> " << line;  // << "\033[0m" << std::endl;
+    if (mlevel == kINFO) { 
+      std::cout << std::endl;
+    } else {
+      std::cout << "\033[0m" << std::endl;
+    }
 #else
-    cout << m_prefix << "<" << slevel->second << "> " << line << endl;
+    std::cout << m_prefix << "<" << slevel->second << "> " << line << std::endl;
 #endif // USE_COLORED_CONSOLE
 
     // take decision to stop if fatal error
     if (mlevel == kFATAL) { 
-        cout << "***> abort program execution" << endl; 
+        std::cout << "***> abort program execution" << std::endl; 
         exit(1); 
     }
 }
@@ -227,7 +229,7 @@ TMsgLevel TMsgLogger::MapLevel( const TString& instr ) const {
 
     // not found --> fatal error
     TString line( Form( "fatal error in <TMsgLogger::MapLevel> unknown output level: %s ==> abort", ins.Data() ) );
-    cout << m_colorMap.find( kFATAL )->second << m_prefix << line << "\033[0m" << endl;
+    std::cout << m_colorMap.find( kFATAL )->second << m_prefix << line << "\033[0m" << std::endl;
     abort();
 
     return kFATAL;

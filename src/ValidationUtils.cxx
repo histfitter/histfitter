@@ -332,9 +332,9 @@ void ValidationUtils::PullPlot3(XtraValues* inValsEl, XtraValues* inValsMu, cons
      }
    }
 
-   cout << " hPullElMu->GetNEntries() = " << hPullElMu->GetEntries() << endl;
-   cout << " hPullEl->GetNEntries() = " << hPullEl->GetEntries() << endl;
-   cout << " hPullMu->GetNEntries() = " << hPullMu->GetEntries() << endl;
+   std::cout << " hPullElMu->GetNEntries() = " << hPullElMu->GetEntries() << std::endl;
+   std::cout << " hPullEl->GetNEntries() = " << hPullEl->GetEntries() << std::endl;
+   std::cout << " hPullMu->GetNEntries() = " << hPullMu->GetEntries() << std::endl;
 
    TLegend* leg = new TLegend(xLeft-0.07,0.885,xLeft+0.43,0.96,"");
    leg->SetFillStyle(0);
@@ -510,13 +510,13 @@ void ValidationUtils::PullPlot5(XtraValues* inValsEl, XtraValues* inValsMu, Xtra
       Float_t err=inValsEM->m_Delta_eTot.at(i);
       Float_t pull = 0;
       if(fabs(err)>0){ pull=delta/err; }
-      //   cout << endl <<" i = " <<i << " pull = " << pull ;
+      //   std::cout << std::endl <<" i = " <<i << " pull = " << pull ;
       hPullElMu->SetBinContent( Npar-i, pull );
    }   
 
    //Draw boxes   
    for (Int_t i=0; i<Npar; i++) {
-     HorizontalElMu( hPullElMu, Npar-i, kFALSE, colEMu, 0.14, 0.14);
+     HorizontalElMu( hPullElMu, Npar-i, kFALSE, colEMu, 0, 0.14);
    }
 
    TLegend* leg = new TLegend(xLeft-0.07,0.885,xLeft+0.43,0.96,"");

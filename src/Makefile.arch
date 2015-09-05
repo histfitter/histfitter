@@ -35,6 +35,10 @@ OPT2          = -O2
 endif
 endif
 
+ROOTVERSION  := $(shell $(ROOTCONFIG) --version)
+ROOTMAJOR    := $(firstword $(subst ., ,$(ROOTVERSION)))
+ROOTMINOR    := $(lastword $(subst ., ,$(firstword $(subst /, ,$(ROOTVERSION)))))
+ROOTREVISION := $(lastword $(subst /, ,$(ROOTVERSION)))
 ROOTCFLAGS   := $(shell $(ROOTCONFIG) --cflags)
 ROOTLDFLAGS  := $(shell $(ROOTCONFIG) --ldflags)
 ROOTLIBS     := $(shell $(ROOTCONFIG) --libs)
