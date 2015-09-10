@@ -26,6 +26,8 @@
 #include "TString.h"
 #include "TH1.h"
 #include "TH2.h"
+#include "TFile.h"
+#include "TGraphAsymmErrors.h"
 
 #include <iostream>
 
@@ -383,6 +385,50 @@ namespace Util
      Get RooMCStudy based on PDF contained in ModelConfig of the workspace
   */
   RooMCStudy* GetMCStudy( const RooWorkspace* w );
+
+  /**
+   Get error band for a specific systematic
+   @param hNom  -> Nominal Histogram Name
+   @param hHigh -> High Systematic Histogram Name
+   @param hLow  -> Low Systematic Histogram Name
+  */
+  TGraph* getErrorBand(TH1F* hNom, TH1F* hHigh, TH1F* hLow);
+
+  /**
+  Plot a sample distribution of a specific varible with the error related to a specifc systematic
+  @param f          -> histCacheFile
+  @param hNomName   -> Nominal Histogram Name
+  @param Syst       -> Systematic Name
+  @param NameSample -> Sample Name
+  @param Region     -> Region:{ex. SR,CR,VR}
+  @param Var        -> Varible  
+  */
+  
+  void plotDistribution(TFile* f, TString hNomName, TString Syst, TString NameSample, TString Region, TString Var);
+
+  /**
+  Plot the systematic variations due to the considered systematics
+  @param f          -> histCacheFile
+  @param hNomName   -> Nominal Histogram Name
+  @param Syst       -> Systematics
+  @param NameSample -> Sample Name
+  @param Region     -> Region:{ex. SR,CR,VR}
+  @param Var        -> Varible  
+  */
+
+ void plotSystematics(TFile* f,TString hNomName, std::vector<TString> Syst, TString NameSample, TString Region, TString Var);
+
+  /**
+  Call plotSystematics and plotDistribution
+  @param FileName   -> Name of the histCacheFile
+  @param NameSample -> Sample Name
+  @param SystName   -> List of the Systematics ex. JER,JES (a comma should be used to between each systematic)
+  @param Region     -> Region:{ex. SR,CR,VR}
+  @param Var        -> Varible  
+  */
+
+ void plotUpDown(TString FileName, TString NameSample, TString SystName, TString Region, TString Var);
+
 
 
 }

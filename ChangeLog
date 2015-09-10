@@ -1,3 +1,9 @@
+2015-09-10 Jeanette Miriam Lorenz <jeanette.miriam.lorenz@cern.ch
+        * adding possibility to display impact of systematics before fit - code proposals by Luigi
+        M       scripts/HistFitter.py
+        M       src/Utils.cxx
+        M       src/Utils.h
+
 2015-09-02 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
 	* Patch to TMsgLogger.cxx to work on OS X
 	* Patch to Makefile.arch to detect ROOT versions

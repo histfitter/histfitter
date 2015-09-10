@@ -66,7 +66,9 @@
 #include "RooStats/RooStatsUtils.h"
 #include "RooStats/HistFactory/PiecewiseInterpolation.h"
 
+#include "TAxis.h"
 #include "TF1.h"
+#include "TH1F.h"
 #include "TH2D.h"
 #include "TTree.h"
 #include "TBranch.h"
@@ -88,6 +90,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <vector>
 
 using namespace std;
 using namespace RooFit;
@@ -3058,4 +3061,376 @@ Util::scanStrForFloats(const TString& toscan, const TString& format)
     return wsid;
 }
 
+//---------------------------------------------------------------------------------------
+
+TGraph* Util::getErrorBand(TH1F* hNom, TH1F* hHigh, TH1F* hLow){
+
+   vector<double> nom(0), high(0), low(0);
+   vector<double> X(0), ErrXl(0), ErrXh(0);
+
+   for(int i=1;i<=hNom->GetNbinsX();i++){
+
+      X.push_back(hNom->GetBinCenter(i));
+      ErrXl.push_back(hNom->GetBinWidth(i)/2);
+      ErrXh.push_back(hNom->GetBinWidth(i)/2);
+      nom.push_back(hNom->GetBinContent(i));
+      //case in which high > nominal and nominal > low
+      if(hHigh->GetBinContent(i)>hNom->GetBinContent(i) && hNom->GetBinContent(i)>hLow->GetBinContent(i)){
+        high.push_back(hHigh->GetBinContent(i)-hNom->GetBinContent(i));
+        low.push_back(hNom->GetBinContent(i)-hLow->GetBinContent(i));
+      }
+      //case in which low > nominal and nominal > high
+      else if(hLow->GetBinContent(i)>hNom->GetBinContent(i) && hNom->GetBinContent(i)>hHigh->GetBinContent(i)){
+        high.push_back(hLow->GetBinContent(i)-hNom->GetBinContent(i));
+        low.push_back(hNom->GetBinContent(i)-hHigh->GetBinContent(i));
+      }
+      //case in which low and high > nominal
+      else if(hLow->GetBinContent(i)>hNom->GetBinContent(i) && hHigh->GetBinContent(i)>hNom->GetBinContent(i)){
+        if(hHigh->GetBinContent(i)>=hLow->GetBinContent(i)){
+          high.push_back(hHigh->GetBinContent(i)-hNom->GetBinContent(i));
+          low.push_back(0.);
+        }
+        else{
+          high.push_back(hLow->GetBinContent(i)-hNom->GetBinContent(i));
+          low.push_back(0.);
+        }
+      }
+      //case in which low and high < nominal
+      else if(hLow->GetBinContent(i)<hNom->GetBinContent(i) && hHigh->GetBinContent(i)<hNom->GetBinContent(i)){
+        if(hHigh->GetBinContent(i)>=hLow->GetBinContent(i)){
+          high.push_back(0.);
+          low.push_back(hNom->GetBinContent(i)-hLow->GetBinContent(i));
+        }
+        else{
+          high.push_back(0.);
+          low.push_back(hNom->GetBinContent(i)-hHigh->GetBinContent(i));
+        }
+      }
+      //all other cases
+      else{
+        if(hNom->GetBinContent(i) == hHigh->GetBinContent(i)){
+          if(hNom->GetBinContent(i)>hLow->GetBinContent(i)){
+            high.push_back(0.);  
+            low.push_back(hNom->GetBinContent(i)-hLow->GetBinContent(i));
+          }
+          else{
+            high.push_back(hLow->GetBinContent(i)-hNom->GetBinContent(i));
+            low.push_back(0.);
+          }
+        }
+        else{
+          if(hNom->GetBinContent(i)>hHigh->GetBinContent(i)){
+            high.push_back(0.);
+            low.push_back(hNom->GetBinContent(i)-hHigh->GetBinContent(i));
+          }
+          else{
+            high.push_back(hHigh->GetBinContent(i)-hNom->GetBinContent(i));
+            low.push_back(0);
+          }
+        }
+      }
+   }
+
+
+   TGraph* g = new TGraph();
+   for(unsigned int i=0;i<X.size();i++){
+     g->SetPoint(2*i,X[i]-ErrXl[i],nom[i]+high[i]);
+     g->SetPoint(2*i+1,X[i]+ErrXh[i],nom[i]+high[i]);
+   }
+   
+   int Ntmp = g->GetN();
+   
+   for(unsigned int i=0;i<X.size();i++){
+    g->SetPoint(Ntmp+2*i,X[X.size()-1-i]+ErrXh[X.size()-1-i],nom[X.size()-1-i]-low[X.size()-1-i]);
+    g->SetPoint(Ntmp+2*i+1,X[X.size()-1-i]-ErrXl[X.size()-1-i],nom[X.size()-1-i]-low[X.size()-1-i]);
+   }
+
+   g->SetFillColor(kYellow);
+
+   return g;
+ 
+}
+
+void Util::plotDistribution(TFile* f, TString hNomName, TString Syst, TString NameSample, TString Region, TString Var){
+
+
+   TH1F* hNom = (TH1F*)f->Get(hNomName);
+   
+   TString syst_name = Syst;
+   TString norm = "";
+   if (syst_name.EndsWith("Norm")) {
+      syst_name.ReplaceAll("Norm","");
+      norm = "Norm";
+   }
+
+   TString hHighName = hNomName;
+   hHighName.ReplaceAll("Nom",syst_name+"High");
+   TH1F* hHigh = (TH1F*)f->Get(hHighName+norm);
+
+   TString hLowName = hNomName;
+   hLowName.ReplaceAll("Nom",syst_name+"Low");
+   TH1F* hLow = (TH1F*)f->Get(hLowName+norm);
+
+   if(!hHigh || !hLow){
+     Logger << kWARNING << syst_name << " systematic (with or without normalization) has not been found  " << GEndl;
+     return;
+   }
+
+   TH1F* hNomClone = (TH1F*)hNom->Clone();
+   for(int i=1;i<=hNomClone->GetNbinsX();i++){
+       if(hNom->GetBinContent(i)>0) hNomClone->SetBinError(i,hNom->GetBinError(i)/hNom->GetBinContent(i));
+       hNomClone->SetBinContent(i,1);
+       
+   }
+
+   TH1F* hHighClone = (TH1F*)hHigh->Clone();
+   hHighClone->Divide(hNom);
+   for(int i=1;i<=hHighClone->GetNbinsX();i++){
+       hHighClone->SetBinError(i,0.);
+   }
+   TH1F* hLowClone = (TH1F*)hLow->Clone();
+   hLowClone->Divide(hNom);
+   for(int i=1;i<=hLowClone->GetNbinsX();i++){
+       hLowClone->SetBinError(i,0.);
+   }
+   
+   for(int i=1;i<=hNom->GetNbinsX();i++){
+      if(hNom->GetBinContent(i)<=0){
+        if(hLow->GetBinContent(i)<=0 && hHigh->GetBinContent(i)<=0){
+             hLowClone->SetBinContent(i,1.);
+             hHighClone->SetBinContent(i,1); 
+        }
+        else if(hLow->GetBinContent(i)<=0 && hHigh->GetBinContent(i)>0) hHighClone->SetBinContent(i,10);
+        else if(hLow->GetBinContent(i)>0 && hHigh->GetBinContent(i)<=0) hLowClone->SetBinContent(i,10);
+        else{
+         if(hHigh->GetBinContent(i)>hLow->GetBinContent(i)){
+            hHighClone->SetBinContent(i,10);
+            hLowClone->SetBinContent(i,1.);
+         }
+         else{
+            hLowClone->SetBinContent(i,10);
+            hHighClone->SetBinContent(i,1.);
+         }
+        }
+        
+      }
+   }
+
+   
+  
+
+   TCanvas* c = new TCanvas(NameSample+"_"+Syst+"Syst_"+Region+"_Dist",NameSample+" "+Syst+" Syst ("+Region+") Dist",600,400);
+
+   TPad* pad1 = new TPad("pad1","pad1",0.0,0.3,1.0,1.0,0);
+   pad1->Draw();
+   pad1->cd();
+
+   TLegend* leg = new TLegend(0.65,0.7,0.85,0.85,"");
+   leg->SetFillStyle(0);
+   leg->SetFillColor(0);
+   leg->SetBorderSize(0);
+
+
+   TGraph* g = getErrorBand(hNom,hHigh,hLow);
+   g->SetName(Syst+" Syst");
+   g->SetTitle(Syst+" Syst");
+   g->GetXaxis()->SetTitle(Var);
+   g->GetYaxis()->SetTitle("Entries");
+   g->GetYaxis()->SetTitleSize(0.045);
+   leg->AddEntry(g,"","f");
+   g->Draw("APF2");
+
+   hNom->SetMarkerStyle(20);
+   leg->AddEntry(hNom,"Nom [MCStatError]","l");
+   hNom->Draw("samep");
+
+   hHigh->SetLineColor(kCyan-3);
+   hHigh->SetLineStyle(kDashed);
+   hHigh->SetLineWidth(2.);
+   leg->AddEntry(hHigh,Syst+" High","l");
+   hHigh->Draw("same");
+
+   hLow->SetLineColor(kMagenta-3);
+   hLow->SetLineStyle(kDotted);
+   hLow->SetLineWidth(2.);
+   leg->AddEntry(hLow,Syst+" Low","l");
+   hLow->Draw("same");
+
+   leg->Draw();
+
+   c->cd();
+   TPad* pad2 = new TPad("pad2","pad2",0.0,0.0,1.0,0.365,0);
+   pad2->SetTopMargin(0.1);
+   pad2->SetBottomMargin(0.2);
+   pad2->Draw();
+   pad2->cd();
+  
+   TGraph* gClone = getErrorBand(hNomClone,hHighClone,hLowClone);
+   gClone->GetXaxis()->SetLabelSize(0.08);  
+   gClone->GetXaxis()->SetTitleSize(0.08);
+   gClone->GetXaxis()->SetTitle(Var);
+   gClone->GetYaxis()->SetTitle("#Delta X/X[%]");
+   gClone->GetYaxis()->SetTitleOffset(0.5);
+   gClone->GetYaxis()->SetTitleSize(0.08);
+   gClone->GetYaxis()->SetRangeUser(0,2.);
+   gClone->GetYaxis()->SetLabelSize(0.06);  
+   double minY=11., maxY=0;
+   for(int i=0;i<gClone->GetN();i++){
+      double x,y;
+      gClone->GetPoint(i,x,y);
+      if(y<minY) minY=y;
+      if(y>maxY) maxY=y;     
+   }
+   if(maxY>2.) maxY=2.;
+   gClone->GetYaxis()->SetRangeUser(minY-0.01,maxY+0.01);
+   gClone->Draw("APF2");
+
+   hNomClone->SetMarkerStyle(20);
+   hNomClone->Draw("samep");
+
+   hHighClone->SetLineColor(kCyan-3);
+   hHighClone->SetLineStyle(kDashed);
+   hHighClone->SetLineWidth(2.);
+   hHighClone->Draw("same");
+
+   hLowClone->SetLineColor(kMagenta-3);
+   hLowClone->SetLineStyle(kDotted);
+   hLowClone->SetLineWidth(2.);
+   hLowClone->Draw("same");
+
+
+   c->SaveAs(Form("plots/%s.eps",c->GetName()));
+   c->SaveAs(Form("plots/%s.root",c->GetName()));
+
+}
+
+void Util::plotSystematics(TFile* f,TString hNomName, vector<TString> Syst, TString NameSample, TString Region, TString Var){
+
+   TH1F* h = (TH1F*)f->Get(hNomName);
+   if(!h) return;
+   float Nom = h->Integral();
+
+   const int NBins = Syst.size();
+   TH1F* hSystNom = new TH1F("hSystNom","hSystNom",NBins,0,NBins);
+   TH1F* hSystHigh = new TH1F("hSystHigh","hSystHigh",NBins,0,NBins);
+   TH1F* hSystLow = new TH1F("hSystLow","hSystLow",NBins,0,NBins);
+
+
+   for(int i=1;i<=NBins;i++){
+
+      TString syst_name = Syst[i-1];
+      TString norm = "";
+      if (syst_name.EndsWith("Norm")) {
+        syst_name.ReplaceAll("Norm","");
+        norm = "Norm";
+      }
+      
+       
+      hSystNom->SetBinContent(i,Nom);
+      TString hHighName = hNomName;
+      hHighName.ReplaceAll("Nom",syst_name+"High");
+      TH1F* hH = (TH1F*)f->Get(hHighName+norm);
+
+      TString hLowName = hNomName;
+      hLowName.ReplaceAll("Nom",syst_name+"Low");
+      TH1F* hL = (TH1F*)f->Get(hLowName+norm);
+
+      if(!hH || !hL){ 
+        Logger << kWARNING << syst_name <<" systematic (with or without normalization) has not been found" << GEndl;
+        hSystHigh->SetBinContent(i,Nom);
+        hSystLow->SetBinContent(i,Nom);
+      }
+      else{
+        hSystHigh->SetBinContent(i,hH->Integral());
+        hSystLow->SetBinContent(i,hL->Integral());
+      }
+   }
+
+
+   TCanvas* c = new TCanvas(NameSample+"_AllSyst_"+Region,NameSample+" All Syst ("+Region+")",600,400);
+
+   TLegend* leg = new TLegend(0.65,0.7,0.85,0.85,"");
+   leg->SetFillStyle(0);
+   leg->SetFillColor(0);
+   leg->SetBorderSize(0);
+
+
+   TGraph* g = getErrorBand(hSystNom,hSystHigh,hSystLow);
+   g->SetName("Syst");
+   g->SetTitle("Syst");
+   g->GetHistogram()->GetXaxis()->Set(NBins,0,NBins);
+   for(int i=1;i<=NBins;i++) g->GetHistogram()->GetXaxis()->SetBinLabel(i,Syst[i-1]);
+   g->GetXaxis()->SetTitle(Var);
+   g->GetYaxis()->SetTitle("Entries");
+   g->GetYaxis()->SetTitleOffset(1.25);
+   leg->AddEntry(g,"","f");
+   g->Draw("APF2");
+
+   hSystNom->SetLineWidth(2.);
+   leg->AddEntry(hSystNom,"Nom","l");
+   hSystNom->Draw("same");
+
+   hSystHigh->SetLineColor(kCyan-3);
+   hSystHigh->SetLineStyle(kDashed);
+   hSystHigh->SetLineWidth(2.);
+   leg->AddEntry(hSystHigh,"High Syst","l");
+   hSystHigh->Draw("same");
+
+   hSystLow->SetLineColor(kMagenta-3);
+   hSystLow->SetLineStyle(kDotted);
+   hSystLow->SetLineWidth(2.);
+   leg->AddEntry(hSystLow,"Low Syst","l");
+   hSystLow->Draw("same");
+
+   leg->Draw();
+
+   c->SaveAs(Form("plots/%s.eps",c->GetName()));
+   c->SaveAs(Form("plots/%s.root",c->GetName()));
+
+
+}
+
+void Util::plotUpDown(TString FileName, TString NameSample, TString SystName, TString Region, TString Var){
+
+ TFile* f = TFile::Open(FileName.Data(), "READ");
+ if (f->IsZombie()) {
+        Logger << kERROR << "Cannot open file: " << FileName << GEndl;
+        return;
+ }
+ f->cd();
+
+ //Loading the nominal histo
+ TString hNomName = "h"+NameSample+"Nom_"+Region+"_obs_"+Var;
+ int NBins = -1;
+ TH1F* h = (TH1F*)f->Get(hNomName);
+ if(h!=0) NBins = h->GetNbinsX();
+ delete h;
+
+
+ //Taking systematic labels
+ if(NBins>0){
+  vector<TString> Syst(0);
+
+  TObjArray* Obj = SystName.Tokenize(",");
+  if(Obj->LastIndex()>-1){
+   for(int i=0;i<=Obj->GetLast();i++)   Syst.push_back(((TObjString*)Obj->At(i))->String());
+  }
+  else{
+   Syst.push_back(SystName);
+  }
+
+
+  if(NBins>0){
+   for(unsigned int i=0;i<Syst.size();i++) plotDistribution(f,hNomName,Syst[i],NameSample,Region,Var);    
+  }
+
+  plotSystematics(f,hNomName,Syst,NameSample,Region,Var);
+
+ }
+ else Logger << kWARNING << " No nominal histogram for  " << NameSample << GEndl;
+
+ //f->Close();
+ //delete f;
+   
+}
 
