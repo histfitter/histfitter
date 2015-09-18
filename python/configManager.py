@@ -1199,7 +1199,7 @@ class ConfigManager(object):
                 self.prepare.addHisto(tmpName, useOverflow=chan.useOverflowBin, useUnderflow=chan.useUnderflowBin)
                 ###check that nominal sample is not empty for that channel
                 if self.hists[tmpName].GetSum() == 0.0:
-                    log.warning("    ***nominal sample %s is empty for channel %s. Remove from PDF.***"%(sam.name, chan.name))
+                    log.warning("    ***nominal sample %s is empty for channel %s. Remove from PDF.***" % (sam.name, chan.name))
                     chan.removeSample(sam.name)
                 #    del self.hists[tmpName]
                 #    self.hists[tmpName]=None    ## MB : do not delete, else cannot rerun later with -w

@@ -208,14 +208,22 @@ class PrepareHistos(object):
         
         @retval The constructed histogram
         """
+
+        log.debug("__addHistoFromTree: %s" % name)
+
         if self.var == "cuts":
             if self.configMgr.hists[name] is None:
                 self.configMgr.hists[name] = TH1F(name, name, len(self.channel.regions), self.channel.binLow, float(len(self.channel.regions))+self.channel.binLow)
                 for (iReg,reg) in enumerate(self.channel.regions):
+                    log.debug("__addHistoFromTree: append %s in region %s" % (name, reg))
                     self.cuts = self.configMgr.cutsDict[reg]
                     
                     tempName = "%stemp%s" % (name, str(iReg))
                     tempHist = TH1F(tempName, tempName, 1, 0.5, 1.5)
+
+                    log.debug("__addHistoFromTree: projecting into %s with cuts %s weights %s" % (tempName, self.cuts, self.weights))
+                    log.debug("__addHistoFromTree: Project(\"%s\", \"%s\", \"%s\")" % (tempName, self.cuts, self.weights) )
+
                     self.configMgr.chains[self.currentChainName].Project(tempName, self.cuts, self.weights)
                     
                     error = Double()
@@ -360,10 +368,6 @@ class PrepareHistos(object):
         self.__addHistoFromTree(prefixNom)
         self.__addHistoFromTree(prefixHigh)
         self.__addHistoFromTree(prefixLow)
-
-        self.configMgr.hists[prefixNom].SetCanExtend(0)
-        self.configMgr.hists[prefixHigh].SetCanExtend(0)
-        self.configMgr.hists[prefixLow].SetCanExtend(0)
         
         systName = "%sSyst" % self.name
         statName = "%sStat" % self.name

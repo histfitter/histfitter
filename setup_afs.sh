@@ -2,6 +2,7 @@
 # check Root environment setup. Allow for external setup script.
 
 export BUILD="x86_64-slc6-gcc49-opt"
+export PYTHONBUILD="x86_64-slc6-gcc48-opt"
 export ROOTVERSION="6.04.00"
 export CERNPREFIX="/afs/cern.ch/"
 export PYTHONVERSION="2.7.3"
@@ -18,8 +19,8 @@ if [[ `hostname -f` = b*.cern.ch ]] || [[ `hostname -f` = l*.cern.ch ]]; then
     source $CERNPREFIX/sw/lcg/external/gcc/${GCCVERSION}/x86_64-slc6/setup.sh
     # second, setup an uptodate python version
     echo "Setting up python version ${PYTHONVERSION} ..."
-    export PATH="$CERNPREFIX/sw/lcg/external/Python/${PYTHONVERSION}/$BUILD/bin:${PATH}"
-    export LD_LIBRARY_PATH="$CERNPREFIX/sw/lcg/external/Python/${PYTHONVERSION}/$BUILD/lib:${LD_LIBRARY_PATH}"
+    export PATH="$CERNPREFIX/sw/lcg/external/Python/${PYTHONVERSION}/$PYTHONBUILD/bin:${PATH}"
+    export LD_LIBRARY_PATH="$CERNPREFIX/sw/lcg/external/Python/${PYTHONVERSION}/$PYTHONBUILD/lib:${LD_LIBRARY_PATH}"
 fi
 
 # the root-setup section here is cern specific
