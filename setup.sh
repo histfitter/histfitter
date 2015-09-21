@@ -37,6 +37,7 @@ fi
 HISTFITTER=$HF; export HISTFITTER
 SUSYFITTER=$HF; export SUSYFITTER # for backwards compatibility
 
+HISTFITTER_VERSION=$VERSION
 export HISTFITTER_VERSION
 
 # put root & python stuff into PATH, LD_LIBRARY_PATH

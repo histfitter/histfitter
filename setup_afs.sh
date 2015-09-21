@@ -47,4 +47,4 @@ if [ ! $ROOTSYS ]; then
   #export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$CERNPREFIX/atlas/offline/external/FullChainTest/tier0/test/mbaak/root/extlibs64"
 fi
 
-source setup.sh
+. setup.sh
