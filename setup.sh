@@ -1,17 +1,15 @@
 # setup ROOT
 # check Root environment setup. Allow for external setup script.
 
-export BUILD="x86_64-slc6-gcc49-opt"
-export ROOTVERSION="6.04.00"
-#export CERNPREFIX="/afs/cern.ch/"
-export HF_CERNPREFIX="cvmfs/atlas.cern.ch/repo"
-export PYTHONVERSION="2.7.3"
-export GCCVERSION="4.9"
-
 # check Root environment setup 
 if [ ! $ROOTSYS ]; then
   echo "Warning: No valid Root environment (ROOTSYS) defined. Please do so first!"
   return
+fi
+
+if [[ "$(root-config --version | cut -d "." -f 1)" == "5" ]]; then
+  echo "NOTE: ROOT5 installation detected - be aware that this version of HistFitter is developed against ROOT6."
+  echo "We cannot guarantee you will not run into issues."
 fi
 
 if [ ! $LD_LIBRARY_PATH ]; then
@@ -50,4 +48,3 @@ export SVNPHYS="svn+ssh://svn.cern.ch/reps/atlasphys"
 
 # Hack for ssh from mac 
 export LC_ALL=C 
-
