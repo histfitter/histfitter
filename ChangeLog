@@ -1,3 +1,9 @@
+2015-09-21 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
+	* Sharing of functionality between setup.sh and setup_afs.sh
+	* Setup.sh now contains a 'VERSION' that gets exported to
+	'HISTFITTER-VERSION'. Use this in case of a tag (e.g. "00-00-51")
+	* svn:ignore on *.pyc in scripts
+
 2015-09-18 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
 	* Make sure that setup_afs actually picks up python
 	* Better debugging in prepareHistos()

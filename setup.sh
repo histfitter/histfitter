@@ -1,6 +1,9 @@
 # setup ROOT
 # check Root environment setup. Allow for external setup script.
 
+# Update here when tagged
+VERSION="trunk"
+
 # check Root environment setup 
 if [ ! $ROOTSYS ]; then
   echo "Warning: No valid Root environment (ROOTSYS) defined. Please do so first!"
@@ -33,6 +36,8 @@ else
 fi
 HISTFITTER=$HF; export HISTFITTER
 SUSYFITTER=$HF; export SUSYFITTER # for backwards compatibility
+
+export HISTFITTER_VERSION
 
 # put root & python stuff into PATH, LD_LIBRARY_PATH
 export PATH=$HISTFITTER/bin:$HISTFITTER/scripts:${PATH}
