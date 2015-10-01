@@ -162,15 +162,18 @@ def writeOutputFile(data, filename):
     print "%s: wrote %s" % (scriptName, filename)
     pass
 
+def writeListFile(inputFilename, outputFilename):
+    # can be used when importing this script
+    data = readInputFile(inputFilename)
+    keys = getKeys(data)
+
+    writeHeaderFiles(keys, outputFilename)
+    writeOutputFile(data, outputFfilename)
+
 parser = argparse.ArgumentParser()
 parser.add_argument('-f', '--file', metavar='FILE', dest='filename', help='input filename', required=True, type=str)
 parser.add_argument('-o', '--output', metavar='FILE', dest='output_filename', required=False, type=str, help="default output filename strips .json off the extension")
 args = parser.parse_args()
 
 checkArgs(args)
-
-data = readInputFile(args.filename)
-keys = getKeys(data)
-
-writeHeaderFiles(keys, args.output_filename)
-writeOutputFile(data, args.output_filename)
+writeListFile(args.filename, args.outputfilename)
