@@ -8,6 +8,8 @@ import os
 import string
 import sys
 
+from collections import OrderedDict
+
 scriptName = os.path.basename(__file__)
 
 def checkArgs(args):
@@ -32,6 +34,7 @@ def sanitizeData(data):
     for d in data[0]:
         for key in d:
             if isinstance(d[key], float): continue
+            if key == "fID": continue # fID may contain strings
             d[key] = float(d[key])
 
     return data
@@ -124,9 +127,16 @@ def cppHeaderTemplate():
 
     return includes + harvesttree + writetree + main 
 
+def treeType(key):
+    if key == "fID": return "C"
+    return "F"
+
 def writeHeaderFiles(keys, inputFilename, outputFilename):
-    description = ":".join(keys)
-    
+    types = {k: "{0}/F".format(k) for k in keys}
+    types = OrderedDict([(k, "{0}/{1}".format(k, treeType(k))) for k in keys])
+
+    description = ":".join(types.values())
+
     t = string.Template(pythonHeaderTemplate())
     pythonHeader = t.substitute({"outfile": os.path.abspath(outputFilename), "description": description })
     
@@ -154,10 +164,16 @@ def writeHeaderFiles(keys, inputFilename, outputFilename):
 
     pass
 
+def typeForVar(key):
+    if key == "fID": 
+        return "%s"
+    
+    return "%e"
+
 def writeOutputFile(data, filename):
     f = open(filename, "w+")
     for d in data[0]:
-        f.write(" ".join(["%e" % v for v in d.values()]))
+        f.write(" ".join([typeForVar(k) % v for (k, v) in d.items()]))
         f.write("\n")
     f.close()
     
