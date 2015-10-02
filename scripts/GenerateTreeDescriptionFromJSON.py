@@ -61,14 +61,16 @@ def getKeys(data):
 def pythonHeaderTemplate():
     s = ( "#!/usr/bin/env python\n\n"
           "import os, sys, ROOT\n"
-          "from ROOT import TTree, TString\n\n"
+          "#from ROOT import TTree, TString\n\n"
+          "ROOT.gROOT.SetBatch(True)\n"
+          "ROOT.PyConfig.IgnoreCommandLineOptions = True\n\n"
           "def treedescription():\n"
           "  filename = \"$outfile\"\n"
           "  description = \"$description\"\n"
           "  return filename, description\n\n"
-          "def harvesttree(textfile=''):\n"
+          "def harvesttree(textfile='$outfile'):\n"
           "  filename, description=treedescription()\n"
-          "  tree = TTree('tree','data from ascii file')\n"
+          "  tree = ROOT.TTree('tree','data from ascii file')\n"
           "  if len(textfile)>0:\n"
           "    nlines = tree.ReadFile(textfile,description)\n"
           "  elif len(filename)>0:\n"
@@ -122,29 +124,29 @@ def cppHeaderTemplate():
 
     return includes + harvesttree + writetree + main 
 
-def writeHeaderFiles(keys, filename):
+def writeHeaderFiles(keys, inputFilename, outputFilename):
     description = ":".join(keys)
     
     t = string.Template(pythonHeaderTemplate())
-    pythonHeader = t.substitute({"outfile": os.path.abspath(args.output_filename), "description": description })
+    pythonHeader = t.substitute({"outfile": os.path.abspath(outputFilename), "description": description })
     
     t = string.Template(cppHeaderTemplate())
-    cppHeader = t.substitute({"outfile": os.path.abspath(args.output_filename), "description": description })
+    cppHeader = t.substitute({"outfile": os.path.abspath(outputFilename), "description": description })
 
     # will have to go in same dir as input filename
-    outputDir = os.path.dirname(os.path.abspath(args.filename))
+    outputDir = os.path.dirname(os.path.abspath(inputFilename))
     
     # write the python header
-    outputFilename = "%s/summary_harvest_tree_description.py" % outputDir
-    f = open(outputFilename, "w+")
+    headerFilename = "%s/summary_harvest_tree_description.py" % outputDir
+    f = open(headerFilename, "w+")
     f.write(pythonHeader)
     f.close()
 
     print "%s: wrote summary_harvest_tree_description.py" % scriptName
 
     # write the C++ header
-    outputFilename = "%s/summary_harvest_tree_description.h" % outputDir
-    f = open(outputFilename, "w+")
+    headerFilename = "%s/summary_harvest_tree_description.h" % outputDir
+    f = open(headerFilename, "w+")
     f.write(cppHeader)
     f.close()
     
@@ -167,13 +169,14 @@ def writeListFile(inputFilename, outputFilename):
     data = readInputFile(inputFilename)
     keys = getKeys(data)
 
-    writeHeaderFiles(keys, outputFilename)
-    writeOutputFile(data, outputFfilename)
+    writeHeaderFiles(keys, inputFilename, outputFilename)
+    writeOutputFile(data, outputFilename)
 
-parser = argparse.ArgumentParser()
-parser.add_argument('-f', '--file', metavar='FILE', dest='filename', help='input filename', required=True, type=str)
-parser.add_argument('-o', '--output', metavar='FILE', dest='output_filename', required=False, type=str, help="default output filename strips .json off the extension")
-args = parser.parse_args()
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-f', '--file', metavar='FILE', dest='filename', help='input filename', required=True, type=str)
+    parser.add_argument('-o', '--output', metavar='FILE', dest='output_filename', required=False, type=str, help="default output filename strips .json off the extension")
+    args = parser.parse_args()
 
-checkArgs(args)
-writeListFile(args.filename, args.outputfilename)
+    checkArgs(args)
+    writeListFile(args.filename, args.outputfilename)
