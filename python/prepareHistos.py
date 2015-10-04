@@ -368,7 +368,11 @@ class PrepareHistos(object):
         self.__addHistoFromTree(prefixNom)
         self.__addHistoFromTree(prefixHigh)
         self.__addHistoFromTree(prefixLow)
-        
+
+        self.configMgr.hists[prefixNom].SetCanExtend(0)
+        self.configMgr.hists[prefixHigh].SetCanExtend(0)
+        self.configMgr.hists[prefixLow].SetCanExtend(0)
+
         systName = "%sSyst" % self.name
         statName = "%sStat" % self.name
         qcdHistoSyst = TH1F(systName, systName, self.channel.nBins, self.channel.binLow, self.channel.binHigh)
