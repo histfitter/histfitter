@@ -1,3 +1,7 @@
+2015-10-13 Jeanette Miriam Lorenz <jeanette.miriam.lorenz@cern.ch
+        * small hack in prepareHistos.py to allow for backup cache files on eos
+        M python/prepareHistos.py
+
 2015-10-02 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
     * scripts/GenerateTreeDescriptionFromJSON.py now stores fID as string and writes appropriate header 
 

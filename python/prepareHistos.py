@@ -84,13 +84,15 @@ class PrepareHistos(object):
         self.cacheFileName = filepath
         self.cache2FileName = file2path
         
-        if os.path.isfile(file2path):
-            self.cache2File = TFile(file2path,"READ")
+        if file2path!='':
+            self.cache2File = TFile.Open(file2path,"READ")
+            if self.cache2File.IsZombie():
+                self.cache2File = None
         else:
             self.cache2File = None
         
         if os.path.isfile(filepath):
-            if not os.path.isfile(file2path): # default, no archive file
+            if file2path=='': # default, no archive file
                 self.cacheFile = TFile(filepath,"READ")
                 self.recreate = False
             else:
