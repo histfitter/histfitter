@@ -1,3 +1,6 @@
+2015-10-14 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
+	* Setup script fixes for zsh
+
 2015-10-13 Jeanette Miriam Lorenz <jeanette.miriam.lorenz@cern.ch
         * small hack in prepareHistos.py to allow for backup cache files on eos
         M python/prepareHistos.py

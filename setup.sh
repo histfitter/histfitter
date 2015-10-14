@@ -20,9 +20,10 @@ if [ ! $LD_LIBRARY_PATH ]; then
   return
 fi
 
+
 # setup HistFitter package
 #if [ "x${BASH_ARGV[0]}" == "x" ]; then
-if [ "$(dirname ${BASH_ARGV[0]})" == "." ]; then
+if [ -z ${ZSH_NAME} ] && [ "$(dirname ${BASH_ARGV[0]})" == "." ]; then
   if [ ! -f setup.sh ]; then
     echo ERROR: must "cd where/HistFitter/is" before calling "source setup.sh" for this version of bash!
     HF=; export HF
@@ -31,14 +32,18 @@ if [ "$(dirname ${BASH_ARGV[0]})" == "." ]; then
   HF=$(pwd); export HF
 else
   # get param to "."
-  thishistfitter=$(dirname ${BASH_ARGV[0]})
-  HF=${thishistfitter}; export HF
+  scriptname=${BASH_SOURCE:-$0}
+  DIR=$( cd "$( dirname "${scriptname}" )" && pwd )
+  #thishistfitter=$(dirname ${BASH_ARGV[0]})
+  HF=${DIR}; export HF
 fi
 HISTFITTER=$HF; export HISTFITTER
 SUSYFITTER=$HF; export SUSYFITTER # for backwards compatibility
 
 HISTFITTER_VERSION=$VERSION
 export HISTFITTER_VERSION
+
+echo "Setting \$HISTFITTER to ${HISTFITTER}"
 
 # put root & python stuff into PATH, LD_LIBRARY_PATH
 export PATH=$HISTFITTER/bin:$HISTFITTER/scripts:${PATH}

@@ -47,5 +47,7 @@ if [ ! $ROOTSYS ]; then
   #export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$CERNPREFIX/atlas/offline/external/FullChainTest/tier0/test/mbaak/root/extlibs64"
 fi
 
-DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
-. $DIR/setup.sh
+scriptname=${BASH_SOURCE:-$0}
+DIR=$( cd "$( dirname "${scriptname}" )" && pwd )
+
+source $DIR/setup.sh
