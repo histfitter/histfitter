@@ -1,4 +1,8 @@
 2015-10-14 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
+	* Supress several memory leaks in the collection of list files
+	* LimitResult now uses std::string
+
+2015-10-14 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
 	* Setup script fixes for zsh
 
 2015-10-13 Jeanette Miriam Lorenz <jeanette.miriam.lorenz@cern.ch
@@ -332,7 +336,7 @@
 
 2013-11-20 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
 	* scripts/YieldsTable.py: allow -C and -L options to set caption and label
- 	  by hand for outputted table
+	  by hand for outputted table
 	* scripts/YieldsTableTex.py: propagated changes from YieldsTable.py
 
 2013-11-15 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
@@ -362,7 +366,7 @@
 	* Fix compilation warnings
 	M       src/ConfigMgr.cxx
 	* reset initial values before doing upperlimit
-	M 	setup.sh
+	M	setup.sh
 	* root v5.34.10
 
 2013-10-28 Alex Koutsman <koutsman@cern.ch>
@@ -377,7 +381,7 @@
 2013-10-28 Max Baak <mbaak@cern.ch>
 	M       src/HypoTestTool.cxx
 	* Initial fit of hypotest done with Minuit2
-	M 	src/Utils.cxx
+	M	src/Utils.cxx
 	* Fix to function that resets nominal global measurements for mc stat errors.
 	M       setup.sh
 	* Migration to slc 6
@@ -389,13 +393,13 @@
 	-major clean-up of SysTable.py
 	  * removed un-used method 2 with its arguments
 	  * moved namemap from core to an optional end-user config file
-	    with an exmaple in python/MySystTableConfig.py
-	    --> usable as: SysTable.py <options> MySystTableConfig.py
+		with an exmaple in python/MySystTableConfig.py
+		--> usable as: SysTable.py <options> MySystTableConfig.py
 	-added new the possibility to merge samples, with syntax:
-	    --> SysTable.py -s '[topZ,topW,ttbarHiggs,singleTopZ],[diBosonWZ,diBosonPowhegZZ,triBoson],fakes'
-	    --> YieldsTable.py -s '[topZ,topW,ttbarHiggs,singleTopZ],[diBosonWZ,diBosonPowhegZZ,triBoson],fakes'
+		--> SysTable.py -s '[topZ,topW,ttbarHiggs,singleTopZ],[diBosonWZ,diBosonPowhegZZ,triBoson],fakes'
+		--> YieldsTable.py -s '[topZ,topW,ttbarHiggs,singleTopZ],[diBosonWZ,diBosonPowhegZZ,triBoson],fakes'
 	-added the possibility to merge systematics after fit, using namemap object, with syntax:
-	    --> SysTable.py <options> MySystTableConfig.py
+		--> SysTable.py <options> MySystTableConfig.py
 	-added -t argument to YieldsTable.py to set the latex table name
 	-added -u argument to YieldsTable.py to pass arbitrary string to latex table caption
 	* Tagging HistFitter-00-00-31
@@ -461,7 +465,7 @@
 
 
 2012-12-05 Alex Koutsman <alex.koutsman@cern.ch>
-	M 	Utils.cxx
+	M	Utils.cxx
 	* Fixed the NLL plotting for Inf/NaN-error and wrong range setting.
 	
 2013-06-18 Max Baak <mbaak@cern.ch>
@@ -471,7 +475,7 @@
 	M       channel.py
 	* Option to add text lines to plots.
 	M	setup.sh
-	M 	Utils.cxx (Alex Koutsman)
+	M	Utils.cxx (Alex Koutsman)
 	* Fix of Roofit VisualizeError bug, see:
 	* https://groups.cern.ch/group/hn-atlas-physics-Statistics/Lists/Archive/DispForm.aspx?ID=2070
 	* Switch to head of root-5.34-patches branches for fix.
@@ -783,7 +787,7 @@
 	A       MyConfigExampleMCStat.py
 	M       MyConfigExample.py
 	* Example for alternative mc stat implementation, where the MC stat error is implemented per sample. 
-	M 	setup.sh
+	M	setup.sh
 	* Revert to root 5.34.02 -- plotting issue (see comment Alex below)
 
 2012-11-21 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
@@ -828,7 +832,7 @@
 	
 2012-11-12 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
 	* scripts/HistFitter.py: -D is -d again; using without options gives old
-	                         behaviour (before+after)
+							 behaviour (before+after)
 
 2012-11-12 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
 	* python/fitConfig.py: statErrorType property added, plus option to set it

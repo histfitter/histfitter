@@ -57,10 +57,11 @@ static TMsgLogger CombineWorkSpacesLogger("CombineWorkSpaces");
 
 //________________________________________________________________________________________________
 void clearVec( std::vector<RooWorkspace*>& wsVec ) {
-    std::vector<RooWorkspace*>::iterator wItr=wsVec.begin(), wEnd=wsVec.end();
-    for (; wItr!=wEnd; ++wItr) { 
-        if ((*wItr)!=0) { 
-            delete (*wItr); 
+    //std::vector<RooWorkspace*>::iterator wItr=wsVec.begin(), wEnd=wsVec.end();
+    //for (; wItr!=wEnd; ++wItr) {
+    for(auto *wItr: wsVec) {
+        if ( wItr !=0) { 
+            delete (wItr); 
         } 
     }
     wsVec.clear();
@@ -74,21 +75,24 @@ void clearVec( std::vector<RooWorkspace*>& wsVec ) {
  */
 std::vector<RooWorkspace*> CollectWorkspaces( const std::map< TString,TString >& fwnameMap, const TString& wid ) {
     std::vector<RooWorkspace*> wsVec;
-    std::map< TString,TString >::const_iterator wfItr=fwnameMap.begin(), wfEnd=fwnameMap.end();
+    //std::map< TString,TString >::const_iterator wfItr=fwnameMap.begin(), wfEnd=fwnameMap.end();
 
-    for (int i=0; wfItr!=wfEnd; ++wfItr, ++i) {
-        RooWorkspace* w = GetWorkspaceFromFile( wfItr->first.Data(), wfItr->second );
+    unsigned int i = 0;
+    for(auto const &wfItr : fwnameMap) {
+        //for (int i=0; wfItr!=wfEnd; ++wfItr, ++i) {
+        ++i;
+        RooWorkspace* w = GetWorkspaceFromFile( wfItr.first.Data(), wfItr.second );
         if ( w==0 ) {
-            CombineWorkSpacesLogger << kFATAL << "Cannot open workspace <" << wfItr->second << "> in file <" << wfItr->second << ">" << GEndl;
+            CombineWorkSpacesLogger << kFATAL << "Cannot open workspace <" << wfItr.second << "> in file <" << wfItr.second << ">" << GEndl;
         }
 
-        CombineWorkSpacesLogger << kINFO << "Now collecting <" << wfItr->first << "> <" << wfItr->second << ">" << GEndl;
+        CombineWorkSpacesLogger << kINFO << "Now collecting <" << wfItr.first << "> <" << wfItr.second << ">" << GEndl;
 
         w->SetName( Form("%s%d",wid.Data(),i) );
         wsVec.push_back(w);
     }
 
-    return wsVec;
+return wsVec;
 }
 
 
@@ -103,7 +107,7 @@ std::map< TString,TString > GetMatchingWorkspaces( const TString& infile, const 
     CombineWorkSpacesLogger << kDEBUG   << " GetMatchingWorkspaces() : interpretation=" << interpretation << GEndl;
     CombineWorkSpacesLogger << kDEBUG   << " GetMatchingWorkspaces() : cutStr=" << cutStr << GEndl;
     CombineWorkSpacesLogger << kDEBUG   << " GetMatchingWorkspaces() : fID = " << fID  << GEndl ;//<< " ORTree = " << ORTree->GetName() << GEndl;
-  
+
     std::map< TString,TString > wsidMap;
 
     TFile* file = TFile::Open(infile.Data(), "READ");
@@ -116,8 +120,8 @@ std::map< TString,TString > GetMatchingWorkspaces( const TString& infile, const 
     CombineWorkSpacesLogger << kDEBUG << " 1  format = " << format << GEndl;
     Bool_t searchFileName(kFALSE);
     if (format.BeginsWith("filename+")) { 
-      format = format.ReplaceAll("filename+","");
-      searchFileName = kTRUE;
+        format = format.ReplaceAll("filename+","");
+        searchFileName = kTRUE;
     }
 
     CombineWorkSpacesLogger << kDEBUG << " 2  format = " << format << GEndl;
@@ -127,7 +131,7 @@ std::map< TString,TString > GetMatchingWorkspaces( const TString& infile, const 
         TObjArray* iArr = format.Tokenize("+");
         int narg = iArr->GetEntries();
         if (narg==2) {
-          fullWSName = ((TObjString*)iArr->At(1))->GetString();
+            fullWSName = ((TObjString*)iArr->At(1))->GetString();
         }
         delete iArr;
     }
@@ -155,7 +159,7 @@ std::map< TString,TString > GetMatchingWorkspaces( const TString& infile, const 
 
     CombineWorkSpacesLogger << kDEBUG << " 4  wsidvec.size() = " << wsidvec.size() << GEndl;
     for(unsigned int i=0; i<wsidvec.size();i++){
-      CombineWorkSpacesLogger << kDEBUG << " wsidvec[" << i << "] = " << wsidvec[i] << GEndl;
+        CombineWorkSpacesLogger << kDEBUG << " wsidvec[" << i << "] = " << wsidvec[i] << GEndl;
     }
 
     file->cd();
@@ -165,7 +169,7 @@ std::map< TString,TString > GetMatchingWorkspaces( const TString& infile, const 
     TList* list = file->GetListOfKeys();
     CombineWorkSpacesLogger << kDEBUG << " 5 list : "  << GEndl;
     if(CombineWorkSpacesLogger.GetMinLevel() < kINFO) {
-      list->Print("v");
+        list->Print("v");
     }
     for(int j=0; j<list->GetEntries(); j++) {
         TKey* key = (TKey*)list->At(j);
@@ -174,28 +178,28 @@ std::map< TString,TString > GetMatchingWorkspaces( const TString& infile, const 
         if ( keymap.find(key->GetName())==keymap.end() ) { keymap[key->GetName()] = key->GetCycle(); }
         else if ( key->GetCycle()>keymap[key->GetName()] ) { keymap[key->GetName()] = key->GetCycle(); }
         wsname = Form("%s;%d",key->GetName(),keymap[key->GetName()]) ;
-	wsnameSearch = wsname;
-	CombineWorkSpacesLogger << kDEBUG <<" 5.1   j = " << j << " wsnameSearch = " << wsnameSearch << GEndl;
+        wsnameSearch = wsname;
+        CombineWorkSpacesLogger << kDEBUG <<" 5.1   j = " << j << " wsnameSearch = " << wsnameSearch << GEndl;
 
         if (searchFileName && !fullWSName.IsNull()) { // E.g. WS is called combined 
-	  CombineWorkSpacesLogger << kDEBUG << " 5.2   searchFileName && !fullWSName.IsNull() = " << (searchFileName && !fullWSName.IsNull()) << GEndl;
-	  CombineWorkSpacesLogger << kDEBUG << " 5.3   TString(key->GetName())) = " << TString(key->GetName()) << GEndl;
-          if (fullWSName != TString(key->GetName()))  continue;
+            CombineWorkSpacesLogger << kDEBUG << " 5.2   searchFileName && !fullWSName.IsNull() = " << (searchFileName && !fullWSName.IsNull()) << GEndl;
+            CombineWorkSpacesLogger << kDEBUG << " 5.3   TString(key->GetName())) = " << TString(key->GetName()) << GEndl;
+            if (fullWSName != TString(key->GetName()))  continue;
         }
 
-	
+
         //// Turn off, this is slow! Reading the object and checking for non-NULL doesnt make a lot of sense
         //// -> we check for NULL when really reading anyway!
         //// confirm this is a workspace
         //TObject* obj = file->Get( wsname.Data() );
         //if (obj==0) continue; 
-	////	if ( obj->ClassName()!=TString("RooWorkspace") ) continue;
+        ////	if ( obj->ClassName()!=TString("RooWorkspace") ) continue;
 
-	CombineWorkSpacesLogger << kDEBUG << " 5.4  searchFileName = " << searchFileName << GEndl;
-	if (searchFileName) {
-	  wsnameSearch = infile + "_" + wsnameSearch;	
-	}
-	CombineWorkSpacesLogger << kDEBUG << " 5.5  wsnameSearch = " << wsnameSearch << GEndl;
+        CombineWorkSpacesLogger << kDEBUG << " 5.4  searchFileName = " << searchFileName << GEndl;
+        if (searchFileName) {
+            wsnameSearch = infile + "_" + wsnameSearch;	
+        }
+        CombineWorkSpacesLogger << kDEBUG << " 5.5  wsnameSearch = " << wsnameSearch << GEndl;
 
         // accept upto 10 args in ws name
         int narg2 = sscanf( wsnameSearch.Data(), format.Data(), &wsarg[0],&wsarg[1],&wsarg[2],&wsarg[3],&wsarg[4],&wsarg[5],&wsarg[6],&wsarg[7],&wsarg[8],&wsarg[9] ); 
@@ -205,8 +209,8 @@ std::map< TString,TString > GetMatchingWorkspaces( const TString& infile, const 
         wsid.Clear();  // form unique ws id
         for (int i=0; i<narg2; ++i) { 
             objString = (TObjString*)iArr->At(i);
-	    // wsid  += Form("%s_%.0f_", objString->GetString().Data(), wsarg[i]); 
-	    wsid  += Form("%s=%.0f_", objString->GetString().Data(), wsarg[i]); 
+            // wsid  += Form("%s_%.0f_", objString->GetString().Data(), wsarg[i]); 
+            wsid  += Form("%s=%.0f_", objString->GetString().Data(), wsarg[i]); 
             formula.SetValue(objString->GetString(),wsarg[i]);
         }        
         //wsid += Form( "%d_",keymap[key->GetName()] );
@@ -223,7 +227,7 @@ std::map< TString,TString > GetMatchingWorkspaces( const TString& infile, const 
 
         // NOTE: wsid always connects to highest key-index found in file!
         wsidMap[wsid] = wsname;    
-	CombineWorkSpacesLogger << kDEBUG  << " 5.6  wsidMap[ " << wsid << "] = " << wsname << GEndl;
+        CombineWorkSpacesLogger << kDEBUG  << " 5.6  wsidMap[ " << wsid << "] = " << wsname << GEndl;
     }
 
     CombineWorkSpacesLogger << kINFO << "Found : " << wsidMap.size() << " matching workspaces in file : " << infile << GEndl;
@@ -383,9 +387,9 @@ RooMCStudy* GetMCStudy( const RooWorkspace* w ) {
 
 
 //________________________________________________________________________________________________
-std::map<TString,float> ParseWorkspaceID( const TString& wid ) {
+std::map<std::string, float> ParseWorkspaceID( const TString& wid ) {
     // workspace id has form "m0=300.00_m12=700_"
-    std::map<TString,float> wconf;
+    std::map<std::string, float> wconf;
 
     // basic checks
     if ( wid.Length()<3 ) return wconf;
@@ -404,12 +408,11 @@ std::map<TString,float> ParseWorkspaceID( const TString& wid ) {
         if (jArr->GetEntries()!=2) { delete jArr; continue; }
         par = ((TObjString*)jArr->At(0))->GetString();
         parVal = ((TObjString*)jArr->At(1))->GetString().Atof();
-        wconf[par] = parVal;
+        wconf[par.Data()] = parVal;
         delete jArr;
     }
 
     delete iArr;
-
     return wconf;
 }
 

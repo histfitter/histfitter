@@ -59,12 +59,12 @@ static TMsgLogger ToyUtilsLogger("toy_utils");
 
 
 //________________________________________________________________________________________________
-const char* CollectAndWriteHypoTestResults( const TString& infile, const TString& format, const TString& interpretation, const TString& cutStr, const bool rejectFailedPrefit, const TString& outDir, const TString& fileprefix  ){
+void CollectAndWriteHypoTestResults( const TString& infile, const TString& format, const TString& interpretation, const TString& cutStr, const bool rejectFailedPrefit, const TString& outDir, const TString& fileprefix  ){
     // outdir
     TString outdir = gSystem->pwd();
     if ( !gSystem->cd( outDir.Data() ) ) {
         ToyUtilsLogger << kERROR << "output dir <" << outDir << "> does not exist. Return." << GEndl;
-        return 0;
+        return;
     } else {
         TString fulloutdir = gSystem->pwd();
         gSystem->cd( outdir.Data() ); // back to original dir
@@ -102,7 +102,7 @@ const char* CollectAndWriteHypoTestResults( const TString& infile, const TString
 
     // store harvest in text file
     //return WriteResultSet( summary, listname, outdir );
-    return WriteResultSetJSON( summary, listname, outdir );
+    WriteResultSetJSON( summary, listname, outdir );
 }
 
 
@@ -121,7 +121,7 @@ std::list<LimitResult> CollectHypoTestResults( const TString& infile, const TStr
 
     // loop over hypotestresults and save results
     std::list<LimitResult> limitres;
-    std::map<TString,TString>::iterator itr=wsnameMap.begin(), end=wsnameMap.end();
+    //std::map<TString,TString>::const_iterator itr = wsnameMap.begin(), end = wsnameMap.end();
 
     int counter_failed_fits = 0;
     int counter_failed_status = 0;
@@ -132,8 +132,9 @@ std::list<LimitResult> CollectHypoTestResults( const TString& infile, const TStr
     RooStats::HypoTestInverterResult *ht = NULL; 
     RooFitResult *fitresult = NULL;
 
-    for (; itr!=end; ++itr) {
-        ht = GetHypoTestResultFromFile( infile, itr->second );
+    //for (; itr!=end; ++itr) {
+    for (const auto &itr : wsnameMap) {
+        ht = GetHypoTestResultFromFile( infile, itr.second );
 
         if(!ht) { continue; }
         if(ht->ArraySize()==0) {
@@ -159,7 +160,7 @@ std::list<LimitResult> CollectHypoTestResults( const TString& infile, const TStr
         bool failed_status = false;
         if (fitresult && fitresult->status()!=0) {
             ToyUtilsLogger << kWARNING << "Fit failed for point " << fitresultname.Data() << ". Result has been flagged as failed fit." << GEndl;
-            counter_failed_status++;
+            ++counter_failed_status;
             failed_status = true;   
         }
 
@@ -173,20 +174,20 @@ std::list<LimitResult> CollectHypoTestResults( const TString& infile, const TStr
         if (fitresult && fitresult->covQual() < 1.1) {
             ToyUtilsLogger << kWARNING << "Fit result " << fitresultname.Data() 
                 << " has bad covariance matrix quality! Result has been flagged as failed fit." << GEndl;
-            counter_badcovquality++;
+            ++counter_badcovquality;
             //failed_fit = true;
             failed_cov = true;
         } else if (fitresult && fitresult->covQual() < 2.1) {
             ToyUtilsLogger << kWARNING << "Fit result " << fitresultname.Data() 
                 << " has mediocre covariance matrix quality. Result has been flagged as failed cov matrix." << GEndl;
-            counter_not_great_fits++;
+            ++counter_not_great_fits;
             //failed_cov = true;
             dodgy_cov = true;
         }
         int covqual = ( fitresult!=0 ? fitresult->covQual() : -1 );
 
         bool failed_fit = ( failed_status || failed_cov || dodgy_cov );
-        if(failed_fit) counter_failed_fits++;
+        if(failed_fit) ++counter_failed_fits;
 
         // don't store points with failed fits, if configured so.
         if (rejectFailedPrefit && failed_fit) {
@@ -206,7 +207,7 @@ std::list<LimitResult> CollectHypoTestResults( const TString& infile, const TStr
             failed_p0half = true;
         }
 
-        std::map<TString,float> failMap;
+        std::map<std::string, float> failMap;
         failMap["nofit"]        = float(nofit);
         failMap["failedstatus"] = float(failed_status);
         failMap["fitstatus"]    = float(fitstatus);
@@ -217,7 +218,7 @@ std::list<LimitResult> CollectHypoTestResults( const TString& infile, const TStr
 
         failMap["failedp0"]     = float(failed_p0half);
 
-        result.AddMetaData ( ParseWorkspaceID(itr->first) );
+        result.AddMetaData ( ParseWorkspaceID(itr.first) );
         result.AddMetaData ( failMap );
 
         // store info from interpretation string (eg m0 and m12 value) 
@@ -239,16 +240,17 @@ std::list<LimitResult> CollectHypoTestResults( const TString& infile, const TStr
 
 
 //________________________________________________________________________________________________
-const char* WriteResultSetJSON( const std::list<LimitResult>& summary, const TString& listname, const TString& outDir ){
-    if (summary.empty()) 
-        return 0;
+void WriteResultSetJSON( const std::list<LimitResult>& summary, const TString& listname, const TString& outDir ){
+    if (summary.empty()) { 
+        return;
+    }
 
     ToyUtilsLogger << kINFO << "Storing results of " << summary.size() << " scan points as JSON" << GEndl;
 
     TString outdir = gSystem->pwd(); 
     if ( !gSystem->cd( outDir.Data() ) ) {
         ToyUtilsLogger << kERROR << "output dir <" << outDir << "> does not exist. Return." << GEndl;
-        return 0;
+        return;
     } else {
         TString fulloutdir = gSystem->pwd();
         gSystem->cd( outdir.Data() ); // back to original dir
@@ -256,38 +258,40 @@ const char* WriteResultSetJSON( const std::list<LimitResult>& summary, const TSt
     }
     outdir = ( outdir.EndsWith("/") ? outdir : outdir+"/" );
 
-    TString outfile = outdir + listname + "_harvest_list.json" ;
+    //TString outfile = outdir + listname + "_harvest_list.json" ;
+    std::ostringstream outfile;
+    outfile << outdir.Data() << listname.Data() << "_harvest_list.json";
 
     JSON limresJSON = JSON::Array();
-    for(auto l: summary) { limresJSON.asVector().push_back( l.GetJSONData()); }
+    for(auto const &l: summary) { 
+        limresJSON.asVector().push_back( l.GetJSONData()); 
+    }
 
     // write out files
     ofstream fout;
-    fout.open(outfile.Data());
+    fout.open(outfile.str().c_str());
     if (!fout.is_open()) {
-        ToyUtilsLogger << kERROR << "Error opening file <" << outfile <<">" << GEndl;
-        return 0;
+        ToyUtilsLogger << kERROR << "Error opening file <" << outfile.str() <<">" << GEndl;
+        return;
     }
     limresJSON.print(fout);
     fout.close();
 
-    ToyUtilsLogger << kINFO << "JSON list file stored as <" << outfile << ">" << GEndl;
-
-    return outfile.Data();
-
+    ToyUtilsLogger << kINFO << "JSON list file stored as <" << outfile.str() << ">" << GEndl;
 }
 
 //________________________________________________________________________________________________
-const char* WriteResultSet( const std::list<LimitResult>& summary, const TString& listname, const TString& outDir ){
-    if (summary.empty()) 
-        return 0;
+void WriteResultSet( const std::list<LimitResult>& summary, const TString& listname, const TString& outDir ){
+    if (summary.empty()) {
+        return;
+    }
 
     ToyUtilsLogger << kINFO << "Storing results of " << summary.size() << " scan points." << GEndl;
 
     TString outdir = gSystem->pwd(); 
     if ( !gSystem->cd( outDir.Data() ) ) {
         ToyUtilsLogger << kERROR << "output dir <" << outDir << "> does not exist. Return." << GEndl;
-        return 0;
+        return;
     } else {
         TString fulloutdir = gSystem->pwd();
         gSystem->cd( outdir.Data() ); // back to original dir
@@ -371,7 +375,7 @@ const char* WriteResultSet( const std::list<LimitResult>& summary, const TString
     fout.open(outdesc);
     if (!fout.is_open()) {
         ToyUtilsLogger << kERROR << "Error opening file <" << outdesc <<">" << GEndl;
-        return 0;
+        return;
     }
     fout << includes << "\n";
     fout << harvesttree << "\n";
@@ -383,7 +387,7 @@ const char* WriteResultSet( const std::list<LimitResult>& summary, const TString
     fout.open(outdescp);
     if (!fout.is_open()) {
         ToyUtilsLogger << kERROR << "Error opening file <" << outdescp <<">" << GEndl;
-        return 0;
+        return;
     }
     fout << pythonstr << "\n";
     fout.close();
@@ -392,25 +396,23 @@ const char* WriteResultSet( const std::list<LimitResult>& summary, const TString
     fout.open(outfile.Data());
     if (!fout.is_open()) {
         ToyUtilsLogger << kERROR << "Error opening file <" << outfile <<">" << GEndl;
-        return 0;
+        return;
     }
     for(; itr!=end; ++itr) { fout << itr->GetSummaryString() << "\n"; }
     fout.close();
 
     ToyUtilsLogger << kINFO << "list file stored as <" << outfile << ">" << GEndl;
-
-    return outfile.Data();
 }
 
 
 /// Same code, but takes workspaces as input from which p-values are evaluated, then stored
 //________________________________________________________________________________________________
-const char* CollectAndWriteResultSet( const TString& infile, const TString& format, const TString& interpretation, const TString& cutStr, const int& mode, const int& n_toys, const int& in_doFreeFitFirst, const int& do_ul, const TString& outDir, const TString& fileprefix ) {
+void CollectAndWriteResultSet( const TString& infile, const TString& format, const TString& interpretation, const TString& cutStr, const int& mode, const int& n_toys, const int& in_doFreeFitFirst, const int& do_ul, const TString& outDir, const TString& fileprefix ) {
     // outdir
     TString outdir = gSystem->pwd();
     if ( !gSystem->cd( outDir.Data() ) ) {
         ToyUtilsLogger << kERROR << "output dir <" << outDir << "> does not exist. Return." << GEndl;
-        return 0;
+        return;
     } else {
         TString fulloutdir = gSystem->pwd();
         gSystem->cd( outdir.Data() ); // back to original dir
@@ -448,7 +450,7 @@ const char* CollectAndWriteResultSet( const TString& infile, const TString& form
 
     // store harvest in text file
     //return WriteResultSet( summary, listname, outdir );
-    return WriteResultSetJSON( summary, listname, outdir );
+    WriteResultSetJSON( summary, listname, outdir );
 }
 
 
@@ -465,11 +467,12 @@ std::list<LimitResult> CollectLimitResults( const TString& infile, const TString
 
     // loop over workspaces and print results
     std::list<LimitResult> limitres;
-    std::map<TString,TString>::iterator itr=wsnameMap.begin(), end=wsnameMap.end();
+    //std::map<TString,TString>::const_iterator itr=wsnameMap.begin(), end=wsnameMap.end();
 
-    for (; itr!=end; ++itr) {
-        RooWorkspace* w = GetWorkspaceFromFile( infile, itr->second );
-        LimitResult result = get_Pvalue( w, mode, n_toys, do_ul, itr->first );
+    //for (; itr!=end; ++itr) {
+    for (const auto &itr : wsnameMap) {
+        RooWorkspace* w = GetWorkspaceFromFile( infile, itr.second );
+        LimitResult result = get_Pvalue( w, mode, n_toys, do_ul, itr.first );
         limres.push_back(result);
         delete w;
     }

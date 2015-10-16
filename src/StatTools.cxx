@@ -594,7 +594,7 @@ RooStats::HypoTestInverterResult* RooStats::MakeUpperLimitPlot(const char* filep
 }
 
 //________________________________________________________________________________________________
-LimitResult RooStats::get_Pvalue( const RooStats::HypoTestInverterResult* fResults, bool doUL ) {
+LimitResult RooStats::get_Pvalue(const RooStats::HypoTestInverterResult* fResults, bool doUL ) {
     // MB : code taken from HypoTestInverterPlot::MakeExpectedPlot()
 
     const int nEntries = fResults->ArraySize();
@@ -713,7 +713,7 @@ LimitResult RooStats::get_Pvalue( const RooStats::HypoTestInverterResult* fResul
     else {
         if (resultIsAsymptotic) {
 
-            SamplingDistribution * s = fResults->GetExpectedPValueDist(0) ;
+            SamplingDistribution *s = fResults->GetExpectedPValueDist(0) ;
             if (!s) { 
                 StatToolsLogger << kERROR << "Sampling distribution is empty. Exit." << GEndl;
                 return dummyResult;
@@ -734,6 +734,7 @@ LimitResult RooStats::get_Pvalue( const RooStats::HypoTestInverterResult* fResul
             qv[3] = values[i3];
             qv[4] = values[i4];
 
+            delete s; //we own this - see https://root.cern.ch/root/html/src/RooStats__HypoTestInverterResult.cxx.html#Xhee2
         } else {
             RooStats::HypoTestResult* oneresult = new RooStats::HypoTestResult( *fResults->GetResult(0) ) ;
 
@@ -766,14 +767,6 @@ LimitResult RooStats::get_Pvalue( const RooStats::HypoTestInverterResult* fResul
     qv[6]  = fResults->CLsError(0) ; //
     qv[8]  = fResults->CLbError(0) ; //
     qv[10] = fResults->CLsplusbError(0) ; //
-
-    ////jlorenz: dirty hack in order to avoid 0.000000 values in textfile
-    ////gbesjes: should not be needed anymore with %e, but leave in place for now. (2/6/2014)
-    //for (int k=0; k<=10; k++) { 
-        //if (TMath::Abs(qv[k]) < 0.000001) { 
-            //qv[k] = 0.000001; 
-        //} 
-    //}
 
     /// And pass on to limitresult object
     LimitResult result;

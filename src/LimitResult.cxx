@@ -31,7 +31,7 @@ LimitResult::~LimitResult()
 
 
 //_____________________________________________________________________________
-LimitResult::LimitResult(const TString &name, const TString &title) :
+LimitResult::LimitResult(const std::string &name, const std::string &title) :
     m_p0(-1),
     m_p1(-1),
     m_CLs(-1),
@@ -61,7 +61,7 @@ LimitResult::LimitResult(const TString &name, const TString &title) :
     m_resultfilename(""),
     m_comments("") {
     // dummy code: allow unused variable
-    TString tmp=title; 
+    std::string tmp=title; 
     tmp=name;
 };
 
@@ -107,8 +107,8 @@ void LimitResult::Summary() {
 
 
 //_____________________________________________________________________________
-TString  LimitResult::GetSummaryString() const {
-    TString summary;
+std::string  LimitResult::GetSummaryString() const {
+    std::string summary;
     summary += Form(" %e %e %e",GetP0(),GetP1(),GetCLs());
     summary += Form(" %d %d",GetMode(),GetNExp());
     summary += Form(" %u",GetSeed());
@@ -123,7 +123,7 @@ TString  LimitResult::GetSummaryString() const {
 		    GetUpperLimitEstimatedError(),GetExpectedUpperLimit(),GetExpectedUpperLimitPlus1Sig(),
 		    GetExpectedUpperLimitPlus2Sig(),GetExpectedUpperLimitMinus1Sig(),GetExpectedUpperLimitMinus2Sig());
 
-    std::map<TString,float>::const_iterator itr=m_metadata.begin(), end=m_metadata.end();
+    std::map<std::string,float>::const_iterator itr=m_metadata.begin(), end=m_metadata.end();
     for (; itr!=end; ++itr) { summary += Form(" %f",itr->second); }
     return summary;
 }
@@ -165,37 +165,42 @@ JSON LimitResult::GetJSONData() const {
     summary["xsec"] = -999007.;
     summary["excludedXsec"] = -999007.;
 
-    std::map<TString,float>::const_iterator itr=m_metadata.begin(), end=m_metadata.end();
-    for (; itr!=end; ++itr)
-        summary[itr->first.Data()] = itr->second;
-    
+    //std::map<std::string,float>::const_iterator itr=m_metadata.begin(), end=m_metadata.end();
+    //for (; itr!=end; ++itr)
+    for(const auto &itr : m_metadata) {
+        summary[itr.first] = itr.second;
+    }
+
     return summary;
 }
 
 //_____________________________________________________________________________
-TString  LimitResult::GetDescriptionString() const {
-    TString description;
-    description += "p0:p1:CLs:"; //3
-    description += "mode:nexp:";  //2
-    description += "seed:";       //1 
-    description += "CLsexp:";     //1
-    description += "fID:sigma0:sigma1:";   //3
-    description += "clsu1s:clsd1s:clsu2s:clsd2s:"; //4
-    description += "p0exp:p0u1s:p0d1s:p0u2s:p0d2s:"; //5
-    description += "upperLimit:upperLimitEstimatedError:expectedUpperLimit:expectedUpperLimitPlus1Sig:";
-    description += "expectedUpperLimitPlus2Sig:expectedUpperLimitMinus1Sig:expectedUpperLimitMinus2Sig:";
-    description += "xsec:excludedXsec"; //2
+std::string LimitResult::GetDescriptionString() const {
+    std::ostringstream description;
+    description << "p0:p1:CLs:"; //3
+    description << "mode:nexp:";  //2
+    description << "seed:";       //1 
+    description << "CLsexp:";     //1
+    description << "fID:sigma0:sigma1:";   //3
+    description << "clsu1s:clsd1s:clsu2s:clsd2s:"; //4
+    description << "p0exp:p0u1s:p0d1s:p0u2s:p0d2s:"; //5
+    description << "upperLimit:upperLimitEstimatedError:expectedUpperLimit:expectedUpperLimitPlus1Sig:";
+    description << "expectedUpperLimitPlus2Sig:expectedUpperLimitMinus1Sig:expectedUpperLimitMinus2Sig:";
+    description << "xsec:excludedXsec"; //2
 
-    std::map<TString,float>::const_iterator itr=m_metadata.begin(), end=m_metadata.end();
-    for (; itr!=end; ++itr)
-        description += Form(":%s",itr->first.Data());
-    return description;
+    //std::map<std::string,float>::const_iterator itr=m_metadata.begin(), end=m_metadata.end();
+    //for (; itr!=end; ++itr)
+    for(const auto &itr: m_metadata) {
+        //description += Form(":%s",itr.first);
+        description << itr.first;
+    }
+    return description.str();
 }
 
 
 //_____________________________________________________________________________
-void LimitResult::AddMetaData(const std::map<TString,float>& metadata) {
-    std::map<TString,float>::const_iterator itr=metadata.begin(), end=metadata.end();
+void LimitResult::AddMetaData(const std::map<std::string,float>& metadata) {
+    std::map<std::string,float>::const_iterator itr=metadata.begin(), end=metadata.end();
     for (; itr!=end; ++itr) { m_metadata[itr->first]=itr->second; }
 }
 

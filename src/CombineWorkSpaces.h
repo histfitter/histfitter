@@ -51,7 +51,7 @@ RooFitResult* GetFitResultFromFile( const TString& infile, const TString& fitnam
 
 RooMCStudy* GetMCStudy( const RooWorkspace* w );
 
-std::map<TString,float> ParseWorkspaceID( const TString& wid );
+std::map<std::string, float> ParseWorkspaceID( const TString& wid );
 
 #endif
 
