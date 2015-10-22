@@ -21,7 +21,7 @@
 from ROOT import THStack,TLegend,TCanvas,TFile,std,TH1F
 from ROOT import ConfigMgr,FitConfig,ChannelStyle #this module comes from gSystem.Load("libSusyFitter.so")
 from prepareHistos import PrepareHistos
-from copy import deepcopy
+from copy import copy, deepcopy
 from histogramsManager import histMgr
 from logger import Logger
 import os
@@ -773,10 +773,12 @@ class ConfigManager(object):
                 # Run over the nominal configuration first
                 # Set the weights, cuts, weights
                 self.setWeightsCutsVariable(chan, sam, regionString)
+                
                 #depending on the sample type,  the Histos and up/down weights are added
+                log.debug("Calling addSampleSpecificHists() for {0}".format(chan.name))
                 self.addSampleSpecificHists(fitConfig, chan, sam, regionString, normRegions, normString, normCuts)
 
-        #post-processing 1: loop for user-norm systematics
+        # post-processing 1: loop for user-norm systematics
         for chan in fitConfig.channels:
             regionString = "".join(chan.regions)
             
@@ -792,15 +794,15 @@ class ConfigManager(object):
                             for normReg in sam.normRegions:
                                 if not type(normReg[0]) == "list":
                                     normList = [normReg[0]]
-                                    c = fitConfig.getChannel(normReg[1],normList)
+                                    c = fitConfig.getChannel(normReg[1], normList)
                                 else:
-                                    c = fitConfig.getChannel(normReg[1],normReg[0])
+                                    c = fitConfig.getChannel(normReg[1], normReg[0])
                                 normString += c.regionString
     
                         syst.PrepareGlobalNormalization(normString, self, fitConfig, chan, sam)
                         sam.addHistoSys(syst.name, nomName, highName, lowName, False, True, False, False, sam.name, normString)
 
-        #post-processing 2: swapping of overall systematics for specified channel by systematics from ohter channel
+        # post-processing 2: swapping of overall systematics for specified channel by systematics from ohter channel
         for chan in fitConfig.channels:
             # only consider channels for which a remap channel has been defined.
             if len(chan.remapSystChanName) == 0:
@@ -927,18 +929,16 @@ class ConfigManager(object):
             #removing regions used for remapping systematic uncertainties, but only for exclusion fits
             #execute the folllowing only if some channel with a remapped systematic uncertaintiy was used
             #in this case, keep only channels belonging to the signalchannels or the bkgConstrainchannels
-            if self.myFitType==self.FitType.Exclusion and len([chan for chan in fitConfig.channels if len(chan.remapSystChanName)>0]) > 0:
+            if self.myFitType == self.FitType.Exclusion and len([chan for chan in fitConfig.channels if len(chan.remapSystChanName)>0]) > 0:
                 log.info("Found top level object for exclusion fit: %s" % fitConfig.name)
-                remove_channels=[]
+                
                 for chan in fitConfig.channels:
-                    if not fitConfig.signalChannels.__contains__(chan.channelName) and not fitConfig.bkgConstrainChannels.__contains__(chan.channelName):
-                        remove_channels.append(chan)
-                for remove_chan in remove_channels:
-                    try:
-                        fitConfig.channels.remove(remove_chan)
-                        log.info("Removing channel %s from top level object %s as not signal region and not control region" % (remove_chan.name,fitConfig.name))
-                    except:
-                        log.warning("Unable to remove channel %s from top level object %s" % (remove_chan.name,fitConfig.name))
+                    if not chan.channelName in fitConfig.signalChannels and not chan.channelName in fitConfig.bkgConstrainChannels:
+                        try:
+                            fitConfig.channels.remove(chan)
+                            log.info("Removing channel %s from top level object %s as not signal region and not control region" % (chan.name, fitConfig.name))
+                        except:
+                            log.warning("Unable to remove channel %s from top level object %s" % (chan.name, fitConfig.name))
 
             if self.writeXML:
                 fitConfig.writeXML()   #<--- this internally calls channel.writeXML()
@@ -1119,7 +1119,7 @@ class ConfigManager(object):
         else:
             raise Exception("Incorrect systematic method specified for QCD: %s" % getSample(sam.name).qcdSyst)
 
-    def setWeightsCutsVariable(self, chan, sam, regionString):
+    def setWeightsCutsVariable(self, chan, sam, regionString, noRead=False):
         """
         Generate the string of weights applied to a sample
 
@@ -1127,29 +1127,43 @@ class ConfigManager(object):
         @param sam The sample to use
         @param regionString Internal string to use in the dictionary of cuts
         """
+        log.debug("setWeightsCutsVariable() for channel {0} sample {1}".format(chan.name, sam.name))
         if not sam.isData and not sam.isQCD and not sam.isDiscovery:
+            oldWeights = copy(self.prepare.weights)
             self.prepare.weights = str(self.lumiUnits*self.outputLumi/self.inputLumi)
             self.prepare.weights += " * " + " * ".join(sam.weights)
+            log.debug("settings weights to {0}".format(self.prepare.weights))
+            if oldWeights == self.prepare.weights:
+                log.debug(" => NOTE: no change in weights!")
+
             if (self.readFromTree and not sam.isDiscovery) or self.useCacheToTreeFallback:
                     treeName = sam.treeName
                     if treeName == '': 
                         treeName = sam.name+self.nomName
-                    self.prepare.read(treeName, sam.files)
+                    if not noRead:
+                        log.debug("setWeightsCutsVariable(): calling prepare.read()")
+                        self.prepare.read(treeName, sam.files)
         else:
             self.prepare.weights = "1."
             if self.readFromTree or self.useCacheToTreeFallback:
                 treeName = sam.treeName
                 if treeName == '': 
                     treeName = sam.name
-                self.prepare.read(treeName, sam.files)
+                if not noRead:
+                    log.debug("setWeightsCutsVariable(): calling prepare.read()")
+                    self.prepare.read(treeName, sam.files)
 
+        oldCuts = copy(self.prepare.cuts)
         if len(sam.cutsDict.keys()) == 0:
             if not chan.variableName == "cuts":
                 self.prepare.cuts = self.cutsDict[regionString]
         else:
             if not chan.variableName == "cuts":
                 self.prepare.cuts = sam.cutsDict[regionString]
-
+        log.debug("Setting cuts to {0}".format(self.prepare.cuts))
+        if oldCuts == self.prepare.cuts:
+            log.debug(" => NOTE: no change in cuts!")
+        
         if sam.unit == "GeV":
             self.prepare.var = chan.variableName
         elif sam.unit == "MeV" and chan.variableName.find("/") < 0 and not chan.variableName.startswith("n"):
@@ -1196,6 +1210,7 @@ class ConfigManager(object):
         elif not sam.isQCD and not sam.isDiscovery:
             tmpName="h"+sam.name+"Nom_"+regionString+"_obs_"+replaceSymbols(chan.variableName)
             if not len(sam.shapeFactorList):
+                log.debug("Building temporary histogram {0}".format(tmpName))
                 self.prepare.addHisto(tmpName, useOverflow=chan.useOverflowBin, useUnderflow=chan.useUnderflowBin)
                 ###check that nominal sample is not empty for that channel
                 if self.hists[tmpName].GetSum() == 0.0:
@@ -1258,6 +1273,7 @@ class ConfigManager(object):
                             pass
                     else:
                         self.hists[tmpName] = TH1F(tmpName, tmpName, 1, 0.5, 1.5)
+                        log.debug("Building temporary histogram {0}".format(tmpName))
                         for normReg in sam.normRegions:
                             if not type(normReg[0]) == "list":
                                 normList = [normReg[0]]
@@ -1273,6 +1289,7 @@ class ConfigManager(object):
 
                                 treeName = s.treeName
                                 if treeName=='': treeName = s.name+self.nomName
+                                log.debug("addSampleSpecificHists(): calling prepare.read()")
                                 self.prepare.read(treeName, s.files)
 
                                 tempHist = TH1F("temp", "temp", 1, 0.5, 1.5)
@@ -1293,10 +1310,11 @@ class ConfigManager(object):
             for (systName,syst) in chan.getSample(sam.name).systDict.items():
                 log.info("    Systematic: %s" % systName)
 
-                #first reset weight to nominal value
-                self.setWeightsCutsVariable(chan, sam, regionString)
+                # first reset weight to nominal value -> TODO: is this needed for tree-based systematics?!
+                self.setWeightsCutsVariable(chan, sam, regionString) # no need to call the prepare() method <- YES there is. This sets the correct SR. Bad design@
+                
+                # this method actually calls the hard work. Note: this NEEDS to not rely on this method. Now it's not parallelizable.
                 syst.PrepareWeightsAndHistos(regionString, normString, normCuts, self, fitConfig, chan, sam)
-
                 self.addHistoSysforNoQCD(regionString, normString, normCuts, fitConfig, chan, sam, syst)
 
         elif sam.isQCD:	
