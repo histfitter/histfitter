@@ -213,9 +213,8 @@ class fitConfig(object):
             # can be used to compare to our own XML if necessary
             #m.PrintXML("xmlFromPy/"+self.prefix, m.GetOutputFilePrefix())
             
-            #NB this function's name is deceiving - does not run fits unless m.exportOnly=False
+            # Note: this function's name is deceiving - does not run fits unless m.exportOnly=False
             ROOT.RooStats.HistFactory.MakeModelAndMeasurementFast(m)
-        
         return
 
     def close(self):
