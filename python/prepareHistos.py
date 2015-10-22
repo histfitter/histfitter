@@ -156,15 +156,19 @@ class PrepareHistos(object):
             log.warning("No tree name provided, cache fallback to trees will not work")
             return
 
-        if not self.currentChainName=='' and not (self.currentChainName.find(treeName)>-1):
+        if not self.currentChainName == '' and not treeName in self.currentChainName:
+            log.debug("read(): deleting chain {0} (treeName asked = {1})".format(self.currentChainName, treeName))
             del self.configMgr.chains[self.currentChainName]
 
-        chainID = treeName
-        for fileName in fileList: chainID += '_' +fileName
+        chainID = "{0}_{1}".format(treeName, "_".join(fileList))
+        #chainID = treeName
+        #for fileName in fileList: chainID += '_' +fileName
+        
         self.currentChainName = chainID
         
         ## MB : no need to recreate chain if it already exists
-        if not self.configMgr.chains.has_key(chainID):
+        if not chainID in self.configMgr.chains:
+            log.debug("Creating chain {0}".format(chainID))
             self.configMgr.chains[chainID] = TChain(treeName)
             for fileName in fileList:
                 self.configMgr.chains[self.currentChainName].Add(fileName)
