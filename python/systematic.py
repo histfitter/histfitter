@@ -309,6 +309,7 @@ class SystematicBase:
                         #log.verbose("systNorm low %s"%systNorm.low)
                         log.verbose("treeName %s"%treeName)
 
+                        log.debug("FillUpDownHist(): calling prepare.read()")
                         abstract.prepare.read(treeName, filelist)
 
                         tempHist = TH1F("temp", "temp", 1, 0.5, 1.5)
@@ -359,6 +360,8 @@ class TreeWeightSystematic(SystematicBase):
 
     def PrepareWAHforWeight(self, regionString="", normString="", normCuts="",
                             abstract=None, topLvl=None, chan=None, sam=None):
+        
+        log.debug("PrepareWAHforWeight()")
         highandlow = ["High_", "Low_"] # ,"Nom_"]
         if self.differentNominalTreeWeight:
             highandlow = ["High_", "Low_", "Nom_"]
@@ -379,6 +382,7 @@ class TreeWeightSystematic(SystematicBase):
                 treeName = sam.treeName
                 if treeName == '':
                     treeName = "%s%s" % (sam.name, abstract.nomName)
+                log.debug("PrepareWAHforWeight(): calling prepare.read()")
                 abstract.prepare.read(treeName, sam.files)
             
             TreeWeightSystematic.tryAddHistos(self, highorlow, regionString,
@@ -396,11 +400,13 @@ class TreeWeightSystematic(SystematicBase):
         if self.differentNominalTreeWeight:
             highandlow = ["High_", "Low_", "Nom_"]
 
+        log.debug("PrepareWAHforTree()")
+
         weightstemp = abstract.prepare.weights
         for highorlow in highandlow:
             abstract.prepare.weights = weightstemp
             for myw in sam.weights:
-                if abstract.prepare.weights.find(myw) == -1:
+                if not myw in abstract.prepare.weights:
                     abstract.prepare.weights += " * " + myw
 
             if abstract.readFromTree or abstract.useCacheToTreeFallback:
@@ -409,26 +415,32 @@ class TreeWeightSystematic(SystematicBase):
                         filelist = self.filesHi[sam.name]
                     else:
                         filelist = sam.files
+
                     if sam.name in self.treeHiName:
                         treeName = self.treeHiName[sam.name]
                     else:
                         treeName = sam.treeName + self.high
+                    
                     if treeName == '' or treeName == self.high:
                         treeName = sam.name + self.high
 
+                    log.debug("PrepareWAHforTree(): calling prepare.read()")
                     abstract.prepare.read(treeName, filelist)
                 elif highorlow == "Low_":
                     if sam.name in self.filesLo:
                         filelist = self.filesLo[sam.name]
                     else:
                         filelist = sam.files
+                    
                     if sam.name in self.treeLoName:
                         treeName = self.treeLoName[sam.name]
                     else:
                         treeName = sam.treeName + self.low
+                    
                     if treeName == '' or treeName == self.low:
                         treeName = sam.name + self.low
                 
+                    log.debug("PrepareWAHforTree(): calling prepare.read()")
                     abstract.prepare.read(treeName, filelist)
                 elif highorlow == "Nom_":
                     filelist = sam.files
@@ -436,6 +448,7 @@ class TreeWeightSystematic(SystematicBase):
                     if treeName == '' or treeName == self.nominal:
                         treeName = sam.name + self.nominal
                 
+                    log.debug("PrepareWAHforTree(): calling prepare.read()")
                     abstract.prepare.read(treeName, filelist)
 
             TreeWeightSystematic.tryAddHistos(self, highorlow, regionString,
