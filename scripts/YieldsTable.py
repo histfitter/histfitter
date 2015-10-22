@@ -19,9 +19,9 @@
 import ROOT
 ROOT.gROOT.SetBatch(True)
 ROOT.PyConfig.IgnoreCommandLineOptions = True
+ROOT.gSystem.Load("libSusyFitter.so")
 
 from ROOT import gROOT,gSystem,gDirectory, PyConfig
-gSystem.Load("libSusyFitter.so")
 gROOT.Reset()
 
 from ROOT import TFile, RooWorkspace, TObject, TString, RooAbsReal, RooRealVar, RooFitResult, RooDataSet, RooAddition, RooArgSet, RooFormulaVar, RooAbsData, RooRandom, RooArgList, RooBinningCategory
@@ -219,7 +219,10 @@ def latexfitresults(filename,regionList,sampleList,dataname='obsData',showSum=Fa
   get a list of RooRealSumPdf per region (RooRealSumPdf is the top-pdf per region containing all samples)
   """
   rrspdfinRegionList = []
-  for index,pdf in enumerate(pdfinRegionList):
+  for index, pdf in enumerate(pdfinRegionList):
+    if not pdf:
+        print "WARNING: pdf is NULL for index {0}".format(index)
+        continue
     prodList = pdf.pdfList()
     foundRRS = 0
     for idx in range(prodList.getSize()):
@@ -351,6 +354,9 @@ def latexfitresults(filename,regionList,sampleList,dataname='obsData',showSum=Fa
   """
   rrspdfinRegionList = []
   for index,pdf in enumerate(pdfinRegionList):
+    if not pdf: 
+        print "WARNING: pdf is NULL for index {0}".format(index)
+        continue
     prodList = pdf.pdfList()
     foundRRS = 0
     for idx in range(prodList.getSize()):
