@@ -296,9 +296,7 @@ if __name__ == "__main__":
     standard execution from now on
     """
     configMgr.initialize()
-
     RooRandom.randomGenerator().SetSeed(configMgr.toySeed)
-
     ReduceCorrMatrix = configMgr.ReduceCorrMatrix
 
     """
