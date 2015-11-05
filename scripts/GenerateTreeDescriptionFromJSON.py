@@ -50,6 +50,7 @@ def readInputFile(filename):
 
 def getKeys(data):
     first = True
+    keys = []
     for d in data[0]:
         if first: 
             keys = list(d.keys())
