@@ -140,10 +140,13 @@ class LimitResult {
         void SetComments(const std::string & val) 	{ m_comments = val; }   
 
         void Summary();
+        std::vector<std::string> GetKeys() const;
+        std::map<std::string, float> GetData() const;
         JSON GetJSONData() const; 
         std::string GetSummaryString() const; 
         std::string GetDescriptionString() const;
         void AddMetaData(const std::map<std::string,float>& metadata); 
+        void AddMetaData(const std::string&, float);
 };
 
 #endif

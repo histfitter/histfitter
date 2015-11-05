@@ -128,9 +128,17 @@ std::string  LimitResult::GetSummaryString() const {
     return summary;
 }
 
-JSON LimitResult::GetJSONData() const {
-    JSON summary = JSON::Object();
-    
+std::vector<std::string> LimitResult::GetKeys() const {
+    std::vector<std::string> retval;
+    for(const auto &itr : GetData() ){
+        retval.push_back(itr.first);
+    }
+
+    return retval;
+}
+
+std::map<std::string, float> LimitResult::GetData() const {
+    std::map<std::string, float> summary;
     summary["p0"] = GetP0(); 
     summary["p1"] = GetP1();
     summary["CLs"] = GetCLs();
@@ -172,6 +180,16 @@ JSON LimitResult::GetJSONData() const {
     }
 
     return summary;
+
+}
+
+JSON LimitResult::GetJSONData() const {
+    JSON summary = JSON::Object();
+   
+    for(const auto &itr : GetData()){
+        summary[itr.first] = itr.second;
+    }
+    return summary;
 }
 
 //_____________________________________________________________________________
@@ -200,7 +218,14 @@ std::string LimitResult::GetDescriptionString() const {
 
 //_____________________________________________________________________________
 void LimitResult::AddMetaData(const std::map<std::string,float>& metadata) {
-    std::map<std::string,float>::const_iterator itr=metadata.begin(), end=metadata.end();
-    for (; itr!=end; ++itr) { m_metadata[itr->first]=itr->second; }
+    //std::map<std::string,float>::const_iterator itr=metadata.begin(), end=metadata.end();
+    //for (; itr!=end; ++itr) { m_metadata[itr->first]=itr->second; }
+    for(const auto &kv : metadata){
+        AddMetaData(kv.first, kv.second);
+    }
+}
+
+void LimitResult::AddMetaData(const std::string& s, float val){
+    m_metadata[s] = val;
 }
 
