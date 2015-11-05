@@ -10,11 +10,11 @@ include ../src/Makefile.arch
 
 # Internal configuration
 PACKAGE=SusyFitter
-LD_LIBRARY_PATH:=.:../lib:$(ROOTSYS)/lib:$(LD_LIBRARY_PATH)
+LD_LIBRARY_PATH:=.:../lib:$(shell $(ROOTCONFIG) --libdir):$(LD_LIBRARY_PATH)
 OBJDIR=obj
 DEPDIR=$(OBJDIR)/dep
 VPATH= $(OBJDIR)
-INCLUDES += -I../include -I$(ROOTSYS)/include 
+INCLUDES += -I../include -I$(shell $(ROOTCONFIG) --incdir)
 ROOTSYS  ?= ERROR_RootSysIsNotDefined
  
 DICTHEAD  = $(PACKAGE)_Dict.h
@@ -35,7 +35,7 @@ CXXFLAGS = -std=c++11 -fPIC -Wall
 
 UNAME = $(shell uname)
 
-LINKLIBSIN = -L$(ROOTSYS)/lib -lCore -lRIO -lNet -lHist -lGraf -lGraf3d -lGpad -lTree -lRint -lPostscript -lMatrix -lPhysics -lGui -lRooFit -lRooStats -lHistFactory -lXMLParser -pthread -lRooFitCore -lm -ldl -lFoam -lMinuit -L../lib 
+LINKLIBSIN = -L$(shell $(ROOTCONFIG) --libdir) -lCore -lRIO -lNet -lHist -lGraf -lGraf3d -lGpad -lTree -lRint -lPostscript -lMatrix -lPhysics -lGui -lRooFit -lRooStats -lHistFactory -lXMLParser -pthread -lRooFitCore -lm -ldl -lFoam -lMinuit -L../lib 
 
 LINKLIBS = $(LINKLIBSIN) -lSusyFitter
 
