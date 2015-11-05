@@ -32,14 +32,17 @@
 #pragma link C++ function resetFloatPars;
 
 //CombineWorkSpaces.cxx
-#pragma link C++ function clearVec;
-#pragma link C++ function CollectWorkspaces;
-#pragma link C++ function GetMatchingWorkspaces;
-#pragma link C++ function GetWorkspaceFromFile;
-#pragma link C++ function GetHypoTestResultFromFile;
-#pragma link C++ function GetFitResultFromFile;
-#pragma link C++ function GetMCStudy;
-#pragma link C++ function ParseWorkspaceID;
+
+//#pragma link C++ function clearVec;
+//#pragma link C++ function CollectWorkspaces;
+//pragma link C++ function GetMatchingWorkspaces;
+//#pragma link C++ function GetWorkspaceFromFile;
+//#pragma link C++ function GetHypoTestResultFromFile;
+//#pragma link C++ function GetFitResultFromFile;
+//#pragma link C++ function GetMCStudy;
+//#pragma link C++ function ParseWorkspaceID;
+
+#pragma link C++ defined_in "CombineWorkSpaces.h";
 
 //TEasyFormula.cxx
 #pragma link C++ class TEasyFormula ;
