@@ -719,7 +719,7 @@ LimitResult RooStats::get_Pvalue(const RooStats::HypoTestInverterResult* fResult
                 return dummyResult;
                 //exit(1); 
             } 
-            const std::vector<double> & values = s->GetSamplingDistribution();
+            const std::vector<double> values = s->GetSamplingDistribution();
 
             double maxSigma = 5; // == HypoTestInverterResult::fgAsymptoticMaxSigma; // MB: HACK
             double dsig = 2.*maxSigma / (values.size() -1) ;         
@@ -740,7 +740,7 @@ LimitResult RooStats::get_Pvalue(const RooStats::HypoTestInverterResult* fResult
 
             SamplingDistribution* t = oneresult->GetAltDistribution() ;
             unsigned int sampleSize = t->GetSamplingDistribution().size() ;
-            const std::vector<double> & values = t->GetSamplingDistribution();
+            const std::vector<double> values = t->GetSamplingDistribution();
 
             int idx[5];
             double ts[5]; 
@@ -753,6 +753,7 @@ LimitResult RooStats::get_Pvalue(const RooStats::HypoTestInverterResult* fResult
                 // for storage later
             }
 
+            delete t;
             delete oneresult; 
         }
     }
