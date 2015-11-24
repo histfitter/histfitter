@@ -372,11 +372,19 @@ def makePullPlot(pickleFilename, regionList, samples, renamedRegions, outputPref
 
     mydict = pickle.load(picklefile)
 
+    #print len(mydict["names"])
+    #print len(mydict["nobs"])
+
     results1 = []
     results2 = []
     for region in mydict["names"]:
-        index = mydict["names"].index(region)        
-        nbObs = mydict["nobs"][index]               
+        # TODO: this is pretty bad. we should zip all these things.
+        index = mydict["names"].index(region)
+        try:
+            nbObs = mydict["nobs"][index] 
+        except:
+            nbObs = 0
+
         nbExp = mydict["TOTAL_FITTED_bkg_events"][index]  
         nbExpEr = mydict["TOTAL_FITTED_bkg_events_err"][index]            
         pEr = PoissonError(nbExp)
@@ -391,14 +399,16 @@ def makePullPlot(pickleFilename, regionList, samples, renamedRegions, outputPref
 
         nbExpComponents = []
         for sam in samples.split(","):
-             nbExpComponents.append((sam,mydict["Fitted_events_"+sam][index] ))
+             nbExpComponents.append((sam, mydict["Fitted_events_"+sam][index] ))
         
         if -0.02 < pull < 0: pull = -0.02 ###ATT: ugly
         if 0 < pull < 0.02:  pull = 0.02 ###ATT: ugly
              
-        if region.find("SR")>=0 and doBlind:
+        if "SR" in region and doBlind:
             nbObs = -100
             pull = 0
+
+        print "region: {0} nObs {1}".format(region, nbObs)
 
         results1.append((region,pull,nbObs,nbExp,nbExpEr,totEr,nbExpComponents))
 
