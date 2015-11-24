@@ -611,8 +611,8 @@ if __name__ == "__main__":
     m3 = pickle.load(f)
     f.close()
   else:
-    m3 = latexfitresults(wsFileName,chanList,sampleList,dataname,showSumAllRegions,doAsym, blinded, splitBins)
-    f = open(outputFileName.replace(".tex",".pickle"), 'w')
+    m3 = latexfitresults(wsFileName, chanList, sampleList, dataname, showSumAllRegions, doAsym, blinded, splitBins)
+    f = open(outputFileName.replace(".tex", ".pickle"), 'w')
     pickle.dump(m3, f)
     f.close()
 
