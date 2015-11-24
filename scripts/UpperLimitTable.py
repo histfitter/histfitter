@@ -32,7 +32,7 @@ import pickle
 import os
 import sys
 
-def latexfitresults(filename, poiname='mu_SIG', lumiFB=1.0, nTOYS=3000, asimov=False, wname='combined'):
+def latexfitresults(filename, poiname='mu_SIG', lumiFB=1.0, nTOYS=3000, nPoints=20, muRange=40, asimov=False, wname='combined', outputPrefix=""):
   """
   Calculate before/after-fit yields in all channels given
   
@@ -41,7 +41,10 @@ def latexfitresults(filename, poiname='mu_SIG', lumiFB=1.0, nTOYS=3000, asimov=F
   @param lumiFB Given lumi in fb-1 to translate upper limit on N_events into xsection limit (default='1.0')
   @param nTOYS Number of toys to be run
   @param asimov Boolean to run asimov or not (default=False)
+  @param nPoints Number of points of mu_SIG ranges to scan
+  @param muRange Maximim value of mu_SIG to probe
   @param wname RooWorkspace name in file (default='combined')
+  @param outputPrefix Prefix of the output file name (default="")
   """
 
   """
@@ -69,11 +72,11 @@ def latexfitresults(filename, poiname='mu_SIG', lumiFB=1.0, nTOYS=3000, asimov=F
     modelConfig.GetNuisanceParameters().remove(poi)
 
   """
-  set some default values for nToys, calculator type and npoints to be scanned
+  set some default values for nToys, calculator type and nPoints to be scanned
   """
   ntoys = 3000
   calctype = 0   # toys = 0, asymptotic (asimov) = 2
-  npoints = 20
+  nPoints = nPoints
 
   if nTOYS != 3000 and nTOYS>0:
     ntoys = nTOYS
@@ -83,14 +86,23 @@ def latexfitresults(filename, poiname='mu_SIG', lumiFB=1.0, nTOYS=3000, asimov=F
   """
   set the range of POI to be scanned and perform HypoTest inversion
   """
+  nCPUs=8
   murangelow = 0.0
-  murangehigh = 40.0 #set here -1. if you want to have automatic determined scan range, if using values != -1, please check the log file if the scan range was large enough
-  hti_result = RooStats.DoHypoTestInversion(w,ntoys,calctype,3,True,npoints,murangelow,murangehigh)
+  murangehigh = muRange #set here -1. if you want to have automatic determined scan range, if using values != -1, please check the log file if the scan range was large enough
+  hti_result = RooStats.DoHypoTestInversion(w, ntoys, calctype, 3, True, nPoints, murangelow, murangehigh, False, False, "ModelConfig", "", "obsData", "")
+  #hti_result = RooStats.DoHypoTestInversion(w, ntoys, calctype, 3, True, nPoints, murangelow, murangehigh, False, False, "ModelConfig", "", "obsData", "", nCPUs)
 
-  """
-  save and print the HypoTest result
-  """
-  outFileName = "./htiResult_poi_" + poiname + "_ntoys_" + str(ntoys) + "_calctype_" + str(calctype) + "_npoints_" + str(npoints) + ".root"
+  nRemoved = hti_result.ExclusionCleanup()
+  if nRemoved > 0:
+    print "WARNING: removed %d points from hti_result" % nRemoved
+
+  #store plot
+  RooStats.AnalyzeHypoTestInverterResult( hti_result, calctype, 3, True, nPoints, "%s%s" % (outputPrefix, poiname), ".eps")
+  RooStats.AnalyzeHypoTestInverterResult( hti_result, calctype, 3, True, nPoints, "%s%s" % (outputPrefix, poiname), ".pdf")
+  RooStats.AnalyzeHypoTestInverterResult( hti_result, calctype, 3, True, nPoints, "%s%s" % (outputPrefix, poiname), ".png")
+  
+  outFileName = "./%shtiResult_poi_%s_ntoys_%d_calctype_%s_nPoints_%d.root" % (outputPrefix, poiname, ntoys, calctype, nPoints)
+  
   hti_result.SaveAs(outFileName)
   hti_result.Print()
 
@@ -139,6 +151,7 @@ def latexfitresults(filename, poiname='mu_SIG', lumiFB=1.0, nTOYS=3000, asimov=F
   try:
     alpha_CLB = (CLB_P - CLB_M) / (mu_P - mu_M)
     beta_CLB = CLB_P - alpha_CLB*mu_P
+    # CLB is taken as the point on the CLB curve for the same poi value, as the observed upperlimit
     CLB = alpha_CLB * uL_nobsinSR + beta_CLB
   except ZeroDivisionError:
     print "WARNING ZeroDivisionError while calculating CLb. Setting CLb=0."
@@ -164,10 +177,6 @@ def latexfitresults(filename, poiname='mu_SIG', lumiFB=1.0, nTOYS=3000, asimov=F
   ulList = [uL_visXsec, uL_nobsinSR, uL_nexpinSR, uL_nexpinSRerrP, uL_nexpinSRerrM, CLB, pval ]
 
   return ulList
-
-
-
-
 
 ##################################
 ##################################
@@ -195,6 +204,8 @@ if __name__ == "__main__":
     print "-w <workspaceFileName>: single name accepted only (OBLIGATORY) ;   if multiple channels given in -c, assumes the workspace filenaming scheme is general (discussed above)"
     print "-l <lumi>: same unit as used for creating the workspace by HistFitter (OBLIGATORY)"
     print "-n <nTOYS>: sets number of TOYs (default = 3000)"
+    print "-N <nPoints>: sets number of points (default = 20)"
+    print "-R <range>: sets upper range for mu_SIG (default = 40)"
     print "-a : use asimov dataset, ie asymptotic calculation insted of toys (default is toys)"
     print "-p <poiNames>: single POI name string (mu_<SRname>) or comma separated list accepted, only needed if your workspace contains a different POI then mu_<SRname>"
     print "-o <outputFileName>: sets the output table file name"
@@ -211,7 +222,7 @@ if __name__ == "__main__":
 
   wsFileName='/results/MyOneLeptonKtScaleFit_HardLepR17_BkgOnlyKt_combined_NormalMeasurement_model_afterFit.root'
   try:
-    opts, args = getopt.getopt(sys.argv[1:], "c:w:l:o:n:p:ai")
+    opts, args = getopt.getopt(sys.argv[1:], "c:w:l:o:n:N:R:p:ai")
   except:
     usage()
   if len(opts)<3:
@@ -226,6 +237,8 @@ if __name__ == "__main__":
   useAsimovSet = False
   nTOYS = -1
   poiName = "default"
+  nPoints = 20
+  muRange = -1
 
   """
   set options as given by the user call
@@ -242,6 +255,10 @@ if __name__ == "__main__":
       lumiFB = float(arg)
     elif opt == '-n':
       nTOYS = int(arg)
+    elif opt == '-N':
+      nPoints = int(arg)
+    elif opt == '-R':
+      muRange = int(arg)
     elif opt == '-a':
       useAsimovSet = True
     elif opt == '-p':
@@ -302,7 +319,7 @@ if __name__ == "__main__":
   call the function to calculate the upper limits
   """
   upLim = {}
-  for index,chan in enumerate(chanList):      
+  for index,chan in enumerate(chanList):
     poiNameChan = poiList[index]
     wsFileNameChan = wsFileNameList[index]
     outputFileNameChan = outputFileNameList[index]
@@ -310,7 +327,8 @@ if __name__ == "__main__":
     """
     calculate upper limit
     """
-    ulMapChan = latexfitresults(wsFileNameChan, poiNameChan, lumiFB, nTOYS, useAsimovSet) #, chan)
+    outputPrefix = outputFileName.replace(".tex.tmp", "_") # HACK. Who cares. #GJ -19/2/2014
+    ulMapChan = latexfitresults(wsFileNameChan, poiNameChan, lumiFB, nTOYS, nPoints, muRange, useAsimovSet, chan, outputPrefix)
     upLim[chan] = ulMapChan
     """
     print file for every channel separately

@@ -1,3 +1,7 @@
+2015-11-24 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
+	* scripts/UpperLimitTable: allow setting of output prefix, number of
+	points and mu range by hand. Store plot scan in png, pdf and eps format.
+
 2015-10-14 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
 	* Supress several memory leaks in the collection of list files
 	* LimitResult now uses std::string
