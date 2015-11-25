@@ -173,11 +173,12 @@ def latexfitresults(filename, poiname='mu_SIG', lumiFB=1.0, nTOYS=3000, nPoints=
   calculate p(s=0) from the workspace given
   """
   pval = RooStats.get_Presult(w2,False,ntoys,calctype)
-  print pval
-  sigma = StatTools.GetSigma(pval)
-  print sigma
+  #print pval
+  #sigma = StatTools.GetSigma(pval)
+  #print sigma
   
-  ulList = [uL_visXsec, uL_nobsinSR, uL_nexpinSR, uL_nexpinSRerrP, uL_nexpinSRerrM, CLB, pval, sigma ]
+  #ulList = [uL_visXsec, uL_nobsinSR, uL_nexpinSR, uL_nexpinSRerrP, uL_nexpinSRerrM, CLB, pval, sigma ]
+  ulList = [uL_visXsec, uL_nobsinSR, uL_nexpinSR, uL_nexpinSRerrP, uL_nexpinSRerrM, CLB, pval ]
 
   return ulList
 
