@@ -1,3 +1,6 @@
+2015-11-25 Jeanette Miriam Lorenz <jeanette.miriam.lorenz@cern.ch
+        * small bug fix in scripts/UpperLimitTable
+
 2015-11-24 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
 	* scripts/UpperLimitTable: allow setting of output prefix, number of
 	points and mu range by hand. Store plot scan in png, pdf and eps format.
