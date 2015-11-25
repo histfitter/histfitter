@@ -23,7 +23,7 @@ from ROOT import ConfigMgr,FitConfig
 gROOT.Reset()
 
 from ROOT import TFile, RooWorkspace, TObject, TString, RooAbsReal, RooRealVar, RooFitResult, RooDataSet, RooAddition, RooArgSet,RooAbsData,RooRandom 
-from ROOT import Util, TMath, RooStats
+from ROOT import Util, TMath, RooStats, StatTools
 from ROOT import RooFit
 
 from UpperLimitTableTex import *
@@ -173,8 +173,11 @@ def latexfitresults(filename, poiname='mu_SIG', lumiFB=1.0, nTOYS=3000, nPoints=
   calculate p(s=0) from the workspace given
   """
   pval = RooStats.get_Presult(w2,False,ntoys,calctype)
+  print pval
+  sigma = StatTools.GetSigma(pval)
+  print sigma
   
-  ulList = [uL_visXsec, uL_nobsinSR, uL_nexpinSR, uL_nexpinSRerrP, uL_nexpinSRerrM, CLB, pval ]
+  ulList = [uL_visXsec, uL_nobsinSR, uL_nexpinSR, uL_nexpinSRerrP, uL_nexpinSRerrM, CLB, pval, sigma ]
 
   return ulList
 
@@ -328,7 +331,7 @@ if __name__ == "__main__":
     calculate upper limit
     """
     outputPrefix = outputFileName.replace(".tex.tmp", "_") # HACK. Who cares. #GJ -19/2/2014
-    ulMapChan = latexfitresults(wsFileNameChan, poiNameChan, lumiFB, nTOYS, nPoints, muRange, useAsimovSet, chan, outputPrefix)
+    ulMapChan = latexfitresults(wsFileNameChan, poiNameChan, lumiFB, nTOYS, nPoints, muRange, useAsimovSet, 'combined', outputPrefix)
     upLim[chan] = ulMapChan
     """
     print file for every channel separately
