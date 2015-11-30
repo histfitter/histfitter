@@ -1,5 +1,13 @@
+2015-11-30 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
+	* scripts/UpperLimitTable.py
+	* scripts/UpperLimitTableTex.py
+	* Don't use a weird list but use a dictionary as intermediate holder of
+	results
+	* Write out significance of p-value as well
+	* Automatically cap nan p-values to 0.5 if nObs < nExp
+
 2015-11-25 Jeanette Miriam Lorenz <jeanette.miriam.lorenz@cern.ch
-        * small bug fix in scripts/UpperLimitTable
+	* small bug fix in scripts/UpperLimitTable
 
 2015-11-24 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
 	* scripts/UpperLimitTable: allow setting of output prefix, number of
@@ -13,11 +21,11 @@
 	* Setup script fixes for zsh
 
 2015-10-13 Jeanette Miriam Lorenz <jeanette.miriam.lorenz@cern.ch
-        * small hack in prepareHistos.py to allow for backup cache files on eos
-        M python/prepareHistos.py
+	* small hack in prepareHistos.py to allow for backup cache files on eos
+	M python/prepareHistos.py
 
 2015-10-02 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
-    * scripts/GenerateTreeDescriptionFromJSON.py now stores fID as string and writes appropriate header 
+	* scripts/GenerateTreeDescriptionFromJSON.py now stores fID as string and writes appropriate header 
 
 2015-09-21 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
 	* Sharing of functionality between setup.sh and setup_afs.sh
@@ -30,10 +38,10 @@
 	* Better debugging in prepareHistos()
 
 2015-09-10 Jeanette Miriam Lorenz <jeanette.miriam.lorenz@cern.ch
-        * adding possibility to display impact of systematics before fit - code proposals by Luigi
-        M       scripts/HistFitter.py
-        M       src/Utils.cxx
-        M       src/Utils.h
+	* adding possibility to display impact of systematics before fit - code proposals by Luigi
+	M       scripts/HistFitter.py
+	M       src/Utils.cxx
+	M       src/Utils.h
 
 2015-09-02 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
 	* Patch to TMsgLogger.cxx to work on OS X
@@ -44,95 +52,95 @@
 	* NOTE: ROOT5 compatibility is not guaranteed. This version still works, future versions might break.
 
 2015-07-02 Jeanette Miriam Lorenz <jeanette.miriam.lorenz@cern.ch>
-        M       macros/Examples/contourplot/contourmacros/CombinationGlob.C
-        M       macros/Examples/contourplot/contourmacros/SUSY_m0_vs_m12_all_withBand_cls.C
-        M       macros/Examples/contourplot/contourmacros/m0_vs_m12_nofloat.C
-        M       macros/Examples/contourplot/makecontourplots.C
-        M       macros/Examples/contourplot/makelistfiles.C
-        M       macros/Examples/p-values/pvalue.C
-        M       python/prepareHistos.py
-        M       setup.sh
-        M       setup_afs.sh
-        M       src/LinkDef.h
-        M       src/Makefile
-        M       src/Makefile.arch
-        M       src/RooHist.h
-        M       src/RooPlot.h
-        M       src/TEasyFormula.cxx
-        * switching to Root 6.04
+	M       macros/Examples/contourplot/contourmacros/CombinationGlob.C
+	M       macros/Examples/contourplot/contourmacros/SUSY_m0_vs_m12_all_withBand_cls.C
+	M       macros/Examples/contourplot/contourmacros/m0_vs_m12_nofloat.C
+	M       macros/Examples/contourplot/makecontourplots.C
+	M       macros/Examples/contourplot/makelistfiles.C
+	M       macros/Examples/p-values/pvalue.C
+	M       python/prepareHistos.py
+	M       setup.sh
+	M       setup_afs.sh
+	M       src/LinkDef.h
+	M       src/Makefile
+	M       src/Makefile.arch
+	M       src/RooHist.h
+	M       src/RooPlot.h
+	M       src/TEasyFormula.cxx
+	* switching to Root 6.04
 
 
 2015-07-02 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
-        * List files now outputted in JSON by default
-        * Intermediate plain-text list file still needed to run makeContourHists.C
-        * Added src/json.cxx, src/json.h
-        * Added method to LimitResult.cxx
-        * New intermediate script GenerateTreeDescriptionFromJSON.py
-        * Updated README and comments
-        * NOTE: C++11 supported is now required!
+	* List files now outputted in JSON by default
+	* Intermediate plain-text list file still needed to run makeContourHists.C
+	* Added src/json.cxx, src/json.h
+	* Added method to LimitResult.cxx
+	* New intermediate script GenerateTreeDescriptionFromJSON.py
+	* Updated README and comments
+	* NOTE: C++11 supported is now required!
 
 2015-06-26 Jeanette Miriam Lorenz <jeanette.miriam.lorenz@cern.ch
-        * Evgeny added the possibility of a reduced correlation matrix. Changes mostlyin Utils.cxx, but also in some other files. See: https://its.cern.ch/jira/browse/HISTFITTER-4
+	* Evgeny added the possibility of a reduced correlation matrix. Changes mostlyin Utils.cxx, but also in some other files. See: https://its.cern.ch/jira/browse/HISTFITTER-4
 
 2015-05-22 Jeanette Miriam Lorenz <jeanette.miriam.lorenz@cern.ch>
-        * update to Root 5.34.30 in setup_afs.sh
-        * remove reference to external xrootd libaries in setup_afs.sh
-        * tag HistFitter-00-00-48
+	* update to Root 5.34.30 in setup_afs.sh
+	* remove reference to external xrootd libaries in setup_afs.sh
+	* tag HistFitter-00-00-48
 
 2015-04-13 Jeanette Miriam Lorenz <jeanette.miriam.lorenz@cern.ch>
-        * update README to latest svn path
-        * fix a bug (potential division by 0) in python/prepareHistos.py
-        * tagging HistFitter-00-00-47
+	* update README to latest svn path
+	* fix a bug (potential division by 0) in python/prepareHistos.py
+	* tagging HistFitter-00-00-47
 
 2015-03-27 Jeanette Miriam Lorenz <jeanette.miriam.lorenz@cern.ch>
-        * update of multiple tutorial macros to not using ATLAS data
-        * tagging HistFitter-00-00-46 for tutorial at DESY
+	* update of multiple tutorial macros to not using ATLAS data
+	* tagging HistFitter-00-00-46 for tutorial at DESY
 
 2015-03-14 Jeanette Miriam Lorenz <jeanette.miriam.lorenz@cern.ch>
-        M       analysis/tutorial/MyShapeFitExample.py
-        M       analysis/tutorial/MySimpleChannelConfig.py
-        M       scripts/HistFitter.py
-        M       src/Utils.cxx
-        M       src/Utils.h
-        * allow for fixing certain parameters in a fit by using the command line option -C parameter1:value1,parameter2:value2,...
-        * various small additions to tutorial examples
+	M       analysis/tutorial/MyShapeFitExample.py
+	M       analysis/tutorial/MySimpleChannelConfig.py
+	M       scripts/HistFitter.py
+	M       src/Utils.cxx
+	M       src/Utils.h
+	* allow for fixing certain parameters in a fit by using the command line option -C parameter1:value1,parameter2:value2,...
+	* various small additions to tutorial examples
 
 2015-03-11 Jeanette Miriam Lorenz <jeanette.miriam.lorenz@cern.ch>
-        M       src/ConfigMgr.cxx
-        M       analysis/tutorial/MySimpleChannelConfig.py
-        M       docs/tutorial_upperlimits.txt
-        * completed upper limit tutorial
-        * tagging HistFitter-00-00-45
+	M       src/ConfigMgr.cxx
+	M       analysis/tutorial/MySimpleChannelConfig.py
+	M       docs/tutorial_upperlimits.txt
+	* completed upper limit tutorial
+	* tagging HistFitter-00-00-45
 
 2015-03-06 Jeanette Miriam Lorenz <jeanette.miriam.lorenz@cern.ch>
-        A       scripts/HypoTest.py
-        M       src/ConfigMgr.cxx
-        M       src/ConfigMgr.h
-        * added dynamic rescan for upper limit calculation
+	A       scripts/HypoTest.py
+	M       src/ConfigMgr.cxx
+	M       src/ConfigMgr.h
+	* added dynamic rescan for upper limit calculation
 
 2015-02-18 Jeanette Miriam Lorenz <jeanette.miriam.lorenz@cern.ch>
-        M       python/configManager.py
-        M       src/ConfigMgr.cxx
-        M       src/ConfigMgr.h
+	M       python/configManager.py
+	M       src/ConfigMgr.cxx
+	M       src/ConfigMgr.h
 	* allow the user to specify the scan ranges for the second scan in -l - addition sugested by Daniela Boerner
 
 2015-01-21 Jeanette Miriam Lorenz <jeanette.miriam.lorenz@cern.ch>
-        * multiple smaller modifications for the tutorial, mostly commenting any usage of the ATLAS plotting style, but also adding the file MyUpperLimitAnalysis_SS.py back
-        * updating setup_afs.sh to Root 5.34.23
-        * tagging HistFitter-00-00-44
+	* multiple smaller modifications for the tutorial, mostly commenting any usage of the ATLAS plotting style, but also adding the file MyUpperLimitAnalysis_SS.py back
+	* updating setup_afs.sh to Root 5.34.23
+	* tagging HistFitter-00-00-44
 
 2014-10-24 Jeanette Miriam Lorenz <jeanette.miriam.lorenz@cern.ch>
-        * fixing buildHisto in python/sample.py: default lower edge of histograms now 0.5 as required for the 'cuts' case (previously buggy)
-        * added the functionality to define a width of the bins - formerly alsways 1., now variable. Default is 1. to ensure backward compatibility.
+	* fixing buildHisto in python/sample.py: default lower edge of histograms now 0.5 as required for the 'cuts' case (previously buggy)
+	* added the functionality to define a width of the bins - formerly alsways 1., now variable. Default is 1. to ensure backward compatibility.
 
 2014-10-02 Jeanette Miriam Lorenz <jeanette.miriam.lorenz@cern.ch>
-        * moving macros/contourplot and analysis/batchjobs directories to HistFitter User
-        * add licences to files in macro directory
-        * remove ATLAS specific stuff in macro directory
-        D macros/AtlasStyle.C and macros/AtlasStyle.h
+	* moving macros/contourplot and analysis/batchjobs directories to HistFitter User
+	* add licences to files in macro directory
+	* remove ATLAS specific stuff in macro directory
+	D macros/AtlasStyle.C and macros/AtlasStyle.h
 
 2014-09-19 Jeanette Miriam Lorenz <jeanette.miriam.lorenz@cern.ch>
-        * starting to comment macro directory - to be continued
+	* starting to comment macro directory - to be continued
 
 2014-09-08 Alex Koutsman <alex.koutsman@cern.ch>
 	* setup.sh: several updates to make the setup script non CERN specific (working after setting up localRootSetup)
@@ -145,12 +153,12 @@
 	* Tagging HistFitter-00-00-41
 
 2014-08-19 Jeanette Miriam Lorenz <jeanette.miriam.lorenz@cern.ch>
-        M scripts/UpperLimitTable.py
-        * resetting of signal strength parameter not done correctly for calculation of discovery p-value. 
-        * Fixed by explicit reopening of the workspace before the calculation of discovery p-value.
+	M scripts/UpperLimitTable.py
+	* resetting of signal strength parameter not done correctly for calculation of discovery p-value. 
+	* Fixed by explicit reopening of the workspace before the calculation of discovery p-value.
 
 2014-07-23 Jeanette Miriam Lorenz <jeanette.miriam.lorenz@cern.ch>
-        * Tagging HistFitter-00-00-40
+	* Tagging HistFitter-00-00-40
 
 2014-07-15 Max Baak <mbaak@cern.ch>
 	M       src/Utils.cxx

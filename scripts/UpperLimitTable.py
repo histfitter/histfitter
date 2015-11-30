@@ -86,7 +86,7 @@ def latexfitresults(filename, poiname='mu_SIG', lumiFB=1.0, nTOYS=3000, nPoints=
   """
   set the range of POI to be scanned and perform HypoTest inversion
   """
-  nCPUs=8
+  nCPUs = 8
   murangelow = 0.0
   murangehigh = muRange #set here -1. if you want to have automatic determined scan range, if using values != -1, please check the log file if the scan range was large enough
   hti_result = RooStats.DoHypoTestInversion(w, ntoys, calctype, 3, True, nPoints, murangelow, murangehigh, False, False, "ModelConfig", "", "obsData", "")
@@ -176,11 +176,23 @@ def latexfitresults(filename, poiname='mu_SIG', lumiFB=1.0, nTOYS=3000, nPoints=
   #print pval
   #sigma = StatTools.GetSigma(pval)
   #print sigma
+ 
+  UL = {}
+  UL["visXsec"] = uL_visXsec
+  UL["nObsInSR"] = uL_nobsinSR
+  UL["nExpInSR"] = uL_nexpinSR
+  UL["nExpInSRPlus1Sigma"] = uL_nexpinSRerrP
+  UL["nExpInSRMinus1Sigma"] = uL_nexpinSRerrM
+  UL["CLb"] = CLB
+  UL["p0"] = pval
+  UL["Z"] = StatTools.GetSigma(pval)
   
-  #ulList = [uL_visXsec, uL_nobsinSR, uL_nexpinSR, uL_nexpinSRerrP, uL_nexpinSRerrM, CLB, pval, sigma ]
-  ulList = [uL_visXsec, uL_nobsinSR, uL_nexpinSR, uL_nexpinSRerrP, uL_nexpinSRerrM, CLB, pval ]
+  return UL
 
-  return ulList
+  ##ulList = [uL_visXsec, uL_nobsinSR, uL_nexpinSR, uL_nexpinSRerrP, uL_nexpinSRerrM, CLB, pval, sigma ]
+  #ulList = [uL_visXsec, uL_nobsinSR, uL_nexpinSR, uL_nexpinSRerrP, uL_nexpinSRerrM, CLB, pval ]
+
+  #return ulList
 
 ##################################
 ##################################

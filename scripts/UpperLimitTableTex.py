@@ -15,6 +15,8 @@
  * LICENSE.                                                                       *
 """
 
+import math
+
 def tablefragment(m,tabname):
   """ 
   main function to transfer the set of numbers/names (=m provided by UpperLimitTable) into a LaTeX table
@@ -27,11 +29,11 @@ def tablefragment(m,tabname):
 
   tableline += '''
 \\begin{table}
-\\begin{center}
+\\centering
 \\setlength{\\tabcolsep}{0.0pc}
 \\begin{tabular*}{\\textwidth}{@{\\extracolsep{\\fill}}lccccc}
 \\noalign{\\smallskip}\\hline\\noalign{\\smallskip}
-{\\bf Signal channel}                        & $\\langle\\epsilon{\\rm \\sigma}\\rangle_{\\rm obs}^{95}$[fb]  &  $S_{\\rm obs}^{95}$  & $S_{\\rm exp}^{95}$ & $CL_{B}$ & $p(s=0)$  \\\\
+{\\bf Signal channel}                        & $\\langle\\epsilon{\\rm \\sigma}\\rangle_{\\rm obs}^{95}$[fb]  &  $S_{\\rm obs}^{95}$  & $S_{\\rm exp}^{95}$ & $CL_{B}$ & $p(s=0)$ ($Z$)  \\\\
 \\noalign{\\smallskip}\\hline\\noalign{\\smallskip}
 %%'''
 
@@ -43,7 +45,6 @@ def tablefragment(m,tabname):
   tableline += '''
 \\noalign{\\smallskip}\\hline\\noalign{\\smallskip}
 \\end{tabular*}
-\\end{center}
 \\caption[Breakdown of upper limits.]{
 Left to right: 95\\%% CL upper limits on the visible cross section
 ($\\langle\\epsilon\\sigma\\rangle_{\\rm obs}^{95}$) and on the number of
@@ -60,24 +61,32 @@ the background-only hypothesis, and the discovery $p$-value ($p(s = 0)$).
 
   return tableline
 
+def addlinetosystable(tableline, m, name):
+    try:
+        m.has_key(name)
+    except:
+        print " \n", name, "  not inside the upper limit table"
+        return tableline
 
-  
-def givetuplesym(m,name):
-  ntuple = ( m[name][0], m[name][1], m[name][2], m[name][3] , m[name][4], m[name][5], m[name][6])
-  return ntuple
+    printname = name
+    printname = printname.replace('_','\_')
 
-def addlinetosystable(tableline,m,name):
-  try:
-    m.has_key(name)
-  except:
-    print " \n", name, "  not inside the upper limit table"
+    info = m[name] 
+
+    wroteCapped = False
+    if math.isnan(info["p0"]) and info["nObsInSR"] < info["nExpInSR"]:
+        # underfluctuation leads to nan -> write the capped p-value by hand
+        wroteCapped = True
+        info["p0"] = 0.5
+        info["Z" ] = 0 
+
+    tableline += "\n {0}    & ${1:.2f}$ &  ${2:.1f}$ & $ {{ {3:.1f} }}^{{ +{4:.1f} }}_{{ -{5:.1f} }}$ & ${6:.2f}$ & $ {7:.2f}$~$({8:.2f})$ \\\\%".format(printname, info["visXsec"], info["nObsInSR"], info["nExpInSR"], info["nExpInSRPlus1Sigma"], info["nExpInSRMinus1Sigma"], info["CLb"], info["p0"], info["Z"])
+    #tableline += '\n'+ printname + '''   & $%.2f$ &  $%.1f$  & ${%.1f}^{+%.1f}_{-%.1f}$ & $%.2f$ &  $%.2f$  \\\\ 
+    #%%''' % givetuplesym(m,name)
+
+    if wroteCapped:
+        print("NOTE: capped p-value was nan, wrote 0.5 since nObs < nExp")
+        tableline += " %% NOTE: capped p-value was nan, wrote 0.5 since nObs < nExp"
+
     return tableline
-
-  printname = name
-  printname = printname.replace('_','\_')
-  tableline += '\n'+ printname + '''   & $%.2f$ &  $%.1f$  & ${%.1f}^{+%.1f}_{-%.1f}$ & $%.2f$ &  $%.2f$  \\\\ 
-  %%''' % givetuplesym(m,name)
-
-  
-  return tableline
- 
+     
