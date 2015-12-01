@@ -349,6 +349,7 @@ nToyRatio            ratio of S+B/B toys (default is 2)
        calc.SetParameter("NToysRatio", nToysRatio);
        calc.SetParameter("MaxPOI", maxPOI);
        calc.SetParameter("UseProof", useProof);
+       calc.SetParameter("EnableDetailedOutput", true);
        calc.SetParameter("NWorkers", nworkers);
        calc.SetParameter("Rebuild", rebuild);
        calc.SetParameter("NToyToRebuild", nToyToRebuild);
@@ -445,6 +446,7 @@ nToyRatio            ratio of S+B/B toys (default is 2)
        calc.SetParameter("NToysRatio", nToysRatio);
        calc.SetParameter("MaxPOI", maxPOI);
        calc.SetParameter("UseProof", useProof);
+       calc.SetParameter("EnableDetailedOutput", true);
        calc.SetParameter("Nworkers", nworkers);
        calc.SetParameter("Rebuild", rebuild);
        calc.SetParameter("NToyToRebuild", nToyToRebuild);
@@ -546,6 +548,7 @@ void RooStats::AnalyzeHypoTestInverterResult(RooStats::HypoTestInverterResult* r
        calc.SetParameter("NToysRatio", nToysRatio);
        calc.SetParameter("MaxPOI", maxPOI);
        calc.SetParameter("UseProof", useProof);
+       calc.SetParameter("EnableDetailedOutput", true);
        calc.SetParameter("Nworkers", nworkers);
        calc.SetParameter("Rebuild", rebuild);
        calc.SetParameter("NToyToRebuild", nToyToRebuild);
@@ -571,7 +574,7 @@ RooStats::HypoTestInverterResult* RooStats::MakeUpperLimitPlot(const char* filep
     /// dynamic evaluation of ranges
     RooStats::HypoTestInverterResult* hypo = RooStats::DoHypoTestInversion(w, 1, 2, testStatType, useCLs, 20, 0, -1);  
     int nPointsRemoved = hypo->ExclusionCleanup();
-    //StatToolsLogger << kWARNING << "MakeUpperLimitPlot(): ExclusionCleanup() removed " << nPointsRemoved << " scan point(s) for hypo test inversion (quick scan): " << hypo->GetName() << GEndl;
+    StatToolsLogger << kWARNING << "MakeUpperLimitPlot(): ExclusionCleanup() removed " << nPointsRemoved << " scan point(s) for hypo test inversion (quick scan): " << hypo->GetName() << GEndl;
 
     /// then reevaluate with proper settings
     if ( hypo!=0 ) { 
