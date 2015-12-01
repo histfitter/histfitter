@@ -338,6 +338,7 @@ nToyRatio            ratio of S+B/B toys (default is 2)
     }
 
     HypoTestTool calc;
+    calc.SetParameter("EnableDetailedOutput", true);
 
     // set parameters
     /*
@@ -435,6 +436,7 @@ nToyRatio            ratio of S+B/B toys (default is 2)
     }
 
     HypoTestTool calc;
+    calc.SetParameter("EnableDetailedOutput", true);
 
     // set parameters
     /*
@@ -537,6 +539,7 @@ void RooStats::AnalyzeHypoTestInverterResult(RooStats::HypoTestInverterResult* r
     //////////////////////////////////////////////////////////////////////////////////////////
 
     HypoTestTool calc;
+    calc.SetParameter("EnableDetailedOutput", true);
 
     // set parameters
     /*
