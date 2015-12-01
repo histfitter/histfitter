@@ -89,7 +89,7 @@ RooStats::HypoTestTool::HypoTestTool() : m_hc(0), m_calc(0),
     mUseVectorStore(true),
     mGenerateBinned(true),
     mUseProof(false),
-    mEnableDetailedOutput(false);
+    mEnableDetailedOutput(false),
     mRebuild(false),
     mNWorkers(4),
     mNToyToRebuild(100),
@@ -601,7 +601,7 @@ RooStats::HypoTestTool::SetupHypoTestCalculator(RooWorkspace * w, bool doUL,
         if (altModel->GetNuisanceParameters()) altParams.add(*altModel->GetNuisanceParameters());
         if (altModel->GetSnapshot()) slrts->SetAltParameters(altParams);
 
-        if (mEnableDetailedOutput) slrts.EnableDetailedOutput()
+        if (mEnableDetailedOutput) slrts->EnableDetailedOutput();
         slrts->SetReuseNLL(mOptimize);
     }  
 
@@ -613,7 +613,7 @@ RooStats::HypoTestTool::SetupHypoTestCalculator(RooWorkspace * w, bool doUL,
         ropl->SetPrintLevel(mPrintLevel);
         ropl->SetMinimizer(mMinimizerType.c_str());
         ropl->SetReuseNLL(mOptimize);
-        if (mEnableDetailedOutput) ropl.EnableDetailedOutput();
+        if (mEnableDetailedOutput) ropl->EnableDetailedOutput();
         if (mOptimize) ropl->SetStrategy(0);
     }  
 
@@ -627,7 +627,7 @@ RooStats::HypoTestTool::SetupHypoTestCalculator(RooWorkspace * w, bool doUL,
         profll->SetMinimizer(mMinimizerType.c_str());
         profll->SetPrintLevel(mPrintLevel);
         profll->SetReuseNLL(mOptimize);
-        if (mEnableDetailedOutput) profll.EnableDetailedOutput();
+        if (mEnableDetailedOutput) profll->EnableDetailedOutput();
         if (mOptimize) profll->SetStrategy(0);
         profll->SetLOffset();
     }
