@@ -1,3 +1,7 @@
+2015-12-01 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
+	* Port back enableDetailedOutput setting for HypoTestTool from ROOT
+	example
+
 2015-11-30 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
 	* scripts/UpperLimitTable.py
 	* scripts/UpperLimitTableTex.py

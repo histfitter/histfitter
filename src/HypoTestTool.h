@@ -110,6 +110,7 @@ namespace RooStats {
             bool mUseVectorStore;
             bool mGenerateBinned;
             bool mUseProof;
+            bool mEnableDetailedOutput;
             bool mRebuild;
             int     mNWorkers;
             int     mNToyToRebuild;

@@ -176,7 +176,7 @@ std::map< TString,TString > GetMatchingWorkspaces( const TString& infile, const 
         // get proper index with name
         // NOTE: wsid always connects to highest key-index found in file!
         if ( keymap.find(key->GetName())==keymap.end() ) { keymap[key->GetName()] = key->GetCycle(); }
-        else if ( key->GetCycle()>keymap[key->GetName()] ) { keymap[key->GetName()] = key->GetCycle(); }
+        else if ( key->GetCycle() > keymap[key->GetName()] ) { keymap[key->GetName()] = key->GetCycle(); }
         wsname = Form("%s;%d",key->GetName(),keymap[key->GetName()]) ;
         wsnameSearch = wsname;
         CombineWorkSpacesLogger << kDEBUG <<" 5.1   j = " << j << " wsnameSearch = " << wsnameSearch << GEndl;

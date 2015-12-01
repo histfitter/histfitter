@@ -68,6 +68,7 @@ using namespace RooStats;
  *  double nToysRatio = 2;                   // ratio Ntoys S+b/ntoysB
  *  double maxPOI = -1;                      // max value used of POI (in case of auto scan) 
  *  bool useProof = false;                    // use Proof Light when using toys (for freq or hybrid)
+ *  bool enableDetailedOutput = false;       // enable detailed output with all fit information for each toys (output will be written in result file
  *  int nworkers = 4;                        // number of worker for Proof
  *  bool rebuild = false;                    // re-do extra toys for computing expected limits and rebuild test stat
  *  // distributions (N.B this requires much more CPU (factor is equivalent to nToyToRebuild)
@@ -88,6 +89,7 @@ RooStats::HypoTestTool::HypoTestTool() : m_hc(0), m_calc(0),
     mUseVectorStore(true),
     mGenerateBinned(true),
     mUseProof(false),
+    mEnableDetailedOutput(false);
     mRebuild(false),
     mNWorkers(4),
     mNToyToRebuild(100),
@@ -121,6 +123,7 @@ RooStats::HypoTestTool::SetParameter(const char * name, bool value){
     if (s_name.find("UseVectorStore") != std::string::npos) mUseVectorStore = value;
     if (s_name.find("GenerateBinned") != std::string::npos) mGenerateBinned = value;
     if (s_name.find("UseProof") != std::string::npos) mUseProof = value;
+    if (s_name.find("EnableDetailedOutput") != std::string::npos) mEnableDetailedOutput = value;
     if (s_name.find("Rebuild") != std::string::npos) mRebuild = value;
 
     return;
@@ -419,8 +422,8 @@ RooStats::HypoTestTool::SetupHypoTestCalculator(RooWorkspace * w, bool doUL,
         Info("HypoTestTool","Model %s has no snapshot  - make one using model poi",modelSBName);
         RooRealVar * var = dynamic_cast<RooRealVar*>(sbModel->GetParametersOfInterest()->first());
         if (var) {
-	  Info("HypoTestTool","Setting poi to 1.0");
-	  var->setVal(1.0);
+            Info("HypoTestTool","Setting poi to 1.0");
+            var->setVal(1.0);
         }
         sbModel->SetSnapshot( *sbModel->GetParametersOfInterest() );
     }
@@ -516,9 +519,11 @@ RooStats::HypoTestTool::SetupHypoTestCalculator(RooWorkspace * w, bool doUL,
         const RooArgSet* tPoiSet = sbModel->GetParametersOfInterest();
 
         Info( "StandardHypoTestInvDemo"," Doing a first fit to the observed data ");
-        if (mMinimizerType.size()==0) mMinimizerType = ROOT::Math::MinimizerOptions::DefaultMinimizerType();
-        else 
+        if (mMinimizerType.size()==0) {
+            mMinimizerType = ROOT::Math::MinimizerOptions::DefaultMinimizerType();
+        } else { 
             ROOT::Math::MinimizerOptions::SetDefaultMinimizer(mMinimizerType.c_str());
+        }
         Info("StandardHypoTestInvDemo","Using %s as minimizer for computing the test statistic",
                 ROOT::Math::MinimizerOptions::DefaultMinimizerType().c_str() );
         RooArgSet constrainParams;
@@ -596,6 +601,7 @@ RooStats::HypoTestTool::SetupHypoTestCalculator(RooWorkspace * w, bool doUL,
         if (altModel->GetNuisanceParameters()) altParams.add(*altModel->GetNuisanceParameters());
         if (altModel->GetSnapshot()) slrts->SetAltParameters(altParams);
 
+        if (mEnableDetailedOutput) slrts.EnableDetailedOutput()
         slrts->SetReuseNLL(mOptimize);
     }  
 
@@ -607,6 +613,7 @@ RooStats::HypoTestTool::SetupHypoTestCalculator(RooWorkspace * w, bool doUL,
         ropl->SetPrintLevel(mPrintLevel);
         ropl->SetMinimizer(mMinimizerType.c_str());
         ropl->SetReuseNLL(mOptimize);
+        if (mEnableDetailedOutput) ropl.EnableDetailedOutput();
         if (mOptimize) ropl->SetStrategy(0);
     }  
 
@@ -620,6 +627,7 @@ RooStats::HypoTestTool::SetupHypoTestCalculator(RooWorkspace * w, bool doUL,
         profll->SetMinimizer(mMinimizerType.c_str());
         profll->SetPrintLevel(mPrintLevel);
         profll->SetReuseNLL(mOptimize);
+        if (mEnableDetailedOutput) profll.EnableDetailedOutput();
         if (mOptimize) profll->SetStrategy(0);
         profll->SetLOffset();
     }
