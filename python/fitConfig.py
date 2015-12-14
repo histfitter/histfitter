@@ -357,7 +357,7 @@ class fitConfig(object):
 
         # If the channel doesn't have any weights then add them
         if len(newObj.weights) == 0:
-            newObj.weights.setWeights(self.weights)
+            newObj.setWeights(self.weights)
 
         # Propagate systematics into channel
         for (systName, syst) in self.systDict.items():

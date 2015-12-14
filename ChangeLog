@@ -1,3 +1,7 @@
+2015-12-14 Sophio Pataraia <sophio.pataraia@cern.ch>
+	* fixed shape systematics reset function (src/Utils.cxx)
+        * fixed channel setWeights function (python/fitConfig.py)
+
 2015-12-01 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
 	* Port back enableDetailedOutput setting for HypoTestTool from ROOT
 	example
