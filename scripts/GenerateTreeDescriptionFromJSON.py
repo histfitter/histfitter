@@ -196,4 +196,4 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     checkArgs(args)
-    writeListFile(args.filename, args.outputfilename)
+    writeListFile(args.filename, args.output_filename)
