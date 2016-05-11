@@ -203,7 +203,7 @@ if __name__ == "__main__":
     
     if HistFitterArgs.draw:
         drawArgs = HistFitterArgs.draw.split(",")
-        if len(drawArgs) == 1 and drawArgs[0] == "allPlots":
+        if len(drawArgs) == 1 and (drawArgs[0] == "allPlots" or drawArgs[0] == "all"):
             drawBeforeFit = True
             drawAfterFit = True
             drawCorrelationMatrix = True
@@ -225,7 +225,7 @@ if __name__ == "__main__":
                 elif drawArg == "systematics":
                     drawSystematics = True
                 else:
-                    log.fatal("Wrong draw argument: %s\n  Possible draw arguments are 'allPlots' or comma separated 'before after corrMatrix sepComponents likelihood'" % drawArg) 
+                    log.fatal("Wrong draw argument: '%s'. Possible draw arguments are 'allPlots' or comma separated 'before after corrMatrix sepComponents likelihood'" % drawArg) 
 
     if HistFitterArgs.no_empty:
         configMgr.removeEmptyBins = True

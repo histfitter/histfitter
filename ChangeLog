@@ -1,4 +1,8 @@
 2016-05-11 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
+	* scripts/HistFitter.py: allow 'all' as shorthand for 'allPlots'. Fix
+	multiline fatal message.
+
+2016-05-11 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
 	* src/Utils: use C++ casts in fit method. Check that our data actually
 	exists; throw fatal in case data is absent. (Points to a misuse of blinded
 	fits typically.)
