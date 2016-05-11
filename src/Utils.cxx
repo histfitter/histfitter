@@ -376,11 +376,38 @@ RooFitResult* Util::FitPdf( RooWorkspace* w, TString fitRegions, Bool_t lumiCons
         Logger << kERROR << "Workspace not found, no fitting performed" << GEndl;
         return NULL; 
     }
-    RooSimultaneous* pdf = (RooSimultaneous*) w->pdf("simPdf");
+    RooSimultaneous* pdf = static_cast<RooSimultaneous*>(w->pdf("simPdf"));
 
-    RooAbsData* data = ( inputData!=0 ? inputData : (RooAbsData*)w->data("obsData") ); 
+    RooAbsData* data = ( inputData!=0 ? inputData : static_cast<RooAbsData*>(w->data("obsData")) ); 
+    if(!data) {
+        Logger << kERROR << "Can't find RooAbsData 'data' in workspace" << GEndl;
+        return NULL; 
+    }
+    
     RooCategory* regionCat = (RooCategory*) w->cat("channelCat");  
-    data->table(*((RooAbsCategory*)regionCat))->Print("v");
+    if(!regionCat) {
+        Logger << kERROR << "Can't find RooCategory 'channelCat' in workspace" << GEndl;
+        return NULL; 
+    }
+   
+    RooAbsCategory* absRegionCat = static_cast<RooAbsCategory*>(regionCat);
+    if(!absRegionCat) {
+        Logger << kERROR << "Can't cast RooAbsCategory 'channelCat' from workspace" << GEndl;
+        return NULL; 
+    }
+  
+    Logger << kINFO << "Will dump channelCat as RooAbsCategory now:" << GEndl;
+    absRegionCat->Print("v");
+
+    //auto table = data->table(*((RooAbsCategory*)regionCat));
+    auto table = data->table(*absRegionCat);
+    if(!table) {
+        Logger << kERROR << "data->table(channelCat) returned NULL" << GEndl;
+        return NULL;
+    }
+
+    Logger << kINFO << "Will dump table for channelCat now:" << GEndl;
+    table->Print("v");
 
     if (lumiConst) {
         RooRealVar* lumi = (RooRealVar*) w->var("Lumi");
