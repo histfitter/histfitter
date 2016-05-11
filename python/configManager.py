@@ -109,7 +109,7 @@ class ConfigManager(object):
         self.blindSR = False # Blind the SRs only
         self.blindCR = False # Blind the CRs only
         self.blindVR = False # Blind the VRs only
-        self.useSignalInBlindedData = False
+        self.useSignalInBlindedData = False # Add signal MC on top when building blinded data histogram in SR
         self.FitType = enum('FitType','Discovery , Exclusion , Background') # to distinguish between background, exclusion and discovery fit
         self.myFitType = None #propagted from HistFitter.py
         self.scanRange = None # possibility to define a scan range with a tuple (min, max) (when the first fit fails)
