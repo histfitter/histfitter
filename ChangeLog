@@ -1,3 +1,8 @@
+2016-05-11 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
+	* src/Utils: use C++ casts in fit method. Check that our data actually
+	exists; throw fatal in case data is absent. (Points to a misuse of blinded
+	fits typically.)
+
 2015-12-14 Sophio Pataraia <sophio.pataraia@cern.ch>
 	* fixed shape systematics reset function (src/Utils.cxx)
         * fixed channel setWeights function (python/fitConfig.py)

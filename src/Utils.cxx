@@ -380,7 +380,7 @@ RooFitResult* Util::FitPdf( RooWorkspace* w, TString fitRegions, Bool_t lumiCons
 
     RooAbsData* data = ( inputData!=0 ? inputData : static_cast<RooAbsData*>(w->data("obsData")) ); 
     if(!data) {
-        Logger << kERROR << "Can't find RooAbsData 'data' in workspace" << GEndl;
+        Logger << kFATAL << "Can't find RooAbsData 'data' in workspace. Are you attempting to run a blinded fit but did you not add a (dummy) data sample?" << GEndl;
         return NULL; 
     }
     
