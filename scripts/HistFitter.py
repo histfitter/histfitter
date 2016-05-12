@@ -28,7 +28,7 @@ import argparse
 from logger import Logger
 log = Logger('HistFitter')
 
-def GenerateFitAndPlotCPP(fc, anaName, drawBeforeFit, drawAfterFit, drawCorrelationMatrix, drawSeparateComponents, drawLogLikelihood, minos, minosPars, doFixParameters, fixedPars, ReduceCorrMatrix):
+def GenerateFitAndPlotCPP(fc, anaName, drawBeforeFit, drawAfterFit, drawCorrelationMatrix, drawSeparateComponents, drawLogLikelihood, minos, minosPars, doFixParameters, fixedPars, ReduceCorrMatrix, noFit):
     """ 
     function call to top-level C++ side function Util.GenerateFitAndPlot()
 
@@ -43,7 +43,8 @@ def GenerateFitAndPlotCPP(fc, anaName, drawBeforeFit, drawAfterFit, drawCorrelat
     @param minosPars When minos is called, defining what parameters need asymmetric error calculation
     @param doFixParameters Boolean deciding if some parameters are fixed to a value given or not
     @param fixedPars String of parameter1:value1,parameter2:value2 giving information on which parameter to fix to which value if dofixParameter == True
-    @ReduceCorrMatrix Boolean deciding whether reduced correlation matrix plot is produced
+    @param ReduceCorrMatrix Boolean deciding whether reduced correlation matrix plot is produced
+    @param noFit Don't re-run fit but use after-fit workspace
     """
     
     from ROOT import Util
@@ -59,9 +60,10 @@ def GenerateFitAndPlotCPP(fc, anaName, drawBeforeFit, drawAfterFit, drawCorrelat
     log.debug("GenerateFitAndPlotCPP: doFixParameters %s " % doFixParameters)
     log.debug("GenerateFitAndPlotCPP: fixedPars %s " % fixedPars)
     log.debug("GenerateFitAndPlotCPP: ReduceCorrMatrix %s " % ReduceCorrMatrix)
+    log.debug("GenerateFitAndPlotCPP: noFit {0}".format(noFit))
     
     Util.GenerateFitAndPlot(fc.name, anaName, drawBeforeFit, drawAfterFit, drawCorrelationMatrix,
-                            drawSeparateComponents, drawLogLikelihood, minos, minosPars, doFixParameters, fixedPars, ReduceCorrMatrix)
+                            drawSeparateComponents, drawLogLikelihood, minos, minosPars, doFixParameters, fixedPars, ReduceCorrMatrix, noFit)
 
 if __name__ == "__main__":
     """
@@ -337,7 +339,7 @@ if __name__ == "__main__":
     """
     runs fitting and plotting, by calling C++ side functions
     """
-    if runFit:
+    if runFit or HistFitterArgs.draw:
         idx = 0
         if len(configMgr.fitConfigs) > 0:
            
@@ -353,8 +355,12 @@ if __name__ == "__main__":
                 if not fitFound:
                     log.fatal("Unable to find fitConfig with name %s, bailing out" % HistFitterArgs.fitname)
 
+            noFit = False
+            if not runFit: noFit = True
+
             log.info("Running on fitConfig %s" % configMgr.fitConfigs[idx].name)
-            r = GenerateFitAndPlotCPP(configMgr.fitConfigs[idx], configMgr.analysisName, drawBeforeFit, drawAfterFit, drawCorrelationMatrix, drawSeparateComponents, drawLogLikelihood, runMinos, minosPars, doFixParameters, fixedPars, ReduceCorrMatrix)
+            log.info("Setting noFit = {0}".format(noFit))
+            r = GenerateFitAndPlotCPP(configMgr.fitConfigs[idx], configMgr.analysisName, drawBeforeFit, drawAfterFit, drawCorrelationMatrix, drawSeparateComponents, drawLogLikelihood, runMinos, minosPars, doFixParameters, fixedPars, ReduceCorrMatrix, noFit)
             pass
         log.info(" GenerateFitAndPlotCPP(configMgr.fitConfigs[%d], configMgr.analysisName, drawBeforeFit, drawAfterFit, drawCorrelationMatrix, drawSeparateComponents, drawLogLikelihood, runMinos, minosPars, doFixParameters, fixedPars, ReduceCorrMatrix)" % idx)
         log.info("   where drawBeforeFit, drawAfterFit, drawCorrelationMatrix, drawSeparateComponents, drawLogLikelihood, ReduceCorrMatrix are booleans")

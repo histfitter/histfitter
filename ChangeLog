@@ -1,4 +1,10 @@
 2016-05-12 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
+	* src/Utils.h: new 'noFit' option for GenerateFitAndPlot
+	* src/Utils.cxx: allow GenerateFitAndPlot to recycle afterFit workspace
+	* scripts/HistFitter.py: call GenerateFitAndPlotCPP even if -f not
+	specified; set the noFit flag in this case
+
+2016-05-12 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
 	* src/Utils.cxx: write out nll curve in ROOT file, not just plots 
 
 2016-05-11 Geert-Jan Besjes <geert-jan.besjes@cern.ch>

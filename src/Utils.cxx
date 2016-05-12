@@ -157,7 +157,7 @@ double Util::getNonQcdVal(const TString& proc, const TString& reg, TMap* map,con
 //_____________________________________________________________________________
 void Util::GenerateFitAndPlot(TString fcName, TString anaName, Bool_t drawBeforeFit, Bool_t drawAfterFit, Bool_t plotCorrelationMatrix, 
 			      Bool_t plotSeparateComponents, Bool_t plotNLL, Bool_t minos, TString minosPars,
-                              Bool_t doFixParameters, TString fixedPars, bool ReduceCorrMatrix ){
+                              Bool_t doFixParameters, TString fixedPars, bool ReduceCorrMatrix, bool noFit ){
 
     ConfigMgr* mgr = ConfigMgr::getInstance();
     FitConfig* fc = mgr->getFitConfig(fcName);
@@ -174,11 +174,29 @@ void Util::GenerateFitAndPlot(TString fcName, TString anaName, Bool_t drawBefore
     Logger << kINFO << "     doFixParameters = " << doFixParameters << GEndl;
     Logger << kINFO << "     fixedPars = " << fixedPars << GEndl;
     Logger << kINFO << "     ReduceCorrMatrix = " << ReduceCorrMatrix << GEndl;
+    Logger << kINFO << "     noFit = " << ReduceCorrMatrix << GEndl;
 
-    RooWorkspace* w = GetWorkspaceFromFile(fc->m_inputWorkspaceFileName, "combined");
+    auto inputFilename = fc->m_inputWorkspaceFileName;
+    Logger << kINFO << " Will read workspace from filename " << inputFilename << GEndl;
+
+    if(noFit) {
+        // TOOD: might not work when using ToyMC
+        inputFilename.ReplaceAll(".root","_afterFit.root");
+        Logger << kINFO << " Updated input filename to " << inputFilename << GEndl;
+
+        //if (suffix != "") { //comes from ToyMC::GetName()
+            //TString suff =  "_" + suffix + ".root";
+            //outFileName.ReplaceAll(".root",suff);
+        //}
+    }
+
+    RooWorkspace* w = GetWorkspaceFromFile(inputFilename, "combined");
     if(w==NULL){
         Logger << kWARNING << "     RooWorkspace('combined') does not exist, trying workspace('w')" << GEndl;
-        w = GetWorkspaceFromFile(fc->m_inputWorkspaceFileName, "w");
+        w = GetWorkspaceFromFile(inputFilename, "w");
+        if(w) {
+            Logger << kWARNING << "Managed to find workspace 'w'!" << GEndl;
+        }
     }
 
     if(w==NULL){
@@ -187,7 +205,10 @@ void Util::GenerateFitAndPlot(TString fcName, TString anaName, Bool_t drawBefore
     }
 
     Util::SetInterpolationCode(w,4); 
-    SaveInitialSnapshot(w);
+    if (not noFit ) {
+        // only modify the workspace when actually fitting
+        SaveInitialSnapshot(w);
+    }
 
     TString plotChannels = "ALL";
 
@@ -210,15 +231,17 @@ void Util::GenerateFitAndPlot(TString fcName, TString anaName, Bool_t drawBefore
 
     //  fit toy MC if specified. When left None, data is fit by default
     RooAbsData* toyMC = NULL;
-    if( mgr->m_seed != 0 && !mgr->m_useAsimovSet){
-        // generate a toy dataset
-        Logger << kINFO << " Util::GenerateFitAndPlot() : generating toy MC set for fitting and plotting.      Seed =" << mgr->m_seed << GEndl;
-        toyMC = GetToyMC();    // this generates one toy dataset
-    } else if (mgr->m_useAsimovSet && mgr->m_seed == 0 ){
-        Logger << kINFO << " Util::GenerateFitAndPlot() : using Asimov set for fitting and plotting." << GEndl;
-        toyMC = GetAsimovSet(w);  // this returns the asimov set
-    } else {
-        Logger << kINFO << " Util::GenerateFitAndPlot()  : using data for fitting and plotting." <<  GEndl;
+    if(not noFit) {
+        if( mgr->m_seed != 0 && !mgr->m_useAsimovSet){
+            // generate a toy dataset
+            Logger << kINFO << " Util::GenerateFitAndPlot() : generating toy MC set for fitting and plotting.      Seed =" << mgr->m_seed << GEndl;
+            toyMC = GetToyMC();    // this generates one toy dataset
+        } else if (mgr->m_useAsimovSet && mgr->m_seed == 0 ){
+            Logger << kINFO << " Util::GenerateFitAndPlot() : using Asimov set for fitting and plotting." << GEndl;
+            toyMC = GetAsimovSet(w);  // this returns the asimov set
+        } else {
+            Logger << kINFO << " Util::GenerateFitAndPlot()  : using data for fitting and plotting." <<  GEndl;
+        }
     }
 
     // set Errors of all parameters to 'natural' values before plotting/fitting
@@ -232,48 +255,73 @@ void Util::GenerateFitAndPlot(TString fcName, TString anaName, Bool_t drawBefore
 
     // create an RooExpandedFitResult encompassing all the
     // regions/parameters & save it to workspace
-    RooExpandedFitResult* expResultBefore = new RooExpandedFitResult(floatPars);
-    ImportInWorkspace(w, expResultBefore, "RooExpandedFitResult_beforeFit");
+    RooExpandedFitResult* expResultBefore;
+    if(not noFit) {
+        expResultBefore = new RooExpandedFitResult(floatPars);
+        ImportInWorkspace(w, expResultBefore, "RooExpandedFitResult_beforeFit");
+    } else {
+        // retrieve from the workspace
+        expResultBefore = static_cast<RooExpandedFitResult*>( w->genobj("RooExpandedFitResult_beforeFit") ); 
+        LoadSnapshotInWorkspace(w, "snapshot_paramsVals_RooExpandedFitResult_beforeFit");
+    }
 
     // plot before fit
     if (drawBeforeFit)
         PlotPdfWithComponents(w, fc->m_name, anaName, plotChannels, "beforeFit", expResultBefore, toyMC);
 
-    //fit of all regions
-    RooFitResult*  result = FitPdf(w, fitChannels, lumiConst, toyMC, "", minos, minosPars, doFixParameters, fixedPars);
+    RooFitResult* result = nullptr;
+    RooExpandedFitResult* expResultAfter = nullptr;
+    if(not noFit) {
+        //fit of all regions
+        result = FitPdf(w, fitChannels, lumiConst, toyMC, "", minos, minosPars, doFixParameters, fixedPars);
 
-    if (result==NULL) return;
+        if (result == NULL) {
+            Logger << kERROR << "PlotNLL(): running FitPdf() failed!" << GEndl;    
+            return;
+        }
 
-    // create an RooExpandedFitResult encompassing all the regions/parameters
-    //  with the result & save it to workspace
-    RooExpandedFitResult* expResultAfter = new RooExpandedFitResult(result, floatPars);
-    ImportInWorkspace(w, expResultAfter, "RooExpandedFitResult_afterFit");
+        // create an RooExpandedFitResult encompassing all the regions/parameters
+        //  with the result & save it to workspace
+        expResultAfter = new RooExpandedFitResult(result, floatPars);
+        ImportInWorkspace(w, expResultAfter, "RooExpandedFitResult_afterFit");
+    } else {
+        // load back the fit result
+        expResultAfter = static_cast<RooExpandedFitResult*>( w->genobj("RooExpandedFitResult_afterFit") ); 
+        LoadSnapshotInWorkspace(w, "snapshot_paramsVals_RooExpandedFitResult_afterFit");
+    }
 
     // plot after fit
-    if (drawAfterFit)
+    if (drawAfterFit) {
         PlotPdfWithComponents(w, fc->m_name, anaName, plotChannels, "afterFit", expResultAfter, toyMC);
-
+    }
 
     // plot each component of each region separately with propagated
     // error after fit  (interesting for debugging)
-    if(plotSeparateComponents) 
-        PlotSeparateComponents(w, fc->m_name, anaName, plotChannels,"afterFit", result,toyMC);
+    if(plotSeparateComponents) { 
+        //PlotSeparateComponents(w, fc->m_name, anaName, plotChannels, "afterFit", result, toyMC);
+        PlotSeparateComponents(w, fc->m_name, anaName, plotChannels, "afterFit", expResultAfter, toyMC);
+    }
 
     //plot correlation matrix for result
-    if(plotCorrelationMatrix)  
-        PlotCorrelationMatrix(result, anaName, ReduceCorrMatrix);
+    if(plotCorrelationMatrix) { 
+        //PlotCorrelationMatrix(result, anaName, ReduceCorrMatrix);
+        PlotCorrelationMatrix(expResultAfter, anaName, ReduceCorrMatrix);
+    }
 
     // plot likelihood
     Bool_t plotPLL = minos;
     if(plotNLL) {
         PlotNLL(w, expResultAfter, plotPLL, anaName, "", toyMC, minosPars, fitChannels, lumiConst);
     }
-
-    if (toyMC) 
-        WriteWorkspace(w, fc->m_inputWorkspaceFileName, toyMC->GetName());
-    else 
-        WriteWorkspace(w, fc->m_inputWorkspaceFileName);
-
+    
+    if(not noFit) {
+        // only write out output workspace if we've run a fit
+        if (toyMC) { 
+            WriteWorkspace(w, inputFilename, toyMC->GetName());
+        } else {
+            WriteWorkspace(w, inputFilename);
+        }
+    }
     if (result)  
         result->Print("v");
 }
