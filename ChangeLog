@@ -1,4 +1,10 @@
 2016-05-12 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
+	* src/Utils.h: introduce new GeneratePlots(), which is effectively
+	GenerateFitAndPlot - without the fit and a fitConfig passed. Useful for
+	plotting existing afterFit workspaces
+	* src/Utils.cxx: new GeneratePlots() method
+
+2016-05-12 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
 	* src/Utils.h: new 'noFit' option for GenerateFitAndPlot
 	* src/Utils.cxx: allow GenerateFitAndPlot to recycle afterFit workspace
 	* scripts/HistFitter.py: call GenerateFitAndPlotCPP even if -f not

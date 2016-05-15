@@ -145,7 +145,12 @@ namespace Util
   */  
   void GenerateFitAndPlot(TString fcName, TString anaName, Bool_t drawBeforeFit, Bool_t drawAfterFit, Bool_t plotCorrelationMatrix, 
 			  Bool_t plotSeparateComponents, Bool_t plotNLL,  Bool_t minos = kFALSE, TString minosPars="", Bool_t doFixParameters = kFALSE, TString fixedPars="", bool ReduceCorrMatrix = true, bool noFit = false);
-  
+ 
+  // Same as above, but now only for afterFit workspace
+  void GeneratePlots(TString filename, TString anaName, Bool_t drawBeforeFit, Bool_t drawAfterFit, Bool_t plotCorrelationMatrix, 
+          Bool_t plotSeparateComponents, Bool_t plotNLL, Bool_t minos, TString minosPars,
+          Bool_t doFixParameters, TString fixedPars, bool ReduceCorrMatrix);
+
   /**
      Function to plot each region with data, pdf and pdf-components(=samples)  
      @param w RooWorkspace pointer

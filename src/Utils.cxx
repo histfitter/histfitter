@@ -156,8 +156,8 @@ double Util::getNonQcdVal(const TString& proc, const TString& reg, TMap* map,con
 
 //_____________________________________________________________________________
 void Util::GenerateFitAndPlot(TString fcName, TString anaName, Bool_t drawBeforeFit, Bool_t drawAfterFit, Bool_t plotCorrelationMatrix, 
-			      Bool_t plotSeparateComponents, Bool_t plotNLL, Bool_t minos, TString minosPars,
-                              Bool_t doFixParameters, TString fixedPars, bool ReduceCorrMatrix, bool noFit ){
+        Bool_t plotSeparateComponents, Bool_t plotNLL, Bool_t minos, TString minosPars,
+        Bool_t doFixParameters, TString fixedPars, bool ReduceCorrMatrix, bool noFit ){
 
     ConfigMgr* mgr = ConfigMgr::getInstance();
     FitConfig* fc = mgr->getFitConfig(fcName);
@@ -174,7 +174,7 @@ void Util::GenerateFitAndPlot(TString fcName, TString anaName, Bool_t drawBefore
     Logger << kINFO << "     doFixParameters = " << doFixParameters << GEndl;
     Logger << kINFO << "     fixedPars = " << fixedPars << GEndl;
     Logger << kINFO << "     ReduceCorrMatrix = " << ReduceCorrMatrix << GEndl;
-    Logger << kINFO << "     noFit = " << ReduceCorrMatrix << GEndl;
+    Logger << kINFO << "     noFit = " << noFit << GEndl;
 
     auto inputFilename = fc->m_inputWorkspaceFileName;
     Logger << kINFO << " Will read workspace from filename " << inputFilename << GEndl;
@@ -325,6 +325,180 @@ void Util::GenerateFitAndPlot(TString fcName, TString anaName, Bool_t drawBefore
     if (result)  
         result->Print("v");
 }
+
+///////////////
+
+//_____________________________________________________________________________
+void Util::GeneratePlots(TString filename, TString anaName, Bool_t drawBeforeFit, Bool_t drawAfterFit, Bool_t plotCorrelationMatrix, 
+        Bool_t plotSeparateComponents, Bool_t plotNLL, Bool_t minos, TString minosPars,
+        Bool_t doFixParameters, TString fixedPars, bool ReduceCorrMatrix){
+
+    const bool noFit = true; // we never re-fit an existing afterFit workspace
+
+    Logger << kINFO << " GenerateFitAndPlot for filename = " << filename << GEndl;
+    Logger << kINFO << "     analysisName = " << anaName << GEndl;
+    Logger << kINFO << "     drawBeforeFit = " << drawBeforeFit << GEndl;
+    Logger << kINFO << "     drawAfterFit = " << drawAfterFit << GEndl;
+    Logger << kINFO << "     plotCorrelationMatrix = " << plotCorrelationMatrix << GEndl;
+    Logger << kINFO << "     plotSeparateComponents = " << plotSeparateComponents << GEndl;
+    Logger << kINFO << "     plotNLL = " << plotNLL << GEndl;
+    Logger << kINFO << "     minos = " << minos << GEndl;
+    Logger << kINFO << "     minosPars = " << minosPars << GEndl;
+    Logger << kINFO << "     doFixParameters = " << doFixParameters << GEndl;
+    Logger << kINFO << "     fixedPars = " << fixedPars << GEndl;
+    Logger << kINFO << "     ReduceCorrMatrix = " << ReduceCorrMatrix << GEndl;
+
+    auto inputFilename = filename;
+    Logger << kINFO << " Will read workspace from filename " << inputFilename << GEndl;
+
+    if(noFit) {
+        // TOOD: might not work when using ToyMC
+        inputFilename.ReplaceAll(".root","_afterFit.root");
+        Logger << kINFO << " Updated input filename to " << inputFilename << GEndl;
+
+        //if (suffix != "") { //comes from ToyMC::GetName()
+            //TString suff =  "_" + suffix + ".root";
+            //outFileName.ReplaceAll(".root",suff);
+        //}
+    }
+
+    RooWorkspace* w = GetWorkspaceFromFile(inputFilename, "combined");
+    if(w==NULL){
+        Logger << kWARNING << "     RooWorkspace('combined') does not exist, trying workspace('w')" << GEndl;
+        w = GetWorkspaceFromFile(inputFilename, "w");
+        if(w) {
+            Logger << kWARNING << "Managed to find workspace 'w'!" << GEndl;
+        }
+    }
+
+    if(w==NULL){
+        Logger << kERROR << "     Cannot find RooWorkspace, quitting " << GEndl;
+        return;
+    }
+
+    Util::SetInterpolationCode(w,4); 
+    if (not noFit ) {
+        // only modify the workspace when actually fitting
+        SaveInitialSnapshot(w);
+    }
+
+    TString plotChannels = "ALL";
+
+    //// fit only in CRs and SRs, not in VR
+    //TString fitChannels = "";
+    //for(unsigned int i=0; i <fc->m_bkgConstrainChannels.size(); i++){
+        //if (fitChannels.Length() > 0)   fitChannels += ",";
+        //fitChannels += fc->m_bkgConstrainChannels[i];
+    //}
+
+    //for(unsigned int i=0; i <fc->m_signalChannels.size(); i++){
+        //if (fitChannels.Length() > 0)   fitChannels += ",";
+        //fitChannels += fc->m_signalChannels[i];
+    //}
+
+    //hack to be fixed at HistFactory level (check again with ROOT 5.34)
+    // Bool_t lumiConst = kTRUE;
+    //if (fc->m_signalChannels.size() > 0) 
+    Bool_t lumiConst = kFALSE;
+
+    //  fit toy MC if specified. When left None, data is fit by default
+    RooAbsData* toyMC = NULL;
+/*    if(not noFit) {*/
+        //if( mgr->m_seed != 0 && !mgr->m_useAsimovSet){
+            //// generate a toy dataset
+            //Logger << kINFO << " Util::GenerateFitAndPlot() : generating toy MC set for fitting and plotting.      Seed =" << mgr->m_seed << GEndl;
+            //toyMC = GetToyMC();    // this generates one toy dataset
+        //} else if (mgr->m_useAsimovSet && mgr->m_seed == 0 ){
+            //Logger << kINFO << " Util::GenerateFitAndPlot() : using Asimov set for fitting and plotting." << GEndl;
+            //toyMC = GetAsimovSet(w);  // this returns the asimov set
+        //} else {
+            //Logger << kINFO << " Util::GenerateFitAndPlot()  : using data for fitting and plotting." <<  GEndl;
+        //}
+    /*}*/
+
+    // set Errors of all parameters to 'natural' values before plotting/fitting
+    resetAllErrors(w);
+
+    // get a list of all floating parameters for all regions
+    RooAbsPdf* simPdf = w->pdf("simPdf");
+    ModelConfig*  mc = GetModelConfig(w);
+    const RooArgSet* obsSet = mc->GetObservables();
+    RooArgList floatPars = getFloatParList(*simPdf, *obsSet);
+
+    // create an RooExpandedFitResult encompassing all the
+    // regions/parameters & save it to workspace
+    RooExpandedFitResult* expResultBefore;
+    if(not noFit) {
+        expResultBefore = new RooExpandedFitResult(floatPars);
+        ImportInWorkspace(w, expResultBefore, "RooExpandedFitResult_beforeFit");
+    } else {
+        // retrieve from the workspace
+        expResultBefore = static_cast<RooExpandedFitResult*>( w->genobj("RooExpandedFitResult_beforeFit") ); 
+        LoadSnapshotInWorkspace(w, "snapshot_paramsVals_RooExpandedFitResult_beforeFit");
+    }
+
+    // plot before fit  
+    if (drawBeforeFit)
+        PlotPdfWithComponents(w, "beforeFit", anaName, plotChannels, "beforeFit", expResultBefore, toyMC);
+
+    RooFitResult* result = nullptr;
+    RooExpandedFitResult* expResultAfter = nullptr;
+    //if(not noFit) {
+        ////fit of all regions
+        //result = FitPdf(w, fitChannels, lumiConst, toyMC, "", minos, minosPars, doFixParameters, fixedPars);
+
+        //if (result == NULL) {
+            //Logger << kERROR << "PlotNLL(): running FitPdf() failed!" << GEndl;    
+            //return;
+        //}
+
+        //// create an RooExpandedFitResult encompassing all the regions/parameters
+        ////  with the result & save it to workspace
+        //expResultAfter = new RooExpandedFitResult(result, floatPars);
+        //ImportInWorkspace(w, expResultAfter, "RooExpandedFitResult_afterFit");
+    //} else {
+        // load back the fit result
+        expResultAfter = static_cast<RooExpandedFitResult*>( w->genobj("RooExpandedFitResult_afterFit") ); 
+        LoadSnapshotInWorkspace(w, "snapshot_paramsVals_RooExpandedFitResult_afterFit");
+    //}
+
+    // plot after fit
+    if (drawAfterFit) {
+        PlotPdfWithComponents(w, "afterFit", anaName, plotChannels, "afterFit", expResultAfter, toyMC);
+    }
+
+    // plot each component of each region separately with propagated
+    // error after fit  (interesting for debugging)
+    if(plotSeparateComponents) { 
+        //PlotSeparateComponents(w, fc->m_name, anaName, plotChannels, "afterFit", result, toyMC);
+        PlotSeparateComponents(w, "afterFit_separateComponents", anaName, plotChannels, "afterFit", expResultAfter, toyMC);
+    }
+
+    //plot correlation matrix for result
+    if(plotCorrelationMatrix) { 
+        //PlotCorrelationMatrix(result, anaName, ReduceCorrMatrix);
+        PlotCorrelationMatrix(expResultAfter, anaName, ReduceCorrMatrix);
+    }
+
+    // plot likelihood
+    Bool_t plotPLL = minos;
+    if(plotNLL) {
+        //PlotNLL(w, expResultAfter, plotPLL, anaName, "", toyMC, minosPars, fitChannels, lumiConst);
+        PlotNLL(w, expResultAfter, plotPLL, anaName, "", toyMC, minosPars, "ALL", lumiConst);
+    }
+    
+    if(not noFit) {
+        // only write out output workspace if we've run a fit
+        if (toyMC) { 
+            WriteWorkspace(w, inputFilename, toyMC->GetName());
+        } else {
+            WriteWorkspace(w, inputFilename);
+        }
+    }
+    if (result)  
+        result->Print("v");
+}
+
 
 //_____________________________________________________________________________
 void Util::SaveInitialSnapshot(RooWorkspace* w){
