@@ -97,11 +97,13 @@ class fitConfig(object):
         """
         if newName == "":
             newName = self.name
-        #copies all properties prior to initialize
+        
+        # copies all properties prior to initialize
         newTLX = deepcopy(self)
         newTLX.ConstructorInit(newName)
         for chan in newTLX.channels:
             chan.ConstructorInit(newTLX.prefix)
+        
         return newTLX
 
     def ConstructorInit(self, name):
@@ -130,7 +132,8 @@ class fitConfig(object):
         #Note: wsFileName is an educated guess of the workspace
         # file name externally decided by HistFactory.
         self.wsFileName = "results/%s_combined_%s_model.root" % (self.prefix, self.measurements[0].name)
-       
+        log.debug("fitConfig.initialize(): set output filename for {0} to {1}".format(self.name, self.wsFileName))
+
         for sam in self.sampleList:
             if sam.isData: # FIXME (works but ugly)
                 self.sampleList.remove(sam)       #Just making sure that Data is the last element of the list

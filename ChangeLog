@@ -1,3 +1,11 @@
+2016-05-17 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
+	* python/configManager.py: comment fixes
+	* python/fitConfig.py: debug message for output filename
+	* src/Utils.cxx: typo in GeneratePlots() printout fixed
+	* scripts/HistFitter.py: run all fit configs when -f is specified, not
+	just the first one
+	* set svn ignore for .*.swp in all dirs
+
 2016-05-12 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
 	* src/Utils.h: introduce new GeneratePlots(), which is effectively
 	GenerateFitAndPlot - without the fit and a fitConfig passed. Useful for

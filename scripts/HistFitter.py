@@ -341,29 +341,37 @@ if __name__ == "__main__":
     """
     if runFit or HistFitterArgs.draw:
         idx = 0
-        if len(configMgr.fitConfigs) > 0:
-           
-            if HistFitterArgs.fitname != "": # user specified a fit name
-                fitFound = False
-                for (i, config) in enumerate(configMgr.fitConfigs):
-                    if configMgr.fitConfigs[i].name == HistFitterArgs.fitname:
-                        idx = i
-                        fitFound = True
-                        log.info("Found fitConfig with name %s at index %d" % (HistFitterArgs.fitname, idx))
-                        break
-                        
-                if not fitFound:
-                    log.fatal("Unable to find fitConfig with name %s, bailing out" % HistFitterArgs.fitname)
+        if len(configMgr.fitConfigs) == 0:
+            log.fatal("No fit configurations found!")
+        
+        runAll = True
+        if HistFitterArgs.fitname != "": # user specified a fit name
+            fitFound = False
+            for (i, config) in enumerate(configMgr.fitConfigs):
+                if configMgr.fitConfigs[i].name == HistFitterArgs.fitname:
+                    idx = i
+                    fitFound = True
+                    runAll = False
+                    log.info("Found fitConfig with name %s at index %d" % (HistFitterArgs.fitname, idx))
+                    break
+                    
+            if not fitFound:
+                log.fatal("Unable to find fitConfig with name %s, bailing out" % HistFitterArgs.fitname)
 
-            noFit = False
-            if not runFit: noFit = True
+        noFit = False
+        if not runFit: noFit = True
 
-            log.info("Running on fitConfig %s" % configMgr.fitConfigs[idx].name)
+        for i in xrange(len(configMgr.fitConfigs)):
+            if not runAll and i != idx:
+                log.debug("Skipping fit config {0}".configMgr.fitConfigs[i].name)
+                continue
+
+            log.info("Running on fitConfig %s" % configMgr.fitConfigs[i].name)
             log.info("Setting noFit = {0}".format(noFit))
-            r = GenerateFitAndPlotCPP(configMgr.fitConfigs[idx], configMgr.analysisName, drawBeforeFit, drawAfterFit, drawCorrelationMatrix, drawSeparateComponents, drawLogLikelihood, runMinos, minosPars, doFixParameters, fixedPars, ReduceCorrMatrix, noFit)
-            pass
-        log.info(" GenerateFitAndPlotCPP(configMgr.fitConfigs[%d], configMgr.analysisName, drawBeforeFit, drawAfterFit, drawCorrelationMatrix, drawSeparateComponents, drawLogLikelihood, runMinos, minosPars, doFixParameters, fixedPars, ReduceCorrMatrix)" % idx)
-        log.info("   where drawBeforeFit, drawAfterFit, drawCorrelationMatrix, drawSeparateComponents, drawLogLikelihood, ReduceCorrMatrix are booleans")
+            r = GenerateFitAndPlotCPP(configMgr.fitConfigs[i], configMgr.analysisName, drawBeforeFit, drawAfterFit, drawCorrelationMatrix, drawSeparateComponents, drawLogLikelihood, runMinos, minosPars, doFixParameters, fixedPars, ReduceCorrMatrix, noFit)
+        
+        log.debug(" GenerateFitAndPlotCPP(configMgr.fitConfigs[%d], configMgr.analysisName, drawBeforeFit, drawAfterFit, drawCorrelationMatrix, drawSeparateComponents, drawLogLikelihood, runMinos, minosPars, doFixParameters, fixedPars, ReduceCorrMatrix)" % idx)
+        log.debug("   where drawBeforeFit, drawAfterFit, drawCorrelationMatrix, drawSeparateComponents, drawLogLikelihood, ReduceCorrMatrix are booleans")
         pass
 
     """

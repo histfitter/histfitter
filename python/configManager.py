@@ -193,14 +193,14 @@ class ConfigManager(object):
         else:
             raise RuntimeError("Logic error in addFitConfig")
 
-        #check that newName is not already used
+        # check that newName is not already used
         for tl in self.fitConfigs:
             if tl.name == newName:
                 raise RuntimeError("fitConfig %s already exists in configManager. Please use a different name." %
                                    newName )
             pass
 
-        #create new fitConfig object and return pointer
+        # create new fitConfig object and return reference
         if isinstance(input, fitConfig):
             newFitConfig = input.Clone(newName)
         else:

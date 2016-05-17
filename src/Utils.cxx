@@ -335,7 +335,7 @@ void Util::GeneratePlots(TString filename, TString anaName, Bool_t drawBeforeFit
 
     const bool noFit = true; // we never re-fit an existing afterFit workspace
 
-    Logger << kINFO << " GenerateFitAndPlot for filename = " << filename << GEndl;
+    Logger << kINFO << " GeneratePlots for filename = " << filename << GEndl;
     Logger << kINFO << "     analysisName = " << anaName << GEndl;
     Logger << kINFO << "     drawBeforeFit = " << drawBeforeFit << GEndl;
     Logger << kINFO << "     drawAfterFit = " << drawAfterFit << GEndl;
