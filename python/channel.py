@@ -92,7 +92,7 @@ class Channel(object):
         self.showLumi = None
         self.lumi = None
         self.remapSystChanName = ""
-        self.doBlindingOverwrite = False
+        self.blind = False
         self.text1 = ''
         self.text2 = ''
         self.textsize1 = 0.03
@@ -500,3 +500,16 @@ class Channel(object):
             return False
 
         return True
+
+    @property
+    def doBlindingOverwrite(self):
+        """ 
+        Backwards compatible function for self.blind"
+        """
+        log.warning("channel.doBlindingOverwrite deprecated in favour of channel.blind")
+        return self.blind
+
+    @doBlindingOverwrite.setter
+    def doBlindingOverwrite(self, value):
+        log.warning("channel.doBlindingOverwrite deprecated in favour of channel.blind")
+        self.blind = value

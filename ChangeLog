@@ -1,3 +1,10 @@
+2016-05-19 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
+	* Fixes for HISTFITTER-17
+	* python/channel.py: change doBlindingOverwrite to simpler flag "blind";
+	old method is now @property plus a deprecation warning
+	* python/configManager.py: rewrite blinding block in better form; use new
+	flag
+
 2016-05-17 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
 	* python/configManager.py: comment fixes
 	* python/fitConfig.py: debug message for output filename
