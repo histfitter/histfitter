@@ -40,7 +40,7 @@ void makelistfiles()
   const char* cutStr = "1"; // accept everything
 
   //  TString outputfile = Combination::CollectAndWriteHypoTestResults( inputfile, format, interpretation, cutStr ) ;
-  TString outputfile = CollectAndWriteHypoTestResults( inputfile, format, interpretation, cutStr ) ;
+  CollectAndWriteHypoTestResults( inputfile, format, interpretation, cutStr ) ;
 
   
   // you now have the information from your fits in JSON. In python you can easily import this information using the default module 'json'.

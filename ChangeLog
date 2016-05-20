@@ -1,3 +1,7 @@
+2016-05-20 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
+	* macros/Examples/contourplot/makelistfiles.C: CollectAndWriteHypoTests()
+	is no longer a void function, fix the example
+
 2016-05-19 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
 	* Fixes for HISTFITTER-17
 	* python/channel.py: change doBlindingOverwrite to simpler flag "blind";
