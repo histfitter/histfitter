@@ -39,9 +39,7 @@ void makelistfiles()
   // cut string on m0 and m12 value, eg "m0>1200"
   const char* cutStr = "1"; // accept everything
 
-  //  TString outputfile = Combination::CollectAndWriteHypoTestResults( inputfile, format, interpretation, cutStr ) ;
   CollectAndWriteHypoTestResults( inputfile, format, interpretation, cutStr ) ;
-
   
   // you now have the information from your fits in JSON. In python you can easily import this information using the default module 'json'.
   // to be able to make histograms, convert the file using:
