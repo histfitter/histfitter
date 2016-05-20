@@ -531,8 +531,10 @@ void ConfigMgr::doUpperLimit(FitConfig* fc) {
         
         hypo = RooStats::DoHypoTestInversion(w, m_nToys, m_calcType, m_testStatType, m_useCLs, m_nPoints, minRange, maxRange);
         int nPointsRemoved = hypo->ExclusionCleanup();
-        m_logger << kWARNING << "ExclusionCleanup() removed " << nPointsRemoved 
+        if (nPointsRemoved > 0) {
+            m_logger << kWARNING << "ExclusionCleanup() removed " << nPointsRemoved 
                 << " scan point(s) for hypo test inversion: " << hypo->GetName() << GEndl;
+        }
 
         if (m_useScanRange) {
             if ((1.2 * hypo->GetExpectedUpperLimit(2)) > m_scanRangeMax) {

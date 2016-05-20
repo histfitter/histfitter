@@ -1,4 +1,9 @@
 2016-05-20 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
+	* ConfigMgr.cxx: implement warning about HypoTestInverter cleanup _only_
+	in case points are actually removed
+	* StatTools.cxx: idem
+
+2016-05-20 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
 	* macros/Examples/contourplot/makelistfiles.C: CollectAndWriteHypoTests()
 	is no longer a void function, fix the example
 

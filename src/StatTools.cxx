@@ -577,7 +577,9 @@ RooStats::HypoTestInverterResult* RooStats::MakeUpperLimitPlot(const char* filep
     /// dynamic evaluation of ranges
     RooStats::HypoTestInverterResult* hypo = RooStats::DoHypoTestInversion(w, 1, 2, testStatType, useCLs, 20, 0, -1);  
     int nPointsRemoved = hypo->ExclusionCleanup();
-    StatToolsLogger << kWARNING << "MakeUpperLimitPlot(): ExclusionCleanup() removed " << nPointsRemoved << " scan point(s) for hypo test inversion (quick scan): " << hypo->GetName() << GEndl;
+    if(nPointsRemoved > 0) {
+        StatToolsLogger << kWARNING << "MakeUpperLimitPlot(): ExclusionCleanup() removed " << nPointsRemoved << " scan point(s) for hypo test inversion (quick scan): " << hypo->GetName() << GEndl;
+    } 
 
     /// then reevaluate with proper settings
     if ( hypo!=0 ) { 
@@ -591,7 +593,9 @@ RooStats::HypoTestInverterResult* RooStats::MakeUpperLimitPlot(const char* filep
     if ( hypo!=0 ) {
         hypo->ExclusionCleanup();
         nPointsRemoved = hypo->ExclusionCleanup();
-        StatToolsLogger << kWARNING << "MakeUpperLimitPlot(): ExclusionCleanup() removed " << nPointsRemoved << " scan point(s) for hypo test inversion: " << hypo->GetName() << GEndl;
+        if(nPointsRemoved > 0) {
+            StatToolsLogger << kWARNING << "MakeUpperLimitPlot(): ExclusionCleanup() removed " << nPointsRemoved << " scan point(s) for hypo test inversion: " << hypo->GetName() << GEndl;
+        }
 
         RooStats::AnalyzeHypoTestInverterResult( hypo, calculatorType, testStatType, useCLs, npoints, fileprefix, ".eps") ;
     }
