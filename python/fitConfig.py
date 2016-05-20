@@ -155,7 +155,7 @@ class fitConfig(object):
                             found = True
 
                 if not found:
-                    log.warning("signal sample %s is not contained in sampleList of TopLvlXML %s or its daughter channels" % (self.signalSample, self.name))
+                    log.warning("signal sample %s is not contained in sampleList of fitConfig %s or its daughter channels" % (self.signalSample, self.name))
 
         for chan in self.channels:
             chanName = chan.channelName
