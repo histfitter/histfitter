@@ -177,10 +177,10 @@ class fitConfig(object):
                 nFound += 1
 
             if nFound == 0:
-                log.warning("TopLvlXML: %s, Channel: %s --> SR/CR/VR undefined" % (self.name, chanName))
+                log.warning("%s: Channel: no region type for region %s defined! " % (self.name, chanName))
 
             if nFound > 1:
-                log.warning("TopLvlXML: %s, Channel: %s --> SR=%s CR=%s VR=%s is ambiguous" % (self.name, chanName, isSR, isCR, isVR))
+                log.warning("%s: Channel: region type for %s is ambiguous: SR=%s CR=%s VR=%s. Double check your configuration! " % (self.name, chanName, isSR, isCR, isVR))
 
             #for sample in self.sampleList:
             #    try:
