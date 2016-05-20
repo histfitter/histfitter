@@ -363,7 +363,7 @@ if __name__ == "__main__":
 
         for i in xrange(len(configMgr.fitConfigs)):
             if not runAll and i != idx:
-                log.debug("Skipping fit config {0}".configMgr.fitConfigs[i].name)
+                log.debug("Skipping fit config {0}".format(configMgr.fitConfigs[i].name))
                 continue
 
             log.info("Running on fitConfig %s" % configMgr.fitConfigs[i].name)
