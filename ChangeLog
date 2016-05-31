@@ -1,4 +1,7 @@
 2016-05-31 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
+	* Tagged HistFitter-00-00-52
+
+2016-05-31 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
 	* Allow use of square brackets in channel names
 	* See HISTFITTER-15
 
