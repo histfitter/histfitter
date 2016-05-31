@@ -24,6 +24,8 @@ from copy import deepcopy
 from logger import Logger
 from ROOT import gROOT
 
+from configManager import replaceSymbols
+
 log = Logger('Systematic')
 
 ###############################################
@@ -36,16 +38,6 @@ log = Logger('Systematic')
 # "FillUpDownHist" (for the methods "userNormHistoSys" or "normHistoSys") and
 # "tryAddHistos" function in the Baseclass SystematicBase.
 ###############################################
-
-def replaceSymbols(s):
-    """
-    Strip a string from /, *, ( and )
-
-    @param s The string to remove the symbols from
-    """
-    s = s.replace("/", "").replace("*", "").replace("(", "").replace(")", "")
-    return s
-
 
 class SystematicBase:
     def __init__(self, name="", nominal=None, high=None, low=None,

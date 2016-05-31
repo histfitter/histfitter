@@ -48,7 +48,7 @@ def replaceSymbols(s):
 
     @param s The string to remove the symbols from
     """
-    s = s.replace("/","").replace("*","").replace("(","").replace(")","")
+    s = s.replace("/","").replace("*","").replace("(","").replace(")","").replace("[", "_").replace("]","_")
     return s
     
 def enum(typename, field_names):

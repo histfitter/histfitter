@@ -30,6 +30,8 @@ TH1.SetDefaultSumw2(True)
 from copy import deepcopy
 from configManager import configMgr
 
+from configManager import replaceSymbols
+
 log = Logger('Channel')
 
 class Channel(object):
@@ -51,12 +53,13 @@ class Channel(object):
         @param binHigh Upper edge of the last bin
         @param statErrorThreshold Threshold for statistical errors
         """
-        
+
         regions.sort()
         self.regionString = "".join(regions)
         self.variableName = variableName
-        self.name = self.variableName.replace("/", "") + "_" + self.regionString
-        self.channelName = self.regionString + "_" + variableName.replace("/", "")
+        self.niceVarName = replaceSymbols(variableName)
+        self.name = self.niceVarName + "_" + self.regionString
+        self.channelName = self.regionString + "_" + self.niceVarName
         self.ConstructorInit(prefix)  # shared method with Clone or deepcopy
         self.regions = regions
         self.nBins = nBins
@@ -331,7 +334,7 @@ class Channel(object):
             self.addSample(sigSample)
             self.parentTopLvl.setSignalSample(sigSample)
 
-            histoName = "h%sNom_%s_obs_%s" % (sigSample.name, sr, self.variableName.replace("/", ""))
+            histoName = "h%sNom_%s_obs_%s" % (sigSample.name, sr, self.niceVarName)
             self.getSample("DiscoveryMode_%s" % sr).setHistoName(histoName)
 
             configMgr.hists[histoName] = TH1F(histoName, histoName,
