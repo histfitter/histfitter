@@ -1,3 +1,7 @@
+2016-05-31 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
+	* setup_afs.sh: pick up root 6.06.04 (was 6.04.00), gcc 4.9.3 (was 4.9.2), python 2.7.4
+	(was 2.7.6)
+
 2016-05-20 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
 	* ConfigMgr.cxx: implement warning about HypoTestInverter cleanup _only_
 	in case points are actually removed
