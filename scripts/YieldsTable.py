@@ -29,6 +29,9 @@ from ROOT import TMath, TMap, RooExpandedFitResult, Util
 
 from cmdLineUtils import getPdfInRegions,getName,getPdfInRegionsWithRangeName
 
+from logger import Logger
+log = Logger('YieldsTable')
+
 from YieldsTableTex import *
 import os
 import sys
@@ -52,8 +55,8 @@ def latexfitresults(filename,regionList,sampleList,dataname='obsData',showSum=Fa
   """
   workspacename = 'w'
   w = Util.GetWorkspaceFromFile(filename,'w')
-  if w==None:
-    print "ERROR : Cannot open workspace : ", workspacename
+  if w is None:
+    log.error("Cannot open workspace {0} ".format(workspacename))
     sys.exit(1) 
 
   """
@@ -61,7 +64,7 @@ def latexfitresults(filename,regionList,sampleList,dataname='obsData',showSum=Fa
   """
   resultAfterFit = w.obj('RooExpandedFitResult_afterFit')
   if resultAfterFit==None:
-    print "ERROR : Cannot open fit result after fit RooExpandedFitResult_afterFit"
+    log.error("Cannot open fit result after fit RooExpandedFitResult_afterFit")
     sys.exit(1)
 
   """
@@ -69,7 +72,7 @@ def latexfitresults(filename,regionList,sampleList,dataname='obsData',showSum=Fa
   """
   resultBeforeFit = w.obj('RooExpandedFitResult_beforeFit')
   if resultBeforeFit==None:
-    print "ERROR : Cannot open fit result before fit RooExpandedFitResult_beforeFit"
+    log.error("Cannot open fit result before fit RooExpandedFitResult_beforeFit")
     sys.exit(1)
 
   """
@@ -77,7 +80,7 @@ def latexfitresults(filename,regionList,sampleList,dataname='obsData',showSum=Fa
   """
   data_set = w.data(dataname)
   if data_set==None:
-    print "ERROR : Cannot open dataset : ", "data_set"+suffix
+    log.error("Cannot open dataset data_set{0}".format(suffix))
     sys.exit(1)
       
   """
@@ -85,22 +88,25 @@ def latexfitresults(filename,regionList,sampleList,dataname='obsData',showSum=Fa
   """
   regionCat = w.obj("channelCat")
   if not blinded:
+    log.info("Channel category for obsData contains the following:")
     data_set.table(regionCat).Print("v")
 
   """
   find full (long) name list of regions (i.e. short=SR3J, long=SR3J_meffInc30_JVF25pt50)
   """
+  log.info("Loading region names from workspace")
   regionFullNameList = [ Util.GetFullRegionName(regionCat, region) for region in regionList]
 
 
   """
   load afterFit workspace snapshot (=set all parameters to values after fit)
   """
+  log.info("Loading afterFit snapshot from workspace")
   snapshot =  'snapshot_paramsVals_RooExpandedFitResult_afterFit'
   w.loadSnapshot(snapshot)
 
   if not w.loadSnapshot(snapshot):
-    print "ERROR : Cannot load snapshot : ", snapshot
+    log.error("Cannot load snapshot {0}".format(snapshot))
     sys.exit(1)
 
   """
@@ -132,6 +138,7 @@ def latexfitresults(filename,regionList,sampleList,dataname='obsData',showSum=Fa
   """
   retrieve number of observed (=data) events per region
   """
+  log.info("Loading observed data per region")
   regionDatasetList = [data_set.reduce(regioncat) for regioncat in regionCatList]
   for index, data in enumerate(regionDatasetList):
     data.SetName("data_" + regionList[index])
@@ -157,6 +164,7 @@ def latexfitresults(filename,regionList,sampleList,dataname='obsData',showSum=Fa
   """
   get a list of pdf's and variables per region
   """
+  log.info("Loading PDFs and variables per region")
   pdfinRegionList = [ Util.GetRegionPdf(w, region)  for region in regionList]
   varinRegionList =  [ Util.GetRegionVar(w, region) for region in regionList]
   
@@ -174,7 +182,7 @@ def latexfitresults(filename,regionList,sampleList,dataname='obsData',showSum=Fa
     rangeNameBinsInRegionList = [[regionList[idx]+"_bin"+str(ibin) for ibin in range(0, varNbinsInRegionList[idx]) ] for idx,region in enumerate(regionList)]
     for index,region in enumerate(regionList):
       if varNbinsInRegionList[index]==1:
-        print " \n YieldsTable.py: WARNING: you have called -P (= per-bin yields) but this region ", region, " has only 1 bin \n"
+        log.warning("You have called -P (= per-bin yields) but this region {0} has only 1 bin".format(region))
 
   
 
@@ -210,6 +218,7 @@ def latexfitresults(filename,regionList,sampleList,dataname='obsData',showSum=Fa
   if blinded=True, set all numbers of observed events to -1
   """
   if blinded: 
+    log.info("Blinded - setting observed events to -1")
     for index, nobs in enumerate(nobs_regionListWithBins):
       nobs_regionListWithBins[index] = -1
     tablenumbers['nobs'] = nobs_regionListWithBins
@@ -221,7 +230,7 @@ def latexfitresults(filename,regionList,sampleList,dataname='obsData',showSum=Fa
   rrspdfinRegionList = []
   for index, pdf in enumerate(pdfinRegionList):
     if not pdf:
-        print "WARNING: pdf is NULL for index {0}".format(index)
+        log.warning("pdf is NULL for index {0}".format(index))
         continue
     prodList = pdf.pdfList()
     foundRRS = 0
@@ -240,8 +249,8 @@ def latexfitresults(filename,regionList,sampleList,dataname='obsData',showSum=Fa
           varinRegionList[index].setRange(origMin,origMax)
         foundRRS += 1
     if foundRRS >1 or foundRRS==0:
-      print " \n\n WARNING: ", pdf.GetName(), " has ", foundRRS, " instances of RooRealSumPdf"
-      print pdf.GetName(), " component list:", prodList.Print("v")
+      log.warning("{0} has {1} instances of RooRealSumPdf".format(pdf.GetName, foundRRS))
+      log.warning("{0} component list: {1}".format(pdf.GetName(), prodList.Print("v")))
     
   """
   calculate total pdf number of fitted events and error
@@ -269,6 +278,7 @@ def latexfitresults(filename,regionList,sampleList,dataname='obsData',showSum=Fa
   """
   calculate the fitted number of events and propagated error for each requested sample, by splitting off each sample pdf
   """
+  log.info("Calculating fitted number of events and error per region")
   for isam, sample in enumerate(sampleList):
     sampleName=getName(sample)
     nSampleInRegionVal = []
@@ -283,7 +293,7 @@ def latexfitresults(filename,regionList,sampleList,dataname='obsData',showSum=Fa
         sampleInRegionError = Util.GetPropagatedError(sampleInRegion, resultAfterFit, doAsym) 
         sampleInAllRegions.add(sampleInRegion)
       else:
-        print " \n YieldsTable.py: WARNING: sample =", sampleName, " non-existent (empty) in region =",region, "\n"
+        log.warning("sample {0} non-existent (empty) in region {1}".format(sample, region))
       nSampleInRegionVal.append(sampleInRegionVal)
       nSampleInRegionError.append(sampleInRegionError)
       
@@ -303,7 +313,7 @@ def latexfitresults(filename,regionList,sampleList,dataname='obsData',showSum=Fa
             sampleInRegionVal = sampleInRegion.getVal()
             sampleInRegionError = Util.GetPropagatedError(sampleInRegion, resultAfterFit, doAsym)
           else:
-            print " \n YieldsTable.py: WARNING: sample =", sampleName, " non-existent (empty) in region=",region, " bin=",ibin, " \n"
+            log.warning("sample {0} non-existent (empty) in region {1} bin {2}".format(sample, region, ibin))
           nSampleInRegionVal.append(sampleInRegionVal)
           nSampleInRegionError.append(sampleInRegionError)
  
@@ -323,7 +333,7 @@ def latexfitresults(filename,regionList,sampleList,dataname='obsData',showSum=Fa
 
 
   
-  print "\n starting BEFORE-FIT calculations \n"
+  log.info("starting BEFORE-FIT calculations")
   """
   FROM HERE ON OUT WE CALCULATE THE EXPECTED NUMBER OF EVENTS __BEFORRE__ THE FIT
   """
@@ -331,6 +341,7 @@ def latexfitresults(filename,regionList,sampleList,dataname='obsData',showSum=Fa
   """
   load beforeFit workspace snapshot (=set all parameters to values before fit)
   """
+  log.info("Loading before-fit snapshot")
   w.loadSnapshot('snapshot_paramsVals_RooExpandedFitResult_beforeFit')
 
   """
@@ -339,13 +350,17 @@ def latexfitresults(filename,regionList,sampleList,dataname='obsData',showSum=Fa
   _result = w.obj('RooExpandedFitResult_beforeFit')
   _muFacs = _result.floatParsFinal()
 
+  log.info("Found the following floating parameters:")
+  log.info(", ".join([_muFacs[i].GetName() for i in range(len(_muFacs)) ] ))
+
   for i in range(len(_muFacs)):
     if "mu_" in _muFacs[i].GetName() and _muFacs[i].getVal() != 1.0:
-      print  " \n WARNING: scaling factor %s != 1.0 (%g) expected MC yield WILL BE WRONG!" % (_muFacs[i].GetName(), _muFacs[i].getVal())
+      log.warning("scaling factor {0} != 1.0 ({1}) expected MC yield WILL BE WRONG!".format(_muFacs[i].GetName(), _muFacs[i].getVal()))
   
   """
   get a list of pdf's and variables per region
   """
+  log.info("Loading PDFs and variables per region")
   pdfinRegionList = [ Util.GetRegionPdf(w, region)  for region in regionList]
   varinRegionList =  [ Util.GetRegionVar(w, region) for region in regionList]
 
@@ -355,8 +370,9 @@ def latexfitresults(filename,regionList,sampleList,dataname='obsData',showSum=Fa
   rrspdfinRegionList = []
   for index,pdf in enumerate(pdfinRegionList):
     if not pdf: 
-        print "WARNING: pdf is NULL for index {0}".format(index)
+        log.warning("pdf is NULL for index {0}".format(index))
         continue
+    
     prodList = pdf.pdfList()
     foundRRS = 0
     for idx in range(prodList.getSize()):
@@ -374,12 +390,13 @@ def latexfitresults(filename,regionList,sampleList,dataname='obsData',showSum=Fa
           varinRegionList[index].setRange(origMin,origMax)
         foundRRS += 1
     if foundRRS >1 or foundRRS==0:
-      print " \n\n WARNING: ", pdf.GetName(), " has ", foundRRS, " instances of RooRealSumPdf"
-      print pdf.GetName(), " component list:", prodList.Print("v")
+      log.warning("{0} has {1} instances of RooRealSumPdf".format(pdf.GetName, foundRRS))
+      log.warning("{0} component list: {1}".format(pdf.GetName(), prodList.Print("v")))
 
   """
   calculate total pdf number of expected events and error
   """
+  log.info("Calculating total number of expected events and error")
   nExpInRegionList =  [ pdf.getVal() for index, pdf in enumerate(rrspdfinRegionList)]
   pdfExpErrInRegionList = [ Util.GetPropagatedError(pdf, resultBeforeFit, doAsym)  for pdf in rrspdfinRegionList]
   
@@ -416,7 +433,7 @@ def latexfitresults(filename,regionList,sampleList,dataname='obsData',showSum=Fa
         MCSampleInRegionError = Util.GetPropagatedError(MCSampleInRegion, resultBeforeFit, doAsym) 
         MCSampleInAllRegions.add(MCSampleInRegion)
       else:
-        print " \n WARNING: sample=", sampleName, " non-existent (empty) in region=",region
+        log.warning("sample {0} non-existent (empty) in region {1}".format(sample, region))
       nMCSampleInRegionVal.append(MCSampleInRegionVal)
       nMCSampleInRegionError.append(MCSampleInRegionError)
 
@@ -436,7 +453,8 @@ def latexfitresults(filename,regionList,sampleList,dataname='obsData',showSum=Fa
             MCSampleInRegionVal = MCSampleInRegion.getVal()
             MCSampleInRegionError = Util.GetPropagatedError(MCSampleInRegion, resultBeforeFit, doAsym)
           else:
-            print " \n YieldsTable.py: WARNING: sample =", sampleName, " non-existent (empty) in region=",region, " bin=",ibin, " \n"
+            log.warning("sample {0} non-existent (empty) in region {1} bin {2}".format(sample, region, ibin))
+          
           nMCSampleInRegionVal.append(MCSampleInRegionVal)
           nMCSampleInRegionError.append(MCSampleInRegionError)
  
@@ -463,9 +481,10 @@ def latexfitresults(filename,regionList,sampleList,dataname='obsData',showSum=Fa
   """
   print the sorted tablenumbers set
   """
+  log.info("Will dump output dictionary:")
   for name in map_listofkeys:
-    if tablenumbers.has_key(name) :
-      print name, ": ", tablenumbers[name]
+    if tablenumbers.has_key(name) : 
+      log.info("{0}: {1}".format(name, tablenumbers[name]))
       
   return tablenumbers
 
@@ -639,6 +658,5 @@ if __name__ == "__main__":
   else:
       f.write( tableend(userString,tableName) )
   f.close()
-  print "\nResult written in:"
-  print outputFileName
+  log.info("Result written in: {0}".format(outputFileName))
 
