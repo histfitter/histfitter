@@ -646,6 +646,8 @@ RooStats::HypoTestInverterResult* RooStats::MakeUpperLimitPlot(const char* filep
         }
 
         RooStats::AnalyzeHypoTestInverterResult( hypo, calculatorType, testStatType, useCLs, npoints, fileprefix, ".eps") ;
+        RooStats::AnalyzeHypoTestInverterResult( hypo, calculatorType, testStatType, useCLs, npoints, fileprefix, ".pdf") ;
+        RooStats::AnalyzeHypoTestInverterResult( hypo, calculatorType, testStatType, useCLs, npoints, fileprefix, ".png") ;
     }
 
     return hypo;

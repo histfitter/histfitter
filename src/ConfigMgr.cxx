@@ -503,46 +503,98 @@ void ConfigMgr::doUpperLimit(FitConfig* fc) {
         hypo = RooStats::DoHypoTestInversion(w, 1, 2, m_testStatType, m_useCLs, 20, 0, -1); 
     }
 
-    /// then reevaluate with proper settings
-    if ( hypo!=0 || m_useScanRange) {
-        double minRange = -1;
-        double maxRange = -1;
-        if (m_useScanRange) { // next fit is done between the user defined values
-            minRange = m_scanRangeMin;
-            maxRange = m_scanRangeMax;
-        }
-        else { // next fit is done between 0 and the expected upper limit + 2 sigma
-            (void) hypo->ExclusionCleanup();             
-            
-            int i=0; 
-            while (i<5) {
-                if (min_CLs(hypo)>0.05) { 
-                    m_logger << kINFO << "Starting rescan iteration: " << i << GEndl;           
-                    hypo = RedoScan(w,hypo);
-                    if ( hypo!=0 ) { (void) hypo->ExclusionCleanup(); }
-                }
-                else { break; }
-                i+=1;
-            }
-            minRange = 0;
-            maxRange = 1.10 * hypo->GetExpectedUpperLimit(2);
+    double maxRange = 0.0;
+    if ( hypo!=0 ) { 
+        maxRange = 1.10 * hypo->GetExpectedUpperLimit(2);
+    }
+
+    while(true) { 
+        if ( hypo!=0 ) { 
             delete hypo; hypo=0;
-        }
-        
-        hypo = RooStats::DoHypoTestInversion(w, m_nToys, m_calcType, m_testStatType, m_useCLs, m_nPoints, minRange, maxRange);
-        int nPointsRemoved = hypo->ExclusionCleanup();
-        if (nPointsRemoved > 0) {
-            m_logger << kWARNING << "ExclusionCleanup() removed " << nPointsRemoved 
-                << " scan point(s) for hypo test inversion: " << hypo->GetName() << GEndl;
+            hypo = RooStats::DoHypoTestInversion(w, m_nToys, m_calcType, m_testStatType, m_useCLs, m_nPoints, 0, maxRange);
         }
 
-        if (m_useScanRange) {
-            if ((1.2 * hypo->GetExpectedUpperLimit(2)) > m_scanRangeMax) {
-                m_logger << kWARNING << "Scan Range is too near to the upper limit + 2 sigma! (calc exp limit + 2 sigma: " << hypo->GetExpectedUpperLimit(2)
-                 << ", set range: " << m_scanRangeMax << ")" << GEndl;
-            }
+        if(m_calcType != 2) { 
+            // not running asymptotic, so run only once
+            break;
         }
-    }       
+
+        // we're running asymptotic. ensure that the +2 sigma dives below 0.05
+        
+        // get the sampling dist for the last point
+        RooStats::SamplingDistribution * s = hypo->GetExpectedPValueDist(m_nPoints-1); 
+        if (!s) { 
+            m_logger << kERROR << "Sampling distribution is empty. Exit." << GEndl;
+            break;
+        } 
+
+        // get its valyes
+        const std::vector<double> & values = s->GetSamplingDistribution();
+
+        // find indices for expected p-values
+        double nsig1(1.0);
+        double nsig2(2.0);
+        nsig1 = std::abs(nsig1);
+        nsig2 = std::abs(nsig2);
+        double maxSigma = 5; 
+        double dsig = 2.*maxSigma / (values.size() -1) ;         
+        //int  i0 = (int) TMath::Floor ( ( -nsig2 + maxSigma )/dsig + 0.5 ); // idx for -2 sig
+        //int  i1 = (int) TMath::Floor ( ( -nsig1 + maxSigma )/dsig + 0.5 ); // idx for -1 sig
+        //int  i2 = (int) TMath::Floor ( ( maxSigma )/dsig + 0.5 ); // idx for nominal
+        //int  i3 = (int) TMath::Floor ( ( nsig1 + maxSigma )/dsig + 0.5 ); // idx for +1 sig
+        int  i4 = (int) TMath::Floor ( ( nsig2 + maxSigma )/dsig + 0.5 ); // idx for +2 sig
+
+        if(values[i4] < 0.05) {
+            // +2 sigma band is below 0.05. stop!
+            break;
+        }
+
+        // Not far enough - +2sigma band still above 0.05. Add an extra 50% of points.
+        // We don't cut away things on the left as that might kill the -2 sigma band.
+        m_nPoints *= 1.5;
+        maxRange *= 1.5;
+    }
+
+/*    /// then reevaluate with proper settings*/
+    //if ( hypo!=0 || m_useScanRange) {
+        //double minRange = -1;
+        //double maxRange = -1;
+        //if (m_useScanRange) { // next fit is done between the user defined values
+            //minRange = m_scanRangeMin;
+            //maxRange = m_scanRangeMax;
+        //}
+        //else { // next fit is done between 0 and the expected upper limit + 2 sigma
+            //(void) hypo->ExclusionCleanup();             
+            
+            //int i=0; 
+            //while (i<5) {
+                //if (min_CLs(hypo)>0.05) { 
+                    //m_logger << kINFO << "Starting rescan iteration: " << i << GEndl;           
+                    //hypo = RedoScan(w,hypo);
+                    //if ( hypo!=0 ) { (void) hypo->ExclusionCleanup(); }
+                //}
+                //else { break; }
+                //i+=1;
+            //}
+            //minRange = 0;
+            //maxRange = 1.10 * hypo->GetExpectedUpperLimit(2);
+            //delete hypo; hypo=0;
+        //}
+        
+        //hypo = RooStats::DoHypoTestInversion(w, m_nToys, m_calcType, m_testStatType, m_useCLs, m_nPoints, minRange, maxRange);
+        //int nPointsRemoved = hypo->ExclusionCleanup();
+        //if (nPointsRemoved > 0) {
+            //m_logger << kWARNING << "ExclusionCleanup() removed " << nPointsRemoved 
+                //<< " scan point(s) for hypo test inversion: " << hypo->GetName() << GEndl;
+        //}
+
+        //if (m_useScanRange) {
+            //if ((1.2 * hypo->GetExpectedUpperLimit(2)) > m_scanRangeMax) {
+                //m_logger << kWARNING << "Scan Range is too near to the upper limit + 2 sigma! (calc exp limit + 2 sigma: " << hypo->GetExpectedUpperLimit(2)
+                 //<< ", set range: " << m_scanRangeMax << ")" << GEndl;
+            //}
+        //}
+    /*}   */    
         
 
     /// store ul as nice plot ..
