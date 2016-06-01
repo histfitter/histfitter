@@ -307,7 +307,7 @@ class fitConfig(object):
         chanObj = Channel(variableName, regions, self.prefix, nBins,
                              binLow, binHigh, self.statErrThreshold)
 
-        log.debug("Created channel object {0} for {1}".format(hex(id(chanObj)), chanObj.name))
+        log.debug("Created channel object {0} for {1}".format(hex(id(chanObj)), chanObj.channelName))
 
         # Verify that this name is not already used
         for chan in self.channels:
