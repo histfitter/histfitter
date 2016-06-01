@@ -395,7 +395,6 @@ class fitConfig(object):
 
         @param name The name to search for
         """
-        print self.channels
         for chan in self.channels:
             if chan.name == name:
                 return chan
@@ -409,7 +408,6 @@ class fitConfig(object):
 
         @param name The name to search for
         """
-        print self.channels
         for chan in self.channels:
             if chan.channelName == name:
                 return chan
