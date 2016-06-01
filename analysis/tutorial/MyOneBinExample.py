@@ -133,7 +133,7 @@ if myFitType==FitType.Discovery:
    discoveryFitConfig.addSystematic(jes)
    #Channel
    srBin = discoveryFitConfig.addChannel("cuts",["SR"],1,0.5,1.5)
-   discoveryFitConfig.setSignalChannels([srBin])
+   discoveryFitConfig.addSignalChannels([srBin])
    srBin.addDiscoverySamples(["Discovery"],[1.],[0.],[10000.],[kMagenta])
 
 #**************
@@ -156,7 +156,7 @@ if myFitType==FitType.Exclusion:
     
     # Channel
     srBin = exclusionFitConfig.addChannel("cuts",["SR"],1,0.5,1.5)
-    exclusionFitConfig.setSignalChannels([srBin])
+    exclusionFitConfig.addSignalChannels([srBin])
     
     sigSample = Sample("SM_GG_onestepCC_425_385_345",kPink)
     sigSample.setFileList(["samples/tutorial/SusyFitterTree_p832_GG-One-Step_soft_v1.root"])

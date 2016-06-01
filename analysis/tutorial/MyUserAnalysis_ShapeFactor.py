@@ -86,8 +86,8 @@ chanSR = ana.addChannel("cuts",["SR"],2,0.5,2.5)
 chanSR.addSample(sigSample)
 chanSR.getSample("DataDriven").addSystematic(xtrap)
 
-ana.setBkgConstrainChannels([chanCR])
-ana.setSignalChannels([chanSR])
+ana.addBkgConstrainChannels([chanCR])
+ana.addSignalChannels([chanSR])
 ana.setSignalSample(sigSample)
 
 # Make sure that file is re-made when before HistFactory is executed

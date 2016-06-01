@@ -243,7 +243,7 @@ nJetTS.useOverflowBin = False
 nJetTS.addSystematic(jes)
 nJetTS.addSystematic(mcstat)
 
-bkt.setBkgConstrainChannels([nJetWS,nJetTS])
+bkt.addBkgConstrainChannels([nJetWS,nJetTS])
 
 ###################
 #                                               #
@@ -334,8 +334,8 @@ if doValidation:
     mm2J.addSystematic(jes)
     mm2J.addSystematic(mcstat)
 
-    #    bkt.setValidationChannels([nJetSLVR2,metSLVR2,meffSLVR2,nBJetSLVR2,metmeffSLVR2,mm2J,srs1l2jTChannel])
-    bkt.setValidationChannels([nJetSLVR2,srs1l2jTChannel,mm2J])
+    #    bkt.addValidationChannels([nJetSLVR2,metSLVR2,meffSLVR2,nBJetSLVR2,metmeffSLVR2,mm2J,srs1l2jTChannel])
+    bkt.addValidationChannels([nJetSLVR2,srs1l2jTChannel,mm2J])
      
     dataSample.buildHisto([0.,1.,6.,16.,3.,0.],"SS","metmeff2Jet",0.1,0.1)
     dataSample.buildHisto([25.],"SR1sl2j","cuts",0.5) 
@@ -352,7 +352,7 @@ if doDiscovery:
     ssChannel = discovery.addChannel("cuts",["SS"],srNBins,srBinLow,srBinHigh)
     ssChannel.addSystematic(jes)
     ssChannel.addDiscoverySamples(["SS"],[1.],[0.],[100.],[kMagenta])
-    discovery.setSignalChannels([ssChannel])
+    discovery.addSignalChannels([ssChannel])
     dataSample.buildHisto([26.],"SS","cuts",0.5)
 
 #-----------------------------
@@ -384,4 +384,4 @@ if doExclusion:
             mm2J.useOverflowBin=True
             mm2J.addSystematic(jes)
             pass
-        myTopLvl.setSignalChannels([mm2J])
+        myTopLvl.addSignalChannels([mm2J])

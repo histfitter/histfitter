@@ -89,7 +89,7 @@ meas.addParamSetting("Lumi",True)
 
 # Add the channel
 chan = ana.addChannel("cuts",["UserRegion"],1,0.5,1.5)
-ana.setSignalChannels([chan])
+ana.addSignalChannels([chan])
 
 # These lines are needed for the user analysis to run
 # Make sure file is re-made when executing HistFactory

@@ -97,4 +97,4 @@ for sig in sigSamples:
     myTopLvl.addSamples(sigSample)
     myTopLvl.setSignalSample(sigSample)
     ch = myTopLvl.getChannel("cuts",cutsRegions)
-    myTopLvl.setSignalChannels(ch)
+    myTopLvl.addSignalChannels(ch)

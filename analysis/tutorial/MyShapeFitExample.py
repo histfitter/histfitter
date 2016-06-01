@@ -174,7 +174,7 @@ if myFitType==FitType.Exclusion:
        srBin = exclusionFitConfig.addChannel("met/meff2Jet",["SR"],6,0.1,0.7)
        srBin.useOverflowBin=True
        srBin.useUnderflowBin=True
-       exclusionFitConfig.setSignalChannels([srBin])
+       exclusionFitConfig.addSignalChannels([srBin])
 
        sigSample = Sample(sig,kPink)
        sigSample.setFileList(["samples/tutorial/SusyFitterTree_p832_GG-One-Step_soft_v1.root"])

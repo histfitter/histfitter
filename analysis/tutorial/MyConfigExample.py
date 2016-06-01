@@ -224,7 +224,7 @@ nJetTS.hasBQCD = True
 nJetTS.useOverflowBin = False    
 nJetTS.addSystematic(jes)
 
-bkt.setBkgConstrainChannels([nJetWS,nJetTS])
+bkt.addBkgConstrainChannels([nJetWS,nJetTS])
 
 ### alternative: statistical error for each sample
 #nJetWS.getSample("Top").addSystematic(statWRtop)
@@ -279,8 +279,8 @@ if doValidation:
     mm2Jl.useOverflowBin=True
     mm2Jl.addSystematic(jes)
 
-    #    bkt.setValidationChannels([nJetSLVR2,metSLVR2,meffSLVR2,nBJetSLVR2,metmeffSLVR2,mm2J,srs1l2jTChannel])
-    bkt.setValidationChannels([nJetSLVR2,srs1l2jTChannel,mm2J,mm2Jl])
+    #    bkt.addValidationChannels([nJetSLVR2,metSLVR2,meffSLVR2,nBJetSLVR2,metmeffSLVR2,mm2J,srs1l2jTChannel])
+    bkt.addValidationChannels([nJetSLVR2,srs1l2jTChannel,mm2J,mm2Jl])
      
     dataSample.buildHisto([0.,1.,6.,16.,3.,0.],"SS","metmeff2Jet",0.1,0.1)
     dataSample.buildHisto([25.],"SR1sl2j","cuts",0.5)
@@ -298,7 +298,7 @@ if myFitType==FitType.Discovery:
     ssChannel = discovery.addChannel("cuts",["SS"],srNBins,srBinLow,srBinHigh)
     ssChannel.addSystematic(jes)
     ssChannel.addDiscoverySamples(["SS"],[1.],[0.],[100.],[kMagenta])
-    discovery.setSignalChannels([ssChannel])
+    discovery.addSignalChannels([ssChannel])
     dataSample.buildHisto([26.],"SS","cuts",0.5)
 
 #-----------------------------
@@ -330,7 +330,7 @@ if myFitType==FitType.Exclusion:
             mm2J.useOverflowBin=True
             mm2J.addSystematic(jes)
             pass
-        myTopLvl.setSignalChannels([mm2J])
+        myTopLvl.addSignalChannels([mm2J])
 
 	
 	
