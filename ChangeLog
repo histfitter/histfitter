@@ -1,4 +1,8 @@
 2016-06-01 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
+	* python/fitConfig.py: renamed set*Channel() methods. They did not really
+	set but append. Now called add*Channel() method.
+
+2016-06-01 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
 	* python/configManager.py: split initialize() method in to sub methods to
 	make it easier to read and maintain
 	* python/configManager.py: add an autodetection of a background-only fit.
