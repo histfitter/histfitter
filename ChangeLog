@@ -1,4 +1,8 @@
 2016-06-01 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
+	* analysis/tutorial/MySimpleChannelConfig.py: set the default normfactor
+	to 1 and not 0.5 - or YieldsTable.py complains and confuses users! 
+
+2016-06-01 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
 	* python/fitConfig.py: renamed set*Channel() methods. They did not really
 	set but append. Now called add*Channel() method.
 
