@@ -784,13 +784,13 @@ LimitResult RooStats::get_Pvalue(const RooStats::HypoTestInverterResult* fResult
     result.SetP0(     p0 );
     result.SetP1(     qv[9] );
     result.SetCLs(    qv[5] );
-    if (doUL) { /// exclusion
+    if (doUL or resultIsAsymptotic) { /// exclusion OR asymptotic discovery
+        result.SetCLsd2S( qv[0] );  
+        result.SetCLsd1S( qv[1] );
         result.SetCLsexp( qv[2] );
         result.SetCLsu1S( qv[3] );
-        result.SetCLsd1S( qv[1] );
         result.SetCLsu2S( qv[4] );
-        result.SetCLsd2S( qv[0] );  
-    } else { /// discovery
+    } else { /// non-resultIsAsymptotic discovery
         result.SetP0exp( qv[2] );
         result.SetP0u1S( qv[3] );
         result.SetP0d1S( qv[4] );

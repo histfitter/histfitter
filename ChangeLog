@@ -1,3 +1,7 @@
+2016-06-01 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
+	* src/StatTools.cxx: for discovery tests, fill the up/down bands correctly
+	and not mixed in a strange way (see HISTFITTER-13)
+
 2016-05-31 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
 	* Tagged HistFitter-00-00-52
 
