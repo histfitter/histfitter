@@ -1,4 +1,8 @@
 2016-06-01 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
+	* src/StatTools.cxx: add mechanism to keep extending UL range if running
+	asymptotic, until +2 sigma band is below 0.05
+
+2016-06-01 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
 	* scripts/YieldsTable.py: use the logger class for better output
 	* scripts/YieldsTableTex.py: use the logger class for better output
 

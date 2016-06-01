@@ -582,11 +582,59 @@ RooStats::HypoTestInverterResult* RooStats::MakeUpperLimitPlot(const char* filep
     } 
 
     /// then reevaluate with proper settings
+
+    double maxRange = 0.0;
     if ( hypo!=0 ) { 
-        double eul2 = 1.10 * hypo->GetExpectedUpperLimit(2);
-        delete hypo; hypo=0;
-        //cout << "INFO grepme : nToys=" << ntoys << " calcType=" << calculatorType << " testStatType=" << testStatType << " useCLs=" << useCLs << " nPoints=" << npoints << " eul2=" << eul2 << std::endl;
-        hypo = RooStats::DoHypoTestInversion(w, ntoys, calculatorType, testStatType, useCLs, npoints, 0, eul2); 
+        maxRange = 1.10 * hypo->GetExpectedUpperLimit(2);
+    }
+
+    while(true) { 
+        if ( hypo!=0 ) { 
+            delete hypo; hypo=0;
+            //cout << "INFO grepme : nToys=" << ntoys << " calcType=" << calculatorType << " testStatType=" << testStatType << " useCLs=" << useCLs << " nPoints=" << npoints << " eul2=" << eul2 << std::endl;
+            hypo = RooStats::DoHypoTestInversion(w, ntoys, calculatorType, testStatType, useCLs, npoints, 0, maxRange); 
+        }
+
+        if(calculatorType != 2) { 
+            // not running asymptotic, so run only once
+            break;
+        }
+
+        // we're running asymptotic. ensure that the +2 sigma dives below 0.05
+        
+        // get the sampling dist for the last point
+        SamplingDistribution * s = hypo->GetExpectedPValueDist(npoints-1); 
+        if (!s) { 
+            StatToolsLogger << kERROR << "Sampling distribution is empty. Exit." << GEndl;
+            break;
+        } 
+
+        // get its valyes
+        const std::vector<double> & values = s->GetSamplingDistribution();
+
+        // find indices for expected p-values
+        double nsig1(1.0);
+        double nsig2(2.0);
+        nsig1 = std::abs(nsig1);
+        nsig2 = std::abs(nsig2);
+        double maxSigma = 5; 
+        double dsig = 2.*maxSigma / (values.size() -1) ;         
+        //int  i0 = (int) TMath::Floor ( ( -nsig2 + maxSigma )/dsig + 0.5 ); // idx for -2 sig
+        //int  i1 = (int) TMath::Floor ( ( -nsig1 + maxSigma )/dsig + 0.5 ); // idx for -1 sig
+        //int  i2 = (int) TMath::Floor ( ( maxSigma )/dsig + 0.5 ); // idx for nominal
+        //int  i3 = (int) TMath::Floor ( ( nsig1 + maxSigma )/dsig + 0.5 ); // idx for +1 sig
+        int  i4 = (int) TMath::Floor ( ( nsig2 + maxSigma )/dsig + 0.5 ); // idx for +2 sig
+
+        if(values[i4] < 0.05) {
+            // +2 sigma band is below 0.05. stop!
+            break;
+        }
+
+        // Not far enough - +2sigma band still above 0.05. Add an extra 50% of points.
+        // We don't cut away things on the left as that might kill the -2 sigma band.
+        npoints *= 1.5;
+        maxRange *= 1.5;
+
     }
 
     /// store ul as nice plot ..
