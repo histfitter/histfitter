@@ -1,4 +1,22 @@
 2016-06-01 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
+	* python/configManager.py: split initialize() method in to sub methods to
+	make it easier to read and maintain
+	* python/configManager.py: add an autodetection of a background-only fit.
+	If this is the case, change any defined SRs to VRs unless an overrule flag
+	self.keepSignalRegionType is set. Added new doDiscoveryHypoTest to check 
+	that we're not running -z. Solves HISTFITTER-16
+	* scripts/HistFitter.py: properly set configMgr.doHypoTest and
+	configMgr.doDiscoveryHypoTest when doing -p or -z (needed for the feature
+	above)
+	* python/fitConfig.py: new method to find channels by channelName and not
+	just name; more debug statements when adding regions to make
+	the user understand what's going on
+
+2016-06-01 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
+	* python/fitConfig.py: appendStrChanOrListToList refactored to more
+	intuitive appendChannelsToList
+
+2016-06-01 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
 	* src/StatTools.cxx: for discovery tests, fill the up/down bands correctly
 	and not mixed in a strange way (see HISTFITTER-13)
 

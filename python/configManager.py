@@ -110,6 +110,7 @@ class ConfigManager(object):
         self.blindCR = False # Blind the CRs only
         self.blindVR = False # Blind the VRs only
         self.useSignalInBlindedData = False # Add signal MC on top when building blinded data histogram in SR
+        self.keepSignalRegionType = False # Force SR to always remain an SR and no autochanging to VR
         self.FitType = enum('FitType','Discovery , Exclusion , Background') # to distinguish between background, exclusion and discovery fit
         self.myFitType = None #propagted from HistFitter.py
         self.scanRange = None # possibility to define a scan range with a tuple (min, max) (when the first fit fails)
@@ -137,6 +138,7 @@ class ConfigManager(object):
         self.writeXML = False # Boolean to chose whether to write HistFactory XML files by hand
         self.printHistoNames = False # Print out the names of generated histograms
         self.doHypoTest = False
+        self.doDiscoveryHypoTest = False
         self.ReduceCorrMatrix = False # Boolean to make a reduced correlation matrix
 
         self.fitConfigs = [] # fitConfig object
@@ -272,22 +274,7 @@ class ConfigManager(object):
         log.warning("fitConfig named '%s' does not exist. Cannot be returned." % name)
         return 0
 
-    def initialize(self):
-        """
-        Initializes the configuration manager by propagating setting down to channels, samples, etc.
-        """
-        
-        log.info("Initializing...")
-        if self.histCacheFile == '':
-            tmpName = "data/%s.root" % self.analysisName
-            log.info("Giving default name histCacheFile: %s" % tmpName)
-            self.histCacheFile = tmpName
-            pass
-        if self.inputLumi is None and self.outputLumi is None:
-            self.inputLumi = 1.0
-            self.outputLumi = 1.0
-            pass
-
+    def initializePythonObjects(self):
         # Propagate stuff down from config manager
         log.info("  -initialize python objects...")
         for tl in self.fitConfigs:
@@ -305,7 +292,21 @@ class ConfigManager(object):
                         for w in sam.tempWeights: sam.addWeight(w) 
                     elif sam.isQCD or sam.isData:
                         chan.getSample(sam.name).setWrite(False)
-        
+
+    def setCacheFilename(self):
+        if self.histCacheFile == '':
+            tmpName = "data/%s.root" % self.analysisName
+            log.info("Giving default name histCacheFile: %s" % tmpName)
+            self.histCacheFile = tmpName
+            pass
+
+    def setLumi(self):
+        if self.inputLumi is None and self.outputLumi is None:
+            self.inputLumi = 1.0
+            self.outputLumi = 1.0
+            pass
+
+    def initializeHistograms(self):
         log.info("  -initialize global histogram dictionary...")
         for tl in self.fitConfigs:
             for chan in tl.channels:
@@ -405,37 +406,107 @@ class ConfigManager(object):
                                                                         replaceSymbols(chan.variableName))
                                 if not nomMergedName in self.hists.keys():
                                     self.hists[nomMergedName] = None
-        
-        if self.readFromTree:
-            log.info("  -build PrepareHistos() for trees...")
-            self.prepare = PrepareHistos(False)
-            if self.plotHistos is None:    #set plotHistos if not already set by user
-                self.plotHistos = False  #this is essentially for debugging
-                pass
+        return
+
+    
+    def initializeHistoPrepareObjectFromTrees(self):
+        """
+        Initialize the internal tree-to-histogram method
+        """
+        log.info("  -build PrepareHistos() for trees...")
+        self.prepare = PrepareHistos(False)
+        if self.plotHistos is None:    #set plotHistos if not already set by user
+            self.plotHistos = False  #this is essentially for debugging
+        return
+
+    def initializeHistoPrepareObjectFromHistograms(self):
+        """
+        Initialize the reading from histograms
+        """
+        if self.useCacheToTreeFallback:
+            log.info("  -build PrepareHistos() for cache, with fallback to trees...")
+            self.prepare = PrepareHistos(True, True)
         else:
-            if self.useCacheToTreeFallback:
-                log.info("  -build PrepareHistos() for cache, with fallback to trees...")
-                self.prepare = PrepareHistos(True, True)
-            else:
-                log.info("  -build PrepareHistos() for cache...")
-                self.prepare = PrepareHistos(True)
+            log.info("  -build PrepareHistos() for cache...")
+            self.prepare = PrepareHistos(True)
 
-            if self.useHistBackupCacheFile:
-                self.prepare.setHistoPaths(self.histCacheFile, self.histBackupCacheFile)
-            else:
-                self.prepare.setHistoPaths(self.histCacheFile)
+        if self.useHistBackupCacheFile:
+            self.prepare.setHistoPaths(self.histCacheFile, self.histBackupCacheFile)
+        else:
+            self.prepare.setHistoPaths(self.histCacheFile)
 
-        #C++ alter-ego
-        log.info("  -initialize C++ mgr...")
+        return
+    
+    def initializeHistoPrepareObject(self):
+        """
+        Initialize the inputdata-to-histograms builder
+        """
+        if self.readFromTree:
+            self.initializeHistoPrepareObjectFromTrees()
+        else:
+            self.initializeHistoPrepareObjectFromHistograms()
+
+        return
+
+    def checkSignalRegionType(self):
+        """
+        Change the SRs to VRs in case of a background only fit - unless you overrule it
+        """
+        if self.doHypoTest or self.doDiscoveryHypoTest:
+            # Running a hypothesis test - SRs needed
+            return
+
+        if self.myFitType != self.FitType.Background:
+            # Not a background fit. Must be on purpose.
+            return
+        
+        if self.keepSignalRegionType:
+            # User wants to keep the SR
+            return
+
+        log.warning("Detected a background-only fit - will change your SRs to become VRs")
+        log.info("(Change this behaviour by setting configMgr.keepSignalRegionType = True)")
+
+        for fc in self.fitConfigs:
+            SRs = fc.signalChannels
+            fc.signalChannels = []
+
+            # Check whether we're blinded for VR; if so, blind the SRs
+            if self.blindSR:
+                log.info("Running with blindSR - blinding the new VRs individually")
+                for r in SRs:
+                    log.debug("Blinded region {0}".format(r))
+                    fc.getChannelByChannelName(r).blind = True
+             
+            # Now add them as validation channels 
+            fc.addValidationChannels(SRs)
+        return
+
+    def initialize(self):
+        """
+        Initializes the configuration manager by propagating setting down to channels, samples, etc.
+        """
+        
+        log.info("Initializing...")
+        
+        # Set various output settings & lumi
+        self.setCacheFilename()
+        self.setLumi()
+       
+        # Check if we want to change the SRs to VRs
+        self.checkSignalRegionType()
+
+        # Initialize the histogram bookkeeping; their reader; and our C++ counterpart
+        self.initializePythonObjects()
+        self.initializeHistograms()
+        self.initializeHistoPrepareObject()
         self.initializeCppMgr()
 
-        log.info("  -propagate file list and tree names...")
-        self.propagateFileList() # propagate file lists down the tree
-
-        ## Assume that all tree names have been set
+        # Propagate the relevant settings down
+        self.propagateFileList() 
         self.propagateTreeName()
 
-        #Summary
+        # Summary
         self.Print() 
         return
 
@@ -444,8 +515,11 @@ class ConfigManager(object):
         Initialise the C++ side copy of the configuration manager and set its properties
         """
 
+        log.info("  -initialize C++ mgr...")
+
         # settings for hypothesis test
         self.cppMgr.m_doHypoTest = self.doHypoTest
+        self.cppMgr.m_doDiscoveryHypoTest = self.doDiscoveryHypoTest
         self.cppMgr.setNToys( self.nTOYs )
         self.cppMgr.setCalcType( self.calculatorType )# frequentist calculator
         self.cppMgr.setTestStatType( self.testStatType )  # one-sided test statistic
@@ -468,7 +542,7 @@ class ConfigManager(object):
         else:
             self.cppMgr.setScanRange(False)
 
-        #Fill FitConfigs from TopLevelXMLs
+        # Fill FitConfigs from TopLevelXMLs
         for fc in self.fitConfigs:
             cppFC = self.cppMgr.addFitConfig(fc.name)
             cppFC.m_inputWorkspaceFileName = fc.wsFileName
@@ -477,7 +551,7 @@ class ConfigManager(object):
             if not fc.signalSample is None:
                 cppFC.m_signalSampleName = fc.signalSample
      
-            #CR/SR/VR channels
+            # CR/SR/VR channels
             for cName in fc.signalChannels:
                 cppFC.m_signalChannels.push_back(cName)
             for cName in fc.validationChannels:
@@ -561,6 +635,7 @@ class ConfigManager(object):
         log.info("outputLumi: %.3f" % self.outputLumi)
         log.info("nTOYs: %i" % self.nTOYs)
         log.info("doHypoTest: %s" % self.doHypoTest)
+        log.info("doDiscoveryHypoTest: %s" % self.doDiscoveryHypoTest)
         log.info("fixSigXSec: %s" % self.fixSigXSec)
         log.info("runOnlyNominalXSec: %s" % self.runOnlyNominalXSec)
         log.info("Systematics: %s" % self.systDict.keys())
@@ -683,6 +758,8 @@ class ConfigManager(object):
         """
         Propagate the file list downwards.
         """
+        log.info("  -propagate file list and tree names to fit configurations")
+        
         # propagate our file list downwards (if we don't have one,
         # this will result in the propagation of the files belonging
         # to our top level xml)

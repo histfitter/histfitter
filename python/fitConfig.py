@@ -303,21 +303,24 @@ class fitConfig(object):
             #binLow = 0.5
             binHigh = nBins + binLow
             pass
+        
         chanObj = Channel(variableName, regions, self.prefix, nBins,
                              binLow, binHigh, self.statErrThreshold)
+
+        log.debug("Created channel object {0} for {1}".format(hex(id(chanObj)), chanObj.name))
 
         # Verify that this name is not already used
         for chan in self.channels:
             if chan.name == chanObj.name:
-                log.info("Not gonna add the region, because it exists in fitConfig --> channel-List follows:" )
+                log.info("Not going to add the region, because it exists in fitConfig --> channel list as follows:" )
                 for chan in self.channels:
                     print "      chan.name = ", chan.name
                 raise RuntimeError("Channel %s already exists in fitConfig %s. Please use a different name." % (chanObj.name, self.name))
 
-        #set channel parent
+        # set channel parent
         chanObj.parentTopLvl = self
 
-        #set stat error type
+        # set stat error type
         chanObj.statErrorType = self.statErrorType
 
         # Channel doesn't have weights so add them
@@ -392,11 +395,26 @@ class fitConfig(object):
 
         @param name The name to search for
         """
+        print self.channels
         for chan in self.channels:
             if chan.name == name:
                 return chan
 
         raise RuntimeError("No channel with name %s found" % name)
+   
+    # TODO: why do we have two the name properties?! -- GJ 1/6/16
+    def getChannelByChannelName(self, name):
+        """
+        Find the channel with the given channelName
+
+        @param name The name to search for
+        """
+        print self.channels
+        for chan in self.channels:
+            if chan.channelName == name:
+                return chan
+
+        raise RuntimeError("No channel with channelName %s found" % name)
 
 
     def getChannel(self, variableName, regions):
@@ -568,51 +586,75 @@ class fitConfig(object):
             raise RuntimeError("setSignalSample does not support type %s" % (type(sig)))
         return
 
-    def appendStrChanOrListToList(self, input, targetList):
-        #little utility function
+    def appendChannelsToList(self, input, targetList):
+        """
+        Internal utility function to take a list of channel or channel names and add themto the list
+        
+        @param input channels to add
+        @param targetList list to add channels to
+        """
         if isinstance(input, list):
             inList = input
         else:
             inList = [input]
             pass
+
         for i in inList:
             if isinstance(i, Channel):
                 chanName = i.channelName
+                log.debug("\tFound channel name from object ({1}): {0}".format(chanName, hex(id(i))))
             else:
                 chanName = i
+                log.debug("\tUsing channel name as string: {0}".format(chanName))
                 pass
-            if not targetList.__contains__(chanName):
+            
+            if chanName not in targetList:
+                log.debug("\t=> Appending channel {0}".format(chanName))
                 targetList.append(chanName)
                 pass
             pass
         return
 
     def setSignalChannels(self, channels):
+        log.warning("setSignalChannels deprecated in favour of addSignalChannels")
+        self.addSignalChannels(channels)
+    
+    def setBkgConstrainChannels(self, channels):
+        log.warning("setBkgConstrainChannels deprecated in favour of addBkgConstrainChannels")
+        self.addBkgConstrainChannels(channels)
+    
+    def setValidationChannels(self, channels):
+        log.warning("setValidationChannels deprecated in favour of addValidationChannels")
+        self.addValidationChannels(channels)
+
+    def addSignalChannels(self, channels):
         """
-        Set the channels to be treated as signal (SRs)
+        Add the channels to be treated as signal (SRs)
 
         @param channels List of channels
         """
-        self.appendStrChanOrListToList(channels, self.signalChannels)
+        log.debug("Adding signal channels")
+        self.appendChannelsToList(channels, self.signalChannels)
         return
 
-    def setBkgConstrainChannels(self, channels):
+    def addBkgConstrainChannels(self, channels):
         """
-        Set the channels to be treated as constraining regions (CRs)
+        Add the channels to be treated as constraining regions (CRs)
         
         @param channels List of channels
         """
-        self.appendStrChanOrListToList(channels, self.bkgConstrainChannels)
+        log.debug("Adding background channels")
+        self.appendChannelsToList(channels, self.bkgConstrainChannels)
         return
 
-    def setValidationChannels(self, channels):
-        #TODO should be renamed appendValidationChannels !
+    def addValidationChannels(self, channels):
         """
         Set the channels to be treated as validation regions (VRs)
         
         @param channels List of channels
         """
-        self.appendStrChanOrListToList(channels, self.validationChannels)
+        log.debug("Adding validation channels")
+        self.appendChannelsToList(channels, self.validationChannels)
         return
 
     def setFileList(self, filelist):

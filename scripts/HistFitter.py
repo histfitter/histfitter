@@ -181,7 +181,7 @@ if __name__ == "__main__":
     if HistFitterArgs.fit:
         runFit = True
 
-    configMgr.userArg=HistFitterArgs.userArg
+    configMgr.userArg = HistFitterArgs.userArg
     configMgr.nTOYs = HistFitterArgs.num_toys
 
     if HistFitterArgs.interactive:
@@ -194,9 +194,11 @@ if __name__ == "__main__":
         printLimits = True
 
     if HistFitterArgs.hypotest:
+        configMgr.doHypoTest = True
         doHypoTests = True
 
     if HistFitterArgs.discovery_hypotest:
+        configMgr.doDiscoveryHypoTest = True
         doDiscoveryHypoTests = True
 
     if HistFitterArgs.d:
