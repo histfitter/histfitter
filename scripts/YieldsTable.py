@@ -49,6 +49,10 @@ def latexfitresults(filename,regionList,sampleList,dataname='obsData',showSum=Fa
   @param blinded Observed event count will not be shown if set to True (default=False)
   @param splitBins Calculates bin-by-bin yields for all regions if set to True (default=False)
   """
+ 
+  if not os.path.exists(filename):
+    log.error("File {0} does not exist!".format(filename))
+    sys.exit(1)
 
   """
   pick up workspace from file
