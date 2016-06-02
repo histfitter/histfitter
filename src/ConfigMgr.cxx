@@ -480,8 +480,11 @@ void ConfigMgr::doUpperLimit(FitConfig* fc) {
         return;
     }
 
+    // TODO: this functionality ought to be in StatTools in a function that we just call!!! Then the UL script can also use it. 
+    // -- GJ 2 jun 2016
+
     // 6th order poly interp + linear extrapolation (also used in Higgs group)
-    Util::SetInterpolationCode(w,4);
+    Util::SetInterpolationCode(w, 4);
 
     // reset all nominal values
     Util::resetAllValues(w) ;
@@ -495,112 +498,135 @@ void ConfigMgr::doUpperLimit(FitConfig* fc) {
     }
 
     /// here we go ...
-    
     RooStats::HypoTestInverterResult* hypo = nullptr;
     if (!m_useScanRange) {
         /// first asymptotic limit, to get a quick but reliable estimate for the upper limit
         /// dynamic evaluation of ranges
+        m_logger << kINFO << "doUpperLimit(): no range specified - running quick asymptotic scan in attempt at finding one" << GEndl;
         hypo = RooStats::DoHypoTestInversion(w, 1, 2, m_testStatType, m_useCLs, 20, 0, -1); 
     }
 
+    double minRange = 0.0;
     double maxRange = 0.0;
-    if ( hypo!=0 ) { 
+    if ( hypo != 0 ) { 
         maxRange = 1.10 * hypo->GetExpectedUpperLimit(2);
     }
+        
+    // did the user overrule our scan range finding? 
+    if (m_useScanRange) { 
+        minRange = m_scanRangeMin;
+        maxRange = m_scanRangeMax;
+    }
 
-    while(true) { 
-        if ( hypo!=0 ) { 
-            delete hypo; hypo=0;
-            hypo = RooStats::DoHypoTestInversion(w, m_nToys, m_calcType, m_testStatType, m_useCLs, m_nPoints, 0, maxRange);
+    // first evaluation with proper settings
+    if ( hypo!=0 ) { 
+        delete hypo; hypo=0;
+    }
+    
+    m_logger << kINFO << "doUpperLimit(): running DoHypoTestInversion in [" << minRange << ", " << maxRange << "] with " << m_nPoints << " points " << GEndl;
+    hypo = RooStats::DoHypoTestInversion(w, m_nToys, m_calcType, m_testStatType, m_useCLs, m_nPoints, minRange, maxRange);
+
+    const double startingMaxRange = maxRange;
+    double previousMaxRange = maxRange; // needed in case we fall into the trap where all the points in the extension happen to fail
+    while(true) {
+        // Clean up any odd issues
+        if(hypo != 0) { 
+            int nPointsRemoved = hypo->ExclusionCleanup();
+            if (nPointsRemoved > 0) {
+                m_logger << kWARNING << "ExclusionCleanup() removed " << nPointsRemoved 
+                    << " scan point(s) for hypo test inversion: " << hypo->GetName() << GEndl;
+            }
         }
 
         if(m_calcType != 2) { 
             // not running asymptotic, so run only once
+            m_logger << kINFO << "doUpperLimit(): not running in asymptotic mode; will not try to attempt to extend scan range" << GEndl;
             break;
         }
 
-        // we're running asymptotic. ensure that the +2 sigma dives below 0.05
-        
-        // get the sampling dist for the last point
-        RooStats::SamplingDistribution * s = hypo->GetExpectedPValueDist(m_nPoints-1); 
+        // what's the current p-value for +2 sigma? 
+        // start by getting the sampling dist for the last point
+        int currentNPoints = hypo->ArraySize();
+        RooStats::SamplingDistribution *s = hypo->GetExpectedPValueDist(currentNPoints-1); 
         if (!s) { 
-            m_logger << kERROR << "Sampling distribution is empty. Exit." << GEndl;
+            m_logger << kERROR << "doUpperLimit(): sampling distribution for the hypothesis test is empty. Exit." << GEndl;
             break;
         } 
-
-        // get its valyes
-        const std::vector<double> & values = s->GetSamplingDistribution();
+        
+        // get its values
+        const std::vector<double>& values = s->GetSamplingDistribution();
 
         // find indices for expected p-values
-        double nsig1(1.0);
-        double nsig2(2.0);
-        nsig1 = std::abs(nsig1);
-        nsig2 = std::abs(nsig2);
-        double maxSigma = 5; 
+        const double nsig1 = 1.0;
+        const double nsig2 = 2.0;
+        const double maxSigma = 5; 
         double dsig = 2.*maxSigma / (values.size() -1) ;         
-        //int  i0 = (int) TMath::Floor ( ( -nsig2 + maxSigma )/dsig + 0.5 ); // idx for -2 sig
-        //int  i1 = (int) TMath::Floor ( ( -nsig1 + maxSigma )/dsig + 0.5 ); // idx for -1 sig
-        //int  i2 = (int) TMath::Floor ( ( maxSigma )/dsig + 0.5 ); // idx for nominal
-        //int  i3 = (int) TMath::Floor ( ( nsig1 + maxSigma )/dsig + 0.5 ); // idx for +1 sig
-        int  i4 = (int) TMath::Floor ( ( nsig2 + maxSigma )/dsig + 0.5 ); // idx for +2 sig
+        int i4 = (int) TMath::Floor ( ( nsig2 + maxSigma )/dsig + 0.5 ); // idx for +2 sig
 
-        if(values[i4] < 0.05) {
-            // +2 sigma band is below 0.05. stop!
+        // Everything OK? 
+        if(values[i4] < 0.05 && hypo->GetExpectedUpperLimit(2) < 0.9*hypo->GetXValue(currentNPoints-1) ) {
+            // +2 sigma band is below 0.05 and smaller than 0.9x the current range. stop!
+            m_logger << kINFO << "doUpperLimit(): the +2 sigma band is below 0.05 and UL+2sig is smaller than 0.9x the current range. All good!" << GEndl;
+            delete s;
             break;
         }
 
-        // Not far enough - +2sigma band still above 0.05. Add an extra 50% of points.
-        // We don't cut away things on the left as that might kill the -2 sigma band.
-        m_nPoints *= 1.5;
-        maxRange *= 1.5;
+        //// Limit the # of extensions. Probably we should implement this if we're using toys as well in this loop. 
+        //if(hypo->GetXValue(currentNPoints - 1) / startingMaxRange >= 25) {
+            //m_logger << kFATAL << "doUpperLimit(): extended the scan range by a factor 25 or more. Started at " << startingMaxRange << " and now at " << hypo->GetXValue(currentNPoints - 1) << ". Give a sensible range by setting configMgr.range = (0, max) in your configuration!" << GEndl;
+            //break;
+        //}
+
+        // How much do we want to run extra in percentage?
+        int nPointsDivisor = 5;
+        if(values[i4] > 0.05) {
+            m_logger << kWARNING << "doUpperLimit(): the +2 sigma band is not below 0.05. Will attempt to extend it." << GEndl;
+        } else {
+            m_logger << kWARNING << "doUpperLimit(): the +2 sigma UL found very close to the maximum of the scan range. Will attempt to extend it." << GEndl;
+            nPointsDivisor = 10; // 10% extra should be enough 
+        }
+
+
+        // Determine range for an extra HypoTestInverter
+        int nPoints = currentNPoints / nPointsDivisor; // 20% extra points; or 10% if <0.05 but range too small
+        const double oldMax = hypo->GetXValue(currentNPoints - 1); // mu_sig of last entry
+        const double stepSize = 2 * oldMax / currentNPoints; // twice the average step size of previous scan
+        
+        double minRange = oldMax + stepSize; // start _beyond_ the last point
+        double maxRange = oldMax + (nPoints) * stepSize;
+
+        if(maxRange == previousMaxRange) {
+            // this can happen if we e.g. extend by 3 points and all 3 points fail. In that case, we need a different range.
+            ++nPoints;
+            maxRange += stepSize;
+        }
+
+        m_logger << kINFO << "doUpperLimit(): current scan had " << currentNPoints << " points" << GEndl;
+        m_logger << kINFO << "doUpperLimit(): current scan used range [" << hypo->GetXValue(0) << ", " << oldMax << "]" << GEndl;
+
+        m_logger << kWARNING << "doUpperLimit(): running extra scan in [" << minRange << ", " << maxRange << "] with " << nPoints << " points (step size = " << stepSize << ") " << GEndl;
+        sleep(1); // we want the user to be able to see what's going on here
+
+        // Run an extra hypotest inverter
+        auto extraHypo = RooStats::DoHypoTestInversion(w, m_nToys, m_calcType, m_testStatType, m_useCLs, nPoints, minRange, maxRange);
+
+        if(!extraHypo) {
+            m_logger << kERROR << "doUpperLimit(): additional DoHypoTestInversion returned a nullptr - stopping" << GEndl;
+            break;
+        }
+
+        // Append it - should re-evaluate the settings for us automatically
+        hypo->Add(*extraHypo);
+        delete extraHypo;
+        previousMaxRange = maxRange;
     }
-
-/*    /// then reevaluate with proper settings*/
-    //if ( hypo!=0 || m_useScanRange) {
-        //double minRange = -1;
-        //double maxRange = -1;
-        //if (m_useScanRange) { // next fit is done between the user defined values
-            //minRange = m_scanRangeMin;
-            //maxRange = m_scanRangeMax;
-        //}
-        //else { // next fit is done between 0 and the expected upper limit + 2 sigma
-            //(void) hypo->ExclusionCleanup();             
-            
-            //int i=0; 
-            //while (i<5) {
-                //if (min_CLs(hypo)>0.05) { 
-                    //m_logger << kINFO << "Starting rescan iteration: " << i << GEndl;           
-                    //hypo = RedoScan(w,hypo);
-                    //if ( hypo!=0 ) { (void) hypo->ExclusionCleanup(); }
-                //}
-                //else { break; }
-                //i+=1;
-            //}
-            //minRange = 0;
-            //maxRange = 1.10 * hypo->GetExpectedUpperLimit(2);
-            //delete hypo; hypo=0;
-        //}
-        
-        //hypo = RooStats::DoHypoTestInversion(w, m_nToys, m_calcType, m_testStatType, m_useCLs, m_nPoints, minRange, maxRange);
-        //int nPointsRemoved = hypo->ExclusionCleanup();
-        //if (nPointsRemoved > 0) {
-            //m_logger << kWARNING << "ExclusionCleanup() removed " << nPointsRemoved 
-                //<< " scan point(s) for hypo test inversion: " << hypo->GetName() << GEndl;
-        //}
-
-        //if (m_useScanRange) {
-            //if ((1.2 * hypo->GetExpectedUpperLimit(2)) > m_scanRangeMax) {
-                //m_logger << kWARNING << "Scan Range is too near to the upper limit + 2 sigma! (calc exp limit + 2 sigma: " << hypo->GetExpectedUpperLimit(2)
-                 //<< ", set range: " << m_scanRangeMax << ")" << GEndl;
-            //}
-        //}
-    /*}   */    
-        
 
     /// store ul as nice plot ..
     if ( hypo!=0 ) {
         TString outputPrefix = TString(gSystem->DirName(outfileName))+"/"+fc->m_signalSampleName.Data();
         RooStats::AnalyzeHypoTestInverterResult( hypo, m_calcType, m_testStatType, m_useCLs, m_nPoints, outputPrefix, ".eps") ;
+        RooStats::AnalyzeHypoTestInverterResult( hypo, m_calcType, m_testStatType, m_useCLs, m_nPoints, outputPrefix, ".pdf") ;
+        RooStats::AnalyzeHypoTestInverterResult( hypo, m_calcType, m_testStatType, m_useCLs, m_nPoints, outputPrefix, ".png") ;
     }
 
     // save complete hypotestinverterresult to file
