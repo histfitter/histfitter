@@ -483,9 +483,9 @@ class UserSystematic(SystematicBase):
         for lowhigh in ["High_","Low_"]:
             lowhighName = "h%s%s%s%s_obs_%s" % (sam.name, self.name, lowhigh, regionString, replaceSymbols(chan.variableName))
             if abstract.hists[lowhighName] is None:
-                if lowhigh=="High_":
+                if lowhigh == "High_":
                     abstract.hists[lowhighName] = histMgr.buildUserHistoSysFromHist(lowhighName, self.high, abstract.hists[nomName])
-                elif lowhigh=="Low_":
+                elif lowhigh == "Low_":
                     abstract.hists[lowhighName] = histMgr.buildUserHistoSysFromHist(lowhighName, self.low, abstract.hists[nomName])
         return
 

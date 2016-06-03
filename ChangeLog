@@ -1,4 +1,8 @@
 2016-06-02 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
+	* python/histogramsManager.py: add Logger. Also clearer error if input for user-defined
+	systematic is wrong and the user probably meant to use a tree
+
+2016-06-02 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
 	* src/ConfigMgr.cxx: add mechanism to keep extending UL range if running
 	in asymptotic mode. Will keep added points and merging
 	HypoTestInverterResult until +2sigma band < 0.05 and the UL <0.9x the scan

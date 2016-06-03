@@ -18,6 +18,9 @@
 """
 
 from ROOT import TH1F
+from logger import Logger
+
+log = Logger('HistogramsManager')
 
 class HistogramsManager:
     """
@@ -81,15 +84,16 @@ class HistogramsManager:
         @param err The error to use; either a list of bin-by-bin errors or a number
         @param hNom The nominal-value histogram to construct the error for
         """
-        if isinstance(binErrs,float):
-            binErrs=self.floatToArray(binErrs,hNom)
-        elif isinstance(binErrs,list):
-            if len(binErrs)==1:
-                binErrs=self.floatToArray(binErrs[0],hNom)
+        if isinstance(binErrs, float):
+            binErrs = self.floatToArray(binErrs,hNom)
+        elif isinstance(binErrs, list):
+            if len(binErrs) == 1:
+                binErrs=self.floatToArray(binErrs[0], hNom)
             elif hNom.GetNbinsX() != len(binErrs):
                 raise ValueError("hNom and binErrs must have same length in buildUserHistoSysFromHist()")
         else:
-            raise TypeError("binErrs of type %s is not supported"%type(binErrs))
+            log.error("Incorrect input format for user-defined systematic")
+            raise TypeError("Input of errors of type {0} is not supported for a 'user' systematic - float or list of floats expected. Double check whether you meant to use 'tree' instead.".format(str(type(binErrs).__name__)))
          
         #binErrs is the relative errors
         xmin = hNom.GetXaxis().GetXmin()
