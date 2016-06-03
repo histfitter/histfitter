@@ -576,8 +576,8 @@ void ConfigMgr::doUpperLimit(FitConfig* fc) {
         }
 
         // Stop condition
-        if(currentNPoints > 100) { // TODO: make it dependent on whether we use toys? Pass a flag in configMgr?
-            m_logger << kERROR << "doUpperLimit(): extended the UL scan to more than 100 points already - won't keep going further. Pass a helpful range to configMgr instead." << GEndl;
+        if(currentNPoints > m_nPoints) { // TODO: make it dependent on whether we use toys? Pass a flag in configMgr?
+            m_logger << kERROR << "doUpperLimit(): extended the UL scan to more than 5x the original amount of points already (currently at " << currentNPoints << ") - won't keep going further. Pass a helpful range to configMgr instead." << GEndl;
             break;
         }
 
