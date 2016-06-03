@@ -1,4 +1,8 @@
-2016-06-02 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
+2016-06-03 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
+	* src/configMgr.cxx: add stop condition for UL range extending at 100
+	points
+
+2016-06-03 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
 	* python/histogramsManager.py: add Logger. Also clearer error if input for user-defined
 	systematic is wrong and the user probably meant to use a tree
 

@@ -563,11 +563,21 @@ void ConfigMgr::doUpperLimit(FitConfig* fc) {
         double dsig = 2.*maxSigma / (values.size() -1) ;         
         int i4 = (int) TMath::Floor ( ( nsig2 + maxSigma )/dsig + 0.5 ); // idx for +2 sig
 
+        double pValueForULplus2sigma = values[i4];
+
+        // Don't need sampling dist anymore
+        delete s;
+
         // Everything OK? 
-        if(values[i4] < 0.05 && hypo->GetExpectedUpperLimit(2) < 0.9*hypo->GetXValue(currentNPoints-1) ) {
+        if(pValueForULplus2sigma < 0.05 && hypo->GetExpectedUpperLimit(2) < 0.9*hypo->GetXValue(currentNPoints-1) ) {
             // +2 sigma band is below 0.05 and smaller than 0.9x the current range. stop!
             m_logger << kINFO << "doUpperLimit(): the +2 sigma band is below 0.05 and UL+2sig is smaller than 0.9x the current range. All good!" << GEndl;
-            delete s;
+            break;
+        }
+
+        // Stop condition
+        if(currentNPoints > 100) { // TODO: make it dependent on whether we use toys? Pass a flag in configMgr?
+            m_logger << kERROR << "doUpperLimit(): extended the UL scan to more than 100 points already - won't keep going further. Pass a helpful range to configMgr instead." << GEndl;
             break;
         }
 
@@ -579,7 +589,7 @@ void ConfigMgr::doUpperLimit(FitConfig* fc) {
 
         // How much do we want to run extra in percentage?
         int nPointsDivisor = 5;
-        if(values[i4] > 0.05) {
+        if(pValueForULplus2sigma > 0.05) {
             m_logger << kWARNING << "doUpperLimit(): the +2 sigma band is not below 0.05. Will attempt to extend it." << GEndl;
         } else {
             m_logger << kWARNING << "doUpperLimit(): the +2 sigma UL found very close to the maximum of the scan range. Will attempt to extend it." << GEndl;
