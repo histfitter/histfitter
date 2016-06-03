@@ -644,23 +644,23 @@ void ConfigMgr::doUpperLimit(FitConfig* fc) {
         outfile->cd();
         TString hypName; //="hypo_"+fc->m_signalSampleName;
         if (hypo->ArraySize()>0 && min_CLs(hypo)>0.05) {
-                m_logger << kERROR << "Final CLs value not below threshold of 0.05  - upper limit scan most likely failed." << GEndl;
+                m_logger << kERROR << "No CLs value below threshold of 0.05 found - upper limit scan most likely failed." << GEndl;
                 m_logger << kERROR << "Will store result only for debugging purposes - do not use it in contour plots!" << GEndl;
-                hypName="debug_"+fc->m_signalSampleName;
-        }
-        else if (hypo->ArraySize()>0 && max_CLs(hypo)<0.05) {
-                m_logger << kERROR << "Initial CLs value not above threshold of 0.05 - upper limit scan most likely failed." << GEndl;
+                hypName = "debug_"+fc->m_signalSampleName;
+        } else if (hypo->ArraySize()>0 && max_CLs(hypo)<0.05) {
+                m_logger << kERROR << "No CLs value above threshold of 0.05 found - upper limit scan most likely failed." << GEndl;
                 m_logger << kERROR << "Will store result only for debugging purposes - do not use it in contour plots!" << GEndl;
-                if (!std::isnan(hypo->GetResult(0)->CLs())) { m_logger << kINFO << "Try rescan in range (0," << hypo->GetXValue(0) << ")" << GEndl; }             
-                hypName="debug_"+fc->m_signalSampleName;
-        }        
-        else if (hypo->ArraySize()==0) {
+                if (!std::isnan(hypo->GetResult(0)->CLs())) { 
+                    m_logger << kINFO << "Try rescan in range (0," << hypo->GetXValue(0) << ")" << GEndl; 
+                }             
+                hypName = "debug_"+fc->m_signalSampleName;
+        } else if (hypo->ArraySize()==0) {
                 m_logger << kERROR << "All fits seem to have failed - cannot compute upper limit!" << GEndl;
-                hypName="debug_"+fc->m_signalSampleName;
+                hypName = "debug_"+fc->m_signalSampleName;
+        } else {
+                hypName = "hypo_"+fc->m_signalSampleName;
         }
-        else {
-                hypName="hypo_"+fc->m_signalSampleName;
-        }
+        
         hypo->SetName(hypName);
         m_logger << kINFO << "Now storing HypoTestInverterResult <" << hypName << ">" << GEndl;
         hypo->Write();

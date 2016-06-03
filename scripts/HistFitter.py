@@ -319,7 +319,7 @@ if __name__ == "__main__":
     if drawSystematics:
        from ROOT import Util
        if not os.path.isdir("./plots"): 
-          log.info("no directory 'plots' found.... creating one")
+          log.info("no directory './plots' found - attempting to create one")
           os.mkdir("./plots")
        for fC in configMgr.fitConfigs:
            for chan in fC.channels:
