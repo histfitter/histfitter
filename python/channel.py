@@ -147,7 +147,8 @@ class Channel(object):
         @param index The index to use; if -1, append at the end
         """
         if index == -1:
-            index = len(self.sampleList)  # = end of list
+            # don't overwrite the last element but append it
+            index = len(self.sampleList) 
 
         self.sampleList.insert(index, sample.Clone())
         self.sampleList[index].parentChannel = self
@@ -159,7 +160,7 @@ class Channel(object):
             self.sampleList[index].weights = deepcopy(self.weights)
 
         for (systName, syst) in self.systDict.items():
-            if not systName in self.sampleList[-1].systDict.keys():
+            if not systName in self.sampleList[index].systDict.keys():
                 self.sampleList[index].addSystematic(syst)
         return
 

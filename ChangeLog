@@ -1,3 +1,7 @@
+2016-06-08 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
+	* python/channel.py: addSample() would use the index of the last sample to
+	check systematics, even if you specified an index. Now fixed. 
+
 2016-06-03 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
 	* src/configMgr.cxx: add stop condition for UL range extending at 5x
 	points; change the error messages about min_CLs and max_CLs to reflect
