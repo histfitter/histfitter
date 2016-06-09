@@ -22,6 +22,7 @@ from ROOT import gROOT,gSystem,gDirectory,RooAbsData,RooRandom,RooWorkspace
 gSystem.Load("libSusyFitter.so")
 from ROOT import ConfigMgr
 gROOT.Reset()
+
 import os
 import argparse
 
@@ -105,10 +106,16 @@ if __name__ == "__main__":
     """
     Definition of all options and defaults given as arguments
     """
-    parser = argparse.ArgumentParser()
+    mode_helper = { "bkg": "Run background-only fit",
+                       "excl": "Run exclusion fit (model-dependent fit)",
+                       "model-dep": "Run exclusion fit (model-dependent fit) (alias of excl)",
+                       "disc": "Run discovery fit (model-independent fit)",
+                       "model-indep": "Run discovery fit (model-indepndent fit) (alias of disc)"}
+
+    parser = argparse.ArgumentParser(description="HistFitter options:")
     parser.add_argument("configFile", nargs="+", help="configuration file to execute")
     parser.add_argument("-L", "--log-level", help="set log level", choices=["VERBOSE", "DEBUG", "INFO", "WARNING", "ERROR", "FATAL", "ALWAYS"])
-    parser.add_argument("-F", "--fit-type", help="type of fit to run", choices=["bkg", "disc", "excl"])
+    parser.add_argument("-F", "--fit-type", help="type of fit to run: bkg (background-only fit), excl (exclusion fit / model-dependent fit), disc (discovery fit / model-independent fit), model-dep (alias of excl), model-indep (alias of disc)", choices=["bkg", "excl", "disc", "model-dep", "model-indep"]) 
     parser.add_argument("-t", "--create-histograms", help="re-create histograms from TTrees", action="store_true", default=configMgr.readFromTree)
     parser.add_argument("-w", "--create-workspace", help="re-create workspace from histograms", action="store_true", default=configMgr.executeHistFactory)
     parser.add_argument("-x", "--use-XML", help="write XML files by hand and call hist2workspace on them, instead of directly writing workspaces", action="store_true", default=configMgr.writeXML)
@@ -151,12 +158,19 @@ if __name__ == "__main__":
     """
     process all the arguments/options
     """
+    if not os.path.exists(HistFitterArgs.configFile[0]) and not os.path.isfile(HistFitterArgs.configFile[0]):
+        log.fatal("Specified input file '{0}' does not exist or is not a file".format(HistFitterArgs.configFile[0]))
+        sys.exit(-1)
+
     if HistFitterArgs.fit_type == "bkg":
         myFitType = FitType.Background
-    elif HistFitterArgs.fit_type == "excl":
+        log.info("Will run in background-only fit mode")
+    elif HistFitterArgs.fit_type == "excl" or HistFitterArgs.fit_type == "model-dep":
         myFitType = FitType.Exclusion
-    elif HistFitterArgs.fit_type == "disc":
+        log.info("Will run in exclusion (model-dependent) fit mode")
+    elif HistFitterArgs.fit_type == "disc" or HistFitterArgs.fit_type == "model-indep":
         myFitType = FitType.Discovery
+        log.info("Will run in discovery (model-independent) fit mode")
 
     configMgr.myFitType = myFitType
  
