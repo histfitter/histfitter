@@ -1,4 +1,11 @@
 2016-07-11 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
+	* scripts/plotUpDown.py: pythonic and modular version of the macro
+	plotUpDown.C but with easy settings
+	* new module python/histfitter: module directory for modules to be
+	imported in our utility scripts. New plotUpDown.py relies on one module
+	inside this.
+
+2016-07-11 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
 	* channel.py, configManager.py, sample.py, systematic.py: modifications to
 	allow for new systematic types "normHistoSysEnvelopeSym",
 	"histoSysEnvelopeSym", "overallNormHistoSysEnvelopeSym". These look at the
