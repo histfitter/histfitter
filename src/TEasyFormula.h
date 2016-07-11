@@ -22,11 +22,11 @@
 #include <vector>
 #include <map>
 
-#include "TFormula.h"
+#include "v5/TFormula.h"
 #include "TString.h"
 #include "TMsgLogger.h"
 
-class TEasyFormula : public TFormula {
+class TEasyFormula : public ROOT::v5::TFormula {
 
     public:
 

@@ -1,3 +1,7 @@
+2016-07-11 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
+	* src/TEasyFormula.h: inherit from ROOT::v5::TFormula to ensure that our
+	cutStr still works properly
+
 2016-06-09 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
 	* scripts/HistFitter.py: add model-dep and model-indep fit types as
 	aliases of excl and disc
