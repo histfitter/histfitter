@@ -1,4 +1,14 @@
 2016-07-11 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
+	* channel.py, configManager.py, sample.py, systematic.py: modifications to
+	allow for new systematic types "normHistoSysEnvelopeSym",
+	"histoSysEnvelopeSym", "overallNormHistoSysEnvelopeSym". These look at the
+	bin content of the histogram and set the error to max(nom-low, high-nom);
+	i.e. high' = nom + max(abs(nom-low), abs(high-nom)) and similar for low.
+	Such types did not exist yet.
+	* Same files: Added additional verbose statements to clarify what's going on to aid the
+	user. 
+
+2016-07-11 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
 	* src/TEasyFormula.h: inherit from ROOT::v5::TFormula to ensure that our
 	cutStr still works properly
 

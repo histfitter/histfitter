@@ -858,7 +858,7 @@ class ConfigManager(object):
         # post-processing 1: loop for user-norm systematics
         for chan in fitConfig.channels:
             regionString = "".join(chan.regions)
-            
+
             for sam in chan.sampleList:
                 for syst in sam.systDict.values():
                     if syst.method == "userNormHistoSys":
@@ -875,7 +875,7 @@ class ConfigManager(object):
                                 else:
                                     c = fitConfig.getChannel(normReg[1], normReg[0])
                                 normString += c.regionString
-    
+   
                         syst.PrepareGlobalNormalization(normString, self, fitConfig, chan, sam)
                         sam.addHistoSys(syst.name, nomName, highName, lowName, False, True, False, False, sam.name, normString)
 
@@ -1058,11 +1058,18 @@ class ConfigManager(object):
         lowName    = "h%s%sLow_%s_obs_%s" % (sam.name, syst.name, regionString, replaceSymbols(chan.variableName) )
 
         if syst.method == "histoSys":
-            chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName, False, False, nomSysName=nomSysName)
+            chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName, 
+                                                includeOverallSys=False, normalizeSys=False, nomSysName=nomSysName)
         elif syst.method == "histoSysOneSide":
-            chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName, False, False, False, True, nomSysName=nomSysName)
+            chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName, 
+                                                includeOverallSys=False, normalizeSys=False, symmetrize=False, oneSide=True, nomSysName=nomSysName)
         elif syst.method == "histoSysOneSideSym":
-            chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName, False, False, True, True, nomSysName=nomSysName)
+            chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName, 
+                                                includeOverallSys=False, normalizeSys=False, symmetrize=True, oneSide=True, nomSysName=nomSysName)
+        elif syst.method == "histoSysEnvelopeSym": 
+            chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName, 
+                                                includeOverallSys=False, normalizeSys=False, symmetrize=True, oneSide=False, symmetrizeEnvelope=True, 
+                                                samName=sam.name, normString=normString, nomSysName=nomSysName)
         elif syst.method == "overallSys":
             highIntegral = configMgr.hists[highName].Integral()
             lowIntegral = configMgr.hists[lowName].Integral()
@@ -1081,21 +1088,44 @@ class ConfigManager(object):
         elif syst.method == "userOverallSys":
             chan.getSample(sam.name).addOverallSys(syst.name, syst.high, syst.low)
         elif syst.method == "overallHistoSys":
-            chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName, True,  False, nomSysName=nomSysName)
+            chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName, 
+                                                includeOverallSys=True, normalizeSys=False, nomSysName=nomSysName)
         elif syst.method == "overallNormSys":
-            chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName, True,  True, False, False, sam.name, normString, nomSysName=nomSysName)
+            chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName, 
+                                                includeOverallSys=True, normalizeSys=True, symmetrize=False, oneSide=False, 
+                                                samName=sam.name, normString=normString, nomSysName=nomSysName)
         elif syst.method == "overallNormHistoSys":
-            chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName, True,  True, False, False, sam.name, normString, nomSysName=nomSysName)
+            chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName, 
+                                                includeOverallSys=True, normalizeSys=True, symmetrize=False, oneSide=False, 
+                                                samName=sam.name, normString=normString, nomSysName=nomSysName)
         elif syst.method == "overallNormHistoSysOneSide":
-            chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName, True,  True, False, True,  sam.name, normString, nomSysName=nomSysName)
+            chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName, 
+                                                includeOverallSys=True, normalizeSys=True, symmetrize=False, oneSide=True,
+                                                samName=sam.name, normString=normString, nomSysName=nomSysName)
         elif syst.method == "overallNormHistoSysOneSideSym":
-            chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName, True,  True, True,  True,  sam.name, normString, nomSysName=nomSysName)
+            chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName, 
+                                                includeOverallSys=True, normalizeSys=True, symmetrize=True, oneSide=True,
+                                                samName=sam.name, normString=normString, nomSysName=nomSysName)
+        elif syst.method == "overallNormHistoSysEnvelopeSym":
+            chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName, 
+                                                includeOverallSys=True, normalizeSys=True, symmetrize=True, oneSide=False, symmetrizeEnvelope=True,
+                                                samName=sam.name, normString=normString, nomSysName=nomSysName)
         elif syst.method == "normHistoSys":
-            chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName, False, True, False, False, sam.name, normString, nomSysName=nomSysName)
+            chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName, 
+                                                includeOverallSys=False, normalizeSys=True,symmetrize= False, oneSide=False, 
+                                                samName=sam.name, normString=normString, nomSysName=nomSysName)
         elif syst.method == "normHistoSysOneSide":
-            chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName, False, True, False, True,  sam.name, normString, nomSysName=nomSysName)
+            chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName, 
+                                                includeOverallSys=False, normalizeSys=True, symmetrize=False, oneSide=True, 
+                                                samName=sam.name, normString=normString, nomSysName=nomSysName)
         elif syst.method == "normHistoSysOneSideSym":
-            chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName, False, True, True,  True,  sam.name, normString, nomSysName=nomSysName)
+            chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName, 
+                                                includeOverallSys=False, normalizeSys=True, symmetrize=True, oneSide=True, 
+                                                samName=sam.name, normString=normString, nomSysName=nomSysName)
+        elif syst.method == "normHistoSysEnvelopeSym": 
+            chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName, 
+                                                includeOverallSys=False, normalizeSys=True, symmetrize=True, oneSide=False, symmetrizeEnvelope=True, 
+                                                samName=sam.name, normString=normString, nomSysName=nomSysName)
         elif syst.method == "userHistoSys" or syst.method == "userNormHistoSys":
             if configMgr.hists[highName] is None:
                 configMgr.hists[highName] = histMgr.buildUserHistoSysFromHist(highName,  syst.high,  configMgr.hists[nomName])
@@ -1144,7 +1174,7 @@ class ConfigManager(object):
                                                                                       replaceSymbols(chan.variableName)),
                                                            nomName+"Norm", syst.constraint, "", "", "", ""))
         else:
-            log.error("ERROR don't know what to do with %s %s"%(syst.name,syst.method))
+            log.error("ERROR don't know what to do with {0:s} (type: {1:s})".format(syst.name,syst.method))
         return
 
     def addHistoSysForQCD(self,regionString,normString,normCuts,chan,sam):
@@ -1314,19 +1344,24 @@ class ConfigManager(object):
 
             if not sam.normRegions and (not sam.noRenormSys): 
                 needsNorm = False
+                log.debug("Checking whether sample {0} needs normalisation regions".format(sam.name))
                 for sys in sam.systDict.values():
                     if sys.method == "userNormHistoSys" \
                            or sys.method == "normHistoSys" \
                            or sys.method == "normHistoSysOneSide" \
+                           or sys.method == "normHistoSysEnvelopeSym" \
                            or sys.method == "normHistoSysOneSideSym" \
                            or sys.method == "overallNormSys" \
                            or sys.method == "overallNormHistoSys" \
                            or sys.method == "overallNormHistoSysOneSide" \
+                           or sys.method == "overallNormHistoSysEnvelopeSym" \
                            or sys.method == "overallNormHistoSysOneSideSym":
                         log.error("    %s needs normRegions because of %s of type %s but no normalization regions specified. This is not safe,  please fix." % (sam.name, sys.name, sys.method))
                         needsNorm = True
                         break
+    
                 if needsNorm:
+                    log.verbose("Setting normalisation regions for {0}".format(sam.name))
                     normChannels=[]
                     tl=sam.parentChannel.parentTopLvl
                     for ch in tl.channels:
@@ -1347,6 +1382,8 @@ class ConfigManager(object):
                         c = fitConfig.getChannel(normReg[1],normReg[0])
                     normString += c.regionString
           
+                log.verbose("Constructed normString {0} for sample {1}".format(normString, sam.name))
+
                 tmpName = "h%sNom_%sNorm" % (sam.name, normString )
                 if not tmpName in self.hists.keys():
                     
@@ -1396,6 +1433,7 @@ class ConfigManager(object):
 
             for (systName,syst) in chan.getSample(sam.name).systDict.items():
                 log.info("    Systematic: %s" % systName)
+                log.verbose("normString = {0}".format(normString))
 
                 # first reset weight to nominal value -> TODO: is this needed for tree-based systematics?!
                 self.setWeightsCutsVariable(chan, sam, regionString) # no need to call the prepare() method <- YES there is. This sets the correct SR. Bad design@

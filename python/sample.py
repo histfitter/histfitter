@@ -31,6 +31,31 @@ TH1.SetDefaultSumw2(True)
 from copy import deepcopy
 from configManager import configMgr
 
+def symmetrizeSystematicEnvelope(nomName, lowName, highName):
+    # Loop over all bins - and look for the biggest error
+    for iBin in xrange(1, configMgr.hists[lowName].GetNbinsX()+1):
+        lowVal = configMgr.hists[lowName].GetBinContent(iBin)
+        highVal = configMgr.hists[highName].GetBinContent(iBin)
+        nomVal = configMgr.hists[nomName].GetBinContent(iBin)
+        
+        lowErr = fabs(nomVal-lowVal)
+        highErr = fabs(highVal-nomVal)
+
+        err = max(lowErr, highErr)
+
+        # If low' = (nominal-error) is < 0, truncate it to 0
+        newLowVal = (nomVal - err)
+        if newLowVal < 0.0:
+            log.warning("symmetrizeSystematicEnvelope(): low={0:f} is < 0.0 in {1:s} bin {2:d}. Setting negative bins to 0.0.".format(newLowVal, lowName, iBin))
+        newHighVal = nomVal + err
+        
+        log.debug("symmetrizeSystematicEnvelope(): bin {0:d} -> found nom={1}, low={2}, high={3} => symmetrized error to low={4} high={5}".format(iBin, nomVal, lowVal, highVal, newLowVal, newHighVal))
+
+        configMgr.hists[highName].SetBinContent(iBin, newHighVal) 
+        configMgr.hists[lowName].SetBinContent(iBin, newLowVal) 
+
+    return
+
 class Sample(object):
     """
     Defines a Sample belonging to a Channel
@@ -339,7 +364,7 @@ class Sample(object):
                #pass
         return
 
-    def addHistoSys(self, systName, nomName, highName, lowName, includeOverallSys, normalizeSys, symmetrize=False, oneSide=False, samName="", normString="", nomSysName=""):
+    def addHistoSys(self, systName, nomName, highName, lowName, includeOverallSys, normalizeSys, symmetrize=False, oneSide=False, samName="", normString="", nomSysName="", symmetrizeEnvelope=False):
         """
         Add a HistoSys entry using the nominal,  high and low histograms,  set if to include OverallSys
 
@@ -358,7 +383,14 @@ class Sample(object):
         @param samName Name of the sample
         @param normString String to append to the name of renormalised samples (default empty)
         @param nomSysName Name of the nominal systematic to generate high/low from (optional use (see source); default empty)
+        @param symmetrizeEnvelope Boolean to indicate whether or not the envelope of up/down is taken as a symmetrical error
         """
+
+        log.debug("Building histograms {0} / {1} / {2}".format(nomName, highName, lowName))
+        log.verbose("Using settings: includeOverallSys={0}, normalizeSys={1}, symmetrize={2}, oneSide={3}, symmetrizeEnvelope={4}".format(includeOverallSys, normalizeSys, symmetrize, oneSide, symmetrizeEnvelope)) 
+
+        if oneSide and symmetrizeEnvelope:
+            log.fatal("Cannot use oneSided histogram with symmetrizeEnvelope - use either, not both. Please check the systematic type of {0}".format(nomName))
 
         ### usecase of different tree from nominal histogram in case of 
         if len(nomSysName)>0:
@@ -402,15 +434,21 @@ class Sample(object):
             log.warning("            For now, using all non-validation channels by default: %s"%self.normRegions)
 
         ## Three use-cases:
-        ## 1. Normalized systematics over control regions, and all sub-cases (symmetrize, includeOverallSys)
+        ## 1. Normalized systematics over control regions, and all sub-cases (symmetrize, includeOverallSys; symmetrizeEnvelope)
         ## 2. includeOverallSys and not normalizeSys:
         ## 3. No renormalization, and no overall-systematics
 
         if normalizeSys:
+            log.verbose("Case 1: normalized systematic")
             if not self.normRegions: 
                 raise RuntimeError("Please specify normalization regions!")
-
-            if oneSide and symmetrize:
+            
+            if symmetrize and symmetrizeEnvelope:
+                # build the envelope of up/down
+                log.verbose("Symmetrizing envelope of histogram: building error = max ( (up-nom), (nom-down) )")
+                log.verbose("(nom={0} / low={1} / high={2}".format(nomName, lowName, highName))
+                symmetrizeSystematicEnvelope(nomName, lowName, highName)
+            elif oneSide and symmetrize:
                 # symmetrize
                 configMgr.hists[lowName] = configMgr.hists[nomName].Clone(lowName)
                 configMgr.hists[lowName].Scale(2.0)
@@ -420,17 +458,25 @@ class Sample(object):
                     binVal = configMgr.hists[lowName].GetBinContent(iBin)
                     if binVal<0.:
                         configMgr.hists[lowName].SetBinContent(iBin, 0.)
-
+            
             # use different renormalization region
             if len(self.normSampleRemap)>0: 
                 samNameRemap = self.normSampleRemap
-                log.info("remapping normalization of <%s> to sample:  %s"%(samName,samNameRemap))
+                log.info("remapping normalization of <%s> to sample:  %s" % (samName,samNameRemap))
             else:
                 samNameRemap = samName
+                log.debug("Using samNameRemap = {0}".format(samName))
 
-            highIntegral = configMgr.hists["h"+samNameRemap+systName+"High_"+normString+"Norm"].Integral()
-            lowIntegral  = configMgr.hists["h"+samNameRemap+systName+"Low_"+normString+"Norm"].Integral()
-            nomIntegral  = configMgr.hists["h"+samNameRemap+"Nom_"+normString+"Norm"].Integral()
+            highRemapName = "h"+samNameRemap+systName+"High_"+normString+"Norm"
+            lowRemapName = "h"+samNameRemap+systName+"Low_"+normString+"Norm"
+            nomRemapName = "h"+samNameRemap+"Nom_"+normString+"Norm"
+            log.verbose("Loading high integral from {0}".format(highRemapName))
+            log.verbose("Loading low integral from {0}".format(lowRemapName))
+            log.verbose("Loading nominal integral from {0}".format(nomRemapName))
+
+            highIntegral = configMgr.hists[highRemapName].Integral()
+            lowIntegral  = configMgr.hists[lowRemapName].Integral()
+            nomIntegral  = configMgr.hists[nomRemapName].Integral()
             if len(nomSysName)>0:  ## renormalization done based on consistent set of trees
                 if configMgr.hists[nomSysName] != None:
                     nomIntegral  = configMgr.hists["h"+samNameRemap+systName+"Nom_"+normString+"Norm"].Integral()
@@ -494,13 +540,20 @@ class Sample(object):
                 self.histoSystList.append((systName, highName+"Norm", nomName, configMgr.histCacheFile, "", "", "", ""))
             else:
                 self.histoSystList.append((systName, highName+"Norm", lowName+"Norm", configMgr.histCacheFile, "", "", "", ""))
+            
             if includeOverallSys and not (oneSide and not symmetrize):
                 self.addOverallSys(systName, highN, lowN)                
             
 
+        # Case 2
         if includeOverallSys and not normalizeSys:
-
-            if oneSide and symmetrize:
+            log.verbose("Case 2: non-normalized systematic with includeOverallSys")
+            
+            if symmetrizeEnvelope:
+                # build the envelope of up/down
+                log.verbose("Symmetrizing envelope of histogram: building error = max ( (up-nom), (nom-down) )")
+                symmetrizeSystematicEnvelope(nomName, lowName, highName)
+            elif oneSide and symmetrize:
                 # symmetrize
                 configMgr.hists[lowName] = configMgr.hists[nomName].Clone(lowName)
                 configMgr.hists[lowName].Scale(2.0)
@@ -539,10 +592,12 @@ class Sample(object):
                 self.histoSystList.append((systName, highName+"Norm", lowName+"Norm", configMgr.histCacheFile, "", "", "", ""))
                 self.addOverallSys(systName, high, low)
 
-
+        # Case 3
         if not includeOverallSys and not normalizeSys: # no renormalization,  and no overall systematic
+            log.verbose("Case 3: non-normalized systematic without includeOverallSys")
 
-            if symmetrize and not oneSide: ## symmetrize the systematic uncertainty
+            if symmetrize and not (oneSide or symmetrizeEnvelope): ## symmetrize the systematic uncertainty
+                log.verbose("Symmetrizing histogram; _NOT_ using oneSide or symmetrizeEnvelope")
                 nomIntegral = configMgr.hists[nomName].Integral()
                 lowIntegral = configMgr.hists[lowName].Integral()
                 highIntegral = configMgr.hists[highName].Integral()
@@ -554,25 +609,25 @@ class Sample(object):
                     log.error("    generating HistoSys for %s syst=%s nom=%g high=%g low=%g. Systematic is removed from fit." % (nomName, systName, nomIntegral, highIntegral, lowIntegral))
                     return
 
-                if high<1.0 and 1.0 > low > 0.0:
+                if high < 1.0 and 1.0 > low > 0.0:
                     log.warning("    addHistoSys: high=%f is < 1.0 in %s. Taking symmetric value from low %f %f"% (high, systName, low, 2.-low))
                     configMgr.hists[highName+"Norm"] = configMgr.hists[highName].Clone(highName+"Norm")
                     try:
-                        configMgr.hists[highName+"Norm"].Scale((2.-low)/high)
+                        configMgr.hists[highName+"Norm"].Scale((2.0-low)/high)
                     except ZeroDivisionError:
                         log.error("    generating HistoSys for %s syst=%s nom=%g high=%g low=%g. Systematic is removed from fit." % (nomName, systName, nomIntegral, highIntegral, lowIntegral))
                         return
                     self.histoSystList.append((systName, highName+"Norm", lowName, configMgr.histCacheFile, "", "", "", ""))
-                elif low>1.0 and high>1.0:
+                elif low > 1.0 and high > 1.0:
                     log.warning("    addHistoSys: low=%f is > 1.0 in %s. Taking symmetric value from high %f %f"% (low, systName, high, 2.-high))
                     configMgr.hists[lowName+"Norm"] = configMgr.hists[lowName].Clone(lowName+"Norm")
                     try:
-                        configMgr.hists[lowName+"Norm"].Scale((2.-high)/low)
+                        configMgr.hists[lowName+"Norm"].Scale((2.0-high)/low)
                     except ZeroDivisionError:
                         log.error("    generating HistoSys for %s syst=%s nom=%g high=%g low=%g. Systematic is removed from fit." % (nomName, systName, nomIntegral, highIntegral, lowIntegral))
                         return
                     self.histoSystList.append((systName, highName, lowName+"Norm", configMgr.histCacheFile, "", "", "", ""))
-                elif low<0.:
+                elif low < 0.0:
                     log.warning("    addHistoSys: low=%f is < 0.0 in %s. Setting negative bins to 0.0."% (low, systName))
                     configMgr.hists[lowName+"Norm"] = configMgr.hists[lowName].Clone(lowName+"Norm")
                     for iBin in xrange(1, configMgr.hists[lowName+"Norm"].GetNbinsX()+1):
@@ -582,17 +637,24 @@ class Sample(object):
                 else:
                     self.histoSystList.append((systName, highName, lowName, configMgr.histCacheFile, "", "", "", ""))
             elif symmetrize and oneSide:
+                log.verbose("Symmetrizing one-sided histogram: building low=(2*nominal)-high")
                 # symmetrize one-side systematic, nothing else
                 configMgr.hists[lowName] = configMgr.hists[nomName].Clone(lowName)
                 configMgr.hists[lowName].Scale(2.0)
-                configMgr.hists[lowName].Add(configMgr.hists[highName],  -1.0)
+                configMgr.hists[lowName].Add(configMgr.hists[highName], -1.0)
 
                 for iBin in xrange(1, configMgr.hists[lowName].GetNbinsX()+1):
                     binVal = configMgr.hists[lowName].GetBinContent(iBin)
-                    if binVal<0.:
+                    if binVal < 0.:
                         configMgr.hists[lowName].SetBinContent(iBin, 0.)
 
                 self.histoSystList.append((systName, highName, lowName, configMgr.histCacheFile, "", "", "", "")) 
+            elif symmetrize and symmetrizeEnvelope:
+                log.verbose("Symmetrizing envelope of histogram: building error = max ( (up-nom), (nom-down) )")
+                symmetrizeSystematicEnvelope(nomName, lowName, highName)
+                
+                self.histoSystList.append((systName, highName, lowName, configMgr.histCacheFile, "", "", "", ""))
+                
             else: # default: don't do anything special
                 self.histoSystList.append((systName, highName, lowName, configMgr.histCacheFile, "", "", "", ""))
 

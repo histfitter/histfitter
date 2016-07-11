@@ -100,6 +100,8 @@ class Channel(object):
         self.text2 = ''
         self.textsize1 = 0.03
         self.textsize2 = 0.03
+
+        log.debug("Defining new channel '{0}'".format(self.name))
         return
 
     def initialize(self):
@@ -383,12 +385,14 @@ class Channel(object):
 
         @param syst The systematic to add
         """
+        log.debug("Adding systematic '{0}' to channel '{1}'".format(syst.name, self.name))
         if syst.name in self.systDict.keys():
             raise Exception("Attempt to overwrite systematic %s "
                             " in Channel %s" % (syst.name, self.name))
         else:
             self.systDict[syst.name] = syst.Clone()
             for sam in self.sampleList:
+                log.debug("Adding systematic '{0}' to sample '{1}'".format(syst.name, sam.name))
                 sam.addSystematic(syst)
             return
 

@@ -65,11 +65,14 @@ class SystematicBase:
 
         allowedSys = ["histoSys","overallSys","userOverallSys","overallHistoSys","normHistoSys",
                       "shapeSys","shapeStat","histoSysOneSide","histoSysOneSideSym","normHistoSysOneSide","normHistoSysOneSideSym","userHistoSys","userNormHistoSys",
-                      "overallNormHistoSys","overallNormHistoSysOneSide","overallNormHistoSysOneSideSym", "overallNormSys" ]
+                      "overallNormHistoSys","overallNormHistoSysOneSide","overallNormHistoSysOneSideSym", "overallNormSys", 
+                      "normHistoSysEnvelopeSym", "histoSysEnvelopeSym", "overallNormHistoSysEnvelopeSym" ]
 
         if not self.method in allowedSys:
             raise Exception("Given method %s is not known; use one of %s"
                              % (self.method, allowedSys))
+
+        log.debug("Defining new systematic '{0}' of type {1}".format(self.name, self.method))
 
     def Clone(self, name=""):
         """ 
@@ -181,7 +184,9 @@ class SystematicBase:
             or self.method == "normHistoSys"
             or self.method == "normHistoSysOneSide"
             or self.method == "normHistoSysOneSideSym"
+            or self.method == "normHistoSysEnvelopeSym"
             or self.method == "overallNormHistoSys"
+            or self.method == "overallNormHistoSysEnvelopeSym"
             or self.method == "overallNormHistoSysOneSide"
             or self.method == "overallNormHistoSysOneSideSym" ) \
                and (not sam.noRenormSys):
@@ -458,10 +463,12 @@ class TreeWeightSystematic(SystematicBase):
 
         log.verbose("PrepareWeightsAndHistos()")
         if self.type == "weight":
+            log.verbose("Calling TreeWeightSystematic.PrepareWAHforWeight()") 
             TreeWeightSystematic.PrepareWAHforWeight(self, regionString,
                                                      normString, normCuts,
                                                      abstract, topLvl, chan, sam)
         if self.type == "tree":
+            log.verbose("Calling TreeWeightSystematic.PrepareWAHforTree()") 
             TreeWeightSystematic.PrepareWAHforTree(self, regionString,
                                                    normString, normCuts,
                                                    abstract, topLvl, chan, sam)
