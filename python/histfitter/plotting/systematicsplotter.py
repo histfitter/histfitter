@@ -78,6 +78,10 @@ class SystematicsPlot:
         return s
 
     def getHistograms(self):
+        if not os.path.exists(self.filename) or not os.path.isfile(self.filename):
+            print("Error: file {0} does not exist or is not a file".format(self.filename))
+            return False
+
         f = ROOT.TFile.Open(self.filename)
         self.nominalHistogram = f.Get(self.nominalName)
         self.upHistogram = f.Get(self.upName)
@@ -119,9 +123,9 @@ class SystematicsPlot:
         c = ROOT.TCanvas(canvasName, canvasName, 600, 400)
 
         if self.variable != "cuts":
-            self.nominalHistogram.SetTitle("Impact in {0} (binned: {2}) of {1}".format(self.region, self.systematic, self.variable))
+            self.nominalHistogram.SetTitle("Impact on {3} in {0} (binned: {2}) of {1}".format(self.region, self.systematic, self.variable, self.sample))
         else:
-            self.nominalHistogram.SetTitle("Impact in {0} of {1}".format(self.region, self.systematic))
+            self.nominalHistogram.SetTitle("Impact on {2} in {0} of {1}".format(self.region, self.systematic, self.sample))
         self.nominalHistogram.SetMarkerColor(ROOT.kBlack)
         self.nominalHistogram.SetMarkerStyle(20)
         self.nominalHistogram.SetLineWidth(2)
