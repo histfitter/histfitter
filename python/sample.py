@@ -960,7 +960,18 @@ class Sample(object):
         Remove all systematics from the sample
         """
         self.systDict.clear()
-  
+ 
+    def replaceSystematic(self, old, new):
+        """
+        Replace a systematic
+        
+        @param old Systematic object to remove
+        @param new Systematic object to add
+        """
+        self.removeSystematic(old)
+        self.addSystematic(new)
+        pass
+        
     # TODO: it would be nice to change the internal lists to dictionaries instead of arrays in a next iteration
     def createHistFactoryObject(self):
         """

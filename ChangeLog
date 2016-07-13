@@ -1,4 +1,7 @@
 2016-07-12 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
+	* python/sample.py: replaceSystematic() function (HISTFITTER-21)
+
+2016-07-12 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
 	* python/histfitter/plotting/systematicsplotter.py: check file existence;
 	put sample name in canvas title
 
