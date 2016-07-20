@@ -1,3 +1,8 @@
+2016-07-20 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
+	* scripts/HistFitter.py: forbid simultaneous use of -p and -z options as
+	the combination can lead to changing CLs values for the -p option (also
+	reported as HISTFITTER-25)
+
 2016-07-12 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
 	* python/sample.py: replaceSystematic() function (HISTFITTER-21)
 

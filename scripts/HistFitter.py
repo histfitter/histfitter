@@ -6,7 +6,8 @@
  * Created : November 2012                                                        *
  *                                                                                *
  * Description:                                                                   *
- *              Top-level control script for all commands/run-conditions          *                                                                                *
+ *              Top-level control script for all commands/run-conditions          *   
+ *                                                                                *
  * Authors:                                                                       *
  *      HistFitter group                                                          *
  *                                                                                *
@@ -25,6 +26,7 @@ gROOT.Reset()
 
 import os
 import argparse
+import sys
 
 from logger import Logger
 log = Logger('HistFitter')
@@ -171,6 +173,16 @@ if __name__ == "__main__":
     elif HistFitterArgs.fit_type == "disc" or HistFitterArgs.fit_type == "model-indep":
         myFitType = FitType.Discovery
         log.info("Will run in discovery (model-independent) fit mode")
+    
+    # Combining -p and -z can give funny results. It's not recommend. We stop the user from doing this and
+    # force them to execute in two steps.
+    if HistFitterArgs.hypotest and HistFitterArgs.discovery_hypotest:
+        log.error("You specified both -p and -z in the options. This can currently lead to unexpected results for the obtained CLs values for the -p option.")
+        log.error("Please run these two steps separately - there is no need to regenerate the workspace, so there is no overhead to do so.")
+        sys.exit()
+
+    parser.add_argument("-p", "--hypotest", help="run exclusion hypothesis test", action="store_true", default=doHypoTests)
+    parser.add_argument("-z", "--discovery-hypotest", help="run discovery hypothesis test", action="store_true", default=doDiscoveryHypoTests)
 
     configMgr.myFitType = myFitType
  
