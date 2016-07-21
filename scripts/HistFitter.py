@@ -181,9 +181,6 @@ if __name__ == "__main__":
         log.error("Please run these two steps separately - there is no need to regenerate the workspace, so there is no overhead to do so.")
         sys.exit()
 
-    parser.add_argument("-p", "--hypotest", help="run exclusion hypothesis test", action="store_true", default=doHypoTests)
-    parser.add_argument("-z", "--discovery-hypotest", help="run discovery hypothesis test", action="store_true", default=doDiscoveryHypoTests)
-
     configMgr.myFitType = myFitType
  
     if HistFitterArgs.validation:
