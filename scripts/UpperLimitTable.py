@@ -297,7 +297,6 @@ if __name__ == "__main__":
 
   if useAsimovSet and nTOYS>0:
     print "Info: -a means you will use the Asimov dataset, no need to specify nTOYS (with -n) as it will not be used in this case"
-    sys.exit(0)
   
   """
   make a list of workspace (outputfile, poi) names, if multiple channels/regions are required.

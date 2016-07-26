@@ -74,7 +74,7 @@ def addlinetosystable(tableline, m, name):
     info = m[name] 
 
     wroteCapped = False
-    if math.isnan(info["p0"]) and info["nObsInSR"] < info["nExpInSR"]:
+    if math.isnan(info["p0"]) and info["nObsInSR"] <= info["nExpInSR"]:
         # underfluctuation leads to nan -> write the capped p-value by hand
         wroteCapped = True
         info["p0"] = 0.5
