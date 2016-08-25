@@ -1,3 +1,8 @@
+2016-08-25 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
+	* src/StatTools.cxx: fix p0exp - bug introduced by misleading comment.
+	Comment changed. See HISTFITTER-29. Also fixed -2sigma and -1sigma values.
+	* python/prepareHistos.py: fix error in throwing exception
+
 2016-07-26 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
 	* scripts/UpperLimitTable.py: don't exit if -a and nToys given at the same
 	time

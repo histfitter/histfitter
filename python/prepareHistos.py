@@ -327,7 +327,7 @@ class PrepareHistos(object):
                         return None
                     log.debug("__addHistoFromCache(): forceNoFallback=%s useCacheToTreeFallback=%s" % (forceNoFallback, self.useCacheToTreeFallback))
                     log.error("Could not find histogram <"+name+"> in "+self.cacheFileName+" ! ")
-                    raise #Exception("Could not find histogram <"+name+"> in "+self.cacheFileName)
+                    raise Exception("Could not find histogram <"+name+"> in "+self.cacheFileName)
                 else:
                     log.info("Histogram has different binning <"+name+"> in "+self.cacheFileName+", trying from tree ")
                     log.info("addHistoFromCache: required binning %d,%f,%f, while histo has %d,%f,%f" % ( self.channel.nBins,self.channel.binLow,self.channel.binHigh,self.configMgr.hists[name].GetNbinsX(), self.configMgr.hists[name].GetBinLowEdge(1),self.configMgr.hists[name].GetXaxis().GetBinUpEdge(self.configMgr.hists[name].GetNbinsX()) ))
