@@ -791,7 +791,7 @@ LimitResult RooStats::get_Pvalue(const RooStats::HypoTestInverterResult* fResult
         result.SetCLsu1S( qv[3] );
         result.SetCLsu2S( qv[4] );
     } else { ///  discovery
-        result.SetP0d2S( qv[0] );        
+        result.SetP0d2S( qv[0] );
         result.SetP0d1S( qv[1] );
         result.SetP0exp( qv[2] );
         result.SetP0u1S( qv[3] );
