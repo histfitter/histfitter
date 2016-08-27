@@ -75,6 +75,7 @@
 #include "TGraph2D.h"
 #include "TGraphAsymmErrors.h"
 #include "TPad.h"
+#include "TGaxis.h"
 #include "TStyle.h"
 
 #include "TVectorD.h"
@@ -322,8 +323,10 @@ void Util::GenerateFitAndPlot(TString fcName, TString anaName, Bool_t drawBefore
             WriteWorkspace(w, inputFilename);
         }
     }
-    if (result)  
+    if (result){  
         result->Print("v");
+        PlotFitParameters(result,anaName);
+    }
 }
 
 ///////////////
@@ -3699,4 +3702,145 @@ void Util::plotUpDown(TString FileName, TString NameSample, TString SystName, TS
  //delete f;
    
 }
+
+//-------------------------------------------------------------------------------------------------------
+void Util::PlotFitParameters(RooFitResult* r, TString anaName){
+
+ RooArgList ListParams = r->floatParsFinal();
+
+ vector<TString> alpha_parNames, mcstat_parNames, mu_parNames;
+ vector<double> N, errN;
+ vector<double> alpha_parVals,alpha_parHighErrors,alpha_parLowErrors;
+ vector<double> mcstat_parVals,mcstat_parHighErrors,mcstat_parLowErrors;
+ vector<double> mu_parVals,mu_parHighErrors,mu_parLowErrors;
+
+ int count=0;
+
+ for(int i=0;i<ListParams.getSize();i++){
+    RooRealVar* x = (RooRealVar*) ListParams.at(ListParams.getSize()-i-1);
+    //cout<<x->GetName()<<" "<<x->getVal()<<" +- "<<x->getAsymErrorHi()<<" "<<x->getAsymErrorLo()<<endl;
+    TString tmpName = x->GetName();
+    if(tmpName.Contains("alpha")){
+      tmpName.ReplaceAll("alpha","#alpha");
+      count+=2;
+      alpha_parNames.push_back(tmpName);
+      alpha_parVals.push_back(x->getVal());
+      alpha_parHighErrors.push_back(x->getAsymErrorHi());
+      if(x->getAsymErrorLo()!=0) alpha_parLowErrors.push_back(fabs(x->getAsymErrorLo()));
+      else alpha_parLowErrors.push_back(x->getAsymErrorHi());
+      N.push_back(count);
+      errN.push_back(0);
+    }else if(tmpName.Contains("Lumi") || tmpName.Contains("mcstat") || tmpName.Contains("gamma_stat")){
+      tmpName.ReplaceAll("gamma_shape_mcstat","#gamma");
+      tmpName.ReplaceAll("gamma_stat","#gamma");
+      count+=2;
+      mcstat_parNames.push_back(tmpName);
+      mcstat_parVals.push_back(x->getVal()-1);
+      mcstat_parHighErrors.push_back(x->getAsymErrorHi());
+      if(x->getAsymErrorLo()!=0) mcstat_parLowErrors.push_back(fabs(x->getAsymErrorLo()));
+      else mcstat_parLowErrors.push_back(x->getAsymErrorHi());
+      N.push_back(count);
+      errN.push_back(0);
+    }else{
+      tmpName.ReplaceAll("mu","#mu");
+      count+=2;
+      mu_parNames.push_back(tmpName);
+      mu_parVals.push_back(x->getVal()-1);
+      mu_parHighErrors.push_back(x->getAsymErrorHi());
+      if(x->getAsymErrorLo()!=0) mu_parLowErrors.push_back(fabs(x->getAsymErrorLo()));
+      else mu_parLowErrors.push_back(x->getAsymErrorHi());
+      N.push_back(count);
+      errN.push_back(0);
+    }
+ }
+
+ vector<TString> parNames;
+ parNames.insert(parNames.end(), alpha_parNames.begin(), alpha_parNames.end());
+ parNames.insert(parNames.end(), mcstat_parNames.begin(), mcstat_parNames.end());
+ parNames.insert(parNames.end(), mu_parNames.begin(), mu_parNames.end());
+ vector<double> parVals, parHighErrors, parLowErrors;
+ parVals.insert(parVals.end(), alpha_parVals.begin(), alpha_parVals.end());
+ parVals.insert(parVals.end(), mcstat_parVals.begin(), mcstat_parVals.end());
+ parVals.insert(parVals.end(), mu_parVals.begin(), mu_parVals.end());
+ parHighErrors.insert(parHighErrors.end(), alpha_parHighErrors.begin(), alpha_parHighErrors.end());
+ parHighErrors.insert(parHighErrors.end(), mcstat_parHighErrors.begin(), mcstat_parHighErrors.end());
+ parHighErrors.insert(parHighErrors.end(), mu_parHighErrors.begin(), mu_parHighErrors.end());
+ parLowErrors.insert(parLowErrors.end(), alpha_parLowErrors.begin(), alpha_parLowErrors.end());
+ parLowErrors.insert(parLowErrors.end(), mcstat_parLowErrors.begin(), mcstat_parLowErrors.end());
+ parLowErrors.insert(parLowErrors.end(), mu_parLowErrors.begin(), mu_parLowErrors.end());
+ 
+ 
+
+ TCanvas* c_np = new TCanvas("fit_parameters","fit_parameters",1200,800);
+ c_np->cd();
+ TPad* p_np = new TPad("p_np","p_np",0,1,1,0.,0);
+ p_np->SetLeftMargin(0.3);
+ p_np->Draw();
+ p_np->cd();
+
+ TGraphAsymmErrors* g = new TGraphAsymmErrors(N.size(),&(parVals[0]),&(N[0]),&(parLowErrors[0]),&(parHighErrors[0]),&(errN[0]),&(errN[0])); 
+ g->GetHistogram()->GetYaxis()->Set(count/2,1,count+1);
+ for(unsigned int i=1;i<=N.size();i++) g->GetHistogram()->GetYaxis()->SetBinLabel(i,parNames[i-1]);
+ g->GetHistogram()->GetYaxis()->SetRangeUser(1,count+1);
+ g->GetHistogram()->GetYaxis()->SetTickLength(0.);
+ g->GetHistogram()->GetYaxis()->SetLabelSize(0.035);
+ g->GetHistogram()->GetXaxis()->SetRangeUser(-1.5,1.5);
+ g->GetHistogram()->GetXaxis()->SetTitle("#alpha");
+ g->SetName("fit_results");
+ g->SetTitle("");
+ g->SetMarkerStyle(8);
+ g->SetMarkerSize(2);
+ g->SetLineWidth(1);
+ g->Draw("AP");
+
+ vector<double> _N, _errN;
+ vector<double> _parVals, _parHighErrors, _parLowErrors;
+ for(unsigned int i=1;i<=mcstat_parVals.size()+mu_parVals.size();i++){
+     _N.push_back(alpha_parVals.size()*2+2*i);
+     _errN.push_back(0);
+ }
+ _parVals.insert(_parVals.end(), mcstat_parVals.begin(), mcstat_parVals.end());
+ _parVals.insert(_parVals.end(), mu_parVals.begin(), mu_parVals.end());
+ _parHighErrors.insert(_parHighErrors.end(), mcstat_parHighErrors.begin(), mcstat_parHighErrors.end());
+ _parHighErrors.insert(_parHighErrors.end(), mu_parHighErrors.begin(), mu_parHighErrors.end());
+ _parLowErrors.insert(_parLowErrors.end(), mcstat_parLowErrors.begin(), mcstat_parLowErrors.end());
+ _parLowErrors.insert(_parLowErrors.end(), mu_parLowErrors.begin(), mu_parLowErrors.end());
+
+ TGraph* _g = new TGraph(_N.size(),&(_parVals[0]),&(_N[0])); 
+ _g->SetName("_fit_results");
+ _g->SetTitle("");
+ _g->SetMarkerStyle(8);
+ _g->SetMarkerColor(kBlue);
+ _g->SetMarkerSize(2);
+ _g->Draw("Psame");
+
+
+ TGraph* yMCstatBand = new TGraph();
+ yMCstatBand->SetPoint(0,-1,0);
+ yMCstatBand->SetPoint(1,-1,count+2);
+ yMCstatBand->SetPoint(2,1,count+2);
+ yMCstatBand->SetPoint(3,1,0);
+ yMCstatBand->SetFillColor(kYellow); 
+ yMCstatBand->SetFillStyle(3352); 
+
+ TLine* lMCstat = new TLine(0,1,0,count+1);
+ lMCstat->SetLineStyle(8);
+ c_np->Update(); 
+
+ TGaxis *axis1 = new TGaxis(p_np->GetUxmin(),p_np->GetUymax(),p_np->GetUxmax(),p_np->GetUymax(),p_np->GetUxmin()+1,p_np->GetUxmax()+1,510,"-L");
+ axis1->SetLineColor(kBlue);
+ axis1->SetLabelColor(kBlue);
+ axis1->SetTitle("#gamma / #mu");
+ axis1->SetTitleColor(kBlue);
+ axis1->Draw("same");
+
+ yMCstatBand->Draw("Fsame");
+ lMCstat->Draw("same");
+ g->Draw("Psame");
+ _g->Draw("Psame");
+
+ c_np->SaveAs("results/"+anaName+"/"+c_np->GetName()+".root"); 
+
+}
+
 

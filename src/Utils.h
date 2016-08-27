@@ -435,7 +435,12 @@ namespace Util
 
  void plotUpDown(TString FileName, TString NameSample, TString SystName, TString Region, TString Var);
 
+ /*Plot the fit results
+ @ r -> fir result
+ @ anaName -> name of the analysis
+ */
 
+ void PlotFitParameters(RooFitResult* r, TString anaName);
 
 }
 
