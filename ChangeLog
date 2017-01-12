@@ -1,3 +1,8 @@
+2017-01-12 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
+	* python/prepareHistos.py: improve the histograms-not-found error to
+	reflect the incorrect binning in the output if that is the issue why the
+	histogram cannot be read properly
+
 2016-08-28 Luigi Longo <luigi.longo@cern.ch>
 	* src/Utils.cxx: added method to display fit results one time GenerateFitAndPlot
 	is called

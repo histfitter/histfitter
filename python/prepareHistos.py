@@ -321,13 +321,17 @@ class PrepareHistos(object):
                ( abs(self.channel.binLow - self.configMgr.hists[name].GetBinLowEdge(1))>0.00001 ) or \
                ( abs(self.channel.binHigh - self.configMgr.hists[name].GetXaxis().GetBinUpEdge(self.configMgr.hists[name].GetNbinsX())) > 0.00001):
                 if forceNoFallback or not self.useCacheToTreeFallback:
-                    self.configMgr.hists[name] = None
                     if forceReturn: # used for QCD histograms
                         log.info("Could not find histogram <"+name+"> in "+self.cacheFileName+" ! Force return.")
                         return None
                     log.debug("__addHistoFromCache(): forceNoFallback=%s useCacheToTreeFallback=%s" % (forceNoFallback, self.useCacheToTreeFallback))
                     log.error("Could not find histogram <"+name+"> in "+self.cacheFileName+" ! ")
-                    raise Exception("Could not find histogram <"+name+"> in "+self.cacheFileName)
+                    log.error("Requested nBins: {} / found: {}".format(int(self.channel.nBins), int(self.configMgr.hists[name].GetNbinsX())))
+                    log.error("Requested low: {} / found: {}".format(self.channel.binLow, self.configMgr.hists[name].GetBinLowEdge(1)))
+                    log.error("Requested up: {} / found: {}".format(self.channel.binHigh, self.configMgr.hists[name].GetXaxis().GetBinUpEdge(self.configMgr.hists[name].GetNbinsX())))
+                    
+                    self.configMgr.hists[name] = None
+                    raise Exception("Could not find histogram <"+name+"> in "+self.cacheFileName+" with correct binning")
                 else:
                     log.info("Histogram has different binning <"+name+"> in "+self.cacheFileName+", trying from tree ")
                     log.info("addHistoFromCache: required binning %d,%f,%f, while histo has %d,%f,%f" % ( self.channel.nBins,self.channel.binLow,self.channel.binHigh,self.configMgr.hists[name].GetNbinsX(), self.configMgr.hists[name].GetBinLowEdge(1),self.configMgr.hists[name].GetXaxis().GetBinUpEdge(self.configMgr.hists[name].GetNbinsX()) ))
