@@ -1244,21 +1244,21 @@ class ConfigManager(object):
                 log.debug(" => NOTE: no change in weights!")
 
             if (self.readFromTree and not sam.isDiscovery) or self.useCacheToTreeFallback:
-                    treeName = sam.treeName
-                    if treeName == '': 
-                        treeName = sam.name+self.nomName
+                    #treeName = sam.treeName
+                    #if treeName == '': 
+                    #    treeName = sam.name+self.nomName
                     if not noRead:
                         log.debug("setWeightsCutsVariable(): calling prepare.read()")
-                        self.prepare.read(treeName, sam.files)
+                        self.prepare.read(sam.getTreeName(), sam.files)
         else:
             self.prepare.weights = "1."
             if self.readFromTree or self.useCacheToTreeFallback:
-                treeName = sam.treeName
-                if treeName == '': 
-                    treeName = sam.name
+                #treeName = sam.treeName
+                #if treeName == '': 
+                #    treeName = sam.name
                 if not noRead:
                     log.debug("setWeightsCutsVariable(): calling prepare.read()")
-                    self.prepare.read(treeName, sam.files)
+                    self.prepare.read(sam.getTreeName(), sam.files)
 
         oldCuts = copy(self.prepare.cuts)
         if len(sam.cutsDict.keys()) == 0:
@@ -1411,10 +1411,10 @@ class ConfigManager(object):
                                     # assume that if no histogram is made, then it is not needed  
                                     continue
 
-                                treeName = s.treeName
-                                if treeName=='': treeName = s.name+self.nomName
+                                #treeName = s.treeName
+                                #if treeName=='': treeName = s.name+self.nomName
                                 log.debug("addSampleSpecificHists(): calling prepare.read()")
-                                self.prepare.read(treeName, s.files)
+                                self.prepare.read(sam.getTreeName(), s.files)
 
                                 tempHist = TH1F("temp", "temp", 1, 0.5, 1.5)
 

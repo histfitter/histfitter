@@ -113,6 +113,10 @@ class Sample(object):
         self.files = []
         ## Name of input tree
         self.treeName = ""
+        ## Prefix of input tree
+        self.prefixTreeName = "" 
+        ## Suffix of input tree
+        self.suffixTreeName = ""         
         ## Nominal cross-section weight for signal samples
         self.xsecWeight = None
         ## +1 sigma variation of cross-section weight
@@ -338,6 +342,24 @@ class Sample(object):
         """
         self.treeName = treeName
         return
+    
+    def setPrefixTreeName(self, prefixTreeName):
+        """
+        Set the prefix contained in every name of trees used for this sample - do not use setPreFixTreeName and setTreeName together. setTreeName will take precedence.
+
+        @param prefixTreeName Name of the tree
+        """
+        self.prefixTreeName = prefixTreeName
+        return  
+    
+    def setSuffixTreeName(self, suffixTreeName):
+        """
+        Set the suffix contained in every name of trees used for this sample - do not use setSuffixTreeName and setTreeName together. setTreeName will take precedence.
+
+        @param suffixTreeName Name of the tree
+        """
+        self.suffixTreeName = suffixTreeName
+        return     
 
     def setNormRegions(self, normRegions):
         """
@@ -363,6 +385,29 @@ class Sample(object):
                #syst.propagateTreeName(self.treeName)
                #pass
         return
+    
+    def getTreeName(self):
+        """
+        Get name of the tree to take histograms from
+        """
+        if self.treeName != "":
+            log.debug("Overriding treename for {} to {}".format(self.name, self.treeName))
+            return self.treeName
+
+        if self.prefixTreeName == "":
+            self.prefixTreeName = self.name
+            log.debug("Using name of sample as prefix for names of trees")
+            
+        suffix = ""
+        if not self.isData and not self.isQCD and not self.isDiscovery: 
+            suffix = configMgr.nomName
+        
+        if self.suffixTreeName != "":
+            suffix = self.suffixTreeName
+    
+        log.debug("Using tree suffix {}".format(suffix))
+
+        return "{}{}".format(self.prefixTreeName, suffix)
 
     def addHistoSys(self, systName, nomName, highName, lowName, includeOverallSys, normalizeSys, symmetrize=False, oneSide=False, samName="", normString="", nomSysName="", symmetrizeEnvelope=False):
         """

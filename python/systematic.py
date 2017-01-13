@@ -263,7 +263,11 @@ class SystematicBase:
                                 else:
                                     treeName = s.treeName
                             if self.type == "tree" and (treeName == '' or treeName == systNorm.low):
-                                treeName = s.name + systNorm.low
+                                # checking if the sample tree name should have a prefix, if yes use this                                
+                                if s.prefixTreeName == '':
+                                    treeName = s.name + systNorm.low
+                                else:
+                                    treeName = s.prefixTreeName + systNorm.low
 
                         if 'High' in lowhigh:
                             if s.name in systNorm.filesHi:
@@ -280,8 +284,12 @@ class SystematicBase:
                                     treeName = s.treeName + systNorm.high
                                 else:
                                     treeName = s.treeName
-                            if self.type == "tree" and (treeName == '' or treeName == systNorm.high):
-                                treeName = s.name + systNorm.high
+                            if self.type == "tree" and (treeName == '' or treeName == systNorm.high):    
+                                # checking if the sample tree name should have a prefix, if yes use this
+                                if s.prefixTreeName == '':
+                                    treeName = s.name + systNorm.high
+                                else:
+                                    treeName = s.prefixTreeName + systNorm.high
 
                         if 'Nom' in lowhigh:
                             filelist = s.files
@@ -293,12 +301,19 @@ class SystematicBase:
                                 treeName = s.treeName
                             ## possibly rename treename
                             if self.type == "tree" and (treeName == '' or treeName == systNorm.nominal):
-                                treeName = s.name + systNorm.nominal
+                                # checking if the sample tree name should have a prefix, if yes use this
+                                if s.prefixTreeName == '':
+                                    treeName = s.name + systNorm.nominal
+                                else:
+                                    treeName = s.prefixTreeName + systNorm.nominal                           
 
                         # weight-based trees assuming up/down are in one tree have identical name for up/low
                         # if our current name does not exist, we assume this one does
                         if self.type == "weight" and (not abstract.prepare.checkTree(treeName, filelist)):
-                            treeName = s.name + abstract.nomName
+                            if s.prefixTreeName == '':
+                                treeName = s.name + abstract.nomName
+                            else:
+                                treeName = s.prefixTreeName + abstract.nomName
 
                         log.verbose("s.name %s"%s.name)
                         log.verbose("sam.name %s"%sam.name)
@@ -378,7 +393,10 @@ class TreeWeightSystematic(SystematicBase):
             if abstract.readFromTree or abstract.useCacheToTreeFallback:
                 treeName = sam.treeName
                 if treeName == '':
-                    treeName = "%s%s" % (sam.name, abstract.nomName)
+                    if sam.prefixTreeName == '':
+                        treeName = "%s%s" % (sam.name, abstract.nomName)
+                    else:
+                        treeName = "%s%s" % (sam.prefixTreeName, abstract.nomName)
                 log.debug("PrepareWAHforWeight(): calling prepare.read()")
                 abstract.prepare.read(treeName, sam.files)
             
@@ -419,7 +437,10 @@ class TreeWeightSystematic(SystematicBase):
                         treeName = sam.treeName + self.high
                     
                     if treeName == '' or treeName == self.high:
-                        treeName = sam.name + self.high
+                        if sam.prefixTreeName == '':
+                            treeName = sam.name + self.high
+                        else:
+                            treeName = sam.prefixTreeName + self.high
 
                     log.debug("PrepareWAHforTree(): calling prepare.read()")
                     abstract.prepare.read(treeName, filelist)
@@ -435,7 +456,10 @@ class TreeWeightSystematic(SystematicBase):
                         treeName = sam.treeName + self.low
                     
                     if treeName == '' or treeName == self.low:
-                        treeName = sam.name + self.low
+                        if sam.prefixTreeName == '':
+                            treeName = sam.name + self.low
+                        else:
+                            treeName = sam.prefixTreeName + self.low
                 
                     log.debug("PrepareWAHforTree(): calling prepare.read()")
                     abstract.prepare.read(treeName, filelist)
@@ -443,7 +467,10 @@ class TreeWeightSystematic(SystematicBase):
                     filelist = sam.files
                     treeName = sam.treeName + self.nominal
                     if treeName == '' or treeName == self.nominal:
-                        treeName = sam.name + self.nominal
+                        if sam.prefixTreeName == '':
+                            treeName = sam.name + self.nominal
+                        else:
+                            treeName = sam.prefixTreeName + self.nominal
                 
                     log.debug("PrepareWAHforTree(): calling prepare.read()")
                     abstract.prepare.read(treeName, filelist)

@@ -22,7 +22,7 @@ ROOT.PyConfig.IgnoreCommandLineOptions = True
 from ROOT import gROOT,gSystem,gDirectory,RooAbsData,RooRandom,RooWorkspace
 gSystem.Load("libSusyFitter.so")
 from ROOT import ConfigMgr
-gROOT.Reset()
+#gROOT.Reset()
 
 import os
 import argparse
