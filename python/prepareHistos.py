@@ -320,6 +320,14 @@ class PrepareHistos(object):
             if not (int(self.channel.nBins) == int(self.configMgr.hists[name].GetNbinsX())) or \
                ( abs(self.channel.binLow - self.configMgr.hists[name].GetBinLowEdge(1))>0.00001 ) or \
                ( abs(self.channel.binHigh - self.configMgr.hists[name].GetXaxis().GetBinUpEdge(self.configMgr.hists[name].GetNbinsX())) > 0.00001):
+                # this is a ugly hack for now, to add an exception for 'Norm' histograms that originate from a channel with multiple bins   
+                if 'Norm' in self.configMgr.hists[name].GetTitle():
+                    if (int(self.configMgr.hists[name].GetNbinsX()) == 1 and \
+                        self.configMgr.hists[name].GetBinLowEdge(1) == 0.5 and \
+                        self.configMgr.hists[name].GetXaxis().GetBinUpEdge(self.configMgr.hists[name].GetNbinsX()) == 1.5): 
+                            log.debug("This is ugly: Stupid hack to evade check of histogram binning for 'Norm' histograms")
+                            self.name = name
+                            return self.configMgr.hists[name]                       
                 if forceNoFallback or not self.useCacheToTreeFallback:
                     if forceReturn: # used for QCD histograms
                         log.info("Could not find histogram <"+name+"> in "+self.cacheFileName+" ! Force return.")
