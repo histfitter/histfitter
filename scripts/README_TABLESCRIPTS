@@ -116,3 +116,36 @@ For example:
 ./UpperLimitTable.py -c SR4jTEl -w /afs/cern.ch/user/k/koutsman/HistFitterUser/MET_jets_leptons/results/MyDiscoveryAnalysis_Lumi_SR4jTEl_SPlusB_combined_NormalMeasurement_model.root -l 4.713 -n 5000
 ./UpperLimitTable.py -c SR4jTEl -w /afs/cern.ch/user/k/koutsman/HistFitterUser/MET_jets_leptons/results/MyDiscoveryAnalysis_Lumi_SR4jTEl_SPlusB_combined_NormalMeasurement_model.root -l 4.713 -a
 
+
+###########################
+##  Impact of systematics on POI (mu_SIGNAL)  ##
+###########################
+
+SystRankingPlot.py -w <workspace> -f <fitregion1,fitregion2,...> [-p <poi>] [--param-title <title>] [-o/--output <path>] [-n/--name <name>] [--max-np <n>] [--stat] [--post-fit] [-i/--input <file>] [--atlas <str>] [--sqrts <n>] [--lumi <l>]
+
+Required parameters:
+-w <workspace>:                 After fit workspace file
+-f <fitregion1, fitregion2>     Comma separated list of fit regions (e.g. TCR,WCR,SR)
+
+Optional parameters:
+-p <poi>                        Parameter of interest (default: mu_signal)
+--param-title <title>           Nice title for the parameter of interest (default: #mu_{signal})
+
+-o/--output <path>              Directory into which the plot will be saved (default: plots/)
+-n/--name <name>                Name of the resulting file, without extension (default: ranking)
+
+--max-np <n>                    Max. number of NPs to show (default: 20)
+--stat                          Display uncertainty based on stat. only result (default: no)
+--post-fit                      Only show post-fit impact on the POI
+
+-i/--input                      Data file from last run, to prevent rerunning the refit
+                                The script creates a file called ranking.data in the output directory
+                                which contains the resultsin a python format. In case someone only
+                                wants to change any of the display options (--param-title, --max-np,
+                                --stat, --post-fit, 
+
+--atlas, --sqrts, --lumi) the fits do not need to be run again.
+
+--atlas <str>                   Text for the ATLAS label (default: internal)
+--sqrts <n>                     sqrt(s) in TeV for the label (default: 13)
+--lumi <l>                      lumi in /fb for the label (default 36.5)
