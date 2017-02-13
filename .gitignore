@@ -1,0 +1,6 @@
+obj
+lib/*
+src/SusyFitter_Dict.C
+
+# copied from the src dir!
+include/*.h 
