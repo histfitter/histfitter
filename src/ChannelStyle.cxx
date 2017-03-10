@@ -47,8 +47,21 @@ ChannelStyle::ChannelStyle(const TString& name) : m_logger("ChannelStyle") {
     m_ATLASLabelX = -1.;
     m_ATLASLabelY = -1.;
     m_ATLASLabelText = "";
-    m_showLumi = kFALSE;
+    m_ShowLumi = kFALSE;
     m_lumi = -1.;
+    m_RegionLabelX = -1.;
+    m_RegionLabelY = -1.;
+    m_RegionLabelText = "";
+    m_LumiX = -1.;
+    m_LumiY = -1.;
+    m_XErrorSize = 0.;
+    m_IntegerStyle = kFALSE;
+    m_ArrowX = -1.;
+    m_ArrowY = -1.;
+    m_ArrowEnd = -1.;
+    m_ArrowAngle = 40.;
+    m_ArrowWidth = 2.;
+    m_ArrowColor = 1;
 
     m_defaultSampleColor = kRed-10;
     m_defaultSampleCounter = 0;

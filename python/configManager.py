@@ -581,12 +581,38 @@ class ConfigManager(object):
                      style.setATLASLabelY(c.ATLASLabelY)
                  if not c.ATLASLabelX is None:
                      style.setATLASLabelText(c.ATLASLabelText)
-                 if not c.showLumi is None:
-                     style.setShowLumi(c.showLumi)     
+                 if not c.ShowLumi is None:
+                     style.setShowLumi(c.ShowLumi)     
                  if not self.outputLumi is None:
                      if c.lumi is None:
                          style.setLumi(self.outputLumi)
                      else: style.setLumi(c.lumi)
+                 if not c.LumiX is None:
+                     style.setLumiX(c.LumiX)
+                 if not c.LumiY is None:
+                     style.setLumiY(c.LumiY)
+                 if not c.XErrorSize is None:
+                     style.setXErrorSize(c.XErrorSize)
+                 if not c.IntegerStyle is None:
+                     style.setIntegerStyle(c.IntegerStyle)
+                 if not c.RegionLabelX is None:
+                     style.setRegionLabelX(c.RegionLabelX)
+                 if not c.RegionLabelY is None:
+                     style.setRegionLabelY(c.RegionLabelY)
+                 if not c.RegionLabelText is None:
+                     style.setRegionLabelText(c.RegionLabelText)
+                 if not c.ArrowX is None:
+                     style.setArrowX(c.ArrowX)
+                 if not c.ArrowY is None:
+                     style.setArrowY(c.ArrowY)
+                 if not c.ArrowEnd is None:
+                     style.setArrowEnd(c.ArrowEnd)
+                 if not c.ArrowAngle is None:
+                     style.setArrowAngle(c.ArrowAngle)
+                 if not c.ArrowWidth is None:
+                     style.setArrowWidth(c.ArrowWidth)
+                 if not c.ArrowColor is None:
+                     style.setArrowColor(c.ArrowColor)
                  if len(c.text1)>0:
                      style.setText1(c.text1)
                  if len(c.text2)>0:
