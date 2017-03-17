@@ -581,38 +581,38 @@ class ConfigManager(object):
                      style.setATLASLabelY(c.ATLASLabelY)
                  if not c.ATLASLabelX is None:
                      style.setATLASLabelText(c.ATLASLabelText)
-                 if not c.ShowLumi is None:
-                     style.setShowLumi(c.ShowLumi)     
+                 if not c.showLumi is None:
+                     style.setShowLumi(c.showLumi)     
                  if not self.outputLumi is None:
                      if c.lumi is None:
                          style.setLumi(self.outputLumi)
                      else: style.setLumi(c.lumi)
-                 if not c.LumiX is None:
-                     style.setLumiX(c.LumiX)
-                 if not c.LumiY is None:
-                     style.setLumiY(c.LumiY)
-                 if not c.XErrorSize is None:
-                     style.setXErrorSize(c.XErrorSize)
-                 if not c.IntegerStyle is None:
-                     style.setIntegerStyle(c.IntegerStyle)
-                 if not c.RegionLabelX is None:
-                     style.setRegionLabelX(c.RegionLabelX)
-                 if not c.RegionLabelY is None:
-                     style.setRegionLabelY(c.RegionLabelY)
-                 if not c.RegionLabelText is None:
-                     style.setRegionLabelText(c.RegionLabelText)
-                 if not c.ArrowX is None:
-                     style.setArrowX(c.ArrowX)
-                 if not c.ArrowY is None:
-                     style.setArrowY(c.ArrowY)
-                 if not c.ArrowEnd is None:
-                     style.setArrowEnd(c.ArrowEnd)
-                 if not c.ArrowAngle is None:
-                     style.setArrowAngle(c.ArrowAngle)
-                 if not c.ArrowWidth is None:
-                     style.setArrowWidth(c.ArrowWidth)
-                 if not c.ArrowColor is None:
-                     style.setArrowColor(c.ArrowColor)
+                 if not c.lumiX is None:
+                     style.setLumiX(c.lumiX)
+                 if not c.lumiY is None:
+                     style.setLumiY(c.lumiY)
+                 if not c.xErrorSize is None:
+                     style.setXErrorSize(c.xErrorSize)
+                 if not c.integerStyle is None:
+                     style.setIntegerStyle(c.integerStyle)
+                 if not c.regionLabelX is None:
+                     style.setRegionLabelX(c.regionLabelX)
+                 if not c.regionLabelY is None:
+                     style.setRegionLabelY(c.regionLabelY)
+                 if not c.regionLabelText is None:
+                     style.setRegionLabelText(c.regionLabelText)
+                 if not c.arrowX is None:
+                     style.setArrowX(c.arrowX)
+                 if not c.arrowY is None:
+                     style.setArrowY(c.arrowY)
+                 if not c.arrowEnd is None:
+                     style.setArrowEnd(c.arrowEnd)
+                 if not c.arrowAngle is None:
+                     style.setArrowAngle(c.arrowAngle)
+                 if not c.arrowWidth is None:
+                     style.setArrowWidth(c.arrowWidth)
+                 if not c.arrowColor is None:
+                     style.setArrowColor(c.arrowColor)
                  if len(c.text1)>0:
                      style.setText1(c.text1)
                  if len(c.text2)>0:
