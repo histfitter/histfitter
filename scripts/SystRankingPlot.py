@@ -83,7 +83,7 @@ def get_syst_ranking(opts):
 			(par_name + "_init_p1s", par_init.getErrorHi()),
 			(par_name + "_init_m1s", par_init.getErrorLo()),
 			(par_name + "_final_p1s", par_final.getErrorHi()),
-			(par_name + "_final_p1s", par_final.getErrorLo()),
+			(par_name + "_final_m1s", par_final.getErrorLo()),
 		]
 
 		poi_shifts = []
