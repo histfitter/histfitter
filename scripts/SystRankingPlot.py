@@ -89,6 +89,14 @@ def get_syst_ranking(opts):
 		poi_shifts = []
 
 		for name, value in fix_list:
+                        if "init" in name:
+                           value+=par_init.getVal()
+                        elif "final" in name:
+                           value+=par_final.getVal()
+                        else:
+                           print "FATAL in get parameter nominal value"
+                           sys.exit()
+                       
 			fit_result = refit_fixed(name + "_fixed", par_name, value, w, fit_regions, data_set)
 
 			exp_result = RooExpandedFitResult(fit_result, float_pars_final)
