@@ -1,6 +1,7 @@
 obj
 lib/*
 src/SusyFitter_Dict.C
+.*.swp
 
 # copied from the src dir!
 include/*.h 
