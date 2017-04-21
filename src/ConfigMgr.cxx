@@ -524,10 +524,15 @@ void ConfigMgr::doUpperLimit(FitConfig* fc) {
     }
     
     m_logger << kINFO << "doUpperLimit(): running DoHypoTestInversion in [" << minRange << ", " << maxRange << "] with " << m_nPoints << " points " << GEndl;
+    if(m_disableULRangeExtension) {
+        m_logger << kWARNING << "doUpperLimit(): scan range extender disabled; this scan will never be extended. Please remember to check the output plot for convergence" << GEndl;
+        sleep(2); // user should see this message
+    }
     hypo = RooStats::DoHypoTestInversion(w, m_nToys, m_calcType, m_testStatType, m_useCLs, m_nPoints, minRange, maxRange);
 
     const double startingMaxRange = maxRange;
     double previousMaxRange = maxRange; // needed in case we fall into the trap where all the points in the extension happen to fail
+    int nScanExtensions = 0;
     while(true) {
         // Clean up any odd issues
         if(hypo != 0) { 
@@ -575,6 +580,10 @@ void ConfigMgr::doUpperLimit(FitConfig* fc) {
             break;
         }
 
+        if(m_disableULRangeExtension) {
+            break;
+        }
+
         // Stop condition
         if(currentNPoints > m_nPoints) { // TODO: make it dependent on whether we use toys? Pass a flag in configMgr?
             m_logger << kERROR << "doUpperLimit(): extended the UL scan to more than 5x the original amount of points already (currently at " << currentNPoints << ") - won't keep going further. Pass a helpful range to configMgr instead." << GEndl;
@@ -601,9 +610,17 @@ void ConfigMgr::doUpperLimit(FitConfig* fc) {
         int nPoints = currentNPoints / nPointsDivisor; // 20% extra points; or 10% if <0.05 but range too small
         const double oldMax = hypo->GetXValue(currentNPoints - 1); // mu_sig of last entry
         const double stepSize = 2 * oldMax / currentNPoints; // twice the average step size of previous scan
-        
+       
+        if(nPoints == 0) { 
+            // this happens if the current scan had precisely 1 point
+            nPoints = 2;
+        }
+
         double minRange = oldMax + stepSize; // start _beyond_ the last point
         double maxRange = oldMax + (nPoints) * stepSize;
+
+        m_logger << kWARNING << "nPoints = " << nPoints << " oldMax = " << oldMax << " stepSize = " << stepSize << GEndl;
+        m_logger << kWARNING << "min = " << minRange << " max = " << maxRange << GEndl;
 
         if(maxRange == previousMaxRange) {
             // this can happen if we e.g. extend by 3 points and all 3 points fail. In that case, we need a different range.
@@ -618,6 +635,9 @@ void ConfigMgr::doUpperLimit(FitConfig* fc) {
         sleep(1); // we want the user to be able to see what's going on here
 
         // Run an extra hypotest inverter
+        ++nScanExtensions;
+        m_logger << kWARNING << "Running extension number " << nScanExtensions << " for UL scan" << GEndl;
+        m_logger << kWARNING << "Setting nPoints = " << nPoints << " min = " << minRange << " max = " << maxRange << GEndl;
         auto extraHypo = RooStats::DoHypoTestInversion(w, m_nToys, m_calcType, m_testStatType, m_useCLs, nPoints, minRange, maxRange);
 
         if(!extraHypo) {
@@ -626,6 +646,7 @@ void ConfigMgr::doUpperLimit(FitConfig* fc) {
         }
 
         // Append it - should re-evaluate the settings for us automatically
+        m_logger << kINFO << "Adding scan result to existing limit scan" << GEndl;
         hypo->Add(*extraHypo);
         delete extraHypo;
         previousMaxRange = maxRange;

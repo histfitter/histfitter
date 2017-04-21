@@ -532,13 +532,47 @@ RooStats::HypoTestTool::SetupHypoTestCalculator(RooWorkspace * w, bool doUL,
         TStopwatch tw;
         tw.Start();
         Bool_t verbose = (m_logger.GetMinLevel() <= kDEBUG) ? kTRUE : kFALSE;
-        RooFitResult * fitres = sbModel->GetPdf()->fitTo(*data,InitialHesse(false), Hesse(false),
-                Minimizer(mMinimizerType.c_str(),"Migrad"), Strategy(0), Verbose(verbose),
-                PrintLevel(mPrintLevel+1), Constrain(constrainParams), Save(true) );
+        
+        RooLinkedList fitArgs;
+        RooCmdArg _InitialHesse(InitialHesse(false));
+        RooCmdArg _Hesse(Hesse(false));
+        RooCmdArg _Minimizer(Minimizer(mMinimizerType.c_str(),"Migrad"));
+        RooCmdArg _Strategy(Strategy(0));
+        RooCmdArg _Strategy_alt(Strategy(1));
+        RooCmdArg _Verbose(Verbose(verbose));
+        RooCmdArg _PrintLevel(PrintLevel(mPrintLevel+1));
+        RooCmdArg _Constrain(Constrain(constrainParams));
+        RooCmdArg _Save(Save(true));
+        RooCmdArg _SumW2Error(SumW2Error(true));
+
+        fitArgs.Add(dynamic_cast<TObject*>(&_InitialHesse));
+        fitArgs.Add(dynamic_cast<TObject*>(&_Hesse));
+        fitArgs.Add(dynamic_cast<TObject*>(&_Minimizer));
+        fitArgs.Add(dynamic_cast<TObject*>(&_Verbose));
+        fitArgs.Add(dynamic_cast<TObject*>(&_PrintLevel));
+        fitArgs.Add(dynamic_cast<TObject*>(&_Constrain));
+        fitArgs.Add(dynamic_cast<TObject*>(&_Save));
+        fitArgs.Add(dynamic_cast<TObject*>(&_SumW2Error));
+        
+        RooLinkedList fitArgs_alt(fitArgs);
+        
+        fitArgs.Add(dynamic_cast<TObject*>(&_Strategy));
+        fitArgs_alt.Add(dynamic_cast<TObject*>(&_Strategy_alt));
+        //Hesse(false),
+                //Minimizer(mMinimizerType.c_str(),"Migrad"), Strategy(0), Verbose(verbose), 
+                //PrintLevel(mPrintLevel+1), Constrain(constrainParams), Save(true) );
+
+        //RooFitResult * fitres = sbModel->GetPdf()->fitTo(*data, InitialHesse(false), Hesse(false),
+                //Minimizer(mMinimizerType.c_str(),"Migrad"), Strategy(0), Verbose(verbose), 
+                //PrintLevel(mPrintLevel+1), Constrain(constrainParams), Save(true) );
+        
+        RooFitResult * fitres = sbModel->GetPdf()->fitTo(*data, fitArgs);
+        
         if (fitres->status() != 0) { 
             Warning("StandardHypoTestInvDemo","Fit to the model failed - try with strategy 1 and perform first an Hesse computation");
-            fitres = sbModel->GetPdf()->fitTo(*data,InitialHesse(true), Hesse(false),Minimizer(mMinimizerType.c_str(),"Migrad"), 
-                    Strategy(1), PrintLevel(mPrintLevel+1), Constrain(constrainParams), Save(true), Verbose(verbose) );
+            //fitres = sbModel->GetPdf()->fitTo(*data, InitialHesse(true), Hesse(false), Minimizer(mMinimizerType.c_str(),"Migrad"), 
+                    //Strategy(1), PrintLevel(mPrintLevel+1), Constrain(constrainParams), Save(true), SumW2Error(true) );
+            fitres = sbModel->GetPdf()->fitTo(*data, fitArgs_alt);
         }
         if (fitres->status() != 0) 
             Warning("StandardHypoTestInvDemo"," Fit still failed - continue anyway.....");
@@ -842,7 +876,7 @@ RooStats::HypoTestTool::SetupHypoTestInverter(RooWorkspace * w,
         m_calc->SetFixedScan(npoints,poimin,poimax);
     }
     else { 
-        m_logger << kINFO << "Doing an  automatic scan  in interval : " << poi->getMin() << " , " << poi->getMax() << GEndl;
+        m_logger << kINFO << "Doing an automatic scan in interval: " << poi->getMin() << " , " << poi->getMax() << GEndl;
     }
 
     m_logger << kINFO << ">>> Done setting up HypoTestInverter on the workspace " << w->GetName() << GEndl;
