@@ -117,6 +117,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="HistFitter options:")
     parser.add_argument("configFile", nargs="+", help="configuration file to execute")
     parser.add_argument("-L", "--log-level", help="set log level", choices=["VERBOSE", "DEBUG", "INFO", "WARNING", "ERROR", "FATAL", "ALWAYS"])
+    parser.add_argument("-v", "--verbose", action="store_true", default=False, help="an alias of -L VERBOSE")
     parser.add_argument("-F", "--fit-type", help="type of fit to run: bkg (background-only fit), excl (exclusion fit / model-dependent fit), disc (discovery fit / model-independent fit), model-dep (alias of excl), model-indep (alias of disc)", choices=["bkg", "excl", "disc", "model-dep", "model-indep"]) 
     parser.add_argument("-t", "--create-histograms", help="re-create histograms from TTrees", action="store_true", default=configMgr.readFromTree)
     parser.add_argument("-w", "--create-workspace", help="re-create workspace from histograms", action="store_true", default=configMgr.executeHistFactory)
@@ -210,7 +211,9 @@ if __name__ == "__main__":
     if HistFitterArgs.interactive:
         runInterpreter = True
 
-    if HistFitterArgs.log_level:
+    if HistFitterArgs.verbose:
+        log.setLevel("VERBOSE", True)
+    elif HistFitterArgs.log_level:
         log.setLevel(HistFitterArgs.log_level, True) #do not add a default to HistFitterArgs.log_level or we will always lock it
 
     if HistFitterArgs.limit_plot:
