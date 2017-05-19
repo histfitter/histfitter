@@ -101,6 +101,7 @@ class ConfigManager(object):
         self.fixSigXSec = False # true = fix SigXSec by nominal, +/-1sigma
         self.runOnlyNominalXSec = False #t true = for fixed xsec, run only nominal fit and not +/- 1 sigma fits
         self.nPoints = 20 # number of points in upper limit evaluation
+        self.disableULRangeExtension = False # disable the UL range extender
         self.seed = 0 # seed for random generator. default is clock
         self.muValGen = 0.0 # mu_sig used for toy generation
         self.toySeedSet = False # Set the seed for toys
@@ -528,6 +529,7 @@ class ConfigManager(object):
         self.cppMgr.setfixSigXSec( self.fixSigXSec )
         self.cppMgr.setRunOnlyNominalXSec( self.runOnlyNominalXSec )
         self.cppMgr.setNPoints( self.nPoints )
+        self.cppMgr.setDisableULRangeExtension( self.disableULRangeExtension )
         self.cppMgr.setSeed( self.toySeed )
         self.cppMgr.setMuValGen( self.muValGen )
         self.cppMgr.setUseAsimovSet( self.useAsimovSet)
