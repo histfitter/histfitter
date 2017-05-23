@@ -45,24 +45,13 @@ def chi2test(h1, h2):
     for i in binsX:
         for j in binsY:
             idx = h1.GetBin(i, j)
-
-            if(h1.GetBinContent(idx) * h1.GetBinContent(idx) == 0 and h2.GetBinContent(idx) * h2.GetBinContent(idx)):
-                continue
-
             sigma = max([h1.GetBinError(idx), h2.GetBinError(idx)*norm])
             if sigma == 0: continue
             test_chi2 += ((h1.GetBinContent(idx) - h2.GetBinContent(idx)*norm) / sigma)**2
             dof += 1
-
-
-    #print "dof = {}".format(dof)
-    #print "test_chi2 = {}".format(test_chi2)
-
-    #print ROOT.TMath.Prob(test_chi2, dof)
-
     return chi2.sf(test_chi2, dof)
 
-def checkNormalizationEffect(hNom, hUp, hDown, norm_threshold=0.005):
+def checkNormEffect(hNom, hUp, hDown, norm_threshold=0.005):
     # True for keeping norm effect, false for pruning
     nom_integral = hNom.Integral()
     
@@ -71,38 +60,17 @@ def checkNormalizationEffect(hNom, hUp, hDown, norm_threshold=0.005):
     
     up_norm = hUp.Integral() / nom_integral
     down_norm = hDown.Integral() / nom_integral
-   
-    max_variation = max([abs(up_norm-1), abs(down_norm-1)])
-    if max_variation < norm_threshold:
-        log.verbose("checkNormalizationEffect(): {}, {}, {}: max variation = {:.3f}, threshold = {:.3f}".format(hNom.GetName(), hUp.GetName(), hDown.GetName(), max_variation, threshold))
-        return False
-
-    return True
     
-def checkShapeEffect(hNom, hUp, hDown, chi2_threshold=0.95, use_overflows=True):
-    # Perform a weighted comparison including the overflow and underflow, unless the user says they don't want it
-    opt = "WW OF UF"
-    if not use_overflows:
-        opt = "WW"
+    return (max([abs(up_norm-1), abs(down_norm-1)]) > norm_threshold)
 
-    # ROOT prints annoying messages about bin content at Info level; suppress them temporarily
-    _err_level = ROOT.gErrorIgnoreLevel
-    ROOT.gErrorIgnoreLevel = 2000
-
-    up_pvalue = hNom.Chi2Test(hUp, opt)
-    down_pvalue = hNom.Chi2Test(hDown, opt)
-    
-    ROOT.gErrorIgnoreLevel = _err_level
-    
-    #up_pvalue = chi2test(hNom, hUp)
-    #down_pvalue = chi2test(hNom, hDown)
+def checkShapeEffect(hNom, hUp, hDown, chi2_threshold=0.9):
+    # True for keeping shape effect, false for pruning
+    up_pvalue = chi2test(hNom, hUp)
+    down_pvalue = chi2test(hNom, hDown)
     
     pvalue = min([up_pvalue, down_pvalue])
-    if not pvalue < chi2_threshold:
-        log.verbose("checkShapeEffect(): {}, {}, {}: up_pvalue = {:.3f}, down_pvalue = {:3f}, chi2 threshold = {:.3f}".format(hNom.GetName(), hUp.GetName(), hDown.GetName(), up_pvalue, down_pvalue, chi2_threshold))
-        return False
-
-    return True
+    
+    return (pvalue < chi2_threshold)
 
 def symmetrizeSystematicEnvelope(nomName, lowName, highName):
     # Loop over all bins - and look for the biggest error
@@ -189,9 +157,7 @@ class Sample(object):
         ## Prefix of input tree
         self.prefixTreeName = "" 
         ## Suffix of input tree
-        self.suffixTreeName = ""   
-        ## Additional selection applied on this sample
-        self.additionalCuts = ""
+        self.suffixTreeName = ""         
         ## Nominal cross-section weight for signal samples
         self.xsecWeight = None
         ## +1 sigma variation of cross-section weight
@@ -479,15 +445,14 @@ class Sample(object):
         
         if self.suffixTreeName != "":
             suffix = self.suffixTreeName
-   
-        if suffix != "":
-            log.debug("Using tree suffix {}".format(suffix))
+    
+        log.debug("Using tree suffix {}".format(suffix))
 
         return "{}{}".format(self.prefixTreeName, suffix)
 
     def addHistoSys(self, systName, nomName, highName, lowName, includeOverallSys, normalizeSys, symmetrize=False, oneSide=False, samName="", normString="", nomSysName="", symmetrizeEnvelope=False):
         """
-        Add a HistoSys entry using the nominal, high and low histograms, set if to include OverallSys
+        Add a HistoSys entry using the nominal,  high and low histograms,  set if to include OverallSys
 
         If includeOverallSys then extract scale factors
 
@@ -548,7 +513,7 @@ class Sample(object):
             tl = self.parentChannel.parentTopLvl
             for ch in tl.channels:
                 if (ch.channelName in tl.bkgConstrainChannels) or (ch.channelName in tl.signalChannels):
-                    normChannels.append( (ch.regionString, ch.variableName) )
+                    normChannels.append((ch.regionString,ch.variableName))
                     pass
                 pass
             self.setNormRegions(normChannels)
@@ -582,7 +547,7 @@ class Sample(object):
                         configMgr.hists[lowName].SetBinContent(iBin, 0.)
             
             # use different renormalization region
-            if len(self.normSampleRemap) > 0: 
+            if len(self.normSampleRemap)>0: 
                 samNameRemap = self.normSampleRemap
                 log.info("remapping normalization of <%s> to sample:  %s" % (samName,samNameRemap))
             else:
@@ -592,22 +557,21 @@ class Sample(object):
             highRemapName = "h"+samNameRemap+systName+"High_"+normString+"Norm"
             lowRemapName = "h"+samNameRemap+systName+"Low_"+normString+"Norm"
             nomRemapName = "h"+samNameRemap+"Nom_"+normString+"Norm"
+            
+            log.verbose("Loading high integral from {0}".format(highRemapName))
+            log.verbose("Loading low integral from {0}".format(lowRemapName))
+            log.verbose("Loading nominal integral from {0}".format(nomRemapName))
 
             highIntegral = configMgr.hists[highRemapName].Integral()
             lowIntegral  = configMgr.hists[lowRemapName].Integral()
             nomIntegral  = configMgr.hists[nomRemapName].Integral()
 
-            log.verbose("Loading high remap integral from {0}: {1}".format(highRemapName, highIntegral))
-            log.verbose("Loading low remap integral from {0}: {1}".format(lowRemapName, lowIntegral))
-            log.verbose("Loading nominal remap integral from {0}: {1}".format(nomRemapName, nomIntegral))
-            
             if len(nomSysName) > 0:  ## renormalization done based on consistent set of trees
                 if configMgr.hists[nomSysName] != None:
-                    nomIntegral = configMgr.hists["h"+samNameRemap+systName+"Nom_"+normString+"Norm"].Integral()
+                    nomIntegral  = configMgr.hists["h"+samNameRemap+systName+"Nom_"+normString+"Norm"].Integral()
             
             # Attempt to symmetrize 
             if oneSide and symmetrize:
-                log.debug("Attempting to symmetrize one-sided systematic")
                 lowIntegral = 2.*nomIntegral - highIntegral # NOTE: this is an approximation!
                 if lowIntegral < 0:
                     lowIntegral = configMgr.hists["h"+samNameRemap+systName+"Low_"+normString+"Norm"].Integral()
@@ -622,38 +586,29 @@ class Sample(object):
             try:
                 high = highIntegral / nomIntegral
                 low = lowIntegral / nomIntegral
-                log.verbose("Determined high and low ratios w.r.t. nominal: {} and {}".format(high, low))
             except ZeroDivisionError:
                 log.error("    generating HistoSys for %s syst=%s nom=%g high=%g low=%g. Systematic is removed from fit." % (nomName, systName, nomIntegral, highIntegral, lowIntegral))
                 return
 
-            log.debug("Constructing cloned normalized histograms")
             configMgr.hists["%sNorm" % highName] = configMgr.hists[highName].Clone("%sNorm" % highName)
             configMgr.hists["%sNorm" % lowName] = configMgr.hists[lowName].Clone("%sNorm" % lowName)
-           
 
             # Attempt to scale the high and low histograms down to normalized histograms
             try:
-                log.debug("Scaling normalized histograms by integrals of remapped histograms: high with {}, low with {}".format(1.0/high, 1.0/low))
                 configMgr.hists[highName+"Norm"].Scale(1./high)
                 configMgr.hists[lowName+"Norm"].Scale(1./low)
             except ZeroDivisionError:
                 log.error("    generating HistoSys for %s syst=%s nom=%g high=%g low=%g. Systematic is removed from fit." % (nomName, systName, nomIntegral, highIntegral, lowIntegral))
                 return
-            
+
             # Attempt to generate an overallNormHistoSys if required
             if includeOverallSys and not (oneSide and not symmetrize):
-                log.debug("Attempting to build overallNormHistoSys")
                 nomIntegralN = configMgr.hists[nomName].Integral()
                 lowIntegralN = configMgr.hists[lowName+"Norm"].Integral()
                 highIntegralN = configMgr.hists[highName+"Norm"].Integral()
-            
-                log.verbose("Loading high norm integral from {0}: {1}".format(highName+"Norm", highIntegralN))
-                log.verbose("Loading low norm integral from {0}: {1}".format(lowName+"Norm", lowIntegralN))
-                log.verbose("Loading nominal norm integral from {0}: {1}".format(nomName, nomIntegralN))
 
                 if nomIntegralN == 0 or highIntegralN == 0 or lowIntegralN == 0:
-                    # MB : cannot renormalize, so don't after all
+                    # MB : cannot renormalize,  so don't after all
                     log.warning("    will not generate overallNormHistoSys for %s syst=%s nom=%g high=%g low=%g. Revert to NormHistoSys." % (nomName, systName, nomIntegralN, highIntegralN, lowIntegralN))
                     includeOverallSys = False
                     pass
@@ -667,7 +622,6 @@ class Sample(object):
                         return
                 
                     try:
-                        log.debug("Scaling normalized histograms: high with {}, low with {}".format(1.0/highN, 1.0/lowN))
                         configMgr.hists[highName+"Norm"].Scale(1./highN)
                         configMgr.hists[lowName+"Norm"].Scale(1./lowN)
                     except ZeroDivisionError:
@@ -675,30 +629,13 @@ class Sample(object):
                         return
 
 
-            ## Check the shape and normalisation impact
-            #
-            # The chi2test can be performed on either the normal or the Norm histogram; since they're scaled
-            # up and down by simple numbers, there is no effect. 
-            # 
-            # The normalisation check is just performed on highN and lowN. 
-
-            #print configMgr.hists[highName+"Norm"].Integral()
-            #print configMgr.hists[lowName+"Norm"].Integral()
-
-            #print configMgr.hists[nomName].Chi2Test(configMgr.hists[highName+"Norm"], "WW UF OF P")
-            #print configMgr.hists[nomName].Chi2Test(configMgr.hists[highName], "WW UF OF P")
-
-            #print highN, lowN
-            #print high, low
-    
             # Now, finally add the systematic
             if oneSide and not symmetrize:
                 ## MB : avoid swapping of histograms, always pass high and nominal
                 self.histoSystList.append((systName, highName+"Norm", nomName, configMgr.histCacheFile, "", "", "", ""))
             else:
                 self.histoSystList.append((systName, highName+"Norm", lowName+"Norm", configMgr.histCacheFile, "", "", "", ""))
-           
-            # Do we need to include an overall systematic?
+            
             if includeOverallSys and not (oneSide and not symmetrize):
                 self.addOverallSys(systName, highN, lowN)                
             
@@ -731,14 +668,7 @@ class Sample(object):
             # Check whether a renormalization actually makes sense
             if nomIntegral == 0 or lowIntegral == 0 or highIntegral == 0:
                 # MB : cannot renormalize, so don't after all
-
-                # TODO: check shape effect
-                if checkShapeEffect(configMgr.hists[nomName], configMgr.hists[highName], configMgr.hists[lowName] ):
-                    log.error("    generating HistoSys for %s syst=%s nom=%g high=%g low=%g: cannot renormalize; only using shape" % (nomName, systName, nomIntegral, highIntegral, lowIntegral))
-                    self.histoSystList.append((systName, highName, lowName, configMgr.histCacheFile, "", "", "", ""))
-                else:
-                    log.error("    generating HistoSys for %s syst=%s nom=%g high=%g low=%g: cannot renormalize, no shape effect. Systematic is removed from fit." % (nomName, systName, nomIntegral, highIntegral, lowIntegral))
-                    return
+                self.histoSystList.append((systName, highName, lowName, configMgr.histCacheFile, "", "", "", ""))
             else:
                 # renormalize
                 try:
@@ -759,20 +689,11 @@ class Sample(object):
                     return
 
                 # And finally add the systematic
-                # TODO: check shape effect
-                if checkShapeEffect(configMgr.hists[nomName], configMgr.hists[highName], configMgr.hists[lowName] ):
-                    self.histoSystList.append((systName, highName+"Norm", lowName+"Norm", configMgr.histCacheFile, "", "", "", ""))
-                else:
-                    log.error("    generating HistoSys for %s syst=%s nom=%g high=%g low=%g has no impact on shape. Shape effect of systematic is removed from fit." % (nomName, systName, nomIntegral, highIntegral, lowIntegral))
-
-                # TODO: check norm effect
-                if max( abs(high-1.0), abs(1.0-low) ) < 0.005:
-                    log.error("    generating OverallSys for %s syst=%s nom=%g high=%g low=%g. Systematic has less than 0.5% impact and is removed from fit." % (nomName, systName, nomIntegral, highIntegral, lowIntegral))
-                else: 
-                    self.addOverallSys(systName, high, low)
+                self.histoSystList.append((systName, highName+"Norm", lowName+"Norm", configMgr.histCacheFile, "", "", "", ""))
+                self.addOverallSys(systName, high, low)
 
         # Case 3
-        if not includeOverallSys and not normalizeSys: # no renormalization, and no overall systematic
+        if not includeOverallSys and not normalizeSys: # no renormalization,  and no overall systematic
             log.verbose("Case 3: non-normalized systematic without includeOverallSys")
 
             if symmetrize and not (oneSide or symmetrizeEnvelope): ## symmetrize the systematic uncertainty
@@ -836,30 +757,6 @@ class Sample(object):
                 
             else: # default: don't do anything special
                 log.verbose("Adding a simple variation")
-
-                nomIntegral = configMgr.hists[nomName].Integral()
-                lowIntegral = configMgr.hists[lowName].Integral()
-                highIntegral = configMgr.hists[highName].Integral()
-
-                keepNorm = True
-                if not checkNormalizationEffect(configMgr.hists[nomName], configMgr.hists[highName], configMgr.hists[lowName]):
-                    log.error("    HistoSys for {} syst={} nom={:g} high={:g} low={:g} has small impact on normalisation.".format(nomName, systName, nomIntegral, highIntegral, lowIntegral))
-                    keepNorm = False
-
-                if not checkShapeEffect(configMgr.hists[nomName], configMgr.hists[highName], configMgr.hists[lowName]):
-                    if not keepNorm:
-                        log.error("    HistoSys for {} syst={} nom={:g} high={:g} low={:g} has small impact on normalisation and no effect on shape. Removing from fit.".format(nomName, systName, nomIntegral, highIntegral, lowIntegral))
-                        return
-                        
-                    log.error("    HistoSys for {} syst={} nom={:g} high={:g} low={:g} has small impact on shape. Using normalisation only.".format(nomName, systName, nomIntegral, highIntegral, lowIntegral))
-
-                    for i in xrange(0, configMgr.hists[nomName].GetNbinsX()+2):
-                        configMgr.hists[lowName].SetBinContent(i, configMgr.hists[nomName].GetBinContent(i))
-                        configMgr.hists[highName].SetBinContent(i, configMgr.hists[nomName].GetBinContent(i))
-                        
-                    configMgr.hists[lowName].Scale(lowIntegral)
-                    configMgr.hists[highName].Scale(highIntegral)
-
                 self.histoSystList.append((systName, highName, lowName, configMgr.histCacheFile, "", "", "", ""))
 
         if not systName in configMgr.systDict.keys():

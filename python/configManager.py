@@ -1269,11 +1269,6 @@ class ConfigManager(object):
         else:
             if not chan.variableName == "cuts":
                 self.prepare.cuts = sam.cutsDict[regionString]
-        
-        if sam.additionalCuts != "":
-            log.debug("Using additional cuts for sample {}: '{}'".format(sam.name, sam.additionalCuts))
-            self.prepare.cuts = "({}) && ({})".format(self.prepare.cuts, sam.additionalCuts)
-
         log.debug("Setting cuts to {0}".format(self.prepare.cuts))
         if oldCuts == self.prepare.cuts:
             log.debug(" => NOTE: no change in cuts!")
