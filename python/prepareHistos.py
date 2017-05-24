@@ -24,6 +24,56 @@ import os
 
 log = Logger('PrepareHistos')
 
+def pairwise(iterable):
+    import itertools
+    
+    "s -> (s0,s1), (s1,s2), (s2, s3), ..."
+    a, b = itertools.tee(iterable)
+    next(b, None)
+    return itertools.izip(a, b)
+
+def getBinEdges(hist, axis, index=None, overflow=False):
+    if axis == 0:
+	nbins = hist.GetNbinsX()
+        ax = hist.GetXaxis()	
+    elif axis == 1:
+	nbins = hist.GetNbinsY()
+        ax = hist.GetYaxis()	
+    elif axis == 2:
+	nbins = hist.GetNbinsZ()
+        ax = hist.GetZaxis()	
+    else:
+	raise ValueError("axis must be 0, 1, or 2")   
+ 
+    if index is None:
+        def temp_generator():
+            if overflow:
+                yield float('-inf')
+            for index in range(1, nbins + 1):
+                yield ax.GetBinLowEdge(index)
+            yield ax.GetBinUpEdge(nbins)
+            if overflow:
+                yield float('+inf')
+        return temp_generator()
+    
+    index = index % (nbins + 3)
+    if index == 0:
+        return float('-inf')
+    if index == nbins + 2:
+        return float('+inf')
+    
+    return ax.GetBinLowEdge(index)
+
+def range_subset(range1, range2):
+    """Whether range1 is a subset of range2."""
+    if not range1:
+        return True  # empty range is subset of anything
+    if not range2:
+        return False  # non-empty range can't be subset of empty range
+    if len(range1) > 1 and range1.step % range2.step:
+        return False  # must have a single value or integer multiple step
+    return range1.start in range2 and range1[-1] in range2
+
 class PrepareHistos(object):
     """
     Class to define histogram preparation methods
@@ -369,14 +419,49 @@ class PrepareHistos(object):
                     raise Exception("Could not find histogram <"+name+"> in "+self.cacheFileName+" with correct binning")
                 else:
                     log.error("Histogram has different binning <"+name+"> in "+self.cacheFileName+", trying from tree ")
-                    log.error("addHistoFromCache: required binning %d,%f,%f, while found histogram has %d,%f,%f" % ( self.channel.nBins, self.channel.binLow,self.channel.binHigh, self.configMgr.hists[name].GetNbinsX(), self.configMgr.hists[name].GetBinLowEdge(1),self.configMgr.hists[name].GetXaxis().GetBinUpEdge(self.configMgr.hists[name].GetNbinsX()) ))
+                    log.error("addHistoFromCache: required binning %d,%f,%f, while found histogram has %d,%f,%f" % ( self.channel.nBins, self.channel.binLow, self.channel.binHigh, self.configMgr.hists[name].GetNbinsX(), self.configMgr.hists[name].GetBinLowEdge(1), self.configMgr.hists[name].GetXaxis().GetBinUpEdge(self.configMgr.hists[name].GetNbinsX()) ))
 
-                    if self.configMgr.hists[name].GetNbinsX() % self.channel.nBins == 0:
-                        # this should be rebinnable!
-                        ngroup = self.configMgr.hists[name].GetNbinsX() /self.channel.nBins
-                        log.warning("Original has a multiple of desired number of bins. Attempting solution of rebinning input histogram with ngroup={}".format(ngroup))
-                        self.configMgr.hists[name].Rebin(ngroup)
+                    if self.channel.binLow == self.configMgr.hists[name].GetBinLowEdge(1) and self.channel.binHigh == self.configMgr.hists[name].GetXaxis().GetBinUpEdge(self.configMgr.hists[name].GetNbinsX()): 
+                        if self.configMgr.hists[name].GetNbinsX() % self.channel.nBins == 0:
+                            # this should be rebinnable!
+                            ngroup = self.configMgr.hists[name].GetNbinsX() /self.channel.nBins
+                            log.warning("Original has a multiple of desired number of bins. Attempting solution of rebinning input histogram with ngroup={}".format(ngroup))
+                            self.configMgr.hists[name].Rebin(ngroup)
+                            return self.configMgr.hists[name]                       
+
+                    # Check if the found binning is a subset of the binning that's desired
+                    # Since HistFactory only eats uniformly binned histograms, this always works.
+                    desired_binSize = float(self.channel.binHigh - self.channel.binLow) / self.channel.nBins
+                    desired_binning = [self.channel.binLow + i*desired_binSize for i in range(0, self.channel.nBins+1)]
+                    found_binning = [x for x in getBinEdges(self.configMgr.hists[name], 0)]
+
+                    if set(desired_binning) < set(found_binning):
+                        log.warning("Original is wider than the desired histogram. Attempting to load appropriate bin content.")
+
+                        # What are the bin indices of the bins we need?
+                        needs_bins = [i for i, x in enumerate(pairwise(found_binning)) if x in pairwise(desired_binning)]
+          
+                        temp = TH1F("h_temp", "h_temp", self.channel.nBins, self.channel.binLow, self.channel.binHigh)
+
+                        log.verbose("Loading bin content from {}".format(name))
+                        for i, x in enumerate(needs_bins):
+                            temp.SetBinContent(i+1, self.configMgr.hists[name].GetBinContent(x)) 
+                            temp.SetBinError(i+1, self.configMgr.hists[name].GetBinError(x)) 
+
+                        temp_name = self.configMgr.hists[name].GetName()
+                        temp_title = self.configMgr.hists[name].GetTitle()
+
+                        log.verbose("Deleting original histogram from memory")
+                        del self.configMgr.hists[name]
+
+                        log.verbose("Moving temporary to {}".format(name))
+                        self.configMgr.hists[name] = temp
+                        self.configMgr.hists[name].SetName(temp_name)
+                        self.configMgr.hists[name].SetTitle(temp_title)
+                            
                         return self.configMgr.hists[name]                       
+
+                    #set(list1) < set(list2)
 
                     self.configMgr.hists[name] = None
                     
