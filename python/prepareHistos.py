@@ -17,7 +17,7 @@
  **********************************************************************************
 """
 
-from ROOT import gROOT,TFile,TH1F,Double,gDirectory,TChain,TObject
+from ROOT import gROOT, TFile, TH1F, Double, gDirectory, TChain, TObject, TTree
 from math import sqrt
 from logger import Logger
 import os
@@ -137,7 +137,7 @@ class PrepareHistos(object):
 
         return False
 
-    def read(self, treeName, fileList):
+    def read(self, treeName, fileList, friendTreeName=""):
         """
         Read in the root object that will make histograms and set the TChain objects in ConfigManager
 
@@ -170,8 +170,17 @@ class PrepareHistos(object):
         if not chainID in self.configMgr.chains:
             log.debug("Creating chain {0}".format(chainID))
             self.configMgr.chains[chainID] = TChain(treeName)
-            for fileName in fileList:
-                self.configMgr.chains[self.currentChainName].Add(fileName)
+            for filename in fileList:
+                self.configMgr.chains[self.currentChainName].Add(filename)
+
+            # does this chain need a friend? 
+            if friendTreeName != "":
+                log.debug("Adding friend tree {} to {}".format(friendTreeName, self.currentChainName)) 
+                for filename in fileList:
+                    self.configMgr.chains[self.currentChainName].AddFriend(friendTreeName, filename)
+
+        else:
+            log.debug("Chain {} already exists - not rebuilding".format(chainID))
 
         return
 
@@ -192,14 +201,17 @@ class PrepareHistos(object):
         
         @retval The constructed histogram
         """
+        log.debug("addHisto(): attempting to find {}".format(name))
         if self.useCache:
+            log.debug("addHisto(): will use cache for {}".format(name))
             return self.__addHistoFromCache(name, nBins, binLow, binHigh, useOverflow, useUnderflow, forceNoFallback)
    
+        log.debug("addHisto(): will use tree for {}".format(name))
         return self.__addHistoFromTree(name, nBins, binLow, binHigh, nBinsY, binLowY, binHighY, useOverflow, useUnderflow)
 
     def __addHistoFromTree(self, name, nBins=0, binLow=0., binHigh=0., nBinsY=0, binLowY=0., binHighY=0., useOverflow=False, useUnderflow=False):
         """
-        Use the TTree::Draw method to create the histograms for var from cuts and weights defined in instance
+        Use the TTree::Project method to create the histograms for var from cuts and weights defined in instance
         Recover from ROOT memory and add to dictionary of histograms
         
         @param name Name of the histogram
@@ -215,19 +227,23 @@ class PrepareHistos(object):
         @retval The constructed histogram
         """
 
-        log.debug("__addHistoFromTree: %s" % name)
+        log.debug("__addHistoFromTree: attempting to load {}".format(name))
 
         if self.var == "cuts":
             if self.configMgr.hists[name] is None:
                 self.configMgr.hists[name] = TH1F(name, name, len(self.channel.regions), self.channel.binLow, float(len(self.channel.regions))+self.channel.binLow)
                 for (iReg,reg) in enumerate(self.channel.regions):
-                    log.debug("__addHistoFromTree: append %s in region %s" % (name, reg))
-                    self.cuts = self.configMgr.cutsDict[reg]
+                    log.debug("__addHistoFromTree: loading %s in region %s" % (name, reg))
+                    
+                    #self.cuts = self.configMgr.cutsDict[reg] # wtf is this doing here? -- GJ 24/5/17.
+                    # NOTE: Changed configManager.py for it to behave the same as the binned version 
                     
                     tempName = "%stemp%s" % (name, str(iReg))
                     tempHist = TH1F(tempName, tempName, 1, 0.5, 1.5)
 
-                    log.debug("__addHistoFromTree: projecting into %s with cuts %s weights %s" % (tempName, self.cuts, self.weights))
+                    log.debug("__addHistoFromTree: projecting into {}".format(tempName))
+                    log.verbose("__addHistoFromTree: cuts: {}".format(self.cuts))
+                    log.verbose("__addHistoFromTree: weights: {}".format(self.weights))
                     log.debug("__addHistoFromTree: Project(\"%s\", \"%s\", \"%s\")" % (tempName, self.cuts, self.weights) )
 
                     self.configMgr.chains[self.currentChainName].Project(tempName, self.cuts, self.weights)
@@ -247,10 +263,12 @@ class PrepareHistos(object):
 
         else:
             if self.configMgr.hists[name] is None:
+                log.verbose("Constructing binned histogram for {}".format(name))
                 if self.var.find(":") == -1:
                     self.configMgr.hists[name] = TH1F(name, name, self.channel.nBins, self.channel.binLow, self.channel.binHigh)
                 else:
                     self.configMgr.hists[name] = TH2F(name, name, self.channel.nBins, self.channel.binLow, self.channel.binHigh, self.channelnBinsY, self.channel.binLowY, self.channel.binHighY)
+                
                 for (iReg,reg) in enumerate(self.channel.regions):
                     tempName = "%stemp%s" % (name, str(iReg))
                     #self.cuts = self.configMgr.cutsDict[reg]
@@ -258,6 +276,12 @@ class PrepareHistos(object):
                         tempHist = TH1F(tempName, tempName, self.channel.nBins, self.channel.binLow, self.channel.binHigh)
                     else:
                         tempHist = TH2F(tempName, tempName, self.channel.nBins, self.channel.binLow, self.channel.binHigh, self.channelnBinsY, self.channel.binLowY, self.channel.binHighY)
+                    
+                    log.debug("__addHistoFromTree: projecting binned {} into {}".format(self.var, tempName))
+                    log.verbose("__addHistoFromTree: cuts: {}".format(self.cuts))
+                    log.verbose("__addHistoFromTree: weights: {}".format(self.weights))
+                    log.debug('__addHistoFromTree: Project("{}", "{}", "{} * ({})" )'.format(tempName, self.var, self.cuts, self.weights) )
+                    
                     #print "!!!!!! PROJECTING",name+"temp"+str(iReg)
                     #print "!!!!!! VAR",self.var
                     #print "!!!!!! WEIGHTS",self.weights
@@ -279,7 +303,8 @@ class PrepareHistos(object):
         #Over/Underflow bins
         if useOverflow or useUnderflow:
             self.updateOverflowBins(self.configMgr.hists[name], useOverflow, useUnderflow)
-            
+        
+        log.verbose("Loaded histogram {} with integral {}".format(self.configMgr.hists[name], self.configMgr.hists[name].Integral()))
         return self.configMgr.hists[name]
     
     def __addHistoFromCacheWithoutFallback(self, name, nBins=None, binLow=None, binHigh=None, useOverflow=False, useUnderflow=False):
@@ -290,14 +315,15 @@ class PrepareHistos(object):
         """
         Add this histogram to the dictionary of histograms.
         """
-        #Note: useOverflow and useUnderflow has no effect. It's there just for symmetry with TreePrepare above.
+        # NOTE: useOverflow and useUnderflow has no effect. It's there just for symmetry with TreePrepare above.
 
         if self.configMgr.hists[name] is None:
+            log.debug("Attempting to load {}".format(name))
             try:
                 self.configMgr.hists[name] = self.cache2File.Get(name)
                 testsum = self.configMgr.hists[name].GetSum()
             except: # IOError:
-                log.info("Could not get histogram <%s> from backupCacheFile %s, trying cacheFile" % (name, self.cache2FileName))
+                log.info("Could not get histogram <%s> from backupCacheFile '%s', trying cacheFile '%s'" % (name, self.cache2FileName, self.cacheFileName))
                 try:
                     self.configMgr.hists[name] = self.cacheFile.Get(name)
                     testsum = self.configMgr.hists[name].GetSum()
@@ -305,18 +331,19 @@ class PrepareHistos(object):
                     if forceNoFallback or not self.useCacheToTreeFallback:
                         self.configMgr.hists[name] = None
                         if forceReturn: # used for QCD histograms
-                            log.info("Could not find histogram <"+name+"> in "+self.cacheFileName+" ! Force return.")
+                            log.warning("Could not find histogram <"+name+"> in "+self.cacheFileName+" ! Force return.")
                             return None
                         log.debug("__addHistoFromCache(): forceNoFallback=%s useCacheToTreeFallback=%s" % (forceNoFallback, self.useCacheToTreeFallback))
                         log.error("Could not find histogram <"+name+"> in "+self.cacheFileName+" ! ")
                         raise #Exception("Could not find histogram <"+name+"> in "+self.cacheFileName)
                     else:
                         log.info("Could not find histogram <"+name+"> in "+self.cacheFileName+", trying from tree ")
-                        
+
                         self.configMgr.hists[name] = None
                         return self.__addHistoFromTree(name, nBins, binLow, binHigh, nBins, binLow, binHigh, useOverflow, useUnderflow)
 
         if not (self.configMgr.hists[name] is None):
+            log.debug("Loaded histogram {} from cache with integral {}".format(name, self.configMgr.hists[name].Integral()))
             if not (int(self.channel.nBins) == int(self.configMgr.hists[name].GetNbinsX())) or \
                ( abs(self.channel.binLow - self.configMgr.hists[name].GetBinLowEdge(1))>0.00001 ) or \
                ( abs(self.channel.binHigh - self.configMgr.hists[name].GetXaxis().GetBinUpEdge(self.configMgr.hists[name].GetNbinsX())) > 0.00001):
@@ -341,9 +368,18 @@ class PrepareHistos(object):
                     self.configMgr.hists[name] = None
                     raise Exception("Could not find histogram <"+name+"> in "+self.cacheFileName+" with correct binning")
                 else:
-                    log.info("Histogram has different binning <"+name+"> in "+self.cacheFileName+", trying from tree ")
-                    log.info("addHistoFromCache: required binning %d,%f,%f, while histo has %d,%f,%f" % ( self.channel.nBins,self.channel.binLow,self.channel.binHigh,self.configMgr.hists[name].GetNbinsX(), self.configMgr.hists[name].GetBinLowEdge(1),self.configMgr.hists[name].GetXaxis().GetBinUpEdge(self.configMgr.hists[name].GetNbinsX()) ))
+                    log.error("Histogram has different binning <"+name+"> in "+self.cacheFileName+", trying from tree ")
+                    log.error("addHistoFromCache: required binning %d,%f,%f, while found histogram has %d,%f,%f" % ( self.channel.nBins, self.channel.binLow,self.channel.binHigh, self.configMgr.hists[name].GetNbinsX(), self.configMgr.hists[name].GetBinLowEdge(1),self.configMgr.hists[name].GetXaxis().GetBinUpEdge(self.configMgr.hists[name].GetNbinsX()) ))
+
+                    if self.configMgr.hists[name].GetNbinsX() % self.channel.nBins == 0:
+                        # this should be rebinnable!
+                        ngroup = self.configMgr.hists[name].GetNbinsX() /self.channel.nBins
+                        log.warning("Original has a multiple of desired number of bins. Attempting solution of rebinning input histogram with ngroup={}".format(ngroup))
+                        self.configMgr.hists[name].Rebin(ngroup)
+                        return self.configMgr.hists[name]                       
+
                     self.configMgr.hists[name] = None
+                    
                     return self.__addHistoFromTree(name, self.channel.nBins, self.channel.binLow, self.channel.binHigh, nBins, binLow, binHigh, useOverflow, useUnderflow)
 
         self.name = name
