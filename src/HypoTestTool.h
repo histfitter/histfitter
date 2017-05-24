@@ -126,6 +126,7 @@ namespace RooStats {
             bool mNoSystematics;
             double mConfLevel;
             TMsgLogger m_logger;
+            bool m_generateAsimovDataForObserved;
 
     };
 
