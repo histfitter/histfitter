@@ -33,8 +33,8 @@ log = Logger('Systematic')
 # TreeWeightSystematic or a UserSystematic. These classes are derived classes
 # and the Baseclass for both of them is the SystematicBase. In
 # TreeWeightSystematic the set of the weights differs for the systematic type
-# tree and weight. Therefore, there exist the functions PrepareWAHforWeight
-# or PrepareWAHforTree. All three types of systematics share the
+# tree and weight. Therefore, the functions PrepareWAHforWeight
+# or PrepareWAHforTree exist. All three types of systematics share the
 # "FillUpDownHist" (for the methods "userNormHistoSys" or "normHistoSys") and
 # "tryAddHistos" function in the Baseclass SystematicBase.
 ###############################################
