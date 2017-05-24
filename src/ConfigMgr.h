@@ -147,8 +147,9 @@ class ConfigMgr {
         TString m_outputFileName;
         std::vector<FitConfig*> m_fitConfigs;
         int  m_seed;
-        bool m_useAsimovSet;  
-	std::string m_plotRatio;
+        bool m_useAsimovSet;
+        bool m_generateAsimovDataForObserved;
+        std::string m_plotRatio;
 
     private:
         TMsgLogger m_logger;

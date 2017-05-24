@@ -42,21 +42,21 @@ ConfigMgr::ConfigMgr() : m_logger("ConfigMgrCPP") {
     m_calcType = 0;
     m_testStatType = 3;
     m_status = "Unkwn";
-    m_saveTree=false;
-    m_doHypoTest=false;
-    m_useCLs=true;
-    m_useScanRange=false;
-    m_scanRangeMin=-1;
-    m_scanRangeMax=-1;
-    m_fixSigXSec=false;
-    m_runOnlyNominalXSec=false;
-    m_doUL=true;
-    m_seed=0;
-    m_nPoints=10;
-    m_muValGen=0.0;  
-    m_removeEmptyBins=false;
-    m_useAsimovSet=false;
-    m_plotRatio="ratio"; //options: "ratio", "pull", "none"
+    m_saveTree = false;
+    m_doHypoTest = false;
+    m_useCLs = true;
+    m_useScanRange = false;
+    m_scanRangeMin = -1;
+    m_scanRangeMax = -1;
+    m_fixSigXSec = false;
+    m_runOnlyNominalXSec = false;
+    m_doUL = true;
+    m_seed = 0;
+    m_nPoints = 10;
+    m_muValGen = 0.0;  
+    m_removeEmptyBins = false;
+    m_useAsimovSet = false;
+    m_plotRatio = "ratio"; //options: "ratio", "pull", "none"
 }
 
 
@@ -244,8 +244,8 @@ void ConfigMgr::doHypoTest(FitConfig* fc, TString outdir, double SigXSecSysnsigm
     bool useNumberCounting = false;
     TString modelSBName = "ModelConfig";
     TString modelBName;
-    const char * dataName = "obsData";                 
-    const char * nuisPriorName = 0;
+    const char* dataName = "obsData";                 
+    const char* nuisPriorName = 0;
 
     if ( !m_bkgParNameVec.empty()) {
         m_logger << kINFO << "Performing bkg correction for bkg-only toys." << GEndl;
@@ -257,7 +257,7 @@ void ConfigMgr::doHypoTest(FitConfig* fc, TString outdir, double SigXSecSysnsigm
 
     if(fitresult) {	
         outfile->cd();
-        TString hypName = "fitTo_"+fc->m_signalSampleName;
+        TString hypName = "fitTo_" + fc->m_signalSampleName;
         fitresult->SetName(hypName);
         fitresult->Print();
         fitresult->Write();
@@ -270,14 +270,15 @@ void ConfigMgr::doHypoTest(FitConfig* fc, TString outdir, double SigXSecSysnsigm
 
     if (doUL) { /// a. exclusion
         result = RooStats::DoHypoTestInversion(w, 
-                m_nToys,m_calcType,m_testStatType,
+                m_nToys, m_calcType, m_testStatType,
                 useCLs, 
-                npoints,poimin,poimax,
+                npoints, poimin, poimax,
                 doAnalyze,
                 useNumberCounting, 
                 modelSBName.Data(), modelBName.Data(),
                 dataName, 
-                nuisPriorName ) ;
+                nuisPriorName
+                ) ;
         if(result) { result->UseCLs(useCLs); }
     } else {  // b. discovery 
         // MB: Hack, needed for ProfileLikeliHoodTestStat to work properly.
@@ -290,7 +291,7 @@ void ConfigMgr::doHypoTest(FitConfig* fc, TString outdir, double SigXSecSysnsigm
 
         htr = RooStats::DoHypoTest(w, doUL, m_nToys, m_calcType, m_testStatType, modelSBName, modelBName, dataName, 
                 useNumberCounting, nuisPriorName);
-        if (htr!=0) {
+        if (htr != 0) {
             htr->Print(); 
             result = new RooStats::HypoTestInverterResult();
             result->Add(0,*htr);
@@ -299,7 +300,7 @@ void ConfigMgr::doHypoTest(FitConfig* fc, TString outdir, double SigXSecSysnsigm
     }
 
     /// 3. Storage
-    if ( result!=0 ) {	
+    if ( result != 0 ) {	
         outfile->cd();
         TString hypName="hypo_"+fc->m_signalSampleName;
         if(fc->m_hypoTestName.Length() > 0){ hypName="hypo_"+fc->m_hypoTestName; }
@@ -314,7 +315,7 @@ void ConfigMgr::doHypoTest(FitConfig* fc, TString outdir, double SigXSecSysnsigm
         delete result;
     }
 
-    if ( htr!=0 ) {	
+    if ( htr != 0 ) {	
         outfile->cd();
         TString hypName="discovery_htr_"+fc->m_signalSampleName;
         if(fc->m_hypoTestName.Length() > 0){ hypName="discovery_htr_"+fc->m_hypoTestName; }
@@ -496,6 +497,15 @@ void ConfigMgr::doUpperLimit(FitConfig* fc) {
         w->var("alpha_SigXSec")->setVal(0);
         w->var("alpha_SigXSec")->setConstant(true);
     }
+    
+    bool doAnalyze = false;
+    bool useNumberCounting = false;
+    TString modelSBName = "ModelConfig";
+    TString modelBName;
+    const char* dataName = "obsData";                 
+    const char* nuisPriorName = 0;
+
+    bool generateAsimovDataForObserved = m_generateAsimovDataForObserved;
 
     /// here we go ...
     RooStats::HypoTestInverterResult* hypo = nullptr;
@@ -503,7 +513,14 @@ void ConfigMgr::doUpperLimit(FitConfig* fc) {
         /// first asymptotic limit, to get a quick but reliable estimate for the upper limit
         /// dynamic evaluation of ranges
         m_logger << kINFO << "doUpperLimit(): no range specified - running quick asymptotic scan in attempt at finding one" << GEndl;
-        hypo = RooStats::DoHypoTestInversion(w, 1, 2, m_testStatType, m_useCLs, 20, 0, -1); 
+        hypo = RooStats::DoHypoTestInversion(w, 1, 2, m_testStatType, m_useCLs, 20, 0, -1,
+                doAnalyze,
+                useNumberCounting, 
+                modelSBName.Data(), modelBName.Data(),
+                dataName, 
+                nuisPriorName,
+                generateAsimovDataForObserved
+                ); 
     }
 
     double minRange = 0.0;
@@ -528,7 +545,14 @@ void ConfigMgr::doUpperLimit(FitConfig* fc) {
         m_logger << kWARNING << "doUpperLimit(): scan range extender disabled; this scan will never be extended. Please remember to check the output plot for convergence" << GEndl;
         sleep(2); // user should see this message
     }
-    hypo = RooStats::DoHypoTestInversion(w, m_nToys, m_calcType, m_testStatType, m_useCLs, m_nPoints, minRange, maxRange);
+    hypo = RooStats::DoHypoTestInversion(w, m_nToys, m_calcType, m_testStatType, m_useCLs, m_nPoints, minRange, maxRange,
+                doAnalyze,
+                useNumberCounting, 
+                modelSBName.Data(), modelBName.Data(),
+                dataName, 
+                nuisPriorName,
+                generateAsimovDataForObserved
+            );
 
     const double startingMaxRange = maxRange;
     double previousMaxRange = maxRange; // needed in case we fall into the trap where all the points in the extension happen to fail
@@ -638,7 +662,14 @@ void ConfigMgr::doUpperLimit(FitConfig* fc) {
         ++nScanExtensions;
         m_logger << kWARNING << "Running extension number " << nScanExtensions << " for UL scan" << GEndl;
         m_logger << kWARNING << "Setting nPoints = " << nPoints << " min = " << minRange << " max = " << maxRange << GEndl;
-        auto extraHypo = RooStats::DoHypoTestInversion(w, m_nToys, m_calcType, m_testStatType, m_useCLs, nPoints, minRange, maxRange);
+        auto extraHypo = RooStats::DoHypoTestInversion(w, m_nToys, m_calcType, m_testStatType, m_useCLs, nPoints, minRange, maxRange,
+                doAnalyze,
+                useNumberCounting, 
+                modelSBName.Data(), modelBName.Data(),
+                dataName, 
+                nuisPriorName,
+                generateAsimovDataForObserved
+                );
 
         if(!extraHypo) {
             m_logger << kERROR << "doUpperLimit(): additional DoHypoTestInversion returned a nullptr - stopping" << GEndl;
