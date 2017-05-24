@@ -100,6 +100,7 @@ class Channel(object):
         self.text2 = ''
         self.textsize1 = 0.03
         self.textsize2 = 0.03
+        self.ignoreAdditionalCuts = False # ignore any sample-specific cuts in this region
 
         log.debug("Defining new channel '{0}'".format(self.name))
         return
