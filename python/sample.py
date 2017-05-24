@@ -190,6 +190,8 @@ class Sample(object):
         self.prefixTreeName = "" 
         ## Suffix of input tree
         self.suffixTreeName = ""   
+        ## Name of a friends tree (in the same files) to add
+        self.friendTreeName = ""
         ## Additional selection applied on this sample
         self.additionalCuts = ""
         ## Nominal cross-section weight for signal samples
@@ -406,6 +408,7 @@ class Sample(object):
         
         @param histoName Name of the histogram
         """
+        log.verbose("Setting histoName to {}".format(histoName))
         self.histoName = histoName
         return
 
