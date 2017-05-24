@@ -734,14 +734,15 @@ class Sample(object):
             # Check whether a renormalization actually makes sense
             if nomIntegral == 0 or lowIntegral == 0 or highIntegral == 0:
                 # MB : cannot renormalize, so don't after all
+                self.histoSystList.append((systName, highName, lowName, configMgr.histCacheFile, "", "", "", ""))
 
-                # TODO: check shape effect
-                if checkShapeEffect(configMgr.hists[nomName], configMgr.hists[highName], configMgr.hists[lowName] ):
-                    log.error("    generating HistoSys for %s syst=%s nom=%g high=%g low=%g: cannot renormalize; only using shape" % (nomName, systName, nomIntegral, highIntegral, lowIntegral))
-                    self.histoSystList.append((systName, highName, lowName, configMgr.histCacheFile, "", "", "", ""))
-                else:
-                    log.error("    generating HistoSys for %s syst=%s nom=%g high=%g low=%g: cannot renormalize, no shape effect. Systematic is removed from fit." % (nomName, systName, nomIntegral, highIntegral, lowIntegral))
-                    return
+                ## TODO: check shape effect
+                #if checkShapeEffect(configMgr.hists[nomName], configMgr.hists[highName], configMgr.hists[lowName] ):
+                    #log.error("    generating HistoSys for %s syst=%s nom=%g high=%g low=%g: cannot renormalize; only using shape" % (nomName, systName, nomIntegral, highIntegral, lowIntegral))
+                    #self.histoSystList.append((systName, highName, lowName, configMgr.histCacheFile, "", "", "", ""))
+                #else:
+                    #log.error("    generating HistoSys for %s syst=%s nom=%g high=%g low=%g: cannot renormalize, no shape effect. Systematic is removed from fit." % (nomName, systName, nomIntegral, highIntegral, lowIntegral))
+                    #return
             else:
                 # renormalize
                 try:
@@ -760,19 +761,22 @@ class Sample(object):
                 except ZeroDivisionError:
                     log.error("    generating HistoSys for %s syst=%s nom=%g high=%g low=%g keeping in fit (offending histogram should be empty)." % (nomName, systName, nomIntegral, highIntegral, lowIntegral))
                     return
+                    
+                self.histoSystList.append((systName, highName+"Norm", lowName+"Norm", configMgr.histCacheFile, "", "", "", ""))
+                self.addOverallSys(systName, high, low)
 
-                # And finally add the systematic
-                # TODO: check shape effect
-                if checkShapeEffect(configMgr.hists[nomName], configMgr.hists[highName], configMgr.hists[lowName] ):
-                    self.histoSystList.append((systName, highName+"Norm", lowName+"Norm", configMgr.histCacheFile, "", "", "", ""))
-                else:
-                    log.error("    generating HistoSys for %s syst=%s nom=%g high=%g low=%g has no impact on shape. Shape effect of systematic is removed from fit." % (nomName, systName, nomIntegral, highIntegral, lowIntegral))
+                ## And finally add the systematic
+                ## TODO: check shape effect
+                #if checkShapeEffect(configMgr.hists[nomName], configMgr.hists[highName], configMgr.hists[lowName] ):
+                    #self.histoSystList.append((systName, highName+"Norm", lowName+"Norm", configMgr.histCacheFile, "", "", "", ""))
+                #else:
+                    #log.error("    generating HistoSys for %s syst=%s nom=%g high=%g low=%g has no impact on shape. Shape effect of systematic is removed from fit." % (nomName, systName, nomIntegral, highIntegral, lowIntegral))
 
-                # TODO: check norm effect
-                if max( abs(high-1.0), abs(1.0-low) ) < 0.005:
-                    log.error("    generating OverallSys for %s syst=%s nom=%g high=%g low=%g. Systematic has less than 0.5% impact and is removed from fit." % (nomName, systName, nomIntegral, highIntegral, lowIntegral))
-                else: 
-                    self.addOverallSys(systName, high, low)
+                ## TODO: check norm effect
+                #if max( abs(high-1.0), abs(1.0-low) ) < 0.005:
+                    #log.error("    generating OverallSys for {} syst={} nom={:g} high={:g} low={:g}. Systematic has less than 0.5% impact and is removed from fit.".format(nomName, systName, nomIntegral, highIntegral, lowIntegral))
+                #else: 
+                    #self.addOverallSys(systName, high, low)
 
         # Case 3
         if not includeOverallSys and not normalizeSys: # no renormalization, and no overall systematic
