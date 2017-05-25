@@ -220,6 +220,10 @@ class PrepareHistos(object):
         if not chainID in self.configMgr.chains:
             log.debug("Creating chain {0}".format(chainID))
             self.configMgr.chains[chainID] = TChain(treeName)
+            
+            self.configMgr.chains[chainID].Project._creates = True
+            self.configMgr.chains[chainID].Draw._creates = True
+            
             for filename in fileList:
                 self.configMgr.chains[self.currentChainName].Add(filename)
 
@@ -294,7 +298,7 @@ class PrepareHistos(object):
                     log.debug("__addHistoFromTree: projecting into {}".format(tempName))
                     log.verbose("__addHistoFromTree: cuts: {}".format(self.cuts))
                     log.verbose("__addHistoFromTree: weights: {}".format(self.weights))
-                    log.debug("__addHistoFromTree: Project(\"%s\", \"%s\", \"%s\")" % (tempName, self.cuts, self.weights) )
+                    log.debug('__addHistoFromTree: {}->Project("{}", "{}", "{}")'.format(self.currentChainName, tempName, self.cuts, self.weights) )
 
                     self.configMgr.chains[self.currentChainName].Project(tempName, self.cuts, self.weights)
                     
@@ -303,7 +307,10 @@ class PrepareHistos(object):
                     self.configMgr.hists[name].SetBinContent(iReg+1, integral)
                     self.configMgr.hists[name].SetBinError(iReg+1, error)
                     self.configMgr.hists[name].GetXaxis().SetBinLabel(iReg+1, reg)
-                    tempHist.Delete()
+                  
+                    del tempHist
+                    del error
+                    #tempHist.Delete()
 
                     for iBin in xrange(1, self.configMgr.hists[name].GetNbinsX()+1):
                         binVal = self.configMgr.hists[name].GetBinContent(iBin)
@@ -314,14 +321,15 @@ class PrepareHistos(object):
         else:
             if self.configMgr.hists[name] is None:
                 log.verbose("Constructing binned histogram for {}".format(name))
-                if self.var.find(":") == -1:
-                    self.configMgr.hists[name] = TH1F(name, name, self.channel.nBins, self.channel.binLow, self.channel.binHigh)
-                else:
-                    self.configMgr.hists[name] = TH2F(name, name, self.channel.nBins, self.channel.binLow, self.channel.binHigh, self.channelnBinsY, self.channel.binLowY, self.channel.binHighY)
+                #if self.var.find(":") == -1:
+                    #self.configMgr.hists[name] = TH1F(name, name, self.channel.nBins, self.channel.binLow, self.channel.binHigh)
+                #else:
+                    #self.configMgr.hists[name] = TH2F(name, name, self.channel.nBins, self.channel.binLow, self.channel.binHigh, self.channelnBinsY, self.channel.binLowY, self.channel.binHighY)
                 
                 for (iReg,reg) in enumerate(self.channel.regions):
                     tempName = "%stemp%s" % (name, str(iReg))
                     #self.cuts = self.configMgr.cutsDict[reg]
+                    
                     if self.var.find(":") == -1:                    
                         tempHist = TH1F(tempName, tempName, self.channel.nBins, self.channel.binLow, self.channel.binHigh)
                     else:
@@ -330,15 +338,16 @@ class PrepareHistos(object):
                     log.debug("__addHistoFromTree: projecting binned {} into {}".format(self.var, tempName))
                     log.verbose("__addHistoFromTree: cuts: {}".format(self.cuts))
                     log.verbose("__addHistoFromTree: weights: {}".format(self.weights))
-                    log.debug('__addHistoFromTree: Project("{}", "{}", "{} * ({})" )'.format(tempName, self.var, self.cuts, self.weights) )
+                    log.debug('__addHistoFromTree: {}->Project("{}", "{}", "{} * ({})" )'.format(self.currentChainName, tempName, self.var, self.cuts, self.weights) )
                     
-                    #print "!!!!!! PROJECTING",name+"temp"+str(iReg)
-                    #print "!!!!!! VAR",self.var
-                    #print "!!!!!! WEIGHTS",self.weights
-                    #print "!!!!!! CUTS",self.cuts
                     nCuts = self.configMgr.chains[self.currentChainName].Project(tempName, self.var, self.weights+" * ("+self.cuts+")")
-                    self.configMgr.hists[name].Add(tempHist.Clone())
-                    tempHist.Delete()
+                    self.configMgr.hists[name] = tempHist.Clone()
+                    self.configMgr.hists[name].SetName(name)
+                    self.configMgr.hists[name].SetName(name)
+
+                    del tempHist
+
+                    #tempHist.Delete()
 
                     for iBin in xrange(1, self.configMgr.hists[name].GetNbinsX()+1):
                         binVal = self.configMgr.hists[name].GetBinContent(iBin)
