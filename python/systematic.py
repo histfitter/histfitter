@@ -179,17 +179,14 @@ class SystematicBase:
 
     def FillUpDownHist(self, lowhigh="", regionString="", normString="",
                        normCuts="", abstract=None, topLvl=None, chan=None, sam=None):
-        if (self.method == "userNormHistoSys"
-            or self.method == "overallNormSys"
-            or self.method == "normHistoSys"
-            or self.method == "normHistoSysOneSide"
-            or self.method == "normHistoSysOneSideSym"
-            or self.method == "normHistoSysEnvelopeSym"
-            or self.method == "overallNormHistoSys"
-            or self.method == "overallNormHistoSysEnvelopeSym"
-            or self.method == "overallNormHistoSysOneSide"
-            or self.method == "overallNormHistoSysOneSideSym" ) \
-               and (not sam.noRenormSys):
+        
+        _allowed_methods = ["userNormHistoSys", 
+                            "overallNormSys", "normHistoSys", 
+                            "normHistoSysOneSide", "normHistoSysOneSideSym", 
+                            "normHistoSysEnvelopeSym", "overallNormHistoSys", 
+                            "overallNormHistoSysEnvelopeSym", "overallNormHistoSysOneSide", "overallNormHistoSysOneSideSym"]
+        
+        if self.method in _allowed_methods and (not sam.noRenormSys):
 
             histName = "h" + sam.name + self.name + lowhigh + normString + "Norm"
             if not histName in abstract.hists.keys():
