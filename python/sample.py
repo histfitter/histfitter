@@ -1071,8 +1071,9 @@ class Sample(object):
 
         @param syst An object of type Systematic
         """
+        log.verbose("Adding systematic {} to sample {} ({})".format(syst.name, self.name, hex(id(self))))
         if syst.name in self.systDict.keys():
-            raise Exception("Attempt to overwrite systematic %s in Sample %s" % (syst.name, self.name))
+            raise Exception("Attempt to overwrite systematic %s in Sample %s (%s)" % (syst.name, self.name, hex(id(self))))
         else:
             self.systDict[syst.name] = syst.Clone()
             return
@@ -1170,6 +1171,7 @@ class Sample(object):
         """
         Remove all systematics from the sample
         """
+        log.verbose("Clearing systematics for {} ({})".format(self.name, hex(id(self)))) 
         self.systDict.clear()
  
     def replaceSystematic(self, old, new):
