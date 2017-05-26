@@ -225,12 +225,19 @@ class PrepareHistos(object):
             self.configMgr.chains[chainID].Draw._creates = True
             
             for filename in fileList:
-                self.configMgr.chains[self.currentChainName].Add(filename)
+                if os.path.exists(filename):
+                    self.configMgr.chains[self.currentChainName].Add(filename)
+                else:
+                    log.error("input file {} does not exist".format(filename))
 
             # does this chain need a friend? 
             if friendTreeName != "":
                 log.debug("Adding friend tree {} to {}".format(friendTreeName, self.currentChainName)) 
                 for filename in fileList:
+                    if not os.path.exists(filename):
+                        log.warning("Could not add friend {} - this is not necessarily bad; if we don't need the trees you're safe".format(friendTreeName))
+                        continue
+
                     try:
                         self.configMgr.chains[self.currentChainName].AddFriend(friendTreeName, filename)
                     except:
