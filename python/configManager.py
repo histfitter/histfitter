@@ -320,20 +320,17 @@ class ConfigManager(object):
                     #lowName    = "h%sLow_%s_obs_%s" % (sam.name, regString, replaceSymbols(chan.variableName))
 
                     nomName = sam.getHistogramName(tl)
-                    highName = sam.getHistogramName(tl, "High")
-                    lowName = sam.getHistogramName(tl, "Low")
+                        
+                    if not sam.isData:
+                        highName = sam.getHistogramName(tl, "High")
+                        lowName = sam.getHistogramName(tl, "Low")
 
                     if sam.isData:
-                        #if self.channelIsBlinded(tl, channel):
-                        if channel.isBlinded(tl):
-                            sam.blindedHistName = "h%s%sBlind_%s_obs_%s" % (tl.name, sam.name, regString,
-                                                                            replaceSymbols(channel.variableName))
-                            if not sam.blindedHistName in self.hists.keys():
-                                self.hists[sam.blindedHistName] = None
-                        else:
-                            histName = "h%s_%s_obs_%s" % (sam.name, regString, replaceSymbols(channel.variableName))
-                            if not histName in self.hists.keys():
-                                self.hists[histName] = None
+                        _name = sam.getHistogramName(tl)
+                        log.error("Data name {}".format(_name))
+                        if not _name in self.hists.keys():
+                            self.hists[_name] = None
+
                     elif sam.isQCD:
                         systName = "h%sSyst_%s_obs_%s" % (sam.name, regString, replaceSymbols(channel.variableName))
                         statName = "h%sStat_%s_obs_%s" % (sam.name, regString, replaceSymbols(channel.variableName))
@@ -1351,12 +1348,15 @@ class ConfigManager(object):
         histoName = "h%s_%s_obs_%s" % (sam.name, regionString, replaceSymbols(chan.variableName) )
 
         if sam.isData:
-            if self.channelIsBlinded(fitConfig, chan):
+            #if self.channelIsBlinded(fitConfig, chan):
+            if sam.isBlinded(fitConfig):
                 log.info("Using blinded data for channel {0} for sample {1}".format(chan.name, sam.name)) 
-                chan.addData(sam.blindedHistName)
+                #chan.addData(sam.blindedHistName)
             else:
-                self.prepare.addHisto(histoName, useOverflow=chan.useOverflowBin, useUnderflow=chan.useUnderflowBin)
-                chan.addData(histoName)
+                self.prepare.addHisto(sam.getHistogramName(fitConfig), useOverflow=chan.useOverflowBin, useUnderflow=chan.useUnderflowBin)
+                #chan.addData(histoName)
+            
+            chan.addData(sam.getHistogramName(fitConfig))
 
             #if chan.channelName in fitConfig.signalChannels:
                 #if self.blindSR:
@@ -1511,37 +1511,34 @@ class ConfigManager(object):
 
         return False
 
-    def buildBlindedHistos(self, fitConfig, chan, sam):
+    def buildBlindedHistos(self, fitConfig, channel, sample):
         """
         Build blinded histograms for a fit configuration
 
         @param fitConfig The fit configuratio
-        @param chan The channel
-        @param sam The sample
+        @param channel The channelnel
+        @param sample The sample
         """
-        #if chan.blind or \
-           #(self.blindSR and (chan.channelName in fitConfig.signalChannels)) or \
-           #(self.blindCR and chan.channelName in fitConfig.bkgConstrainChannels) or \
-           #(self.blindVR and (chan.channelName in fitConfig.validationChannels)):
-       
-        log.debug("buildBlindedHistos: checking channel {}".format(chan.channelName))
+        log.debug("buildBlindedHistos: checking channel {}".format(channel.channelName))
 
-        if not self.channelIsBlinded(fitConfig, chan):
-            log.verbose("buildBlindedHistos: channel {} is not blinded, performing nothing".format(chan.channelName))
+        if not sample.isBlinded(fitConfig):
+            log.verbose("buildBlindedHistos: sample {} is not blinded, performing nothing".format(sample.name))
             return 
 
-        if self.hists[sam.blindedHistName]:
-            log.verbose("buildBlindedHistos: histogram {} already exists".format(sam.blindedHistName))
+        histname = sample.getHistogramName(fitConfig)
+
+        if self.hists[histname]:
+            log.verbose("buildBlindedHistos: histogram {} already exists".format(histname))
             return
 
-        log.verbose("buildBlindedHistos: constructing {}".format(sam.blindedHistName))
-        self.hists[sam.blindedHistName] = TH1F(sam.blindedHistName, sam.blindedHistName, chan.nBins, chan.binLow, chan.binHigh)
+        log.verbose("buildBlindedHistos: constructing {}".format(histname))
+        self.hists[histname] = TH1F(histname, histname, channel.nBins, channel.binLow, channel.binHigh)
 
-        log.info("Blinding sample {} in {} with the following samples:".format(sam.name, chan.channelName))
-        for s in chan.sampleList:
-            if (not s.isData) and (self.useSignalInBlindedData or s.name!=fitConfig.signalSample):
+        log.info("Blinding sample {} in {} with the following samples:".format(sample.name, channel.channelName))
+        for s in channel.sampleList:
+            if (not s.isData) and (self.useSignalInBlindedData or s.name != fitConfig.signalSample):
                 log.info(s.name)			
-                self.hists[sam.blindedHistName].Add(self.hists[s.histoName])
+                self.hists[histname].Add(self.hists[s.histoName])
         
         return
     
