@@ -18,8 +18,8 @@
  **********************************************************************************
 """
 
-from ROOT import THStack,TLegend,TCanvas,TFile,std,TH1F
-from ROOT import ConfigMgr,FitConfig,ChannelStyle #this module comes from gSystem.Load("libSusyFitter.so")
+from ROOT import THStack, TLegend, TCanvas, TFile, std, TH1F
+from ROOT import ConfigMgr, FitConfig, ChannelStyle #this module comes from gSystem.Load("libSusyFitter.so")
 from prepareHistos import PrepareHistos
 from copy import copy, deepcopy
 from histogramsManager import histMgr
@@ -311,27 +311,32 @@ class ConfigManager(object):
     def initializeHistograms(self):
         log.info("  -initialize global histogram dictionary...")
         for tl in self.fitConfigs:
-            for chan in tl.channels:
-                for sam in chan.sampleList:
-                    regString = "".join(chan.regions)
+            for channel in tl.channels:
+                for sam in channel.sampleList:
+                    regString = "".join(channel.regions)
 
-                    nomName    = "h%sNom_%s_obs_%s" % (sam.name, regString, replaceSymbols(chan.variableName))
-                    highName   = "h%sHigh_%s_obs_%s" % (sam.name, regString, replaceSymbols(chan.variableName))
-                    lowName    = "h%sLow_%s_obs_%s" % (sam.name, regString, replaceSymbols(chan.variableName))
+                    #nomName    = "h%sNom_%s_obs_%s" % (sam.name, regString, replaceSymbols(chan.variableName))
+                    #highName   = "h%sHigh_%s_obs_%s" % (sam.name, regString, replaceSymbols(chan.variableName))
+                    #lowName    = "h%sLow_%s_obs_%s" % (sam.name, regString, replaceSymbols(chan.variableName))
+
+                    nomName = sam.getHistogramName(tl)
+                    highName = sam.getHistogramName(tl, "High")
+                    lowName = sam.getHistogramName(tl, "Low")
 
                     if sam.isData:
-                        if self.channelIsBlinded(tl, chan):
+                        #if self.channelIsBlinded(tl, channel):
+                        if channel.isBlinded(tl):
                             sam.blindedHistName = "h%s%sBlind_%s_obs_%s" % (tl.name, sam.name, regString,
-                                                                            replaceSymbols(chan.variableName))
+                                                                            replaceSymbols(channel.variableName))
                             if not sam.blindedHistName in self.hists.keys():
                                 self.hists[sam.blindedHistName] = None
                         else:
-                            histName = "h%s_%s_obs_%s" % (sam.name, regString, replaceSymbols(chan.variableName))
+                            histName = "h%s_%s_obs_%s" % (sam.name, regString, replaceSymbols(channel.variableName))
                             if not histName in self.hists.keys():
                                 self.hists[histName] = None
                     elif sam.isQCD:
-                        systName = "h%sSyst_%s_obs_%s" % (sam.name, regString, replaceSymbols(chan.variableName))
-                        statName = "h%sStat_%s_obs_%s" % (sam.name, regString, replaceSymbols(chan.variableName))
+                        systName = "h%sSyst_%s_obs_%s" % (sam.name, regString, replaceSymbols(channel.variableName))
+                        statName = "h%sStat_%s_obs_%s" % (sam.name, regString, replaceSymbols(channel.variableName))
 
                         if not nomName in self.hists.keys():
                             self.hists[nomName] = None
@@ -348,10 +353,10 @@ class ConfigManager(object):
                         if not statName in self.hists.keys():
                             self.hists[statName] = None
 
-                        if chan.variableName == "cuts":
-                            nHists = len(chan.regions)
+                        if channel.variableName == "cuts":
+                            nHists = len(channel.regions)
                         else:
-                            nHists = chan.nBins
+                            nHists = channel.nBins
 
                         for iBin in xrange(1, nHists+1):
                             if not "%s_%s" % (nomName, str(iBin)) in self.hists.keys():
@@ -367,19 +372,19 @@ class ConfigManager(object):
                         if not nomName in self.hists.keys():
                             self.hists[nomName] = None
 
-                        for (name, syst) in chan.getSample(sam.name).systDict.items():
+                        for (name, syst) in channel.getSample(sam.name).systDict.items():
                             highSystName = "h%s%sHigh_%s_obs_%s" % (sam.name, syst.name, regString,
-                                                                    replaceSymbols(chan.variableName))
+                                                                    replaceSymbols(channel.variableName))
                             if not highSystName in self.hists.keys():
                                 self.hists[highSystName] = None
 
                             lowSystName = "h%s%sLow_%s_obs_%s" % (sam.name, syst.name, regString,
-                                                                  replaceSymbols(chan.variableName))
+                                                                  replaceSymbols(channel.variableName))
                             if not lowSystName in self.hists.keys():
                                 self.hists[lowSystName] = None
 
                             nomSystName = "h%s%sNom_%s_obs_%s" % (sam.name, syst.name, regString,
-                                                                  replaceSymbols(chan.variableName))
+                                                                  replaceSymbols(channel.variableName))
                             if not nomSystName in self.hists.keys():
                                 self.hists[nomSystName] = None
 
@@ -387,22 +392,22 @@ class ConfigManager(object):
                                 mergedName = "".join(syst.sampleList)
 
                                 nomMergedName = "h%sNom_%s_obs_%s" % (mergedName, regString,
-                                                                      replaceSymbols(chan.variableName))
+                                                                      replaceSymbols(channel.variableName))
                                 if not nomMergedName in self.hists.keys():
                                     self.hists[nomMergedName] = None
 
                                 highMergedName = "h%s%sHigh_%s_obs_%s" % (mergedName, syst.name, regString,
-                                                                          replaceSymbols(chan.variableName))
+                                                                          replaceSymbols(channel.variableName))
                                 if not highMergedName in self.hists.keys():
                                     self.hists[highMergedName] = None
 
                                 lowMergedName = "h%s%sLow_%s_obs_%s" % (mergedName, syst.name, regString,
-                                                                        replaceSymbols(chan.variableName))
+                                                                        replaceSymbols(channel.variableName))
                                 if not lowMergedName in self.hists.keys():
                                     self.hists[lowMergedName] = None
 
                                 nomMergedName = "h%s%sNom_%s_obs_%s" % (mergedName, syst.name, regString,
-                                                                        replaceSymbols(chan.variableName))
+                                                                        replaceSymbols(channel.variableName))
                                 if not nomMergedName in self.hists.keys():
                                     self.hists[nomMergedName] = None
         return
@@ -1019,14 +1024,20 @@ class ConfigManager(object):
                 else:
                     pass
         
+        # Plot histograms, if asked
         if self.plotHistos:
             mkdir_p("plots/%s" % self.analysisName)
             for (iChan,chan) in enumerate(fitConfig.channels):
                 if chan.hasDiscovery:
                     continue
                 self.makeDicts(fitConfig, chan)
-        
+
+        # Write the data file
         self.outputRoot()
+        
+        # Build any merged samples if needed
+        fitConfig.createMergedSamples()
+        sys.exit()
         
         if self.executeHistFactory:
             #removing regions used for remapping systematic uncertainties, but only for exclusion fits
