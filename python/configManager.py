@@ -994,9 +994,9 @@ class ConfigManager(object):
         # Write the data file
         self.outputRoot()
         
-        # Build any merged samples if needed
-        fitConfig.createMergedSamples()
-        sys.exit()
+        ## Build any merged samples if needed
+        #fitConfig.createMergedSamples()
+        #sys.exit()
         
         if self.executeHistFactory:
             #removing regions used for remapping systematic uncertainties, but only for exclusion fits
@@ -1048,27 +1048,22 @@ class ConfigManager(object):
         return
 
     def addHistoSysforNoQCD(self, regionString, normString, normCuts, fitConfig, chan, sam, syst):
-        #nomName    = "h%sNom_%s_obs_%s" % (sam.name, regionString, replaceSymbols(chan.variableName) )
-        #nomSysName = "h%s%sNom_%s_obs_%s" % (sam.name, syst.name, regionString, replaceSymbols(chan.variableName) )
-        #highName   = "h%s%sHigh_%s_obs_%s" % (sam.name, syst.name, regionString, replaceSymbols(chan.variableName) )
-        #lowName    = "h%s%sLow_%s_obs_%s" % (sam.name, syst.name, regionString, replaceSymbols(chan.variableName) )
-
-        nomName = sam.getHistogramName(fitConfig)
-        nomSysName = sam.getHistogramName(fitConfig, syst.name)
-        highName = sam.getHistogramName(fitConfig, syst.name, "High")
-        lowName = sam.getHistogramName(fitConfig, syst.name, "Low")
+        nomName    = "h%sNom_%s_obs_%s" % (sam.name, regionString, replaceSymbols(chan.variableName) )
+        nomSysName = "h%s%sNom_%s_obs_%s" % (sam.name, syst.name, regionString, replaceSymbols(chan.variableName) )
+        highName   = "h%s%sHigh_%s_obs_%s" % (sam.name, syst.name, regionString, replaceSymbols(chan.variableName) )
+        lowName    = "h%s%sLow_%s_obs_%s" % (sam.name, syst.name, regionString, replaceSymbols(chan.variableName) )
 
         if syst.method == "histoSys":
-            sam.addHistoSys(syst.name, nomName, highName, lowName, 
+            chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName, 
                                                 includeOverallSys=False, normalizeSys=False, nomSysName=nomSysName)
         elif syst.method == "histoSysOneSide":
-            sam.addHistoSys(syst.name, nomName, highName, lowName, 
+            chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName, 
                                                 includeOverallSys=False, normalizeSys=False, symmetrize=False, oneSide=True, nomSysName=nomSysName)
         elif syst.method == "histoSysOneSideSym":
-            sam.addHistoSys(syst.name, nomName, highName, lowName, 
+            chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName, 
                                                 includeOverallSys=False, normalizeSys=False, symmetrize=True, oneSide=True, nomSysName=nomSysName)
         elif syst.method == "histoSysEnvelopeSym": 
-            sam.addHistoSys(syst.name, nomName, highName, lowName, 
+            chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName, 
                                                 includeOverallSys=False, normalizeSys=False, symmetrize=True, oneSide=False, symmetrizeEnvelope=True, 
                                                 samName=sam.name, normString=normString, nomSysName=nomSysName)
         elif syst.method == "overallSys":
@@ -1085,46 +1080,46 @@ class ConfigManager(object):
             except ZeroDivisionError:
                 log.warning("    generating Low overallSys for %s syst=%s nom=%g high=%g low=%g" % (nomName, syst.name, nomIntegral, highIntegral, lowIntegral))
                 overallSystLow = 1.0
-            sam.addOverallSys(syst.name, overallSystHigh, overallSystLow)
+            chan.getSample(sam.name).addOverallSys(syst.name, overallSystHigh, overallSystLow)
         elif syst.method == "userOverallSys":
-            sam.addOverallSys(syst.name, syst.high, syst.low)
+            chan.getSample(sam.name).addOverallSys(syst.name, syst.high, syst.low)
         elif syst.method == "overallHistoSys":
-            sam.addHistoSys(syst.name, nomName, highName, lowName, 
+            chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName, 
                                                 includeOverallSys=True, normalizeSys=False, nomSysName=nomSysName)
         elif syst.method == "overallNormSys":
-            sam.addHistoSys(syst.name, nomName, highName, lowName, 
+            chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName, 
                                                 includeOverallSys=True, normalizeSys=True, symmetrize=False, oneSide=False, 
                                                 samName=sam.name, normString=normString, nomSysName=nomSysName)
         elif syst.method == "overallNormHistoSys":
-            sam.addHistoSys(syst.name, nomName, highName, lowName, 
+            chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName, 
                                                 includeOverallSys=True, normalizeSys=True, symmetrize=False, oneSide=False, 
                                                 samName=sam.name, normString=normString, nomSysName=nomSysName)
         elif syst.method == "overallNormHistoSysOneSide":
-            sam.addHistoSys(syst.name, nomName, highName, lowName, 
+            chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName, 
                                                 includeOverallSys=True, normalizeSys=True, symmetrize=False, oneSide=True,
                                                 samName=sam.name, normString=normString, nomSysName=nomSysName)
         elif syst.method == "overallNormHistoSysOneSideSym":
-            sam.addHistoSys(syst.name, nomName, highName, lowName, 
+            chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName, 
                                                 includeOverallSys=True, normalizeSys=True, symmetrize=True, oneSide=True,
                                                 samName=sam.name, normString=normString, nomSysName=nomSysName)
         elif syst.method == "overallNormHistoSysEnvelopeSym":
-            sam.addHistoSys(syst.name, nomName, highName, lowName, 
+            chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName, 
                                                 includeOverallSys=True, normalizeSys=True, symmetrize=True, oneSide=False, symmetrizeEnvelope=True,
                                                 samName=sam.name, normString=normString, nomSysName=nomSysName)
         elif syst.method == "normHistoSys":
-            sam.addHistoSys(syst.name, nomName, highName, lowName, 
+            chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName, 
                                                 includeOverallSys=False, normalizeSys=True,symmetrize= False, oneSide=False, 
                                                 samName=sam.name, normString=normString, nomSysName=nomSysName)
         elif syst.method == "normHistoSysOneSide":
-            sam.addHistoSys(syst.name, nomName, highName, lowName, 
+            chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName, 
                                                 includeOverallSys=False, normalizeSys=True, symmetrize=False, oneSide=True, 
                                                 samName=sam.name, normString=normString, nomSysName=nomSysName)
         elif syst.method == "normHistoSysOneSideSym":
-            sam.addHistoSys(syst.name, nomName, highName, lowName, 
+            chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName, 
                                                 includeOverallSys=False, normalizeSys=True, symmetrize=True, oneSide=True, 
                                                 samName=sam.name, normString=normString, nomSysName=nomSysName)
         elif syst.method == "normHistoSysEnvelopeSym": 
-            sam.addHistoSys(syst.name, nomName, highName, lowName, 
+            chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName, 
                                                 includeOverallSys=False, normalizeSys=True, symmetrize=True, oneSide=False, symmetrizeEnvelope=True, 
                                                 samName=sam.name, normString=normString, nomSysName=nomSysName)
         elif syst.method == "userHistoSys" or syst.method == "userNormHistoSys":
@@ -1133,7 +1128,7 @@ class ConfigManager(object):
             if configMgr.hists[lowName] is None:
                 configMgr.hists[lowName] = histMgr.buildUserHistoSysFromHist(lowName,  syst.low,  configMgr.hists[nomName])
             if syst.method == "userHistoSys":
-                sam.addHistoSys(syst.name, nomName, highName, lowName, False, False, nomSysName=nomSysName)
+                chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName, False, False, nomSysName=nomSysName)
             pass
         elif syst.method == "shapeSys":
             if syst.merged:
@@ -1158,28 +1153,28 @@ class ConfigManager(object):
                     else:
                         self.hists[lowMergedName].Add(self.hists[lowName])
                     if syst.isMerged():
-                        sam.addShapeSys(syst.name,nomMergedName,highMergedName,lowMergedName,syst.constraint)
+                        chan.getSample(sam.name).addShapeSys(syst.name,nomMergedName,highMergedName,lowMergedName,syst.constraint)
                         syst.Reset()
-                    sam.shapeSystList.append((syst.name, nomMergedName+"Norm", syst.constraint, "", "", "", ""))
+                    chan.getSample(sam.name).shapeSystList.append((syst.name, nomMergedName+"Norm", syst.constraint, "", "", "", ""))
             else:
-                sam.addShapeSys(syst.name, nomName, highName, lowName)
-                sam.shapeSystList.append((syst.name, nomName+"Norm", syst.constraint, "", "", "", ""))
+                chan.getSample(sam.name).addShapeSys(syst.name, nomName, highName, lowName)
+                chan.getSample(sam.name).shapeSystList.append((syst.name, nomName+"Norm", syst.constraint, "", "", "", ""))
         elif syst.method == "shapeStat":
             try:
                 threshold = chan.statErrorThreshold
             except:
                 threshold = None     
-            sam.addShapeStat(syst.name, nomName, statErrorThreshold = threshold ) # this stores a new histogram called: nomName+"Norm" 
-            sam.shapeSystList.append(('shape_%s_%s_%s_obs_%s' % (syst.name, sam.name,
-                                                                              regionString,
-                                                                              replaceSymbols(chan.variableName)),
+            chan.getSample(sam.name).addShapeStat(syst.name, nomName, statErrorThreshold = threshold ) # this stores a new histogram called: nomName+"Norm" 
+            chan.getSample(sam.name).shapeSystList.append(('shape_%s_%s_%s_obs_%s' % (syst.name, sam.name,
+                                                                                      regionString,
+                                                                                      replaceSymbols(chan.variableName)),
                                                            nomName+"Norm", syst.constraint, "", "", "", ""))
         else:
             log.error("ERROR don't know what to do with {0:s} (type: {1:s})".format(syst.name,syst.method))
         return
 
-    def addHistoSysForQCD(self, regionString, normString, normCuts, chan, sam):
-        self.prepare.addQCDHistos(sam, chan.useOverflowBin, chan.useUnderflowBin)
+    def addHistoSysForQCD(self,regionString,normString,normCuts,chan,sam):
+        self.prepare.addQCDHistos(sam,chan.useOverflowBin,chan.useUnderflowBin)
 
         if chan.variableName == "cuts":
             nHists = len(chan.regions)
@@ -1190,12 +1185,12 @@ class ConfigManager(object):
         prefixHigh = "h%sHigh_%s_obs_%s" % (sam.name, regionString, replaceSymbols(chan.variableName))
         prefixLow = "h%sLow_%s_obs_%s" % (sam.name, regionString, replaceSymbols(chan.variableName))
 
-        sam.setWrite(True)
-        sam.setHistoName(prefixNom)
+        chan.getSample(sam.name).setWrite(True)
+        chan.getSample(sam.name).setHistoName(prefixNom)
 
-        if sam.qcdSyst == "histoSys":
-            sam.addHistoSys("QCDNorm_"+regionString, prefixNom, prefixHigh, prefixLow, False, False)
-        elif sam.qcdSyst == "overallSys":
+        if chan.getSample(sam.name).qcdSyst == "histoSys":
+            chan.getSample(sam.name).addHistoSys("QCDNorm_"+regionString,prefixNom,prefixHigh,prefixLow,False,False)
+        elif chan.getSample(sam.name).qcdSyst == "overallSys":
             highIntegral = configMgr.hists[prefixHigh].Integral()
             lowIntegral = configMgr.hists[prefixLow].Integral()
             nomIntegral = configMgr.hists[prefixNom].Integral()
@@ -1204,18 +1199,18 @@ class ConfigManager(object):
                 overallSystHigh = highIntegral / nomIntegral
                 overallSystLow = lowIntegral / nomIntegral
             except ZeroDivisionError:
-                log.warning("Error generating HistoSys for %s syst=%s nom=%g high=%g low=%g" % (nomName, "QCDNorm_"+regionString, nomIntegral, highIntegral, lowIntegral))
+                log.warning("Error generating HistoSys for %s syst=%s nom=%g high=%g low=%g" % (nomName,"QCDNorm_"+regionString,nomIntegral,highIntegral,lowIntegral))
             
-            sam.addOverallSys("QCDNorm_"+regionString, overallSystHigh, overallSystLow)
-        elif sam.qcdSyst == "overallHistoSys":
-            sam.addHistoSys("QCDNorm_"+regionString, prefixNom, prefixHigh, prefixLow, True, False)
-        elif sam.qcdSyst == "normHistoSys":
-            sam.addHistoSys("QCDNorm_"+regionString, prefixNom, prefixHigh, prefixLow, False, True)
-        elif sam.qcdSyst == "shapeSys":
-            sam.addShapeSys("QCDNorm_"+regionString, prefixNom, prefixHigh, prefixLow)
-            sam.shapeSystList.append(("QCDNorm_"+regionString, prefixNom+"Norm", "data/"+configMgr.analysisName+".root", "", "", "", ""))
-        elif sam.qcdSyst == "uncorr":
-            sam.setWrite(False)
+            chan.getSample(sam.name).addOverallSys("QCDNorm_"+regionString, overallSystHigh, overallSystLow)
+        elif chan.getSample(sam.name).qcdSyst == "overallHistoSys":
+            chan.getSample(sam.name).addHistoSys("QCDNorm_"+regionString, prefixNom, prefixHigh, prefixLow, True, False)
+        elif chan.getSample(sam.name).qcdSyst == "normHistoSys":
+            chan.getSample(sam.name).addHistoSys("QCDNorm_"+regionString, prefixNom, prefixHigh, prefixLow, False, True)
+        elif chan.getSample(sam.name).qcdSyst == "shapeSys":
+            chan.getSample(sam.name).addShapeSys("QCDNorm_"+regionString, prefixNom, prefixHigh, prefixLow)
+            chan.getSample(sam.name).shapeSystList.append(("QCDNorm_"+regionString, prefixNom+"Norm", "data/"+configMgr.analysisName+".root", "", "", "", ""))
+        elif chan.getSample(sam.name).qcdSyst == "uncorr":
+            chan.getSample(sam.name).setWrite(False)
 
             for iBin in xrange(1,nHists+1):
                 qcdSam = sam.Clone()
