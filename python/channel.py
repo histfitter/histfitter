@@ -66,6 +66,7 @@ class Channel(object):
         self.binHigh = binHigh
         self.binLow = binLow
         self.sampleList = []
+        self.samplesToMerge = []
         self.dataList = []
         self.weights = []
         self.systDict = {}
@@ -179,7 +180,7 @@ class Channel(object):
                 return s
 
         raise Exception("Could not find sample with name %s in %s"
-                        % (name, self.sampleList))
+                        % (name, [s.name for s in self.sampleList]))
 
     def hasSample(self, name):
         """
@@ -433,6 +434,15 @@ class Channel(object):
             sam.propagateTreeName(self.treeName)
             pass
         return
+
+    def isBlinded(self, fitConfig):
+        if self.blind or \
+           (configMgr.blindSR and (self.channelName in fitConfig.signalChannels)) or \
+           (configMgr.blindCR and self.channelName in fitConfig.bkgConstrainChannels) or \
+           (configMgr.blindVR and (self.channelName in fitConfig.validationChannels)):
+            return True
+
+        return False
 
     def createHistFactoryObject(self):
         """
