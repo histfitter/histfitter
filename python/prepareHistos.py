@@ -382,7 +382,7 @@ class PrepareHistos(object):
                 self.configMgr.hists[name] = self.cache2File.Get(name)
                 testsum = self.configMgr.hists[name].GetSum()
             except: # IOError:
-                log.info("Could not get histogram <%s> from backupCacheFile '%s', trying cacheFile '%s'" % (name, self.cache2FileName, self.cacheFileName))
+                log.verbose("Could not get histogram <%s> from backupCacheFile '%s', trying cacheFile '%s'" % (name, self.cache2FileName, self.cacheFileName))
                 try:
                     self.configMgr.hists[name] = self.cacheFile.Get(name)
                     testsum = self.configMgr.hists[name].GetSum()
@@ -396,7 +396,7 @@ class PrepareHistos(object):
                         log.error("Could not find histogram <"+name+"> in "+self.cacheFileName+" ! ")
                         raise #Exception("Could not find histogram <"+name+"> in "+self.cacheFileName)
                     else:
-                        log.info("Could not find histogram <"+name+"> in "+self.cacheFileName+", trying from tree ")
+                        log.debug("Could not find histogram <"+name+"> in "+self.cacheFileName+", trying from tree ")
 
                         self.configMgr.hists[name] = None
                         return self.__addHistoFromTree(name, nBins, binLow, binHigh, nBins, binLow, binHigh, useOverflow, useUnderflow)
