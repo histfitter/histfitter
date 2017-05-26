@@ -29,10 +29,10 @@ log = Logger('Sample')
 TH1.SetDefaultSumw2(True)
 
 from copy import deepcopy
-from configManager import configMgr
+from configManager import configMgr, replaceSymbols
 
 def chi2test(h1, h2):
-    if h2.Integral()==0:
+    if h2.Integral() == 0:
         return 1
     norm = h1.Integral() / h2.Integral()
 
@@ -208,6 +208,9 @@ class Sample(object):
         self.parentChannel = None
         self.allowRemapOfSyst = True
         self.mergeOverallSysSet = []
+
+        # will this sample be merged with something?
+        self.toBeMerged = False
 
         if self.name[0].isdigit():
             log.warning("Sample name %s starts with a digit - this can confuse HistFactory internals" % self.name)
@@ -448,6 +451,29 @@ class Sample(object):
         self.normRegions = normRegions
         self.noRenormSys = False
         return
+
+    def getHistogramName(self, fitConfig, variation=""):
+        """
+        Return the histogram name for with a possible variation
+
+        @param variation A variation: either the empty string (equivalent to Nom), or High (or Up) or Low (or Down)
+        """
+
+        if variation == "":
+            variation = "Nom"
+
+        if variation == "Up":
+            variation = "High"
+
+        if variation == "Down":
+            variation = "Low"
+
+        variations = ["Nom", "High", "Low"]
+
+        if not variation in variations:
+            raise ValueError("Sample {}: cannot generate histogram name for unknown variation {}".format(variation))
+
+        return "h{}{}_{}_obs_{}".format(self.name, variation, "".join(self.parentChannel.regions), replaceSymbols(self.parentChannel.variableName))
 
     def propagateTreeName(self, treeName):
         """
@@ -1134,6 +1160,13 @@ class Sample(object):
                 del self.overallSystList[idx]
                 self.removeSystematic(systName)
                 return
+
+    def getAllSystematicNames(self):
+        """
+        Get all names of systematics associated to this sample
+        """
+
+        return self.systDict.keys()
 
     def getSystematic(self, systName):
         """
