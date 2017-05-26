@@ -452,13 +452,43 @@ class Sample(object):
         self.noRenormSys = False
         return
 
+    def isBlinded(self, fitConfig):
+        """
+        Is the sample blinded in this fit config? 
+
+        @param fitConfig The fit configuration to pass
+        """
+
+        if not self.isData:
+            # non data is never blinded
+            return False
+
+        # is the channel we belong to blinded? then yes, otherwise no
+        if self.parentChannel.isBlinded(fitConfig):
+            return True
+
+        return False
+
     def getHistogramName(self, fitConfig, variation=""):
         """
         Return the histogram name for with a possible variation
 
+        @param The fit config to generate for (needed for blinded data)
         @param variation A variation: either the empty string (equivalent to Nom), or High (or Up) or Low (or Down)
         """
 
+        if self.isData and variation != "":
+            raise ValueError("Sample {}: is data, cannot specify variation!".format(self.name))
+
+        # Special treatment for blinded samples
+        if self.isBlinded(fitConfig):
+            return "h{}{}Blind_{}_obs".format(fitConfig.name, self.name, "".join(self.parentChannel.regions), replaceSymbols(self.parentChannel.variableName))
+       
+        # Special treatment for data
+        if self.isData:
+            return "h{}_{}_obs_{}".format(self.name, "".join(self.parentChannel.regions), replaceSymbols(self.parentChannel.variableName))
+
+        # Now on to the usual variation
         if variation == "":
             variation = "Nom"
 
