@@ -231,7 +231,10 @@ class PrepareHistos(object):
             if friendTreeName != "":
                 log.debug("Adding friend tree {} to {}".format(friendTreeName, self.currentChainName)) 
                 for filename in fileList:
-                    self.configMgr.chains[self.currentChainName].AddFriend(friendTreeName, filename)
+                    try:
+                        self.configMgr.chains[self.currentChainName].AddFriend(friendTreeName, filename)
+                    except:
+                        log.warning("Could not add friend {} - this is not necessarily bad; if we don't need the trees you're safe".format(friendTreeName))
 
         else:
             log.debug("Chain {} already exists - not rebuilding".format(chainID))
