@@ -32,7 +32,7 @@ import os, errno
 
 TH1.SetDefaultSumw2(True)
 
-from copy import deepcopy
+from copy import copy, deepcopy
 from configManager import configMgr
 
 def mkdir_p(path):
@@ -68,6 +68,7 @@ class fitConfig(object):
         self.measurements = []
         self.channels = []
         self.sampleList = []
+        self.samplesToMerge = []
         self.signalSample = None
         self.signalChannels = []
         self.validationChannels = []
@@ -463,9 +464,124 @@ class fitConfig(object):
                 raise RuntimeError("Sample %s already defined in fitConfig %s" % (s.name, self.name))
 
             # Propagate to channels that are already owned as well
-            for c in self.channels:
-                if not s.name in [sam.name for sam in c.sampleList]:
+            for channel in self.channels:
+                if not any(s.name == sam.name for s in channel.sampleList):
                     c.addSample(self.getSample(s.name))
+        return
+
+    def mergeSamples(self, samples, target=""):
+        # Merge several samples. If no target specified, we merge onto the _first_ of the samples. 
+        # The remaining samples are effectively deleted from the fit configuration.
+
+        # This function does not actually do anything, it just sets stuff to merge 
+        # NOTE: experimental feature! Needs to be debugged on funny samples with norm regions etc.
+
+        log.warning("mergeSamples() is an experimental functionality that does not check things such as systematics remapping and normalisation regions!")
+
+        if len(samples) < 2:
+            raise RuntimeError("Cannot merge less than 2 samples in fitConfig {}".format(self.name))
+
+        # Is any of the samples already flagged for merging?
+        # don't use any() for this check - we want to prnt the names
+        cannotMerge = False
+        for s in samples:
+            if s.toBeMerged:
+                log.error("Sample {} is already flagged for merging in fitConfig {}".format(sam.name, self.name))
+                cannotMerge = True
+
+        if cannotMerge:
+            raise RuntimeError("One or more samples already flagged to be merged in fitConfig {}".format(self.name))
+        
+        log.debug("mergeSamples: merging samples {} in fitConfig {}".format(", ".join(s.name for s in samples), self.name))
+
+        _target = samples[0].name
+        if target != "":
+            _target = copy(target)
+
+        log.debug("mergeSamples: set target name to {}".format(_target))
+
+        for s in samples:
+            s.toBeMerged = True
+    
+        mergeInfo = {"samples" : samples, "target" : _target}
+        self.samplesToMerge.append(mergeInfo)
+
+        return
+
+    def createMergedSamples(self):
+        log.warning("createMergedSamples: remember, mergeSamples() is experimental!")
+
+        for combination in self.samplesToMerge:
+            self.createMergedSample(combination['samples'], combination['target'])
+
+        return
+
+    def createMergedSample(self, samples, target):
+        log.info("createMergedSample: merging {} to {} in fitConfig {}".format(", ".join(s.name for s in samples), target, self.name))
+
+        for channel in self.channels:
+            log.info("createMergedSample: at channel {}".format(channel.name))
+   
+            # find the samples here. The channel can throw an exception, so we avoid list comprehensions
+            channel_samples = []
+            for s in samples:
+                try:
+                    _sample = channel.getSample(s.name)
+                    channel_samples.append(_sample)
+                except:
+                    log.info("createMergedSample: cannot find {} in channel {}".format(s.name, channel.name))
+                    continue
+
+            if channel_samples == []:
+                log.info("createMergedSample: no samples associated with {}, continuing".format(channel.name))
+                continue
+
+            log.info("createMergedSample: channel {}: found samples {}".format(channel.name, ", ".join(s.name for s in channel_samples)))
+
+            # Even if we have just _one_ sample, we continue with our logic. It is too risky remap everything, we just want to construct and
+            # copy stuff before removing the original. That should be easy enough.
+
+            combined_systs = []
+            for s in channel_samples:
+                _systs = s.getAllSystematicNames()
+                log.verbose("createMergedSample: channel {}, sample {}: affected by {:d} systematics".format(channel.name, s.name, len(_systs)))
+                combined_systs = set(list(combined_systs) + list(_systs))
+
+            if len(combined_systs) == 0:
+                # No systematics for the combined sample, nothing to do!
+                continue
+
+            log.info("createMergedSample: channel {}: merged sample {} affected by {:d} systematics".format(channel.name, target, len(combined_systs)))
+
+        # for every channel:
+            # merge nominal sample
+
+            # now find out what the heck our systematics are
+            # make a combined set of all of these
+            # assign it to the merged sample
+            # hadd all the various histograms together
+
+            # wipe the samples from t
+
+        # delete the original samples from the fit config
+
+        return
+
+    def removeSample(self, name):
+        if any(s.name == name for s in self.sampleList):
+            found = True
+            
+        for channel in self.channels:
+            if any(s.name == name for s in channel.sampleList):
+                found = True
+                break
+
+        if not found:
+            raise RuntimeError("Sample {} not defined in fitConfig {}".format(s.name))
+
+        print "WAAAAAAH"
+        sys.exit(0)
+    
         return
 
     def getSample(self, name):
