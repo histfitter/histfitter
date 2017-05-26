@@ -18,6 +18,7 @@
 
 import ROOT
 ROOT.PyConfig.IgnoreCommandLineOptions = True
+ROOT.SetMemoryPolicy( ROOT.kMemoryStrict )
 
 from ROOT import gROOT,gSystem,gDirectory,RooAbsData,RooRandom,RooWorkspace
 gSystem.Load("libSusyFitter.so")
