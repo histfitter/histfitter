@@ -315,39 +315,34 @@ class ConfigManager(object):
                 for sam in channel.sampleList:
                     regString = "".join(channel.regions)
 
-                    #nomName    = "h%sNom_%s_obs_%s" % (sam.name, regString, replaceSymbols(chan.variableName))
-                    #highName   = "h%sHigh_%s_obs_%s" % (sam.name, regString, replaceSymbols(chan.variableName))
-                    #lowName    = "h%sLow_%s_obs_%s" % (sam.name, regString, replaceSymbols(chan.variableName))
-
                     nomName = sam.getHistogramName(tl)
                         
-                    if not sam.isData:
-                        highName = sam.getHistogramName(tl, "High")
-                        lowName = sam.getHistogramName(tl, "Low")
-
                     if sam.isData:
                         _name = sam.getHistogramName(tl)
                         log.error("Data name {}".format(_name))
-                        if not _name in self.hists.keys():
+                        if not _name in self.hists:
                             self.hists[_name] = None
 
                     elif sam.isQCD:
+                        highName = sam.getHistogramName(tl, variation="High")
+                        lowName = sam.getHistogramName(tl, variation="Low")
+
                         systName = "h%sSyst_%s_obs_%s" % (sam.name, regString, replaceSymbols(channel.variableName))
                         statName = "h%sStat_%s_obs_%s" % (sam.name, regString, replaceSymbols(channel.variableName))
 
-                        if not nomName in self.hists.keys():
+                        if not nomName in self.hists:
                             self.hists[nomName] = None
 
-                        if not highName in self.hists.keys():
+                        if not highName in self.hists:
                             self.hists[highName] = None
 
-                        if not lowName in self.hists.keys():
+                        if not lowName in self.hists:
                             self.hists[lowName] = None
 
-                        if not systName in self.hists.keys():
+                        if not systName in self.hists:
                             self.hists[systName] = None
 
-                        if not statName in self.hists.keys():
+                        if not statName in self.hists:
                             self.hists[statName] = None
 
                         if channel.variableName == "cuts":
@@ -356,57 +351,24 @@ class ConfigManager(object):
                             nHists = channel.nBins
 
                         for iBin in xrange(1, nHists+1):
-                            if not "%s_%s" % (nomName, str(iBin)) in self.hists.keys():
+                            if not "%s_%s" % (nomName, str(iBin)) in self.hists:
                                 self.hists["%s_%s" % (nomName, str(iBin))] = None
 
-                            if not "%s_%s" % (highName, str(iBin)) in self.hists.keys():
+                            if not "%s_%s" % (highName, str(iBin)) in self.hists:
                                 self.hists["%s_%s" % (highName, str(iBin))] = None
 
-                            if not "%s_%s" % (lowName, str(iBin)) in self.hists.keys():
+                            if not "%s_%s" % (lowName, str(iBin)) in self.hists:
                                 self.hists["%s_%s" % (lowName, str(iBin))] = None
 
                     elif not sam.isDiscovery:
-                        if not nomName in self.hists.keys():
+                        if not nomName in self.hists:
                             self.hists[nomName] = None
 
-                        for (name, syst) in channel.getSample(sam.name).systDict.items():
-                            highSystName = "h%s%sHigh_%s_obs_%s" % (sam.name, syst.name, regString,
-                                                                    replaceSymbols(channel.variableName))
-                            if not highSystName in self.hists.keys():
-                                self.hists[highSystName] = None
+                        # Build for all the systematic variations by looping over a generator object
+                        for name in sam.getAllHistogramNamesForSystematics(tl):
+                            if name in self.hists: continue
+                            self.hists[name] = None
 
-                            lowSystName = "h%s%sLow_%s_obs_%s" % (sam.name, syst.name, regString,
-                                                                  replaceSymbols(channel.variableName))
-                            if not lowSystName in self.hists.keys():
-                                self.hists[lowSystName] = None
-
-                            nomSystName = "h%s%sNom_%s_obs_%s" % (sam.name, syst.name, regString,
-                                                                  replaceSymbols(channel.variableName))
-                            if not nomSystName in self.hists.keys():
-                                self.hists[nomSystName] = None
-
-                            if syst.merged:
-                                mergedName = "".join(syst.sampleList)
-
-                                nomMergedName = "h%sNom_%s_obs_%s" % (mergedName, regString,
-                                                                      replaceSymbols(channel.variableName))
-                                if not nomMergedName in self.hists.keys():
-                                    self.hists[nomMergedName] = None
-
-                                highMergedName = "h%s%sHigh_%s_obs_%s" % (mergedName, syst.name, regString,
-                                                                          replaceSymbols(channel.variableName))
-                                if not highMergedName in self.hists.keys():
-                                    self.hists[highMergedName] = None
-
-                                lowMergedName = "h%s%sLow_%s_obs_%s" % (mergedName, syst.name, regString,
-                                                                        replaceSymbols(channel.variableName))
-                                if not lowMergedName in self.hists.keys():
-                                    self.hists[lowMergedName] = None
-
-                                nomMergedName = "h%s%sNom_%s_obs_%s" % (mergedName, syst.name, regString,
-                                                                        replaceSymbols(channel.variableName))
-                                if not nomMergedName in self.hists.keys():
-                                    self.hists[nomMergedName] = None
         return
 
     

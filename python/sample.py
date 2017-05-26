@@ -469,7 +469,28 @@ class Sample(object):
 
         return False
 
-    def getHistogramName(self, fitConfig, variation=""):
+    def getAllHistogramNamesForSystematics(self, fitConfig):
+        """
+        Generate all names for systematic variations for this sample"
+
+        @param fitConfig A fit configuration to pass
+        @returns A generator to be used in loops
+        """
+        for name in self.systDict:
+            syst = self.systDict[name]
+            for var in ["Nom", "High", "Low"]:
+                #retval.append(self.getHistogramName(fitConfig, syst.name, var))
+                yield self.getHistogramName(fitConfig, syst.name, var)
+
+            if syst.merged:
+                mergedName = "".join(syst.sampleList)
+                yield self.getHistogramName(fitConfig, mergedName) 
+                for var in ["Nom", "High", "Low"]:
+                    yield self.getHistogramName(fitConfig, mergedName, var) 
+    
+        #return retval
+
+    def getHistogramName(self, fitConfig, syst_name="", variation=""):
         """
         Return the histogram name for with a possible variation
 
@@ -503,7 +524,7 @@ class Sample(object):
         if not variation in variations:
             raise ValueError("Sample {}: cannot generate histogram name for unknown variation {}".format(variation))
 
-        return "h{}{}_{}_obs_{}".format(self.name, variation, "".join(self.parentChannel.regions), replaceSymbols(self.parentChannel.variableName))
+        return "h{}{}{}_{}_obs_{}".format(self.name, syst_name, variation, "".join(self.parentChannel.regions), replaceSymbols(self.parentChannel.variableName))
 
     def propagateTreeName(self, treeName):
         """
