@@ -388,7 +388,7 @@ class TreeWeightSystematic(SystematicBase):
             highandlow = ["High_", "Low_", "Nom_"]
 
         for highorlow in highandlow:
-            abstract.prepare.weights = str(abstract.lumiUnits*abstract.outputLumi/abstract.inputLumi)
+            abstract.prepare.weights = str(abstract.lumiUnits * abstract.outputLumi/abstract.inputLumi)
             if highorlow == "High_":
                 mywList = [ " * %s " % myw for myw in self.high]
                 abstract.prepare.weights += "".join(mywList)
@@ -562,12 +562,13 @@ class UserSystematic(SystematicBase):
 ## It returns an object
 def Systematic(name="", nominal=None, high=None, low=None,
                type="", method="", constraint="Gaussian"):
-    if type == "weight" or type == "tree" or type == "user":
-        if type == "weight" or type == "tree":
-            return TreeWeightSystematic(name, nominal, high, low,
-                                        type, method, constraint)
-        else:
-            return UserSystematic(name, nominal, high, low,
-                                        type, method, constraint)
+    types = ["weight", "tree", "user"]
+    if type not in types:
+        raise Exception("Systematic type {} unknown for {}".format(type, name))
+        
+    if type == "weight" or type == "tree":
+        return TreeWeightSystematic(name, nominal, high, low,
+                                    type, method, constraint)
     else:
-        raise Exception("type unknown")
+        return UserSystematic(name, nominal, high, low,
+                                    type, method, constraint)
