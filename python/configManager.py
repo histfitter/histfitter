@@ -20,13 +20,16 @@
 
 from ROOT import THStack, TLegend, TCanvas, TFile, std, TH1F
 from ROOT import ConfigMgr, FitConfig, ChannelStyle #this module comes from gSystem.Load("libSusyFitter.so")
+from ROOT import gROOT, TObject, TProof
 from prepareHistos import PrepareHistos
 from copy import copy, deepcopy
 from histogramsManager import histMgr
 from logger import Logger
-import os
-from ROOT import gROOT
 from math import sqrt
+
+from inputTree import InputTree
+
+import os
 
 gROOT.SetBatch(True)
 log = Logger('ConfigManager')
@@ -130,6 +133,7 @@ class ConfigManager(object):
         self.histoDict = {} # Dictionary mapping histogram names to histograms
         self.hists = {} # Instances of all histograms in memory
         self.chains = {} # Instances of all trees in memory
+        self.friend_chains = {} # Instances of all friend trees in memory
 
         self.includeOverallSys = True # Boolean to chose if HistoSys should also have OverallSys
         self.readFromTree = False # Boolean to chose if reading histograms from tree will also write to file
@@ -150,8 +154,10 @@ class ConfigManager(object):
         self.histBackupCacheFile = ""
         self.useCacheToTreeFallback = False
         self.useHistBackupCacheFile = False
-        self.fileList = [] # File list to be used for tree production
-        self.treeName = ''
+        
+        self.input_files = set() # Input list to be used for tree production
+        #self.treeName = ''
+        
         self.bkgParName = ''
         self.bkgCorrVal = -1.
         return
@@ -212,12 +218,28 @@ class ConfigManager(object):
             pass
 
         newFitConfig.setWeights(self.weights)
-        newFitConfig.removeEmptyBins=self.removeEmptyBins
+        newFitConfig.removeEmptyBins = self.removeEmptyBins
 
         self.fitConfigs.append(newFitConfig)
-        log.info("Created Fit Config: %s" % newName)
+        log.info("Created fitConfig: {}".format(newName))
+        
+        log.debug("Appending existing files to fit configuration {}".format(newName))
+        for i in self.input_files:
+            newFitConfig.addInput(i.filename, i.treename)
 
-        return self.fitConfigs[len(self.fitConfigs)-1]
+        return self.fitConfigs[-1]
+
+    def addInput(self, filename, treename):
+        # add an input with a treename
+        self.input_files.add(InputTree(filename, treename))
+       
+        for fitConfig in self.fitConfigs:
+            fitConfig.addInput(filename, treename)
+
+    def addInputs(self, filenames, treename):
+        # bulk add a bunch of filenames with the same treename
+        for f in filenames:
+            self.addInput(f, treename)
 
     def addTopLevelXMLClone(self, obj, name):
         """
@@ -465,9 +487,9 @@ class ConfigManager(object):
         self.initializeHistoPrepareObject()
         self.initializeCppMgr()
 
-        # Propagate the relevant settings down
-        self.propagateFileList() 
-        self.propagateTreeName()
+        ## Propagate the relevant settings down
+        #self.propagateInputFiles() 
+        #self.propagateTreeName()
 
         # Summary
         self.Print() 
@@ -619,10 +641,10 @@ class ConfigManager(object):
         configMgr.printHists()
         log.info("Chain names: (set log level DEBUG & note chains are only generated with -t)")
         configMgr.printChains()
-        log.info("File names: (set log level DEBUG)")
+        log.info("Inputs: (set log level DEBUG)")
         configMgr.printFiles()
-        log.info("Input tree names: (set log level DEBUG)")
-        configMgr.printTreeNames()
+        #log.info("Input tree names: (set log level DEBUG)")
+        #configMgr.printTreeNames()
         log.info("*-------------------------------------------------*\n")
         return
 
@@ -633,6 +655,7 @@ class ConfigManager(object):
         histList = self.hists.keys()
         histList.sort()
         for hist in histList:
+            print hist
             log.debug(hist)
         return
 
@@ -650,105 +673,126 @@ class ConfigManager(object):
         """
         Print all the input files used for the various fit configurations
         """
-        log.debug("ConfigManager:")
-        log.debug(str(self.fileList))
-
-        for fitConfig in self.fitConfigs:
-            log.debug("  fitConfig: %s " % fitConfig.name)
-            log.debug("             %s " % str(fitConfig.files))
-
-            for channel in fitConfig.channels:
-                log.debug("             Channel: %s" % channel.name)
-                log.debug("             %s" % str(channel.files))
-
-                for sample in channel.sampleList:
-                    log.debug("             ---> Sample: %s" % sample.name)
-                    log.debug("                          %s" % str(sample.files))
-
-                    for (systName,syst) in sample.systDict.items():
-                        log.debug("                            ---> Systematic: %s" % syst.name)
-                        log.debug("                                       Low : %s" % str(syst.filesLo))
-                        log.debug("                                       High: %s" % str(syst.filesHi))
-        return
-
-    def printTreeNames(self):
-        """
-        Print the names of all the ROOT TTrees used in the fit configurations defined
-        """
-        if str(self.treeName).strip() == "":
-            log.debug("No tree used")
-            return
-
-        log.debug("ConfigManager:")
-        log.debug(str(self.treeName).strip())
-
-        for fitConfig in self.fitConfigs:
-            log.debug("  fitConfig: %s" % fitConfig.name)
-            log.debug("             %s" % str(fitConfig.treeName))
-
-            for channel in fitConfig.channels:
-                log.debug("    ---> Channel: %s" % channel.name)
-                log.debug("                  %s" % str(channel.treeName))
-
-                for sample in channel.sampleList:
-                    log.debug("           ---> Sample: %s" % sample.name)
-                    log.debug("                        %s" % str(sample.treeName))
-
-                    for (systName,syst) in sample.systDict.items():
-                        log.debug("                   ---> Systematic: %s" % syst.name)
-                        log.debug("                        Low : %s" % str(syst.treeLoName))
-                        log.debug("                        High: %s" % str(syst.treeHiName))
-        return
-
-    def setFileList(self,filelist):
-        """
-        Set file list for config manager.
-        This will be used as default for top level xmls that don't specify
-        their own file list.
-
-        @param filelist A list of filenames
-        """
-        self.fileList = filelist
-
-    def setFile(self,file):
-        """
-        Set file list for config manager.
-        This will be used as default for top level xmls that don't specify
-        their own file list.
-
-        @param file A filename to set as a list
-        """
-        self.fileList = [file]
-
-    def propagateFileList(self):
-        """
-        Propagate the file list downwards.
-        """
-        log.info("  -propagate file list and tree names to fit configurations")
         
-        # propagate our file list downwards (if we don't have one,
-        # this will result in the propagation of the files belonging
-        # to our top level xml)
-        for fc in self.fitConfigs:
-            fc.propagateFileList(self.fileList)
+        width = 3 
+        depth = 1
+        
+        log.info("ConfigManager:")
+        for i, inputTree in enumerate(self.input_files):
+            log.info("{}Input {:d}/{:d}: '{}' from {} ".format(" "*depth*width, i+1, len(self.input_files), inputTree.treename, inputTree.filename))
 
-    def setTreeName(self,treeName):
-        """
-        Set the treename
+        for idx, fitConfig in enumerate(self.fitConfigs):
+            depth = 1
+            log.info("{}fitConfig {:d}/{:d}: {} - {:d} channels,  {:d} inputs".format(" "*depth*width, idx+1, len(self.fitConfigs), fitConfig.name, len(fitConfig.channels), len(fitConfig.input_files)))
+            for i, inputTree in enumerate(fitConfig.input_files):
+                log.info("{}Input {:d}/{:d}: '{}' from {} ".format(" "*depth*width, i+1, len(fitConfig.input_files), inputTree.treename, inputTree.filename))
 
-        @param treeName The name of the tree to use
-        """
-        self.treeName = treeName
+            for i, channel in enumerate(fitConfig.channels):
+                depth = 2
+                log.info("{}Channel {:d}/{:d}: {} - {:d} samples, {:d} inputs".format(" "*depth*width, i+1, len(fitConfig.channels), channel.name, len(channel.sampleList), len(channel.input_files)))
+                for j, inputTree in enumerate(channel.input_files):
+                    depth = 3
+                    log.info("{}Input {:d}/{:d}: '{}' from {} ".format(" "*depth*width, j+1, len(channel.input_files), inputTree.treename, inputTree.filename))
+
+                for j, sample in enumerate(channel.sampleList):
+                    depth = 3
+                    log.info("{}Sample {:d}/{:d}: {} - {:d} systematics, {:d} inputs".format(" "*depth*width, j+1, len(channel.sampleList), sample.name, len(sample.systDict), len(sample.input_files)))
+
+                    for k, inputTree in enumerate(sample.input_files):
+                        depth = 4
+                        log.info("{}Input {:d}/{:d}: '{}' from {} ".format(" "*depth*width, k+1, len(sample.input_files), inputTree.treename, inputTree.filename))
+                    
+                    for k, syst_name in enumerate(sample.systDict.keys()):
+                        depth = 4
+                        syst = sample.systDict[syst_name]
+                        
+                        log.info("{}Systematic {:d}/{:d}: {}".format(" "*depth*width, k+1, len(sample.systDict.keys()), syst_name))
+
+                    #for (systName, syst) in sample.systDict.items():
+                        #log.info("                            ---> Systematic: %s" % syst.name)
+                        #log.info("                                       Low : %s" % str(syst.filesLo))
+                        #log.info("                                       High: %s" % str(syst.filesHi))
+        
         return
 
-    def propagateTreeName(self):
-        """
-        Propogate the tree name down to all owned fit configurations
-        """
-        for fc in self.fitConfigs:
-            fc.propagateTreeName(self.treeName)
-            pass
-        return
+    #def printTreeNames(self):
+        #"""
+        #Print the names of all the ROOT TTrees used in the fit configurations defined
+        #"""
+        #if str(self.treeName).strip() == "":
+            #log.debug("No tree used")
+            #return
+
+        #log.debug("ConfigManager:")
+        #log.debug(str(self.treeName).strip())
+
+        #for fitConfig in self.fitConfigs:
+            #log.debug("  fitConfig: %s" % fitConfig.name)
+            #log.debug("             %s" % str(fitConfig.treeName))
+
+            #for channel in fitConfig.channels:
+                #log.debug("    ---> Channel: %s" % channel.name)
+                #log.debug("                  %s" % str(channel.treeName))
+
+                #for sample in channel.sampleList:
+                    #log.debug("           ---> Sample: %s" % sample.name)
+                    #log.debug("                        %s" % str(sample.treeName))
+
+                    #for (systName,syst) in sample.systDict.items():
+                        #log.debug("                   ---> Systematic: %s" % syst.name)
+                        #log.debug("                        Low : %s" % str(syst.treeLoName))
+                        #log.debug("                        High: %s" % str(syst.treeHiName))
+        #return
+
+    #def setInputFiles(self, filelist):
+        #"""
+        #Set file list for config manager.
+        #This will be used as default for top level xmls that don't specify
+        #their own file list.
+
+        #@param input_files A list of input files
+        #"""
+        #self.input_files = filelist
+
+    #def setInputFile(self, file):
+        #"""
+        #Set file list for config manager.
+        #This will be used as default for top level xmls that don't specify
+        #their own file list.
+
+        #@param file A filename to set as a list
+        #"""
+        #self.input_files = [file]
+
+    #def propagateInputFiles(self):
+        #"""
+        #Propagate the file list downwards.
+        #"""
+        #log.info("  -propagate file list and tree names to fit configurations")
+        
+        ## propagate our file list downwards (if we don't have one,
+        ## this will result in the propagation of the files belonging
+        ## to our top level xml)
+        #for fitConfig in self.fitConfigs:
+            #fitConfig.propagateInputFiles(self.input_files)
+
+    #def setTreeName(self, treeName):
+        #"""
+        #Set the treename
+
+        #@param treeName The name of the tree to use
+        #"""
+        #self.treeName = treeName
+        #return
+
+    #def propagateTreeName(self):
+        #"""
+        #Propogate the tree name down to all owned fit configurations
+        #"""
+        #for fc in self.fitConfigs:
+            #fc.propagateTreeName(self.treeName)
+            #pass
+        #return
 
     def executeAll(self):
         """
@@ -956,16 +1000,16 @@ class ConfigManager(object):
 
                     elif isinstance(sam.mergeOverallSysSet[0],str):
                         if len(sam.mergeOverallSysSet)<=1: continue
-                        log.info("Post-processing: for channel %s and sample %s, merging of systematics %s." % (chan.name,sam.name,str(sam.mergeOverallSysSet)))
+                        log.info("Post-processing: for channel %s and sample %s, merging of systematics %s." % (chan.name, sam.name, str(sam.mergeOverallSysSet)))
                         keepName = sam.mergeOverallSysSet[0]
                         lowErr2 = 0.0
                         highErr2 = 0.0
                         for systName in sam.mergeOverallSysSet:
                             sys = sam.getOverallSys(systName)
-                            if sys!=None:
+                            if sys != None:
                                 highErr2 += (sys[1]-1.0)**2
                                 lowErr2 += (sys[2]-1.0)**2
-                                log.info("Now processing : %s %f %f" % (systName,sys[1]-1.0,sys[2]-1.0))
+                                log.info("Now processing : %s %f %f" % (systName, sys[1]-1.0, sys[2]-1.0))
                                 # and remove ... to be readded merged below
                                 sam.removeOverallSys(systName)
                             pass
@@ -993,11 +1037,7 @@ class ConfigManager(object):
 
         # Write the data file
         self.outputRoot()
-        
-        ## Build any merged samples if needed
-        #fitConfig.createMergedSamples()
-        #sys.exit()
-        
+       
         if self.executeHistFactory:
             #removing regions used for remapping systematic uncertainties, but only for exclusion fits
             #execute the folllowing only if some channel with a remapped systematic uncertaintiy was used
@@ -1244,8 +1284,10 @@ class ConfigManager(object):
                     #if treeName == '': 
                     #    treeName = sam.name+self.nomName
                     if not noRead:
-                        log.debug("setWeightsCutsVariable(): calling prepare.read() for {}".format(sam.getTreeName()))
-                        self.prepare.read(sam.getTreeName(), sam.files, friendTreeName=sam.friendTreeName)
+                        log.debug("setWeightsCutsVariable(): calling prepare.read() for {}".format(sam.treename))
+                        
+                        #self.prepare.read(sam.treename, sam.files, friendTreeName=sam.friendTreeName)
+                        self.prepare.read(sam.input_files, friendTreeName=sam.friendTreeName)
         else:
             self.prepare.weights = "1."
             if self.readFromTree or self.useCacheToTreeFallback:
@@ -1253,8 +1295,9 @@ class ConfigManager(object):
                 #if treeName == '': 
                 #    treeName = sam.name
                 if not noRead:
-                    log.debug("setWeightsCutsVariable(): calling prepare.read() for {}".format(sam.getTreeName()))
-                    self.prepare.read(sam.getTreeName(), sam.files, friendTreeName=sam.friendTreeName)
+                    log.debug("setWeightsCutsVariable(): calling prepare.read() for {}".format(sam.treename))
+                    #self.prepare.read(sam.treename, sam.files, friendTreeName=sam.friendTreeName)
+                    self.prepare.read(sam.input_files, friendTreeName=sam.friendTreeName)
 
         oldCuts = copy(self.prepare.cuts)
         #if len(sam.cutsDict.keys()) == 0:
@@ -1430,8 +1473,9 @@ class ConfigManager(object):
 
                                 #treeName = s.treeName
                                 #if treeName=='': treeName = s.name+self.nomName
-                                log.debug("addSampleSpecificHists(): calling prepare.read() for {}".format(sam.getTreeName()))
-                                self.prepare.read(sam.getTreeName(), s.files, friendTreeName=sam.friendTreeName)
+                                log.debug("addSampleSpecificHists(): calling prepare.read() for {}".format(sam.treename))
+                                #self.prepare.read(sam.treename, s.files, friendTreeName=sam.friendTreeName)
+                                self.prepare.read(sam.input_files, friendTreeName=sam.friendTreeName)
 
                                 tempHist = TH1F("temp", "temp", 1, 0.5, 1.5)
 
@@ -1632,11 +1676,11 @@ class ConfigManager(object):
         """
         outputRootFile = None
         if self.readFromTree:
-            outputRootFile = TFile(self.histCacheFile,"RECREATE")
+            outputRootFile = TFile(self.histCacheFile, "RECREATE")
         elif self.prepare.recreate:
             outputRootFile = self.prepare.cacheFile
             if not outputRootFile.IsOpen():
-                outputRootFile = outputRootFile.Open(self.histCacheFile,"UPDATE")
+                outputRootFile = outputRootFile.Open(self.histCacheFile, "UPDATE")
 
         if outputRootFile:
             log.info('Storing histograms in file: %s' % self.histCacheFile)
@@ -1644,15 +1688,15 @@ class ConfigManager(object):
             outputRootFile.cd()
             histosToWrite = self.hists.values()
             def notNull(x): return not type(x).__name__ == "TObject"
-            histosToWrite = filter(notNull,histosToWrite)
+            histosToWrite = filter(notNull, histosToWrite)
             histosToWrite.sort()
             for histo in histosToWrite:
                 if histo:
-                    histo.Write()
+                    histo.Write(histo.GetName(), TObject.kOverwrite)
             outputRootFile.Close()
 
 if vars().has_key("configMgr"):
-    raise RuntimeError("ConfigManager already exists, no multiple imports allowed!!!")
+    raise RuntimeError("ConfigManager already exists, no multiple imports allowed!")
 
 # Instantiate the singleton
 
