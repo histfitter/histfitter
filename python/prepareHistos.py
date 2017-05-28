@@ -17,7 +17,8 @@
  **********************************************************************************
 """
 
-from ROOT import gROOT, TFile, TH1F, Double, gDirectory, TChain, TObject, TTree
+from ROOT import gROOT, TFile, TH1F, Double, gDirectory
+from ROOT import TChain, TObject, TTree, TIter
 from math import sqrt
 from logger import Logger
 import os
@@ -187,64 +188,177 @@ class PrepareHistos(object):
 
         return False
 
-    def read(self, treeName, fileList, friendTreeName=""):
+    def read(self, input_files, friendTreeName=""):
         """
         Read in the root object that will make histograms and set the TChain objects in ConfigManager
 
-        @param treeName Name of the tree to use
-        @param fileList List of files to use
+        @param input_files List of input trees to use
         """
-        if self.useCache and not self.useCacheToTreeFallback and treeName == '':
-            log.info("Not using trees, will read histograms from %s" % (fileList))
+        if self.useCache and not self.useCacheToTreeFallback and len(input_files) == 0:
+            log.info("Not using trees, will read histograms")
             return
 
-        if not self.useCache and treeName == '':
-            log.fatal("No tree name provided")
+        if self.useCache and self.useCacheToTreeFallback and len(input_files) == 0:
+            log.warning("No input files provided, cache fallback to trees will not work for current sample")
             return
 
-        if self.useCache and self.useCacheToTreeFallback and treeName == '':
-            log.warning("No tree name provided, cache fallback to trees will not work")
-            return
+        if (not self.useCache) or (self.useCache and self.useCacheToTreeFallback):
+            # If we're not using the cache, or if we're using the fallback to trees, check that all treenames are given
+            for i in input_files:
+                if i.treename == '':
+                    log.fatal("No tree name provided for input file {}".format(i.filename))
+                    return
 
-        if not self.currentChainName == '' and not treeName in self.currentChainName:
-            log.debug("read(): deleting chain {0} (treeName asked = {1})".format(self.currentChainName, treeName))
+        sorted_input_files = sorted(list(input_files))
+    
+        # Construct a combined set of tree and filenames. The sorting is performed to ensure every time we build the same chain.
+        # The set is needed as, although the _combinations_ in input_files are by construction unique, it could be that the same file or chain is
+        # used multiple times!
+        treenames = "_".join(sorted(x for x in set(i.treename for i in input_files)))
+        filenames = "_".join(sorted(x for x in set(i.filename for i in input_files)))
+       
+        chainID = "{0}_{1}".format(treenames, filenames)
+
+        log.debug("Constructed chain ID {}".format(chainID))
+
+        if not self.currentChainName == '' and chainID != self.currentChainName:
+            log.debug("read(): deleting chain {0} (chainID asked = {1})".format(self.currentChainName, chainID))
+            # this deletion is necessary for the garbage collector to kick in. The overhead of building a new chain is minimal.
+
+            print self.configMgr.chains[self.currentChainName].GetListOfFriends()
+
+            if self.currentChainName in self.configMgr.friend_chains:
+                self.configMgr.chains[self.currentChainName].RemoveFriend(self.configMgr.friend_chains[self.currentChainName])
+
+            ## Check if we've got any friends
+            #iterator = TIter(self.configMgr.chains[self.currentChainName].GetListOfFriends())
+            #obj = iterator()
+            #while obj:
+                #friend_name = obj.GetName()
+                #log.verbose("read(): remove friend {} from {}".format(friend_name, self.currentChainName))
+                #self.configMgr.chains[self.currentChainName].RemoveFriend(friend_name)
+                #obj = iterator()
+
+            #while ((TObject *obj = next()))
+               #obj->Draw(next.GetOption());
+
             del self.configMgr.chains[self.currentChainName]
 
-        chainID = "{0}_{1}".format(treeName, "_".join(fileList))
-        #chainID = treeName
-        #for fileName in fileList: chainID += '_' +fileName
-        
         self.currentChainName = chainID
         
         ## MB : no need to recreate chain if it already exists
-        if not chainID in self.configMgr.chains:
-            log.debug("Creating chain {0}".format(chainID))
-            self.configMgr.chains[chainID] = TChain(treeName)
-            
-            self.configMgr.chains[chainID].Project._creates = True
-            self.configMgr.chains[chainID].Draw._creates = True
-            
-            for filename in fileList:
-                if os.path.exists(filename):
-                    self.configMgr.chains[self.currentChainName].Add(filename)
-                else:
-                    log.error("input file {} does not exist".format(filename))
-
-            # does this chain need a friend? 
-            if friendTreeName != "":
-                log.debug("Adding friend tree {} to {}".format(friendTreeName, self.currentChainName)) 
-                for filename in fileList:
-                    if not os.path.exists(filename):
-                        log.warning("Could not add friend {} - this is not necessarily bad; if we don't need the trees you're safe".format(friendTreeName))
-                        continue
-
-                    try:
-                        self.configMgr.chains[self.currentChainName].AddFriend(friendTreeName, filename)
-                    except:
-                        log.warning("Could not add friend {} - this is not necessarily bad; if we don't need the trees you're safe".format(friendTreeName))
-
-        else:
+        if chainID in self.configMgr.chains:
             log.debug("Chain {} already exists - not rebuilding".format(chainID))
+            return
+
+        # ROOT has a nasty problem in combining TChains and friends. What we do is the following.
+        # For each tree, create a TChain with _just_ _that_ tree
+        # Then, create a combined TChain of those TChains
+        # Add _all_ the friends to that. Otherwise, Project() calls give 0 magically.
+        # You can easily test this in a simple .C macro to confirm.
+
+        log.debug("Creating chain {}".format(chainID))
+        self.configMgr.chains[chainID] = TChain(treenames)
+        
+        self.configMgr.chains[chainID].Project._creates = True
+        self.configMgr.chains[chainID].Draw._creates = True
+        
+        log.verbose("Created chain {} @ {}".format(chainID, hex(id(self.configMgr.chains[chainID])) ))
+        
+        # Build a temporary chain for each file
+        tmp_chains = []
+        for i in sorted_input_files:
+            log.info("read(): attempting to load {} from {}".format(i.treename, i.filename))
+            if not os.path.exists(i.filename):
+                log.error("input file {} does not exist - cannot load {} from it".format(i.filename, i.treename))
+                continue
+           
+            tmp_name = "tmp_{}_{}".format(i.treename, i.filename)
+            tmp_chain = TChain(tmp_name)
+            log.warning("Constructing tmp TChain {} @ {}".format(tmp_name, hex(id(tmp_chain))))
+            tmp_chain.Add("{}/{}".format(i.filename, i.treename))
+
+            tmp_chains.append(tmp_chain)
+
+        # Add all the temporaries to a combined chain
+        for chain in tmp_chains:
+            self.configMgr.chains[self.currentChainName].Add(chain)
+
+        # Add any friends to the combined one 
+        if friendTreeName != "":
+            log.debug("Adding friend tree {} to {}".format(friendTreeName, self.currentChainName)) 
+      
+            friend_tree_idx = "{}_{}".format(self.currentChainName, friendTreeName)
+
+            #if friend_tree_idx in self.configMgr.friend_chains:
+                #log.debug("Loading friend tree idx {} from cache".format(friend_tree_idx))
+                #self.configMgr.chains[self.currentChainName].AddFriend(self.configMgr.friend_chains[friend_tree_idx])
+                #return
+
+            major_idx = set()
+            minor_idx = set()
+            for i in sorted_input_files:
+                try:
+                    _file = TFile.Open(i.filename)
+                    _friend = _file.Get(friendTreeName) 
+                    if _friend.GetTreeIndex() != 0:
+                        major_idx.add(_friend.GetTreeIndex().GetMajorName())
+                        minor_idx.add(_friend.GetTreeIndex().GetMinorName())
+
+                except:
+                    log.warning("Could not retrieve indices for friend tree {} in file {}".format(friendTreeName, i.filename))
+                    continue
+            
+            # Check if we've got multiple indices. ROOT silently gives nonsense in such cases, so this is a hard stop.:w
+            if len(major_idx) > 1:
+                log.fatal("Found multiple major indices for your friend trees: {}. The projections are going to go wrong as the merged friend tree needs a common index".format(", ".join(s for s in major_idx)))
+            
+            if len(minor_idx) > 1:
+                log.fatal("Found multiple minor indices for your friend trees: {}. The projections are going to go wrong as the merged friend tree needs a common index".format(", ".join(s for s in minor_idx)))
+            
+            # If the friend chains have any indices (e.g. for normalisation weights with run numbers),
+            # we HAVE to rebuild the index. ROOT doesn't do that for us. Yay ROOT.
+            friend_chain = TChain(friendTreeName)
+
+            for i in sorted_input_files:
+                try:
+                    log.debug("Trying to add friend {}/{}".format(i.filename, friendTreeName))
+                    #self.configMgr.chains[self.currentChainName].AddFriend(friendTreeName, i.filename)
+                    friend_chain.Add("{}/{}".format(i.filename, friendTreeName))
+                except:
+                    log.warning("Could not add friend {} - this is not necessarily bad; if we don't need the trees you're safe".format(friendTreeName))
+  
+        major_idx_name = ""
+        minor_idx_name = ""
+        if len(major_idx) == 1:
+            major_idx_name = major_idx.pop()
+        if len(minor_idx) == 1:
+            minor_idx_name = minor_idx.pop()
+
+        if major_idx_name == "0":
+            major_idx_name = ""
+        
+        if minor_idx_name == "0":
+            minor_idx_name = ""
+
+        try:
+            if major_idx_name != "" and minor_idx_name != "": 
+                log.verbose("Building index({}, {}) for friend chain".format(major_idx_name, minor_idx_name))
+                friend_chain.BuildIndex(major_idx_name, minor_idx_name)
+                pass
+            elif major_idx_name != "": 
+                log.verbose("Building index({}) for friend chain".format(major_idx_name))
+                friend_chain.BuildIndex(major_idx_name)
+                pass
+        except Exception as ex:
+            # Catch all exceptions. Note that PyROOT doesn't do exceptions. Some users might be using rootpy however, which
+            # trees a BuildIndex error as fatal
+            pass
+
+        self.configMgr.chains[self.currentChainName].AddFriend(friend_chain)
+        self.configMgr.friend_chains[self.currentChainName] = friend_chain
+
+        #self.configMgr.chains[self.currentChainName].SetProof()
 
         return
 
@@ -343,9 +457,11 @@ class PrepareHistos(object):
                     if self.var.find(":") == -1:                    
                         tempHist = TH1F(tempName, tempName, self.channel.nBins, self.channel.binLow, self.channel.binHigh)
                     else:
-                        tempHist = TH2F(tempName, tempName, self.channel.nBins, self.channel.binLow, self.channel.binHigh, self.channelnBinsY, self.channel.binLowY, self.channel.binHighY)
+                        tempHist = TH2F(tempName, tempName, self.channel.nBins, self.channel.binLow, self.channel.binHigh, 
+                                                            self.channelnBinsY, self.channel.binLowY, self.channel.binHighY)
                     
                     log.debug("__addHistoFromTree: projecting binned {} into {}".format(self.var, tempName))
+                    log.verbose("__addHistoFromTree: chain: {} ({})".format(self.currentChainName, hex(id(self.configMgr.chains[self.currentChainName])) ))
                     log.verbose("__addHistoFromTree: cuts: {}".format(self.cuts))
                     log.verbose("__addHistoFromTree: weights: {}".format(self.weights))
                     log.debug('__addHistoFromTree: {}->Project("{}", "{}", "{} * ({})" )'.format(self.currentChainName, tempName, self.var, self.cuts, self.weights) )
@@ -354,7 +470,7 @@ class PrepareHistos(object):
                     self.configMgr.hists[name] = tempHist.Clone()
                     self.configMgr.hists[name].SetName(name)
                     self.configMgr.hists[name].SetName(name)
-
+                   
                     del tempHist
 
                     #tempHist.Delete()
