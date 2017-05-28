@@ -25,6 +25,8 @@ from channel import Channel
 from sample import Sample
 from logger import Logger
 from systematic import SystematicBase
+from collections import OrderedDict
+from inputTree import InputTree
 
 log = Logger('fitConfig')
 
@@ -74,9 +76,9 @@ class fitConfig(object):
         self.validationChannels = []
         self.bkgConstrainChannels = []
         self.systDict = {}
-        self.files = []
+        self.input_files = set()
         self.weights = []
-        self.treeName = ''
+        #self.treeName = ''
         self.hasDiscovery = False
 
         # Plot cosmetics
@@ -335,10 +337,15 @@ class fitConfig(object):
         for s in self.sampleList:
             chanObj.addSample(s.Clone())
 
+        # Add any input files we own to the channel
+        log.debug("Appending existing files to channel {}".format(chanObj.channelName))
+        for i in self.input_files:
+            chanObj.addInput(i.filename, i.treename)
+
         # Add channel to the list
         self.channels.append(chanObj)
 
-        return self.channels[len(self.channels) - 1]
+        return self.channels[-1]
 
     def addChannelObj(self, obj):
         """
@@ -505,65 +512,6 @@ class fitConfig(object):
     
         mergeInfo = {"samples" : samples, "target" : _target}
         self.samplesToMerge.append(mergeInfo)
-
-        return
-
-    def createMergedSamples(self):
-        log.warning("createMergedSamples: remember, mergeSamples() is experimental!")
-
-        for combination in self.samplesToMerge:
-            self.createMergedSample(combination['samples'], combination['target'])
-
-        return
-
-    def createMergedSample(self, samples, target):
-        log.info("createMergedSample: merging {} to {} in fitConfig {}".format(", ".join(s.name for s in samples), target, self.name))
-
-        for channel in self.channels:
-            log.info("createMergedSample: at channel {}".format(channel.name))
-   
-            # find the samples here. The channel can throw an exception, so we avoid list comprehensions
-            channel_samples = []
-            for s in samples:
-                try:
-                    _sample = channel.getSample(s.name)
-                    channel_samples.append(_sample)
-                except:
-                    log.info("createMergedSample: cannot find {} in channel {}".format(s.name, channel.name))
-                    continue
-
-            if channel_samples == []:
-                log.info("createMergedSample: no samples associated with {}, continuing".format(channel.name))
-                continue
-
-            log.info("createMergedSample: channel {}: found samples {}".format(channel.name, ", ".join(s.name for s in channel_samples)))
-
-            # Even if we have just _one_ sample, we continue with our logic. It is too risky remap everything, we just want to construct and
-            # copy stuff before removing the original. That should be easy enough.
-
-            combined_systs = []
-            for s in channel_samples:
-                _systs = s.getAllSystematicNames()
-                log.verbose("createMergedSample: channel {}, sample {}: affected by {:d} systematics".format(channel.name, s.name, len(_systs)))
-                combined_systs = set(list(combined_systs) + list(_systs))
-
-            if len(combined_systs) == 0:
-                # No systematics for the combined sample, nothing to do!
-                continue
-
-            log.info("createMergedSample: channel {}: merged sample {} affected by {:d} systematics".format(channel.name, target, len(combined_systs)))
-
-        # for every channel:
-            # merge nominal sample
-
-            # now find out what the heck our systematics are
-            # make a combined set of all of these
-            # assign it to the merged sample
-            # hadd all the various histograms together
-
-            # wipe the samples from t
-
-        # delete the original samples from the fit config
 
         return
 
@@ -771,43 +719,56 @@ class fitConfig(object):
         self.appendChannelsToList(channels, self.validationChannels)
         return
 
-    def setFileList(self, filelist):
-        """
-        Set file list for this fitConfig 
-        This will be used as default for channels that don't specify
-        their own file list.
+    def addInput(self, filename, treename):
+        # add an input with a treename
+        self.input_files.add(InputTree(filename, treename))
+       
+        for channel in self.channels:
+            channel.addInput(filename, treename)
+
+    def addInputs(self, filenames, treename):
+        # bulk add a bunch of filenames with the same treename
+        for f in filenames:
+            self.addInput(f, treename)
+
+    #def setFileList(self, filelist):
+        #"""
+        #Set file list for this fitConfig 
+        #This will be used as default for channels that don't specify
+        #their own file list.
         
-        @param filelist List of filenames
-        """
-        self.files = filelist
-        return
+        #@param filelist List of filenames
+        #"""
+        #self.input_files = filelist
+        #return
 
-    def setFile(self, file):
-        """
-        Set file for this fitConfig 
-        This will be used as default for channels that don't specify
-        their own file list.
+    #def setFile(self, file):
+        #"""
+        #Set file for this fitConfig 
+        #This will be used as default for channels that don't specify
+        #their own file list.
 
-        @param file Name of the input file
-        """
-        self.files = [file]
-        return
+        #@param file Name of the input file
+        #"""
+        #self.input_files = [file]
+        #return
 
-    def propagateFileList(self, fileList):
-        """
-        Propagate the file list downwards.
+    #def propagateInputFiles(self, fileList):
+        #"""
+        #Propagate the file list downwards.
 
-        @param fileList List of files
-        """
-        # if we don't have our own file list, use the one given to us
-        if not self.files:
-            self.files = fileList
+        #@param fileList List of files
+        #"""
+        ## if we don't have our own file list, use the one given to us
+        #if not self.input_files:
+            #self.input_files = fileList
 
-        # propagate our file list downwards
-        for ch in self.channels:
-            ch.propagateFileList(self.files)
+        ## propagate our file list downwards
+        #for ch in self.channels:
+            #print self.input_files
+            #ch.propagateInputFiles(self.input_files)
 
-        return
+        #return
 
     def addSystematic(self, syst):
         """
@@ -868,28 +829,28 @@ class fitConfig(object):
         del self.systDict[name]
         return
 
-    def setTreeName(self, treeName):
-        """
-        Set the tree nae
+    #def setTreeName(self, treeName):
+        #"""
+        #Set the tree nae
         
-        @param treeName Name of the tree
-        """
-        self.treeName = treeName
-        return
+        #@param treeName Name of the tree
+        #"""
+        #self.treeName = treeName
+        #return
 
-    def propagateTreeName(self, treeName):
-        """
-        Propagate the tree name
+    #def propagateTreeName(self, treeName):
+        #"""
+        #Propagate the tree name
         
-        @param treeName Name of the tree
-        """
-        if self.treeName == '':
-            self.treeName = treeName
-        ## propagate down to channels
-        for chan in self.channels:
-            chan.propagateTreeName(self.treeName)
-            pass
-        return
+        #@param treeName Name of the tree
+        #"""
+        #if self.treeName == '':
+            #self.treeName = treeName
+        ### propagate down to channels
+        #for chan in self.channels:
+            #chan.propagateTreeName(self.treeName)
+            #pass
+        #return
 
     def __str__(self):
         """
