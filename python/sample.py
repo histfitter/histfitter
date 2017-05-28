@@ -23,6 +23,7 @@ from ROOT import kBlack, kWhite, kGray, kRed, kPink, kMagenta, kViolet, kBlue, k
 from math import fabs
 from logger import Logger
 from systematic import SystematicBase
+from inputTree import InputTree
 
 log = Logger('Sample')
 
@@ -182,10 +183,10 @@ class Sample(object):
         self.unit = "GeV"
         ## Dictionary of cuts placed on the sample in various regions
         self.cutsDict = {}
-        ## List of input files
-        self.files = []
-        ## Name of input tree
-        self.treeName = ""
+        ## List of input files - combinations have to be unique
+        self.input_files = set()
+        ## Override for input tree name
+        self.overrideTreename = ""
         ## Prefix of input tree
         self.prefixTreeName = "" 
         ## Suffix of input tree
@@ -415,14 +416,14 @@ class Sample(object):
         self.histoName = histoName
         return
 
-    def setTreeName(self, treeName):
-        """
-        Set the tree name used for this sample
+    #def setTreeName(self, treeName):
+        #"""
+        #Set the tree name used for this sample
 
-        @param treeName Name of the tree
-        """
-        self.treeName = treeName
-        return
+        #@param treeName Name of the tree
+        #"""
+        #self.treeName = treeName
+        #return
     
     def setPrefixTreeName(self, prefixTreeName):
         """
@@ -526,28 +527,32 @@ class Sample(object):
 
         return "h{}{}{}_{}_obs_{}".format(self.name, syst_name, variation, "".join(self.parentChannel.regions), replaceSymbols(self.parentChannel.variableName))
 
-    def propagateTreeName(self, treeName):
-        """
-        Propagate the tree name
+    #def propagateTreeName(self, treeName):
+        #"""
+        #Propagate the tree name
 
-        @param treeName The tree name to set and propagate down
-        """
-        if self.treeName == '':
-            self.treeName = treeName
-        # MAB: Propagate treeName down to systematics of sample
-        #for (systName, systList) in self.systDict.items():
-           #for syst in systList:
-               #syst.propagateTreeName(self.treeName)
-               #pass
-        return
-    
-    def getTreeName(self):
+        #@param treeName The tree name to set and propagate down
+        #"""
+        #if self.treeName == '':
+            #self.treeName = treeName
+        ## MAB: Propagate treeName down to systematics of sample
+        ##for (systName, systList) in self.systDict.items():
+           ##for syst in systList:
+               ##syst.propagateTreeName(self.treeName)
+               ##pass
+        #return
+   
+    def setOverrideTreename(self, name):
+        self.overrideTreename = name
+
+    @property
+    def treename(self):
         """
         Get name of the tree to take histograms from
         """
-        if self.treeName != "":
-            log.debug("Overriding treename for {} to {}".format(self.name, self.treeName))
-            return self.treeName
+        if self.overrideTreename != "":
+            log.debug("Overriding treename for {} to {}".format(self.name, self.overrideTreename))
+            return self.overrideTreename
 
         if self.prefixTreeName == "":
             self.prefixTreeName = self.name
@@ -1106,33 +1111,53 @@ class Sample(object):
             configMgr.normList.append(name)
         return
 
-    def setFileList(self, filelist):
-        """
-        Set file list for this Sample directly
-
-        @param filelist A list of filenames
-        """
-        self.files = filelist
-
-    def setFile(self, file):
-        """
-        Set file for this Sample directly
-
-        @param file a filename
-        """
-        self.files = [file]
-
-    def propagateFileList(self,  fileList):
-        """
-        Propagate the file list downwards.
+    def addInput(self, filename, treename=""):
+        # add a file with a treename. If none given, fall back to whatever @property treename() gives for us.
         
-        @param filelist A list of filenames
-        """
-        # if we don't have our own file list,  use the one given to us
-        if not self.files:
-            self.files = fileList
+        _treename = self.treename
+        if treename != "":
+            _treename = treename
+
+        self.input_files.add(InputTree(filename, _treename))
+        
         # we are the leaves of the configMgr->fitConfig->channel->sample tree,
         # so no propagation necessary
+
+    def addInputs(self, filenames, treename=""):
+        # bulk add a bunch of filenames with the same treename
+        for f in filenames:
+            self.addInput(f, treename)
+        
+        # we are the leaves of the configMgr->fitConfig->channel->sample tree,
+        # so no propagation necessary
+
+    #def setFileList(self, filelist):
+        #"""
+        #Set file list for this Sample directly
+
+        #@param filelist A list of filenames
+        #"""
+        #self.input_files = filelist
+
+    #def setFile(self, file):
+        #"""
+        #Set file for this Sample directly
+
+        #@param file a filename
+        #"""
+        #self.input_files = [file]
+
+    #def propagateInputFiles(self, input_files):
+        #"""
+        #Propagate the file list downwards.
+        
+        #@param filelist A list of filenames
+        #"""
+        ## if we don't have our own file list,  use the one given to us
+        #if not self.input_files:
+            #self.input_files = input_files
+        ## we are the leaves of the configMgr->fitConfig->channel->sample tree,
+        ## so no propagation necessary
 
     def addShapeFactor(self, name):
         """
@@ -1184,7 +1209,7 @@ class Sample(object):
         @param name Name of the histoSys systematic
         """
         for syst in self.histoSystList:
-            if name==syst[0]: return syst
+            if name == syst[0]: return syst
         return None
 
     def replaceHistoSys(self, rsyst):
@@ -1218,6 +1243,13 @@ class Sample(object):
         """
 
         return self.systDict.keys()
+
+    def getAllSystematics(self):
+        """
+        Return all systematics
+        """
+
+        return self.systDict
 
     def getSystematic(self, systName):
         """
