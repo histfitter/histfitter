@@ -106,76 +106,76 @@ class SystematicBase:
         else:
             return False
 
-    def setFileList(self, sample, filelist):
-        """
-        Set file list for this Systematic directly
+    #def setFileList(self, sample, filelist):
+        #"""
+        #Set file list for this Systematic directly
 
-        @param sample The Sample to set the files for
-        @param filelist A list of filenames
-        """
-        self.filesLo[sample] = filelist
-        self.filesHi[sample] = filelist
+        #@param sample The Sample to set the files for
+        #@param filelist A list of filenames
+        #"""
+        #self.filesLo[sample] = filelist
+        #self.filesHi[sample] = filelist
 
-    def setFile(self, sample, file):
-        """
-        Set a file for this Systematic directly
+    #def setFile(self, sample, file):
+        #"""
+        #Set a file for this Systematic directly
         
-        @param sample The Sample to set the file for
-        @param filelist A filename
-        """
-        self.filesLo[sample] = [file]
-        self.filesHi[sample] = [file]
+        #@param sample The Sample to set the file for
+        #@param filelist A filename
+        #"""
+        #self.filesLo[sample] = [file]
+        #self.filesHi[sample] = [file]
 
-    def setTreeName(self, sampleName, treeName):
-        """
-        Set name of the tree for a sample
+    #def setTreeName(self, sampleName, treeName):
+        #"""
+        #Set name of the tree for a sample
         
-        @param sampleName Name of the sample
-        @param treeName Tree name to set for the sample
-        """
-        self.treeLoName[sampleName] = treeName
-        self.treeHiName[sampleName] = treeName
-        return
+        #@param sampleName Name of the sample
+        #@param treeName Tree name to set for the sample
+        #"""
+        #self.treeLoName[sampleName] = treeName
+        #self.treeHiName[sampleName] = treeName
+        #return
 
-    def setLoTreeName(self, sampleName, treeName):
-        """
-        Set name of the tree for a sample for -1 sigma variations only
+    #def setLoTreeName(self, sampleName, treeName):
+        #"""
+        #Set name of the tree for a sample for -1 sigma variations only
         
-        @param sampleName Name of the sample
-        @param treeName Tree name to set for the sample
-        """
-        self.treeLoName[sampleName] = treeName
-        return
+        #@param sampleName Name of the sample
+        #@param treeName Tree name to set for the sample
+        #"""
+        #self.treeLoName[sampleName] = treeName
+        #return
 
-    def setHiTreeName(self, sampleName, treeName):
-        """
-        Set name of the tree for a sample for +1 sigma variations only
+    #def setHiTreeName(self, sampleName, treeName):
+        #"""
+        #Set name of the tree for a sample for +1 sigma variations only
         
-        @param sampleName Name of the sample
-        @param treeName Tree name to set for the sample
-        """
-        self.treeHiName[sampleName] = treeName
-        return
+        #@param sampleName Name of the sample
+        #@param treeName Tree name to set for the sample
+        #"""
+        #self.treeHiName[sampleName] = treeName
+        #return
 
-    def setHiFileList(self, sample, filelist):
-        """
-        Set file list for +1 sigma variations only
+    #def setHiFileList(self, sample, filelist):
+        #"""
+        #Set file list for +1 sigma variations only
         
-        @param sampleName Name of the sample
-        @param treeName Tree name to set for the sample
-        """
-        self.filesHi[sample] = filelist
-        return
+        #@param sampleName Name of the sample
+        #@param treeName Tree name to set for the sample
+        #"""
+        #self.filesHi[sample] = filelist
+        #return
 
-    def setLoFileList(self, sample, filelist):
-        """
-        Set file list for -1 sigma variations only
+    #def setLoFileList(self, sample, filelist):
+        #"""
+        #Set file list for -1 sigma variations only
         
-        @param sampleName Name of the sample
-        @param treeName Tree name to set for the sample
-        """
-        self.filesLo[sample] = filelist
-        return
+        #@param sampleName Name of the sample
+        #@param treeName Tree name to set for the sample
+        #"""
+        #self.filesLo[sample] = filelist
+        #return
 
     def FillUpDownHist(self, lowhigh="", regionString="", normString="",
                        normCuts="", abstract=None, topLvl=None, chan=None, sam=None):
@@ -257,6 +257,7 @@ class SystematicBase:
                 else:
                     # otherwise - take the sample file list
                     filelist = s.files
+                
                 if s.name in systNorm.treeLoName:
                     treeName = systNorm.treeLoName[s.name]
                 else:
@@ -266,6 +267,7 @@ class SystematicBase:
                         treeName = s.treeName + systNorm.low
                     else:
                         treeName = s.treeName
+                
                 if self.type == "tree" and (treeName == '' or treeName == systNorm.low):
                     # checking if the sample tree name should have a prefix, if yes use this                                
                     if s.prefixTreeName == '':
@@ -279,6 +281,7 @@ class SystematicBase:
                 else:
                     # otherwise - take the sample file list
                     filelist = s.files
+                
                 if s.name in systNorm.treeHiName:
                     treeName = systNorm.treeHiName[s.name]
                 else:
@@ -288,6 +291,7 @@ class SystematicBase:
                         treeName = s.treeName + systNorm.high
                     else:
                         treeName = s.treeName
+                
                 if self.type == "tree" and (treeName == '' or treeName == systNorm.high):    
                     # checking if the sample tree name should have a prefix, if yes use this
                     if s.prefixTreeName == '':
@@ -303,6 +307,7 @@ class SystematicBase:
                     treeName = s.treeName + systNorm.nominal
                 else:
                     treeName = s.treeName
+                
                 ## possibly rename treename
                 if self.type == "tree" and (treeName == '' or treeName == systNorm.nominal):
                     # checking if the sample tree name should have a prefix, if yes use this
@@ -319,11 +324,11 @@ class SystematicBase:
                 else:
                     treeName = s.prefixTreeName + abstract.nomName
 
-            log.verbose("s.name %s"%s.name)
-            log.verbose("sam.name %s"%sam.name)
-            #log.verbose("systNorm high %s"%systNorm.high)
-            #log.verbose("systNorm low %s"%systNorm.low)
-            log.verbose("treeName %s"%treeName)
+            log.verbose("s.name %s" % s.name)
+            log.verbose("sam.name %s" % sam.name)
+            #log.verbose("systNorm high %s" % systNorm.high)
+            #log.verbose("systNorm low %s" % systNorm.low)
+            log.verbose("treeName %s" % treeName)
 
             log.debug("FillUpDownHist(): calling prepare.read()")
             abstract.prepare.read(treeName, filelist)
@@ -331,18 +336,18 @@ class SystematicBase:
             tempHist = TH1F("temp", "temp", 1, 0.5, 1.5)
 
             if systNorm.type == "tree":
-                log.verbose("normalization region %s"%("".join(normReg[0])))
-                log.verbose("normalization cuts %s"%(abstract.cutsDict["".join(normReg[0])]))
-                log.verbose("current chain %s"% abstract.prepare.currentChainName)
-                log.verbose("projecting string %s"%(str(abstract. lumiUnits*abstract.outputLumi/abstract.inputLumi) + " * " + "*". join(s.weights) + " * (" + abstract.cutsDict["".join(normReg[0])] + ")"))
+                log.verbose("normalization region %s" % ("".join(normReg[0])))
+                log.verbose("normalization cuts %s" % (abstract.cutsDict["".join(normReg[0])]))
+                log.verbose("current chain %s" %  abstract.prepare.currentChainName)
+                log.verbose("projecting string %s" % (str(abstract. lumiUnits*abstract.outputLumi/abstract.inputLumi) + " * " + "*". join(s.weights) + " * (" + abstract.cutsDict["".join(normReg[0])] + ")"))
 
                 abstract.chains[abstract.prepare.currentChainName].Project("temp",abstract.cutsDict["".join(normReg[0])],str(abstract.lumiUnits*abstract.outputLumi/abstract.inputLumi)+" * "+"*".join(s.weights)+" * ("+abstract.cutsDict["".join(normReg[0])]+")")
                 abstract.hists[histName].SetBinContent(1,abstract.hists[histName].GetSum()+tempHist.GetSumOfWeights())
             elif systNorm.type == "weight":
-                log.verbose("normalization region %s"%("".join(normReg[0])))
-                log.verbose("normalization cuts %s"%(abstract.cutsDict["".join(normReg[0])]))
-                log.verbose("current chain %s"% abstract.prepare.currentChainName)
-                log.verbose("projecting string %s"%(str(abstract.lumiUnits*abstract.outputLumi/abstract.inputLumi)+" * "+"*".join(s.weights)+" * ("+abstract.cutsDict["".join(normReg[0])]+")"))
+                log.verbose("normalization region %s" % ("".join(normReg[0])))
+                log.verbose("normalization cuts %s" % (abstract.cutsDict["".join(normReg[0])]))
+                log.verbose("current chain %s" %  abstract.prepare.currentChainName)
+                log.verbose("projecting string %s" % (str(abstract.lumiUnits*abstract.outputLumi/abstract.inputLumi)+" * "+"*".join(s.weights)+" * ("+abstract.cutsDict["".join(normReg[0])]+")"))
 
                 if 'High' in lowhigh:
                     abstract.chains[abstract.prepare.currentChainName].Project("temp",abstract.cutsDict["".join(normReg[0])],str(abstract.lumiUnits*abstract.outputLumi/abstract.inputLumi)+" * "+"*".join(s.systDict[systNorm.name].high)+" * ("+abstract.cutsDict["".join(normReg[0])]+")")
