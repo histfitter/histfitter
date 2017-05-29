@@ -652,11 +652,10 @@ class ConfigManager(object):
         """
         Print all the histograms defined in the manager
         """
-        histList = self.hists.keys()
-        histList.sort()
-        for hist in histList:
-            print hist
-            log.debug(hist)
+        hists = sorted(self.hists.keys())
+        log.info("# Histograms defined: {}".format(len(hists)))
+        for i, hist in enumerate(hists):
+            log.debug("Histogram {}/{}: {}".format(i+1, len(hists), hist))
         return
 
     def printChains(self):
@@ -1435,15 +1434,17 @@ class ConfigManager(object):
                     log.warning("            For now, using all non-validation channels by default: %s" % sam.normRegions)
                     
             if sam.normRegions and (not sam.noRenormSys):
-                normString = ""
+                regionStrings = []
                 for normReg in sam.normRegions:
-                    if not type(normReg[0]) == "list":
-                        normList = [normReg[0]]
-                        c = fitConfig.getChannel(normReg[1],normList)
+                    if not isinstance(normReg[0], list):
+                        c = fitConfig.getChannel(normReg[1], [normReg[0]])
                     else:
-                        c = fitConfig.getChannel(normReg[1],normReg[0])
-                    normString += c.regionString
-          
+                        c = fitConfig.getChannel(normReg[1], normReg[0])
+                    
+                    regionStrings.append(c.regionString)
+         
+                normString = "".join(regionStrings)
+
                 log.verbose("Constructed normString {0} for sample {1}".format(normString, sam.name))
 
                 tmpName = "h%sNom_%sNorm" % (sam.name, normString )
