@@ -549,7 +549,7 @@ class Sample(object):
 
     def removeCurrentSystematic(self):
         self.currentSystematic = None
-    
+   
     def setCurrentSystematic(self, name, mode="nominal"):
         if name is None:
             self.removeCurrentSystematic()
@@ -558,7 +558,13 @@ class Sample(object):
         _name = name
         if isinstance(name, SystematicBase):
             _name = name.name
+            
+            if name.type == "weight":
+                log.verbose("setCurrentSystematic: sample {}, name {} is a weight - not setting suffix".format(self.name, _name))
+                return
 
+        log.verbose("setCurrentSystematic: sample {}, name {}".format(self.name, _name))
+        
         if _name is not None and _name not in self.systDict:
             raise ValueError("Sample {}: cannot set systematic to unknown {}".format(self.name, _name))
 
