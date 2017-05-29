@@ -1035,6 +1035,8 @@ class ConfigManager(object):
                     continue
                 self.makeDicts(fitConfig, chan)
 
+        sys.exit()
+
         # Write the data file
         self.outputRoot()
        
@@ -1084,7 +1086,7 @@ class ConfigManager(object):
             chan.infoDict[sam.name].append((systName+"High", self.nomName, syst.high, syst.method))
             chan.infoDict[sam.name].append((systName+"Low", self.nomName, syst.low, syst.method))
         else:
-            chan.infoDict[sam.name].append((systName,syst.high,syst.low,syst.method))
+            chan.infoDict[sam.name].append((systName, syst.high, syst.low, syst.method))
         return
 
     def addHistoSysforNoQCD(self, regionString, normString, normCuts, fitConfig, chan, sam, syst):
@@ -1287,7 +1289,7 @@ class ConfigManager(object):
                         log.debug("setWeightsCutsVariable(): calling prepare.read() for {}".format(sam.treename))
                         
                         #self.prepare.read(sam.treename, sam.files, friendTreeName=sam.friendTreeName)
-                        self.prepare.read(sam.input_files, friendTreeName=sam.friendTreeName)
+                        self.prepare.read(sam.input_files, suffix=sam.getTreenameSuffix(), friendTreeName=sam.friendTreeName)
         else:
             self.prepare.weights = "1."
             if self.readFromTree or self.useCacheToTreeFallback:
@@ -1297,7 +1299,7 @@ class ConfigManager(object):
                 if not noRead:
                     log.debug("setWeightsCutsVariable(): calling prepare.read() for {}".format(sam.treename))
                     #self.prepare.read(sam.treename, sam.files, friendTreeName=sam.friendTreeName)
-                    self.prepare.read(sam.input_files, friendTreeName=sam.friendTreeName)
+                    self.prepare.read(sam.input_files, suffix=sam.getTreenameSuffix(), friendTreeName=sam.friendTreeName)
 
         oldCuts = copy(self.prepare.cuts)
         #if len(sam.cutsDict.keys()) == 0:
@@ -1494,10 +1496,12 @@ class ConfigManager(object):
 
             for (systName,syst) in chan.getSample(sam.name).systDict.items():
                 log.info("    Systematic: %s" % systName)
-                log.verbose("normString = {0}".format(normString))
+                log.verbose("current normString = {0}".format(normString))
+
+                # TODO: flag the syst as the current systematic -> means the treename for the sample can be updated!
 
                 # first reset weight to nominal value -> TODO: is this needed for tree-based systematics?!
-                self.setWeightsCutsVariable(chan, sam, regionString) # no need to call the prepare() method <- YES there is. This sets the correct SR. Bad design@
+                self.setWeightsCutsVariable(chan, sam, regionString) # no need to call the prepare() method <- YES there is. This sets the correct SR weights. Bad design@
                 
                 # this method actually calls the hard work. Note: this NEEDS to not rely on this method. Now it's not parallelizable.
                 syst.PrepareWeightsAndHistos(regionString, normString, normCuts, self, fitConfig, chan, sam)

@@ -435,56 +435,23 @@ class TreeWeightSystematic(SystematicBase):
 
             if abstract.readFromTree or abstract.useCacheToTreeFallback:
                 log.debug("PrepareWAHforTree(): will read syst {} from trees (or fallback enabled)".format(self.name))
+                
                 if highorlow == "High_":
                     log.verbose("PrepareWAHforTree(): in high mode")
-                    if sam.name in self.filesHi:
-                        filelist = self.filesHi[sam.name]
-                    else:
-                        filelist = sam.files
-
-                    if sam.name in self.treeHiName:
-                        treeName = self.treeHiName[sam.name]
-                    else:
-                        treeName = sam.treeName + self.high
-                    
-                    if treeName == '' or treeName == self.high:
-                        if sam.prefixTreeName == '':
-                            treeName = sam.name + self.high
-                        else:
-                            treeName = sam.prefixTreeName + self.high
-
+                    sam.setCurrentSystematic(self, "high")
                 elif highorlow == "Low_":
                     log.verbose("PrepareWAHforTree(): in low mode")
-                    if sam.name in self.filesLo:
-                        filelist = self.filesLo[sam.name]
-                    else:
-                        filelist = sam.files
-                    
-                    if sam.name in self.treeLoName:
-                        treeName = self.treeLoName[sam.name]
-                    else:
-                        treeName = sam.treeName + self.low
-                    
-                    if treeName == '' or treeName == self.low:
-                        if sam.prefixTreeName == '':
-                            treeName = sam.name + self.low
-                        else:
-                            treeName = sam.prefixTreeName + self.low
-                
+                    sam.setCurrentSystematic(self, "low")
                 elif highorlow == "Nom_":
                     log.verbose("PrepareWAHforTree(): in nominal mode")
-                    filelist = sam.files
-                    treeName = sam.treeName + self.nominal
-                    if treeName == '' or treeName == self.nominal:
-                        if sam.prefixTreeName == '':
-                            treeName = sam.name + self.nominal
-                        else:
-                            treeName = sam.prefixTreeName + self.nominal
+                    sam.setCurrentSystematic(self)
                     
                 log.debug("PrepareWAHforTree(): calling prepare.read() for {} (sample {})".format(self.name, sam.name))
-                log.verbose("PrepareWAHforTree(): tree name = '{}'".format(treeName))
-                log.verbose("PrepareWAHforTree(): file list = {}".format(filelist))
-                abstract.prepare.read(treeName, filelist, friendTreeName=sam.friendTreeName)
+                log.verbose("PrepareWAHforTree(): using the following inputs:")
+                for i in sam.input_files:
+                    log.verbose("{}{} from {}".format(i.treename, sam.getTreenameSuffix(), i.filename))
+
+                abstract.prepare.read(sam.input_files, suffix=sam.getTreenameSuffix(), friendTreeName=sam.friendTreeName)
 
             TreeWeightSystematic.tryAddHistos(self, highorlow, regionString,
                                               normString, normCuts, abstract,
@@ -499,14 +466,14 @@ class TreeWeightSystematic(SystematicBase):
                                 normCuts="", abstract=None,
                                 topLvl=None, chan=None, sam=None):
 
-        log.verbose("PrepareWeightsAndHistos()")
+        log.verbose("PrepareWeightsAndHistos for {}".format(self.name))
         if self.type == "weight":
-            log.verbose("Calling TreeWeightSystematic.PrepareWAHforWeight()") 
+            log.verbose("Calling TreeWeightSystematic.PrepareWAHforWeight() for {}".format(self.name)) 
             TreeWeightSystematic.PrepareWAHforWeight(self, regionString,
                                                      normString, normCuts,
                                                      abstract, topLvl, chan, sam)
         if self.type == "tree":
-            log.verbose("Calling TreeWeightSystematic.PrepareWAHforTree()") 
+            log.verbose("Calling TreeWeightSystematic.PrepareWAHforTree() for {}".format(self.name)) 
             TreeWeightSystematic.PrepareWAHforTree(self, regionString,
                                                    normString, normCuts,
                                                    abstract, topLvl, chan, sam)

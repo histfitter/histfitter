@@ -176,6 +176,8 @@ class Sample(object):
         self.tempWeights = []
         ## Internal dictionary of systematics
         self.systDict = {}
+        ## Flag for the current systematic - needs to be a key of the dict above, or None
+        self.currentSystematic = None
         ## Internal list of normalisation factors
         self.normFactor = []
         self.qcdSyst = None
@@ -545,8 +547,47 @@ class Sample(object):
     def setOverrideTreename(self, name):
         self.overrideTreename = name
 
-    @property
-    def treename(self):
+    def removeCurrentSystematic(self):
+        self.currentSystematic = None
+    
+    def setCurrentSystematic(self, name, mode="nominal"):
+        if name is None:
+            self.removeCurrentSystematic()
+            return
+        
+        _name = name
+        if isinstance(name, SystematicBase):
+            _name = name.name
+
+        if _name is not None and _name not in self.systDict:
+            raise ValueError("Sample {}: cannot set systematic to unknown {}".format(self.name, _name))
+
+        if mode.lower() == "high" or mode.lower() == "up":
+            self.currentSystematic = self.systDict[_name].high
+            return
+
+        if mode.lower() == "low" or mode.lower() == "down":
+            self.currentSystematic = self.systDict[_name].low
+            return
+
+        self.currentSystematic = self.systDict[_name].nominal
+
+    def getTreenameSuffix(self):
+        if self.suffixTreeName != "":
+            # no defaults if we're overruled
+            return self.suffixTreeName
+        
+        if not self.isData and not self.isQCD and not self.isDiscovery:
+            # if we're not data, pick up the default
+
+            if self.currentSystematic is not None:
+                return self.currentSystematic
+
+            return configMgr.nomName
+
+        return ""
+
+    def getTreename(self, suffix=""):
         """
         Get name of the tree to take histograms from
         """
@@ -558,17 +599,19 @@ class Sample(object):
             self.prefixTreeName = self.name
             log.debug("Using name of sample as prefix for names of trees")
             
-        suffix = ""
-        if not self.isData and not self.isQCD and not self.isDiscovery: 
-            suffix = configMgr.nomName
-        
-        if self.suffixTreeName != "":
-            suffix = self.suffixTreeName
-   
+        _suffix = ""
         if suffix != "":
-            log.debug("Using tree suffix {}".format(suffix))
+            _suffix = copy(suffix)
+        else:
+            _suffix = self.getTreenameSuffix()
 
-        return "{}{}".format(self.prefixTreeName, suffix)
+        if _suffix != "":
+            log.debug("Using tree suffix {}".format(_suffix))
+
+        return "{}{}".format(self.prefixTreeName, _suffix)
+
+    # NOTE: not using @property because of the optional argument
+    treename = property(getTreename)
 
     def addHistoSys(self, systName, nomName, highName, lowName, includeOverallSys, normalizeSys, symmetrize=False, oneSide=False, samName="", normString="", nomSysName="", symmetrizeEnvelope=False):
         """
@@ -624,7 +667,7 @@ class Sample(object):
                     pass
 
         if self.noRenormSys and normalizeSys:
-            log.debug("    sample.noRenormSys==True and normalizeSys==True for sample <%s> and syst <%s>. normalizeSys set to False."%(self.name,systName))
+            log.debug("    sample.noRenormSys==True and normalizeSys==True for sample <%s> and syst <%s>. Setting normalizeSys to False."%(self.name, systName))
             normalizeSys = False
 
         if normalizeSys and not self.normRegions: 
@@ -805,13 +848,17 @@ class Sample(object):
 
                 for iBin in xrange(1, configMgr.hists[lowName].GetNbinsX()+1):
                     binVal = configMgr.hists[lowName].GetBinContent(iBin)
-                    if binVal<0.:
+                    if binVal < 0.:
                         configMgr.hists[lowName].SetBinContent(iBin, 0.)
 
             # Now construct high and low integrals for renormalization
-            nomIntegral = configMgr.hists[nomName].Integral()
-            lowIntegral = configMgr.hists[lowName].Integral()
-            highIntegral = configMgr.hists[highName].Integral()
+            try:
+                nomIntegral = configMgr.hists[nomName].Integral()
+                lowIntegral = configMgr.hists[lowName].Integral()
+                highIntegral = configMgr.hists[highName].Integral()
+            except AttributeError:
+                log.error("    generating HistoSys for %s syst=%s one of the histograms is None. Systematic is removed from fit." % (nomName, systName))
+                return
 
             # Check whether a renormalization actually makes sense
             if nomIntegral == 0 or lowIntegral == 0 or highIntegral == 0:

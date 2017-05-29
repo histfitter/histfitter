@@ -188,7 +188,7 @@ class PrepareHistos(object):
 
         return False
 
-    def read(self, input_files, friendTreeName=""):
+    def read(self, input_files, suffix="", friendTreeName=""):
         """
         Read in the root object that will make histograms and set the TChain objects in ConfigManager
 
@@ -214,7 +214,7 @@ class PrepareHistos(object):
         # Construct a combined set of tree and filenames. The sorting is performed to ensure every time we build the same chain.
         # The set is needed as, although the _combinations_ in input_files are by construction unique, it could be that the same file or chain is
         # used multiple times!
-        treenames = "_".join(sorted(x for x in set(i.treename for i in input_files)))
+        treenames = "_".join(sorted("{}{}".format(x, suffix) for x in set(i.treename for i in input_files)))
         filenames = "_".join(sorted(x for x in set(i.filename for i in input_files)))
        
         chainID = "{0}_{1}".format(treenames, filenames)
@@ -223,25 +223,12 @@ class PrepareHistos(object):
 
         if not self.currentChainName == '' and chainID != self.currentChainName:
             log.debug("read(): deleting chain {0} (chainID asked = {1})".format(self.currentChainName, chainID))
-            # this deletion is necessary for the garbage collector to kick in. The overhead of building a new chain is minimal.
-
-            print self.configMgr.chains[self.currentChainName].GetListOfFriends()
 
             if self.currentChainName in self.configMgr.friend_chains:
+                # ensure any friend tree does _not_ get garbage collected
                 self.configMgr.chains[self.currentChainName].RemoveFriend(self.configMgr.friend_chains[self.currentChainName])
 
-            ## Check if we've got any friends
-            #iterator = TIter(self.configMgr.chains[self.currentChainName].GetListOfFriends())
-            #obj = iterator()
-            #while obj:
-                #friend_name = obj.GetName()
-                #log.verbose("read(): remove friend {} from {}".format(friend_name, self.currentChainName))
-                #self.configMgr.chains[self.currentChainName].RemoveFriend(friend_name)
-                #obj = iterator()
-
-            #while ((TObject *obj = next()))
-               #obj->Draw(next.GetOption());
-
+            # this deletion is necessary for the garbage collector to kick in. The overhead of building a new chain is minimal.
             del self.configMgr.chains[self.currentChainName]
 
         self.currentChainName = chainID
@@ -251,11 +238,12 @@ class PrepareHistos(object):
             log.debug("Chain {} already exists - not rebuilding".format(chainID))
             return
 
-        # ROOT has a nasty problem in combining TChains and friends. What we do is the following.
-        # For each tree, create a TChain with _just_ _that_ tree
-        # Then, create a combined TChain of those TChains
-        # Add _all_ the friends to that. Otherwise, Project() calls give 0 magically.
+        # ROOT has a nasty problem in combining TChains and friends, in that indices in a chain are not automatically built. 
         # You can easily test this in a simple .C macro to confirm.
+        # What we do is the following.
+        # - For each tree, create a TChain with _just_ _that_ tree
+        # - Then, create a combined TChain of those TChains
+        # - Add _all_ the friends to that. Otherwise, Project() calls give 0 magically.
 
         log.debug("Creating chain {}".format(chainID))
         self.configMgr.chains[chainID] = TChain(treenames)
@@ -268,21 +256,24 @@ class PrepareHistos(object):
         # Build a temporary chain for each file
         tmp_chains = []
         for i in sorted_input_files:
-            log.info("read(): attempting to load {} from {}".format(i.treename, i.filename))
+            log.info("read(): attempting to load {} from {}".format(i.treename+suffix, i.filename))
             if not os.path.exists(i.filename):
-                log.error("input file {} does not exist - cannot load {} from it".format(i.filename, i.treename))
+                log.error("input file {} does not exist - cannot load {} from it".format(i.filename, i.treename+suffix))
                 continue
            
-            tmp_name = "tmp_{}_{}".format(i.treename, i.filename)
+            tmp_name = "tmp_{}_{}".format(i.treename+suffix, i.filename)
             tmp_chain = TChain(tmp_name)
             log.warning("Constructing tmp TChain {} @ {}".format(tmp_name, hex(id(tmp_chain))))
-            tmp_chain.Add("{}/{}".format(i.filename, i.treename))
+            tmp_chain.Add("{}/{}".format(i.filename, i.treename+suffix))
 
             tmp_chains.append(tmp_chain)
 
         # Add all the temporaries to a combined chain
         for chain in tmp_chains:
-            self.configMgr.chains[self.currentChainName].Add(chain)
+            try:
+                self.configMgr.chains[self.currentChainName].Add(chain)
+            except:
+                pass
 
         # Add any friends to the combined one 
         if friendTreeName != "":
@@ -357,8 +348,6 @@ class PrepareHistos(object):
 
         self.configMgr.chains[self.currentChainName].AddFriend(friend_chain)
         self.configMgr.friend_chains[self.currentChainName] = friend_chain
-
-        #self.configMgr.chains[self.currentChainName].SetProof()
 
         return
 

@@ -6,7 +6,13 @@ class InputTree(object):
             raise ValueError("Cannot initialize InputTree without treename")
 
         self.filename = filename
-        self.treename = treename
+        self._treename = treename
+
+    def getTreename(self, suffix=""):
+        return "{}{}".format(self._treename, suffix)
+   
+    # NOTE: no @property because of the default argument
+    treename = property(getTreename)
 
     def __repr__(self):
         return "InputTree(%s, %s)" % (self.filename, self.treename)
