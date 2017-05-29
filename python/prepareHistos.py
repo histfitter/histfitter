@@ -256,14 +256,14 @@ class PrepareHistos(object):
         # Build a temporary chain for each file
         tmp_chains = []
         for i in sorted_input_files:
-            log.info("read(): attempting to load {} from {}".format(i.treename+suffix, i.filename))
+            log.debug("read(): attempting to load {} from {}".format(i.treename+suffix, i.filename))
             if not os.path.exists(i.filename):
                 log.error("input file {} does not exist - cannot load {} from it".format(i.filename, i.treename+suffix))
                 continue
            
             tmp_name = "tmp_{}_{}".format(i.treename+suffix, i.filename)
             tmp_chain = TChain(tmp_name)
-            log.warning("Constructing tmp TChain {} @ {}".format(tmp_name, hex(id(tmp_chain))))
+            log.debug("Constructing tmp TChain {} @ {}".format(tmp_name, hex(id(tmp_chain))))
             tmp_chain.Add("{}/{}".format(i.filename, i.treename+suffix))
 
             tmp_chains.append(tmp_chain)
@@ -343,7 +343,7 @@ class PrepareHistos(object):
                 pass
         except Exception as ex:
             # Catch all exceptions. Note that PyROOT doesn't do exceptions. Some users might be using rootpy however, which
-            # trees a BuildIndex error as fatal
+            # treats a BuildIndex error as fatal
             pass
 
         self.configMgr.chains[self.currentChainName].AddFriend(friend_chain)
@@ -507,9 +507,11 @@ class PrepareHistos(object):
                         if forceReturn: # used for QCD histograms
                             log.warning("Could not find histogram <"+name+"> in "+self.cacheFileName+" ! Force return.")
                             return None
-                        log.debug("__addHistoFromCache(): forceNoFallback=%s useCacheToTreeFallback=%s" % (forceNoFallback, self.useCacheToTreeFallback))
-                        log.error("Could not find histogram <"+name+"> in "+self.cacheFileName+" ! ")
-                        raise #Exception("Could not find histogram <"+name+"> in "+self.cacheFileName)
+                        
+                        log.debug("__addHistoFromCache(): forceNoFallback=%s useCacheToTreeFallback=%s for %s" % (forceNoFallback, self.useCacheToTreeFallback, name))
+                        log.warning("Could not find histogram <"+name+"> in "+self.cacheFileName+" ! ")
+                        return None
+                        #raise #Exception("Could not find histogram <"+name+"> in "+self.cacheFileName)
                     else:
                         log.debug("Could not find histogram <"+name+"> in "+self.cacheFileName+", trying from tree ")
 
@@ -521,6 +523,7 @@ class PrepareHistos(object):
             if not (int(self.channel.nBins) == int(self.configMgr.hists[name].GetNbinsX())) or \
                ( abs(self.channel.binLow - self.configMgr.hists[name].GetBinLowEdge(1))>0.00001 ) or \
                ( abs(self.channel.binHigh - self.configMgr.hists[name].GetXaxis().GetBinUpEdge(self.configMgr.hists[name].GetNbinsX())) > 0.00001):
+                
                 # this is a ugly hack for now, to add an exception for 'Norm' histograms that originate from a channel with multiple bins   
                 if 'Norm' in self.configMgr.hists[name].GetTitle():
                     if (int(self.configMgr.hists[name].GetNbinsX()) == 1 and \
@@ -528,7 +531,8 @@ class PrepareHistos(object):
                         self.configMgr.hists[name].GetXaxis().GetBinUpEdge(self.configMgr.hists[name].GetNbinsX()) == 1.5): 
                             log.debug("This is ugly: Stupid hack to evade check of histogram binning for 'Norm' histograms")
                             self.name = name
-                            return self.configMgr.hists[name]                       
+                            return self.configMgr.hists[name]
+
                 if forceNoFallback or not self.useCacheToTreeFallback:
                     if forceReturn: # used for QCD histograms
                         log.info("Could not find histogram <"+name+"> in "+self.cacheFileName+" ! Force return.")
