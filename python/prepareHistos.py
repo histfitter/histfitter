@@ -298,8 +298,8 @@ class PrepareHistos(object):
 
                 except:
                     log.warning("Could not retrieve indices for friend tree {} in file {}".format(friendTreeName, i.filename))
-                    continue
-            
+                    pass
+           
             # Check if we've got multiple indices. ROOT silently gives nonsense in such cases, so this is a hard stop.:w
             if len(major_idx) > 1:
                 log.fatal("Found multiple major indices for your friend trees: {}. The projections are going to go wrong as the merged friend tree needs a common index".format(", ".join(s for s in major_idx)))
@@ -319,35 +319,35 @@ class PrepareHistos(object):
                 except:
                     log.warning("Could not add friend {} - this is not necessarily bad; if we don't need the trees you're safe".format(friendTreeName))
   
-        major_idx_name = ""
-        minor_idx_name = ""
-        if len(major_idx) == 1:
-            major_idx_name = major_idx.pop()
-        if len(minor_idx) == 1:
-            minor_idx_name = minor_idx.pop()
-
-        if major_idx_name == "0":
             major_idx_name = ""
-        
-        if minor_idx_name == "0":
             minor_idx_name = ""
+            if len(major_idx) == 1:
+                major_idx_name = major_idx.pop()
+            if len(minor_idx) == 1:
+                minor_idx_name = minor_idx.pop()
 
-        try:
-            if major_idx_name != "" and minor_idx_name != "": 
-                log.verbose("Building index({}, {}) for friend chain".format(major_idx_name, minor_idx_name))
-                friend_chain.BuildIndex(major_idx_name, minor_idx_name)
-                pass
-            elif major_idx_name != "": 
-                log.verbose("Building index({}) for friend chain".format(major_idx_name))
-                friend_chain.BuildIndex(major_idx_name)
-                pass
-        except Exception as ex:
-            # Catch all exceptions. Note that PyROOT doesn't do exceptions. Some users might be using rootpy however, which
-            # treats a BuildIndex error as fatal
-            pass
+            if major_idx_name == "0":
+                major_idx_name = ""
+            
+            if minor_idx_name == "0":
+                minor_idx_name = ""
 
-        self.configMgr.chains[self.currentChainName].AddFriend(friend_chain)
-        self.configMgr.friend_chains[self.currentChainName] = friend_chain
+            try:
+                if major_idx_name != "" and minor_idx_name != "": 
+                    log.verbose("Building index({}, {}) for friend chain".format(major_idx_name, minor_idx_name))
+                    friend_chain.BuildIndex(major_idx_name, minor_idx_name)
+                    pass
+                elif major_idx_name != "": 
+                    log.verbose("Building index({}) for friend chain".format(major_idx_name))
+                    friend_chain.BuildIndex(major_idx_name)
+                    pass
+            except Exception as ex:
+                # Catch all exceptions. Note that PyROOT doesn't do exceptions. Some users might be using rootpy however, which
+                # treats a BuildIndex error as fatal
+                pass
+
+            self.configMgr.chains[self.currentChainName].AddFriend(friend_chain)
+            self.configMgr.friend_chains[self.currentChainName] = friend_chain
 
         return
 
