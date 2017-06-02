@@ -31,6 +31,7 @@
 //#include "RooStats/HypoTestInverterResult.h"
 #include "RooRandom.h"
 #include "RooRealIntegral.h"
+#include "RooRealSumPdf.h"
 
 
 using namespace std;
@@ -506,6 +507,16 @@ void ConfigMgr::doUpperLimit(FitConfig* fc) {
     const char* nuisPriorName = 0;
 
     bool generateAsimovDataForObserved = m_generateAsimovDataForObserved;
+
+    // TODO: should be possible to disable
+    RooFIter iter = w->components().fwdIterator();
+    RooAbsArg* arg;
+    while ((arg = iter.next())) {
+        if (arg->IsA() == RooRealSumPdf::Class()) {
+            arg->setAttribute("BinnedLikelihood");
+            cout << "Activating binned likelihood attribute for " << arg->GetName() << endl;
+        }
+    }
 
     /// here we go ...
     RooStats::HypoTestInverterResult* hypo = nullptr;
