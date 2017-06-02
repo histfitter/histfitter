@@ -371,13 +371,16 @@ class SystematicBase:
             log.verbose("FillUpDownHist(): weights: {}".format(_weight_str)) 
                 
             currentChain = abstract.chains[abstract.prepare.currentChainName]
-            currentChain.Project("temp", _cut_str, "{} * ({})".format(_weight_str, _cut_str) )
+            try:
+                currentChain.Project("temp", _cut_str, "{} * ({})".format(_weight_str, _cut_str) )
+            except:
+                # if e.g. rootpy is used and this goes wrong, it's a fatal exception otherwise
+                pass
 
             log.verbose("FillUpDownHist(): loaded temporary histogram for {} in {} with integral {}".format(self.name, normReg[0],  tempHist.GetSumOfWeights()))
 
             abstract.hists[histName].SetBinContent(1, abstract.hists[histName].GetSum() + tempHist.GetSumOfWeights())
             del tempHist
-
 
         log.verbose("FillUpDownHist(): loaded norm histogram {} for {} in {} with integral {}".format(histName, self.name, normString, abstract.hists[histName].GetSum()))
 
@@ -406,7 +409,9 @@ class TreeWeightSystematic(SystematicBase):
     def PrepareWAHforWeight(self, regionString="", normString="", normCuts="",
                             abstract=None, topLvl=None, chan=None, sam=None):
         
-        log.debug("PrepareWAHforWeight()")
+        log.debug("PrepareWAHforWeight() for {} in {}".format(self, sam.name))
+        sam.removeCurrentSystematic()
+
         highandlow = ["High_", "Low_"] # ,"Nom_"]
         if self.differentNominalTreeWeight:
             highandlow = ["High_", "Low_", "Nom_"]
