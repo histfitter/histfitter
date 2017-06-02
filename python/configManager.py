@@ -1034,8 +1034,27 @@ class ConfigManager(object):
                     continue
                 self.makeDicts(fitConfig, chan)
 
-        sys.exit()
+        # Clear chains
+        for name, chain in self.chains.items():
+            if name in self.friend_chains:
+                self.chains[name].RemoveFriend(self.friend_chains[name])
+                self.friend_chains[name].Reset()
+                log.info("Removing friend chain {}".format(self.friend_chains[name].GetName()))
+                del self.friend_chains[name]
 
+            log.info("Removing chain {}".format(name))
+            self.chains[name].Reset()
+            del self.chains
+
+        # Clear leftover friend chains
+        for name, chain in self.friend_chains.items():
+            log.info("Removing friend chain {} @ {} ({})".format(chain.GetName(), hex(id(chain)), name))
+            for _file in chain.GetListOfFiles():
+                log.info("Chain {} ({}) includes {}".format(chain.GetName(), hex(id(chain)), _file.GetTitle()))
+
+            self.friend_chains[name].Reset()
+            del self.friend_chains[name]
+  
         # Write the data file
         self.outputRoot()
        
@@ -1391,7 +1410,7 @@ class ConfigManager(object):
                 log.debug("Building temporary histogram {0}".format(tmpName))
                 self.prepare.addHisto(tmpName, useOverflow=chan.useOverflowBin, useUnderflow=chan.useUnderflowBin)
                 ###check that nominal sample is not empty for that channel
-                if self.hists[tmpName].GetSum() == 0.0:
+                if self.hists[tmpName] is None or self.hists[tmpName].GetSum() == 0.0:
                     log.warning("    ***nominal sample %s is empty for channel %s. Remove from PDF.***" % (sam.name, chan.name))
                     chan.removeSample(sam.name)
                 #    del self.hists[tmpName]
@@ -1495,18 +1514,27 @@ class ConfigManager(object):
 
                                 log.verbose("nom =%f" % self.hists[nomName].GetSumOfWeights())
 
-            for (systName,syst) in chan.getSample(sam.name).systDict.items():
-                log.info("    Systematic: %s" % systName)
-                log.verbose("current normString = {0}".format(normString))
+            # A simple double loop to ensure all the weights to first, and then all the trees
+            i = 0
+            for syst_type in ["weight", "tree"]:
+                #for (systName, syst) in chan.getSample(sam.name).systDict.items():
+                for syst in (s for s in sorted(chan.getSample(sam.name).systDict.values(), key=lambda s: s.name) if s.type == syst_type):
+                    i += 1
+                    log.info("    Systematic {}/{}: {}".format(i, len(chan.getSample(sam.name).systDict.values()), syst.name))
+                    log.verbose("current normString = {0}".format(normString))
 
-                # TODO: flag the syst as the current systematic -> means the treename for the sample can be updated!
+                    # Remove any current systematic
+                    chan.getSample(sam.name).removeCurrentSystematic()
 
-                # first reset weight to nominal value -> TODO: is this needed for tree-based systematics?!
-                self.setWeightsCutsVariable(chan, sam, regionString) # no need to call the prepare() method <- YES there is. This sets the correct SR weights. Bad design@
-                
-                # this method actually calls the hard work. Note: this NEEDS to not rely on this method. Now it's not parallelizable.
-                syst.PrepareWeightsAndHistos(regionString, normString, normCuts, self, fitConfig, chan, sam)
-                self.addHistoSysforNoQCD(regionString, normString, normCuts, fitConfig, chan, sam, syst)
+                    # first reset weight to nominal value 
+                    self.setWeightsCutsVariable(chan, sam, regionString) # no need to call the prepare() method <- YES there is. This sets the correct SR weights. Bad design@
+                  
+                    # this method actually calls the hard work. Note: this NEEDS to not rely on this method. Now it's not parallelizable.
+                    syst.PrepareWeightsAndHistos(regionString, normString, normCuts, self, fitConfig, chan, sam)
+                    self.addHistoSysforNoQCD(regionString, normString, normCuts, fitConfig, chan, sam, syst)
+            
+            # and remove the last systematic
+            chan.getSample(sam.name).removeCurrentSystematic()
 
         elif sam.isQCD:	
             #Add Histos for Sample-type QCD
