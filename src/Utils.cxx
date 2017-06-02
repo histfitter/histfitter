@@ -622,10 +622,20 @@ RooFitResult* Util::FitPdf( RooWorkspace* w, TString fitRegions, Bool_t lumiCons
 
     RooMsgService::instance().getStream(1).removeTopic(NumIntegration);
 
-    if(w==NULL){ 
+    if(!w){ 
         Logger << kERROR << "Workspace not found, no fitting performed" << GEndl;
         return NULL; 
     }
+
+    RooFIter iter = w->components().fwdIterator();
+    RooAbsArg* arg;
+    while ((arg = iter.next())) {
+        if (arg->IsA() == RooRealSumPdf::Class()) {
+            arg->setAttribute("BinnedLikelihood");
+            cout << "Activating binned likelihood attribute for " << arg->GetName() << endl;
+        }
+    }
+
     RooSimultaneous* pdf = static_cast<RooSimultaneous*>(w->pdf("simPdf"));
 
     RooAbsData* data = ( inputData!=0 ? inputData : static_cast<RooAbsData*>(w->data("obsData")) ); 
@@ -771,8 +781,9 @@ RooFitResult* Util::FitPdf( RooWorkspace* w, TString fitRegions, Bool_t lumiCons
     minim.setStrategy( strategy);
     // use tolerance - but never smaller than 1 (default in RooMinimizer)
     double tol =  ROOT::Math::MinimizerOptions::DefaultTolerance();
-    tol = std::max(tol,1.0); // 1.0 is the minimum value used in RooMinimizer
+    tol = std::max(tol, 1.0); // 1.0 is the minimum value used in RooMinimizer
     minim.setEps( tol );
+    
     //LM: RooMinimizer.setPrintLevel has +1 offset - so subtruct  here -1
     minim.setPrintLevel(minimPrintLevel-1);
     int status = -1;
@@ -1195,10 +1206,21 @@ void Util::PlotNLL(RooWorkspace* w, RooFitResult* rFit, Bool_t plotPLL, TString 
     Logger << kINFO << " ------ Starting PlotNLL with parameters: " << GEndl;
     Logger << kINFO << "  outputPrefix = " << outputPrefix  << GEndl;
 
-    if(w==NULL){ 
+    if(!w){ 
         Logger << kINFO << " Workspace not found, no plotting performed" << GEndl; 
         return; 
     }
+
+    RooFIter iter = w->components().fwdIterator();
+    RooAbsArg* arg;
+    while ((arg = iter.next())) {
+        if (arg->IsA() == RooRealSumPdf::Class()) {
+            arg->setAttribute("BinnedLikelihood");
+            cout << "Activating binned likelihood attribute for " << arg->GetName() << endl;
+        }
+    }
+
+
     RooSimultaneous* pdf = (RooSimultaneous*) w->pdf("simPdf");
 
     RooAbsData* data = ( inputData!=0 ? inputData : (RooAbsData*)w->data("obsData") ); 
@@ -1738,6 +1760,15 @@ Util::doFreeFit( RooWorkspace* w, RooDataSet* inputdata, const bool& verbose, co
         return NULL;
     }
 
+    RooFIter iter = w->components().fwdIterator();
+    RooAbsArg* arg;
+    while ((arg = iter.next())) {
+        if (arg->IsA() == RooRealSumPdf::Class()) {
+            arg->setAttribute("BinnedLikelihood");
+            cout << "Activating binned likelihood attribute for " << arg->GetName() << endl;
+        }
+    }
+
     RooStats::ModelConfig* mc = Util::GetModelConfig(w);
 
     if(mc==0){
@@ -1799,16 +1830,20 @@ Util::doFreeFit( RooWorkspace* w, RooDataSet* inputdata, const bool& verbose, co
     RooMinimizer minim(*nll);
     int strategy = ROOT::Math::MinimizerOptions::DefaultStrategy();
     minim.setStrategy( strategy);
+    
     // use tolerance - but never smaller than 1 (default in RooMinimizer)
     double tol =  ROOT::Math::MinimizerOptions::DefaultTolerance();
     tol = std::max(tol,1.0); // 1.0 is the minimum value used in RooMinimizer
     minim.setEps( tol );
+    
     //LM: RooMinimizer.setPrintLevel has +1 offset - so subtruct  here -1
     minim.setPrintLevel(minimPrintLevel-1);
-    int status = -1;
     minim.optimizeConst(2);
+    
     TString minimizer = "Minuit2"; //ROOT::Math::MinimizerOptions::DefaultMinimizerType(); 
     TString algorithm = ROOT::Math::MinimizerOptions::DefaultMinimizerAlgo(); 
+    
+    int status = -1;
 
     // require covQual = 3 from any fit while retrying?
     bool requireGoodCovQual = true;
