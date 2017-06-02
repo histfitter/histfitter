@@ -1098,35 +1098,48 @@ class Sample(object):
         @param high Value at +1sigma
         @param low Value at -1sigma
         """
-        if high==1.0 and low==1.0:
-            log.warning("    addOverallSys for %s high==1.0 and low==1.0. Systematic is removed from fit" % systName)
+        
+        if high == 1.0 and low == 1.0:
+            log.warning("    addOverallSys for %s high == 1.0 and low == 1.0. Systematic is removed from fit" % systName)
             return
 
-        if high==0.0 and low==0.0:
+        if high == 0.0 and low == 0.0:
             log.warning("    addOverallSys for %s high=%g low=%g. Systematic is removed from fit." % (systName, high, low))
             return
 
-        if high==low:
+        if high == low:
             low = 2.0 - high
-            log.error("    addOverallSys '%s' has invalid inputs: high==low==%.3f.\n    This would result in error=(high-low)/(high+low)=0, silently cancelled by HistFactory.\n    Please fix your user configuration.\n    For now, will recover by symmetrizing error: high=%.3f low=%.3f."%(systName,high,high,low))
+            log.error("    addOverallSys '%s' has invalid inputs: high == low == %.3f.\n    This would result in error=(high-low)/(high+low)=0, silently cancelled by HistFactory.\n    Please fix your user configuration.\n    For now, will recover by symmetrizing error: high=%.3f low=%.3f."%(systName,high,high,low))
 
-        if high==1.0 and low>0.0 and low!=1.0:
-            highOld=high
+        if high == 1.0 and low > 0.0 and low != 1.0:
+            highOld = high
             high = 2.0 - low
-            log.warning("    addOverallSys: high=%f in %s. Taking symmetric value from low %f %f" % (highOld, systName, low, high))
+            log.warning("    addOverallSys: high=%g in %s. Taking symmetric value from low %g => %g" % (highOld, systName, low, high))
 
-        if low==1.0 and high>0.0 and high!=1.0:
-            lowOld=low
+        if low == 1.0 and high > 0.0 and high != 1.0:
+            lowOld = low
             low = 2.0 - high
-            log.warning("    addOverallSys: low=%f in %s. Taking symmetric value from high %f %f" % (lowOld, systName, low, high))
+            log.warning("    addOverallSys: low=%g in %s. Taking symmetric value from high %g => %g" % (lowOld, systName, low, high))
 
-        if low<0.01:
-            log.warning("    addOverallSys: low=%f is < 0.01 in %s. Setting to low=0.01. High=%f." % (low, systName, high))
+        if low < 0.01:
+            log.warning("    addOverallSys: low=%g is < 0.01 in %s. Setting to low=0.01. High=%g." % (low, systName, high))
             low = 0.01
 
-        if high<0.01:
-            log.warning("    addOverallSys: high=%f is < 0.01 in %s. Setting to high=0.01. Low=%f." % (high, systName, low))
+        if high < 0.01:
+            log.warning("    addOverallSys: high=%g is < 0.01 in %s. Setting to high=0.01. Low=%g." % (high, systName, low))
             high = 0.01
+      
+        #print high, high == 1.0
+        #print low, low == 1.0
+
+        # Perform these checks again after the symmetrisation
+        if fabs(high-1.0) < 1E-5 and fabs(low-1.0) < 1E-5:
+            log.warning("    addOverallSys for %s high == 1.0 and low == 1.0. Systematic is removed from fit" % systName)
+            return
+
+        if fabs(high) < 1E-5 and fabs(low) < 1E-5:
+            log.warning("    addOverallSys for %s high=%g low=%g. Systematic is removed from fit." % (systName, high, low))
+            return
 
         self.overallSystList.append((systName, high, low))
         if not systName in configMgr.systDict.keys():
@@ -1165,9 +1178,12 @@ class Sample(object):
         return
 
     def addInput(self, filename, treename=""):
-        # add a file with a treename. If none given, fall back to whatever @property treename() gives for us.
+        # add a file with a treename. If none given, fall back to sample name or our override 
         
-        _treename = self.treename
+        _treename = self.name
+        if self.overrideTreename != "":
+            _treename = self.overrideTreename
+
         if treename != "":
             _treename = treename
 
