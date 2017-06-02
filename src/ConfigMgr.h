@@ -168,6 +168,8 @@ class ConfigMgr {
         bool  m_disableULRangeExtension;
         double m_muValGen;
         bool m_removeEmptyBins;
+
+        bool m_deactivateBinnedLikelihood;
 	
         std::vector<std::string> m_chnNameVec; 
         std::vector<std::string> m_bkgParNameVec;

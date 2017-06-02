@@ -157,7 +157,9 @@ class ConfigManager(object):
         
         self.input_files = set() # Input list to be used for tree production
         #self.treeName = ''
-        
+       
+        self.deactivateBinnedLikelihood = False
+
         self.bkgParName = ''
         self.bkgCorrVal = -1.
         return
@@ -519,6 +521,7 @@ class ConfigManager(object):
         self.cppMgr.setUseAsimovSet( self.useAsimovSet)
         self.cppMgr.m_plotRatio = self.plotRatio
 
+        self.cppMgr.m_deactivateBinnedLikelihood = self.deactivateBinnedLikelihood
         self.cppMgr.m_generateAsimovDataForObserved = self.generateAsimovDataForObserved
 
         if self.outputFileName:
