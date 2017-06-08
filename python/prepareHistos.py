@@ -135,7 +135,7 @@ class PrepareHistos(object):
         self.cacheFileName = filepath
         self.cache2FileName = file2path
         
-        if file2path!='':
+        if os.path.isfile(file2path):
             self.cache2File = TFile.Open(file2path,"READ")
             if self.cache2File.IsZombie():
                 self.cache2File = None
@@ -579,7 +579,7 @@ class PrepareHistos(object):
                     if self.channel.binLow == self.configMgr.hists[name].GetBinLowEdge(1) and self.channel.binHigh == self.configMgr.hists[name].GetXaxis().GetBinUpEdge(self.configMgr.hists[name].GetNbinsX()): 
                         if self.configMgr.hists[name].GetNbinsX() % self.channel.nBins == 0:
                             # this should be rebinnable!
-                            ngroup = self.configMgr.hists[name].GetNbinsX() /self.channel.nBins
+                            ngroup = self.configMgr.hists[name].GetNbinsX() / self.channel.nBins
                             log.warning("Original has a multiple of desired number of bins. Attempting solution of rebinning input histogram with ngroup={}".format(ngroup))
                             self.configMgr.hists[name].Rebin(ngroup)
                             return self.configMgr.hists[name]                       
@@ -600,8 +600,9 @@ class PrepareHistos(object):
 
                         log.verbose("Loading bin content from {}".format(name))
                         for i, x in enumerate(needs_bins):
-                            temp.SetBinContent(i+1, self.configMgr.hists[name].GetBinContent(x)) 
-                            temp.SetBinError(i+1, self.configMgr.hists[name].GetBinError(x)) 
+                            #print i+1, x+1, self.configMgr.hists[name].GetBinContent(x+1)
+                            temp.SetBinContent(i+1, self.configMgr.hists[name].GetBinContent(x+1)) 
+                            temp.SetBinError(i+1, self.configMgr.hists[name].GetBinError(x+1)) 
 
                         temp_name = self.configMgr.hists[name].GetName()
                         temp_title = self.configMgr.hists[name].GetTitle()
