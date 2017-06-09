@@ -223,6 +223,11 @@ class Channel(object):
         
         return
 
+    def addInputsToSamples(self, filename):
+        # add inputs to the samples, not to ourselves
+        for sample in self.sampleList:
+            sample.addInput(filename)
+
     def addInput(self, filename, treename):
         # add an input with a treename
         self.input_files.add(InputTree(filename, treename))
