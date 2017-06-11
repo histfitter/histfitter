@@ -1177,7 +1177,7 @@ class Sample(object):
             configMgr.normList.append(name)
         return
 
-    def addInput(self, filename, treename=""):
+    def addInput(self, filename, treename="", friends=[]):
         # add a file with a treename. If none given, fall back to sample name or our override 
         
         _treename = self.name
@@ -1187,7 +1187,7 @@ class Sample(object):
         if treename != "":
             _treename = treename
 
-        self.input_files.add(InputTree(filename, _treename))
+        self.input_files.add(InputTree(filename, _treename, friends))
         
         # we are the leaves of the configMgr->fitConfig->channel->sample tree,
         # so no propagation necessary
