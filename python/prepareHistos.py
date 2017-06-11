@@ -217,6 +217,10 @@ class PrepareHistos(object):
         # The set is needed as, although the _combinations_ in input_files are by construction unique, it could be that the same file or chain is
         # used multiple times!
         treenames = "_".join(sorted("{}{}".format(x, suffix) for x in set(i.treename for i in input_files)))
+        
+        for i in input_files:
+            print i.filename
+        
         filenames = "_".join(sorted(x for x in set(i.filename for i in input_files)))
        
         chainID = "{0}_{1}".format(treenames, filenames)
@@ -267,26 +271,13 @@ class PrepareHistos(object):
             if not os.path.exists(i.filename):
                 log.error("input file {} does not exist - cannot load {} from it".format(i.filename, i.treename+suffix))
                 continue
-           
-            #tmp_name = "tmp_{}_{}".format(i.treename+suffix, i.filename)
-            #tmp_chain = TChain(tmp_name)
-            #log.debug("Constructing tmp TChain {} @ {}".format(tmp_name, hex(id(tmp_chain))))
-            #tmp_chain.Add("{}/{}".format(i.filename, i.treename+suffix))
-            
+          
             self.configMgr.chains[self.currentChainName].Add("{}/{}".format(i.filename, i.treename+suffix))
-            
-            #self.configMgr.chains[self.currentChainName].Add(chain)
-            
-            #tmp_chains.append(tmp_chain)
+          
+            for f in i.friends:
+                # TODO: check that this doesn't increase the number of open files!
+                self.configMgr.chains[self.currentChainName].AddFriend(f.treename+suffix, f.filename)
 
-        ## Add all the temporaries to a combined chain
-        #for chain in tmp_chains:
-            #try:
-                #self.configMgr.chains[self.currentChainName].Add(chain)
-            #except:
-                #raise
-                ##pass
-       
         # Add any friends to the combined one 
         if friendTreeName != "":
             log.debug("Adding friend tree {} to {}".format(friendTreeName, self.currentChainName)) 
@@ -295,16 +286,6 @@ class PrepareHistos(object):
             friend_tree_idx = "{}_{}".format(friendTreeName, filenames)
 
             log.debug("Friend tree idx = {}".format(friend_tree_idx))
-
-            #if friend_tree_idx in self.configMgr.friend_chains:
-                # TODO: turn this off for now - causes weird segfaults after switching chains
-                #log.info("Loading friend tree idx {} from cache".format(friend_tree_idx))
-                #log.info("Friend tree {}, {}".format(hex(id(self.configMgr.friend_chains[friend_tree_idx])), self.configMgr.friend_chains[friend_tree_idx]))
-                #self.configMgr.friend_chains[friend_tree_idx].Print()
-                #self.configMgr.friend_chains[friend_tree_idx].Scan()
-                
-                #self.configMgr.chains[self.currentChainName].AddFriend(self.configMgr.friend_chains[friend_tree_idx])
-                #return
             
             major_idx = set()
             minor_idx = set()
