@@ -94,12 +94,26 @@ class Channel(object):
         self.ATLASLabelText = None
         self.showLumi = None
         self.lumi = None
+        self.lumiX = None
+        self.lumiY = None
+        self.xErrorSize = None
+        self.integerStyle = None
+        self.regionLabelX = None
+        self.regionLabelY = None
+        self.regionLabelText = None
+        self.arrowX = None
+        self.arrowY = None
+        self.arrowEnd = None
+        self.arrowAngle = None
+        self.arrowWidth = None
+        self.arrowColor = None
         self.remapSystChanName = ""
         self.blind = False
         self.text1 = ''
         self.text2 = ''
         self.textsize1 = 0.03
         self.textsize2 = 0.03
+
 
         log.debug("Defining new channel '{0}'".format(self.name))
         return

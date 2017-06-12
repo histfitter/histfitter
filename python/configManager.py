@@ -587,6 +587,32 @@ class ConfigManager(object):
                      if c.lumi is None:
                          style.setLumi(self.outputLumi)
                      else: style.setLumi(c.lumi)
+                 if not c.lumiX is None:
+                     style.setLumiX(c.lumiX)
+                 if not c.lumiY is None:
+                     style.setLumiY(c.lumiY)
+                 if not c.xErrorSize is None:
+                     style.setXErrorSize(c.xErrorSize)
+                 if not c.integerStyle is None:
+                     style.setIntegerStyle(c.integerStyle)
+                 if not c.regionLabelX is None:
+                     style.setRegionLabelX(c.regionLabelX)
+                 if not c.regionLabelY is None:
+                     style.setRegionLabelY(c.regionLabelY)
+                 if not c.regionLabelText is None:
+                     style.setRegionLabelText(c.regionLabelText)
+                 if not c.arrowX is None:
+                     style.setArrowX(c.arrowX)
+                 if not c.arrowY is None:
+                     style.setArrowY(c.arrowY)
+                 if not c.arrowEnd is None:
+                     style.setArrowEnd(c.arrowEnd)
+                 if not c.arrowAngle is None:
+                     style.setArrowAngle(c.arrowAngle)
+                 if not c.arrowWidth is None:
+                     style.setArrowWidth(c.arrowWidth)
+                 if not c.arrowColor is None:
+                     style.setArrowColor(c.arrowColor)
                  if len(c.text1)>0:
                      style.setText1(c.text1)
                  if len(c.text2)>0:

@@ -99,8 +99,47 @@ class ChannelStyle : public TObject{
   TString getATLASLabelText() { return m_ATLASLabelText;}
   void setATLASLabelText(const TString&  text) { m_ATLASLabelText = text; }
 
-  Bool_t getShowLumi() { return m_showLumi;}
-  void setShowLumi(Bool_t showLumi = kFALSE) { m_showLumi = showLumi; }
+  Bool_t getShowLumi() { return m_ShowLumi;}
+  void setShowLumi(Bool_t showlumi = kFALSE) { m_ShowLumi = showlumi; }
+
+  Double_t getRegionLabelX() { return m_RegionLabelX;}
+  void setRegionLabelX(Double_t x) { m_RegionLabelX = x; }
+
+  Double_t getRegionLabelY() { return m_RegionLabelY;}
+  void setRegionLabelY(Double_t y) { m_RegionLabelY = y; }
+
+  TString getRegionLabelText() { return m_RegionLabelText;}
+  void setRegionLabelText(const TString&  text) { m_RegionLabelText = text; }
+
+  Double_t getLumiX() { return m_LumiX;}
+  void setLumiX(Double_t x) { m_LumiX = x; }
+
+  Double_t getLumiY() { return m_LumiY;}
+  void setLumiY(Double_t y) { m_LumiY = y; }
+
+  Double_t getXErrorSize() { return m_XErrorSize;}
+  void setXErrorSize(Double_t x) { m_XErrorSize = x; }
+  
+  Bool_t getIntegerStyle() { return m_IntegerStyle;}
+  void setIntegerStyle(Bool_t IntegerStyle = kFALSE) { m_IntegerStyle = IntegerStyle; }
+
+  Double_t getArrowX() { return m_ArrowX;}
+  void setArrowX(Double_t x) { m_ArrowX = x; }
+
+  Double_t getArrowY() { return m_ArrowY;}
+  void setArrowY(Double_t y) { m_ArrowY = y; }
+
+  Double_t getArrowEnd() { return m_ArrowEnd;}
+  void setArrowEnd(Double_t end) { m_ArrowEnd = end; }
+
+  Double_t getArrowAngle() { return m_ArrowAngle;}
+  void setArrowAngle(Double_t angle) { m_ArrowAngle = angle; }
+
+  Double_t getArrowWidth() { return m_ArrowWidth;}
+  void setArrowWidth(Double_t width) { m_ArrowWidth = width; }
+
+  Int_t getArrowColor() { return m_ArrowColor; }
+  void setArrowColor(const Int_t& color) { m_ArrowColor = color; }
 
   TLegend* getTLegend(){ return m_legend;}
   void setTLegend(TLegend* leg) { m_legend = leg; }
@@ -151,7 +190,22 @@ private:
   Double_t m_ATLASLabelX;
   Double_t m_ATLASLabelY;
   TString m_ATLASLabelText;
-  Bool_t m_showLumi;        
+  Bool_t m_ShowLumi;        
+
+  Double_t m_RegionLabelX;
+  Double_t m_RegionLabelY;
+  TString m_RegionLabelText;
+  Double_t m_LumiX;
+  Double_t m_LumiY;
+  Double_t m_XErrorSize;
+  Bool_t m_IntegerStyle;
+  Double_t m_ArrowX;
+  Double_t m_ArrowY;
+  Double_t m_ArrowEnd;
+  Double_t m_ArrowAngle;
+  Double_t m_ArrowWidth;
+  Int_t m_ArrowColor;
+
 
   Int_t m_defaultSampleColor;
   Int_t m_defaultSampleCounter;
