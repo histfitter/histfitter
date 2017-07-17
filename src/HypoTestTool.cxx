@@ -88,7 +88,7 @@ RooStats::HypoTestTool::HypoTestTool() : m_hc(0), m_calc(0),
     mOptimize(true),
     mUseVectorStore(true),
     mGenerateBinned(true),
-    mUseProof(false),
+    mUseProof(true),
     mEnableDetailedOutput(false),
     mRebuild(false),
     mNWorkers(4),
@@ -308,6 +308,15 @@ RooStats::HypoTestTool::RunHypoTestInverter(RooWorkspace * w,
     if (!ok) {
         return 0;
     }
+
+    ToyMCSampler *toymcs = (ToyMCSampler*)m_hc->GetTestStatSampler();
+    RooStats::ProofConfig * pc = nullptr;
+    //can speed up using proof-lite
+    if (mUseProof && mNWorkers > 1) {
+      pc = new RooStats::ProofConfig(*w, mNWorkers, "", kFALSE);
+      toymcs->SetProofConfig(pc);    // enable proof
+    }
+
 
     /// by now m_calc has been setup okay ...
     TStopwatch tw; 
@@ -792,12 +801,6 @@ RooStats::HypoTestTool::SetupHypoTestInverter(RooWorkspace * w,
     m_calc->UseCLs(useCLs);
     m_calc->SetVerbose(true);
 
-    // can speed up using proof-lite
-    if (mUseProof && mNWorkers > 1) { 
-        ToyMCSampler *toymcs = (ToyMCSampler*)m_hc->GetTestStatSampler();
-        ProofConfig pc(*w, mNWorkers, "", kFALSE);
-        toymcs->SetProofConfig(&pc);    // enable proof
-    }
 
     // get models from WS
     // get the modelConfig out of the file
