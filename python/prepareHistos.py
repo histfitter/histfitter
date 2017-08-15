@@ -44,8 +44,8 @@ def getBinEdges(hist, axis, index=None, overflow=False):
         nbins = hist.GetNbinsZ()
         ax = hist.GetZaxis()
     else:
-        raise ValueError("axis must be 0, 1, or 2")
-
+        raise ValueError("axis must be 0, 1, or 2")   
+ 
     if index is None:
         def temp_generator():
             if overflow:
@@ -352,7 +352,6 @@ class PrepareHistos(object):
                 pass
 
             # Make sure the tree index is owned; keep the friend chain in a list for deletions
-            #friend_chain.GetBranch("output_comb") ### HACK
             SetOwnership(friend_chain.GetTreeIndex() , False )
             self.configMgr.chains[self.currentChainName].AddFriend(friend_chain)
             self.configMgr.friend_chains[self.currentChainName] = friend_chain
@@ -403,7 +402,7 @@ class PrepareHistos(object):
         """
 
         log.debug("__addHistoFromTree: attempting to load {}".format(name))
-        
+
         if self.var == "cuts":
             if self.configMgr.hists[name] is None:
                 self.configMgr.hists[name] = TH1F(name, name, len(self.channel.regions), self.channel.binLow, float(len(self.channel.regions))+self.channel.binLow)
@@ -415,9 +414,6 @@ class PrepareHistos(object):
                     
                     tempName = "%stemp%s" % (name, str(iReg))
                     tempHist = TH1F(tempName, tempName, 1, 0.5, 1.5)
-
-                    ###HACK HACK
-                    #self.configMgr.chains[self.currentChainName].SetBranchStatus("*", 1)
 
                     log.debug("__addHistoFromTree: current chain name {}".format(self.currentChainName))
                     log.debug("__addHistoFromTree: projecting into {}".format(tempName))
@@ -461,30 +457,17 @@ class PrepareHistos(object):
                         tempHist = TH2F(tempName, tempName, self.channel.nBins, self.channel.binLow, self.channel.binHigh, 
                                                             self.channelnBinsY, self.channel.binLowY, self.channel.binHighY)
                     
-                    ###HACK
-                    # This hack removes the "magical bins" in unblinded data (for optim_mcoll NN ONLY)
-                    #dummy_cut = "{0}=={0}".format(self.var)
-                    
-                    ###HACK HACK
-                    # This somehow solves the problem that entries from trees/files after the first are not properly read
-                    #dummy_branch = self.configMgr.chains[self.currentChainName].GetBranch(self.var)
-                    #dummy_branch = self.configMgr.chains[self.currentChainName].GetBranch("nbJets")
-                    #self.configMgr.chains[self.currentChainName].SetBranchStatus("*", 1)
-                    
                     log.debug("__addHistoFromTree: projecting binned {} into {}".format(self.var, tempName))
                     log.verbose("__addHistoFromTree: chain: {} ({})".format(self.currentChainName, hex(id(self.configMgr.chains[self.currentChainName])) ))
                     log.verbose("__addHistoFromTree: cuts: {}".format(self.cuts))
                     log.verbose("__addHistoFromTree: weights: {}".format(self.weights))
                     log.debug('__addHistoFromTree: {}->Project("{}", "{}", "{} * ({})" )'.format(self.currentChainName, tempName, self.var, self.cuts, self.weights) )
-                    #log.verbose("__addHistoFromTree: dummy_cut: {}".format(dummy_cut))
-                    #log.debug('__addHistoFromTree: {}->Project("{}", "{}", "{} * ({}) * ({})" )'.format(self.currentChainName, tempName, self.var, self.cuts, self.weights, dummy_cut) )
                     
                     nCuts = self.configMgr.chains[self.currentChainName].Project(tempName, self.var, self.weights+" * ("+self.cuts+")")
-                    #nCuts = self.configMgr.chains[self.currentChainName].Project(tempName, self.var, self.weights+" * ("+self.cuts+") * ("+dummy_cut+")")
                     self.configMgr.hists[name] = tempHist.Clone()
                     self.configMgr.hists[name].SetName(name)
                     self.configMgr.hists[name].SetName(name)
-                    
+                   
                     del tempHist
 
                     #tempHist.Delete()
@@ -500,8 +483,6 @@ class PrepareHistos(object):
         self.name = name
 
         #Over/Underflow bins
-        log.verbose("useOverflow: {}".format(useOverflow))
-        log.verbose("useUnderflow: {}".format(useUnderflow))
         if useOverflow or useUnderflow:
             self.updateOverflowBins(self.configMgr.hists[name], useOverflow, useUnderflow)
         
@@ -550,14 +531,13 @@ class PrepareHistos(object):
             
             # Define a function to check for almost-equality between floats
             desired_binSize = float(self.channel.binHigh - self.channel.binLow) / self.channel.nBins
-            isClose = lambda x, y: abs(x - y) < desired_binSize/1e6
             
             if not (round(self.channel.nBins) == round(self.configMgr.hists[name].GetNbinsX())) or \
                ( not isClose(self.channel.binLow, self.configMgr.hists[name].GetBinLowEdge(1)) ) or \
                ( not isClose(self.channel.binHigh, self.configMgr.hists[name].GetXaxis().GetBinUpEdge(self.configMgr.hists[name].GetNbinsX()))):
                 
                 # this is a ugly hack for now, to add an exception for 'Norm' histograms that originate from a channel with multiple bins   
-                if 'Norm' in self.configMgr.hists[name].GetName():
+                if 'Norm' in self.configMgr.hists[name].GetTitle():
                     if (int(self.configMgr.hists[name].GetNbinsX()) == 1 and \
                         self.configMgr.hists[name].GetBinLowEdge(1) == 0.5 and \
                         self.configMgr.hists[name].GetXaxis().GetBinUpEdge(self.configMgr.hists[name].GetNbinsX()) == 1.5): 
@@ -574,7 +554,7 @@ class PrepareHistos(object):
                 
                 if isClose(self.channel.binLow, self.configMgr.hists[name].GetBinLowEdge(1)) and isClose(self.channel.binHigh, self.configMgr.hists[name].GetXaxis().GetBinUpEdge(self.configMgr.hists[name].GetNbinsX())):
                 
-                    log.debug("Found histogram has a multiple of the required number of bins? %s!" % (round(self.configMgr.hists[name].GetNbinsX()) % round(self.channel.nBins) == 0))
+                    log.debug("Found histogram has a multiple of the required number of bins? %s!" % round(self.configMgr.hists[name].GetNbinsX()) % round(self.channel.nBins) == 0)
                     
                     if round(self.configMgr.hists[name].GetNbinsX()) % round(self.channel.nBins) == 0:
                         # this should be rebinnable!
@@ -619,10 +599,10 @@ class PrepareHistos(object):
                     self.configMgr.hists[name].SetTitle(temp_title)
                         
                     return self.configMgr.hists[name]
-
-                log.debug("Required binning is NOT a subset of the found binning.")
-
+                
                 self.configMgr.hists[name] = None
+                
+                log.debug("Required binning is NOT a subset of the found binning.")
                 
                 if forceNoFallback or not self.useCacheToTreeFallback:
                     if forceReturn: # used for QCD histograms

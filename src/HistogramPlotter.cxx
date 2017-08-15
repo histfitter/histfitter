@@ -676,7 +676,6 @@ void HistogramPlot::plot() {
 	// Write output
 	canvas->SaveAs("results/" + m_anaName + "/" + canvasName + ".pdf");
 	canvas->SaveAs("results/" + m_anaName + "/" + canvasName + ".eps");
-	canvas->SaveAs("results/" + m_anaName + "/" + canvasName + ".root");
 }
 
 void HistogramPlot::plotSeparateComponents() {
@@ -715,7 +714,6 @@ void HistogramPlot::plotSeparateComponents() {
 
     canvas->SaveAs("results/" + m_anaName + "/" + canvasName + ".pdf");
     canvas->SaveAs("results/" + m_anaName + "/" + canvasName + ".eps");
-    canvas->SaveAs("results/" + m_anaName + "/" + canvasName + ".root");
 }
 
 void HistogramPlot::plotSingleComponent(unsigned int i, double normalisation) {
