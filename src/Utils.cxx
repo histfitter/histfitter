@@ -1192,6 +1192,7 @@ void Util::PlotSeparateComponents(RooWorkspace* w,TString fcName, TString anaNam
 
             canVec[iVec]->SaveAs("results/"+anaName+"/"+canName+".pdf");
             canVec[iVec]->SaveAs("results/"+anaName+"/"+canName+".eps");
+            canVec[iVec]->SaveAs("results/"+anaName+"/"+canName+".root");
         }
     }
 }
@@ -1455,8 +1456,8 @@ void Util::PlotNLL(RooWorkspace* w, RooFitResult* rFit, Bool_t plotPLL, TString 
         }
 
         canVec[iPar]->SaveAs("results/"+anaName+"/"+canName+".pdf");
-        canVec[iPar]->SaveAs("results/"+anaName+"/"+canName+".C");
         canVec[iPar]->SaveAs("results/"+anaName+"/"+canName+".eps");
+        canVec[iPar]->SaveAs("results/"+anaName+"/"+canName+".root");
 
         TString fname("results/"+anaName+"/"+canName+".root");
         TFile *f = TFile::Open(fname, "RECREATE");
@@ -1583,6 +1584,7 @@ TH2D* Util::PlotCorrelationMatrix(RooFitResult* rFit, TString anaName,  bool Red
 
     c_corr->SaveAs("results/"+anaName+"/"+canName+".pdf");
     c_corr->SaveAs("results/"+anaName+"/"+canName+".eps");
+    c_corr->SaveAs("results/"+anaName+"/"+canName+".root");
 
     gStyle->SetMarkerSize(orig_MarkerSize);
     gStyle->SetMarkerColor(orig_MarkerColor);
@@ -3551,5 +3553,3 @@ void Util::PlotFitParameters(RooFitResult* r, TString anaName){
  c_np->SaveAs("results/"+anaName+"/"+c_np->GetName()+".root"); 
 
 }
-
-
