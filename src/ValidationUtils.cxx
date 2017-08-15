@@ -352,7 +352,6 @@ void ValidationUtils::PullPlot3(XtraValues* inValsEl, XtraValues* inValsMu, cons
 
    c->Print(outFileNamePrefix+".pdf");
    c->Print(outFileNamePrefix+".eps");
-   c->Print(outFileNamePrefix+".root");
    cout<<"mv "<<outFileNamePrefix<<".pdf ~/www/data/."<<endl;
    return;
 }
@@ -536,7 +535,6 @@ void ValidationUtils::PullPlot5(XtraValues* inValsEl, XtraValues* inValsMu, Xtra
 
    c->Print(outFileNamePrefix+".pdf");
    c->Print(outFileNamePrefix+".eps");
-   c->Print(outFileNamePrefix+".root");
    cout<<"mv "<<outFileNamePrefix<<".pdf ~/www/data/."<<endl;
    return;
 }
