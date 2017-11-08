@@ -1378,13 +1378,16 @@ class ConfigManager(object):
         log.debug('addSampleSpecificHists()')
         histoName = "h%s_%s_obs_%s" % (sam.name, regionString, replaceSymbols(chan.variableName) )
 
+        # Do not fall back if the sample has no input files defined!
+        forceNoFallback = len(sam.input_files) == 0
+
         if sam.isData:
             #if self.channelIsBlinded(fitConfig, chan):
             if sam.isBlinded(fitConfig):
                 log.info("Using blinded data for channel {0} for sample {1}".format(chan.name, sam.name)) 
                 #chan.addData(sam.blindedHistName)
             else:
-                self.prepare.addHisto(sam.getHistogramName(fitConfig), useOverflow=chan.useOverflowBin, useUnderflow=chan.useUnderflowBin)
+                self.prepare.addHisto(sam.getHistogramName(fitConfig), useOverflow=chan.useOverflowBin, useUnderflow=chan.useUnderflowBin, forceNoFallback=forceNoFallback)
                 #chan.addData(histoName)
             
             chan.addData(sam.getHistogramName(fitConfig))
@@ -1414,7 +1417,7 @@ class ConfigManager(object):
             tmpName="h"+sam.name+"Nom_"+regionString+"_obs_"+replaceSymbols(chan.variableName)
             if not len(sam.shapeFactorList):
                 log.debug("Building temporary histogram {0}".format(tmpName))
-                self.prepare.addHisto(tmpName, useOverflow=chan.useOverflowBin, useUnderflow=chan.useUnderflowBin)
+                self.prepare.addHisto(tmpName, useOverflow=chan.useOverflowBin, useUnderflow=chan.useUnderflowBin, forceNoFallback=forceNoFallback)
                 ###check that nominal sample is not empty for that channel
                 if self.hists[tmpName] is None or self.hists[tmpName].GetSum() == 0.0:
                     log.warning("    ***nominal sample %s is empty for channel %s. Remove from PDF.***" % (sam.name, chan.name))
@@ -1479,7 +1482,7 @@ class ConfigManager(object):
                         nomName = "h%sNom_%sNorm" % (sam.name, normString)
                         self.hists[nomName] = None
                         try:
-                            self.prepare.addHisto(nomName)
+                            self.prepare.addHisto(nomName, forceNoFallback=forceNoFallback)
                         except:    
                             # assume that if no histogram is made, then it is not needed  
                             pass
