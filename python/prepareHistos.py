@@ -531,6 +531,7 @@ class PrepareHistos(object):
             
             # Define a function to check for almost-equality between floats
             desired_binSize = float(self.channel.binHigh - self.channel.binLow) / self.channel.nBins
+            isClose = lambda x, y: abs(x - y) < desired_binSize/1e6
             
             if not (round(self.channel.nBins) == round(self.configMgr.hists[name].GetNbinsX())) or \
                ( not isClose(self.channel.binLow, self.configMgr.hists[name].GetBinLowEdge(1)) ) or \
