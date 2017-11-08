@@ -59,7 +59,7 @@ configMgr.calculatorType=2 # 2=asymptotic calculator, 0=frequentist calculator
 configMgr.testStatType=3   # 3=one-sided profile likelihood test statistic (LHC default)
 configMgr.nPoints=20       # number of values scanned of signal-strength for upper-limit determination of signal strength.
 
-configMgr.writeXML = True
+configMgr.writeXML = False
 
 ##########################
 
@@ -111,5 +111,5 @@ ana.addSignalChannels([chan])
 # These lines are needed for the user analysis to run
 # Make sure file is re-made when executing HistFactory
 if configMgr.executeHistFactory:
-    if os.path.isfile("data/%s.root"%configMgr.analysisName):
-        os.remove("data/%s.root"%configMgr.analysisName) 
+    if os.path.isfile("data/%s.root" % configMgr.analysisName):
+        os.remove("data/%s.root" % configMgr.analysisName) 
