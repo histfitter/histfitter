@@ -3569,4 +3569,91 @@ void Util::PlotFitParameters(RooFitResult* r, TString anaName){
 
 }
 
+//-------------------------------------------------------------------------------------------------------
 
+TH1* Util::ComponentToHistogram(RooRealSumPdf* component, RooRealVar* variable, RooFitResult *fitResult) {
+    // Build a TH1-based histogram from a pdf, an observable and a fit result
+
+    // Get the stepsize and build a histogram according to the binning of the variable
+    auto stepsize = variable->getBinning().averageBinWidth();
+    auto hist = component->createHistogram(Form("hist_%s", component->GetName()), *variable);
+
+    // Now loop over the bins and fill them 
+    for(unsigned int i=0; i < hist->GetNbinsX()+2; ++i) {
+        auto low = hist->GetBinLowEdge(i);
+        auto width = hist->GetBinWidth(i);
+
+        // Constraint the observable to this bin
+        variable->setRange(Form("bin%d", i), low, low+width);
+
+        // Start by integrating in this bin
+        auto integral = component->createIntegral(RooArgSet(*variable), RooFit::Range(Form("bin%d", i)) );
+
+        // Now get the value and the error
+        auto sum = integral->getVal() / stepsize;
+        auto err = integral->getPropagatedError(*fitResult) / stepsize;
+
+        // and put them in the histogram
+        hist->SetBinContent(i, sum);
+        hist->SetBinError(i, err);
+    }
+
+    auto sum = component->createIntegral(RooArgSet(*variable))->getVal();
+    
+    double scale = 0.0;
+    if(sum != 0 && hist->Integral() != 0) {
+        scale = sum / hist->Integral();
+    }
+
+    hist->Scale(scale);
+
+    return hist;
+}
+
+void Util::ScaleGraph(TGraphAsymmErrors *g, TH1* h) { 
+    if (g->GetN() != h->GetNbinsX() ) {
+        Logger << kERROR << "Cannot multiply graph with " << g->GetN() << " points with histogram with " << h->GetNbinsX() << " points" << GEndl ; 
+        throw 1 ; 
+    }
+
+    for(int i=0; i < g->GetN(); ++i) {
+        // TGraphs are 0-indexed, TH1s are 1-indexed.
+        int j = i+1;
+
+        double x, y;
+        g->GetPoint(i, x, y); 
+
+        g->SetPoint(i, x, y * h->GetBinContent(j));
+        g->SetPointEYhigh(i, g->GetErrorYhigh(i) * h->GetBinContent(j));
+        g->SetPointEYlow(i, g->GetErrorYlow(i) * h->GetBinContent(j));
+    }
+
+    return;
+}
+
+//def compToHist(c, obs, rfr):
+    //"""take a component of a pdf, an observable, and a RooFitResult,
+    //and return a histogram of that component"""
+
+    //stepsize = obs.getBinning().averageBinWidth()
+    //obsset = ROOT.RooArgSet(obs)
+
+    //h = c.createHistogram("hist_" + c.GetName(), obs)
+
+    //for i in range(h.GetNbinsX()+2):
+        //l = h.GetBinLowEdge(i)
+        //w = h.GetBinWidth(i)
+        //obs.setRange("bin"+str(i), l, l+w)
+
+        //(s, e) = sumAndUncert(c.createIntegral(obsset, RF.Range("bin"+str(i))), rfr, stepsize)
+        //h.SetBinContent(i, s)
+        //h.SetBinError(i, e)
+
+    //(s, e) = sumAndUncert(c.createIntegral(obsset), rfr, stepsize)
+    //h.Scale(safeDiv(s, h.Integral()))
+
+    //return h
+
+//def sumAndUncert(x, rfr, stepsize):
+    //return (x.getVal()/stepsize, x.getPropagatedError(rfr)/stepsize)
+    

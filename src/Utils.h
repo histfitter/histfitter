@@ -55,6 +55,7 @@ class FitConfig;
 class RooProdPdf;
 class RooHist;
 class RooCurve;
+class RooRealSumPdf;
 
 namespace RooStats {
   class HypoTestResult;
@@ -248,6 +249,7 @@ namespace Util
   */
   RooCurve* MakePdfErrorRatioHist(RooAbsData* regionData, RooAbsPdf* regionPdf, 
 				  RooRealVar* regionVar, RooFitResult* rFit, Double_t Nsigma = 1.);
+
 
   /**
      Add ATLAS label to plot
@@ -452,6 +454,10 @@ namespace Util
  */
 
  void PlotFitParameters(RooFitResult* r, TString anaName);
+
+
+ TH1* ComponentToHistogram(RooRealSumPdf* component, RooRealVar* variable, RooFitResult *fitResult);
+ void ScaleGraph(TGraphAsymmErrors *g, TH1* h);
 
 }
 
