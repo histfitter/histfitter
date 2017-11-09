@@ -861,7 +861,7 @@ class ConfigManager(object):
                 log.info("  Sample: %s" % sam.name)                
                 
                 # Run over the nominal configuration first
-                # Set the weights, cuts, weights
+                # Set the weights, cuts, weights and actually call prepare.read() internally
                 self.setWeightsCutsVariable(chan, sam, regionString)
                 
                 #depending on the sample type, the Histos and up/down weights are added
@@ -1057,7 +1057,10 @@ class ConfigManager(object):
 
             self.friend_chains[name].Reset()
             del self.friend_chains[name]
-  
+ 
+        # TODO: things are broken up to here
+        # sys.exit()
+    
         # Write the data file
         self.outputRoot()
        
@@ -1505,6 +1508,8 @@ class ConfigManager(object):
                                 #self.prepare.read(sam.treename, s.files, friendTreeName=sam.friendTreeName)
                                 self.prepare.read(sam.input_files, friendTreeName=sam.friendTreeName)
 
+
+                                # TODO: why don't we store this histogram in its proper name for a region? then it can be recycled
                                 tempHist = TH1F("temp", "temp", 1, 0.5, 1.5)
 
                                 self.chains[self.prepare.currentChainName].Project("temp",self.cutsDict[r], \
@@ -1519,11 +1524,42 @@ class ConfigManager(object):
                                 del tempHist
 
                                 log.verbose("nom =%f" % self.hists[nomName].GetSumOfWeights())
+            
+            ## Now move on to systematics, adding weights first
 
-            # A simple double loop to ensure all the weights to first, and then all the trees
+            ## Remove any current systematic
+            #chan.getSample(sam.name).removeCurrentSystematic()
+
+            ## first reset weight to nominal value; this won't load a histogram as the nominal one is already done 
+            #self.setWeightsCutsVariable(chan, sam, regionString) 
+          
+            ## copy the weights to find common string -> save some memory
+            #need_weights = set(copy(sam.weights))
+            
+            #for syst in (s for s in sorted(chan.getSample(sam.name).systDict.values(), key=lambda s: s.name) if s.type == "weight"):
+                #print syst.name
+                ##print syst.nominal
+                ##print syst.low, syst.high
+
+                #if syst.differentNominalTreeWeight:
+                    #for x in syst.nominal: need_weights.add(x)
+               
+                #for x in syst.low: need_weights.add(x)
+                #for x in syst.high: need_weights.add(x)
+                ##need_weights.add([x for x in syst.low])
+                ##need_weights.add([x for x in syst.high])
+
+                ## TODO: find lowest common denominator of all these weights, for now we don't care
+                ## 
+                #pass
+
+            #print sorted(need_weights)
+
+            #sys.exit()
+
+            # A simple double loop to ensure all the weights go first, and then all the trees
             i = 0
             for syst_type in ["weight", "tree"]:
-                #for (systName, syst) in chan.getSample(sam.name).systDict.items():
                 for syst in (s for s in sorted(chan.getSample(sam.name).systDict.values(), key=lambda s: s.name) if s.type == syst_type):
                     i += 1
                     log.info("    Systematic {}/{}: {}".format(i, len(chan.getSample(sam.name).systDict.values()), syst.name))
@@ -1532,10 +1568,11 @@ class ConfigManager(object):
                     # Remove any current systematic
                     chan.getSample(sam.name).removeCurrentSystematic()
 
-                    # first reset weight to nominal value 
-                    self.setWeightsCutsVariable(chan, sam, regionString) # no need to call the prepare() method <- YES there is. This sets the correct SR weights. Bad design@
+                    # first reset weight to nominal value; this won't load a histogram as the nominal one is already done 
+                    self.setWeightsCutsVariable(chan, sam, regionString) 
                   
-                    # this method actually calls the hard work. Note: this NEEDS to not rely on this method. Now it's not parallelizable.
+                    # this method actually calls the hard work. 
+                    # NOTE: this NEEDS to not rely on this method. Now it's not parallelizable.
                     syst.PrepareWeightsAndHistos(regionString, normString, normCuts, self, fitConfig, chan, sam)
                     self.addHistoSysforNoQCD(regionString, normString, normCuts, fitConfig, chan, sam, syst)
             
