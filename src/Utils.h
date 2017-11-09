@@ -63,7 +63,9 @@ namespace RooStats {
 
 namespace Util
 {
- 
+
+  extern bool deactivateBinnedLikelihood;
+
   // Functions related to RooWorkspace
   /**
      Get RooWorkspace from file

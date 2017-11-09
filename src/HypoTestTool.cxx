@@ -810,9 +810,6 @@ RooStats::HypoTestTool::SetupHypoTestCalculator(RooWorkspace * w, bool doUL,
         ((FrequentistCalculator*) m_hc)->SetToys( static_cast<Int_t>(ntoys), static_cast<Int_t>(ntoys/mNToysRatio) ); 
     }
 
-    m_logger << kINFO << "Setting RooStats::UseNLLOffset(true)" << GEndl;
-    RooStats::UseNLLOffset(true);
-
     // Get the result
     RooMsgService::instance().getStream(1).removeTopic(RooFit::NumIntegration);
 

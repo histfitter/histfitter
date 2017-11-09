@@ -35,16 +35,16 @@ def pairwise(iterable):
 
 def getBinEdges(hist, axis, index=None, overflow=False):
     if axis == 0:
-	nbins = hist.GetNbinsX()
-        ax = hist.GetXaxis()	
+        nbins = hist.GetNbinsX()
+        ax = hist.GetXaxis()
     elif axis == 1:
-	nbins = hist.GetNbinsY()
-        ax = hist.GetYaxis()	
+        nbins = hist.GetNbinsY()
+        ax = hist.GetYaxis()
     elif axis == 2:
-	nbins = hist.GetNbinsZ()
-        ax = hist.GetZaxis()	
+        nbins = hist.GetNbinsZ()
+        ax = hist.GetZaxis()
     else:
-	raise ValueError("axis must be 0, 1, or 2")   
+        raise ValueError("axis must be 0, 1, or 2")   
  
     if index is None:
         def temp_generator():
@@ -217,6 +217,10 @@ class PrepareHistos(object):
         # The set is needed as, although the _combinations_ in input_files are by construction unique, it could be that the same file or chain is
         # used multiple times!
         treenames = "_".join(sorted("{}{}".format(x, suffix) for x in set(i.treename for i in input_files)))
+        
+        for i in input_files:
+            print i.filename
+        
         filenames = "_".join(sorted(x for x in set(i.filename for i in input_files)))
        
         chainID = "{0}_{1}".format(treenames, filenames)
@@ -267,26 +271,13 @@ class PrepareHistos(object):
             if not os.path.exists(i.filename):
                 log.error("input file {} does not exist - cannot load {} from it".format(i.filename, i.treename+suffix))
                 continue
-           
-            #tmp_name = "tmp_{}_{}".format(i.treename+suffix, i.filename)
-            #tmp_chain = TChain(tmp_name)
-            #log.debug("Constructing tmp TChain {} @ {}".format(tmp_name, hex(id(tmp_chain))))
-            #tmp_chain.Add("{}/{}".format(i.filename, i.treename+suffix))
-            
+          
             self.configMgr.chains[self.currentChainName].Add("{}/{}".format(i.filename, i.treename+suffix))
-            
-            #self.configMgr.chains[self.currentChainName].Add(chain)
-            
-            #tmp_chains.append(tmp_chain)
+          
+            for f in i.friends:
+                # TODO: check that this doesn't increase the number of open files!
+                self.configMgr.chains[self.currentChainName].AddFriend(f.treename+suffix, f.filename)
 
-        ## Add all the temporaries to a combined chain
-        #for chain in tmp_chains:
-            #try:
-                #self.configMgr.chains[self.currentChainName].Add(chain)
-            #except:
-                #raise
-                ##pass
-       
         # Add any friends to the combined one 
         if friendTreeName != "":
             log.debug("Adding friend tree {} to {}".format(friendTreeName, self.currentChainName)) 
@@ -295,16 +286,6 @@ class PrepareHistos(object):
             friend_tree_idx = "{}_{}".format(friendTreeName, filenames)
 
             log.debug("Friend tree idx = {}".format(friend_tree_idx))
-
-            #if friend_tree_idx in self.configMgr.friend_chains:
-                # TODO: turn this off for now - causes weird segfaults after switching chains
-                #log.info("Loading friend tree idx {} from cache".format(friend_tree_idx))
-                #log.info("Friend tree {}, {}".format(hex(id(self.configMgr.friend_chains[friend_tree_idx])), self.configMgr.friend_chains[friend_tree_idx]))
-                #self.configMgr.friend_chains[friend_tree_idx].Print()
-                #self.configMgr.friend_chains[friend_tree_idx].Scan()
-                
-                #self.configMgr.chains[self.currentChainName].AddFriend(self.configMgr.friend_chains[friend_tree_idx])
-                #return
             
             major_idx = set()
             minor_idx = set()
@@ -470,7 +451,7 @@ class PrepareHistos(object):
                     tempName = "%stemp%s" % (name, str(iReg))
                     #self.cuts = self.configMgr.cutsDict[reg]
                     
-                    if self.var.find(":") == -1:                    
+                    if self.var.find(":") == -1:
                         tempHist = TH1F(tempName, tempName, self.channel.nBins, self.channel.binLow, self.channel.binHigh)
                     else:
                         tempHist = TH2F(tempName, tempName, self.channel.nBins, self.channel.binLow, self.channel.binHigh, 
@@ -547,9 +528,13 @@ class PrepareHistos(object):
 
         if not (self.configMgr.hists[name] is None):
             log.debug("Loaded histogram {} from cache with integral {}".format(name, self.configMgr.hists[name].Integral()))
-            if not (int(self.channel.nBins) == int(self.configMgr.hists[name].GetNbinsX())) or \
-               ( abs(self.channel.binLow - self.configMgr.hists[name].GetBinLowEdge(1))>0.00001 ) or \
-               ( abs(self.channel.binHigh - self.configMgr.hists[name].GetXaxis().GetBinUpEdge(self.configMgr.hists[name].GetNbinsX())) > 0.00001):
+            
+            # Define a function to check for almost-equality between floats
+            desired_binSize = float(self.channel.binHigh - self.channel.binLow) / self.channel.nBins
+            
+            if not (round(self.channel.nBins) == round(self.configMgr.hists[name].GetNbinsX())) or \
+               ( not isClose(self.channel.binLow, self.configMgr.hists[name].GetBinLowEdge(1)) ) or \
+               ( not isClose(self.channel.binHigh, self.configMgr.hists[name].GetXaxis().GetBinUpEdge(self.configMgr.hists[name].GetNbinsX()))):
                 
                 # this is a ugly hack for now, to add an exception for 'Norm' histograms that originate from a channel with multiple bins   
                 if 'Norm' in self.configMgr.hists[name].GetTitle():
@@ -560,6 +545,65 @@ class PrepareHistos(object):
                             self.name = name
                             return self.configMgr.hists[name]
 
+                # Check if we can rebin the cached histogram to get the requested histogram
+                log.error("addHistoFromCache: required binning %d,%f,%f, while found histogram has %d,%f,%f" % ( self.channel.nBins, self.channel.binLow, self.channel.binHigh, self.configMgr.hists[name].GetNbinsX(), self.configMgr.hists[name].GetBinLowEdge(1), self.configMgr.hists[name].GetXaxis().GetBinUpEdge(self.configMgr.hists[name].GetNbinsX()) ))
+
+                log.debug("Checking if found histogram can be rebinned to get the requested histogram.")
+                log.debug("Found histogram has the required lower limit? %s!" % isClose(self.channel.binLow, self.configMgr.hists[name].GetBinLowEdge(1)))
+                log.debug("Found histogram has the required upper limit? %s!" % isClose(self.channel.binHigh, self.configMgr.hists[name].GetXaxis().GetBinUpEdge(self.configMgr.hists[name].GetNbinsX())))
+                
+                if isClose(self.channel.binLow, self.configMgr.hists[name].GetBinLowEdge(1)) and isClose(self.channel.binHigh, self.configMgr.hists[name].GetXaxis().GetBinUpEdge(self.configMgr.hists[name].GetNbinsX())):
+                
+                    log.debug("Found histogram has a multiple of the required number of bins? %s!" % round(self.configMgr.hists[name].GetNbinsX()) % round(self.channel.nBins) == 0)
+                    
+                    if round(self.configMgr.hists[name].GetNbinsX()) % round(self.channel.nBins) == 0:
+                        # this should be rebinnable!
+                        ngroup = self.configMgr.hists[name].GetNbinsX() / self.channel.nBins
+                        log.warning("Original has a multiple of desired number of bins. Attempting solution of rebinning input histogram with ngroup={}".format(ngroup))
+                        self.configMgr.hists[name].Rebin(ngroup)
+                        return self.configMgr.hists[name]   
+                        
+                log.debug("Found histogram is NOT rebinnable.")
+
+                # Check if the found binning is a subset of the binning that's desired
+                # Since HistFactory only eats uniformly binned histograms, this always works.
+                log.debug("Checking if required binning is a subset of the found binning.")
+                desired_binning = [float(self.channel.binLow + i*desired_binSize) for i in range(0, self.channel.nBins+1)]
+                found_binning = [float(x) for x in getBinEdges(self.configMgr.hists[name], 0)]
+
+                log.debug("Found histogram has more bins than requested? %s!" % (len(set(desired_binning)) < len(set(found_binning))))
+                if len(set(desired_binning)) < len(set(found_binning)):
+                    log.warning("Original is wider than the desired histogram. Attempting to load appropriate bin content.")
+
+                    # What are the bin indices of the bins we need?
+                    needs_bins = [i for i, x in enumerate(pairwise(found_binning)) for y in pairwise(desired_binning) if isClose(x[0],y[0]) and isClose(x[1],y[1])]
+                    log.debug("Indices of needed bins from original histogram: %s" % needs_bins)
+
+                    temp = TH1F("h_temp", "h_temp", self.channel.nBins, self.channel.binLow, self.channel.binHigh)
+
+                    log.verbose("Loading bin content from {}".format(name))
+                    for i, x in enumerate(needs_bins):
+                        #print i+1, x+1, self.configMgr.hists[name].GetBinContent(x+1)
+                        temp.SetBinContent(i+1, self.configMgr.hists[name].GetBinContent(x+1)) 
+                        temp.SetBinError(i+1, self.configMgr.hists[name].GetBinError(x+1)) 
+
+                    temp_name = self.configMgr.hists[name].GetName()
+                    temp_title = self.configMgr.hists[name].GetTitle()
+
+                    log.verbose("Deleting original histogram from memory")
+                    del self.configMgr.hists[name]
+
+                    log.verbose("Moving temporary to {}".format(name))
+                    self.configMgr.hists[name] = temp
+                    self.configMgr.hists[name].SetName(temp_name)
+                    self.configMgr.hists[name].SetTitle(temp_title)
+                        
+                    return self.configMgr.hists[name]
+                
+                self.configMgr.hists[name] = None
+                
+                log.debug("Required binning is NOT a subset of the found binning.")
+                
                 if forceNoFallback or not self.useCacheToTreeFallback:
                     if forceReturn: # used for QCD histograms
                         log.info("Could not find histogram <"+name+"> in "+self.cacheFileName+" ! Force return.")
@@ -574,53 +618,6 @@ class PrepareHistos(object):
                     raise Exception("Could not find histogram <"+name+"> in "+self.cacheFileName+" with correct binning")
                 else:
                     log.error("Histogram has different binning <"+name+"> in "+self.cacheFileName+", trying from tree ")
-                    log.error("addHistoFromCache: required binning %d,%f,%f, while found histogram has %d,%f,%f" % ( self.channel.nBins, self.channel.binLow, self.channel.binHigh, self.configMgr.hists[name].GetNbinsX(), self.configMgr.hists[name].GetBinLowEdge(1), self.configMgr.hists[name].GetXaxis().GetBinUpEdge(self.configMgr.hists[name].GetNbinsX()) ))
-
-                    if self.channel.binLow == self.configMgr.hists[name].GetBinLowEdge(1) and self.channel.binHigh == self.configMgr.hists[name].GetXaxis().GetBinUpEdge(self.configMgr.hists[name].GetNbinsX()): 
-                        if self.configMgr.hists[name].GetNbinsX() % self.channel.nBins == 0:
-                            # this should be rebinnable!
-                            ngroup = self.configMgr.hists[name].GetNbinsX() / self.channel.nBins
-                            log.warning("Original has a multiple of desired number of bins. Attempting solution of rebinning input histogram with ngroup={}".format(ngroup))
-                            self.configMgr.hists[name].Rebin(ngroup)
-                            return self.configMgr.hists[name]                       
-
-                    # Check if the found binning is a subset of the binning that's desired
-                    # Since HistFactory only eats uniformly binned histograms, this always works.
-                    desired_binSize = float(self.channel.binHigh - self.channel.binLow) / self.channel.nBins
-                    desired_binning = [self.channel.binLow + i*desired_binSize for i in range(0, self.channel.nBins+1)]
-                    found_binning = [x for x in getBinEdges(self.configMgr.hists[name], 0)]
-
-                    if set(desired_binning) < set(found_binning):
-                        log.warning("Original is wider than the desired histogram. Attempting to load appropriate bin content.")
-
-                        # What are the bin indices of the bins we need?
-                        needs_bins = [i for i, x in enumerate(pairwise(found_binning)) if x in pairwise(desired_binning)]
-          
-                        temp = TH1F("h_temp", "h_temp", self.channel.nBins, self.channel.binLow, self.channel.binHigh)
-
-                        log.verbose("Loading bin content from {}".format(name))
-                        for i, x in enumerate(needs_bins):
-                            #print i+1, x+1, self.configMgr.hists[name].GetBinContent(x+1)
-                            temp.SetBinContent(i+1, self.configMgr.hists[name].GetBinContent(x+1)) 
-                            temp.SetBinError(i+1, self.configMgr.hists[name].GetBinError(x+1)) 
-
-                        temp_name = self.configMgr.hists[name].GetName()
-                        temp_title = self.configMgr.hists[name].GetTitle()
-
-                        log.verbose("Deleting original histogram from memory")
-                        del self.configMgr.hists[name]
-
-                        log.verbose("Moving temporary to {}".format(name))
-                        self.configMgr.hists[name] = temp
-                        self.configMgr.hists[name].SetName(temp_name)
-                        self.configMgr.hists[name].SetTitle(temp_title)
-                            
-                        return self.configMgr.hists[name]                       
-
-                    #set(list1) < set(list2)
-
-                    self.configMgr.hists[name] = None
-                    
                     return self.__addHistoFromTree(name, self.channel.nBins, self.channel.binLow, self.channel.binHigh, nBins, binLow, binHigh, useOverflow, useUnderflow)
 
         self.name = name

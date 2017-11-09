@@ -410,6 +410,8 @@ class TreeWeightSystematic(SystematicBase):
                             abstract=None, topLvl=None, chan=None, sam=None):
         
         log.debug("PrepareWAHforWeight() for {} in {}".format(self, sam.name))
+        
+        log.debug("PrepareWAHforWeight: removing systematic from {} to be sure {}".format(self.name, sam.name))
         sam.removeCurrentSystematic()
 
         highandlow = ["High_", "Low_"] # ,"Nom_"]

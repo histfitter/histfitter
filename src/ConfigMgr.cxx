@@ -56,8 +56,14 @@ ConfigMgr::ConfigMgr() : m_logger("ConfigMgrCPP") {
     m_nPoints = 10;
     m_muValGen = 0.0;  
     m_removeEmptyBins = false;
+    m_deactivateBinnedLikelihood = false;
     m_useAsimovSet = false;
     m_plotRatio = "ratio"; //options: "ratio", "pull", "none"
+
+    Util::deactivateBinnedLikelihood = false;
+
+    m_logger << kDEBUG << "Setting RooStats::UseNLLOffset(true)" << GEndl;
+    RooStats::UseNLLOffset(true);
 }
 
 
@@ -508,13 +514,14 @@ void ConfigMgr::doUpperLimit(FitConfig* fc) {
 
     bool generateAsimovDataForObserved = m_generateAsimovDataForObserved;
 
-    // TODO: should be possible to disable
-    RooFIter iter = w->components().fwdIterator();
-    RooAbsArg* arg;
-    while ((arg = iter.next())) {
-        if (arg->IsA() == RooRealSumPdf::Class()) {
-            arg->setAttribute("BinnedLikelihood");
-            cout << "Activating binned likelihood attribute for " << arg->GetName() << endl;
+    if(!m_deactivateBinnedLikelihood) { 
+        RooFIter iter = w->components().fwdIterator();
+        RooAbsArg* arg;
+        while ((arg = iter.next())) {
+            if (arg->IsA() == RooRealSumPdf::Class()) {
+                arg->setAttribute("BinnedLikelihood");
+                cout << "Activating binned likelihood attribute for " << arg->GetName() << endl;
+            }
         }
     }
 

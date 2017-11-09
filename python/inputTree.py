@@ -1,5 +1,5 @@
 class InputTree(object):
-    def __init__(self, filename, treename):
+    def __init__(self, filename, treename, friends=[]):
         # if the file doesn't exist, that's OK. A file without a treename is not.
 
         if treename == "":
@@ -8,11 +8,25 @@ class InputTree(object):
         self.filename = filename
         self._treename = treename
 
+        self.isFriend = False # 
+        self.friends = [] # a list of friends to add
+
+        for friend in friends:
+            self.addFriend(friend[0], friend[1])
+
     def getTreename(self, suffix=""):
         return "{}{}".format(self._treename, suffix)
    
     # NOTE: no @property because of the default argument
     treename = property(getTreename)
+
+    def addFriend(self, filename, treename):
+        if self.isFriend:
+            raise ValueError("Cannot add friend tree to a tree that is already a friend")
+
+        t = InputTree(filename, treename)
+        t.isFriend = True
+        self.friends.append(t)
 
     def __repr__(self):
         return "InputTree(%s, %s)" % (self.filename, self.treename)

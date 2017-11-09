@@ -100,6 +100,7 @@ using namespace RooStats;
 
 namespace Util {
   static TMsgLogger Logger("Util");
+  bool deactivateBinnedLikelihood = false;
 }
 
 //_____________________________________________________________________________
@@ -627,12 +628,14 @@ RooFitResult* Util::FitPdf( RooWorkspace* w, TString fitRegions, Bool_t lumiCons
         return NULL; 
     }
 
-    RooFIter iter = w->components().fwdIterator();
-    RooAbsArg* arg;
-    while ((arg = iter.next())) {
-        if (arg->IsA() == RooRealSumPdf::Class()) {
-            arg->setAttribute("BinnedLikelihood");
-            cout << "Activating binned likelihood attribute for " << arg->GetName() << endl;
+    if(!deactivateBinnedLikelihood) {
+        RooFIter iter = w->components().fwdIterator();
+        RooAbsArg* arg;
+        while ((arg = iter.next())) {
+            if (arg->IsA() == RooRealSumPdf::Class()) {
+                arg->setAttribute("BinnedLikelihood");
+                cout << "Activating binned likelihood attribute for " << arg->GetName() << endl;
+            }
         }
     }
 
@@ -1210,13 +1213,15 @@ void Util::PlotNLL(RooWorkspace* w, RooFitResult* rFit, Bool_t plotPLL, TString 
         Logger << kINFO << " Workspace not found, no plotting performed" << GEndl; 
         return; 
     }
-
-    RooFIter iter = w->components().fwdIterator();
-    RooAbsArg* arg;
-    while ((arg = iter.next())) {
-        if (arg->IsA() == RooRealSumPdf::Class()) {
-            arg->setAttribute("BinnedLikelihood");
-            cout << "Activating binned likelihood attribute for " << arg->GetName() << endl;
+    
+    if(!deactivateBinnedLikelihood) {
+        RooFIter iter = w->components().fwdIterator();
+        RooAbsArg* arg;
+        while ((arg = iter.next())) {
+            if (arg->IsA() == RooRealSumPdf::Class()) {
+                arg->setAttribute("BinnedLikelihood");
+                cout << "Activating binned likelihood attribute for " << arg->GetName() << endl;
+            }
         }
     }
 
@@ -1760,12 +1765,14 @@ Util::doFreeFit( RooWorkspace* w, RooDataSet* inputdata, const bool& verbose, co
         return NULL;
     }
 
-    RooFIter iter = w->components().fwdIterator();
-    RooAbsArg* arg;
-    while ((arg = iter.next())) {
-        if (arg->IsA() == RooRealSumPdf::Class()) {
-            arg->setAttribute("BinnedLikelihood");
-            cout << "Activating binned likelihood attribute for " << arg->GetName() << endl;
+    if(!deactivateBinnedLikelihood) {
+        RooFIter iter = w->components().fwdIterator();
+        RooAbsArg* arg;
+        while ((arg = iter.next())) {
+            if (arg->IsA() == RooRealSumPdf::Class()) {
+                arg->setAttribute("BinnedLikelihood");
+                cout << "Activating binned likelihood attribute for " << arg->GetName() << endl;
+            }
         }
     }
 
