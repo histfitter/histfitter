@@ -51,6 +51,7 @@
 #include "RooConstVar.h"
 #include "RooNumIntConfig.h"
 #include "RooMinuit.h"
+#include "RooBinningCategory.h"
 
 #include "TLegendEntry.h"
 #include "TLegend.h"
@@ -156,10 +157,12 @@ void HistogramPlotter::Initialize() {
 }
 
 void HistogramPlotter::PlotRegions() {
+    Logger << kINFO << "Plotting all known regions in PDF" << GEndl;
     // loop loop loop
     for(const auto &categoryLabel : m_regions)  {
+        // Does the region actually exist?
         if( m_regionCategory->setLabel(categoryLabel, kTRUE)) {
-            Logger << kINFO << " Label '" << categoryLabel << "' is not a state of channelCat (see Table) " << GEndl;
+            Logger << kINFO << " Label '" << categoryLabel << "' is not a state of channelCat (see table) " << GEndl;
             continue;
         }
 
@@ -195,7 +198,7 @@ void HistogramPlotter::PlotRegion(const TString &regionCategoryLabel) {
     // select the data here
     TString dataCatLabel("channelCat==channelCat::" + regionCategoryLabel);
     Logger << kDEBUG << "Selecting data with '" << dataCatLabel << "'" << GEndl;
-    RooAbsData* regionData = dynamic_cast<RooAbsData*>(m_inputData->reduce(dataCatLabel.Data()));
+    RooDataSet* regionData = dynamic_cast<RooDataSet*>(m_inputData->reduce(dataCatLabel.Data()));
 
     // style for this channel
     ChannelStyle style = m_fitConfig->getChannelStyle(regionCategoryLabel);
@@ -213,7 +216,7 @@ void HistogramPlotter::PlotRegion(const TString &regionCategoryLabel) {
     plot.setPlotComponents(m_plotComponents);
     plot.setOutputPrefix(m_outputPrefix);
 
-    //std::vector<TH1*> hists = plot.loadHistograms();
+    std::vector<TH1*> hists = plot.loadHistograms();
     //m_histograms.push_back(hists);
 
     plot.plot();
@@ -227,7 +230,7 @@ void HistogramPlotter::PlotRegion(const TString &regionCategoryLabel) {
 
 HistogramPlot::HistogramPlot(RooWorkspace *w,
                             const TString& regionCategoryLabel, RooAbsPdf *regionPdf, 
-                            RooAbsData *regionData, const ChannelStyle &style) : m_workspace(w),
+                            RooDataSet *regionData, const ChannelStyle &style) : m_workspace(w),
                                                                                  m_regionPdf(regionPdf),
                                                                                  m_regionData(regionData), 
                                                                                  m_style(style),
@@ -524,7 +527,7 @@ void HistogramPlot::loadComponentInformation() {
         Logger << kWARNING << " binWidth variable not found for region '" << m_regionCategoryLabel << "' => PLOTTING COMPONENTS WILL BE WRONG " << GEndl ;
     }
 
-    // Now load the names and calculate the fractions
+    // Now load the names and calculate the fractions to be able to build the plot
 	while( (component = dynamic_cast<RooProduct*>(iter.Next()))) { 
 		TString componentName(component->GetName());
 	
@@ -533,7 +536,7 @@ void HistogramPlot::loadComponentInformation() {
         // Build the stacked component names
 		TString stackedComponentName(componentName); 
 		if(!m_componentStackedNames.empty()){
-			stackedComponentName = Form("%s,%s" ,m_componentStackedNames.back().Data(), componentName.Data()); 
+			stackedComponentName = Form("%s,%s", m_componentStackedNames.back().Data(), componentName.Data()); 
 		}
 
 		m_componentNames.push_back(componentName);
@@ -552,6 +555,16 @@ void HistogramPlot::loadComponentInformation() {
 		
         m_componentFractions.push_back(componentFraction);
         m_componentStackedFractions.push_back(stackComponentFraction);
+
+        // Find the PDF associated to the component
+        TString componentPdf_name = Form("RooRealSumPdf_region_%s_%s", m_regionCategoryLabel.Data(), componentName.Data());
+        RooArgList compFuncList;
+        RooArgList compCoefList;
+        compFuncList.add(*(RooProduct*) m_workspace->obj(componentName));
+        compCoefList.add(*regionBinWidth);
+        RooRealSumPdf* componentPdf = new RooRealSumPdf(componentPdf_name, componentPdf_name, compFuncList, compCoefList);
+
+        m_componentPdfs[componentName] = componentPdf;
 
 	}
 }
@@ -772,9 +785,99 @@ std::vector<TH1*> HistogramPlot::loadHistograms() {
     if(m_componentNames.empty()) {
         loadComponentInformation(); 
     }
+   
+    std::cout << "hoi!" << std::endl;
+    std::cout << m_regionData->sumEntries() << std::endl;
     
+    
+    // determine the number of bins in the region
+    unsigned int nBins = m_regionVariable->getBinning().numBins();
+    std::cout << "nBins = " << nBins << std::endl;
+   
+    // now determine the bin edges
+    std::vector<double> bin_low_edges(nBins);
+    std::vector<double> bin_high_edges(nBins);
+    std::vector<std::string> bin_names(nBins); // absolutely silly, but needed for the MC below
+    for(unsigned i=0; i < nBins; ++i) { 
+        bin_low_edges[i]  = m_regionVariable->getBinning().binLow(i);
+        bin_high_edges[i] = m_regionVariable->getBinning().binHigh(i);
+
+        bin_names[i] = std::string(m_regionCategoryLabel.Data()) + "_bin" + std::to_string(i); 
+
+        std::cout << "i=" << i << " low=" << bin_low_edges[i] << " high=" << bin_high_edges[i] << " name=" << bin_names[i] << std::endl;
+    }
+   
+    // Construct a binning function
+    TString binning_label = TString("bin_")+m_regionCategoryLabel;
+    auto binning_function = RooBinningCategory(binning_label, binning_label, *m_regionVariable);
+    m_regionData->addColumn(binning_function);
+
+    Logger << kDEBUG << "Binned content of data" << GEndl;
+    m_regionData->table(binning_function)->Print("v");
+
+    // Determine the data in each bin
+    std::string reduce_function = std::string(binning_function.GetName()) + "==" + binning_function.GetName() + "::" + m_regionVariable->GetName() + "_bin";
+    for(unsigned i=0; i < nBins; ++i) {
+        auto _reduce_func = reduce_function + std::to_string(i);
+        std::cout << _reduce_func << std::endl;
+        auto val = m_regionData->reduce(_reduce_func.c_str())->sumEntries();
+        std::cout << val << std::endl;
+    }
+
+    // Now do the same for the MC
     TString RSSPdfName = m_regionCategoryLabel + "_model";
+    
     RooRealSumPdf* RRSPdf = dynamic_cast<RooRealSumPdf*>(m_regionPdf->getComponents()->find(RSSPdfName));
+    const double var_min = m_regionVariable->getMin(); 
+    const double var_max = m_regionVariable->getMax(); 
+	
+    // Load component info if needed
+    if(m_componentNames.empty()) {
+        loadComponentInformation(); 
+    }
+
+    // Load the post-fit snapshot
+    // TODO: NEEDS TO BE A FUCKING SETTING
+    m_workspace->loadSnapshot("snapshot_paramsVals_RooExpandedFitResult_afterFit");
+
+    std::cout << m_regionPdf << std::endl;
+    std::cout << var_min << " " << var_max << std::endl;
+    for(unsigned i=0; i < nBins; ++i) {
+        m_regionVariable->setRange(bin_names[i].c_str(), bin_low_edges[i], bin_high_edges[i]);
+
+        // Now we can get the total in this bin
+        auto integral = RRSPdf->createIntegral(RooArgSet(*m_regionVariable), bin_names[i].c_str());
+        std::cout << "i=" << i << " val=" << integral->getVal() << std::endl;
+
+        // Now loop over each individual sample and get the value and error
+        for(const auto &component : m_componentNames ) {
+            auto compFunc = m_componentPdfs[component]->createIntegral(RooArgSet(*m_regionVariable), bin_names[i].c_str() );
+            auto val = compFunc->getVal();
+
+            // TODO: NEEDS TO BE A SETTING
+            auto err = Util::GetPropagatedError(compFunc, 
+                                         *dynamic_cast<RooFitResult*>(m_workspace->obj("RooExpandedFitResult_afterFit")), 
+                                         true); 
+            
+            std::cout << component.Data() << " val=" << val << " err=" << err << std::endl;
+            //sampleInRegionError = Util.GetPropagatedError(sampleInRegion, resultAfterFit, doAsym)
+        }
+    }
+    
+    // Reset the variable range
+    m_regionVariable->setRange(var_min, var_max);
+
+    exit(0);
+        
+    //// Build the components list to iterate over
+    //RooArgList RRSComponentsList =  RRSPdf->funcList();
+    //RooLinkedListIter iter = RRSComponentsList.iterator() ;
+    //RooProduct* component = nullptr;
+
+    //// Now load the names and calculate the fractions to be able to build the plot
+	//while( (component = dynamic_cast<RooProduct*>(iter.Next()))) { 
+		//TString componentName(component->GetName());
+
     double normalisation = m_regionPdf->expectedEvents(*m_regionVariable);
 
     TH1 *h = m_regionData->createHistogram("data", *m_regionVariable);
@@ -799,16 +902,18 @@ std::vector<TH1*> HistogramPlot::loadHistograms() {
 													//RooFit::VisualizeError(*m_fitResult));
        
         Logger << kDEBUG << "Integral: " << h->Integral(0, h->GetNbinsX()+1) << GEndl;
-		h->Scale(10.0);
-		h->Scale(m_componentFractions[i]);
+		//h->Scale(10.0);
+		//h->Scale(m_componentFractions[i]);
  
-        Logger << kDEBUG << "Integral: " << h->Integral(0, h->GetNbinsX()+1) << GEndl;
+        //Logger << kDEBUG << "Integral: " << h->Integral(0, h->GetNbinsX()+1) << GEndl;
         //TH1D hist;
         //h->Copy(hist);
         //hist.SetName(s);
         m_componentHistograms.push_back(h);
     }
-    
+   
+    exit(0);
+
     //m_regionData->plotOn(m_frame, RooFit::DataError(RooAbsData::Poisson), 
                                   //RooFit::MarkerColor(m_style.getDataColor()), 
                                   //RooFit::LineColor(m_style.getDataColor()));
