@@ -1242,6 +1242,10 @@ class Sample(object):
 
         @param syst An object of type Systematic
         """
+        if self.isData:
+            log.warning("Sample {} is data - not adding systematic {}".format(self.name, syst.name))
+            return
+        
         log.verbose("Adding systematic {} to sample {} ({})".format(syst.name, self.name, hex(id(self))))
         if syst.name in self.systDict.keys():
             raise Exception("Attempt to overwrite systematic %s in Sample %s (%s)" % (syst.name, self.name, hex(id(self))))
