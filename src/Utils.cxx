@@ -3631,29 +3631,3 @@ void Util::ScaleGraph(TGraphAsymmErrors *g, TH1* h) {
     return;
 }
 
-//def compToHist(c, obs, rfr):
-    //"""take a component of a pdf, an observable, and a RooFitResult,
-    //and return a histogram of that component"""
-
-    //stepsize = obs.getBinning().averageBinWidth()
-    //obsset = ROOT.RooArgSet(obs)
-
-    //h = c.createHistogram("hist_" + c.GetName(), obs)
-
-    //for i in range(h.GetNbinsX()+2):
-        //l = h.GetBinLowEdge(i)
-        //w = h.GetBinWidth(i)
-        //obs.setRange("bin"+str(i), l, l+w)
-
-        //(s, e) = sumAndUncert(c.createIntegral(obsset, RF.Range("bin"+str(i))), rfr, stepsize)
-        //h.SetBinContent(i, s)
-        //h.SetBinError(i, e)
-
-    //(s, e) = sumAndUncert(c.createIntegral(obsset), rfr, stepsize)
-    //h.Scale(safeDiv(s, h.Integral()))
-
-    //return h
-
-//def sumAndUncert(x, rfr, stepsize):
-    //return (x.getVal()/stepsize, x.getPropagatedError(rfr)/stepsize)
-    
