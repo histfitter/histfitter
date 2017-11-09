@@ -318,7 +318,7 @@ if myFitType==FitType.Exclusion:
         myTopLvl = configMgr.addFitConfigClone(bkt,"Sig_%s"%sig)
 
         sigSample = Sample(sig,kPink)
-        sigSample.setFileList(sigFiles)
+        sigSample.addInputs(sigFiles)
         sigSample.setNormByTheory()
         sigSample.setStatConfig(useStat)
         sigSample.setNormFactor("mu_SIG",1.,0.,5.)                    
