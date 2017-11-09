@@ -343,7 +343,6 @@ class ConfigManager(object):
                         
                     if sam.isData:
                         _name = sam.getHistogramName(tl)
-                        log.error("Data name {}".format(_name))
                         if not _name in self.hists:
                             self.hists[_name] = None
 
@@ -1048,6 +1047,7 @@ class ConfigManager(object):
             log.info("Removing chain {}".format(name))
             self.chains[name].Reset()
             del self.chains
+            self.chains = {}
 
         # Clear leftover friend chains
         for name, chain in self.friend_chains.items():
@@ -1058,8 +1058,8 @@ class ConfigManager(object):
             self.friend_chains[name].Reset()
             del self.friend_chains[name]
  
-        # TODO: things are broken up to here
-        # sys.exit()
+        ##TODO: things are broken up to here
+        #sys.exit()
     
         # Write the data file
         self.outputRoot()
