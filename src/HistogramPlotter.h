@@ -92,7 +92,7 @@ class HistogramPlot {
         HistogramPlot(RooWorkspace *w, const TString& r, RooAbsPdf *regionPdf, RooDataSet *regionData, const ChannelStyle &style);
         void plot();
 
-        std::vector<TH1*> loadHistograms();
+        void saveHistograms();
         void plotSeparateComponents();
         
         void setAnalysisName(const TString& anaName);
