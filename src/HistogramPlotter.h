@@ -34,6 +34,7 @@ class FitConfig;
 class RooProdPdf;
 class RooHist;
 class RooCurve;
+class RooRealSumPdf;
 
 namespace RooStats {
     class HypoTestResult;
@@ -88,10 +89,10 @@ class HistogramPlotter {
 
 class HistogramPlot {
     public:
-        HistogramPlot(RooWorkspace *w, const TString& r, RooAbsPdf *regionPdf, RooAbsData *regionData, const ChannelStyle &style);
+        HistogramPlot(RooWorkspace *w, const TString& r, RooAbsPdf *regionPdf, RooDataSet *regionData, const ChannelStyle &style);
         void plot();
 
-        std::vector<TH1*> loadHistograms();
+        void saveHistograms();
         void plotSeparateComponents();
         
         void setAnalysisName(const TString& anaName);
@@ -116,7 +117,7 @@ class HistogramPlot {
 
         RooWorkspace* m_workspace;
         RooAbsPdf* m_regionPdf;
-        RooAbsData* m_regionData;
+        RooDataSet* m_regionData;
         ChannelStyle m_style;
        
         RooFitResult* m_fitResult;
@@ -135,6 +136,7 @@ class HistogramPlot {
         // for component plots
         std::vector<TString> m_componentNames;
         std::vector<TString> m_componentStackedNames;
+        std::map<TString, RooRealSumPdf*> m_componentPdfs;
 
         std::vector<double> m_componentFractions;
         std::vector<double> m_componentStackedFractions;

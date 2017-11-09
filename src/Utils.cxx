@@ -1350,8 +1350,8 @@ void Util::PlotNLL(RooWorkspace* w, RooFitResult* rFit, Bool_t plotPLL, TString 
         // To be able to see the 1/2 sigma
         frame->SetMaximum(2.5);
 
-        const char* curvename = 0;
-        RooCurve* curve = (RooCurve*) frame->findObject(curvename,RooCurve::Class()) ;
+        //const char* curvename = 0;
+        RooCurve* curve = (RooCurve*) frame->findObject(nullptr, RooCurve::Class()) ;
 
         TGraph* nllCurve = static_cast<TGraph*>(curve->Clone());
         nllCurve->SetName(TString("nll_")+parName);
@@ -1417,8 +1417,8 @@ void Util::PlotNLL(RooWorkspace* w, RooFitResult* rFit, Bool_t plotPLL, TString 
         if(plotPLL) { 
             pll = nll->createProfile(*par) ;
             pll->plotOn(frame, LineColor(kRed), LineStyle(kDashed), NumCPU(4));
-            const char* curvename = 0;
-            RooCurve* curve = (RooCurve*) frame->findObject(curvename,RooCurve::Class()) ;
+            //const char* curvename = 0;
+            RooCurve* curve = (RooCurve*) frame->findObject(nullptr, RooCurve::Class()) ;
 
             pllCurve = static_cast<TGraph*>(curve->Clone());
             pllCurve->SetName(TString("nll_")+parName);
@@ -2824,36 +2824,53 @@ void Util::RemoveEmptyDataBins( RooPlot* frame){
 
 }
 
+RooHist* Util::MakeRatioOrPullHist(RooAbsData *regionData, RooAbsPdf *regionPdf, RooRealVar *regionVar, bool makePull /*false*/) {
+	// data/pdf ratio histograms are plotted by RooPlot.ratioHist() through a dummy frame
+	RooPlot* frame_dummy = regionVar->frame(); 
+	regionData->plotOn(frame_dummy, RooFit::DataError(RooAbsData::Poisson));
+	
+	// normalize pdf to number of expected events, not to number of events in dataset
+	regionPdf->plotOn(frame_dummy, RooFit::Normalization(1, RooAbsReal::RelativeExpected), 
+								     RooFit::Precision(1e-5));
 
+	if(makePull) {	
+        return dynamic_cast<RooHist*>(frame_dummy->pullHist());
+	}
+		
+    return dynamic_cast<RooHist*>(frame_dummy->ratioHist());
+}
 
 //________________________________________________________________________________________________________________________________________
 RooCurve* Util::MakePdfErrorRatioHist(RooAbsData* regionData, RooAbsPdf* regionPdf, RooRealVar* regionVar, RooFitResult* rFit, Double_t Nsigma){
 
-    // curvename=0 means that the last RooCurve is taken from the RooPlot
-    const char* curvename = 0;
-
-    RooPlot* frame =  regionVar->frame(); 
+    RooPlot* frame = regionVar->frame(); 
     regionData->plotOn(frame, RooFit::DataError(RooAbsData::Poisson));
 
     // normalize pdf to number of expected events, not to number of events in dataset
-    regionPdf->plotOn(frame,Normalization(1,RooAbsReal::RelativeExpected),Precision(1e-5));
-    RooCurve* curveNom = (RooCurve*) frame->findObject(curvename,RooCurve::Class()) ;
+    regionPdf->plotOn(frame, Normalization(1, RooAbsReal::RelativeExpected), Precision(1e-5));
+    RooCurve* curveNom = (RooCurve*) frame->findObject(nullptr, RooCurve::Class()) ;
     if (!curveNom) {
         Logger << kERROR << "Util::MakePdfErrorRatioHist(" << frame->GetName() << ") cannot find curveNom" << curveNom->GetName() << GEndl ;
         return 0 ;
     }
 
-    if(rFit != NULL) regionPdf->plotOn(frame,Normalization(1,RooAbsReal::RelativeExpected),Precision(1e-5),FillColor(kBlue-5),FillStyle(3004),VisualizeError(*rFit,Nsigma));
+    if(rFit != NULL) {
+        regionPdf->plotOn(frame, Normalization(1, RooAbsReal::RelativeExpected), 
+                                 Precision(1e-5), 
+                                 FillColor(kBlue-5), 
+                                 FillStyle(3004), 
+                                 VisualizeError(*rFit, Nsigma));
+    }
 
     // Find curve object
-    RooCurve* curveError = (RooCurve*) frame->findObject(curvename,RooCurve::Class()) ;
+    RooCurve* curveError = (RooCurve*) frame->findObject(nullptr, RooCurve::Class()) ;
     if (!curveError) {
         Logger << kERROR << "Util::makePdfErrorRatioHist(" << frame->GetName() << ") cannot find curveError" << GEndl ;
         return 0 ;
     }
 
     RooCurve* ratioBand = new RooCurve ;
-    ratioBand->SetName(Form("%s_ratio_errorband",curveNom->GetName())) ;
+    ratioBand->SetName(Form("%s_ratio_errorband", curveNom->GetName())) ;
     ratioBand->SetLineWidth(1) ;
     ratioBand->SetLineColor(kBlue-5);
     ratioBand->SetFillColor(kBlue-5);
@@ -2861,10 +2878,10 @@ RooCurve* Util::MakePdfErrorRatioHist(RooAbsData* regionData, RooAbsPdf* regionP
 
     Int_t j = 0;
     Bool_t bottomCurve = kFALSE;
-    for(Int_t i=1; i<curveError->GetN()-1; i++){
+    for(Int_t i=1; i < curveError->GetN()-1; ++i){
         Double_t x = 0.;
         Double_t y = 0.;
-        curveError->GetPoint(i,x,y) ;
+        curveError->GetPoint(i, x, y) ;
 
         // errorBand curve has twice as many points as does a normal/nominal (pdf) curve
         //  first it walks through all +1 sigma points (topCurve), then the -1 sigma points (bottomCurve)
@@ -3552,4 +3569,65 @@ void Util::PlotFitParameters(RooFitResult* r, TString anaName){
 
 }
 
+//-------------------------------------------------------------------------------------------------------
+
+TH1* Util::ComponentToHistogram(RooRealSumPdf* component, RooRealVar* variable, RooFitResult *fitResult) {
+    // Build a TH1-based histogram from a pdf, an observable and a fit result
+
+    // Get the stepsize and build a histogram according to the binning of the variable
+    auto stepsize = variable->getBinning().averageBinWidth();
+    auto hist = component->createHistogram(Form("hist_%s", component->GetName()), *variable);
+
+    // Now loop over the bins and fill them 
+    for(unsigned int i=0; i < hist->GetNbinsX()+2; ++i) {
+        auto low = hist->GetBinLowEdge(i);
+        auto width = hist->GetBinWidth(i);
+
+        // Constraint the observable to this bin
+        variable->setRange(Form("bin%d", i), low, low+width);
+
+        // Start by integrating in this bin
+        auto integral = component->createIntegral(RooArgSet(*variable), RooFit::Range(Form("bin%d", i)) );
+
+        // Now get the value and the error
+        auto sum = integral->getVal() / stepsize;
+        auto err = integral->getPropagatedError(*fitResult) / stepsize;
+
+        // and put them in the histogram
+        hist->SetBinContent(i, sum);
+        hist->SetBinError(i, err);
+    }
+
+    auto sum = component->createIntegral(RooArgSet(*variable))->getVal();
+    
+    double scale = 0.0;
+    if(sum != 0 && hist->Integral() != 0) {
+        scale = sum / hist->Integral();
+    }
+
+    hist->Scale(scale);
+
+    return hist;
+}
+
+void Util::ScaleGraph(TGraphAsymmErrors *g, TH1* h) { 
+    if (g->GetN() != h->GetNbinsX() ) {
+        Logger << kERROR << "Cannot multiply graph with " << g->GetN() << " points with histogram with " << h->GetNbinsX() << " points" << GEndl ; 
+        throw 1 ; 
+    }
+
+    for(int i=0; i < g->GetN(); ++i) {
+        // TGraphs are 0-indexed, TH1s are 1-indexed.
+        int j = i+1;
+
+        double x, y;
+        g->GetPoint(i, x, y); 
+
+        g->SetPoint(i, x, y * h->GetBinContent(j));
+        g->SetPointEYhigh(i, g->GetErrorYhigh(i) * h->GetBinContent(j));
+        g->SetPointEYlow(i, g->GetErrorYlow(i) * h->GetBinContent(j));
+    }
+
+    return;
+}
 

@@ -55,6 +55,7 @@ class FitConfig;
 class RooProdPdf;
 class RooHist;
 class RooCurve;
+class RooRealSumPdf;
 
 namespace RooStats {
   class HypoTestResult;
@@ -228,7 +229,16 @@ namespace Util
   */
   void PlotNLL(RooWorkspace* w, RooFitResult* rFit = NULL,  Bool_t plotPLL = false, TString anaName="Analysis", 
 	       TString outputPrefix = "", RooAbsData* inputData=0, TString plotPars="", TString fitRegions="ALL", Bool_t lumiConst=false);
-  
+ 
+  /**
+     Function to construct a data/model ratio or pull
+     @param regionPdf RooAbsPdf pointer to the total-pdf for this specific region
+     @param regionData RooAbsData pointer to the data for this region
+     @param regionVar RooRealVar pointer to the observable for this region
+     @param makePull Boolean flag to set whether a ratio or pull is returned
+  */
+  RooHist* MakeRatioOrPullHist(RooAbsData *regionData, RooAbsPdf *regionPdf, RooRealVar *regionVar, bool makePull=false);
+
   /**
      Function to construct a band (RooCurve) with the ratio of the nominal pdf curve w.r.t the pdf curve +/- 1 sigma
      @param regionPdf RooAbsPdf pointer to the total-pdf for this specific region
@@ -239,6 +249,7 @@ namespace Util
   */
   RooCurve* MakePdfErrorRatioHist(RooAbsData* regionData, RooAbsPdf* regionPdf, 
 				  RooRealVar* regionVar, RooFitResult* rFit, Double_t Nsigma = 1.);
+
 
   /**
      Add ATLAS label to plot
@@ -443,6 +454,10 @@ namespace Util
  */
 
  void PlotFitParameters(RooFitResult* r, TString anaName);
+
+
+ TH1* ComponentToHistogram(RooRealSumPdf* component, RooRealVar* variable, RooFitResult *fitResult);
+ void ScaleGraph(TGraphAsymmErrors *g, TH1* h);
 
 }
 

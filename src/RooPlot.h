@@ -171,14 +171,14 @@ public:
   virtual void SetMaximum(Double_t maximum = -1111) ;
   virtual void SetMinimum(Double_t minimum = -1111) ;
 
-  Double_t chiSquare(int nFitParam=0) const { return chiSquare(0,0,nFitParam) ; } 
+  Double_t chiSquare(int nFitParam=0) const { return chiSquare(0, 0, nFitParam) ; } 
   Double_t chiSquare(const char* pdfname, const char* histname, int nFitParam=0) const ;
 
   RooHist* residHist(const char* histname=0, const char* pdfname=0,bool normalize=false, bool useAverage=kFALSE,  bool returnRatio=false) const ;
   RooHist* pullHist(const char* histname=0, const char* pdfname=0, bool useAverage=false) const 
-    { return residHist(histname,pdfname,true,useAverage); }
+    { return residHist(histname, pdfname, true, useAverage); }
   RooHist* ratioHist(const char* histname=0, const char* pdfname=0, bool useAverage=false) const 
-    { return residHist(histname,pdfname,false,useAverage,true); }
+    { return residHist(histname, pdfname, false, useAverage, true); }
 
   void Browse(TBrowser *b) ;
 
