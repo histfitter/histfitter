@@ -156,9 +156,10 @@ class ConfigManager(object):
         self.useHistBackupCacheFile = False
         
         self.input_files = set() # Input list to be used for tree production
-        #self.treeName = ''
        
-        self.deactivateBinnedLikelihood = False
+        self.deactivateBinnedLikelihood = False # Deactive the use of binned likelihoods in RooStats? 
+
+        self.ignoreSystematics = False # Turn off systematics?
 
         self.bkgParName = ''
         self.bkgCorrVal = -1.
@@ -809,7 +810,10 @@ class ConfigManager(object):
 
         @param fitConfig The configuration to execute
         """
-        log.info("Preparing histograms and/or workspace for fitConfig %s\n"%fitConfig.name)
+        log.info("Preparing histograms and/or workspace for fitConfig {}\n".format(fitConfig.name))
+        if self.ignoreSystematics:
+            log.info("NOTE: ignoring any defined systematics. Change configMgr.ignoreSystematics if this behaviour is not desired.\n")
+    
 
         if self.plotHistos:
             cutHistoDict = {}
@@ -850,14 +854,14 @@ class ConfigManager(object):
                         self.appendSystinChanInfoDict(chan, sam, systName, syst)
 
         for (iChan, chan) in enumerate(fitConfig.channels):
-            log.info("Channel: %s" % chan.name)
+            log.info("Channel {}/{}: {}".format(iChan+1, len(fitConfig.channels), chan.name))
             regionString = "".join(chan.regions)
             self.prepare.channel = chan
             
             sampleListRun = deepcopy(chan.sampleList)
             #for (iSam, sam) in enumerate(fitConfig.sampleList):
             for (iSam, sam) in enumerate(sampleListRun):
-                log.info("  Sample: %s" % sam.name)                
+                log.info("   Sample {}/{}: {}".format(iSam+1, len(sampleListRun), sam.name))
                 
                 # Run over the nominal configuration first
                 # Set the weights, cuts, weights and actually call prepare.read() internally
@@ -866,6 +870,9 @@ class ConfigManager(object):
                 #depending on the sample type, the Histos and up/down weights are added
                 log.debug("Calling addSampleSpecificHists() for {0}".format(chan.name))
                 self.addSampleSpecificHists(fitConfig, chan, sam, regionString, normRegions, normString, normCuts)
+
+                #sys.exit(0)
+        #sys.exit(0)
 
         # post-processing 1: loop for user-norm systematics
         log.verbose("Adding user-defined norm systematics")
@@ -1311,6 +1318,7 @@ class ConfigManager(object):
                     #    treeName = sam.name+self.nomName
                     if not noRead:
                         log.debug("setWeightsCutsVariable(): calling prepare.read() for {}".format(sam.treename))
+                        #print sam.input_files
                         
                         #self.prepare.read(sam.treename, sam.files, friendTreeName=sam.friendTreeName)
                         self.prepare.read(sam.input_files, suffix=sam.getTreenameSuffix(), friendTreeName=sam.friendTreeName)
@@ -1387,7 +1395,10 @@ class ConfigManager(object):
                 log.info("Using blinded data for channel {0} for sample {1}".format(chan.name, sam.name)) 
                 #chan.addData(sam.blindedHistName)
             else:
-                self.prepare.addHisto(sam.getHistogramName(fitConfig), useOverflow=chan.useOverflowBin, useUnderflow=chan.useUnderflowBin, forceNoFallback=forceNoFallback)
+                self.prepare.addHisto(sam.getHistogramName(fitConfig), 
+                                      useOverflow=chan.useOverflowBin, 
+                                      useUnderflow=chan.useUnderflowBin, 
+                                      forceNoFallback=forceNoFallback)
                 #chan.addData(histoName)
             
             chan.addData(sam.getHistogramName(fitConfig))
@@ -1414,6 +1425,7 @@ class ConfigManager(object):
                 #self.prepare.addHisto(histoName, useOverflow=chan.useOverflowBin, useUnderflow=chan.useUnderflowBin)
                 #chan.addData(histoName)
         elif not sam.isQCD and not sam.isDiscovery:
+            log.info("      - Loading nominal") # layout aligned with call for systematic
             tmpName="h"+sam.name+"Nom_"+regionString+"_obs_"+replaceSymbols(chan.variableName)
             if not len(sam.shapeFactorList):
                 log.debug("Building temporary histogram {0}".format(tmpName))
@@ -1462,6 +1474,8 @@ class ConfigManager(object):
                     log.warning("            For now, using all non-validation channels by default: %s" % sam.normRegions)
                     
             if sam.normRegions and (not sam.noRenormSys):
+                log.debug("addSampleSpecificHists(): sample {} has normalisation regions -- will construct histograms for these".format(sam.name))
+                log.info("      - Loading norm regions") # layout aligned with call for systematic
                 regionStrings = []
                 for normReg in sam.normRegions:
                     if not isinstance(normReg[0], list):
@@ -1473,7 +1487,7 @@ class ConfigManager(object):
          
                 normString = "".join(regionStrings)
 
-                log.verbose("Constructed normString {0} for sample {1}".format(normString, sam.name))
+                log.verbose("addSampleSpecificHists(): constructed normString {0} for sample {1}".format(normString, sam.name))
 
                 tmpName = "h%sNom_%sNorm" % (sam.name, normString )
                 if not tmpName in self.hists.keys():
@@ -1488,26 +1502,25 @@ class ConfigManager(object):
                             pass
                     else:
                         self.hists[tmpName] = TH1F(tmpName, tmpName, 1, 0.5, 1.5)
-                        log.debug("Building temporary histogram {0}".format(tmpName))
+                        log.debug("addSampleSpecificHists(): building temporary histogram {0}".format(tmpName))
                         for normReg in sam.normRegions:
+                            log.verbose("addSampleSpecificHists(): using normalisation in {}".format(normReg))
                             if not type(normReg[0]) == "list":
                                 normList = [normReg[0]]
                                 c = fitConfig.getChannel(normReg[1], normList)
                             else:
                                 c = fitConfig.getChannel(normReg[1], normReg[0])
                             for r in c.regions:
+                                log.verbose("At normalisation region {}".format(r))
                                 try:
                                     s = c.getSample(sam.name)
                                 except:    
                                     # assume that if no histogram is made, then it is not needed  
                                     continue
 
-                                #treeName = s.treeName
-                                #if treeName=='': treeName = s.name+self.nomName
                                 log.debug("addSampleSpecificHists(): calling prepare.read() for {}".format(sam.treename))
-                                #self.prepare.read(sam.treename, s.files, friendTreeName=sam.friendTreeName)
-                                self.prepare.read(sam.input_files, friendTreeName=sam.friendTreeName)
-
+                                #print sam.input_files
+                                self.prepare.read(sam.input_files, suffix=sam.getTreenameSuffix(), friendTreeName=sam.friendTreeName)
 
                                 # TODO: why don't we store this histogram in its proper name for a region? then it can be recycled
                                 tempHist = TH1F("temp", "temp", 1, 0.5, 1.5)
@@ -1523,8 +1536,9 @@ class ConfigManager(object):
                                     self.hists[nomName].SetBinContent(1, self.hists[nomName].GetBinContent(1) + tempHist.GetSumOfWeights())
                                 del tempHist
 
-                                log.verbose("nom =%f" % self.hists[nomName].GetSumOfWeights())
-            
+                                log.verbose("Integral of nominal norm histogram {} = {:f}".format(nomName, self.hists[nomName].GetSumOfWeights()))
+                                #sys.exit()
+
             ## Now move on to systematics, adding weights first
 
             ## Remove any current systematic
@@ -1557,27 +1571,41 @@ class ConfigManager(object):
 
             #sys.exit()
 
-            # A simple double loop to ensure all the weights go first, and then all the trees
-            i = 0
-            for syst_type in ["weight", "tree"]:
-                for syst in (s for s in sorted(chan.getSample(sam.name).systDict.values(), key=lambda s: s.name) if s.type == syst_type):
-                    i += 1
-                    log.info("    Systematic {}/{}: {}".format(i, len(chan.getSample(sam.name).systDict.values()), syst.name))
-                    log.verbose("current normString = {0}".format(normString))
+            if not self.ignoreSystematics:
+                # Construct a simple double loop to ensure all the weights go first, and then all the trees
+                syst_types = ["weight", "tree"]
+                systs_by_type = {}
+                for syst_type in syst_types:
+                    systs_by_type[syst_type] = [s for s in sorted(chan.getSample(sam.name).systDict.values(), key=lambda s: s.name) if s.type == syst_type] 
 
-                    # Remove any current systematic
-                    chan.getSample(sam.name).removeCurrentSystematic()
+                log.info("      - Will load {} weights and {} tree-based systematics".format(len(systs_by_type["weight"]), len(systs_by_type["tree"])))
 
-                    # first reset weight to nominal value; this won't load a histogram as the nominal one is already done 
-                    self.setWeightsCutsVariable(chan, sam, regionString) 
-                  
-                    # this method actually calls the hard work. 
-                    # NOTE: this NEEDS to not rely on this method. Now it's not parallelizable.
-                    syst.PrepareWeightsAndHistos(regionString, normString, normCuts, self, fitConfig, chan, sam)
-                    self.addHistoSysforNoQCD(regionString, normString, normCuts, fitConfig, chan, sam, syst)
-            
-            # and remove the last systematic
-            chan.getSample(sam.name).removeCurrentSystematic()
+                i = 0
+                for syst_type in syst_types:
+                    j = 0
+                    for syst in systs_by_type[syst_type]: 
+                        i += 1
+                        j += 1
+                        log.info("      - Systematic {}/{}: {}".format(i, len(chan.getSample(sam.name).systDict.values()), syst.name))
+                        log.verbose("systematic type: {}".format(syst_type))
+                        log.verbose("current normString = {0}".format(normString))
+
+                        if j > 1: break # just for a test
+
+                        # Remove any current systematic
+                        chan.getSample(sam.name).removeCurrentSystematic()
+
+                        # first reset weight to nominal value
+                        # NOTE: this won't actually load a histogram as the nominal one is already done 
+                        self.setWeightsCutsVariable(chan, sam, regionString) 
+                      
+                        # this method actually calls the hard work. 
+                        # NOTE: this NEEDS to not rely on this method. Now it's not parallelizable.
+                        syst.PrepareWeightsAndHistos(regionString, normString, normCuts, self, fitConfig, chan, sam)
+                        self.addHistoSysforNoQCD(regionString, normString, normCuts, fitConfig, chan, sam, syst)
+                
+                # and remove the last systematic
+                chan.getSample(sam.name).removeCurrentSystematic()
 
         elif sam.isQCD:	
             #Add Histos for Sample-type QCD
