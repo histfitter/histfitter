@@ -164,8 +164,8 @@ class ConfigMgr {
         bool m_fixSigXSec;
         bool m_runOnlyNominalXSec;
         bool m_doUL;
-        bool m_disableULRangeExtension;
         int  m_nPoints;
+        bool  m_disableULRangeExtension;
         double m_muValGen;
         bool m_removeEmptyBins;
 
