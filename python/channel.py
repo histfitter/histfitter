@@ -161,7 +161,7 @@ class Channel(object):
         self.sampleList[index].parentChannel = self
 
         # Add any input files we own to the channel
-        log.debug("Appending existing files for channel {} to sample {}".format(self.channelName, sample.name))
+        log.debug("Appending existing {} files for channel {} to sample {}".format(len(self.input_files), self.channelName, sample.name))
         for i in self.input_files:
             sample.addInput(i.filename, i.treename)
 
