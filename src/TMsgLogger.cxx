@@ -245,8 +245,7 @@ void TMsgLogger::InitMaps() {
     m_levelMap[kFATAL]   = "FATAL";
     m_levelMap[kALWAYS]  = "ALWAYS";
 
-    //m_colorMap[kVERBOSE] = "\033[1;42m";
-    m_colorMap[kVERBOSE] = "\033[96m";
+    m_colorMap[kVERBOSE] = "\033[1;34m";
     m_colorMap[kDEBUG]   = "\033[94m";
     m_colorMap[kINFO]    = "";
     m_colorMap[kWARNING] = "\033[0;31m";

@@ -262,11 +262,19 @@ namespace Util
      Add text to plot
   */
   void AddText(Double_t x,Double_t y,char* text=NULL,Color_t color=kBlack) ;
-  
+ 
+  /**
+     Add text to plot when streamed from steering macro
+  */
+
+  void AddTextLabel(Double_t x, Double_t y, const char* text=NULL, Color_t color=kBlack);
+
   /**
      Remove empty bins for data (otherwise a Poisson error on 0 observed events is shown)
      @param frame RooPlot pointer for the frame that needs removing the empty bins
   */
+ 
+
   void RemoveEmptyDataBins(RooPlot* frame);
   
 

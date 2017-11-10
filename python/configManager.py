@@ -104,7 +104,6 @@ class ConfigManager(object):
         self.fixSigXSec = False # true = fix SigXSec by nominal, +/-1sigma
         self.runOnlyNominalXSec = False #t true = for fixed xsec, run only nominal fit and not +/- 1 sigma fits
         self.nPoints = 20 # number of points in upper limit evaluation
-        self.disableULRangeExtension = False # disable the UL range extender
         self.seed = 0 # seed for random generator. default is clock
         self.muValGen = 0.0 # mu_sig used for toy generation
         self.toySeedSet = False # Set the seed for toys
@@ -515,7 +514,6 @@ class ConfigManager(object):
         self.cppMgr.setfixSigXSec( self.fixSigXSec )
         self.cppMgr.setRunOnlyNominalXSec( self.runOnlyNominalXSec )
         self.cppMgr.setNPoints( self.nPoints )
-        self.cppMgr.setDisableULRangeExtension( self.disableULRangeExtension )
         self.cppMgr.setSeed( self.toySeed )
         self.cppMgr.setMuValGen( self.muValGen )
         self.cppMgr.setUseAsimovSet( self.useAsimovSet)
@@ -578,6 +576,32 @@ class ConfigManager(object):
                      if c.lumi is None:
                          style.setLumi(self.outputLumi)
                      else: style.setLumi(c.lumi)
+                 if not c.lumiX is None:
+                     style.setLumiX(c.lumiX)
+                 if not c.lumiY is None:
+                     style.setLumiY(c.lumiY)
+                 if not c.xErrorSize is None:
+                     style.setXErrorSize(c.xErrorSize)
+                 if not c.integerStyle is None:
+                     style.setIntegerStyle(c.integerStyle)
+                 if not c.regionLabelX is None:
+                     style.setRegionLabelX(c.regionLabelX)
+                 if not c.regionLabelY is None:
+                     style.setRegionLabelY(c.regionLabelY)
+                 if not c.regionLabelText is None:
+                     style.setRegionLabelText(c.regionLabelText)
+                 if not c.arrowX is None:
+                     style.setArrowX(c.arrowX)
+                 if not c.arrowY is None:
+                     style.setArrowY(c.arrowY)
+                 if not c.arrowEnd is None:
+                     style.setArrowEnd(c.arrowEnd)
+                 if not c.arrowAngle is None:
+                     style.setArrowAngle(c.arrowAngle)
+                 if not c.arrowWidth is None:
+                     style.setArrowWidth(c.arrowWidth)
+                 if not c.arrowColor is None:
+                     style.setArrowColor(c.arrowColor)
                  if len(c.text1)>0:
                      style.setText1(c.text1)
                  if len(c.text2)>0:

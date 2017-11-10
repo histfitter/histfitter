@@ -68,6 +68,7 @@
 #include "RooStats/HistFactory/PiecewiseInterpolation.h"
 
 #include "TAxis.h"
+#include "TArrow.h"
 #include "TF1.h"
 #include "TH1F.h"
 #include "TH2D.h"
@@ -547,7 +548,7 @@ void Util::SaveInitialSnapshot(RooWorkspace* w){
     }
     if(pdf==NULL){
         Logger << kWARNING << "Util::SaveInitialSnapshot():   not saving the initial snapshot as cannot find pdf (simPdf or combPdf) in workspace" << GEndl;
-	return;
+    return;
     }
       
     RooAbsData* data = (RooAbsData*) w->data("obsData");
@@ -837,7 +838,7 @@ RooFitResult* Util::FitPdf( RooWorkspace* w, TString fitRegions, Bool_t lumiCons
             minim.hesse();
         }
 
-        // save fit result	  
+        // save fit result    
         r = minim.save();
     }
     else { 
@@ -1182,7 +1183,7 @@ void Util::PlotSeparateComponents(RooWorkspace* w,TString fcName, TString anaNam
                 leg->SetBorderSize(0);
                 TLegendEntry* entry=leg->AddEntry("","Prop. Fit Error","f") ;
                 entry->SetMarkerColor(kCyan);
-                entry->SetMarkerStyle();	
+                entry->SetMarkerStyle();    
                 entry->SetFillColor(kCyan);
                 entry->SetFillStyle(1001);
                 entry=leg->AddEntry("",compShortName.Data(),"l") ;
@@ -1370,11 +1371,11 @@ void Util::PlotNLL(RooWorkspace* w, RooFitResult* rFit, Bool_t plotPLL, TString 
                     Logger << kWARNING << " Removing bin = " << iBin  << " as it was either inf or nan from NLL plot for parameter = " << parName<< GEndl;
                     iBin--;
                 }
-            }	
+            }   
 
             Int_t iBin = 1;
             Double_t xFirstBin = 0.;
-            Double_t yFirstBin = -1.;	
+            Double_t yFirstBin = -1.;   
             while ( (yFirstBin<0 || std::isinf(yFirstBin)  || std::isnan(yFirstBin) )&& iBin < curve->GetN()-1){
                 iBin++;
                 curve->GetPoint(iBin,xFirstBin,yFirstBin) ;
@@ -1385,7 +1386,7 @@ void Util::PlotNLL(RooWorkspace* w, RooFitResult* rFit, Bool_t plotPLL, TString 
             }
             iBin = curve->GetN()-1;
             Double_t xLastBin = 0.;
-            Double_t yLastBin = -1.;	
+            Double_t yLastBin = -1.;    
             while ( (yLastBin < 0 || std::isinf(yLastBin) || std::isnan(yLastBin) ) && iBin >0){
                 iBin--;
                 curve->GetPoint(iBin,xLastBin,yLastBin) ; 
@@ -1436,7 +1437,7 @@ void Util::PlotNLL(RooWorkspace* w, RooFitResult* rFit, Bool_t plotPLL, TString 
         leg->SetBorderSize(0);
         TLegendEntry* entry=leg->AddEntry("", "NLL", "l") ;
         entry->SetLineColor(kBlue);
-        if(plotPLL) {	
+        if(plotPLL) {   
             entry=leg->AddEntry("", "PLL", "l") ;
             entry->SetLineColor(kRed);
             entry->SetLineStyle(kDashed);
@@ -1859,7 +1860,7 @@ Util::doFreeFit( RooWorkspace* w, RooDataSet* inputdata, const bool& verbose, co
         << " with strategy  " << strategy << " and tolerance " << tol << GEndl;
 
     for (int tries = 1, maxtries = 5; tries <= maxtries; ++tries) {
-        //	 status = minim.minimize(fMinimizer, ROOT::Math::MinimizerOptions::DefaultMinimizerAlgo().c_str());
+        //   status = minim.minimize(fMinimizer, ROOT::Math::MinimizerOptions::DefaultMinimizerAlgo().c_str());
         status = minim.minimize(minimizer, algorithm); 
 
         if (status%1000 == 0) {  // ignore erros from Improve 
@@ -1922,7 +1923,7 @@ Util::doFreeFit( RooWorkspace* w, RooDataSet* inputdata, const bool& verbose, co
         }
 
         // save fit result
-        // ignore errors in Hesse or in Improve	if minos option not activated
+        // ignore errors in Hesse or in Improve if minos option not activated
         result  = minim.save();
     }
     else { 
@@ -2015,7 +2016,24 @@ void Util::AddText(Double_t x,Double_t y,char* text,Color_t color)
     }
 }
 
+void Util::AddTextLabel(Double_t x, Double_t y, const char* text, Color_t color)
+{
 
+    TLatex l;
+    l.SetNDC();
+    l.SetTextFont(72);
+    l.SetTextColor(color);
+
+    double delx = 0.115 * 696 * gPad->GetWh() / (472 * gPad->GetWw());
+
+    if (text) {
+        TLatex p;
+        p.SetNDC();
+        p.SetTextFont(42);
+        p.SetTextColor(color);
+        p.DrawLatex(x + delx, y, text);
+    }
+}
 
 //_____________________________________________________________________________
 RooAbsReal* Util::GetComponent(RooWorkspace* w, TString component, TString region, bool exactRegionName, TString rangeName){ 
@@ -2276,7 +2294,7 @@ TString Util::GetFullRegionName(RooCategory* regionCat,  TString regionShortName
             foundReg++;
         } 
         else if( regionsAllVec[iReg].Contains(regionShortName) && foundReg>0){
-            foundReg++;	    
+            foundReg++;     
         }
     }
 
@@ -2910,7 +2928,7 @@ RooCurve* Util::MakePdfErrorRatioHist(RooAbsData* regionData, RooAbsPdf* regionP
         if(  fabs(yNom) > 0.00001 ){ 
             ratioBand->addPoint(x, (y / yNom));  
         } else { 
-            ratioBand->addPoint(x, 0.);       	    
+            ratioBand->addPoint(x, 0.);             
         }
     }
 
