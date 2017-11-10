@@ -2911,7 +2911,7 @@ RooCurve* Util::MakePdfErrorRatioHist(RooAbsData* regionData, RooAbsPdf* regionP
 
         // each errorCurve has two more points just outside the plot, so we need to treat them separately
         if( i == (curveNom->GetN() - 1) ||  i == curveNom->GetN() ){
-            ratioBand->addPoint(x, 0.);   
+            ratioBand->addPoint(x, 0.);
             continue;
         }
 
