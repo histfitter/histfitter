@@ -1,7 +1,10 @@
 obj
 lib/*
 src/SusyFitter_Dict.C
+
 .*.swp
+data/*.root
+*.pyc
 
 # copied from the src dir!
 include/*.h 
