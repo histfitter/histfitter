@@ -527,9 +527,6 @@ class fitConfig(object):
         if not found:
             raise RuntimeError("Sample {} not defined in fitConfig {}".format(s.name))
 
-        print "WAAAAAAH"
-        sys.exit(0)
-    
         return
 
     def getSample(self, name):
