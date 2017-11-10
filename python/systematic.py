@@ -33,8 +33,8 @@ log = Logger('Systematic')
 # TreeWeightSystematic or a UserSystematic. These classes are derived classes
 # and the Baseclass for both of them is the SystematicBase. In
 # TreeWeightSystematic the set of the weights differs for the systematic type
-# tree and weight. Therefore, there exist the functions PrepareWAHforWeight
-# or PrepareWAHforTree. All three types of systematics share the
+# tree and weight. Therefore, the functions PrepareWAHforWeight
+# or PrepareWAHforTree exist. All three types of systematics share the
 # "FillUpDownHist" (for the methods "userNormHistoSys" or "normHistoSys") and
 # "tryAddHistos" function in the Baseclass SystematicBase.
 ###############################################
@@ -106,247 +106,283 @@ class SystematicBase:
         else:
             return False
 
-    def setFileList(self, sample, filelist):
-        """
-        Set file list for this Systematic directly
+    #def setFileList(self, sample, filelist):
+        #"""
+        #Set file list for this Systematic directly
 
-        @param sample The Sample to set the files for
-        @param filelist A list of filenames
-        """
-        self.filesLo[sample] = filelist
-        self.filesHi[sample] = filelist
+        #@param sample The Sample to set the files for
+        #@param filelist A list of filenames
+        #"""
+        #self.filesLo[sample] = filelist
+        #self.filesHi[sample] = filelist
 
-    def setFile(self, sample, file):
-        """
-        Set a file for this Systematic directly
+    #def setFile(self, sample, file):
+        #"""
+        #Set a file for this Systematic directly
         
-        @param sample The Sample to set the file for
-        @param filelist A filename
-        """
-        self.filesLo[sample] = [file]
-        self.filesHi[sample] = [file]
+        #@param sample The Sample to set the file for
+        #@param filelist A filename
+        #"""
+        #self.filesLo[sample] = [file]
+        #self.filesHi[sample] = [file]
 
-    def setTreeName(self, sampleName, treeName):
-        """
-        Set name of the tree for a sample
+    #def setTreeName(self, sampleName, treeName):
+        #"""
+        #Set name of the tree for a sample
         
-        @param sampleName Name of the sample
-        @param treeName Tree name to set for the sample
-        """
-        self.treeLoName[sampleName] = treeName
-        self.treeHiName[sampleName] = treeName
-        return
+        #@param sampleName Name of the sample
+        #@param treeName Tree name to set for the sample
+        #"""
+        #self.treeLoName[sampleName] = treeName
+        #self.treeHiName[sampleName] = treeName
+        #return
 
-    def setLoTreeName(self, sampleName, treeName):
-        """
-        Set name of the tree for a sample for -1 sigma variations only
+    #def setLoTreeName(self, sampleName, treeName):
+        #"""
+        #Set name of the tree for a sample for -1 sigma variations only
         
-        @param sampleName Name of the sample
-        @param treeName Tree name to set for the sample
-        """
-        self.treeLoName[sampleName] = treeName
-        return
+        #@param sampleName Name of the sample
+        #@param treeName Tree name to set for the sample
+        #"""
+        #self.treeLoName[sampleName] = treeName
+        #return
 
-    def setHiTreeName(self, sampleName, treeName):
-        """
-        Set name of the tree for a sample for +1 sigma variations only
+    #def setHiTreeName(self, sampleName, treeName):
+        #"""
+        #Set name of the tree for a sample for +1 sigma variations only
         
-        @param sampleName Name of the sample
-        @param treeName Tree name to set for the sample
-        """
-        self.treeHiName[sampleName] = treeName
-        return
+        #@param sampleName Name of the sample
+        #@param treeName Tree name to set for the sample
+        #"""
+        #self.treeHiName[sampleName] = treeName
+        #return
 
-    def setHiFileList(self, sample, filelist):
-        """
-        Set file list for +1 sigma variations only
+    #def setHiFileList(self, sample, filelist):
+        #"""
+        #Set file list for +1 sigma variations only
         
-        @param sampleName Name of the sample
-        @param treeName Tree name to set for the sample
-        """
-        self.filesHi[sample] = filelist
-        return
+        #@param sampleName Name of the sample
+        #@param treeName Tree name to set for the sample
+        #"""
+        #self.filesHi[sample] = filelist
+        #return
 
-    def setLoFileList(self, sample, filelist):
-        """
-        Set file list for -1 sigma variations only
+    #def setLoFileList(self, sample, filelist):
+        #"""
+        #Set file list for -1 sigma variations only
         
-        @param sampleName Name of the sample
-        @param treeName Tree name to set for the sample
-        """
-        self.filesLo[sample] = filelist
-        return
+        #@param sampleName Name of the sample
+        #@param treeName Tree name to set for the sample
+        #"""
+        #self.filesLo[sample] = filelist
+        #return
 
     def FillUpDownHist(self, lowhigh="", regionString="", normString="",
                        normCuts="", abstract=None, topLvl=None, chan=None, sam=None):
-        if (self.method == "userNormHistoSys"
-            or self.method == "overallNormSys"
-            or self.method == "normHistoSys"
-            or self.method == "normHistoSysOneSide"
-            or self.method == "normHistoSysOneSideSym"
-            or self.method == "normHistoSysEnvelopeSym"
-            or self.method == "overallNormHistoSys"
-            or self.method == "overallNormHistoSysEnvelopeSym"
-            or self.method == "overallNormHistoSysOneSide"
-            or self.method == "overallNormHistoSysOneSideSym" ) \
-               and (not sam.noRenormSys):
+        
+        _allowed_methods = ["userNormHistoSys", 
+                            "overallNormSys", "normHistoSys", 
+                            "normHistoSysOneSide", "normHistoSysOneSideSym", 
+                            "normHistoSysEnvelopeSym", "overallNormHistoSys", 
+                            "overallNormHistoSysEnvelopeSym", "overallNormHistoSysOneSide", "overallNormHistoSysOneSideSym"]
+        
+        if not (self.method in _allowed_methods and (not sam.noRenormSys)):
+            log.debug("FillUpDownHist: systematic '{}' for sample '{}' not remapped - returning".format(self.name, sam.name))
+            return
 
-            histName = "h" + sam.name + self.name + lowhigh + normString + "Norm"
-            if not histName in abstract.hists.keys():
+        histName = "h" + sam.name + self.name + lowhigh + normString + "Norm"
+        if histName in abstract.hists.keys():
+            log.debug("FillUpDownHist: systematic '{}': histogram '{}' already exists! Not rebuilding it.".format(self.name, histName))
+            return
 
-                if not sam.normRegions: 
-                    log.error("    %s but no normalization regions specified for sample %s, noRenormSys=%s. This is not safe, please fix." % (self.method,sam.name,sam.noRenormSys))
-                    normChannels=[]
-                    tl=sam.parentChannel.parentTopLvl
-                    for ch in tl.channels:
-                        if (ch.channelName in tl.bkgConstrainChannels) or (ch.channelName in tl.signalChannels):
-                            normChannels.append((ch.regionString,ch.variableName))
-                            pass
-                        pass
-                    sam.setNormRegions(normChannels)
-                    log.warning("            For now, using all non-validation channels by default: %s"%sam.normRegions)
+        if not sam.normRegions: 
+            log.error("    %s but no normalization regions specified for sample %s, noRenormSys=%s. This is not safe, please fix." % (self.method, sam.name, sam.noRenormSys))
+            normChannels = []
+            tl = sam.parentChannel.parentTopLvl
+            for ch in tl.channels:
+                if (ch.channelName in tl.bkgConstrainChannels) or (ch.channelName in tl.signalChannels):
+                    normChannels.append((ch.regionString,ch.variableName))
+                    pass
+                pass
+            sam.setNormRegions(normChannels)
+            log.warning("            For now, using all non-validation channels by default: %s" % sam.normRegions)
 
-                normString = ""
-                for normReg in sam.normRegions:
-                    if not type(normReg[0]) == "list":
-                        normList = [normReg[0]]
-                        c = topLvl.getChannel(normReg[1],normList)
-                    else:
-                        c = topLvl.getChannel(normReg[1],normReg[0])
-                    normString += c.regionString
-               
-                # Attempt to read from the cache fileout without fallback
-                # If it fails, set this silly boolean and still go into the block below
-                # Necessary, or we end up with nominal == high == low and removed systematics.
+        normString = ""
+        for normReg in sam.normRegions:
+            if not isinstance(normReg[0], list):
+                c = topLvl.getChannel(normReg[1], [normReg[0]])
+            else:
+                c = topLvl.getChannel(normReg[1], normReg[0])
+            normString += c.regionString
+       
+        log.debug("FillUpDownHist: constructed normString {}".format(normString))
 
-                reread = False
-                if not abstract.readFromTree:
-                    abstract.hists[histName] = None
-                    abstract.prepare.addHisto(histName, forceNoFallback=True)
-                    if abstract.hists[histName] == None and abstract.useCacheToTreeFallback: reread = True
+        # Attempt to read from the cache fileout without fallback
+        # If it fails, set this silly boolean and still go into the block below
+        # Necessary, or we end up with nominal == high == low and removed systematics.
 
-                if abstract.readFromTree or reread:
-                    abstract.hists[histName] = TH1F(histName, histName, 1, 0.5, 1.5)
+        reread = False
+        if not abstract.readFromTree:
+            abstract.hists[histName] = None
+            abstract.prepare.addHisto(histName, forceNoFallback=True)
+            if abstract.hists[histName] == None and abstract.useCacheToTreeFallback: 
+                log.warning("Will rebuild {} from trees".format(histName))
+                reread = True
 
-                    for normReg in sam.normRegions:
-                        if not type(normReg[0]) == "list":
-                            normList = [normReg[0]]
-                            c = topLvl.getChannel(normReg[1],normList)
-                        else:
-                            c = topLvl.getChannel(normReg[1],normReg[0])
+        if not abstract.readFromTree and not reread:
+            log.error("FillUpDownHist: systematic {}: histogram {}: not reading from trees and no fallback enabled. Will not build histogram".format(self.name, histName))
+            return
+        
+        abstract.hists[histName] = TH1F(histName, histName, 1, 0.5, 1.5)
 
-                        try:
-                            s = c.getSample(sam.name)
-                        except:
-                            # assume that if no histogram is made,
-                            # then it is not needed
-                            continue
+        for normReg in sam.normRegions:
+            # Find the sample object associated to each of the normalisation regions
+            if not isinstance(normReg[0], list):
+                c = topLvl.getChannel(normReg[1], [normReg[0]])
+            else:
+                c = topLvl.getChannel(normReg[1], normReg[0])
 
-                        systNorm = s.getSystematic(self.name)
+            try:
+                s = c.getSample(sam.name)
+            except:
+                # assume that if no histogram is made,
+                # then it is not needed
+                continue
 
-                        # if the systematic has a dedicated file
-                        # list, use it
+            systNorm = s.getSystematic(self.name)
 
-                        if 'Low' in lowhigh:
-                            if s.name in systNorm.filesLo:
-                                filelist = systNorm.filesLo[s.name]
-                            else:
-                                # otherwise - take the sample file list
-                                filelist = s.files
-                            if s.name in systNorm.treeLoName:
-                                treeName = systNorm.treeLoName[s.name]
-                            else:
-                                # otherwise - take the default tree name
-                                # for the sample
-                                if self.type == "tree":
-                                    treeName = s.treeName + systNorm.low
-                                else:
-                                    treeName = s.treeName
-                            if self.type == "tree" and (treeName == '' or treeName == systNorm.low):
-                                # checking if the sample tree name should have a prefix, if yes use this                                
-                                if s.prefixTreeName == '':
-                                    treeName = s.name + systNorm.low
-                                else:
-                                    treeName = s.prefixTreeName + systNorm.low
+            if "High" in lowhigh:    
+                log.verbose("FillUpDownHist(): in high mode")
+                s.setCurrentSystematic(self, "high")
+            elif "Low" in lowhigh:    
+                log.verbose("FillUpDownHist(): in low mode")
+                s.setCurrentSystematic(self, "low")
+            elif "Nom" in lowhigh:
+                log.verbose("FillUpDownHist(): in nominal mode")
+                s.setCurrentSystematic(self)
+           
+            #print self
+            #print normReg
+            #print s.currentSystematic
+            #print systNorm
+            #print "treename ", s.treename
+            #print "treename suffix ", s.getTreenameSuffix()
 
-                        if 'High' in lowhigh:
-                            if s.name in systNorm.filesHi:
-                                filelist = systNorm.filesHi[s.name]
-                            else:
-                                # otherwise - take the sample file list
-                                filelist = s.files
-                            if s.name in systNorm.treeHiName:
-                                treeName = systNorm.treeHiName[s.name]
-                            else:
-                                # otherwise - take the default tree name
-                                # for the sample
-                                if self.type == "tree":
-                                    treeName = s.treeName + systNorm.high
-                                else:
-                                    treeName = s.treeName
-                            if self.type == "tree" and (treeName == '' or treeName == systNorm.high):    
-                                # checking if the sample tree name should have a prefix, if yes use this
-                                if s.prefixTreeName == '':
-                                    treeName = s.name + systNorm.high
-                                else:
-                                    treeName = s.prefixTreeName + systNorm.high
+            # TODO: fix the use of filesLo, filesHi 
 
-                        if 'Nom' in lowhigh:
-                            filelist = s.files
-                            # take the default tree name
-                            # for the sample
-                            if self.type == "tree":
-                                treeName = s.treeName + systNorm.nominal
-                            else:
-                                treeName = s.treeName
-                            ## possibly rename treename
-                            if self.type == "tree" and (treeName == '' or treeName == systNorm.nominal):
-                                # checking if the sample tree name should have a prefix, if yes use this
-                                if s.prefixTreeName == '':
-                                    treeName = s.name + systNorm.nominal
-                                else:
-                                    treeName = s.prefixTreeName + systNorm.nominal                           
+            #continue
 
-                        # weight-based trees assuming up/down are in one tree have identical name for up/low
-                        # if our current name does not exist, we assume this one does
-                        if self.type == "weight" and (not abstract.prepare.checkTree(treeName, filelist)):
-                            if s.prefixTreeName == '':
-                                treeName = s.name + abstract.nomName
-                            else:
-                                treeName = s.prefixTreeName + abstract.nomName
+            ## if the systematic has a dedicated file
+            ## list, use it
 
-                        log.verbose("s.name %s"%s.name)
-                        log.verbose("sam.name %s"%sam.name)
-                        #log.verbose("systNorm high %s"%systNorm.high)
-                        #log.verbose("systNorm low %s"%systNorm.low)
-                        log.verbose("treeName %s"%treeName)
+            #if 'Low' in lowhigh:
+                #if s.name in systNorm.filesLo:
+                    #filelist = systNorm.filesLo[s.name]
+                #else:
+                    ## otherwise - take the sample file list
+                    #filelist = s.files
+                
+                #if s.name in systNorm.treeLoName:
+                    #treeName = systNorm.treeLoName[s.name]
+                #else:
+                    ## otherwise - take the default tree name
+                    ## for the sample
+                    #if self.type == "tree":
+                        #treeName = s.treeName + systNorm.low
+                    #else:
+                        #treeName = s.treeName
+                
+                #if self.type == "tree" and (treeName == '' or treeName == systNorm.low):
+                    ## checking if the sample tree name should have a prefix, if yes use this                                
+                    #if s.prefixTreeName == '':
+                        #treeName = s.name + systNorm.low
+                    #else:
+                        #treeName = s.prefixTreeName + systNorm.low
 
-                        log.debug("FillUpDownHist(): calling prepare.read()")
-                        abstract.prepare.read(treeName, filelist)
+            #if 'High' in lowhigh:
+                #if s.name in systNorm.filesHi:
+                    #filelist = systNorm.filesHi[s.name]
+                #else:
+                    ## otherwise - take the sample file list
+                    #filelist = s.files
+                
+                #if s.name in systNorm.treeHiName:
+                    #treeName = systNorm.treeHiName[s.name]
+                #else:
+                    ## otherwise - take the default tree name
+                    ## for the sample
+                    #if self.type == "tree":
+                        #treeName = s.treeName + systNorm.high
+                    #else:
+                        #treeName = s.treeName
+                
+                #if self.type == "tree" and (treeName == '' or treeName == systNorm.high):    
+                    ## checking if the sample tree name should have a prefix, if yes use this
+                    #if s.prefixTreeName == '':
+                        #treeName = s.name + systNorm.high
+                    #else:
+                        #treeName = s.prefixTreeName + systNorm.high
 
-                        tempHist = TH1F("temp", "temp", 1, 0.5, 1.5)
+            #if 'Nom' in lowhigh:
+                #filelist = s.files
+                ## take the default tree name
+                ## for the sample
+                #if self.type == "tree":
+                    #treeName = s.treeName + systNorm.nominal
+                #else:
+                    #treeName = s.treeName
+                
+                ### possibly rename treename
+                #if self.type == "tree" and (treeName == '' or treeName == systNorm.nominal):
+                    ## checking if the sample tree name should have a prefix, if yes use this
+                    #if s.prefixTreeName == '':
+                        #treeName = s.name + systNorm.nominal
+                    #else:
+                        #treeName = s.prefixTreeName + systNorm.nominal                           
 
-                        if systNorm.type == "tree":
-                            log.verbose("normalization region %s"%("".join(normReg[0])))
-                            log.verbose("normalization cuts %s"%(abstract.cutsDict["".join(normReg[0])]))
-                            log.verbose("current chain %s"% abstract.prepare.currentChainName)
-                            log.verbose("projecting string %s"%(str(abstract. lumiUnits*abstract.outputLumi/abstract.inputLumi) + " * " + "*". join(s.weights) + " * (" + abstract.cutsDict["".join(normReg[0])] + ")"))
+            ## weight-based trees assuming up/down are in one tree have identical name for up/low
+            ## if our current name does not exist, we assume this one does
+            
+            #if self.type == "weight" and (not abstract.prepare.checkTree(treeName, filelist)):
+                #if s.prefixTreeName == '':
+                    #treeName = s.name + abstract.nomName
+                #else:
+                    #treeName = s.prefixTreeName + abstract.nomName
 
-                            abstract.chains[abstract.prepare.currentChainName].Project("temp",abstract.cutsDict["".join(normReg[0])],str(abstract.lumiUnits*abstract.outputLumi/abstract.inputLumi)+" * "+"*".join(s.weights)+" * ("+abstract.cutsDict["".join(normReg[0])]+")")
-                            abstract.hists[histName].SetBinContent(1,abstract.hists[histName].GetSum()+tempHist.GetSumOfWeights())
-                        elif systNorm.type == "weight":
-                            log.verbose("normalization region %s"%("".join(normReg[0])))
-                            log.verbose("normalization cuts %s"%(abstract.cutsDict["".join(normReg[0])]))
-                            log.verbose("current chain %s"% abstract.prepare.currentChainName)
-                            log.verbose("projecting string %s"%(str(abstract.lumiUnits*abstract.outputLumi/abstract.inputLumi)+" * "+"*".join(s.weights)+" * ("+abstract.cutsDict["".join(normReg[0])]+")"))
+            log.debug("FillUpDownHist(): calling prepare.read() for {}".format(sam.name))
+            #abstract.prepare.read(treeName, filelist)
+            abstract.prepare.read(sam.input_files, suffix=sam.getTreenameSuffix(), friendTreeName=sam.friendTreeName)
 
-                            if 'High' in lowhigh:
-                                abstract.chains[abstract.prepare.currentChainName].Project("temp",abstract.cutsDict["".join(normReg[0])],str(abstract.lumiUnits*abstract.outputLumi/abstract.inputLumi)+" * "+"*".join(s.systDict[systNorm.name].high)+" * ("+abstract.cutsDict["".join(normReg[0])]+")")
-                            elif 'Low' in lowhigh:
-                                abstract.chains[abstract.prepare.currentChainName].Project("temp",abstract.cutsDict["".join(normReg[0])],str(abstract.lumiUnits*abstract.outputLumi/abstract.inputLumi)+" * "+"*".join(s.systDict[systNorm.name].low)+" * ("+abstract.cutsDict["".join(normReg[0])]+")")
+            tempHist = TH1F("temp", "temp", 1, 0.5, 1.5)
 
-                            abstract.hists[histName].SetBinContent(1,abstract.hists[histName].GetSum()+tempHist.GetSumOfWeights())
-                        del tempHist
+            _weights = s.weights
+            if systNorm.type == "weight":
+                if "High" in lowhigh:
+                    _weights = s.getSystematic(systNorm.name).high
+                elif "Low" in lowhigh:
+                    _weights = s.getSystematic(systNorm.name).low
+            
+            _cut_str = abstract.cutsDict[normReg[0]]
+            _weight_str = "{} * {}".format(str(abstract.lumiUnits*abstract.outputLumi/abstract.inputLumi), " * ".join(_weights))
+
+            log.verbose("FillUpDownHist(): current chain {}".format(abstract.prepare.currentChainName))
+            log.verbose("FillUpDownHist(): normalization region {}".format(normReg[0]))
+            log.verbose("FillUpDownHist(): normalization region cuts {}".format(_cut_str))
+            log.verbose("FillUpDownHist(): weights: {}".format(_weight_str)) 
+                
+            currentChain = abstract.chains[abstract.prepare.currentChainName]
+            try:
+                currentChain.Project("temp", _cut_str, "{} * ({})".format(_weight_str, _cut_str) )
+            except:
+                # if e.g. rootpy is used and this goes wrong, it's a fatal exception otherwise
+                pass
+
+            log.verbose("FillUpDownHist(): loaded temporary histogram for {} in {} with integral {}".format(self.name, normReg[0],  tempHist.GetSumOfWeights()))
+
+            abstract.hists[histName].SetBinContent(1, abstract.hists[histName].GetSum() + tempHist.GetSumOfWeights())
+            del tempHist
+
+        log.verbose("FillUpDownHist(): loaded norm histogram {} for {} in {} with integral {}".format(histName, self.name, normString, abstract.hists[histName].GetSum()))
 
         return
 
@@ -373,32 +409,29 @@ class TreeWeightSystematic(SystematicBase):
     def PrepareWAHforWeight(self, regionString="", normString="", normCuts="",
                             abstract=None, topLvl=None, chan=None, sam=None):
         
-        log.debug("PrepareWAHforWeight()")
+        log.debug("PrepareWAHforWeight() for {} in {}".format(self, sam.name))
+        
+        log.debug("PrepareWAHforWeight: removing systematic from {} to be sure {}".format(self.name, sam.name))
+        sam.removeCurrentSystematic()
+
         highandlow = ["High_", "Low_"] # ,"Nom_"]
         if self.differentNominalTreeWeight:
             highandlow = ["High_", "Low_", "Nom_"]
 
         for highorlow in highandlow:
-            abstract.prepare.weights = str(abstract.lumiUnits*abstract.outputLumi/abstract.inputLumi)
+            
+            _weights = self.nominal
             if highorlow == "High_":
-                mywList = [ " * %s " % myw for myw in self.high]
-                abstract.prepare.weights += "".join(mywList)
+                _weights = self.high
             elif highorlow == "Low_":
-                mywList = [ " * %s " % myw for myw in self.low]
-                abstract.prepare.weights += "".join(mywList)
-            elif highorlow == "Nom_":
-                mywList = [ " * %s " % myw for myw in self.nominal]
-                abstract.prepare.weights += "".join(mywList)
+                _weights = self.low
+
+            abstract.prepare.weights = "{} * {}".format(str(abstract.lumiUnits * abstract.outputLumi/abstract.inputLumi), 
+                                                        " * ".join(w for w in _weights))
 
             if abstract.readFromTree or abstract.useCacheToTreeFallback:
-                treeName = sam.treeName
-                if treeName == '':
-                    if sam.prefixTreeName == '':
-                        treeName = "%s%s" % (sam.name, abstract.nomName)
-                    else:
-                        treeName = "%s%s" % (sam.prefixTreeName, abstract.nomName)
                 log.debug("PrepareWAHforWeight(): calling prepare.read()")
-                abstract.prepare.read(treeName, sam.files)
+                abstract.prepare.read(sam.input_files, suffix=sam.getTreenameSuffix(), friendTreeName=sam.friendTreeName)
             
             TreeWeightSystematic.tryAddHistos(self, highorlow, regionString,
                                               normString, normCuts, abstract,
@@ -415,7 +448,7 @@ class TreeWeightSystematic(SystematicBase):
         if self.differentNominalTreeWeight:
             highandlow = ["High_", "Low_", "Nom_"]
 
-        log.debug("PrepareWAHforTree()")
+        log.debug("PrepareWAHforTree() for {}".format(self.name))
 
         weightstemp = abstract.prepare.weights
         for highorlow in highandlow:
@@ -425,55 +458,24 @@ class TreeWeightSystematic(SystematicBase):
                     abstract.prepare.weights += " * " + myw
 
             if abstract.readFromTree or abstract.useCacheToTreeFallback:
+                log.debug("PrepareWAHforTree(): will read syst {} from trees (or fallback enabled)".format(self.name))
+                
                 if highorlow == "High_":
-                    if sam.name in self.filesHi:
-                        filelist = self.filesHi[sam.name]
-                    else:
-                        filelist = sam.files
-
-                    if sam.name in self.treeHiName:
-                        treeName = self.treeHiName[sam.name]
-                    else:
-                        treeName = sam.treeName + self.high
-                    
-                    if treeName == '' or treeName == self.high:
-                        if sam.prefixTreeName == '':
-                            treeName = sam.name + self.high
-                        else:
-                            treeName = sam.prefixTreeName + self.high
-
-                    log.debug("PrepareWAHforTree(): calling prepare.read()")
-                    abstract.prepare.read(treeName, filelist)
+                    log.verbose("PrepareWAHforTree(): in high mode")
+                    sam.setCurrentSystematic(self, "high")
                 elif highorlow == "Low_":
-                    if sam.name in self.filesLo:
-                        filelist = self.filesLo[sam.name]
-                    else:
-                        filelist = sam.files
-                    
-                    if sam.name in self.treeLoName:
-                        treeName = self.treeLoName[sam.name]
-                    else:
-                        treeName = sam.treeName + self.low
-                    
-                    if treeName == '' or treeName == self.low:
-                        if sam.prefixTreeName == '':
-                            treeName = sam.name + self.low
-                        else:
-                            treeName = sam.prefixTreeName + self.low
-                
-                    log.debug("PrepareWAHforTree(): calling prepare.read()")
-                    abstract.prepare.read(treeName, filelist)
+                    log.verbose("PrepareWAHforTree(): in low mode")
+                    sam.setCurrentSystematic(self, "low")
                 elif highorlow == "Nom_":
-                    filelist = sam.files
-                    treeName = sam.treeName + self.nominal
-                    if treeName == '' or treeName == self.nominal:
-                        if sam.prefixTreeName == '':
-                            treeName = sam.name + self.nominal
-                        else:
-                            treeName = sam.prefixTreeName + self.nominal
-                
-                    log.debug("PrepareWAHforTree(): calling prepare.read()")
-                    abstract.prepare.read(treeName, filelist)
+                    log.verbose("PrepareWAHforTree(): in nominal mode")
+                    sam.setCurrentSystematic(self)
+                    
+                log.debug("PrepareWAHforTree(): calling prepare.read() for {} (sample {})".format(self.name, sam.name))
+                log.verbose("PrepareWAHforTree(): using the following inputs:")
+                for i in sam.input_files:
+                    log.verbose("{}{} from {}".format(i.treename, sam.getTreenameSuffix(), i.filename))
+
+                abstract.prepare.read(sam.input_files, suffix=sam.getTreenameSuffix(), friendTreeName=sam.friendTreeName)
 
             TreeWeightSystematic.tryAddHistos(self, highorlow, regionString,
                                               normString, normCuts, abstract,
@@ -488,14 +490,14 @@ class TreeWeightSystematic(SystematicBase):
                                 normCuts="", abstract=None,
                                 topLvl=None, chan=None, sam=None):
 
-        log.verbose("PrepareWeightsAndHistos()")
+        log.verbose("PrepareWeightsAndHistos for {}".format(self.name))
         if self.type == "weight":
-            log.verbose("Calling TreeWeightSystematic.PrepareWAHforWeight()") 
+            log.verbose("Calling TreeWeightSystematic.PrepareWAHforWeight() for {}".format(self.name)) 
             TreeWeightSystematic.PrepareWAHforWeight(self, regionString,
                                                      normString, normCuts,
                                                      abstract, topLvl, chan, sam)
         if self.type == "tree":
-            log.verbose("Calling TreeWeightSystematic.PrepareWAHforTree()") 
+            log.verbose("Calling TreeWeightSystematic.PrepareWAHforTree() for {}".format(self.name)) 
             TreeWeightSystematic.PrepareWAHforTree(self, regionString,
                                                    normString, normCuts,
                                                    abstract, topLvl, chan, sam)
@@ -551,12 +553,13 @@ class UserSystematic(SystematicBase):
 ## It returns an object
 def Systematic(name="", nominal=None, high=None, low=None,
                type="", method="", constraint="Gaussian"):
-    if type == "weight" or type == "tree" or type == "user":
-        if type == "weight" or type == "tree":
-            return TreeWeightSystematic(name, nominal, high, low,
-                                        type, method, constraint)
-        else:
-            return UserSystematic(name, nominal, high, low,
-                                        type, method, constraint)
+    types = ["weight", "tree", "user"]
+    if type not in types:
+        raise Exception("Systematic type {} unknown for {}".format(type, name))
+        
+    if type == "weight" or type == "tree":
+        return TreeWeightSystematic(name, nominal, high, low,
+                                    type, method, constraint)
     else:
-        raise Exception("type unknown")
+        return UserSystematic(name, nominal, high, low,
+                                    type, method, constraint)

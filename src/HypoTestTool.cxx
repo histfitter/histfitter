@@ -103,7 +103,8 @@ RooStats::HypoTestTool::HypoTestTool() : m_hc(0), m_calc(0),
     mResultFileName(),
     mNoSystematics(false),
     mConfLevel(0.95),
-    m_logger("HypoTestTool")
+    m_logger("HypoTestTool"),
+    m_generateAsimovDataForObserved(false)
 {
 }
 
@@ -125,6 +126,7 @@ RooStats::HypoTestTool::SetParameter(const char * name, bool value){
     if (s_name.find("UseProof") != std::string::npos) mUseProof = value;
     if (s_name.find("EnableDetailedOutput") != std::string::npos) mEnableDetailedOutput = value;
     if (s_name.find("Rebuild") != std::string::npos) mRebuild = value;
+    if (s_name.find("GenerateAsimovDataForObserved") != std::string::npos) m_generateAsimovDataForObserved = value;
 
     return;
 }
@@ -442,8 +444,8 @@ RooStats::HypoTestTool::SetupHypoTestCalculator(RooWorkspace * w, bool doUL,
     }
 
     if (!bModel || bModel == sbModel) {
-        Info("HypoTestTool","The background model %s does not exist",modelBName);
-        Info("HypoTestTool","Copy it from ModelConfig %s and set POI to zero",modelSBName);
+        Info("HypoTestTool", "The background model '%s' does not exist", modelBName);
+        Info("HypoTestTool", "Copy it from ModelConfig '%s' and set POI to zero", modelSBName);
         bModel = (ModelConfig*) sbModel->Clone();
         bModel->SetName(TString(modelSBName)+TString("_with_poi_0"));
         if(!bModel->GetParametersOfInterest()->first()){
@@ -457,28 +459,27 @@ RooStats::HypoTestTool::SetupHypoTestCalculator(RooWorkspace * w, bool doUL,
           m_logger << kINFO << "HypoTestTool: Cast failed part 2" << GEndl;
           return false;
         }
+        
         double oldval = var->getVal();
         var->setVal(0);
         bModel->SetSnapshot( RooArgSet(*var)  );
         var->setVal(oldval);
-    }
-    else { 
-        if (!bModel->GetSnapshot() ) { // MB : note, this resets all parameters! 
 
-            Info("HypoTestTool","Model %s has no snapshot  - make one using model poi and 0 values ",modelBName);
-            RooRealVar * var = dynamic_cast<RooRealVar*>(bModel->GetParametersOfInterest()->first());
-            if (var) { 
-                double oldval = var->getVal();
-                var->setVal(0);
-                bModel->SetSnapshot( RooArgSet(*var)  );
-                var->setVal(oldval);
+        //LoadSnapshotInWorkspace(w, "snapshot_paramsVals_RooExpandedFitResult_afterFit")
+    } else if (!bModel->GetSnapshot() ) { // MB : note, this resets all parameters! 
+        Info("HypoTestTool", "Background model %s has no snapshot - make one using model poi and 0 values ",modelBName);
+        RooRealVar * var = dynamic_cast<RooRealVar*>(bModel->GetParametersOfInterest()->first());
+        if (var) { 
+            double oldval = var->getVal();
+            var->setVal(0);
+            bModel->SetSnapshot( RooArgSet(*var)  );
+            var->setVal(oldval);
 
-                Error("HypoTestTool","Model %s has no valid poi",modelBName);
-                return false;
-            }         
-        } else { // reset
-            sbModel->GetSnapshot();
-        }
+            Error("HypoTestTool","Model %s has no valid poi",modelBName);
+            return false;
+        }         
+    } else { // reset
+        sbModel->GetSnapshot();
     }
 
     // check model  has global observables when there are nuisance pdf
@@ -511,20 +512,25 @@ RooStats::HypoTestTool::SetupHypoTestCalculator(RooWorkspace * w, bool doUL,
     if (!doUL) doFit = false;                                   // case of discovery: don't want to adjust s+b toys
     double poihat = 0;
 
+    if(m_generateAsimovDataForObserved) {
+        m_logger << kINFO << "HypoTestTool: generateAsimovDataForObserved is set to true; enabling doFit" << GEndl;
+        doFit = true; 
+    }
+
     if (doFit)  { 
-        // do the fit : By doing a fit the POI snapshot (for S+B)  is set to the fit value
+        // do the fit : By doing a fit the POI snapshot (for S+B) is set to the fit value
         // and the nuisance parameters nominal values will be set to the fit value. 
         // This is relevant when using LEP test statistics
         const RooArgSet* prevSnapSet = sbModel->GetSnapshot();
         const RooArgSet* tPoiSet = sbModel->GetParametersOfInterest();
 
-        Info( "StandardHypoTestInvDemo"," Doing a first fit to the observed data ");
+        Info( "HypoTestTool", "Doing a first fit to the observed data ");
         if (mMinimizerType.size()==0) {
             mMinimizerType = ROOT::Math::MinimizerOptions::DefaultMinimizerType();
         } else { 
             ROOT::Math::MinimizerOptions::SetDefaultMinimizer(mMinimizerType.c_str());
         }
-        Info("StandardHypoTestInvDemo","Using %s as minimizer for computing the test statistic",
+        Info("HypoTestTool", "Using %s as minimizer for computing the test statistic",
                 ROOT::Math::MinimizerOptions::DefaultMinimizerType().c_str() );
         RooArgSet constrainParams;
         if (sbModel->GetNuisanceParameters() ) constrainParams.add(*sbModel->GetNuisanceParameters());
@@ -532,19 +538,53 @@ RooStats::HypoTestTool::SetupHypoTestCalculator(RooWorkspace * w, bool doUL,
         TStopwatch tw;
         tw.Start();
         Bool_t verbose = (m_logger.GetMinLevel() <= kDEBUG) ? kTRUE : kFALSE;
-        RooFitResult * fitres = sbModel->GetPdf()->fitTo(*data,InitialHesse(false), Hesse(false),
-                Minimizer(mMinimizerType.c_str(),"Migrad"), Strategy(0), Verbose(verbose),
-                PrintLevel(mPrintLevel+1), Constrain(constrainParams), Save(true) );
+        
+        RooLinkedList fitArgs;
+        RooCmdArg _InitialHesse(InitialHesse(false));
+        RooCmdArg _Hesse(Hesse(false));
+        RooCmdArg _Minimizer(Minimizer(mMinimizerType.c_str(), "Migrad"));
+        RooCmdArg _Strategy(Strategy(0));
+        RooCmdArg _Strategy_alt(Strategy(1));
+        RooCmdArg _Verbose(Verbose(verbose));
+        RooCmdArg _PrintLevel(PrintLevel(mPrintLevel+1));
+        RooCmdArg _Constrain(Constrain(constrainParams));
+        RooCmdArg _Save(Save(true));
+        //RooCmdArg _SumW2Error(SumW2Error(true));
+
+        fitArgs.Add(dynamic_cast<TObject*>(&_InitialHesse));
+        fitArgs.Add(dynamic_cast<TObject*>(&_Hesse));
+        fitArgs.Add(dynamic_cast<TObject*>(&_Minimizer));
+        fitArgs.Add(dynamic_cast<TObject*>(&_Verbose));
+        fitArgs.Add(dynamic_cast<TObject*>(&_PrintLevel));
+        fitArgs.Add(dynamic_cast<TObject*>(&_Constrain));
+        fitArgs.Add(dynamic_cast<TObject*>(&_Save));
+        //fitArgs.Add(dynamic_cast<TObject*>(&_SumW2Error));
+        
+        RooLinkedList fitArgs_alt(fitArgs);
+        
+        fitArgs.Add(dynamic_cast<TObject*>(&_Strategy));
+        fitArgs_alt.Add(dynamic_cast<TObject*>(&_Strategy_alt));
+        //Hesse(false),
+                //Minimizer(mMinimizerType.c_str(),"Migrad"), Strategy(0), Verbose(verbose), 
+                //PrintLevel(mPrintLevel+1), Constrain(constrainParams), Save(true) );
+
+        //RooFitResult * fitres = sbModel->GetPdf()->fitTo(*data, InitialHesse(false), Hesse(false),
+                //Minimizer(mMinimizerType.c_str(),"Migrad"), Strategy(0), Verbose(verbose), 
+                //PrintLevel(mPrintLevel+1), Constrain(constrainParams), Save(true) );
+        
+        RooFitResult *fitres = sbModel->GetPdf()->fitTo(*data, fitArgs);
+        
         if (fitres->status() != 0) { 
-            Warning("StandardHypoTestInvDemo","Fit to the model failed - try with strategy 1 and perform first an Hesse computation");
-            fitres = sbModel->GetPdf()->fitTo(*data,InitialHesse(true), Hesse(false),Minimizer(mMinimizerType.c_str(),"Migrad"), 
-                    Strategy(1), PrintLevel(mPrintLevel+1), Constrain(constrainParams), Save(true), Verbose(verbose) );
+            Warning("HypoTestTool", "Fit to the model failed - try with strategy 1 and perform first an Hesse computation");
+            //fitres = sbModel->GetPdf()->fitTo(*data, InitialHesse(true), Hesse(false), Minimizer(mMinimizerType.c_str(),"Migrad"), 
+                    //Strategy(1), PrintLevel(mPrintLevel+1), Constrain(constrainParams), Save(true), SumW2Error(true) );
+            fitres = sbModel->GetPdf()->fitTo(*data, fitArgs_alt);
         }
         if (fitres->status() != 0) 
-            Warning("StandardHypoTestInvDemo"," Fit still failed - continue anyway.....");
+            Warning("HypoTestTool", "Fit still failed - continue anyway.....");
 
         poihat  = poi->getVal();
-        m_logger << kINFO << "StandardHypoTestInvDemo - Best Fit value : " << poi->GetName() << " = "  
+        m_logger << kINFO << "HypoTestTool - Best Fit value : " << poi->GetName() << " = "  
             << poihat << " +/- " << poi->getError() << GEndl;
         m_logger << kINFO << "Time for fitting : "; tw.Print(); 
 
@@ -567,7 +607,7 @@ RooStats::HypoTestTool::SetupHypoTestCalculator(RooWorkspace * w, bool doUL,
         //save best fit value in the poi snapshot 
         //sbModel->SetSnapshot(*sbModel->GetParametersOfInterest());
         sbModel->SetSnapshot(newSnapSet);
-        m_logger << kINFO << "StandardHypoTestInvo: snapshot of S+B Model " << sbModel->GetName() 
+        m_logger << kINFO << "HypoTestTool: snapshot of S+B Model " << sbModel->GetName() 
             << " is set to the best fit value" << GEndl;  
     }
 
@@ -579,9 +619,9 @@ RooStats::HypoTestTool::SetupHypoTestCalculator(RooWorkspace * w, bool doUL,
     // print a message in case of LEP test statistics because it affects result by doing or not doing a fit 
     if (testStatType == 0) {
         if (!doFit) 
-            Info("StandardHypoTestInvDemo","Using LEP test statistic - an initial fit is not done and the TS will use the nuisances at the model value");
+            Info("HypoTestTool", "Using LEP test statistic - an initial fit is not done and the TS will use the nuisances at the model value");
         else 
-            Info("StandardHypoTestInvDemo","Using LEP test statistic - an initial fit has been done and the TS will use the nuisances at the best fit value");
+            Info("HypoTestTool", "Using LEP test statistic - an initial fit has been done and the TS will use the nuisances at the best fit value");
     }
 
     // MB: this sets up the null and one hypothesis tests
@@ -621,14 +661,16 @@ RooStats::HypoTestTool::SetupHypoTestCalculator(RooWorkspace * w, bool doUL,
     if (testStatType == 2 || testStatType==3) {
         profll = new ProfileLikelihoodTestStat(*nullModel->GetPdf());
         if (testStatType == 3) { 
-            profll->SetOneSided(1);
-            if (!doUL) profll->SetOneSidedDiscovery(1);
+            profll->SetOneSided(true);
+            if (!doUL) profll->SetOneSidedDiscovery(true);
         }
         profll->SetMinimizer(mMinimizerType.c_str());
-        profll->SetPrintLevel(mPrintLevel);
+        //profll->SetPrintLevel(mPrintLevel);
+        profll->SetPrintLevel(0);
         profll->SetReuseNLL(mOptimize);
-        if (mEnableDetailedOutput) profll->EnableDetailedOutput();
-        if (mOptimize) profll->SetStrategy(0);
+        profll->EnableDetailedOutput();
+        //if (mEnableDetailedOutput) profll->EnableDetailedOutput();
+        if (mOptimize) profll->SetStrategy(false);
         profll->SetLOffset();
     }
 
@@ -641,6 +683,20 @@ RooStats::HypoTestTool::SetupHypoTestCalculator(RooWorkspace * w, bool doUL,
 
     // create the HypoTest calculator class 
     this->ResetHypoTestCalculator(); // first clear
+
+    // build some asimov data here
+    if(m_generateAsimovDataForObserved) {
+        RooArgSet fAsimovGlobObs;
+        fAsimovGlobObs.removeAll();
+        const RooArgSet *altSnapshot = altModel->GetSnapshot();
+        RooArgSet poiAlt(*altSnapshot);
+        RooArgSet *tmp = (RooArgSet*) poiAlt.snapshot(); 
+        auto fAsimovData = AsymptoticCalculator::MakeAsimovData(*data, *nullModel, poiAlt, fAsimovGlobObs, tmp);
+
+        data = dynamic_cast<RooAbsData*>(fAsimovData->Clone());
+    }
+
+    //exit(0);
 
     if (type == 0) m_hc = new FrequentistCalculator(*data, *altModel, *nullModel);
     else if (type == 1) m_hc = new HybridCalculator(*data, *altModel, *nullModel);
@@ -670,7 +726,7 @@ RooStats::HypoTestTool::SetupHypoTestCalculator(RooWorkspace * w, bool doUL,
         return false;
     }  
 
-    ToyMCSampler *toymcs = (ToyMCSampler*)m_hc->GetTestStatSampler();
+    ToyMCSampler *toymcs = dynamic_cast<ToyMCSampler*>(m_hc->GetTestStatSampler());
     if (toymcs) { 
         if (useNumberCounting) toymcs->SetNEventsPerToy(1);
         toymcs->SetTestStatistic(testStat);
@@ -733,8 +789,8 @@ RooStats::HypoTestTool::SetupHypoTestCalculator(RooWorkspace * w, bool doUL,
             Info("HypoTestTool","Using as nuisance Pdf ... " );
             nuisPdf->Print();
 
-            const RooArgSet * nuisParams = (altModel->GetNuisanceParameters() ) ? altModel->GetNuisanceParameters() : nullModel->GetNuisanceParameters();
-            RooArgSet * np = nuisPdf->getObservables(*nuisParams);
+            const RooArgSet* nuisParams = (altModel->GetNuisanceParameters() ) ? altModel->GetNuisanceParameters() : nullModel->GetNuisanceParameters();
+            RooArgSet* np = nuisPdf->getObservables(*nuisParams);
             if (np->getSize() == 0) { 
                 Warning("HypoTestTool","Prior nuisance does not depend on nuisance parameters. They will be smeared in their full range");
             }
@@ -743,16 +799,16 @@ RooStats::HypoTestTool::SetupHypoTestCalculator(RooWorkspace * w, bool doUL,
             hhc->ForcePriorNuisanceAlt(*nuisPdf);
             hhc->ForcePriorNuisanceNull(*nuisPdf);  
         }
-    } 
-    else if (type == 2 || type == 3) { 
-        if (testStatType == 3) ((AsymptoticCalculator*) m_hc)->SetOneSided(true);  
+    } else if (type == 2 || type == 3) { 
+        if (testStatType == 3) dynamic_cast<AsymptoticCalculator*>(m_hc)->SetOneSided(true);  
         if (testStatType != 2 && testStatType != 3)  
             Warning("StandardHypoTestInvDemo","Only the PL test statistic can be used with AsymptoticCalculator - use by default a two-sided PL");
-        ((AsymptoticCalculator*) m_hc)->SetQTilde(true); // bug in roostats. Need to turn on explicitly.
-        ((AsymptoticCalculator*) m_hc)->SetPrintLevel(mPrintLevel+1); 
-    }
-    else if (type == 0 || type == 1) 
+       
+        dynamic_cast<AsymptoticCalculator*>(m_hc)->SetQTilde(true); // bug in roostats. Need to turn on explicitly.
+        dynamic_cast<AsymptoticCalculator*>(m_hc)->SetPrintLevel(mPrintLevel+1); 
+    } else if (type == 0 || type == 1)  {
         ((FrequentistCalculator*) m_hc)->SetToys( static_cast<Int_t>(ntoys), static_cast<Int_t>(ntoys/mNToysRatio) ); 
+    }
 
     // Get the result
     RooMsgService::instance().getStream(1).removeTopic(RooFit::NumIntegration);
@@ -833,8 +889,8 @@ RooStats::HypoTestTool::SetupHypoTestInverter(RooWorkspace * w,
     if (npoints > 0) {
         if (poimin > poimax) { 
             // if no min/max given scan between MLE and +4 sigma 
-            if (poimin>poihat) { poimin = poihat - 4 * poi->getError(); }
-            if (poimin<0) { poimin = 0; }
+            if (poimin > poihat) { poimin = poihat - 4 * poi->getError(); }
+            if (poimin < 0) { poimin = 0; }
             poimax = ( poihat +  20 * poi->getErrorHi() );
         }
         m_logger << kINFO << "Doing a fixed scan  in interval : " << poimin << " , " << poimax << GEndl;
@@ -842,7 +898,7 @@ RooStats::HypoTestTool::SetupHypoTestInverter(RooWorkspace * w,
         m_calc->SetFixedScan(npoints,poimin,poimax);
     }
     else { 
-        m_logger << kINFO << "Doing an  automatic scan  in interval : " << poi->getMin() << " , " << poi->getMax() << GEndl;
+        m_logger << kINFO << "Doing an automatic scan in interval: " << poi->getMin() << " , " << poi->getMax() << GEndl;
     }
 
     m_logger << kINFO << ">>> Done setting up HypoTestInverter on the workspace " << w->GetName() << GEndl;

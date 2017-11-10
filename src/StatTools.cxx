@@ -287,10 +287,12 @@ RooStats::HypoTestInverterResult* RooStats::DoHypoTestInversion(RooWorkspace* w,
         double poimax , 
         bool doAnalyze,
         bool useNumberCounting ,
-        const char * modelSBName ,
-        const char * modelBName,
-        const char * dataName , 
-        const char * nuisPriorName, int nCPUs)
+        const char* modelSBName ,
+        const char* modelBName,
+        const char* dataName , 
+        const char* nuisPriorName,
+        bool generateAsimovDataForObserved,
+        int nCPUs)
 {
     /*
        Other Parameter to pass in tutorial
@@ -366,6 +368,8 @@ nToyRatio            ratio of S+B/B toys (default is 2)
         calc.SetParameter("UseProof", true);
         calc.SetParameter("NWorkers", nCPUs);
     }
+
+    calc.SetParameter("GenerateAsimovDataForObserved", generateAsimovDataForObserved);
 
     HypoTestInverterResult* r = 0;  
     r = calc.RunHypoTestInverter( w, modelSBName, modelBName,

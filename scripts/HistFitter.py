@@ -18,6 +18,7 @@
 
 import ROOT
 ROOT.PyConfig.IgnoreCommandLineOptions = True
+ROOT.SetMemoryPolicy( ROOT.kMemoryStrict )
 
 from ROOT import gROOT,gSystem,gDirectory,RooAbsData,RooRandom,RooWorkspace
 gSystem.Load("libSusyFitter.so")
@@ -117,6 +118,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="HistFitter options:")
     parser.add_argument("configFile", nargs="+", help="configuration file to execute")
     parser.add_argument("-L", "--log-level", help="set log level", choices=["VERBOSE", "DEBUG", "INFO", "WARNING", "ERROR", "FATAL", "ALWAYS"])
+    parser.add_argument("-v", "--verbose", action="store_true", default=False, help="an alias of -L VERBOSE")
     parser.add_argument("-F", "--fit-type", help="type of fit to run: bkg (background-only fit), excl (exclusion fit / model-dependent fit), disc (discovery fit / model-independent fit), model-dep (alias of excl), model-indep (alias of disc)", choices=["bkg", "excl", "disc", "model-dep", "model-indep"]) 
     parser.add_argument("-t", "--create-histograms", help="re-create histograms from TTrees", action="store_true", default=configMgr.readFromTree)
     parser.add_argument("-w", "--create-workspace", help="re-create workspace from histograms", action="store_true", default=configMgr.executeHistFactory)
@@ -131,8 +133,8 @@ if __name__ == "__main__":
     parser.add_argument("-l", "--limit-plot", help="make limit plot of workspace", action="store_true", default=printLimits)
     parser.add_argument("-p", "--hypotest", help="run exclusion hypothesis test", action="store_true", default=doHypoTests)
     parser.add_argument("-z", "--discovery-hypotest", help="run discovery hypothesis test", action="store_true", default=doDiscoveryHypoTests)
-    parser.add_argument("-g", "--grid_points", help="grid points to process (comma-seperated)")
-    parser.add_argument("-r", "--regions", help="signal regions to process (comma-seperated)", default="all")
+    parser.add_argument("-g", "--grid_points", help="grid points to process (comma-separated)")
+    parser.add_argument("-r", "--regions", help="signal regions to process (comma-separated)", default="all")
 
     """
     note that we cannot make -d and -D the same due to http://bugs.python.org/issue9338
@@ -142,14 +144,14 @@ if __name__ == "__main__":
     --GJ 14/11/2012
     """
     parser.add_argument("-d", action="store_true", help="draw before/after plots")
-    parser.add_argument("-D", "--draw", help="specify plots to draw, comma separated; choose from "+str(["allPlots", "before","after", "corrMatrix", "sepComponents", "likelihood","systematics"]))
+    parser.add_argument("-D", "--draw", help="specify plots to draw, comma separated; choose from "+str(["allPlots", "before","after", "corrMatrix", "correlationMatrix", "sepComponents", "separateComponents", "likelihood", "systematics"]))
     parser.add_argument("-syst", "--systematics", help="specify the systematics to be considered with '-D systematics' option, comma separated;")
     
     parser.add_argument("-b", "--background", help="when doing hypotest, set background levels to values, form of bkgParName,value")
     parser.add_argument("-0", "--no-empty", help="do not draw empty bins when drawing", action="store_true")
     parser.add_argument("-T", "--run-toys", help="run toys (default with mu)", action="store_true")
     parser.add_argument("-V", "--validation", help="include validation regions", action="store_true")
-    parser.add_argument("-c", "--cmd", help="python commands to process (semi-colon-seperated)")
+    parser.add_argument("-c", "--cmd", help="python commands to process (semi-colon-separated)")
     parser.add_argument("-u", "--userArg", help="arbitrary user argument(s)", default="")
     parser.add_argument("-A", "--use-archive-histfile", help="use backup histogram cache file", action="store_true")
     parser.add_argument("-P", "--run-profiling", help="Run a python profiler during main HistFitter execution", action="store_true")
@@ -210,7 +212,9 @@ if __name__ == "__main__":
     if HistFitterArgs.interactive:
         runInterpreter = True
 
-    if HistFitterArgs.log_level:
+    if HistFitterArgs.verbose:
+        log.setLevel("VERBOSE", True)
+    elif HistFitterArgs.log_level:
         log.setLevel(HistFitterArgs.log_level, True) #do not add a default to HistFitterArgs.log_level or we will always lock it
 
     if HistFitterArgs.limit_plot:
@@ -243,16 +247,16 @@ if __name__ == "__main__":
                     drawBeforeFit = True
                 elif drawArg == "after":
                     drawAfterFit = True
-                elif drawArg == "corrMatrix":
+                elif drawArg == "corrMatrix" or drawArg == "correlationMatrix":
                     drawCorrelationMatrix = True
-                elif drawArg == "sepComponents":
+                elif drawArg == "sepComponents" or drawArg == "separateComponents":
                     drawSeparateComponents = True
                 elif drawArg == "likelihood":
                     drawLogLikelihood = True
                 elif drawArg == "systematics":
                     drawSystematics = True
                 else:
-                    log.fatal("Wrong draw argument: '%s'. Possible draw arguments are 'allPlots' or comma separated 'before after corrMatrix sepComponents likelihood'" % drawArg) 
+                    log.fatal("Wrong draw argument: '%s'. Possible draw arguments are 'allPlots' or comma separated 'before after corrMatrix correlationMatrix sepComponents separateComponents likelihood'" % drawArg) 
 
     if HistFitterArgs.no_empty:
         configMgr.removeEmptyBins = True

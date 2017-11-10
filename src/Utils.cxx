@@ -23,6 +23,7 @@
 #include "ConfigMgr.h"
 #include "TMsgLogger.h"
 #include "ChannelStyle.h"
+#include "HistogramPlotter.h"
 
 #include "TMap.h"
 #include "TString.h"
@@ -100,6 +101,7 @@ using namespace RooStats;
 
 namespace Util {
   static TMsgLogger Logger("Util");
+  bool deactivateBinnedLikelihood = false;
 }
 
 //_____________________________________________________________________________
@@ -267,10 +269,25 @@ void Util::GenerateFitAndPlot(TString fcName, TString anaName, Bool_t drawBefore
         LoadSnapshotInWorkspace(w, "snapshot_paramsVals_RooExpandedFitResult_beforeFit");
     }
 
-    // plot before fit
-    if (drawBeforeFit)
-        PlotPdfWithComponents(w, fc->m_name, anaName, plotChannels, "beforeFit", expResultBefore, toyMC);
+    // fire up a plotter
 
+    // plot before fit
+    if (drawBeforeFit) {
+        HistogramPlotter h(w, fc->m_name);
+        h.setAnalysisName(anaName);
+        h.setPlotRegions(plotChannels);
+        h.setPlotComponents(true);
+        h.setPlotSeparateComponents(false);
+        h.setOutputPrefix("beforeFit");
+        h.setFitResult(expResultBefore);
+        h.setInputData(toyMC);
+        
+        h.Initialize();
+        h.PlotRegions(); 
+        //h.saveHistograms();
+    }
+
+    // perform fit
     RooFitResult* result = nullptr;
     RooExpandedFitResult* expResultAfter = nullptr;
     if(not noFit) {
@@ -294,14 +311,23 @@ void Util::GenerateFitAndPlot(TString fcName, TString anaName, Bool_t drawBefore
 
     // plot after fit
     if (drawAfterFit) {
-        PlotPdfWithComponents(w, fc->m_name, anaName, plotChannels, "afterFit", expResultAfter, toyMC);
-    }
-
-    // plot each component of each region separately with propagated
-    // error after fit  (interesting for debugging)
-    if(plotSeparateComponents) { 
-        //PlotSeparateComponents(w, fc->m_name, anaName, plotChannels, "afterFit", result, toyMC);
-        PlotSeparateComponents(w, fc->m_name, anaName, plotChannels, "afterFit", expResultAfter, toyMC);
+        HistogramPlotter h(w, fc->m_name);
+        h.setAnalysisName(anaName);
+        h.setPlotRegions(plotChannels);
+        h.setPlotComponents(true);
+        h.setPlotSeparateComponents(false);
+        h.setOutputPrefix("afterFit");
+        h.setFitResult(expResultAfter);
+        h.setInputData(toyMC);
+        
+        // plot each component of each region separately with propagated
+        // error after fit  (interesting for debugging)
+        if(plotSeparateComponents) { 
+            h.setPlotSeparateComponents(true); 
+        }
+        
+        h.Initialize();
+        h.PlotRegions(); 
     }
 
     //plot correlation matrix for result
@@ -522,7 +548,7 @@ void Util::SaveInitialSnapshot(RooWorkspace* w){
     }
     if(pdf==NULL){
         Logger << kWARNING << "Util::SaveInitialSnapshot():   not saving the initial snapshot as cannot find pdf (simPdf or combPdf) in workspace" << GEndl;
-    return;
+        return;
     }
       
     RooAbsData* data = (RooAbsData*) w->data("obsData");
@@ -598,10 +624,22 @@ RooFitResult* Util::FitPdf( RooWorkspace* w, TString fitRegions, Bool_t lumiCons
 
     RooMsgService::instance().getStream(1).removeTopic(NumIntegration);
 
-    if(w==NULL){ 
+    if(!w){ 
         Logger << kERROR << "Workspace not found, no fitting performed" << GEndl;
         return NULL; 
     }
+
+    if(!deactivateBinnedLikelihood) {
+        RooFIter iter = w->components().fwdIterator();
+        RooAbsArg* arg;
+        while ((arg = iter.next())) {
+            if (arg->IsA() == RooRealSumPdf::Class()) {
+                arg->setAttribute("BinnedLikelihood");
+                cout << "Activating binned likelihood attribute for " << arg->GetName() << endl;
+            }
+        }
+    }
+
     RooSimultaneous* pdf = static_cast<RooSimultaneous*>(w->pdf("simPdf"));
 
     RooAbsData* data = ( inputData!=0 ? inputData : static_cast<RooAbsData*>(w->data("obsData")) ); 
@@ -747,8 +785,9 @@ RooFitResult* Util::FitPdf( RooWorkspace* w, TString fitRegions, Bool_t lumiCons
     minim.setStrategy( strategy);
     // use tolerance - but never smaller than 1 (default in RooMinimizer)
     double tol =  ROOT::Math::MinimizerOptions::DefaultTolerance();
-    tol = std::max(tol,1.0); // 1.0 is the minimum value used in RooMinimizer
+    tol = std::max(tol, 1.0); // 1.0 is the minimum value used in RooMinimizer
     minim.setEps( tol );
+    
     //LM: RooMinimizer.setPrintLevel has +1 offset - so subtruct  here -1
     minim.setPrintLevel(minimPrintLevel-1);
     int status = -1;
@@ -799,7 +838,7 @@ RooFitResult* Util::FitPdf( RooWorkspace* w, TString fitRegions, Bool_t lumiCons
             minim.hesse();
         }
 
-        // save fit result    
+        // save fit result 
         r = minim.save();
     }
     else { 
@@ -1028,410 +1067,18 @@ void Util::DecomposeWS(const char* infile, const char* wsname, const char* outfi
 //__________________________________________________________________________________________________________________________________________________________
 void Util::PlotPdfWithComponents(RooWorkspace* w, TString fcName, TString anaName, TString plotRegions, TString outputPrefix, RooFitResult* rFit, RooAbsData* inputData)
 {
-    ConfigMgr* mgr = ConfigMgr::getInstance();
-    FitConfig* fc = mgr->getFitConfig(fcName);
+    HistogramPlotter h(w, fcName);
+    h.setAnalysisName(anaName);
+    h.setPlotRegions(plotRegions);
+    h.setPlotComponents(true);
+    h.setOutputPrefix(outputPrefix);
+    h.setFitResult(rFit);
+    h.setInputData(inputData);
+    h.setPlotSeparateComponents(true); //TODO: hack
 
-    Util::PlotPdfWithComponents(w, fc, anaName, plotRegions, outputPrefix, rFit, inputData);
+    h.Initialize();
+    h.PlotRegions(); 
 }
-
-//__________________________________________________________________________________________________________________________________________________________
-void Util::PlotPdfWithComponents(RooWorkspace* w, FitConfig* fc, TString anaName, TString plotRegions, TString outputPrefix, RooFitResult* rFit, RooAbsData* inputData)
-{
-    Bool_t plotComponents=true;
-    ConfigMgr* mgr = ConfigMgr::getInstance();
-    std::string plotRatio = mgr->m_plotRatio;
-    Logger << kINFO << " ------ Starting Plot with parameters:   analysisName = " << fc->m_name << " and " << anaName << GEndl; 
-    Logger << kINFO << "    plotRegions = " <<  plotRegions <<  "  plotComponents = " << plotComponents << "  outputPrefix = " << outputPrefix  << GEndl;
-
-    // removing unnecessarily verbose output from RooFit
-    RooMsgService::instance().getStream(1).removeTopic(NumIntegration);
-    RooMsgService::instance().getStream(1).removeTopic(Plotting);
-
-    if(w==NULL){ 
-        Logger << kERROR << "Workspace not found, no plotting performed" << GEndl; 
-        return; 
-    }
-    RooSimultaneous* pdf = (RooSimultaneous*) w->pdf("simPdf");
-
-    RooAbsData* data = ( inputData!=0 ? inputData : (RooAbsData*)w->data("obsData") ); 
-
-    RooCategory* regionCat = (RooCategory*) w->cat("channelCat");
-    data->table(*((RooAbsCategory*)regionCat))->Print("v");
-
-    if(plotRegions =="") plotRegions = "ALL";
-    std::vector<TString> regionsVec = GetRegionsVec(plotRegions, regionCat);
-
-    unsigned  int numPlots = regionsVec.size();  
-    TCanvas* canVec[numPlots];
-
-    // iterate over all the regions 
-    for(unsigned int iVec=0; iVec<numPlots; iVec++){
-        TString regionCatLabel = regionsVec[iVec];
-
-        if( regionCat->setLabel(regionCatLabel,kTRUE)){
-            Logger << kINFO << " Label '" << regionCatLabel << "' is not a state of channelCat (see Table) " << GEndl; 
-        } else {
-            RooAbsPdf* regionPdf = (RooAbsPdf*) pdf->getPdf(regionCatLabel.Data());
-            TString dataCatLabel = Form("channelCat==channelCat::%s",regionCatLabel.Data());
-            RooAbsData* regionData = (RooAbsData*) data->reduce(dataCatLabel.Data());
-            ChannelStyle style = fc->getChannelStyle(regionCatLabel);
-
-            if(regionPdf==NULL || regionData==NULL){ 
-                Logger << kWARNING << " Either the Pdf or the Dataset do not have an appropriate state for the region = " << regionCatLabel << ", check the Workspace file" << GEndl;
-                Logger << kWARNING << " regionPdf = " << regionPdf << "   regionData = " << regionData << GEndl;  
-                continue; 
-            }
-            RooRealVar* regionVar =(RooRealVar*) ((RooArgSet*) regionPdf->getObservables(*regionData))->find(Form("obs_x_%s",regionCatLabel.Data()));
-
-            //create plot
-            RooPlot* frame =  regionVar->frame(); 
-            frame->SetName(Form("frame_%s_%s",regionCatLabel.Data(),outputPrefix.Data()));
-
-            regionData->plotOn(frame,RooFit::DataError(RooAbsData::Poisson),MarkerColor(style.getDataColor()),LineColor(style.getDataColor()),XErrorSize(style.getXErrorSize()));
-            if(style.getRemoveEmptyBins()){
-                Logger << kINFO << "RemoveEmptyDataBins() removing empty bin points from data histogram on plot " << frame->GetName() << GEndl;
-                RemoveEmptyDataBins(frame);
-            }
-
-            // normalize pdf to number of expected events, not to number of events in dataset
-            regionPdf->plotOn(frame,Normalization(1,RooAbsReal::RelativeExpected),Precision(1e-5),LineColor(style.getTotalPdfColor()));
-
-            // plot components
-            if(plotComponents)  
-                AddComponentsToPlot(w, fc, frame, regionPdf, regionVar, regionCatLabel.Data(),style);
-
-            // visualize error of fit
-            if(rFit != NULL) {  
-                regionPdf->plotOn(frame,Normalization(1,RooAbsReal::RelativeExpected),Precision(1e-5),FillColor(style.getErrorFillColor()),FillStyle(style.getErrorFillStyle()),LineColor(style.getErrorLineColor()),LineStyle(style.getErrorLineStyle()),VisualizeError(*rFit));
-            }
-
-            // re-plot data and pdf, so they are on top of error and components
-            regionPdf->plotOn(frame,Normalization(1,RooAbsReal::RelativeExpected),Precision(1e-5),LineColor(style.getTotalPdfColor()));
-
-            regionData->plotOn(frame,RooFit::DataError(RooAbsData::Poisson),MarkerColor(style.getDataColor()),LineColor(style.getDataColor()),XErrorSize(style.getXErrorSize()));
-            if(style.getRemoveEmptyBins()) RemoveEmptyDataBins(frame);
-
-            TString canName=Form("can_%s_%s",regionCatLabel.Data(),outputPrefix.Data());
-            canVec[iVec] = new TCanvas(canName,canName, 700, 600);
-
-            // two pads, one for 'standard' plot, one for data/MC ratio
-            float yMinP1=0.305;
-            float bottomMarginP1=0.005;
-            if(plotRatio=="none"){ 
-                yMinP1=0.01;
-                bottomMarginP1=0.09;
-            }      
-            TPad *pad1 = new TPad(Form("%s_pad1",canName.Data()),Form("%s_pad1",canName.Data()),0.,yMinP1,.99,1);
-            pad1->SetBottomMargin(bottomMarginP1);
-            pad1->SetFillColor(kWhite);
-            pad1->SetTickx();
-            pad1->SetTicky();
-            TPad *pad2 = new TPad(Form("%s_pad2",canName.Data()),Form("%s_pad2",canName.Data()),0.,0.01,.99,0.295);
-            pad2->SetTopMargin(0.005);
-            pad2->SetBottomMargin(0.3);
-            pad2->SetFillColor(kWhite);
-
-            if(style.getLogY()) pad1->SetLogy();
-
-            if(style.getTitleX() != "")  
-                frame->GetXaxis()->SetTitle(style.getTitleX());
-            
-            pad1->Draw();
-            if(plotRatio!="none"){ 
-                pad2->Draw(); 
-                frame->GetXaxis()->SetLabelSize(0.); 
-            }
-
-            pad1->cd();
-
-            frame->SetMinimum(style.getMinY());
-
-            if( fabs(style.getMaxY() + 999.) > 0.000001){
-                frame->SetMaximum(style.getMaxY());
-            }
-
-            // draw frame
-            frame->SetTitle(""); 
-            // Remove the ticks on the upper pad in case of intergerstyle
-            if (style.getIntegerStyle()) {
-                frame->GetXaxis()->CenterLabels();
-                frame->GetXaxis()->SetNdivisions(frame->GetNbinsX(), 0, 0, kTRUE);
-            }
-            frame->Draw();
-
-            if ((fabs(style.getArrowX() + 1.) > 0.000001) &&  (fabs(style.getArrowY() + 1.) > 0.000001) && (fabs(style.getArrowEnd() + 1.) > 0.000001)) {
-                TArrow *BaseArrow = new TArrow(canVec[iVec]->XtoPad(style.getArrowX()), canVec[iVec]->YtoPad(0.), canVec[iVec]->XtoPad(style.getArrowX()), canVec[iVec]->YtoPad(style.getArrowY()), 0.05, "|");
-                BaseArrow->SetAngle(style.getArrowAngle());
-                BaseArrow->SetLineWidth(style.getArrowWidth());
-                BaseArrow->SetLineColor(style.getArrowColor());
-                BaseArrow->SetFillColor(style.getArrowColor());
-                BaseArrow->Draw();
-                TArrow *ArrowArrow = new TArrow(canVec[iVec]->XtoPad(style.getArrowX()), canVec[iVec]->YtoPad(style.getArrowY()), canVec[iVec]->XtoPad(style.getArrowEnd()), canVec[iVec]->YtoPad(style.getArrowY()), 0.05, "|>");
-                ArrowArrow->SetAngle(style.getArrowAngle());
-                ArrowArrow->SetLineWidth(style.getArrowWidth());
-                ArrowArrow->SetLineColor(style.getArrowColor());
-                ArrowArrow->SetFillColor(style.getArrowColor());
-                ArrowArrow->Draw();
-            }
-
-            // add cosmetics
-        // ATLAS specific - FIXME ; remove for public release
-            if( (fabs(style.getATLASLabelX() + 1.) > 0.000001) &&  (fabs(style.getATLASLabelY() + 1.) > 0.000001) ){
-                ATLASLabel(style.getATLASLabelX(),style.getATLASLabelY(),style.getATLASLabelText()) ; //"for approval");
-            }
-
-            if ( style.getShowLumi() ) {
-                Float_t lumi =  style.getLumi();
-                if ((fabs(style.getLumiX() + 1.) > 0.000001) && (fabs(style.getLumiY() + 1.) > 0.000001) ) {
-                    AddText(style.getLumiX(), style.getLumiY(), Form("#sqrt{s}=13 TeV, %.1f fb-1:", lumi));
-                }
-                else {
-                    AddText(0.175, 0.775, Form("#int Ldt = %.1f fb^{-1}", lumi));
-                }
-            }
-
-            if ((fabs(style.getRegionLabelX() + 1.) > 0.000001) &&  (fabs(style.getRegionLabelY() + 1.) > 0.000001) ) {
-                AddTextLabel(style.getRegionLabelX(), style.getRegionLabelY(), style.getRegionLabelText().Data()) ;
-            }
-
-            TLegend* leg = style.getTLegend();
-            // default TLegend built from sample names/colors
-            if(leg == NULL){
-                leg = new TLegend(0.5,0.44,0.895,0.895,"");
-                leg->SetFillStyle(0);
-                leg->SetFillColor(0);
-                leg->SetBorderSize(0);
-                TLegendEntry* entry=leg->AddEntry("","Data","p") ;
-                entry->SetMarkerColor(style.getDataColor());
-                entry->SetMarkerStyle(20);
-                entry=leg->AddEntry("","Standard Model","lf") ;
-                entry->SetLineColor(style.getTotalPdfColor());
-                entry->SetFillColor(style.getErrorFillColor());
-                entry->SetFillStyle(style.getErrorFillStyle());
-
-                // add components to legend
-                TString RRSPdfName = Form("%s_model",regionCatLabel.Data()); 
-                RooRealSumPdf* RRSPdf = (RooRealSumPdf*) regionPdf->getComponents()->find(RRSPdfName);
-                RooArgList RRSComponentsList =  RRSPdf->funcList();
-                RooLinkedListIter iter = RRSComponentsList.iterator() ;
-                RooProduct* component;
-                vector<TString> compNameVec;
-                compNameVec.clear();
-                while( (component = (RooProduct*) iter.Next())) { 
-                    TString  componentName = component->GetName();
-                    compNameVec.push_back(componentName);
-                }
-
-                for( int iComp = (compNameVec.size()-1) ; iComp>-1; iComp--){
-                    Int_t  compPlotColor    = ( (fc!=0) ? style.getSampleColor(compNameVec[iComp]) : iComp );
-                    TString  compShortName  = ( (fc!=0) ? style.getSampleName(compNameVec[iComp])  : "" );
-                    TString legName = compShortName;
-                    entry=leg->AddEntry("",legName.Data(),"f") ;
-                    entry->SetLineColor(compPlotColor);
-                    entry->SetFillColor(compPlotColor);
-                    entry->SetFillStyle(1001);
-                }
-            }
-            leg->Draw();    
-
-            // now make/draw the ratio histogram
-            if(plotRatio!="none"){
-                pad2->cd();
-
-                // data/pdf ratio histograms is plotted by RooPlot.ratioHist()
-                RooPlot* frame_dummy =  regionVar->frame(); 
-                data->plotOn(frame_dummy,Cut(dataCatLabel),RooFit::DataError(RooAbsData::Poisson));
-                // normalize pdf to number of expected events, not to number of events in dataset
-                regionPdf->plotOn(frame_dummy,Normalization(1,RooAbsReal::RelativeExpected),Precision(1e-5));
-
-                // Construct a histogram with the ratio of the data w.r.t the pdf curve
-                RooHist* hratio = NULL;
-                if(plotRatio=="ratio")  hratio = (RooHist*) frame_dummy->ratioHist() ;
-                else if(plotRatio=="pull") hratio = (RooHist*) frame_dummy->pullHist() ;
-                hratio->SetMarkerColor(style.getDataColor());
-                hratio->SetLineColor(style.getDataColor());
-
-                // Construct a histogram with the ratio of the pdf curve w.r.t the pdf curve +/- 1 sigma
-                RooCurve* hratioPdfError = new RooCurve;
-                if (rFit != NULL)  hratioPdfError = MakePdfErrorRatioHist(regionData, regionPdf, regionVar, rFit);
-                hratioPdfError->SetFillColor(style.getErrorFillColor());
-                hratioPdfError->SetFillStyle(style.getErrorFillStyle());
-                hratioPdfError->SetLineColor(style.getErrorLineColor());
-                hratioPdfError->SetLineStyle(style.getErrorLineStyle());
-
-                // Create a new frame to draw the residual distribution and add the distribution to the frame
-                RooPlot* frame2 = regionVar->frame() ;
-                if(plotRatio=="ratio")  hratio->SetTitle("Ratio Distribution");
-                else  if(plotRatio=="pull") hratio->SetTitle("Pull Distribution");
-                // only add PdfErrorsPlot when the plot shows ratio, not with pull
-                if (rFit != NULL && plotRatio=="ratio")   frame2->addPlotable(hratioPdfError,"F");
-                frame2->addPlotable(hratio,"0P");
-
-                // ratio plot cosmetics
-                int firstbin = frame_dummy->GetXaxis()->GetFirst();
-                int lastbin = frame_dummy->GetXaxis()->GetLast();
-                double xmax = frame_dummy->GetXaxis()->GetBinUpEdge(lastbin) ;
-                double xmin = frame_dummy->GetXaxis()->GetBinLowEdge(firstbin) ;
-
-                TLine* l = new TLine(xmin,1.,xmax,1.);
-                TLine* l2 = new TLine(xmin,0.5,xmax,0.5);
-                TLine* l3 = new TLine(xmin,1.5,xmax,1.5);
-                TLine* l4 = new TLine(xmin,2.,xmax,2.);
-                TLine* l5 = new TLine(xmin,2.5,xmax,2.5);
-                l->SetLineWidth(1);
-                l->SetLineStyle(2);
-                l2->SetLineStyle(3);
-                l3->SetLineStyle(3);
-                l4->SetLineStyle(3);
-                l5->SetLineStyle(3);
-
-
-                TLine* lp1 = new TLine(xmin,1.,xmax,1.);    
-                TLine* lp2 = new TLine(xmin,2.,xmax,2.);    
-                TLine* lp3 = new TLine(xmin,3.,xmax,3.);
-                TLine* lp4 = new TLine(xmin,4.,xmax,4.);
-                TLine* lp5 = new TLine(xmin,5.,xmax,5.);
-                TLine* lp6 = new TLine(xmin,-1.,xmax,-1.);  
-                TLine* lp7 = new TLine(xmin,-2.,xmax,-2.);  
-                TLine* lp8 = new TLine(xmin,-3.,xmax,-3.);
-                TLine* lp9 = new TLine(xmin,-4.,xmax,-4.);
-                TLine* lp10 = new TLine(xmin,-5.,xmax,-5.);
-
-                lp1->SetLineStyle(3);
-                lp2->SetLineStyle(3);
-                lp3->SetLineStyle(3);
-                lp4->SetLineStyle(3);
-                lp5->SetLineStyle(3);
-                lp6->SetLineStyle(3);
-                lp7->SetLineStyle(3);
-                lp8->SetLineStyle(3);
-                lp9->SetLineStyle(3);
-                lp10->SetLineStyle(3);
-
-                if(plotRatio=="ratio"){ 
-                    frame2->addObject(l);
-                    frame2->addObject(l2);
-                    frame2->addObject(l3);
-                    frame2->addObject(l4);
-                    frame2->addObject(l5);
-                } else if(plotRatio=="pull"){
-                    frame2->addObject(lp1);
-                    frame2->addObject(lp2);
-                    frame2->addObject(lp3);
-                    frame2->addObject(lp4);
-                    frame2->addObject(lp5);
-                    frame2->addObject(lp6);
-                    frame2->addObject(lp7);
-                    frame2->addObject(lp8);
-                    frame2->addObject(lp9);
-                    frame2->addObject(lp10);
-                }
-
-                Double_t lowerlimit = 0.; 
-                Double_t upperlimit = 2.2; 
-                if (plotRatio=="pull"){ 
-                    lowerlimit = -5.7; upperlimit = 5.7;
-                }
-
-                frame2->SetMinimum(lowerlimit);
-                frame2->SetMaximum(upperlimit);
-
-                if(plotRatio=="ratio") 
-                    frame2->GetYaxis()->SetTitle("Data / SM");
-                else if(plotRatio=="pull")
-                    frame2->GetYaxis()->SetTitle("Pull");
-
-                if(style.getTitleX() != "")  
-                    frame2->GetXaxis()->SetTitle(style.getTitleX());
-
-                if(style.getTitleY() != "")  
-                    frame->GetYaxis()->SetTitle(style.getTitleY());
-
-                frame2->GetYaxis()->SetLabelSize(0.13);
-                frame2->GetYaxis()->SetNdivisions(504);         
-                frame2->GetXaxis()->SetLabelSize(0.13);
-                frame2->GetYaxis()->SetTitleSize(0.14);
-                frame2->GetXaxis()->SetTitleSize(0.14);
-                frame2->GetYaxis()->SetTitleOffset(0.35);
-                frame2->GetXaxis()->SetTitleOffset(1.);
-                frame2->GetYaxis()->SetLabelOffset(0.01);
-                frame2->GetXaxis()->SetLabelOffset(0.03);
-                frame2->GetXaxis()->SetTickLength(0.06);
-
-                frame2->SetTitle("");
-                frame2->GetYaxis()->CenterTitle(); 
-
-                if (style.getIntegerStyle()) {
-                    frame2->GetXaxis()->CenterLabels();
-                    frame2->GetXaxis()->SetNdivisions(frame2->GetNbinsX(), 0, 0, kTRUE);
-                }
-                frame2->Draw();
-            }
-
-            canVec[iVec]->SaveAs("results/"+anaName+"/"+canName+".pdf");
-            canVec[iVec]->SaveAs("results/"+anaName+"/"+canName+".eps");
-
-        }
-    }
-
-}
-
-//_____________________________________________________________________________
-void Util::AddComponentsToPlot(RooWorkspace* w, FitConfig* fc, RooPlot* frame, RooAbsPdf* regionPdf, RooRealVar* obsRegion, TString regionCatLabel, ChannelStyle style) {
-
-    TString RRSPdfName = Form("%s_model",regionCatLabel.Data()); 
-    RooRealSumPdf* RRSPdf = (RooRealSumPdf*) regionPdf->getComponents()->find(RRSPdfName);
-    Logger << kINFO << "Adding Components of Region-Model = " << RRSPdfName << " to plot" << GEndl;
-
-    RooArgList RRSComponentsList =  RRSPdf->funcList();
-    //RRSComponentsList.Print("v");
-
-    RooLinkedListIter iter = RRSComponentsList.iterator() ;
-    RooProduct* component;
-    vector<TString> compNameVec;
-    vector <double> compFracVec;
-    vector<TString> compStackNameVec;
-    vector <double> compStackFracVec;
-    compNameVec.clear();
-    compStackNameVec.clear();
-    compFracVec.clear();
-    compStackFracVec.clear();
-
-    TString binWidthName =  Form("binWidth_obs_x_%s_0",regionCatLabel.Data());
-    RooRealVar* regionBinWidth = ((RooRealVar*) RRSPdf->getVariables()->find(Form("binWidth_obs_x_%s_0",regionCatLabel.Data()))) ;
-
-    if(regionBinWidth==NULL){
-        Logger << kWARNING << " bindWidth variable not found for region(" << regionCatLabel << "),   PLOTTING COMPONENTS WILL BE WRONG " << GEndl ;
-    }
-
-    while( (component = (RooProduct*) iter.Next())) { 
-        TString  componentName = component->GetName();
-        TString stackComponentName = componentName; 
-        if(!compStackNameVec.empty()){  stackComponentName  = Form("%s,%s",compStackNameVec.back().Data() ,componentName.Data()); }
-        compNameVec.push_back(componentName);
-        compStackNameVec.push_back(stackComponentName);
-
-        double componentFrac = GetComponentFrac(w,componentName,RRSPdfName,obsRegion,regionBinWidth) ;
-        double stackComponentFrac = componentFrac; 
-        if(!compStackFracVec.empty()){  stackComponentFrac  = compStackFracVec.back() + componentFrac; } 
-        compFracVec.push_back(componentFrac);
-        compStackFracVec.push_back(stackComponentFrac);
-
-    }
-
-    // normalize data to expected number of events 
-    double normCount = regionPdf->expectedEvents(*obsRegion);
-
-    for( int iVec = (compFracVec.size()-1) ; iVec>-1; iVec--){
-        Int_t  compPlotColor = ( (fc!=0) ? style.getSampleColor(compNameVec[iVec]) : iVec );
-
-        if(compPlotColor < 0) compPlotColor = kMagenta;
-
-        regionPdf->plotOn(frame,Components(compStackNameVec[iVec].Data()),FillColor(compPlotColor),FillStyle(1001),DrawOption("F"),Normalization(compStackFracVec[iVec]*normCount,RooAbsReal::NumEvent),Precision(1e-5));
-
-    }
-}
-
 
 //_____________________________________________________________________________________________________________________________________
 void Util::PlotSeparateComponents(RooWorkspace* w,TString fcName, TString anaName, TString plotRegions,TString outputPrefix, RooFitResult* rFit, RooAbsData* inputData)
@@ -1536,7 +1183,7 @@ void Util::PlotSeparateComponents(RooWorkspace* w,TString fcName, TString anaNam
                 leg->SetBorderSize(0);
                 TLegendEntry* entry=leg->AddEntry("","Prop. Fit Error","f") ;
                 entry->SetMarkerColor(kCyan);
-                entry->SetMarkerStyle();    
+                entry->SetMarkerStyle();
                 entry->SetFillColor(kCyan);
                 entry->SetFillStyle(1001);
                 entry=leg->AddEntry("",compShortName.Data(),"l") ;
@@ -1563,10 +1210,23 @@ void Util::PlotNLL(RooWorkspace* w, RooFitResult* rFit, Bool_t plotPLL, TString 
     Logger << kINFO << " ------ Starting PlotNLL with parameters: " << GEndl;
     Logger << kINFO << "  outputPrefix = " << outputPrefix  << GEndl;
 
-    if(w==NULL){ 
+    if(!w){ 
         Logger << kINFO << " Workspace not found, no plotting performed" << GEndl; 
         return; 
     }
+    
+    if(!deactivateBinnedLikelihood) {
+        RooFIter iter = w->components().fwdIterator();
+        RooAbsArg* arg;
+        while ((arg = iter.next())) {
+            if (arg->IsA() == RooRealSumPdf::Class()) {
+                arg->setAttribute("BinnedLikelihood");
+                cout << "Activating binned likelihood attribute for " << arg->GetName() << endl;
+            }
+        }
+    }
+
+
     RooSimultaneous* pdf = (RooSimultaneous*) w->pdf("simPdf");
 
     RooAbsData* data = ( inputData!=0 ? inputData : (RooAbsData*)w->data("obsData") ); 
@@ -1691,8 +1351,8 @@ void Util::PlotNLL(RooWorkspace* w, RooFitResult* rFit, Bool_t plotPLL, TString 
         // To be able to see the 1/2 sigma
         frame->SetMaximum(2.5);
 
-        const char* curvename = 0;
-        RooCurve* curve = (RooCurve*) frame->findObject(curvename,RooCurve::Class()) ;
+        //const char* curvename = 0;
+        RooCurve* curve = (RooCurve*) frame->findObject(nullptr, RooCurve::Class()) ;
 
         TGraph* nllCurve = static_cast<TGraph*>(curve->Clone());
         nllCurve->SetName(TString("nll_")+parName);
@@ -1711,11 +1371,11 @@ void Util::PlotNLL(RooWorkspace* w, RooFitResult* rFit, Bool_t plotPLL, TString 
                     Logger << kWARNING << " Removing bin = " << iBin  << " as it was either inf or nan from NLL plot for parameter = " << parName<< GEndl;
                     iBin--;
                 }
-            }   
+            } 
 
             Int_t iBin = 1;
             Double_t xFirstBin = 0.;
-            Double_t yFirstBin = -1.;   
+            Double_t yFirstBin = -1.; 
             while ( (yFirstBin<0 || std::isinf(yFirstBin)  || std::isnan(yFirstBin) )&& iBin < curve->GetN()-1){
                 iBin++;
                 curve->GetPoint(iBin,xFirstBin,yFirstBin) ;
@@ -1726,7 +1386,7 @@ void Util::PlotNLL(RooWorkspace* w, RooFitResult* rFit, Bool_t plotPLL, TString 
             }
             iBin = curve->GetN()-1;
             Double_t xLastBin = 0.;
-            Double_t yLastBin = -1.;    
+            Double_t yLastBin = -1.;
             while ( (yLastBin < 0 || std::isinf(yLastBin) || std::isnan(yLastBin) ) && iBin >0){
                 iBin--;
                 curve->GetPoint(iBin,xLastBin,yLastBin) ; 
@@ -1758,8 +1418,8 @@ void Util::PlotNLL(RooWorkspace* w, RooFitResult* rFit, Bool_t plotPLL, TString 
         if(plotPLL) { 
             pll = nll->createProfile(*par) ;
             pll->plotOn(frame, LineColor(kRed), LineStyle(kDashed), NumCPU(4));
-            const char* curvename = 0;
-            RooCurve* curve = (RooCurve*) frame->findObject(curvename,RooCurve::Class()) ;
+            //const char* curvename = 0;
+            RooCurve* curve = (RooCurve*) frame->findObject(nullptr, RooCurve::Class()) ;
 
             pllCurve = static_cast<TGraph*>(curve->Clone());
             pllCurve->SetName(TString("nll_")+parName);
@@ -2106,6 +1766,17 @@ Util::doFreeFit( RooWorkspace* w, RooDataSet* inputdata, const bool& verbose, co
         return NULL;
     }
 
+    if(!deactivateBinnedLikelihood) {
+        RooFIter iter = w->components().fwdIterator();
+        RooAbsArg* arg;
+        while ((arg = iter.next())) {
+            if (arg->IsA() == RooRealSumPdf::Class()) {
+                arg->setAttribute("BinnedLikelihood");
+                cout << "Activating binned likelihood attribute for " << arg->GetName() << endl;
+            }
+        }
+    }
+
     RooStats::ModelConfig* mc = Util::GetModelConfig(w);
 
     if(mc==0){
@@ -2167,16 +1838,20 @@ Util::doFreeFit( RooWorkspace* w, RooDataSet* inputdata, const bool& verbose, co
     RooMinimizer minim(*nll);
     int strategy = ROOT::Math::MinimizerOptions::DefaultStrategy();
     minim.setStrategy( strategy);
+    
     // use tolerance - but never smaller than 1 (default in RooMinimizer)
     double tol =  ROOT::Math::MinimizerOptions::DefaultTolerance();
     tol = std::max(tol,1.0); // 1.0 is the minimum value used in RooMinimizer
     minim.setEps( tol );
+    
     //LM: RooMinimizer.setPrintLevel has +1 offset - so subtruct  here -1
     minim.setPrintLevel(minimPrintLevel-1);
-    int status = -1;
     minim.optimizeConst(2);
+    
     TString minimizer = "Minuit2"; //ROOT::Math::MinimizerOptions::DefaultMinimizerType(); 
     TString algorithm = ROOT::Math::MinimizerOptions::DefaultMinimizerAlgo(); 
+    
+    int status = -1;
 
     // require covQual = 3 from any fit while retrying?
     bool requireGoodCovQual = true;
@@ -3167,36 +2842,53 @@ void Util::RemoveEmptyDataBins( RooPlot* frame){
 
 }
 
+RooHist* Util::MakeRatioOrPullHist(RooAbsData *regionData, RooAbsPdf *regionPdf, RooRealVar *regionVar, bool makePull /*false*/) {
+	// data/pdf ratio histograms are plotted by RooPlot.ratioHist() through a dummy frame
+	RooPlot* frame_dummy = regionVar->frame(); 
+	regionData->plotOn(frame_dummy, RooFit::DataError(RooAbsData::Poisson));
+	
+	// normalize pdf to number of expected events, not to number of events in dataset
+	regionPdf->plotOn(frame_dummy, RooFit::Normalization(1, RooAbsReal::RelativeExpected), 
+								     RooFit::Precision(1e-5));
 
+	if(makePull) {	
+        return dynamic_cast<RooHist*>(frame_dummy->pullHist());
+	}
+		
+    return dynamic_cast<RooHist*>(frame_dummy->ratioHist());
+}
 
 //________________________________________________________________________________________________________________________________________
 RooCurve* Util::MakePdfErrorRatioHist(RooAbsData* regionData, RooAbsPdf* regionPdf, RooRealVar* regionVar, RooFitResult* rFit, Double_t Nsigma){
 
-    // curvename=0 means that the last RooCurve is taken from the RooPlot
-    const char* curvename = 0;
-
-    RooPlot* frame =  regionVar->frame(); 
+    RooPlot* frame = regionVar->frame(); 
     regionData->plotOn(frame, RooFit::DataError(RooAbsData::Poisson));
 
     // normalize pdf to number of expected events, not to number of events in dataset
-    regionPdf->plotOn(frame,Normalization(1,RooAbsReal::RelativeExpected),Precision(1e-5));
-    RooCurve* curveNom = (RooCurve*) frame->findObject(curvename,RooCurve::Class()) ;
+    regionPdf->plotOn(frame, Normalization(1, RooAbsReal::RelativeExpected), Precision(1e-5));
+    RooCurve* curveNom = (RooCurve*) frame->findObject(nullptr, RooCurve::Class()) ;
     if (!curveNom) {
         Logger << kERROR << "Util::MakePdfErrorRatioHist(" << frame->GetName() << ") cannot find curveNom" << curveNom->GetName() << GEndl ;
         return 0 ;
     }
 
-    if(rFit != NULL) regionPdf->plotOn(frame,Normalization(1,RooAbsReal::RelativeExpected),Precision(1e-5),FillColor(kBlue-5),FillStyle(3004),VisualizeError(*rFit,Nsigma));
+    if(rFit != NULL) {
+        regionPdf->plotOn(frame, Normalization(1, RooAbsReal::RelativeExpected), 
+                                 Precision(1e-5), 
+                                 FillColor(kBlue-5), 
+                                 FillStyle(3004), 
+                                 VisualizeError(*rFit, Nsigma));
+    }
 
     // Find curve object
-    RooCurve* curveError = (RooCurve*) frame->findObject(curvename,RooCurve::Class()) ;
+    RooCurve* curveError = (RooCurve*) frame->findObject(nullptr, RooCurve::Class()) ;
     if (!curveError) {
         Logger << kERROR << "Util::makePdfErrorRatioHist(" << frame->GetName() << ") cannot find curveError" << GEndl ;
         return 0 ;
     }
 
     RooCurve* ratioBand = new RooCurve ;
-    ratioBand->SetName(Form("%s_ratio_errorband",curveNom->GetName())) ;
+    ratioBand->SetName(Form("%s_ratio_errorband", curveNom->GetName())) ;
     ratioBand->SetLineWidth(1) ;
     ratioBand->SetLineColor(kBlue-5);
     ratioBand->SetFillColor(kBlue-5);
@@ -3204,10 +2896,10 @@ RooCurve* Util::MakePdfErrorRatioHist(RooAbsData* regionData, RooAbsPdf* regionP
 
     Int_t j = 0;
     Bool_t bottomCurve = kFALSE;
-    for(Int_t i=1; i<curveError->GetN()-1; i++){
+    for(Int_t i=1; i < curveError->GetN()-1; ++i){
         Double_t x = 0.;
         Double_t y = 0.;
-        curveError->GetPoint(i,x,y) ;
+        curveError->GetPoint(i, x, y) ;
 
         // errorBand curve has twice as many points as does a normal/nominal (pdf) curve
         //  first it walks through all +1 sigma points (topCurve), then the -1 sigma points (bottomCurve)
@@ -3219,7 +2911,7 @@ RooCurve* Util::MakePdfErrorRatioHist(RooAbsData* regionData, RooAbsPdf* regionP
 
         // each errorCurve has two more points just outside the plot, so we need to treat them separately
         if( i == (curveNom->GetN() - 1) ||  i == curveNom->GetN() ){
-            ratioBand->addPoint(x, 0.);   
+            ratioBand->addPoint(x, 0.);
             continue;
         }
 
@@ -3894,3 +3586,66 @@ void Util::PlotFitParameters(RooFitResult* r, TString anaName){
  c_np->SaveAs("results/"+anaName+"/"+c_np->GetName()+".root"); 
 
 }
+
+//-------------------------------------------------------------------------------------------------------
+
+TH1* Util::ComponentToHistogram(RooRealSumPdf* component, RooRealVar* variable, RooFitResult *fitResult) {
+    // Build a TH1-based histogram from a pdf, an observable and a fit result
+
+    // Get the stepsize and build a histogram according to the binning of the variable
+    auto stepsize = variable->getBinning().averageBinWidth();
+    auto hist = component->createHistogram(Form("hist_%s", component->GetName()), *variable);
+
+    // Now loop over the bins and fill them 
+    for(unsigned int i=0; i < hist->GetNbinsX()+2; ++i) {
+        auto low = hist->GetBinLowEdge(i);
+        auto width = hist->GetBinWidth(i);
+
+        // Constraint the observable to this bin
+        variable->setRange(Form("bin%d", i), low, low+width);
+
+        // Start by integrating in this bin
+        auto integral = component->createIntegral(RooArgSet(*variable), RooFit::Range(Form("bin%d", i)) );
+
+        // Now get the value and the error
+        auto sum = integral->getVal() / stepsize;
+        auto err = integral->getPropagatedError(*fitResult) / stepsize;
+
+        // and put them in the histogram
+        hist->SetBinContent(i, sum);
+        hist->SetBinError(i, err);
+    }
+
+    auto sum = component->createIntegral(RooArgSet(*variable))->getVal();
+    
+    double scale = 0.0;
+    if(sum != 0 && hist->Integral() != 0) {
+        scale = sum / hist->Integral();
+    }
+
+    hist->Scale(scale);
+
+    return hist;
+}
+
+void Util::ScaleGraph(TGraphAsymmErrors *g, TH1* h) { 
+    if (g->GetN() != h->GetNbinsX() ) {
+        Logger << kERROR << "Cannot multiply graph with " << g->GetN() << " points with histogram with " << h->GetNbinsX() << " points" << GEndl ; 
+        throw 1 ; 
+    }
+
+    for(int i=0; i < g->GetN(); ++i) {
+        // TGraphs are 0-indexed, TH1s are 1-indexed.
+        int j = i+1;
+
+        double x, y;
+        g->GetPoint(i, x, y); 
+
+        g->SetPoint(i, x, y * h->GetBinContent(j));
+        g->SetPointEYhigh(i, g->GetErrorYhigh(i) * h->GetBinContent(j));
+        g->SetPointEYlow(i, g->GetErrorYlow(i) * h->GetBinContent(j));
+    }
+
+    return;
+}
+

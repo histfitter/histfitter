@@ -109,6 +109,9 @@ class ConfigMgr {
         void setNPoints(const int& type) { m_nPoints = type; }
         int  getNPoints() { return m_nPoints; }
 
+        void setDisableULRangeExtension(bool b) { m_disableULRangeExtension = b; }
+        bool getDisableULRangeExtension() { return m_disableULRangeExtension; }
+
         void setSeed(const int& seed=0) { m_seed = seed; }
         int  getSeed() { return m_seed; }
 
@@ -144,8 +147,9 @@ class ConfigMgr {
         TString m_outputFileName;
         std::vector<FitConfig*> m_fitConfigs;
         int  m_seed;
-        bool m_useAsimovSet;  
-	std::string m_plotRatio;
+        bool m_useAsimovSet;
+        bool m_generateAsimovDataForObserved;
+        std::string m_plotRatio;
 
     private:
         TMsgLogger m_logger;
@@ -161,8 +165,11 @@ class ConfigMgr {
         bool m_runOnlyNominalXSec;
         bool m_doUL;
         int  m_nPoints;
+        bool  m_disableULRangeExtension;
         double m_muValGen;
         bool m_removeEmptyBins;
+
+        bool m_deactivateBinnedLikelihood;
 	
         std::vector<std::string> m_chnNameVec; 
         std::vector<std::string> m_bkgParNameVec;

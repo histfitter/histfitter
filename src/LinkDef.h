@@ -6,21 +6,21 @@
 
 #pragma link C++ nestedclass;
 
-#pragma link C++ class ConfigMgr;
-#pragma link C++ class FitConfig;
-#pragma link C++ class RooExpandedFitResult;
-#pragma link C++ class XtraValues;
-#pragma link C++ class TMsgLogger;
+#pragma link C++ class ConfigMgr+;
+#pragma link C++ class FitConfig+;
+#pragma link C++ class RooExpandedFitResult+;
+#pragma link C++ class XtraValues+;
+#pragma link C++ class TMsgLogger+;
 
-#pragma link C++ namespace Util;
-#pragma link C++ function Util::GetToyMC;
+#pragma link C++ namespace Util+;
+#pragma link C++ function Util::GetToyMC+;
 
-#pragma link C++ namespace ValidationUtils;
-#pragma link C++ function ValidationUtils::PullPlot3;
+#pragma link C++ namespace ValidationUtils+;
+#pragma link C++ function ValidationUtils::PullPlot3+;
 
-#pragma link C++ class ChannelStyle;
-#pragma link C++ class std::vector<ChannelStyle>;
-#pragma link C++ class vector<ChannelStyle>::iterator;
+#pragma link C++ class ChannelStyle+;
+#pragma link C++ class std::vector<ChannelStyle>+;
+#pragma link C++ class vector<ChannelStyle>::iterator+;
 
 //////////////////////////////////////
 /// Functions from combination package

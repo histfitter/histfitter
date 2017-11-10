@@ -99,8 +99,8 @@ class ChannelStyle : public TObject{
   TString getATLASLabelText() { return m_ATLASLabelText;}
   void setATLASLabelText(const TString&  text) { m_ATLASLabelText = text; }
 
-  Bool_t getShowLumi() { return m_ShowLumi;}
-  void setShowLumi(Bool_t showlumi = kFALSE) { m_ShowLumi = showlumi; }
+  Bool_t getShowLumi() { return m_showLumi;}
+  void setShowLumi(Bool_t showlumi = kFALSE) { m_showLumi = showlumi; }
 
   Double_t getRegionLabelX() { return m_RegionLabelX;}
   void setRegionLabelX(Double_t x) { m_RegionLabelX = x; }
@@ -190,7 +190,7 @@ private:
   Double_t m_ATLASLabelX;
   Double_t m_ATLASLabelY;
   TString m_ATLASLabelText;
-  Bool_t m_ShowLumi;        
+  Bool_t m_showLumi; 
 
   Double_t m_RegionLabelX;
   Double_t m_RegionLabelY;
