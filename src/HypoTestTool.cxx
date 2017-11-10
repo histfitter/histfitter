@@ -898,7 +898,7 @@ RooStats::HypoTestTool::SetupHypoTestInverter(RooWorkspace * w,
         m_calc->SetFixedScan(npoints,poimin,poimax);
     }
     else { 
-        m_logger << kINFO << "Doing an  automatic scan  in interval : " << poi->getMin() << " , " << poi->getMax() << GEndl;
+        m_logger << kINFO << "Doing an automatic scan in interval: " << poi->getMin() << " , " << poi->getMax() << GEndl;
     }
 
     m_logger << kINFO << ">>> Done setting up HypoTestInverter on the workspace " << w->GetName() << GEndl;
