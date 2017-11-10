@@ -9,3 +9,19 @@ data/*.root
 
 # copied from the src dir!
 include/*.h 
+
+# tutorial output
+results/MyUserAnalysis*
+results/MyConfigExample*
+config/MyUserAnalysis*
+config/MyConfigExample*
+data/MyUserAnalysis*
+data/MyConfigExample*
+
+# plots
+results/upperlimit*.png
+results/upperlimit*.pdf
+results/upperlimit*.eps
+
+# other forms of output
+results/*.root
