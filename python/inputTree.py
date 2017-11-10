@@ -1,9 +1,15 @@
+from logger import Logger
+
+log = Logger('InputTree')
+
 class InputTree(object):
     def __init__(self, filename, treename, friends=[]):
         # if the file doesn't exist, that's OK. A file without a treename is not.
 
         if treename == "":
             raise ValueError("Cannot initialize InputTree without treename")
+
+        log.verbose("Initialising input tree with filename='{}' and treename='{}'".format(filename, treename))
 
         self.filename = filename
         self._treename = treename
