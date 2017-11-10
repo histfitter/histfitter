@@ -156,9 +156,15 @@ dataSample.setData()
 dataSample.buildHisto([86.,66.,62.,35.,11.,7.,2.,0.],"SLTR","nJet",2)
 dataSample.buildHisto([1092.,426.,170.,65.,27.,9.,4.,1.],"SLWR","nJet",2)
 
-# set the file from which the samples should be taken
-for sam in [topSample, wzSample, qcdSample, bgSample, dataSample]:
-        sam.setFileList(bgdFiles)
+## set the file from which the samples should be taken
+#for sam in [topSample, wzSample, qcdSample, bgSample, dataSample]:
+    #sam.setFileList(bgdFiles)
+
+topSample.addInputs(bgdFiles, "Top")
+wzSample.addInputs(bgdFiles, "WZ")
+qcdSample.addInputs(bgdFiles, "QCD")
+bgSample.addInputs(bgdFiles, "BG")
+dataSample.addInputs(bgdFiles, "Data")
 
 #Binnings
 nJetBinLowHard = 3
@@ -312,7 +318,7 @@ if myFitType==FitType.Exclusion:
         myTopLvl = configMgr.addFitConfigClone(bkt,"Sig_%s"%sig)
 
         sigSample = Sample(sig,kPink)
-        sigSample.setFileList(sigFiles)
+        sigSample.addInputs(sigFiles)
         sigSample.setNormByTheory()
         sigSample.setStatConfig(useStat)
         sigSample.setNormFactor("mu_SIG",1.,0.,5.)                    

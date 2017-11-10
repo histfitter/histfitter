@@ -34,7 +34,7 @@ ChannelStyle::ChannelStyle(const TString& name) : m_logger("ChannelStyle") {
     m_errorLineColor = kBlue - 5;
     m_errorLineStyle = 1;    // AK: 1 = kSolid, which somehow does not compile    
     m_errorFillColor = kBlue - 5;
-    m_errorFillStyle = 3004;
+    m_errorFillStyle = 3004; 
     m_legend = NULL;
     m_removeEmptyBins = false;     
 
@@ -47,7 +47,7 @@ ChannelStyle::ChannelStyle(const TString& name) : m_logger("ChannelStyle") {
     m_ATLASLabelX = -1.;
     m_ATLASLabelY = -1.;
     m_ATLASLabelText = "";
-    m_ShowLumi = kFALSE;
+    m_showLumi = kFALSE;
     m_lumi = -1.;
     m_RegionLabelX = -1.;
     m_RegionLabelY = -1.;
@@ -77,7 +77,7 @@ ChannelStyle::ChannelStyle(const TString& name) : m_logger("ChannelStyle") {
 Int_t ChannelStyle::getSampleColor(const TString& sample){
   Bool_t sampleFound = kFALSE;
   for(unsigned int i = 0; i< m_sampleColors.size(); i++){
-    m_logger << kDEBUG << "getSampleColor:  requested sample name: "<<sample  
+    m_logger << kVERBOSE << "getSampleColor:  requested sample name: "<<sample  
 	     << " , defined m_sampleNames[" << i << "]="<< m_sampleNames[i] << GEndl;
     TString target = "_"+m_sampleNames[i]+"_";
     if( sample.Contains(target.Data())){
@@ -102,7 +102,7 @@ Int_t ChannelStyle::getSampleColor(const TString& sample){
 //_______________________________________________________________________________________
 TString ChannelStyle::getSampleName(const TString& sample){
     for(unsigned int i = 0; i< m_sampleNames.size(); i++){
-      m_logger << kDEBUG << "getSampleName: requested sample name: "<<sample  
+      m_logger << kVERBOSE << "getSampleName: requested sample name: "<<sample  
 	       << ", defined m_sampleNames[" << i << "]="<< m_sampleNames[i] << GEndl;
       TString target = "_"+m_sampleNames[i]+"_";
       if( sample.Contains(target.Data())){

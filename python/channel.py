@@ -22,6 +22,7 @@ from ROOT import TFile, TMath, RooRandom, TH1, TH1F
 from ROOT import kBlack, kWhite, kGray, kRed, kPink, kMagenta, kViolet, kBlue, kAzure, kCyan, kTeal, kGreen, kSpring, kYellow, kOrange, kDashed, kSolid, kDotted
 from sample import Sample
 from logger import Logger
+from inputTree import InputTree
 
 import generateToys
 
@@ -66,6 +67,7 @@ class Channel(object):
         self.binHigh = binHigh
         self.binLow = binLow
         self.sampleList = []
+        self.samplesToMerge = []
         self.dataList = []
         self.weights = []
         self.systDict = {}
@@ -79,8 +81,8 @@ class Channel(object):
             self.hasStatConfig = True
             self.statErrorThreshold = statErrorThreshold
             self.statErrorType = "Gaussian" #"Gaussian" "Poisson"
-        self.files = []
-        self.treeName = ''
+        self.input_files = set()
+        #self.treeName = ''
         self.parentTopLvl = None
         #  Plot cosmetics
         self.minY = None
@@ -113,6 +115,7 @@ class Channel(object):
         self.text2 = ''
         self.textsize1 = 0.03
         self.textsize2 = 0.03
+        self.ignoreAdditionalCuts = False # ignore any sample-specific cuts in this region
 
 
         log.debug("Defining new channel '{0}'".format(self.name))
@@ -166,8 +169,15 @@ class Channel(object):
             # don't overwrite the last element but append it
             index = len(self.sampleList) 
 
+        log.verbose("addSample: adding sample {} to channel {}".format(sample.name, self.name))
+
         self.sampleList.insert(index, sample.Clone())
         self.sampleList[index].parentChannel = self
+
+        # Add any input files we own to the channel
+        log.debug("Appending existing {} files for channel {} to sample {}".format(len(self.input_files), self.channelName, sample.name))
+        for i in self.input_files:
+            sample.addInput(i.filename, i.treename)
 
         if sample.isData or sample.isDiscovery or sample.isQCD:
             return
@@ -192,7 +202,7 @@ class Channel(object):
                 return s
 
         raise Exception("Could not find sample with name %s in %s"
-                        % (name, self.sampleList))
+                        % (name, [s.name for s in self.sampleList]))
 
     def hasSample(self, name):
         """
@@ -227,38 +237,54 @@ class Channel(object):
         
         return
 
-    def setFileList(self, filelist):
-        """
-        Set file list for this Channel.
-        This will be used as default for samples that don't specify
-        their own file list.
+    def addInputsToSamples(self, filename):
+        # add inputs to the samples, not to ourselves
+        for sample in self.sampleList:
+            sample.addInput(filename)
 
-        @param filelist The list to set
-        """
-        self.files = filelist
+    def addInput(self, filename, treename):
+        # add an input with a treename
+        self.input_files.add(InputTree(filename, treename))
+       
+        for sample in self.sampleList:
+            sample.addInput(filename, treename)
 
-    def setFile(self, file):
-        """
-        Set file for this Sample directly
-        This will be used as default for samples that don't specify
-        their own file list.
+    def addInputs(self, filenames, treename):
+        # bulk add a bunch of filenames with the same treename
+        for f in filenames:
+            self.addInput(f, treename)
 
-        @param file The file to set as filelist.
-        """
-        self.files = [file]
+    #def setFileList(self, input_files):
+        #"""
+        #Set file list for this Channel.
+        #This will be used as default for samples that don't specify
+        #their own file list.
 
-    def propagateFileList(self, fileList):
-        """
-        Propagate the file list downwards to all owned samples. Only sets own file list if not previously given.
+        #@param filelist The list to set
+        #"""
+        #self.input_files = input_files
 
-        @param fileList List of filenames to propagate downwards.
-        """
-        #  if we don't have our own file list,  use the one given to us
-        if not self.files:
-            self.files = fileList
-        #  propagate our file list downwards
-        for sam in self.sampleList:
-                sam.propagateFileList(self.files)
+    #def setFile(self, file):
+        #"""
+        #Set file for this Sample directly
+        #This will be used as default for samples that don't specify
+        #their own file list.
+
+        #@param file The file to set as filelist.
+        #"""
+        #self.input_files = [file]
+
+    #def propagateInputFiles(self, input_files):
+        #"""
+        #Propagate our file list downwards to all owned samples. Only sets own file list if not previously given.
+        #"""
+        ## if we don't have our own file list,  use the one given to us
+        #if not self.input_files:
+            #self.input_files = input_files
+        
+        ## propagate our file list downwards
+        #for sam in self.sampleList:
+            #sam.propagateInputFiles(self.input_files)
 
     def setWeights(self, weights):
         """
@@ -422,30 +448,39 @@ class Channel(object):
             raise KeyError("Could not find systematic %s "
                            "in channel %s" % (systName, self.name))
 
-    def setTreeName(self, treeName):
-        """
-        Set the input tree name
+    #def setTreeName(self, treeName):
+        #"""
+        #Set the input tree name
 
-        @param treeName The name to set
-        """
+        #@param treeName The name to set
+        #"""
 
-        self.treeName = treeName
-        return
+        #self.treeName = treeName
+        #return
 
-    def propagateTreeName(self, treeName):
-        """
-        Propagate the name of the tree down to any samples; also sets our own treename
+    #def propagateTreeName(self, treeName):
+        #"""
+        #Propagate the name of the tree down to any samples; also sets our own treename
         
-        @param treeName The name to set
-        """
+        #@param treeName The name to set
+        #"""
         
-        if self.treeName == '':
-            self.treeName = treeName
-        ##  MAB : Propagate down to samples
-        for sam in self.sampleList:
-            sam.propagateTreeName(self.treeName)
-            pass
-        return
+        #if self.treeName == '':
+            #self.treeName = treeName
+        ###  MAB : Propagate down to samples
+        #for sam in self.sampleList:
+            #sam.propagateTreeName(self.treeName)
+            #pass
+        #return
+
+    def isBlinded(self, fitConfig):
+        if self.blind or \
+           (configMgr.blindSR and (self.channelName in fitConfig.signalChannels)) or \
+           (configMgr.blindCR and self.channelName in fitConfig.bkgConstrainChannels) or \
+           (configMgr.blindVR and (self.channelName in fitConfig.validationChannels)):
+            return True
+
+        return False
 
     def createHistFactoryObject(self):
         """

@@ -50,6 +50,7 @@ namespace RooStats
                 const char * modelBName = "",
                 const char * dataName = "obsData",                 
                 const char * nuisPriorName = 0,
+                bool generateAsimovDataForObserved = false,
                 int nCPUs = 1
                 ) ;
 

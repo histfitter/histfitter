@@ -1,16 +1,22 @@
+2017-01-12 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
+	* python/configManager.py: use additional sample-dependent selection
+	* python/sample.py: add basic pruning selections for cases 2 and 3 (i.e.
+	everything but the norm systematics). Needs to be improved by making them
+	dependent on configManager flags
+
 2017-02-13 Jan Kuechler (Sophio Pataraia <sophio.pataraia@cern.ch>)
-        * scripts/SystRankingPlot.py
-        * scripts/README_TABLESCRIPTS
-        + added script from Jan to produce plot showing the impact of 
-        the nuisance parameters on the fitted POI value (mu_SIGNAL).  
+	* scripts/SystRankingPlot.py
+	* scripts/README_TABLESCRIPTS
+	+ added script from Jan to produce plot showing the impact of 
+	the nuisance parameters on the fitted POI value (mu_SIGNAL).  
 
 2017-01-13 Jeanette Miriam Lorenz <jeanette.miriam.lorenz@cern.ch
-        * python/configManager.py
-        * python/sample.py
-        * python/systematic.py
-        * scripts/HistFitter.py
-        - removing the Reset function in scripts/HistFitter.py to enable support for more recent Root versions
-        - adding the possibility to give a prefix to a treename for samples to allow for having the sample name and tree prefix name different and being propagated to nominal trees and systematic trees
+	* python/configManager.py
+	* python/sample.py
+	* python/systematic.py
+	* scripts/HistFitter.py
+	- removing the Reset function in scripts/HistFitter.py to enable support for more recent Root versions
+	- adding the possibility to give a prefix to a treename for samples to allow for having the sample name and tree prefix name different and being propagated to nominal trees and systematic trees
 
 
 2017-01-12 Geert-Jan Besjes <geert-jan.besjes@cern.ch>
