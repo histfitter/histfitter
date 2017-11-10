@@ -653,6 +653,11 @@ void ConfigMgr::doUpperLimit(FitConfig* fc) {
         int nPoints = currentNPoints / nPointsDivisor; // 20% extra points; or 10% if <0.05 but range too small
         const double oldMax = hypo->GetXValue(currentNPoints - 1); // mu_sig of last entry
         const double stepSize = 2 * oldMax / currentNPoints; // twice the average step size of previous scan
+       
+        if(nPoints == 0) {
+            // this happens if the current scan had precisely 1 point
+            nPoints = 2;
+        }
         
         double minRange = oldMax + stepSize; // start _beyond_ the last point
         double maxRange = oldMax + (nPoints) * stepSize;
