@@ -209,7 +209,8 @@ class PrepareHistos(object):
                     log.fatal("No tree name provided for input file {}".format(i.filename))
                     return
 
-        log.debug("read(): current chain ID {}".format(self.currentChainName))
+        log.debug("read(): current chain ID = '{}'".format(self.currentChainName))
+        log.debug("read(): constructing with suffix = '{}', friend tree = '{}'".format(suffix, friendTreeName))
 
         sorted_input_files = sorted(list(input_files))
     
@@ -217,19 +218,16 @@ class PrepareHistos(object):
         # The set is needed as, although the _combinations_ in input_files are by construction unique, it could be that the same file or chain is
         # used multiple times!
         treenames = "_".join(sorted("{}{}".format(x, suffix) for x in set(i.treename for i in input_files)))
-        
-        for i in input_files:
-            print i.filename
-        
         filenames = "_".join(sorted(x for x in set(i.filename for i in input_files)))
-       
+
         chainID = "{0}_{1}".format(treenames, filenames)
-        log.debug("Constructed chain ID {}".format(chainID))
+        log.debug("read(): looking for chain ID {}".format(chainID))
 
         if not self.currentChainName == '' and chainID != self.currentChainName:
-            log.debug("read(): deleting chain {0} (chainID asked = {1})".format(self.currentChainName, chainID))
+            log.debug("read(): desired ID does not exist; deleting chain {0} (chainID asked = {1})".format(self.currentChainName, chainID))
 
             # this deletion is necessary for the garbage collector to kick in. The overhead of building a new chain is minimal.
+            # Do NOT try it without deleting the chains -- it will leak.
             #self.configMgr.chains[self.currentChainName].Reset()
             if self.currentChainName in self.configMgr.chains:
 
@@ -458,7 +456,7 @@ class PrepareHistos(object):
                                                             self.channelnBinsY, self.channel.binLowY, self.channel.binHighY)
                     
                     log.debug("__addHistoFromTree: projecting binned {} into {}".format(self.var, tempName))
-                    log.verbose("__addHistoFromTree: chain: {} ({})".format(self.currentChainName, hex(id(self.configMgr.chains[self.currentChainName])) ))
+                    log.debug("__addHistoFromTree: chain: {} ({})".format(self.currentChainName, hex(id(self.configMgr.chains[self.currentChainName])) ))
                     log.verbose("__addHistoFromTree: cuts: {}".format(self.cuts))
                     log.verbose("__addHistoFromTree: weights: {}".format(self.weights))
                     log.debug('__addHistoFromTree: {}->Project("{}", "{}", "{} * ({})" )'.format(self.currentChainName, tempName, self.var, self.cuts, self.weights) )
