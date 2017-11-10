@@ -584,11 +584,12 @@ class Sample(object):
             return self.suffixTreeName
         
         if not self.isData and not self.isQCD and not self.isDiscovery:
-            # if we're not data, pick up the default
 
+            # are we in a systematic? if so, return that suffix
             if self.currentSystematic is not None:
                 return self.currentSystematic
 
+            # if we're not data, pick up the default
             return configMgr.nomName
 
         return ""
@@ -614,7 +615,11 @@ class Sample(object):
         if _suffix != "":
             log.debug("Using tree suffix {}".format(_suffix))
 
-        return "{}{}".format(self.prefixTreeName, _suffix)
+        name = "{}{}".format(self.prefixTreeName, _suffix)
+
+        log.debug("Using {} as tree name".format(name))
+
+        return name
 
     # NOTE: not using @property because of the optional argument
     treename = property(getTreename)
@@ -758,7 +763,7 @@ class Sample(object):
                 low = lowIntegral / nomIntegral
                 log.verbose("Determined high and low ratios w.r.t. nominal: {} and {}".format(high, low))
             except ZeroDivisionError:
-                log.error("    generating HistoSys for %s syst=%s nom=%g high=%g low=%g. Systematic is removed from fit." % (nomName, systName, nomIntegral, highIntegral, lowIntegral))
+                log.error("    generating HistoSys for %s syst=%s: nom=%g high=%g low=%g. Systematic is removed from fit." % (nomName, systName, nomIntegral, highIntegral, lowIntegral))
                 return
 
             log.debug("Constructing cloned normalized histograms")
@@ -772,7 +777,7 @@ class Sample(object):
                 configMgr.hists[highName+"Norm"].Scale(1./high)
                 configMgr.hists[lowName+"Norm"].Scale(1./low)
             except ZeroDivisionError:
-                log.error("    generating HistoSys for %s syst=%s nom=%g high=%g low=%g. Systematic is removed from fit." % (nomName, systName, nomIntegral, highIntegral, lowIntegral))
+                log.error("    generating HistoSys for %s syst=%s: nom=%g high=%g low=%g. Systematic is removed from fit." % (nomName, systName, nomIntegral, highIntegral, lowIntegral))
                 return
             
             # Attempt to generate an overallNormHistoSys if required
@@ -863,7 +868,7 @@ class Sample(object):
                 lowIntegral = configMgr.hists[lowName].Integral()
                 highIntegral = configMgr.hists[highName].Integral()
             except AttributeError:
-                log.error("    generating HistoSys for %s syst=%s one of the histograms is None. Systematic is removed from fit." % (nomName, systName))
+                log.error("    generating HistoSys for %s syst=%s: one of the histograms is None. Systematic is removed from fit." % (nomName, systName))
                 return
 
             # Check whether a renormalization actually makes sense
@@ -884,7 +889,7 @@ class Sample(object):
                     high = highIntegral / nomIntegral
                     low = lowIntegral / nomIntegral
                 except ZeroDivisionError:
-                    log.error("    generating HistoSys for %s syst=%s nom=%g high=%g low=%g. Systematic is removed from fit." % (nomName, systName, nomIntegral, highIntegral, lowIntegral))
+                    log.error("    generating HistoSys for %s syst=%s: nom=%g high=%g low=%g. Systematic is removed from fit." % (nomName, systName, nomIntegral, highIntegral, lowIntegral))
                     return
                 
                 configMgr.hists[highName+"Norm"] = configMgr.hists[highName].Clone(highName+"Norm")
@@ -894,7 +899,7 @@ class Sample(object):
                     configMgr.hists[highName+"Norm"].Scale(1./high)
                     configMgr.hists[lowName+"Norm"].Scale(1./low)
                 except ZeroDivisionError:
-                    log.error("    generating HistoSys for %s syst=%s nom=%g high=%g low=%g keeping in fit (offending histogram should be empty)." % (nomName, systName, nomIntegral, highIntegral, lowIntegral))
+                    log.error("    generating HistoSys for %s syst=%s: nom=%g high=%g low=%g keeping in fit (offending histogram should be empty)." % (nomName, systName, nomIntegral, highIntegral, lowIntegral))
                     return
                     
                 self.histoSystList.append((systName, highName+"Norm", lowName+"Norm", configMgr.histCacheFile, "", "", "", ""))
@@ -931,7 +936,7 @@ class Sample(object):
                     return
 
                 if high < 1.0 and 1.0 > low > 0.0:
-                    log.warning("    addHistoSys: high=%f is < 1.0 in %s. Taking symmetric value from low %f %f"% (high, systName, low, 2.-low))
+                    log.warning("    addHistoSys for %s: high=%f is < 1.0. Taking symmetric value from low %f => %f" % (systName, high, low, 2.-low))
                     configMgr.hists[highName+"Norm"] = configMgr.hists[highName].Clone(highName+"Norm")
                     try:
                         configMgr.hists[highName+"Norm"].Scale((2.0-low)/high)
@@ -940,7 +945,7 @@ class Sample(object):
                         return
                     self.histoSystList.append((systName, highName+"Norm", lowName, configMgr.histCacheFile, "", "", "", ""))
                 elif low > 1.0 and high > 1.0:
-                    log.warning("    addHistoSys: low=%f is > 1.0 in %s. Taking symmetric value from high %f %f"% (low, systName, high, 2.-high))
+                    log.warning("    addHistoSys for %s: low=%f is > 1.0. Taking symmetric value from high %f => %f"% (systName, low, high, 2.-high))
                     configMgr.hists[lowName+"Norm"] = configMgr.hists[lowName].Clone(lowName+"Norm")
                     try:
                         configMgr.hists[lowName+"Norm"].Scale((2.0-high)/low)
@@ -949,7 +954,7 @@ class Sample(object):
                         return
                     self.histoSystList.append((systName, highName, lowName+"Norm", configMgr.histCacheFile, "", "", "", ""))
                 elif low < 0.0:
-                    log.warning("    addHistoSys: low=%f is < 0.0 in %s. Setting negative bins to 0.0."% (low, systName))
+                    log.warning("    addHistoSys for %s: low=%f is < 0.0. Setting negative bins to 0.0." % (systName, low))
                     configMgr.hists[lowName+"Norm"] = configMgr.hists[lowName].Clone(lowName+"Norm")
                     for iBin in xrange(1, configMgr.hists[lowName+"Norm"].GetNbinsX()+1):
                         if configMgr.hists[lowName+"Norm"].GetBinContent(iBin) < 0.:
@@ -988,7 +993,8 @@ class Sample(object):
                     log.error("    HistoSys for {} syst={} nom={:g} high={:g} low={:g} has small impact on normalisation.".format(nomName, systName, nomIntegral, highIntegral, lowIntegral))
                     keepNorm = False
 
-                if not checkShapeEffect(configMgr.hists[nomName], configMgr.hists[highName], configMgr.hists[lowName]):
+                #if not checkShapeEffect(configMgr.hists[nomName], configMgr.hists[highName], configMgr.hists[lowName]):
+                if not True: # TODO: checkShapeEffect() to be implemented 
                     if not keepNorm:
                         log.error("    HistoSys for {} syst={} nom={:g} high={:g} low={:g} has small impact on normalisation and no effect on shape. Removing from fit.".format(nomName, systName, nomIntegral, highIntegral, lowIntegral))
                         return
@@ -1100,11 +1106,11 @@ class Sample(object):
         """
         
         if high == 1.0 and low == 1.0:
-            log.warning("    addOverallSys for %s high == 1.0 and low == 1.0. Systematic is removed from fit" % systName)
+            log.warning("    addOverallSys for %s: high == 1.0 and low == 1.0. Systematic is removed from fit" % systName)
             return
 
         if high == 0.0 and low == 0.0:
-            log.warning("    addOverallSys for %s high=%g low=%g. Systematic is removed from fit." % (systName, high, low))
+            log.warning("    addOverallSys for %s: high=%g low=%g. Systematic is removed from fit." % (systName, high, low))
             return
 
         if high == low:
@@ -1114,19 +1120,19 @@ class Sample(object):
         if high == 1.0 and low > 0.0 and low != 1.0:
             highOld = high
             high = 2.0 - low
-            log.warning("    addOverallSys: high=%g in %s. Taking symmetric value from low %g => %g" % (highOld, systName, low, high))
+            log.warning("    addOverallSys for %s: high=%g. Taking symmetric value from low %g => %g" % (systName, highOld, low, high))
 
         if low == 1.0 and high > 0.0 and high != 1.0:
             lowOld = low
             low = 2.0 - high
-            log.warning("    addOverallSys: low=%g in %s. Taking symmetric value from high %g => %g" % (lowOld, systName, low, high))
+            log.warning("    addOverallSys for %s: low=%g. Taking symmetric value from high %g => %g" % (systName, lowOld, low, high))
 
         if low < 0.01:
-            log.warning("    addOverallSys: low=%g is < 0.01 in %s. Setting to low=0.01. High=%g." % (low, systName, high))
+            log.warning("    addOverallSys for %s: low=%g is < 0.01. Setting to low=0.01. High=%g." % (systName, low, high))
             low = 0.01
 
         if high < 0.01:
-            log.warning("    addOverallSys: high=%g is < 0.01 in %s. Setting to high=0.01. Low=%g." % (high, systName, low))
+            log.warning("    addOverallSys for %s: high=%g is < 0.01. Setting to high=0.01. Low=%g." % (systName, high, low))
             high = 0.01
       
         #print high, high == 1.0
@@ -1134,11 +1140,11 @@ class Sample(object):
 
         # Perform these checks again after the symmetrisation
         if fabs(high-1.0) < 1E-5 and fabs(low-1.0) < 1E-5:
-            log.warning("    addOverallSys for %s high == 1.0 and low == 1.0. Systematic is removed from fit" % systName)
+            log.warning("    addOverallSys for %s: high == 1.0 and low == 1.0. Systematic is removed from fit" % systName)
             return
 
         if fabs(high) < 1E-5 and fabs(low) < 1E-5:
-            log.warning("    addOverallSys for %s high=%g low=%g. Systematic is removed from fit." % (systName, high, low))
+            log.warning("    addOverallSys for %s: high=%g low=%g. Systematic is removed from fit." % (systName, high, low))
             return
 
         self.overallSystList.append((systName, high, low))
@@ -1180,15 +1186,24 @@ class Sample(object):
     def addInput(self, filename, treename="", friends=[]):
         # add a file with a treename. If none given, fall back to sample name or our override 
         
+        # NOTE: do NOT use self.treename for this -- it will include a suffix, 
+        # leading to a doubly-suffixed tree in case a config-wide default jas beem set
         _treename = self.name
+        if self.prefixTreeName != "":
+            _treename = self.prefixTreeName
+
         if self.overrideTreename != "":
             _treename = self.overrideTreename
 
         if treename != "":
             _treename = treename
 
+        #log.warning("calling addInput for {}".format(self.name))
+        #log.warning("file = {}".format(filename))
+        #log.warning("tree = {}".format(_treename))
+
         self.input_files.add(InputTree(filename, _treename, friends))
-        
+
         # we are the leaves of the configMgr->fitConfig->channel->sample tree,
         # so no propagation necessary
 
@@ -1243,7 +1258,7 @@ class Sample(object):
         @param syst An object of type Systematic
         """
         if self.isData:
-            log.warning("Sample {} is data - not adding systematic {}".format(self.name, syst.name))
+            log.debug("Sample {} is data - not adding systematic {}".format(self.name, syst.name))
             return
         
         log.verbose("Adding systematic {} to sample {} ({})".format(syst.name, self.name, hex(id(self))))
