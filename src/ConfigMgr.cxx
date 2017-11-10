@@ -574,6 +574,7 @@ void ConfigMgr::doUpperLimit(FitConfig* fc) {
 
     const double startingMaxRange = maxRange;
     double previousMaxRange = maxRange; // needed in case we fall into the trap where all the points in the extension happen to fail
+    int nScanExtensions = 0;
     while(true) {
         // Clean up any odd issues
         if(hypo != 0) { 
@@ -621,6 +622,11 @@ void ConfigMgr::doUpperLimit(FitConfig* fc) {
             break;
         }
 
+        if(m_disableULRangeExtension) {
+            m_logger << kINFO << "doUpperLimit(): scan range extender disabled; stopping" << GEndl;
+            break;
+        }
+
         // Stop condition
         if(currentNPoints > m_nPoints) { // TODO: make it dependent on whether we use toys? Pass a flag in configMgr?
             m_logger << kERROR << "doUpperLimit(): extended the UL scan to more than 5x the original amount of points already (currently at " << currentNPoints << ") - won't keep going further. Pass a helpful range to configMgr instead." << GEndl;
@@ -650,6 +656,9 @@ void ConfigMgr::doUpperLimit(FitConfig* fc) {
         
         double minRange = oldMax + stepSize; // start _beyond_ the last point
         double maxRange = oldMax + (nPoints) * stepSize;
+
+        m_logger << kWARNING << "nPoints = " << nPoints << " oldMax = " << oldMax << " stepSize = " << stepSize << GEndl;
+        m_logger << kWARNING << "min = " << minRange << " max = " << maxRange << GEndl;
 
         if(maxRange == previousMaxRange) {
             // this can happen if we e.g. extend by 3 points and all 3 points fail. In that case, we need a different range.
@@ -682,6 +691,7 @@ void ConfigMgr::doUpperLimit(FitConfig* fc) {
         }
 
         // Append it - should re-evaluate the settings for us automatically
+        m_logger << kINFO << "Adding scan result to existing limit scan" << GEndl;
         hypo->Add(*extraHypo);
         delete extraHypo;
         previousMaxRange = maxRange;

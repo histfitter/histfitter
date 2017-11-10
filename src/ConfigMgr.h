@@ -109,6 +109,9 @@ class ConfigMgr {
         void setNPoints(const int& type) { m_nPoints = type; }
         int  getNPoints() { return m_nPoints; }
 
+        void setDisableULRangeExtension(bool b) { m_disableULRangeExtension = b; }
+        bool getDisableULRangeExtension() { return m_disableULRangeExtension; }
+
         void setSeed(const int& seed=0) { m_seed = seed; }
         int  getSeed() { return m_seed; }
 
@@ -161,6 +164,7 @@ class ConfigMgr {
         bool m_fixSigXSec;
         bool m_runOnlyNominalXSec;
         bool m_doUL;
+        bool m_disableULRangeExtension;
         int  m_nPoints;
         double m_muValGen;
         bool m_removeEmptyBins;
