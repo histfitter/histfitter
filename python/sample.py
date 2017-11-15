@@ -75,7 +75,7 @@ def checkNormalizationEffect(hNom, hUp, hDown, norm_threshold=0.005):
    
     max_variation = max([abs(up_norm-1), abs(down_norm-1)])
     if max_variation < norm_threshold:
-        log.verbose("checkNormalizationEffect(): {}, {}, {}: max variation = {:.3f}, threshold = {:.3f}".format(hNom.GetName(), hUp.GetName(), hDown.GetName(), max_variation, threshold))
+        log.verbose("checkNormalizationEffect(): {}, {}, {}: max variation = {:.3f}, threshold = {:.3f}".format(hNom.GetName(), hUp.GetName(), hDown.GetName(), max_variation, norm_threshold))
         return False
 
     return True
