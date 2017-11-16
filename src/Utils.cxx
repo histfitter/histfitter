@@ -2852,10 +2852,11 @@ RooHist* Util::MakeRatioOrPullHist(RooAbsData *regionData, RooAbsPdf *regionPdf,
 								     RooFit::Precision(1e-5));
 
 	if(makePull) {	
-        return dynamic_cast<RooHist*>(frame_dummy->pullHist());
+        //return static_cast<RooHist*>(frame_dummy->pullHist());
+        return static_cast<RooHist*>(frame_dummy->pullHist());
 	}
 		
-    return dynamic_cast<RooHist*>(frame_dummy->ratioHist());
+    return static_cast<RooHist*>(frame_dummy->ratioHist());
 }
 
 //________________________________________________________________________________________________________________________________________
