@@ -1616,8 +1616,6 @@ class ConfigManager(object):
                         log.verbose("systematic type: {}".format(syst_type))
                         log.verbose("current normString = {0}".format(normString))
 
-                        if j > 1: break # just for a test
-
                         # Remove any current systematic
                         chan.getSample(sam.name).removeCurrentSystematic()
 
