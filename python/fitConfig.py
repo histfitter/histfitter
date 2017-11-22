@@ -473,7 +473,7 @@ class fitConfig(object):
             # Propagate to channels that are already owned as well
             for channel in self.channels:
                 if not any(s.name == sam.name for s in channel.sampleList):
-                    c.addSample(self.getSample(s.name))
+                    channel.addSample(self.getSample(s.name))
         return
 
     def mergeSamples(self, samples, target=""):
