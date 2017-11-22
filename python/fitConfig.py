@@ -448,32 +448,30 @@ class fitConfig(object):
             sampleList = [input]
             pass
 
-        for s in sampleList:
+        for sampleToAdd in sampleList:
             # If the sample doesn't exist in fitConfig already then add it,
             # else something has gone wrong
-            if not s.name in [sam.name for sam in self.sampleList]:
+            if sampleToAdd.name in [sam.name for sam in self.sampleList]:
+                raise RuntimeError("Sample %s already defined in fitConfig %s" % (sampleToAdd.name, self.name))
 
-                # Append copy of the sample
-                self.sampleList.append(s.Clone())
+            # Append copy of the sample
+            self.sampleList.append(sampleToAdd.Clone())
 
-                # Only apply weights and systematics to MC-derived samples
-                if not s.isData and not s.isDiscovery and not s.isQCD:
-                    # If the sample doesn't have weights then add them
-                    if len(self.sampleList[-1].weights) == 0:
-                        self.sampleList[-1].setWeights(self.weights)
+            # Only apply weights and systematics to MC-derived samples
+            if not sampleToAdd.isData and not sampleToAdd.isDiscovery and not sampleToAdd.isQCD:
+                # If the sample doesn't have weights then add ours
+                if len(self.sampleList[-1].weights) == 0:
+                    self.sampleList[-1].setWeights(self.weights)
 
-                    # Propagate systematics into sample
-                    for (systName, syst) in self.systDict.items():
-                        if not systName in self.sampleList[-1].systDict.keys():
-                            self.sampleList[-1].addSystematic(syst)
+                # Propagate our systematics into sample
+                for (systName, syst) in self.systDict.items():
+                    if not systName in self.sampleList[-1].systDict.keys():
+                        self.sampleList[-1].addSystematic(syst)
 
-            else:
-                raise RuntimeError("Sample %s already defined in fitConfig %s" % (s.name, self.name))
-
-            # Propagate to channels that are already owned as well
+            # Propagate to channels that are already owned as well, but don't have this sample yet
             for channel in self.channels:
-                if not any(s.name == sam.name for s in channel.sampleList):
-                    channel.addSample(self.getSample(s.name))
+                if not any(sampleToAdd.name == s.name for s in channel.sampleList):
+                    channel.addSample(self.getSample(sampleToAdd.name))
         return
 
     def mergeSamples(self, samples, target=""):
