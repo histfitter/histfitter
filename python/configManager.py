@@ -1599,12 +1599,12 @@ class ConfigManager(object):
 
             if not self.ignoreSystematics:
                 # Construct a simple double loop to ensure all the weights go first, and then all the trees
-                syst_types = ["weight", "tree"]
+                syst_types = ["weight", "tree", "user"]
                 systs_by_type = {}
                 for syst_type in syst_types:
                     systs_by_type[syst_type] = [s for s in sorted(chan.getSample(sam.name).systDict.values(), key=lambda s: s.name) if s.type == syst_type] 
 
-                log.info("      - Will load {} weights and {} tree-based systematics".format(len(systs_by_type["weight"]), len(systs_by_type["tree"])))
+                log.info("      - Will load {} weights, {} tree-based and {} user systematics".format(len(systs_by_type["weight"]), len(systs_by_type["tree"]), len(systs_by_type["user"])))
 
                 i = 0
                 for syst_type in syst_types:
