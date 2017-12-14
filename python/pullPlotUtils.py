@@ -52,6 +52,7 @@ def PoissonError(obs):
     Return the Poisson uncertainty on a number
 
     @param obs The number to calculate the uncertainty for
+    reference from ATLAS Statistics Forum: http://www.pp.rhul.ac.uk/~cowan/atlas/ErrorBars.pdf
     """
     posError = TMath.ChisquareQuantile(1. - (1. - 0.68)/2. , 2.* (obs + 1.)) / 2. - obs - 1
     negError = obs - TMath.ChisquareQuantile((1. - 0.68)/2., 2.*obs) / 2
