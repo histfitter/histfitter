@@ -24,7 +24,7 @@ ROOT.gROOT.SetBatch()
 parser = argparse.ArgumentParser()
 parser.add_argument("--inputFile","-i",  type=str, help="input harvest file", default = "test.json")
 parser.add_argument("--outputFile","-o", type=str, help="output ROOT file", default = "outputGraphs.root")
-parser.add_argument("--interpolation",   type=str, help="type of interpolation for scipy. e.g. linear, cubic, etc", default = "linear") # linear, multiquadric
+parser.add_argument("--interpolation",   type=str, help="type of interpolation for scipy. e.g. linear, cubic, nearest. NOTE: Anything other than linear seems buggy", default = "linear")
 parser.add_argument("--level",           type=float, help="contour level output. Default to 95% CL", default = ROOT.RooStats.PValueToSignificance( 0.05 ))
 parser.add_argument("--useROOT","-r", help="use the root interpolation engine instead of mpl", action="store_true", default=False)
 parser.add_argument("--debug","-d", help="print extra debugging info", action="store_true", default=False)
@@ -37,7 +37,7 @@ parser.add_argument("--yVariable","-y",  type=str, default = "mlsp" )
 parser.add_argument("--xResolution", type=int, default = 100 )
 parser.add_argument("--yResolution", type=int, default = 100 )
 
-parser.add_argument("--fixedParamsFile","-f", type=str, help="give a json file with key=variable and value=value. e.g. use for pinning down third parameter in harvest list", default="constraints.json")
+parser.add_argument("--fixedParamsFile","-f", type=str, help="give a json file with key=variable and value=value. e.g. use for pinning down third parameter in harvest list", default="")
 
 args = parser.parse_args()
 
@@ -45,9 +45,9 @@ if not args.useROOT:
 
 	import matplotlib.pyplot as plt
 	import numpy as np
-	# from scipy.interpolate import griddata
+	import scipy.interpolate
 
-	from matplotlib.mlab import griddata
+	import matplotlib.mlab
 
 
 listOfContours = ["CLs","CLsexp","clsu1s","clsu2s","clsd1s","clsd2s"]
@@ -64,13 +64,8 @@ def main():
 
 	f = ROOT.TFile(args.outputFile,"recreate")
 
-
 	# Step 1 - Read in harvest list in either text or json format and dump it into a dictionary
 	tmpdict = harvestToDict( args.inputFile )
-
-	# addZerosToDict(tmpdict,maxyvalue = 0)
-
-
 
 	# Step 2 - Interpolate the fit results
 	print ">>> Interpolating surface"
@@ -184,45 +179,6 @@ def harvestToDict( harvestInputFileName = "" ):
 	return modelDict
 
 
-def addZerosToDict(mydict, maxyvalue = 0):
-	# for tau in np.linspace( -0.5,-0.4, 2 ):
-	#   for mg in np.linspace(0,2000,100):
-	#     mydict[(mg,100,tau)] = {
-	#         "CLs":    ROOT.RooStats.PValueToSignificance( 0.005 ),
-	#         "CLsexp": ROOT.RooStats.PValueToSignificance( 0.005 ),
-	#         "clsu1s": ROOT.RooStats.PValueToSignificance( 0.005 ),
-	#         "clsu2s": ROOT.RooStats.PValueToSignificance( 0.005 ),
-	#         "clsd1s": ROOT.RooStats.PValueToSignificance( 0.005 ),
-	#         "clsd2s": ROOT.RooStats.PValueToSignificance( 0.005 ),
-	#       }
-
-	# for x in np.linspace( -2,2, 50 ):
-	#   for mg in xrange(100,1800,100):
-	#     mydict[(mg,100,x)] = {
-	#         "CLs":    0.0001,
-	#         "CLsexp": 0.0001,
-	#         "clsu1s": 0.0001,
-	#         "clsu2s": 0.0001,
-	#         "clsd1s": 0.0001,
-	#         "clsd2s": 0.0001,
-	#       }
-
-
-	# if maxyvalue:
-	#   for x in np.linspace( 0, 2000, 100 ):
-	#     mydict[(x,maxyvalue)] = {
-	#         "CLs":    0,
-	#         "CLsexp": 0,
-	#         "clsu1s": 0,
-	#         "clsu2s": 0,
-	#         "clsd1s": 0,
-	#         "clsd2s": 0,
-	#       }
-
-	pass
-	# return mydict
-
-
 def interpolateSurface(modelDict = {}, interpolationFunction = "linear", useROOT=False):
 	"""The actual interpolation"""
 
@@ -277,6 +233,9 @@ def interpolateSurface(modelDict = {}, interpolationFunction = "linear", useROOT
 	else:
 		print ">>> ... Using scipy interpolate scheme."
 
+		if args.interpolation in ["cubic","nearest"]:
+			print ">>> WARNING: cubic and nearest interpolation modes seem to give unreliable results in tests!"
+
 		xi = {}
 		yi = {}
 		zi = {}
@@ -291,8 +250,8 @@ def interpolateSurface(modelDict = {}, interpolationFunction = "linear", useROOT
 			xi[whichContour], yi[whichContour] = np.linspace(xArray.min(), xArray.max(), args.xResolution), np.linspace(yArray.min(), yArray.max(), args.yResolution);
 			xi[whichContour], yi[whichContour] = np.meshgrid(xi[whichContour], yi[whichContour]);
 
-			zi[whichContour] = griddata(xArray, yArray, zValuesArray, xi[whichContour], yi[whichContour], interp=interpolationFunction)
-			# zi[whichContour] = griddata( xyArray , zValuesArray, (xi[whichContour], yi[whichContour]), method=interpolationFunction)
+			# zi[whichContour] = matplotlib.mlab.griddata(xArray, yArray, zValuesArray, xi[whichContour], yi[whichContour], interp=interpolationFunction)
+			zi[whichContour] = scipy.interpolate.griddata( xyArray , zValuesArray, (xi[whichContour], yi[whichContour]) , method=interpolationFunction)
 
 			contourList = getContourPoints(xi[whichContour],yi[whichContour],zi[whichContour], args.level)
 
@@ -301,10 +260,6 @@ def interpolateSurface(modelDict = {}, interpolationFunction = "linear", useROOT
 				graph = ROOT.TGraph(len(contour[0]), contour[0].flatten('C'), contour[1].flatten('C') )
 				graphs[whichContour].append(graph)
 		return graphs
-
-		# return (xi,yi,zi);
-		# # return (x,y,zValues)
-
 
 
 def createGraphsFromArrays(x,y,z,label):
@@ -325,7 +280,7 @@ def createGraphsFromArrays(x,y,z,label):
 		hist.Write("CLsexp_hist")
 
 	hist.SetContour(1)
-	hist.SetContourLevel(0,ROOT.RooStats.PValueToSignificance( 0.05 ))
+	hist.SetContourLevel(0,args.level)
 	ROOT.SetOwnership(hist,0)
 	hist.Draw("CONT LIST")
 	ROOT.gPad.Update()
