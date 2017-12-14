@@ -6,7 +6,7 @@
 #
 # Reads in a harvest list from the HF output in either text file or json formats (but c'mon.. use json.. what are you doing?)
 # Then the CLs values are interpreted as p-values and converted to significances and then interpolated
-# Interpolation of significance surface can be configured to e.g. linear, cubic (options from scipy.interpolate)
+# Interpolation of significance surface can be configured to e.g. nn, linear, cubic (options from mpl)
 #
 # By: Larry Lee
 
@@ -27,11 +27,15 @@ parser.add_argument("--outputFile","-o", type=str, help="output ROOT file", defa
 parser.add_argument("--interpolation",   type=str, help="type of interpolation for scipy. e.g. linear, cubic, etc", default = "linear") # linear, multiquadric
 parser.add_argument("--level",           type=float, help="contour level output. Default to 95% CL", default = ROOT.RooStats.PValueToSignificance( 0.05 ))
 parser.add_argument("--useROOT","-r", help="use the root interpolation engine instead of mpl", action="store_true", default=False)
+parser.add_argument("--debug","-d", help="print extra debugging info", action="store_true", default=False)
 
 parser.add_argument("--sigmax",          type=float, help="maximum significance in sigmas", default = 5.0)
 
 parser.add_argument("--xVariable","-x",  type=str, default = "mg" )
 parser.add_argument("--yVariable","-y",  type=str, default = "mlsp" )
+
+parser.add_argument("--xResolution", type=int, default = 100 )
+parser.add_argument("--yResolution", type=int, default = 100 )
 
 parser.add_argument("--fixedParamsFile","-f", type=str, help="give a json file with key=variable and value=value. e.g. use for pinning down third parameter in harvest list", default="constraints.json")
 
@@ -39,49 +43,63 @@ args = parser.parse_args()
 
 if not args.useROOT:
 
-	import matplotlib as mpl
-	mpl.use('pdf')
-
 	import matplotlib.pyplot as plt
 	import numpy as np
-	import scipy.interpolate
+	# from scipy.interpolate import griddata
 
 	from matplotlib.mlab import griddata
+
+
+listOfContours = ["CLs","CLsexp","clsu1s","clsu2s","clsd1s","clsd2s"]
 
 
 
 def main():
 	"""Main function for driving the whole thing..."""
 
+	print ">>> Welcome to harvestToContours!"
+	for setting in dir(args):
+		if not setting[0]=="_":
+			print ">>> ... Setting: {: >20} {: >20}".format(setting, eval("args.%s"%setting) )
+
+	f = ROOT.TFile(args.outputFile,"recreate")
+
+
 	# Step 1 - Read in harvest list in either text or json format and dump it into a dictionary
 	tmpdict = harvestToDict( args.inputFile )
 
 	# addZerosToDict(tmpdict,maxyvalue = 0)
 
-	# Step 2 - Interpolate the fit results
-	print ">>> Interpolating mass plane"
-	outputGraphs = interpolateMassPlane( tmpdict , args.interpolation , args.x, args.y)
 
-	f = ROOT.TFile(args.outputFile,"recreate")
+
+	# Step 2 - Interpolate the fit results
+	print ">>> Interpolating surface"
+	outputGraphs = interpolateSurface( tmpdict , args.interpolation , args.useROOT)
 
 	print ">>> Writing contours out"
 	# Step 3 - get TGraph contours
-	for whichEntry in ["CLs","CLsexp","clsu1s","clsu2s","clsd1s","clsd2s"]:
+	for whichContour in listOfContours:
+
 		try:
-			outputGraphs[whichEntry].Write("%s_Contour"%(whichEntry))
+			for iSubGraph,subGraph in enumerate(outputGraphs[whichContour]):
+				subGraph.Write("%s_Contour_%d"%(whichContour,iSubGraph))
 		except:
-			print "well that one's no good... - %s"%whichEntry
+			print ">>> ... Well that one's no good. You might want to check on that... - %s"%whichContour
+			if len(outputGraphs[whichContour]):
+				print ">>> ... It appears this has no contours..."
+
+	if args.debug:
+		canvas = ROOT.TCanvas("FinalCurves","FinalCurves")
+		try:
+			outputGraphs["CLs"][0].Draw("AL")
+			for whichContour in ["CLsexp","clsu1s","clsd1s"]:
+				outputGraphs[whichContour][0].SetLineStyle(7)
+				outputGraphs[whichContour][0].Draw("L")
+			canvas.SaveAs("DebugFinalCurves.pdf")
+		except:
+			print ">>> ... Something broke. You don't seem to have a contour."
 
 
-	canvas = ROOT.TCanvas("FinalCurves","FinalCurves")
-	outputGraphs["CLs"].Draw("AL")
-	for whichEntry in ["CLsexp","clsu1s","clsd1s"]:
-		outputGraphs[whichEntry].SetLineStyle(7)
-		outputGraphs[whichEntry].Draw("L")
-	outputGraphs["CLs"].SetMinimum(0)
-	outputGraphs["CLs"].SetMaximum(400)
-
-	canvas.SaveAs("FinalCurves.pdf")
 	print ">>> Closing file"
 
 	f.Write()
@@ -90,9 +108,9 @@ def main():
 
 def harvestToDict( harvestInputFileName = "" ):
 	"""This parses the input file into a dictionary object for simpler handling"""
-	print ">>> entering harvestToDict()"
+	print ">>> Entering harvestToDict()"
 
-	massPlaneDict = {}
+	modelDict = {}
 
 	harvestInput = open(harvestInputFileName,"r")
 
@@ -104,7 +122,7 @@ def harvestToDict( harvestInputFileName = "" ):
 			constraintsDict = inputFixedParamsJSON
 
 	if ".json" in harvestInputFileName:
-		print ">>> >>> Interpreting json file %s"%harvestInputFileName
+		print ">>> ... Interpreting json file %s"%harvestInputFileName
 
 		with open(harvestInputFileName) as inputJSONFile:
 			inputJSON = json.load(inputJSONFile)
@@ -123,31 +141,19 @@ def harvestToDict( harvestInputFileName = "" ):
 
 
 				if ROOT.RooStats.PValueToSignificance( float(sample["CLsexp"]) ) < args.sigmax and not math.isinf(float(sample["CLsexp"])) :
-					massPlaneDict[sampleParams] = {
-						"CLs":        ( ROOT.RooStats.PValueToSignificance( float(sample["CLs"])     )  ),
-						"CLsexp":     ( ROOT.RooStats.PValueToSignificance( float(sample["CLsexp"])  )  ),
-						"clsu1s":     ( ROOT.RooStats.PValueToSignificance( float(sample["clsu1s"])  )  ),
-						"clsu2s":     ( ROOT.RooStats.PValueToSignificance( float(sample["clsu2s"])  )  ),
-						"clsd1s":     ( ROOT.RooStats.PValueToSignificance( float(sample["clsd1s"])  )  ),
-						"clsd2s":     ( ROOT.RooStats.PValueToSignificance( float(sample["clsd2s"])  )  ),
-					}
+					modelDict[sampleParams] = dict(zip(listOfContours,  [ROOT.RooStats.PValueToSignificance( float(sample["%s"%x]) ) for x in listOfContours] ) )
 
 				else:
-					if not sampleParams in massPlaneDict:
-						massPlaneDict[sampleParams] = {
-							"CLs":        args.sigmax,
-							"CLsexp":     args.sigmax,
-							"clsu1s":     args.sigmax,
-							"clsu2s":     args.sigmax,
-							"clsd1s":     args.sigmax,
-							"clsd2s":     args.sigmax,
-						}
-				print sampleParams, float(sample["CLs"]), ROOT.RooStats.PValueToSignificance( float(sample["CLs"])     )
+					if not sampleParams in modelDict:
+						modelDict[sampleParams] = dict(zip(listOfContours,  [args.sigmax for x in listOfContours] ) )
+				if(args.debug):
+					print sampleParams, float(sample["CLs"]), ROOT.RooStats.PValueToSignificance( float(sample["CLs"])     )
 
 
 	else:
-		print ">>> Interpreting text file"
-
+		print ">>> ... Interpreting text file -- (This feature hasn't been fully tested)"
+		print ">>> ... Also why aren't you just using JSON you fool"
+		print ">>> ... Seriously -- HF now spits out a JSON, and if you're converting that back to a text file you deserve to have things not work..."
 
 		try:
 			from summary_harvest_tree_description import treedescription
@@ -155,35 +161,27 @@ def harvestToDict( harvestInputFileName = "" ):
 			dummy,fieldNames = treedescription()
 			fieldNames = fieldNames.split(':')
 		except:
-			print "Crash and burn -- I need a harvest tree description file!"
+			print ">>> Crash and burn -- I need a harvest tree description file!"
 			sys.exit(0)
 
-		for massLine in harvestInput.readlines():
-			values = massLine.split()
+		for model in harvestInput.readlines():
+			values = model.split()
 			values = dict(zip(fieldNames, values))
 
-			# print values["fID/F"]
+			massPoint = (float(values[args.xVariable]),float(values[args.yVariable]))
 
-			if "m12/F" in values:
-				massPoint = (  float(values["m0/F"])  , float(values["m12/F"])   )
-			elif "mgluino/F" in values:
-				massPoint = (  float(values["mgluino/F"])  , float(values["mlsp/F"])   )
-			elif "msquark/F" in values:
-				massPoint = (  float(values["msquark/F"])  , float(values["mlsp/F"])   )
+			## Allowing filtering of entries via a constraints file
+			if args.fixedParamsFile:
+				failConstraintCutList = [not values[str(constrainedVar)]==constrainedVal for (constrainedVar, constrainedVal) in constraintsDict.iteritems()]
+				if any(failConstraintCutList):
+					continue
 
+			modelDict[massPoint] = dict(zip(listOfContours,  [ROOT.RooStats.PValueToSignificance( float(values["%s/F"%x]) ) for x in listOfContours] ) )
 
-			massPlaneDict[massPoint] = {
-				"CLs":        ROOT.RooStats.PValueToSignificance( float(values["CLs/F"])     ) ,
-				"CLsexp":     ROOT.RooStats.PValueToSignificance( float(values["CLsexp/F"])  ) ,
-				"clsu1s":     ROOT.RooStats.PValueToSignificance( float(values["clsu1s/F"])  ) ,
-				"clsu2s":     ROOT.RooStats.PValueToSignificance( float(values["clsu2s/F"])  ) ,
-				"clsd1s":     ROOT.RooStats.PValueToSignificance( float(values["clsd1s/F"])  ) ,
-				"clsd2s":     ROOT.RooStats.PValueToSignificance( float(values["clsd2s/F"])  ) ,
-			}
 
 			print massPoint, ROOT.RooStats.PValueToSignificance( float(values["CLs/F"])     )
 
-	return massPlaneDict
+	return modelDict
 
 
 def addZerosToDict(mydict, maxyvalue = 0):
@@ -225,24 +223,14 @@ def addZerosToDict(mydict, maxyvalue = 0):
 	# return mydict
 
 
-def interpolateMassPlane(massPlaneDict = {}, interpolationFunction = "linear", xindex = 0, yindex = 1):
+def interpolateSurface(modelDict = {}, interpolationFunction = "linear", useROOT=False):
 	"""The actual interpolation"""
 
-	massPoints = massPlaneDict.keys()
-	massPointsValues = massPlaneDict.values()
+	modelPoints = modelDict.keys()
+	modelPointsValues = modelDict.values()
 
-	# print xindex, yindex
-	# print massPoints
-
-	x0 =   list( zip( *massPoints )[xindex] )
-	y0 =   list( zip( *massPoints )[yindex] )
-
-
-	canvas = ROOT.TCanvas("c1","c1",800,600);
-	h2D    = ROOT.TH2D("h","h",200,min(x0),max(x0),200,min(y0),max(y0) );
-
-	#print  massPoints;
-	#print  massPointsValues;
+	x0 =   list( zip( *modelPoints )[0] )
+	y0 =   list( zip( *modelPoints )[1] )
 
 	zValues = {} # entry x points
 	x={} # entry x points
@@ -250,111 +238,79 @@ def interpolateMassPlane(massPlaneDict = {}, interpolationFunction = "linear", x
 
 	graphs = {}
 
-	for whichEntry in ["CLs","CLsexp","clsu1s","clsu2s","clsd1s","clsd2s"]:
-		zValues[whichEntry] = [ tmpEntry[whichEntry] for tmpEntry in massPointsValues]
-		x[whichEntry]       = [ a for a in x0 ];
-		y[whichEntry]       = [ a for a in y0 ];
-		graphs[whichEntry] = turnAJunkIntoAGraph(x[whichEntry],y[whichEntry],zValues[whichEntry],whichEntry)
-		pass;
 
-	# print zValues["CLsexp"]
+	for whichContour in listOfContours:
+		zValues[whichContour] = [ tmpEntry[whichContour] for tmpEntry in modelPointsValues]
+		x[whichContour]       = [ a for a in x0 ];
+		y[whichContour]       = [ a for a in y0 ];
 
+	# remove inf point in each entry
+	for whichContour in listOfContours:
 
+		while any([math.isinf(tmp) for tmp in zValues[whichContour]  ]):#  np.isinf( zValues[whichContour]  ).any():
+			myindex = [math.isinf(tmp) for tmp in zValues[whichContour] ].index(True)
+			if (args.debug):
+				print ">>> ... Remove Inf at i=%d x=%d y=%d" % (myindex,x[whichContour][myindex],y[whichContour][myindex])
+			x[whichContour].pop(myindex)
+			y[whichContour].pop(myindex)
+			zValues[whichContour].pop(myindex)
+			pass;
 
-	return graphs
+		if any([math.isinf(tmp) for tmp in zValues[whichContour]  ]):
+			print ">>> ... Still infs in %s!! This is a problem... Exiting." % whichContour
+			sys.exit(0)
 
-
-
-	# # remove inf point in each entry
-	# for whichEntry in ["CLs","CLsexp","clsu1s","clsu2s","clsd1s","clsd2s"]:
-
-	#   if np.isinf( zValues[whichEntry]  ).any():
-	#     print "infs in %s!" % whichEntry;
-	#     pass;
-
-	#   while np.isinf( zValues[whichEntry]  ).any():
-	#     myindex = np.isinf( zValues[whichEntry]  ).tolist().index(True)
-	#     print "remove i=%d x=%d x=%d" % (myindex,x[whichEntry][myindex],y[whichEntry][myindex])
-	#     x[whichEntry].pop(myindex)
-	#     y[whichEntry].pop(myindex)
-	#     zValues[whichEntry].pop(myindex)
-	#     pass;
-
-	#   if np.isinf( zValues[whichEntry]  ).any():
-	#     print "still infs in %s!" % whichEntry
-	#     pass;
-
-	#   pass;
- 
-	# # for i in xrange(len(zValues["CLs"]) ):
-	# #   if i-1 > len(zValues["CLs"]):
-	# #     break
-	# #   if np.isinf(zValues["CLs"][i]):
-	# #     x.pop(i)
-	# #     y.pop(i)
-	# #     for k,v in zValues.iteritems():
-	# #       zValues[k].pop(i)
-	# #     i = i-1
+	if useROOT:
+		print ">>> ... Using ROOT's internal interpolation scheme (triangular)."
+		print ">>> ... If you like your plot to look like a dinosaur's back or an escalator, then you're entitled to that.."
 
 
-	# # """
-	# # to check value in zValues
-	# for whichEntry in ["CLs","CLsexp","clsu1s","clsu2s","clsd1s","clsd2s"]:
-	#   for i in range(len(x[whichEntry])):
-	#     mass1 = x[whichEntry][i];
-	#     mass2 = y[whichEntry][i];
-	#     z = zValues[whichEntry][i];
-	#     print "(%.2f,%.2f)" % (mass1,mass2) , z;
-	#     h2D.SetBinContent(h2D.GetXaxis().FindBin(mass1),h2D.GetYaxis().FindBin(mass2),z);
-	#     pass;
-	#   h2D.Draw("colz");
-	#   # h2D.Draw("c same");
-	#   # ROOT.gPad.SetLogx()
-	#   canvas.SaveAs("input_harvest_"+whichEntry+".pdf");
-	#   pass;
-	# # """
+		canvas = ROOT.TCanvas("c1","c1",800,600);
+		h2D    = ROOT.TH2D("h","h",200,min(x0),max(x0),200,min(y0),max(y0) );
 
-	# xi = {}
-	# yi = {}
-	# zi = {}
-	# for whichEntry in ["CLs","CLsexp","clsu1s","clsu2s","clsd1s","clsd2s"]:
-	#   print ">>>> Interpolating %s"%whichEntry;
-	#   xArray = np.array(x[whichEntry]);
-	#   yArray = np.array(y[whichEntry]);
-	#   zValuesArray = np.array( zValues[whichEntry] );
+		for whichContour in listOfContours:
+			graphs[whichContour] = createGraphsFromArrays(x[whichContour],y[whichContour],zValues[whichContour],whichContour)
 
-	#   n = []
-	#   for i in xrange(len(x[whichEntry]) ):
-	#     n.append( (xArray[i], yArray[i],zValuesArray[i]) )
+		# print graphs
+		return graphs
 
-	#   n = np.array(n)
-	#   # print n
+	else:
+		print ">>> ... Using scipy interpolate scheme."
+
+		xi = {}
+		yi = {}
+		zi = {}
+		for whichContour in listOfContours:
+			print ">>> ... Interpolating %s"%whichContour;
+			xArray = np.array(x[whichContour]);
+			yArray = np.array(y[whichContour]);
+			xyArray = np.array( zip(x[whichContour],y[whichContour]) )
+			zValuesArray = np.array( zValues[whichContour] );
+
+			# get xi, yi
+			xi[whichContour], yi[whichContour] = np.linspace(xArray.min(), xArray.max(), args.xResolution), np.linspace(yArray.min(), yArray.max(), args.yResolution);
+			xi[whichContour], yi[whichContour] = np.meshgrid(xi[whichContour], yi[whichContour]);
+
+			zi[whichContour] = griddata(xArray, yArray, zValuesArray, xi[whichContour], yi[whichContour], interp=interpolationFunction)
+			# zi[whichContour] = griddata( xyArray , zValuesArray, (xi[whichContour], yi[whichContour]), method=interpolationFunction)
+
+			contourList = getContourPoints(xi[whichContour],yi[whichContour],zi[whichContour], args.level)
+
+			graphs[whichContour] = []
+			for contour in contourList:
+				graph = ROOT.TGraph(len(contour[0]), contour[0].flatten('C'), contour[1].flatten('C') )
+				graphs[whichContour].append(graph)
+		return graphs
+
+		# return (xi,yi,zi);
+		# # return (x,y,zValues)
 
 
 
-	#   # get xi, yi
-	#   xi[whichEntry], yi[whichEntry] = np.linspace(xArray.min(), xArray.max(), 100), np.linspace(yArray.min(), yArray.max(), 100);
-	#   xi[whichEntry], yi[whichEntry] = np.meshgrid(xi[whichEntry], yi[whichEntry]);
+def createGraphsFromArrays(x,y,z,label):
 
-	#   # print xi[whichEntry]
-	#   # print scipy.interpolate.griddata(n[:,0:2], n[:,2], [(1,1500), (1.2, 1500)], method='linear')
-	#   zi[whichEntry] = griddata(xArray, yArray, zValuesArray, xi[whichEntry], yi[whichEntry], interp='linear')
-
-
-	#   # interpolate and get zi
-	#   # print "size of (x,y,z) = (%d,%d,%d)" % (len(x[whichEntry]), len(y[whichEntry]), len(zValues[whichEntry]));
-	#   # rbf = LSQ_Rbf(x[whichEntry], y[whichEntry], zValues[whichEntry], function=interpolationFunction, smooth=0.1);
-	#   # print "setting zi";
-	#   # zi[whichEntry] = rbf(xi[whichEntry], yi[whichEntry]);
-	#   # print zi[whichEntry]
-	#   pass;
-
-	# return (xi,yi,zi);
-	# # return (x,y,zValues)
-
-
-
-def turnAJunkIntoAGraph(x,y,z,label):
+	if args.debug:
+		print ">>> ... In createGraphsFromArrays for %s"%label
 
 	from array import array
 
@@ -363,45 +319,40 @@ def turnAJunkIntoAGraph(x,y,z,label):
 		array('f',y),
 		array('f',z) )
 
-	hist = gr.GetHistogram().Clone()
+	hist = gr.GetHistogram().Clone(label)
 
-	canvas = ROOT.TCanvas("turnAJunkDiagnostic","turnAJunkDiagnostic")
-	hist.Draw("colz")
-	# gr.Draw("P0 TRI1")
-	for i in xrange(5):
-		hist.Smooth(1,"k5b")
-	canvas.SaveAs("underlyingHist_%s.pdf"%label)
+	if label=="CLsexp":
+		hist.Write("CLsexp_hist")
 
 	hist.SetContour(1)
-	# hist.SetContourLevel(0,9.)
 	hist.SetContourLevel(0,ROOT.RooStats.PValueToSignificance( 0.05 ))
-	# print ROOT.RooStats.PValueToSignificance( 0.05 )
 	ROOT.SetOwnership(hist,0)
 	hist.Draw("CONT LIST")
 	ROOT.gPad.Update()
 	outputContours = ROOT.gROOT.GetListOfSpecials().FindObject("contours")
-	# print len(outputContours.At(0))
 	maxIntegral = 0
 	biggestGraph = 0
+	allGraphs = []
 	for contour in outputContours.At(0):
-		# print contour
 		l = contour.Clone()
 		ROOT.SetOwnership(l,0)
-		# print l
-		# print outputContours
-		# print biggestGraph.GetN()
 		l.Draw("ALP")
-		# print contour.Integral()
 		if contour.Integral() > maxIntegral:
 			maxIntegral = contour.Integral()
 			biggestGraph = contour.Clone()
-	if biggestGraph:
+		allGraphs.append(l)
+		# print contour.GetN()
+	if biggestGraph and args.debug:
 		biggestGraph.Draw("ALP")
-	# print maxIntegral
-	# ROOT.gPad.SetLogx()
-	canvas.SaveAs("gr_%s.pdf"%label)
-	return biggestGraph
-	# pass
+		# canvas.SaveAs("gr_%s.pdf"%label)
+	# return biggestGraph
+
+	if args.debug:
+		print ">>> ... ... Number of graphs %d"%len(allGraphs)
+		# print allGraphs
+
+	return allGraphs
+
 
 
 def getContourPoints(xi,yi,zi,level ):
@@ -422,40 +373,6 @@ def getContourPoints(xi,yi,zi,level ):
 	return contourList
 
 
-
-class LSQ_Rbf(scipy.interpolate.Rbf):
-
-		def __init__(self, *args, **kwargs):
-				self.xi = np.asarray([np.asarray(a, dtype=float).flatten()
-													 for a in args[:-1]])
-				self.N = self.xi.shape[-1]
-				self.di = np.asarray(args[-1]).flatten()
-
-				if not all([x.size == self.di.size for x in self.xi]):
-						raise ValueError("All arrays must be equal length.")
-
-				self.norm = kwargs.pop('norm', self._euclidean_norm)
-				r = self._call_norm(self.xi, self.xi)
-				self.epsilon = kwargs.pop('epsilon', None)
-				if self.epsilon is None:
-						self.epsilon = r.mean()
-				self.smooth = kwargs.pop('smooth', 0.0)
-
-				self.function = kwargs.pop('function', 'multiquadric')
-
-				# attach anything left in kwargs to self
-				#  for use by any user-callable function or
-				#  to save on the object returned.
-				for item, value in kwargs.items():
-						setattr(self, item, value)
-
-				print "init_function - eye*smooth"
-				self.A = self._init_function(r) - np.eye(self.N)*self.smooth
-				# use linalg.lstsq rather than linalg.solve to deal with
-				# overdetermined cases
-				print "linalg.lstsq"
-				self.nodes = np.linalg.lstsq(self.A, self.di)[0]
-				print "End of LSQ_Rbf initialization"
 
 
 if __name__ == "__main__":
