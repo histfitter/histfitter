@@ -17,7 +17,7 @@
 #> lsetup root
 
 
-import ROOT, json, argparse, math, sys
+import ROOT, json, argparse, math, sys, os
 
 ROOT.gROOT.SetBatch()
 
@@ -28,27 +28,39 @@ parser.add_argument("--interpolation",   type=str, help="type of interpolation f
 parser.add_argument("--level",           type=float, help="contour level output. Default to 95% CL", default = ROOT.RooStats.PValueToSignificance( 0.05 ))
 parser.add_argument("--useROOT","-r", help="use the root interpolation engine instead of mpl", action="store_true", default=False)
 parser.add_argument("--debug","-d", help="print extra debugging info", action="store_true", default=False)
-
 parser.add_argument("--sigmax",          type=float, help="maximum significance in sigmas", default = 5.0)
-
 parser.add_argument("--xVariable","-x",  type=str, default = "mg" )
 parser.add_argument("--yVariable","-y",  type=str, default = "mlsp" )
-
 parser.add_argument("--xResolution", type=int, default = 100 )
 parser.add_argument("--yResolution", type=int, default = 100 )
-
 parser.add_argument("--fixedParamsFile","-f", type=str, help="give a json file with key=variable and value=value. e.g. use for pinning down third parameter in harvest list", default="")
+parser.add_argument("--forbiddenFunction","-l", type=str, help="""a ROOT TF1 definition for a forbidden line e.g. kinematically forbidden regions. (for diagonal, use `-l "x"` )""", default="")
 
 args = parser.parse_args()
 
 if not args.useROOT:
-
-	import matplotlib.pyplot as plt
-	import numpy as np
-	import scipy.interpolate
-
-	import matplotlib.mlab
-
+	try:
+		import matplotlib.pyplot as plt
+		import numpy as np
+		import scipy.interpolate
+	except:
+		print ">>> You need matplotlib to be available to run in mpl mode."
+		print ">>> Either use the ROOT interpolator with the option -r or set up mpl"
+		print ">>> In an ATLAS environment, you can..."
+		print ">>> > localSetupSFT --cmtConfig=x86_64-slc6-gcc48-opt releases/LCG_79/pytools/1.9_python2.7,releases/LCG_79/pyanalysis/1.5_python2.7"
+		print ">>> > lsetup root"
+		print ">>> "
+		print ">>> Do you want me to try to set it up for you (in ATLAS env)? (y/n)"
+		choice = raw_input().lower()
+		if choice[0] == "y":
+			try:
+				os.system("localSetupSFT --cmtConfig=x86_64-slc6-gcc48-opt releases/LCG_79/pytools/1.9_python2.7,releases/LCG_79/pyanalysis/1.5_python2.7")
+				os.system("lsetup root")
+			except:
+				print ">>> ... Setup didn't work for some reason!"
+		else:
+			print ">>> Quitting -- You don't have matplotlib/numpy setup and you requested mpl-based interpolation"
+			sys.exit(1)
 
 listOfContours = ["CLs","CLsexp","clsu1s","clsu2s","clsd1s","clsd2s"]
 
@@ -66,6 +78,10 @@ def main():
 
 	# Step 1 - Read in harvest list in either text or json format and dump it into a dictionary
 	tmpdict = harvestToDict( args.inputFile )
+
+	# Step 1.5 - If there's a function for a kinematically forbidden region, add zeros to dictionary
+	if args.forbiddenFunction:
+		addZerosToDict(tmpdict,args.forbiddenFunction)
 
 	# Step 2 - Interpolate the fit results
 	print ">>> Interpolating surface"
@@ -179,6 +195,19 @@ def harvestToDict( harvestInputFileName = "" ):
 	return modelDict
 
 
+def addZerosToDict(inputDict, function, numberOfZeros = 100):
+	"""This takes in a TF1 and dots zero points along that function, and adds to the dict"""
+
+	tmpListOfXValues = [entry[0] for entry in inputDict.keys()]
+	lowerLimit = 0
+	upperLimit = max(tmpListOfXValues)
+	forbiddenFunction = ROOT.TF1("forbiddenFunction",args.forbiddenFunction,lowerLimit,upperLimit)
+	forbiddenFunction.Write("forbiddenFunction")
+
+	for xValue in [lowerLimit + x*(upperLimit-lowerLimit)/float(numberOfZeros) for x in range(numberOfZeros)]:
+		inputDict[(xValue,forbiddenFunction.Eval(xValue))] = dict(zip(listOfContours,  [0.0 for x in listOfContours] ) )
+	return
+
 def interpolateSurface(modelDict = {}, interpolationFunction = "linear", useROOT=False):
 	"""The actual interpolation"""
 
@@ -233,8 +262,8 @@ def interpolateSurface(modelDict = {}, interpolationFunction = "linear", useROOT
 	else:
 		print ">>> ... Using scipy interpolate scheme."
 
-		if args.interpolation in ["cubic","nearest"]:
-			print ">>> WARNING: cubic and nearest interpolation modes seem to give unreliable results in tests!"
+		if args.interpolation in ["nearest"]:
+			print ">>> WARNING: nearest interpolation mode seems to give unreliable results in tests!"
 
 		xi = {}
 		yi = {}
@@ -278,6 +307,7 @@ def createGraphsFromArrays(x,y,z,label):
 
 	if label=="CLsexp":
 		hist.Write("CLsexp_hist")
+		gr.Write("CLexp_gr")
 
 	hist.SetContour(1)
 	hist.SetContourLevel(0,args.level)
