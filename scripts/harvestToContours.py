@@ -33,6 +33,10 @@ parser.add_argument("--xVariable","-x",  type=str, default = "mg" )
 parser.add_argument("--yVariable","-y",  type=str, default = "mlsp" )
 parser.add_argument("--xResolution", type=int, default = 100 )
 parser.add_argument("--yResolution", type=int, default = 100 )
+
+parser.add_argument("--logX", help="use log10 of x variable", action="store_true", default=False)
+parser.add_argument("--logY", help="use log10 of y variable", action="store_true", default=False)
+
 parser.add_argument("--fixedParamsFile","-f", type=str, help="give a json file with key=variable and value=value. e.g. use for pinning down third parameter in harvest list", default="")
 parser.add_argument("--forbiddenFunction","-l", type=str, help="""a ROOT TF1 definition for a forbidden line e.g. kinematically forbidden regions. (for diagonal, use `-l "x"` )""", default="")
 
@@ -155,6 +159,13 @@ def harvestToDict( harvestInputFileName = "" ):
 					print ">>> ... Use cmd line options -x and -y to point to variables that exist in the input"
 					sys.exit(1)
 
+				sampleParamsList = list(sampleParams)
+				if args.logX:
+					sampleParamsList[0] = math.log10(sampleParamsList[0])
+				if args.logY:
+					sampleParamsList[1] = math.log10(sampleParamsList[1])
+				sampleParams = tuple(sampleParamsList)
+
 				if ROOT.RooStats.PValueToSignificance( float(sample["CLsexp"]) ) < args.sigmax and not math.isinf(float(sample["CLsexp"])) :
 					modelDict[sampleParams] = dict(zip(listOfContours,  [ROOT.RooStats.PValueToSignificance( float(sample["%s"%x]) ) for x in listOfContours] ) )
 
@@ -183,7 +194,14 @@ def harvestToDict( harvestInputFileName = "" ):
 			values = model.split()
 			values = dict(zip(fieldNames, values))
 
-			massPoint = (float(values[args.xVariable]),float(values[args.yVariable]))
+			sampleParams = (float(values[args.xVariable]),float(values[args.yVariable]))
+
+			sampleParamsList = list(sampleParams)
+			if args.logX:
+				sampleParamsList[0] = math.log10(sampleParamsList[0])
+			if args.logY:
+				sampleParamsList[1] = math.log10(sampleParamsList[1])
+			sampleParams = tuple(sampleParamsList)
 
 			## Allowing filtering of entries via a constraints file
 			if args.fixedParamsFile:
@@ -191,10 +209,10 @@ def harvestToDict( harvestInputFileName = "" ):
 				if any(failConstraintCutList):
 					continue
 
-			modelDict[massPoint] = dict(zip(listOfContours,  [ROOT.RooStats.PValueToSignificance( float(values["%s/F"%x]) ) for x in listOfContours] ) )
+			modelDict[sampleParams] = dict(zip(listOfContours,  [ROOT.RooStats.PValueToSignificance( float(values["%s/F"%x]) ) for x in listOfContours] ) )
 
 
-			print massPoint, ROOT.RooStats.PValueToSignificance( float(values["CLs/F"])     )
+			print sampleParams, ROOT.RooStats.PValueToSignificance( float(values["CLs/F"])     )
 
 	return modelDict
 
