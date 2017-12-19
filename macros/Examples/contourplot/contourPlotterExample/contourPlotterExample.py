@@ -35,8 +35,8 @@ plot.drawAxes( [0,0,1500,2000] )
 
 ## Other limits to draw
 
-plot.drawShadedRegion( Run1.curve, title="ATLAS 8 TeV, 20.3 fb^{-1} (observed)" )
-plot.drawShadedRegion( Run1.lep  , title="LEP Limits" , color = ROOT.kBlue      )
+plot.drawShadedRegion( externalGraphs.curve, title="ATLAS 8 TeV, 20.3 fb^{-1} (observed)" )
+plot.drawShadedRegion( externalGraphs.lep  , title="LEP Limits" , color = ROOT.kBlue      )
 
 ## Main Result
 
