@@ -8,7 +8,7 @@
 # Then the CLs values are interpreted as p-values and converted to significances and then interpolated
 # Interpolation of significance surface can be configured to e.g. nn, linear, cubic (options from mpl)
 #
-# By: Larry Lee
+# By: Larry Lee - Dec 2017
 
 
 # You'll have to have matplotlib and root setup side-by-side
@@ -39,6 +39,7 @@ parser.add_argument("--logY", help="use log10 of y variable", action="store_true
 
 parser.add_argument("--fixedParamsFile","-f", type=str, help="give a json file with key=variable and value=value. e.g. use for pinning down third parameter in harvest list", default="")
 parser.add_argument("--forbiddenFunction","-l", type=str, help="""a ROOT TF1 definition for a forbidden line e.g. kinematically forbidden regions. (for diagonal, use `-l "x"` )""", default="")
+parser.add_argument("--ignoreUncertainty","-u", help="""Don't care about uncertainty bands!""", action="store_true", default=False)
 
 args = parser.parse_args()
 
@@ -66,8 +67,11 @@ if not args.useROOT:
 			print ">>> Quitting -- You don't have matplotlib/numpy setup and you requested mpl-based interpolation"
 			sys.exit(1)
 
-listOfContours = ["CLs","CLsexp","clsu1s","clsu2s","clsd1s","clsd2s"]
 
+if args.ignoreUncertainty:
+	listOfContours = ["CLs","CLsexp"]
+else:
+	listOfContours = ["CLs","CLsexp","clsu1s","clsu2s","clsd1s","clsd2s"]
 
 
 
@@ -124,14 +128,16 @@ def main():
 	############################################################
 	# Step 4 - Make pretty curves (and bands) or try to...
 
-	for icurve,(curve1,curve2) in enumerate(zip(outputGraphs["clsu1s"],outputGraphs["clsd1s"]) ):
-		band_1s = createBandFromContours( curve1, curve2 )
-		band_1s.SetFillColorAlpha(ROOT.TColor.GetColor("#ffd700"), 0.75)
-		band_1s.Write("Band_1s_%d"%icurve)
-	for icurve,(curve1,curve2) in enumerate(zip(outputGraphs["clsu2s"],outputGraphs["clsd2s"]) ):
-		band_2s = createBandFromContours( curve1, curve2 )
-		band_2s.SetFillColorAlpha(ROOT.TColor.GetColor("#115000"), 0.5)
-		band_2s.Write("Band_2s_%d"%icurve)
+	if not args.ignoreUncertainty:
+		for icurve,(curve1,curve2) in enumerate(zip(outputGraphs["clsu1s"],outputGraphs["clsd1s"]) ):
+			band_1s = createBandFromContours( curve1, curve2 )
+			band_1s.SetFillColorAlpha(ROOT.TColor.GetColor("#ffd700"), 0.75)
+			band_1s.Write("Band_1s_%d"%icurve)
+		for icurve,(curve1,curve2) in enumerate(zip(outputGraphs["clsu2s"],outputGraphs["clsd2s"]) ):
+			band_2s = createBandFromContours( curve1, curve2 )
+			band_2s.SetFillColorAlpha(ROOT.TColor.GetColor("#115000"), 0.5)
+			band_2s.Write("Band_2s_%d"%icurve)
+
 	for icurve,obsCurve in enumerate(outputGraphs["CLs"]):
 		obsCurve.SetLineWidth(2)
 		obsCurve.SetLineColorAlpha(ROOT.TColor.GetColor("#800000"), 0.9 )
@@ -145,8 +151,11 @@ def main():
 	# Step 5 - Write out a pretty canvas for further editing
 
 	canvas = ROOT.TCanvas("FinalCurves","FinalCurves")
-	for iGraph in xrange(len(outputGraphs["clsu1s"]) ):
-		f.Get("Band_1s_%d"%iGraph).Draw("ALF" if iGraph==0 else "LF")
+	if not args.ignoreUncertainty:
+		for iGraph in xrange(len(outputGraphs["clsu1s"]) ):
+			f.Get("Band_1s_%d"%iGraph).Draw("ALF" if iGraph==0 else "LF")
+	else:
+		f.Get("Exp_0").Draw("AL")
 	for iGraph in xrange(len(outputGraphs["CLsexp"]) ):
 		f.Get("Exp_%d"%iGraph).Draw("L")
 	for iGraph in xrange(len(outputGraphs["CLs"]) ):
@@ -195,7 +204,7 @@ def harvestToDict( harvestInputFileName = "" ):
 						continue
 
 				try:
-					sampleParams = (sample[args.xVariable],sample[args.yVariable])
+					sampleParams = (float(sample[args.xVariable]),float(sample[args.yVariable]) )
 				except:
 					print ">>> ... Error: %s or %s doesn't exist as an entry in the input file"%(args.xVariable,args.yVariable)
 					print ">>> ... Use cmd line options -x and -y to point to variables that exist in the input"
@@ -320,7 +329,6 @@ def interpolateSurface(modelDict = {}, interpolationFunction = "linear", useROOT
 		for whichContour in listOfContours:
 			graphs[whichContour] = createGraphsFromArrays(x[whichContour],y[whichContour],zValues[whichContour],whichContour)
 
-		# print graphs
 		return graphs
 
 	else:
