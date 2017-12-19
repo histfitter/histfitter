@@ -85,7 +85,7 @@ def main():
 	# Print out the settings
 	for setting in dir(args):
 		if not setting[0]=="_":
-			print ">>> ... Setting: {: >20} {: >20}".format(setting, eval("args.%s"%setting) )
+			print ">>> ... Setting: {: >20} {: >40}".format(setting, eval("args.%s"%setting) )
 
 	f = ROOT.TFile(args.outputFile,"recreate")
 
