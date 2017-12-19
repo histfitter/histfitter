@@ -148,8 +148,12 @@ def harvestToDict( harvestInputFileName = "" ):
 					if any(failConstraintCutList):
 						continue
 
-				sampleParams = (sample[args.xVariable],sample[args.yVariable])
-
+				try:
+					sampleParams = (sample[args.xVariable],sample[args.yVariable])
+				except:
+					print ">>> ... Error: %s or %s doesn't exist as an entry in the input file"%(args.xVariable,args.yVariable)
+					print ">>> ... Use cmd line options -x and -y to point to variables that exist in the input"
+					sys.exit(1)
 
 				if ROOT.RooStats.PValueToSignificance( float(sample["CLsexp"]) ) < args.sigmax and not math.isinf(float(sample["CLsexp"])) :
 					modelDict[sampleParams] = dict(zip(listOfContours,  [ROOT.RooStats.PValueToSignificance( float(sample["%s"%x]) ) for x in listOfContours] ) )
