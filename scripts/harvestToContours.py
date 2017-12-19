@@ -70,29 +70,45 @@ listOfContours = ["CLs","CLsexp","clsu1s","clsu2s","clsd1s","clsd2s"]
 
 
 
+
+
 def main():
 	"""Main function for driving the whole thing..."""
 
+
 	print ">>> Welcome to harvestToContours!"
+
+	# Print out the settings
 	for setting in dir(args):
 		if not setting[0]=="_":
 			print ">>> ... Setting: {: >20} {: >20}".format(setting, eval("args.%s"%setting) )
 
 	f = ROOT.TFile(args.outputFile,"recreate")
 
+	############################################################
 	# Step 1 - Read in harvest list in either text or json format and dump it into a dictionary
+
 	tmpdict = harvestToDict( args.inputFile )
 
+	############################################################
 	# Step 1.5 - If there's a function for a kinematically forbidden region, add zeros to dictionary
+
 	if args.forbiddenFunction:
 		addZerosToDict(tmpdict,args.forbiddenFunction)
 
+	############################################################
 	# Step 2 - Interpolate the fit results
+
 	print ">>> Interpolating surface"
+
 	outputGraphs = interpolateSurface( tmpdict , args.interpolation , args.useROOT)
 
-	print ">>> Writing contours out"
+	############################################################
 	# Step 3 - get TGraph contours
+
+	print ">>> Writing contours out"
+
+	f.mkdir("SubGraphs"); f.cd("SubGraphs")
 	for whichContour in listOfContours:
 
 		try:
@@ -103,17 +119,43 @@ def main():
 			if len(outputGraphs[whichContour]):
 				print ">>> ... It appears this has no contours..."
 
-	if args.debug:
-		canvas = ROOT.TCanvas("FinalCurves","FinalCurves")
-		try:
-			outputGraphs["CLs"][0].Draw("AL")
-			for whichContour in ["CLsexp","clsu1s","clsd1s"]:
-				outputGraphs[whichContour][0].SetLineStyle(7)
-				outputGraphs[whichContour][0].Draw("L")
-			canvas.SaveAs("DebugFinalCurves.pdf")
-		except:
-			print ">>> ... Something broke. You don't seem to have a contour."
+	f.cd()
 
+	############################################################
+	# Step 4 - Make pretty curves (and bands) or try to...
+
+	for icurve,(curve1,curve2) in enumerate(zip(outputGraphs["clsu1s"],outputGraphs["clsd1s"]) ):
+		band_1s = createBandFromContours( curve1, curve2 )
+		band_1s.SetFillColorAlpha(ROOT.TColor.GetColor("#ffd700"), 0.75)
+		band_1s.Write("Band_1s_%d"%icurve)
+	for icurve,(curve1,curve2) in enumerate(zip(outputGraphs["clsu2s"],outputGraphs["clsd2s"]) ):
+		band_2s = createBandFromContours( curve1, curve2 )
+		band_2s.SetFillColorAlpha(ROOT.TColor.GetColor("#115000"), 0.5)
+		band_2s.Write("Band_2s_%d"%icurve)
+	for icurve,obsCurve in enumerate(outputGraphs["CLs"]):
+		obsCurve.SetLineWidth(2)
+		obsCurve.SetLineColorAlpha(ROOT.TColor.GetColor("#800000"), 0.9 )
+		obsCurve.Write("Obs_%s"%icurve)
+	for icurve,expCurve in enumerate(outputGraphs["CLsexp"]):
+		expCurve.SetLineStyle(7)
+		expCurve.Write("Exp_%s"%icurve)
+
+
+	############################################################
+	# Step 5 - Write out a pretty canvas for further editing
+
+	canvas = ROOT.TCanvas("FinalCurves","FinalCurves")
+	for iGraph in xrange(len(outputGraphs["clsu1s"]) ):
+		f.Get("Band_1s_%d"%iGraph).Draw("ALF" if iGraph==0 else "LF")
+	for iGraph in xrange(len(outputGraphs["CLsexp"]) ):
+		f.Get("Exp_%d"%iGraph).Draw("L")
+	for iGraph in xrange(len(outputGraphs["CLs"]) ):
+		f.Get("Obs_%d"%iGraph).Draw("L")
+	ROOT.gPad.RedrawAxis()
+	canvas.Write()
+
+	if args.debug:
+		canvas.SaveAs("DebugFinalCurves.pdf")
 
 	print ">>> Closing file"
 
@@ -379,8 +421,24 @@ def getContourPoints(xi,yi,zi,level ):
 
 	return contourList
 
+def createBandFromContours(contour1,contour2):
 
+	outputSize = contour1.GetN()+contour2.GetN()+1
+	outputGraph = ROOT.TGraph(outputSize)
+	tmpx, tmpy = ROOT.Double(), ROOT.Double()
+	for iPoint in xrange(contour2.GetN()):
+		contour2.GetPoint(iPoint,tmpx,tmpy)
+		outputGraph.SetPoint(iPoint,tmpx,tmpy)
+	for iPoint in xrange(contour1.GetN()):
+		contour1.GetPoint(contour1.GetN()-1-iPoint,tmpx,tmpy)
+		outputGraph.SetPoint(contour2.GetN()+iPoint,tmpx,tmpy)
+	contour2.GetPoint(0,tmpx,tmpy)
+	outputGraph.SetPoint(contour1.GetN()+contour2.GetN(),tmpx,tmpy)
 
+	outputGraph.SetFillStyle(1001);
+	outputGraph.SetLineWidth(1)
+
+	return outputGraph
 
 if __name__ == "__main__":
 	main()
