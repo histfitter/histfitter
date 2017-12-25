@@ -6,7 +6,7 @@
 #
 # The file that's used here just needs to contain TGraphs for this setup to work.
 # Easy way to make those TGraphs:
-#     python harvestToContours.py --interpolation linear -o stopToStauExample.root -i stopToStauExample.json -x m0 -y m12
+#     harvestToContours.py --interpolation linear -o stopToStauExample.root -i stopToStauExample.json -x m0 -y m12
 #
 # By: Larry Lee - Dec 2017
 
