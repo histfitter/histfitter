@@ -9,21 +9,21 @@ To-do-list HistFitter 9. September 2015
 
 - Documentation on how to setup HistFitter and ROOT on different operating systems (ubuntu done, complete mac instructions)
 - Revision: the Tutorial/documentation could be a more practical-oriented. 
- o Update contour plot example
- o Update FAQ and main HistFitter twiki pages
+ o Update contour plot example ---> work in progress Geert-Jan and Larry Lee
+ o Update FAQ and main HistFitter twiki pages ---> added advance Histfitter twiki with more checks and validation info 
 - Advertizement and examples for combination of workspaces. ---> Partially DONE
-- Migration into ATLAS release
+- Migration into ATLAS release ---> this idea is for time being given up
 - Harmonize the various plotting and batch/grid submission scripts. 
-- Migrate to uncapped p0 values. 
-- toys versus asymptotic - add possibility to assess fit information on toys
-- Investigate 'method 3' from Higgs group for systematics tables
-- Memory issue reported for loading many histograms at the grid by Katharina Behr
+- Migrate to uncapped p0 values ---> we do not cap p0 values 
+- toys versus asymptotic - add possibility to assess fit information on toys ---> underline stats tools need to add this info 
+- Investigate 'method 3' from Higgs group for systematics tables ---> DONE (SystRankingPlot.py) 
+- Memory issue reported for loading many histograms at the grid by Katharina Behr ---> is it still there? 
 
 >>>>>From old to-do list:
-- Proper treatment of all bins with zero events by HistFactory? Check (See recent mail George Lewis)
+- Proper treatment of all bins with zero events by HistFactory? Check (See recent mail George Lewis) ---> no final solution exists, so far we either add tiny contribution and scale syst to get final error, or we merge samples and add systematics on merged BG component.
 - sigma values in list-file. 
 - Hard-coded names, e.g. sig_xsection. Needs to be documented, or made flexible. 
-- Generalized scripts --- for plotting in particular
+- Generalized scripts --- for plotting in particular ---> work in progress Geert-Jan and Larry Lee
 
 
 
@@ -35,7 +35,7 @@ To-do-list HistFitter 9. September 2015
 - Correct statistical treatment of fits to prescaled data. 
 - Clean-up of C++ and python code (see work packages by statistics forum)
 - Add possibility to produce HEPData material
-- Add pull plot for parameters to HistFitter
+- Add pull plot for parameters to HistFitter ---> DONE
 - Provide functions/tools to do fitting/plotting of arbitrary workspaces, also not following the naming convention by HistFitter
 - feature request: generalization of pull plot macro, possible based on pickle format as in Geert-Jan's example macro
 - parallelization for histogram construction and for producing toys
