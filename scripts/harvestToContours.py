@@ -152,7 +152,7 @@ def main():
 
 	canvas = ROOT.TCanvas("FinalCurves","FinalCurves")
 	if not args.ignoreUncertainty:
-		for iGraph in xrange(len(outputGraphs["clsu1s"]) ):
+		for iGraph in xrange( min( len(outputGraphs["clsu1s"]) , len(outputGraphs["clsd1s"]) )   ):
 			f.Get("Band_1s_%d"%iGraph).Draw("ALF" if iGraph==0 else "LF")
 	else:
 		f.Get("Exp_0").Draw("AL")
