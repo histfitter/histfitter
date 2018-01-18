@@ -8,6 +8,12 @@
 # Easy way to make those TGraphs:
 #     harvestToContours.py --interpolation linear -o stopToStauExample.root -i stopToStauExample.json -x m0 -y m12
 #
+# If you don't have a JSON file, you can also use the command GenerateJSONOutput.py to take your
+# ROOT file output from the HF fit and create a JSON that can be used with harvestToContours.py
+#    GenerateJSONOutput.py \
+#        -i [hypotest result root file] \
+#        -f [format of result object name e.g. "hypo_SU_%f_%f_0_10"] \
+#        -p [interpretation of the variables in the name above. e.g. "m0:m12"]
 # By: Larry Lee - Dec 2017
 
 import ROOT
