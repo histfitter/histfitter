@@ -90,6 +90,15 @@ class contourPlotter:
 			self.legendObjects.append( ( legendOrder, curve.Clone("Observed"), title, "L" ) )
 		return
 
+	def drawTheoryUncertaintyCurve(self, curve, color=ROOT.TColor.GetColor("#800000"), alpha=0.7,  style=3):
+		self.canvas.cd()
+		curve.SetLineColorAlpha(color,alpha)
+		curve.SetLineStyle(style)
+		curve.SetLineWidth(1)
+		curve.Draw("L")
+		self.canvas.Update()
+		return
+
 	def drawTextFromTGraph2D(self, graph, title="Grey numbers represent blah", color=ROOT.TColor.GetColor("#000000"), alpha=0.6, angle=30, size=0.015, format="%.1g", titlesize = 0.03):
 		self.canvas.cd()
 		tmpText = ROOT.TLatex()

@@ -64,6 +64,8 @@ plot.setYAxisLabel( "bap [GeV]"  )
 plot.drawLegend()
 
 if drawTheorySysts:
+	plot.drawTheoryUncertaintyCurve( f.Get("Obs_0_Up") )
+	plot.drawTheoryUncertaintyCurve( f.Get("Obs_0_Down") )
 	# coordinate in NDC
 	plot.drawTheoryLegendLines( xyCoord=(0.236,0.6625), length=0.075 )
 
