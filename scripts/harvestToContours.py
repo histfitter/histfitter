@@ -86,7 +86,6 @@ else:
 def main():
 	"""Main function for driving the whole thing..."""
 
-
 	print ">>> Welcome to harvestToContours!"
 
 	# Print out the settings
@@ -96,14 +95,33 @@ def main():
 
 	f = ROOT.TFile(args.outputFile,"recreate")
 
+	processInputFile(inputFile = args.inputFile, outputFile = f, label = "")
+
+	if "XSecNominal" in args.inputFile:
+		print ">>> Handling theory variations..."
+		try:
+			processInputFile(inputFile = args.inputFile.replace("XSecNominal","XSecUp")  , outputFile = f, label = "_Up")
+			processInputFile(inputFile = args.inputFile.replace("XSecNominal","XSecDown"), outputFile = f, label = "_Down")
+		except:
+			print ">>> Can't find theory variation files. Skipping."
+
+	print ">>> Closing file"
+
+	f.Write()
+	f.Close()
+
+
+def processInputFile(inputFile, outputFile, label = ""):
+
 	############################################################
 	# Step 1 - Read in harvest list in either text or json format and dump it into a dictionary
 
-	tmpdict = harvestToDict( args.inputFile )
+	tmpdict = harvestToDict( inputFile )
 
-	for whichContour in ["CLsexp","CLs"]:
-		tmpGraph = createTGraphFromDict(tmpdict,"CLsexp")
-		tmpGraph.Write("%s_gr"%whichContour)
+	if label=="": #Only do this for the nominal signal XS
+		for whichContour in ["CLsexp","CLs"]:
+			tmpGraph = createTGraphFromDict(tmpdict,"CLsexp")
+			tmpGraph.Write("%s_gr"%(whichContour) )
 
 	truncateSignificances( tmpdict , args.sigmax )
 
@@ -125,23 +143,23 @@ def main():
 
 	print ">>> Writing contours out"
 
-	f.mkdir("SubGraphs"); f.cd("SubGraphs")
+	outputFile.mkdir("SubGraphs"); outputFile.cd("SubGraphs")
 	for whichContour in listOfContours:
 
 		try:
 			for iSubGraph,subGraph in enumerate(outputGraphs[whichContour]):
-				subGraph.Write("%s_Contour_%d"%(whichContour,iSubGraph))
+				subGraph.Write("%s_Contour_%d%s"%(whichContour,iSubGraph,label))
 		except:
 			print ">>> ... Well that one's no good. You might want to check on that... - %s"%whichContour
 			if len(outputGraphs[whichContour]):
 				print ">>> ... It appears this has no contours..."
 
-	f.cd()
+	outputFile.cd()
 
 	############################################################
 	# Step 4 - Make pretty curves (and bands) or try to...
 
-	if not args.ignoreUncertainty:
+	if not args.ignoreUncertainty and label=="":
 		for icurve,(curve1,curve2) in enumerate(zip(outputGraphs["clsu1s"],outputGraphs["clsd1s"]) ):
 			band_1s = createBandFromContours( curve1, curve2 )
 			band_1s.SetFillColorAlpha(ROOT.TColor.GetColor("#ffd700"), 0.75)
@@ -154,35 +172,33 @@ def main():
 	for icurve,obsCurve in enumerate(outputGraphs["CLs"]):
 		obsCurve.SetLineWidth(2)
 		obsCurve.SetLineColorAlpha(ROOT.TColor.GetColor("#800000"), 0.9 )
-		obsCurve.Write("Obs_%s"%icurve)
+		obsCurve.Write("Obs_%s%s"%(icurve,label) )
 	for icurve,expCurve in enumerate(outputGraphs["CLsexp"]):
 		expCurve.SetLineStyle(7)
-		expCurve.Write("Exp_%s"%icurve)
+		expCurve.Write("Exp_%s%s"%(icurve,label) )
 
 
 	############################################################
 	# Step 5 - Write out a pretty canvas for further editing
 
-	canvas = ROOT.TCanvas("FinalCurves","FinalCurves")
-	if not args.ignoreUncertainty:
-		for iGraph in xrange( min( len(outputGraphs["clsu1s"]) , len(outputGraphs["clsd1s"]) )   ):
-			f.Get("Band_1s_%d"%iGraph).Draw("ALF" if iGraph==0 else "LF")
-	else:
-		f.Get("Exp_0").Draw("AL")
-	for iGraph in xrange(len(outputGraphs["CLsexp"]) ):
-		f.Get("Exp_%d"%iGraph).Draw("L")
-	for iGraph in xrange(len(outputGraphs["CLs"]) ):
-		f.Get("Obs_%d"%iGraph).Draw("L")
-	ROOT.gPad.RedrawAxis()
-	canvas.Write()
+	if label=="":
+		canvas = ROOT.TCanvas("FinalCurves","FinalCurves")
+		if not args.ignoreUncertainty:
+			for iGraph in xrange( min( len(outputGraphs["clsu1s"]) , len(outputGraphs["clsd1s"]) )   ):
+				outputFile.Get("Band_1s_%d"%iGraph).Draw("ALF" if iGraph==0 else "LF")
+		else:
+			outputFile.Get("Exp_0").Draw("AL")
+		for iGraph in xrange(len(outputGraphs["CLsexp"]) ):
+			outputFile.Get("Exp_%d"%iGraph).Draw("L")
+		for iGraph in xrange(len(outputGraphs["CLs"]) ):
+			outputFile.Get("Obs_%d"%iGraph).Draw("L")
+		ROOT.gPad.RedrawAxis()
+		canvas.Write()
 
-	if args.debug:
-		canvas.SaveAs("DebugFinalCurves.pdf")
+		if args.debug:
+			canvas.SaveAs("DebugFinalCurves.pdf")
 
-	print ">>> Closing file"
-
-	f.Write()
-	f.Close()
+	return
 
 
 def harvestToDict( harvestInputFileName = "" ):
