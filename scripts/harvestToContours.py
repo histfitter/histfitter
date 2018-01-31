@@ -26,7 +26,7 @@ ROOT.gROOT.SetBatch()
 parser = argparse.ArgumentParser()
 parser.add_argument("--inputFile","-i",  type = str, help="input harvest file", default = "test.json")
 parser.add_argument("--outputFile","-o", type = str, help="output ROOT file", default = "outputGraphs.root")
-parser.add_argument("--interpolation",   type = str, help="type of interpolation for scipy. e.g. linear, cubic, nearest. NOTE: Anything other than linear seems buggy", default = "linear")
+parser.add_argument("--interpolation",   type = str, help="type of interpolation for scipy (RBF). e.g. linear, cubic, gaussian, multiquadratic.", default = "linear")
 parser.add_argument("--level",           type = float, help="contour level output. Default to 95%% CL", default = 1.64485362695)
 parser.add_argument("--useROOT","-r",    help = "use the root interpolation engine instead of mpl", action="store_true", default=False)
 parser.add_argument("--debug","-d",      help = "print extra debugging info", action="store_true", default=False)
@@ -44,6 +44,7 @@ parser.add_argument("--forbiddenFunction","-l", type=str, help="""a ROOT TF1 def
 parser.add_argument("--ignoreUncertainty","-u", help="""Don't care about uncertainty bands!""", action="store_true", default=False)
 
 parser.add_argument("--areaThreshold","-a",     type = float, help="Throw away contours with areas less than threshold", default=0)
+parser.add_argument("--smoothing",    "-s",     type = str, help="smoothing option. For ROOT, use {k5a, k5b, k3a}. For scipy, not yet implemented.", default="")
 
 args = parser.parse_args()
 
@@ -350,20 +351,24 @@ def interpolateSurface(modelDict = {}, interpolationFunction = "linear", useROOT
 		yi = {}
 		zi = {}
 		for whichContour in listOfContours:
-			print ">>> ... Interpolating %s"%whichContour;
-			xArray = np.array(x[whichContour]);
-			yArray = np.array(y[whichContour]);
-			xyArray = np.array( zip(x[whichContour],y[whichContour]) )
-			zValuesArray = np.array( zValues[whichContour] );
+			print ">>> ... Interpolating %s"%whichContour
 
-			# get xi, yi
-			xi[whichContour], yi[whichContour] = np.linspace(xArray.min(), xArray.max(), args.xResolution), np.linspace(yArray.min(), yArray.max(), args.yResolution);
-			xi[whichContour], yi[whichContour] = np.meshgrid(xi[whichContour], yi[whichContour]);
+			xArray = np.array(x[whichContour])
+			yArray = np.array(y[whichContour])
+			zArray = np.array( zValues[whichContour] )
 
-			# zi[whichContour] = matplotlib.mlab.griddata(xArray, yArray, zValuesArray, xi[whichContour], yi[whichContour], interp=interpolationFunction)
-			zi[whichContour] = scipy.interpolate.griddata( xyArray , zValuesArray, (xi[whichContour], yi[whichContour]) , method=interpolationFunction)
+			xlinspace, ylinspace = np.linspace(xArray.min(), xArray.max(), args.xResolution), np.linspace(yArray.min(), yArray.max(), args.yResolution)
 
-			contourList = getContourPoints(xi[whichContour],yi[whichContour],zi[whichContour], args.level)
+			xymeshgrid = np.meshgrid(xlinspace,ylinspace)
+
+			smoothingFactor = 0
+			if args.smoothing:
+				smoothingFactor = float(args.smoothing)
+
+			rbf = scipy.interpolate.Rbf(xArray, yArray, zArray, function=interpolationFunction, smooth=smoothingFactor )
+			ZI = rbf(xymeshgrid[0], xymeshgrid[1])
+
+			contourList = getContourPoints(xymeshgrid[0],xymeshgrid[1],ZI, args.level)
 
 			graphs[whichContour] = []
 			for contour in contourList:
@@ -387,6 +392,8 @@ def createGraphsFromArrays(x,y,z,label):
 	gr = createTGraph2DFromArrays(x,y,z)
 
 	hist = gr.GetHistogram().Clone(label)
+	if args.smoothing:
+		hist.Smooth(1, args.smoothing)
 
 	if label in ["CLsexp","CLs"]:
 		hist.Write("%s_hist"%label)
