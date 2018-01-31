@@ -17,27 +17,29 @@
 #> lsetup root
 
 
+
 import ROOT, json, argparse, math, sys, os
 
 ROOT.gROOT.SetBatch()
 
+
 parser = argparse.ArgumentParser()
-parser.add_argument("--inputFile","-i",  type=str, help="input harvest file", default = "test.json")
-parser.add_argument("--outputFile","-o", type=str, help="output ROOT file", default = "outputGraphs.root")
-parser.add_argument("--interpolation",   type=str, help="type of interpolation for scipy. e.g. linear, cubic, nearest. NOTE: Anything other than linear seems buggy", default = "linear")
-parser.add_argument("--level",           type=float, help="contour level output. Default to 95% CL", default = ROOT.RooStats.PValueToSignificance( 0.05 ))
-parser.add_argument("--useROOT","-r", help="use the root interpolation engine instead of mpl", action="store_true", default=False)
-parser.add_argument("--debug","-d", help="print extra debugging info", action="store_true", default=False)
-parser.add_argument("--sigmax",          type=float, help="maximum significance in sigmas", default = 5.0)
-parser.add_argument("--xVariable","-x",  type=str, default = "mg" )
-parser.add_argument("--yVariable","-y",  type=str, default = "mlsp" )
-parser.add_argument("--xResolution", type=int, default = 100 )
-parser.add_argument("--yResolution", type=int, default = 100 )
+parser.add_argument("--inputFile","-i",  type = str, help="input harvest file", default = "test.json")
+parser.add_argument("--outputFile","-o", type = str, help="output ROOT file", default = "outputGraphs.root")
+parser.add_argument("--interpolation",   type = str, help="type of interpolation for scipy. e.g. linear, cubic, nearest. NOTE: Anything other than linear seems buggy", default = "linear")
+parser.add_argument("--level",           type = float, help="contour level output. Default to 95%% CL", default = 1.64485362695)
+parser.add_argument("--useROOT","-r",    help = "use the root interpolation engine instead of mpl", action="store_true", default=False)
+parser.add_argument("--debug","-d",      help = "print extra debugging info", action="store_true", default=False)
+parser.add_argument("--sigmax",          type = float, help="maximum significance in sigmas", default = 5.0)
+parser.add_argument("--xVariable","-x",  type = str, default = "mg" )
+parser.add_argument("--yVariable","-y",  type = str, default = "mlsp" )
+parser.add_argument("--xResolution",     type = int, default = 100 )
+parser.add_argument("--yResolution",     type = int, default = 100 )
 
 parser.add_argument("--logX", help="use log10 of x variable", action="store_true", default=False)
 parser.add_argument("--logY", help="use log10 of y variable", action="store_true", default=False)
 
-parser.add_argument("--fixedParamsFile","-f", type=str, help="give a json file with key=variable and value=value. e.g. use for pinning down third parameter in harvest list", default="")
+parser.add_argument("--fixedParamsFile","-f",   type=str, help="give a json file with key=variable and value=value. e.g. use for pinning down third parameter in harvest list", default="")
 parser.add_argument("--forbiddenFunction","-l", type=str, help="""a ROOT TF1 definition for a forbidden line e.g. kinematically forbidden regions. (for diagonal, use `-l "x"` )""", default="")
 parser.add_argument("--ignoreUncertainty","-u", help="""Don't care about uncertainty bands!""", action="store_true", default=False)
 
