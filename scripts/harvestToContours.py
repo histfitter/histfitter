@@ -43,6 +43,8 @@ parser.add_argument("--fixedParamsFile","-f",   type=str, help="give a json file
 parser.add_argument("--forbiddenFunction","-l", type=str, help="""a ROOT TF1 definition for a forbidden line e.g. kinematically forbidden regions. (for diagonal, use `-l "x"` )""", default="")
 parser.add_argument("--ignoreUncertainty","-u", help="""Don't care about uncertainty bands!""", action="store_true", default=False)
 
+parser.add_argument("--areaThreshold","-a",     type = float, help="Throw away contours with areas less than threshold", default=0)
+
 args = parser.parse_args()
 
 if not args.useROOT:
@@ -320,6 +322,11 @@ def interpolateSurface(modelDict = {}, interpolationFunction = "linear", useROOT
 			print ">>> ... Still infs in %s!! This is a problem... Exiting." % whichContour
 			sys.exit(0)
 
+
+	for whichContour in ["CLsexp","CLs"]:
+		tmpGraph = createTGraph2DFromArrays(x[whichContour],y[whichContour],zValues[whichContour])
+		tmpGraph.Write("%s_gr"%whichContour)
+
 	if useROOT:
 		print ">>> ... Using ROOT's internal interpolation scheme (triangular)."
 		print ">>> ... If you like your plot to look like a dinosaur's back or an escalator, then you're entitled to that.."
@@ -361,27 +368,28 @@ def interpolateSurface(modelDict = {}, interpolationFunction = "linear", useROOT
 			graphs[whichContour] = []
 			for contour in contourList:
 				graph = ROOT.TGraph(len(contour[0]), contour[0].flatten('C'), contour[1].flatten('C') )
-				graphs[whichContour].append(graph)
+				if graph.Integral() > args.areaThreshold:
+					graphs[whichContour].append(graph)
 		return graphs
 
+def createTGraph2DFromArrays(x,y,z):
+	from array import array
+	return ROOT.TGraph2D(len(x),
+		array('f',x),
+		array('f',y),
+		array('f',z) )
 
 def createGraphsFromArrays(x,y,z,label):
 
 	if args.debug:
 		print ">>> ... In createGraphsFromArrays for %s"%label
 
-	from array import array
-
-	gr = ROOT.TGraph2D(len(x),
-		array('f',x),
-		array('f',y),
-		array('f',z) )
+	gr = createTGraph2DFromArrays(x,y,z)
 
 	hist = gr.GetHistogram().Clone(label)
 
-	if label=="CLsexp":
-		hist.Write("CLsexp_hist")
-		gr.Write("CLexp_gr")
+	if label in ["CLsexp","CLs"]:
+		hist.Write("%s_hist"%label)
 
 	hist.SetContour(1)
 	hist.SetContourLevel(0,args.level)
@@ -399,7 +407,8 @@ def createGraphsFromArrays(x,y,z,label):
 		if contour.Integral() > maxIntegral:
 			maxIntegral = contour.Integral()
 			biggestGraph = contour.Clone()
-		allGraphs.append(l)
+		if contour.Integral() > args.areaThreshold:
+			allGraphs.append(l)
 		# print contour.GetN()
 	if biggestGraph and args.debug:
 		biggestGraph.Draw("ALP")
