@@ -81,6 +81,8 @@ else:
 
 
 
+
+
 def main():
 	"""Main function for driving the whole thing..."""
 
@@ -99,11 +101,17 @@ def main():
 
 	tmpdict = harvestToDict( args.inputFile )
 
+	for whichContour in ["CLsexp","CLs"]:
+		tmpGraph = createTGraphFromDict(tmpdict,"CLsexp")
+		tmpGraph.Write("%s_gr"%whichContour)
+
+	truncateSignificances( tmpdict , args.sigmax )
+
 	############################################################
 	# Step 1.5 - If there's a function for a kinematically forbidden region, add zeros to dictionary
 
 	if args.forbiddenFunction:
-		addZerosToDict(tmpdict,args.forbiddenFunction)
+		addZerosToDict(tmpdict, args.forbiddenFunction, numberOfZeros=100 )
 
 	############################################################
 	# Step 2 - Interpolate the fit results
@@ -222,7 +230,8 @@ def harvestToDict( harvestInputFileName = "" ):
 					sampleParamsList[1] = math.log10(sampleParamsList[1])
 				sampleParams = tuple(sampleParamsList)
 
-				if ROOT.RooStats.PValueToSignificance( float(sample["CLsexp"]) ) < args.sigmax and not math.isinf(float(sample["CLsexp"])) :
+				# if ROOT.RooStats.PValueToSignificance( float(sample["CLsexp"]) ) < args.sigmax and not math.isinf(float(sample["CLsexp"])) :
+				if not math.isinf(float(sample["CLsexp"])) :
 					modelDict[sampleParams] = dict(zip(listOfContours,  [ROOT.RooStats.PValueToSignificance( float(sample["%s"%x]) ) for x in listOfContours] ) )
 
 				else:
@@ -277,7 +286,7 @@ def addZerosToDict(inputDict, function, numberOfZeros = 100):
 	"""This takes in a TF1 and dots zero points along that function, and adds to the dict"""
 
 	tmpListOfXValues = [entry[0] for entry in inputDict.keys()]
-	lowerLimit = 0
+	lowerLimit = min(tmpListOfXValues)
 	upperLimit = max(tmpListOfXValues)
 	forbiddenFunction = ROOT.TF1("forbiddenFunction",args.forbiddenFunction,lowerLimit,upperLimit)
 	forbiddenFunction.Write("forbiddenFunction")
@@ -322,11 +331,6 @@ def interpolateSurface(modelDict = {}, interpolationFunction = "linear", useROOT
 		if any([math.isinf(tmp) for tmp in zValues[whichContour]  ]):
 			print ">>> ... Still infs in %s!! This is a problem... Exiting." % whichContour
 			sys.exit(0)
-
-
-	for whichContour in ["CLsexp","CLs"]:
-		tmpGraph = createTGraph2DFromArrays(x[whichContour],y[whichContour],zValues[whichContour])
-		tmpGraph.Write("%s_gr"%whichContour)
 
 	if useROOT:
 		print ">>> ... Using ROOT's internal interpolation scheme (triangular)."
@@ -383,6 +387,28 @@ def createTGraph2DFromArrays(x,y,z):
 		array('f',x),
 		array('f',y),
 		array('f',z) )
+
+def createTGraphFromDict(modelDict,myName):
+
+	modelPoints = modelDict.keys()
+	modelPointsValues = modelDict.values()
+
+	print modelPoints
+	outputGraph = ROOT.TGraph2D(len(modelPoints))
+	for imodel,model in enumerate(modelPoints):
+		print model[0], model[1], modelDict[model][myName]
+		outputGraph.SetPoint(imodel, model[0], model[1], ROOT.RooStats.SignificanceToPValue(modelDict[model][myName]) )
+
+	return outputGraph
+
+def truncateSignificances(modelDict,sigmax=5):
+
+	for model in modelDict:
+		for thing in listOfContours:
+			if modelDict[model][thing] > sigmax:
+				modelDict[model][thing] = sigmax
+
+	return
 
 def createGraphsFromArrays(x,y,z,label):
 

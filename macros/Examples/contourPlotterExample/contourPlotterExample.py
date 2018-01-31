@@ -46,6 +46,8 @@ plot.drawShadedRegion( externalGraphs.lep  , title="LEP Limits" , color = ROOT.k
 
 ## Main Result
 
+plot.drawTextFromTGraph2D( f.Get("CLs_gr")   )
+
 plot.drawOneSigmaBand(  f.Get("Band_1s_0")   )
 plot.drawExpected(      f.Get("Exp_0")       )
 plot.drawObserved(      f.Get("Obs_0"), title="Observed Limit (#pm1 #sigma_{theory}^{SUSY})" if drawTheorySysts else "Observed Limit")

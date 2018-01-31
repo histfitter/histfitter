@@ -90,6 +90,22 @@ class contourPlotter:
 			self.legendObjects.append( ( legendOrder, curve.Clone("Observed"), title, "L" ) )
 		return
 
+	def drawTextFromTGraph2D(self, graph, title="Grey numbers represent blah", color=ROOT.TColor.GetColor("#000000"), alpha=0.6, angle=30, size=0.015, format="%.1g", titlesize = 0.03):
+		self.canvas.cd()
+		tmpText = ROOT.TLatex()
+		tmpText.SetTextSize(size)
+		tmpText.SetTextColorAlpha(color,alpha)
+		tmpText.SetTextAngle(angle)
+		x,y,z = graph.GetX(), graph.GetY(), graph.GetZ()
+		for i in xrange(len(x)):
+			tmpText.DrawLatex(x[i],y[i],format%z[i])
+
+		tmpText.SetTextSize(titlesize)
+		tmpText.SetTextAngle(-90)
+		tmpText.DrawLatexNDC(0.94,0.9,title)
+		self.canvas.Update()
+		return
+
 	def drawShadedRegion(self, curve, color=ROOT.kGray, alpha=0.5, title="title", legendOrder=2):
 		self.canvas.cd()
 		curve.SetFillStyle(1001)

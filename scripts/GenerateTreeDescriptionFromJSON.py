@@ -23,7 +23,7 @@ def checkArgs(args):
 
     if args.output_filename is None or args.output_filename == "":
         args.output_filename = args.filename.replace(".json", "")
-    
+
     print "%s: will write output to %s" % (scriptName, args.output_filename)
 
 def generateHeaderFiles(keys):
