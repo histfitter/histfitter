@@ -25,7 +25,7 @@ ROOT.gROOT.LoadMacro("AtlasStyle.C")
 ROOT.gROOT.LoadMacro("AtlasLabels.C")
 ROOT.SetAtlasStyle()
 
-drawTheorySysts = True
+drawTheorySysts = False
 
 plot = contourPlotter.contourPlotter("stopToStau",800,600)
 
