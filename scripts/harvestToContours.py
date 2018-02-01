@@ -66,6 +66,9 @@ if not args.useROOT:
 			try:
 				os.system("localSetupSFT --cmtConfig=x86_64-slc6-gcc48-opt releases/LCG_79/pytools/1.9_python2.7,releases/LCG_79/pyanalysis/1.5_python2.7")
 				os.system("lsetup root")
+				import matplotlib.pyplot as plt
+				import numpy as np
+				import scipy.interpolate
 			except:
 				print ">>> ... Setup didn't work for some reason!"
 		else:

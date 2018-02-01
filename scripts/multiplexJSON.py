@@ -34,6 +34,7 @@ except:
 	if choice[0] == "y":
 		try:
 			os.system("localSetupSFT --cmtConfig=x86_64-slc6-gcc48-opt releases/LCG_79/pytools/1.9_python2.7,releases/LCG_79/pyanalysis/1.5_python2.7")
+			import pandas as pd
 		except:
 			print ">>> ... Setup didn't work for some reason!"
 	else:
