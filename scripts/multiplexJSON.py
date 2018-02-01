@@ -12,7 +12,6 @@ import json
 import argparse
 import glob
 import os,sys
-import pandas as pd
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--inputFiles","-i",  type=str, help="input files json (use wildcards)" , default = "inputJSON")
@@ -21,6 +20,26 @@ parser.add_argument("--figureOfMerit","-f",  type=str, help="figure of merit", d
 parser.add_argument("--modelDef","-m",  type=str, help="comma separated list of variables that define a model", default = "mg,mlsp,tau,gentau")
 
 args = parser.parse_args()
+
+
+try:
+	import pandas as pd
+except:
+	print ">>> You need pandas to be available."
+	print ">>> In an ATLAS environment, you can..."
+	print ">>> > localSetupSFT --cmtConfig=x86_64-slc6-gcc48-opt releases/LCG_79/pytools/1.9_python2.7,releases/LCG_79/pyanalysis/1.5_python2.7"
+	print ">>> "
+	print ">>> Do you want me to try to set it up for you (in ATLAS env)? (y/n)"
+	choice = raw_input().lower()
+	if choice[0] == "y":
+		try:
+			os.system("localSetupSFT --cmtConfig=x86_64-slc6-gcc48-opt releases/LCG_79/pytools/1.9_python2.7,releases/LCG_79/pyanalysis/1.5_python2.7")
+		except:
+			print ">>> ... Setup didn't work for some reason!"
+	else:
+		print ">>> Quitting -- You don't have pandas set up!"
+		sys.exit(1)
+
 
 
 def main():
