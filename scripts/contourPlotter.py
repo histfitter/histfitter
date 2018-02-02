@@ -162,9 +162,10 @@ class contourPlotter:
 		self.canvas.Update()
 		return
 
-	def drawLegend(self, legend=ROOT.TLegend(0.22,0.55,0.65,0.75) ):
+	def createLegend(self, shape=(0.22,0.55,0.65,0.75) ):
 		self.canvas.cd()
-		# legend = ROOT.TLegend(0.22,0.55,0.7,0.75)
+		legend=ROOT.TLegend(*shape)
+		ROOT.SetOwnership( legend, 0 )
 		legend.SetBorderSize(0)
 		legend.SetFillStyle(0)
 		legend.SetTextFont(42)
@@ -172,10 +173,8 @@ class contourPlotter:
 		self.legendObjects.sort(key=lambda x: x[0], reverse=False)
 		for iItem, (legendOrder,item,title,style) in enumerate(self.legendObjects):
 			legend.AddEntry(item,title,style)
-		legend.Draw()
-		self.canvas.Update()
 
-		return
+		return legend
 
 	def drawTheoryLegendLines(self, xyCoord, length=0.05, ySeparation=0.026, color=ROOT.TColor.GetColor("#800000"), alpha=0.7, style=3 ):
 		self.canvas.cd()

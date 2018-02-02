@@ -216,7 +216,6 @@ def harvestToDict( harvestInputFileName = "" ):
 	if args.fixedParamsFile:
 		with open(args.fixedParamsFile) as inputFixedParamsFile:
 			inputFixedParamsJSON = json.load(inputFixedParamsFile)
-			# print inputFixedParamsJSON
 			constraintsDict = inputFixedParamsJSON
 
 	if ".json" in harvestInputFileName:
@@ -224,8 +223,6 @@ def harvestToDict( harvestInputFileName = "" ):
 
 		with open(harvestInputFileName) as inputJSONFile:
 			inputJSON = json.load(inputJSONFile)
-
-			# print inputJSON
 
 			for sample in inputJSON:
 
@@ -295,8 +292,6 @@ def harvestToDict( harvestInputFileName = "" ):
 
 			modelDict[sampleParams] = dict(zip(listOfContours,  [ROOT.RooStats.PValueToSignificance( float(values["%s/F"%x]) ) for x in listOfContours] ) )
 
-
-			print sampleParams, ROOT.RooStats.PValueToSignificance( float(values["CLs/F"])     )
 
 	return modelDict
 
@@ -412,10 +407,8 @@ def createTGraphFromDict(modelDict,myName):
 	modelPoints = modelDict.keys()
 	modelPointsValues = modelDict.values()
 
-	print modelPoints
 	outputGraph = ROOT.TGraph2D(len(modelPoints))
 	for imodel,model in enumerate(modelPoints):
-		print model[0], model[1], modelDict[model][myName]
 		outputGraph.SetPoint(imodel, model[0], model[1], ROOT.RooStats.SignificanceToPValue(modelDict[model][myName]) )
 
 	return outputGraph
@@ -461,15 +454,11 @@ def createGraphsFromArrays(x,y,z,label):
 			biggestGraph = contour.Clone()
 		if contour.Integral() > args.areaThreshold:
 			allGraphs.append(l)
-		# print contour.GetN()
 	if biggestGraph and args.debug:
 		biggestGraph.Draw("ALP")
-		# canvas.SaveAs("gr_%s.pdf"%label)
-	# return biggestGraph
 
 	if args.debug:
 		print ">>> ... ... Number of graphs %d"%len(allGraphs)
-		# print allGraphs
 
 	return allGraphs
 

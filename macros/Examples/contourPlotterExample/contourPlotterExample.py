@@ -27,7 +27,7 @@ ROOT.SetAtlasStyle()
 
 drawTheorySysts = False
 
-plot = contourPlotter.contourPlotter("stopToStau",800,600)
+plot = contourPlotter.contourPlotter("stopStau",800,600)
 
 plot.processLabel = "Example Process Line Defining Grid. #tilde{g}#rightarrowwhatever"
 
@@ -37,16 +37,16 @@ f = ROOT.TFile("stopToStauExample.root")
 
 ## Axes
 
-plot.drawAxes( [0,0,1500,2000] )
+plot.drawAxes( [0,0,1400,2000] )
 
 ## Other limits to draw
 
 plot.drawShadedRegion( externalGraphs.curve, title="ATLAS 8 TeV, 20.3 fb^{-1} (observed)" )
-plot.drawShadedRegion( externalGraphs.lep  , title="LEP Limits" , color = ROOT.kBlue      )
+plot.drawShadedRegion( externalGraphs.lep  , title="Fake LEP Limits" , color = ROOT.kBlue      )
 
 ## Main Result
 
-plot.drawTextFromTGraph2D( f.Get("CLs_gr")   )
+plot.drawTextFromTGraph2D( f.Get("CLs_gr")  , angle=30 )
 
 plot.drawOneSigmaBand(  f.Get("Band_1s_0")   )
 plot.drawExpected(      f.Get("Exp_0")       )
@@ -54,20 +54,20 @@ plot.drawObserved(      f.Get("Obs_0"), title="Observed Limit (#pm1 #sigma_{theo
 
 ## Draw Lines
 
-plot.drawLine(  coordinates = [0,0,1500,1500], label = "Kinematically Forbidden or blah", style = 7, angle = 30 )
+plot.drawLine(  coordinates = [0,0,800,800], label = "Kinematically Forbidden or blah", style = 7, angle = 30 )
 
 ## Axis Labels
 
 plot.setXAxisLabel( "boom [GeV]" )
 plot.setYAxisLabel( "bap [GeV]"  )
 
-plot.drawLegend()
+plot.createLegend(shape=(0.22,0.58,0.55,0.77) ).Draw()
 
 if drawTheorySysts:
 	plot.drawTheoryUncertaintyCurve( f.Get("Obs_0_Up") )
 	plot.drawTheoryUncertaintyCurve( f.Get("Obs_0_Down") )
 	# coordinate in NDC
-	plot.drawTheoryLegendLines( xyCoord=(0.236,0.6625), length=0.075 )
+	plot.drawTheoryLegendLines( xyCoord=(0.234,0.6625), length=0.057 )
 
 ROOT.ATLASLabel(0.24,0.85," Internal")
 
