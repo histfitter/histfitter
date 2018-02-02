@@ -100,11 +100,11 @@ def main():
 
 	processInputFile(inputFile = args.inputFile, outputFile = f, label = "")
 
-	if "XSecNominal" in args.inputFile:
+	if "Nominal" in args.inputFile:
 		print ">>> Handling theory variations..."
 		try:
-			processInputFile(inputFile = args.inputFile.replace("XSecNominal","XSecUp")  , outputFile = f, label = "_Up")
-			processInputFile(inputFile = args.inputFile.replace("XSecNominal","XSecDown"), outputFile = f, label = "_Down")
+			processInputFile(inputFile = args.inputFile.replace("Nominal","Up")  , outputFile = f, label = "_Up")
+			processInputFile(inputFile = args.inputFile.replace("Nominal","Down"), outputFile = f, label = "_Down")
 		except:
 			print ">>> Can't find theory variation files. Skipping."
 

@@ -14,10 +14,11 @@ import glob
 import os,sys
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--inputFiles","-i",  type=str, help="input files json (use wildcards)" , default = "inputJSON")
+parser.add_argument('--inputFiles','-i', type=str, nargs='+', help='input json files', required=True)
 parser.add_argument("--outputFile","-o",  type=str, help="output json" , default = "outputJSON.json")
 parser.add_argument("--figureOfMerit","-f",  type=str, help="figure of merit", default = "CLsexp")
-parser.add_argument("--modelDef","-m",  type=str, help="comma separated list of variables that define a model", default = "mg,mlsp,tau,gentau")
+parser.add_argument("--modelDef","-m",  type=str, help="comma separated list of variables that define a model", default = "mg,mlsp")
+parser.add_argument("--ignoreTheory","-t",      help = "ignore theory variation files", action="store_true", default=False)
 
 args = parser.parse_args()
 
@@ -60,32 +61,35 @@ def main():
 	databaseListTheoryUp = []
 	databaseListTheoryDown = []
 
-	for filename in glob.glob(args.inputFiles):
+	for filename in args.inputFiles:
 		print ">>> Adding input file: %s"%filename
 		with open(filename) as data_file:
 			data = json.load(data_file)
 			df = pd.DataFrame(data, columns=data[0].keys())
+			df['fID'] = filename
 			databaseList.append(df)
 
 		print ">>> Looking for theory variation files"
-		if "Nominal" in filename and os.path.isfile(filename.replace("Nominal","Up")) and os.path.isfile(filename.replace("Nominal","Down")):
+		if "Nominal" in filename and not args.ignoreTheory and os.path.isfile(filename.replace("Nominal","Up")) and os.path.isfile(filename.replace("Nominal","Down")):
 			with open(filename.replace("Nominal","Up")) as data_file:
 				print ">>> >>> Adding input file for theory up variation"
 				data = json.load(data_file)
 				df = pd.DataFrame(data, columns=data[0].keys())
+				df['fID'] = filename
 				databaseListTheoryUp.append(df)
 			with open(filename.replace("Nominal","Down")) as data_file:
 				print ">>> >>> Adding input file for theory down variation"
 				data = json.load(data_file)
 				df = pd.DataFrame(data, columns=data[0].keys())
+				df['fID'] = filename
 				databaseListTheoryDown.append(df)
 		else:
 			print ">>> ... Can't find theory variation inputs. Skipping..."
 
-	database = pd.concat(databaseList)
+	database = pd.concat(databaseList, ignore_index=True)
 	if len(databaseListTheoryUp):
-		databaseTheoryUp   = pd.concat(databaseListTheoryUp)
-		databaseTheoryDown = pd.concat(databaseListTheoryDown)
+		databaseTheoryUp   = pd.concat(databaseListTheoryUp, ignore_index=True)
+		databaseTheoryDown = pd.concat(databaseListTheoryDown, ignore_index=True)
 
 	# cleaning up the bad stuff!
 	database = database[(database.CLsexp != 0) & database.failedstatus==0]
@@ -99,6 +103,7 @@ def main():
 	print ">>> Number of signal models considered: %s"%len(listOfModels)
 
 	outputDB = doTheMuxing(database,listOfModels)
+	# print outputDB["fID"]
 
 	# Handle the theory variation databses using the optimization from the nominal...
 
@@ -111,9 +116,10 @@ def main():
 	with open(args.outputFile, 'w') as f:
 		f.write( outputDB.to_json(orient = "records") )
 
-
 	if len(databaseListTheoryUp):
 		print ">>> Writing output json for theory variations *_[Up/Down].json "
+		with open(args.outputFile.replace(".json","")+"_Nominal.json", 'w') as f:
+			f.write( outputDB.to_json(orient = "records") )
 		with open(args.outputFile.replace(".json","")+"_Up.json", 'w') as f:
 			f.write( outputDBTheoryUp.to_json(orient = "records") )
 		with open(args.outputFile.replace(".json","")+"_Down.json", 'w') as f:
@@ -150,8 +156,7 @@ def doTheMuxing(database,listOfModels, nominalDatabase=0):
 			for item in list(model.index):
 				tmpNominalDatabase = tmpNominalDatabase.loc[tmpNominalDatabase[item] == model[item]]
 
-			# print tmpNominalDatabase.fID
-			bestRow = tmpDatabase.loc[tmpDatabase["fID"]==tmpNominalDatabase.fID]
+			bestRow = tmpDatabase[(tmpDatabase.fID == tmpNominalDatabase.fID.iloc[0])]
 
 		outputDatabaseList.append(bestRow)
 
