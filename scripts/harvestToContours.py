@@ -45,6 +45,8 @@ parser.add_argument("--ignoreUncertainty","-u", help="""Don't care about uncerta
 
 parser.add_argument("--areaThreshold","-a",     type = float, help="Throw away contours with areas less than threshold", default=0)
 parser.add_argument("--smoothing",    "-s",     type = str, help="smoothing option. For ROOT, use {k5a, k5b, k3a}. For scipy, not yet implemented.", default="")
+parser.add_argument("--noSig","-n",      help = "don't convert CLs to significance -- don't use this option unless you know what you're doing!", action="store_true", default=False)
+
 
 args = parser.parse_args()
 
@@ -246,15 +248,15 @@ def harvestToDict( harvestInputFileName = "" ):
 					sampleParamsList[1] = math.log10(sampleParamsList[1])
 				sampleParams = tuple(sampleParamsList)
 
-				# if ROOT.RooStats.PValueToSignificance( float(sample["CLsexp"]) ) < args.sigmax and not math.isinf(float(sample["CLsexp"])) :
 				if not math.isinf(float(sample["CLsexp"])) :
-					modelDict[sampleParams] = dict(zip(listOfContours,  [ROOT.RooStats.PValueToSignificance( float(sample["%s"%x]) ) for x in listOfContours] ) )
+					tmpList = [float(sample["%s"%x]) if args.noSig else ROOT.RooStats.PValueToSignificance( float(sample["%s"%x]) ) for x in listOfContours]
+					modelDict[sampleParams] = dict(zip(listOfContours,  tmpList ) )
 
 				else:
 					if not sampleParams in modelDict:
 						modelDict[sampleParams] = dict(zip(listOfContours,  [args.sigmax for x in listOfContours] ) )
 				if(args.debug):
-					print sampleParams, float(sample["CLs"]), ROOT.RooStats.PValueToSignificance( float(sample["CLs"])     )
+					print sampleParams, float(sample["CLs"]), float(sample["CLs"]) if args.noSig else ROOT.RooStats.PValueToSignificance( float(sample["CLs"])     )
 
 
 	else:
@@ -290,7 +292,9 @@ def harvestToDict( harvestInputFileName = "" ):
 				if any(failConstraintCutList):
 					continue
 
-			modelDict[sampleParams] = dict(zip(listOfContours,  [ROOT.RooStats.PValueToSignificance( float(values["%s/F"%x]) ) for x in listOfContours] ) )
+			tmpList = [float(values["%s/F"%x]) if args.noSig else ROOT.RooStats.PValueToSignificance( float(values["%s/F"%x]) ) for x in listOfContours]
+
+			modelDict[sampleParams] = dict(zip(listOfContours,  tmpList ) )
 
 
 	return modelDict
