@@ -26,7 +26,7 @@ ROOT.gROOT.SetBatch()
 parser = argparse.ArgumentParser()
 parser.add_argument("--inputFile","-i",  type = str, help="input harvest file", default = "test.json")
 parser.add_argument("--outputFile","-o", type = str, help="output ROOT file", default = "outputGraphs.root")
-parser.add_argument("--interpolation",   type = str, help="type of interpolation for scipy (RBF). e.g. linear, cubic, gaussian, multiquadratic.", default = "linear")
+parser.add_argument("--interpolation",   type = str, help="type of interpolation for scipy (RBF). e.g. linear, cubic, gaussian, multiquadric.", default = "linear")
 parser.add_argument("--level",           type = float, help="contour level output. Default to 95%% CL", default = 1.64485362695)
 parser.add_argument("--useROOT","-r",    help = "use the root interpolation engine instead of mpl", action="store_true", default=False)
 parser.add_argument("--debug","-d",      help = "print extra debugging info", action="store_true", default=False)
@@ -132,7 +132,7 @@ def processInputFile(inputFile, outputFile, label = ""):
 	# Step 1.5 - If there's a function for a kinematically forbidden region, add zeros to dictionary
 
 	if args.forbiddenFunction:
-		addZerosToDict(tmpdict, args.forbiddenFunction, numberOfZeros=100 )
+		addValuesToDict(tmpdict, args.forbiddenFunction, numberOfPoints=100 )
 
 	############################################################
 	# Step 2 - Interpolate the fit results
@@ -296,17 +296,17 @@ def harvestToDict( harvestInputFileName = "" ):
 	return modelDict
 
 
-def addZerosToDict(inputDict, function, numberOfZeros = 100):
+def addValuesToDict(inputDict, function, numberOfPoints = 100, value = 0):
 	"""This takes in a TF1 and dots zero points along that function, and adds to the dict"""
 
 	tmpListOfXValues = [entry[0] for entry in inputDict.keys()]
 	lowerLimit = min(tmpListOfXValues)
 	upperLimit = max(tmpListOfXValues)
-	forbiddenFunction = ROOT.TF1("forbiddenFunction",args.forbiddenFunction,lowerLimit,upperLimit)
-	forbiddenFunction.Write("forbiddenFunction")
+	forbiddenFunction = ROOT.TF1("forbiddenFunction%f"%value,args.forbiddenFunction,lowerLimit,upperLimit)
+	forbiddenFunction.Write("forbiddenFunction%f"%value)
 
-	for xValue in [lowerLimit + x*(upperLimit-lowerLimit)/float(numberOfZeros) for x in range(numberOfZeros)]:
-		inputDict[(xValue,forbiddenFunction.Eval(xValue))] = dict(zip(listOfContours,  [0.0 for x in listOfContours] ) )
+	for xValue in [lowerLimit + x*(upperLimit-lowerLimit)/float(numberOfPoints) for x in range(numberOfPoints)]:
+		inputDict[(xValue,forbiddenFunction.Eval(xValue))] = dict(zip(listOfContours,  [value for x in listOfContours] ) )
 	return
 
 def interpolateSurface(modelDict = {}, interpolationFunction = "linear", useROOT=False):
@@ -362,30 +362,51 @@ def interpolateSurface(modelDict = {}, interpolationFunction = "linear", useROOT
 	else:
 		print ">>> ... Using scipy interpolate scheme."
 
-		if args.interpolation in ["nearest"]:
-			print ">>> WARNING: nearest interpolation mode seems to give unreliable results in tests!"
-
 		xi = {}
 		yi = {}
 		zi = {}
 		for whichContour in listOfContours:
 			print ">>> ... Interpolating %s"%whichContour
 
+			# Convert everything to numpy arrays
 			xArray = np.array(x[whichContour])
 			yArray = np.array(y[whichContour])
 			zArray = np.array( zValues[whichContour] )
 
+			# this scaling here equalizes the axes such that using a radial basis function makes sense!
+			yScaling = np.max(xArray)/np.max(yArray) if np.max(yArray) else 1
+			yArray = yArray*yScaling
+
+			# Creating some linspaces for interpolation
 			xlinspace, ylinspace = np.linspace(xArray.min(), xArray.max(), args.xResolution), np.linspace(yArray.min(), yArray.max(), args.yResolution)
 
+			# Creating meshgrid for interpolation
 			xymeshgrid = np.meshgrid(xlinspace,ylinspace)
 
+
+			# Optional smoothing given by -s option
 			smoothingFactor = 0
 			if args.smoothing:
 				smoothingFactor = float(args.smoothing)
 
+			# Actual interpolation done by RBF
 			rbf = scipy.interpolate.Rbf(xArray, yArray, zArray, function=interpolationFunction, smooth=smoothingFactor )
 			ZI = rbf(xymeshgrid[0], xymeshgrid[1])
 
+			# Undo the scaling from above to get back to original units
+			xymeshgrid[1] = xymeshgrid[1] / yScaling
+
+			# Spit out some diagnostic plots
+			if args.debug and whichContour=="CLsexp":
+				fig, ax = plt.subplots()
+				plt.pcolor(xymeshgrid[0], xymeshgrid[1], ZI)
+				plt.scatter(xArray, yArray, 10,zArray)
+				plt.contour(xymeshgrid[0], xymeshgrid[1], ZI)
+
+				plt.colorbar()
+				fig.savefig("scipy_debug_surface.pdf")
+
+			# Turn this surface into contours!
 			contourList = getContourPoints(xymeshgrid[0],xymeshgrid[1],ZI, args.level)
 
 			graphs[whichContour] = []
@@ -393,6 +414,7 @@ def interpolateSurface(modelDict = {}, interpolationFunction = "linear", useROOT
 				graph = ROOT.TGraph(len(contour[0]), contour[0].flatten('C'), contour[1].flatten('C') )
 				if graph.Integral() > args.areaThreshold:
 					graphs[whichContour].append(graph)
+
 		return graphs
 
 def createTGraph2DFromArrays(x,y,z):

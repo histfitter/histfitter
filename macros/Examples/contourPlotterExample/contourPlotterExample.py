@@ -6,7 +6,7 @@
 #
 # The file that's used here just needs to contain TGraphs for this setup to work.
 # Easy way to make those TGraphs:
-#     harvestToContours.py --interpolation linear -o stopToStauExample.root -i stopToStauExample.json -x m0 -y m12
+#     harvestToContours.py --interpolation linear -o stopToStauExample.root -i stopToStauExample.json -x m0 -y m12 -l "x"
 #
 # If you don't have a JSON file, you can also use the command GenerateJSONOutput.py to take your
 # ROOT file output from the HF fit and create a JSON that can be used with harvestToContours.py
