@@ -127,22 +127,23 @@ def main():
 
 	print ">>> Writing output json: %s"%args.outputFile
 
-	with open(args.outputFile, 'w') as f:
-		f.write( outputDB.to_json(orient = "records") )
+	writeDBOutToFile(outputDB,args.outputFile)
 
 	if len(databaseListTheoryUp):
 		print ">>> Writing output json for theory variations *_[Up/Down].json "
-		with open(args.outputFile.replace(".json","")+"_Nominal.json", 'w') as f:
-			f.write( outputDB.to_json(orient = "records") )
-		with open(args.outputFile.replace(".json","")+"_Up.json", 'w') as f:
-			f.write( outputDBTheoryUp.to_json(orient = "records") )
-		with open(args.outputFile.replace(".json","")+"_Down.json", 'w') as f:
-			f.write( outputDBTheoryDown.to_json(orient = "records") )
+		writeDBOutToFile(outputDB,args.outputFile.replace(".json","")+"_Nominal.json")
+		writeDBOutToFile(outputDBTheoryUp,  args.outputFile.replace(".json","")+"_Up.json")
+		writeDBOutToFile(outputDBTheoryDown,args.outputFile.replace(".json","")+"_Down.json")
 
 	print ">>> Done!"
 	print ">>>"
 
 	return
+
+def writeDBOutToFile(DB, filename):
+	tmpDict = DB.to_dict(orient = "records")
+	with open(filename, 'w') as f:
+		f.write( json.dumps(tmpDict, indent=4) )
 
 def doTheMuxing(database,listOfModels, nominalDatabase=0):
 
