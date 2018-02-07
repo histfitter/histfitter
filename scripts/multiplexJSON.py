@@ -19,6 +19,7 @@ parser.add_argument("--outputFile","-o",  type=str, help="output json" , default
 parser.add_argument("--figureOfMerit","-f",  type=str, help="figure of merit", default = "CLsexp")
 parser.add_argument("--modelDef","-m",  type=str, help="comma separated list of variables that define a model", default = "mg,mlsp")
 parser.add_argument("--ignoreTheory","-t",      help = "ignore theory variation files", action="store_true", default=False)
+parser.add_argument("--debug","-d",      help = "debug", action="store_true", default=False)
 
 args = parser.parse_args()
 
@@ -62,12 +63,18 @@ def main():
 	databaseListTheoryDown = []
 
 	for filename in args.inputFiles:
+		if filename == args.outputFile:
+			continue
 		print ">>> Adding input file: %s"%filename
 		with open(filename) as data_file:
 			data = json.load(data_file)
 			df = pd.DataFrame(data, columns=data[0].keys())
 			df['fID'] = filename
 			databaseList.append(df)
+
+			if args.debug:
+				print ">>> Loading %s"%filename
+				print ">>> ...has %d models "%len(df)
 
 		print ">>> Looking for theory variation files"
 		if "Nominal" in filename and not args.ignoreTheory and os.path.isfile(filename.replace("Nominal","Up")) and os.path.isfile(filename.replace("Nominal","Down")):
@@ -91,16 +98,23 @@ def main():
 		databaseTheoryUp   = pd.concat(databaseListTheoryUp, ignore_index=True)
 		databaseTheoryDown = pd.concat(databaseListTheoryDown, ignore_index=True)
 
+	if args.debug:
+		print ">>> Full database has length: %d"%len(database)
+
 	# cleaning up the bad stuff!
 	database = database[(database.CLsexp != 0) & database.failedstatus==0]
 
 	try:
-		listOfModels = df[args.modelDef.split(",")].drop_duplicates()
+		listOfModels = database[args.modelDef.split(",")].drop_duplicates()
 	except:
 		print ">>> Problem! The model definition variables don't seem to exist! Quitting."
 		sys.exit(1)
 
 	print ">>> Number of signal models considered: %s"%len(listOfModels)
+
+	if args.debug:
+		print ">>> ... List of Signal Models:"
+		print listOfModels
 
 	outputDB = doTheMuxing(database,listOfModels)
 	# print outputDB["fID"]

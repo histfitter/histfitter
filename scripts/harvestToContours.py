@@ -125,8 +125,12 @@ def processInputFile(inputFile, outputFile, label = ""):
 
 	if label=="": #Only do this for the nominal signal XS
 		for whichContour in ["CLsexp","CLs"]:
-			tmpGraph = createTGraphFromDict(tmpdict,"CLsexp")
-			tmpGraph.Write("%s_gr"%(whichContour) )
+			tmpGraph = createTGraphFromDict(tmpdict,whichContour)
+			tmpGraph.Write( "%s_gr"%(whichContour) )
+
+		# listOfFIDs = createListOfFIDs(tmpdict,ROOT.gDirectory)
+		# tmpGraph = createTGraphFromDict(tmpdict,"fID",listOfFIDs)
+		# tmpGraph.Write( "fID_gr" )
 
 	truncateSignificances( tmpdict , args.sigmax )
 
@@ -251,10 +255,12 @@ def harvestToDict( harvestInputFileName = "" ):
 				if not math.isinf(float(sample["CLsexp"])) :
 					tmpList = [float(sample["%s"%x]) if args.noSig else ROOT.RooStats.PValueToSignificance( float(sample["%s"%x]) ) for x in listOfContours]
 					modelDict[sampleParams] = dict(zip(listOfContours,  tmpList ) )
+					modelDict[sampleParams]["fID"] = sample["fID"]
 
 				else:
 					if not sampleParams in modelDict:
 						modelDict[sampleParams] = dict(zip(listOfContours,  [args.sigmax for x in listOfContours] ) )
+						modelDict[sampleParams]["fID"] = ""
 				if(args.debug):
 					print sampleParams, float(sample["CLs"]), float(sample["CLs"]) if args.noSig else ROOT.RooStats.PValueToSignificance( float(sample["CLs"])     )
 
@@ -428,16 +434,41 @@ def createTGraph2DFromArrays(x,y,z):
 		array('f',y),
 		array('f',z) )
 
-def createTGraphFromDict(modelDict,myName):
+def createTGraphFromDict(modelDict,myName,listOfFIDs=None):
+
 
 	modelPoints = modelDict.keys()
 	modelPointsValues = modelDict.values()
 
 	outputGraph = ROOT.TGraph2D(len(modelPoints))
 	for imodel,model in enumerate(modelPoints):
-		outputGraph.SetPoint(imodel, model[0], model[1], ROOT.RooStats.SignificanceToPValue(modelDict[model][myName]) )
+		if listOfFIDs!=None:
+			outputGraph.SetPoint(imodel, model[0], model[1], listOfFIDs.index( modelDict[model][myName] ) )
+		else:
+			outputGraph.SetPoint(imodel, model[0], model[1], modelDict[model][myName] )
 
 	return outputGraph
+
+def createListOfFIDs(modelDict, file=None):
+	# print modelDict
+
+	modelPoints = modelDict.keys()
+	modelPointsValues = modelDict.values()
+	listOfFIDs = []
+	for imodel,model in enumerate(modelPoints):
+		if not modelDict[model]["fID"] in listOfFIDs:
+			listOfFIDs.append( modelDict[model]["fID"] )
+
+	if file!=None:
+		file.cd()
+		listOfFIDsForROOT = ROOT.TCollection()
+		for fID in listOfFIDs:
+			listOfFIDsForROOT.AddLast(ROOT.TObjString(str(fID) ) )
+		listOfFIDsForROOT.Write("fIDList")
+		if args.debug:
+			listOfFIDsForROOT.Print("all")
+
+	return listOfFIDs
 
 def truncateSignificances(modelDict,sigmax=5):
 

@@ -70,13 +70,15 @@ class contourPlotter:
 			self.legendObjects.append( ( legendOrder, tmpLegendObject, "Expected Limit (#pm1 #sigma_{exp})", "lf" ) )
 		return
 
-	def drawExpected(self, curve, color=ROOT.kBlack, alpha=0.9):
+	def drawExpected(self, curve, color=ROOT.kBlack, alpha=0.9, legendOrder=None, title="Expected Limit"):
 		self.canvas.cd()
 		curve.SetLineColorAlpha(color,alpha)
 		curve.SetLineStyle(7)
 		curve.SetLineWidth(1)
 		curve.Draw("L")
 		self.canvas.Update()
+		if type(legendOrder) == int:
+			self.legendObjects.append( ( legendOrder, curve, title, "l" ) )
 		return
 
 	def drawObserved(self, curve, title="Observed Limit (#pm1 #sigma_{theory}^{SUSY})", color=ROOT.TColor.GetColor("#800000"), alpha=0.7, legendOrder=1):
