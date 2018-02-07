@@ -110,7 +110,14 @@ def main():
 			processInputFile(inputFile = args.inputFile.replace("Nominal","Up")  , outputFile = f, label = "_Up")
 			processInputFile(inputFile = args.inputFile.replace("Nominal","Down"), outputFile = f, label = "_Down")
 		except:
-			print ">>> Can't find theory variation files. Skipping."
+			print ">>> ... Can't find theory variation files. Skipping."
+
+		print ">>> Handling upper limits"
+		try:
+			processInputFile(inputFile = args.inputFile.replace("Nominal","UpperLimit")  , outputFile = f, label = "_UL")
+		except:
+			print ">>> ... Can't find upper limit file. Skipping."
+
 
 	print ">>> Closing file"
 
@@ -135,6 +142,12 @@ def processInputFile(inputFile, outputFile, label = ""):
 		if len(listOfFIDs):
 			tmpGraph = createTGraphFromDict(resultsDict,"fID",listOfFIDs)
 			tmpGraph.Write( "fID_gr" )
+
+	if label=="_UL":
+		for whichEntry in ["upperLimit","expectedUpperLimit"]:
+			tmpGraph = createTGraphFromDict(resultsDict,whichEntry)
+			tmpGraph.Write( "%s_gr"%(whichEntry) )
+		return
 
 	truncateSignificances( resultsDict , args.sigmax )
 

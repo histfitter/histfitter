@@ -19,6 +19,7 @@ parser.add_argument("--outputFile","-o",  type=str, help="output json" , default
 parser.add_argument("--figureOfMerit","-f",  type=str, help="figure of merit", default = "CLsexp")
 parser.add_argument("--modelDef","-m",  type=str, help="comma separated list of variables that define a model", default = "mg,mlsp")
 parser.add_argument("--ignoreTheory","-t",      help = "ignore theory variation files", action="store_true", default=False)
+parser.add_argument("--ignoreUL",    "-u",      help = "ignore upper limit files", action="store_true", default=False)
 parser.add_argument("--debug","-d",      help = "debug", action="store_true", default=False)
 
 args = parser.parse_args()
@@ -61,6 +62,7 @@ def main():
 
 	databaseListTheoryUp = []
 	databaseListTheoryDown = []
+	databaseListUpperLimit = []
 
 	for filename in args.inputFiles:
 		if filename == args.outputFile:
@@ -76,27 +78,49 @@ def main():
 				print ">>> Loading %s"%filename
 				print ">>> ...has %d models "%len(df)
 
-		print ">>> Looking for theory variation files"
-		if "Nominal" in filename and not args.ignoreTheory and os.path.isfile(filename.replace("Nominal","Up")) and os.path.isfile(filename.replace("Nominal","Down")):
-			with open(filename.replace("Nominal","Up")) as data_file:
-				print ">>> >>> Adding input file for theory up variation"
-				data = json.load(data_file)
-				df = pd.DataFrame(data, columns=data[0].keys())
-				df['fID'] = filename
-				databaseListTheoryUp.append(df)
-			with open(filename.replace("Nominal","Down")) as data_file:
-				print ">>> >>> Adding input file for theory down variation"
-				data = json.load(data_file)
-				df = pd.DataFrame(data, columns=data[0].keys())
-				df['fID'] = filename
-				databaseListTheoryDown.append(df)
-		else:
-			print ">>> ... Can't find theory variation inputs. Skipping..."
+		print ">>> Looking for related files"
+
+		if "Nominal" in filename and not args.ignoreTheory:
+
+			try:
+				with open(filename.replace("Nominal","Up")) as data_file:
+					print ">>> >>> Adding input file for theory up variation"
+					data = json.load(data_file)
+					df = pd.DataFrame(data, columns=data[0].keys())
+					df['fID'] = filename
+					databaseListTheoryUp.append(df)
+			except:
+				print ">>> Can't find %s"%filename.replace("Nominal","Up")
+
+			try:
+				with open(filename.replace("Nominal","Down")) as data_file:
+					print ">>> >>> Adding input file for theory down variation"
+					data = json.load(data_file)
+					df = pd.DataFrame(data, columns=data[0].keys())
+					df['fID'] = filename
+					databaseListTheoryDown.append(df)
+			except:
+				print ">>> Can't find %s"%filename.replace("Nominal","Down")
+
+		if "Nominal" in filename and not args.ignoreUL:
+
+			try:
+				with open(filename.replace("fixSigXSecNominal_hypotest","upperlimit")) as data_file:
+					print ">>> >>> Adding input file for upper limits"
+					data = json.load(data_file)
+					df = pd.DataFrame(data, columns=data[0].keys())
+					df['fID'] = filename
+					databaseListUpperLimit.append(df)
+			except:
+				print ">>> Can't find %s"%filename.replace("Nominal","Up")
+
 
 	database = pd.concat(databaseList, ignore_index=True)
 	if len(databaseListTheoryUp):
 		databaseTheoryUp   = pd.concat(databaseListTheoryUp, ignore_index=True)
 		databaseTheoryDown = pd.concat(databaseListTheoryDown, ignore_index=True)
+	if len(databaseListUpperLimit):
+		databaseUpperLimit = pd.concat(databaseListUpperLimit, ignore_index=True)
 
 	if args.debug:
 		print ">>> Full database has length: %d"%len(database)
@@ -125,6 +149,11 @@ def main():
 		outputDBTheoryUp   = doTheMuxing(databaseTheoryUp,listOfModels, outputDB)
 		outputDBTheoryDown = doTheMuxing(databaseTheoryDown,listOfModels, outputDB)
 
+	# Handle the theory variation databses using the optimization from the nominal...
+
+	if len(databaseListUpperLimit):
+		outputDBUpperLimit   = doTheMuxing(databaseUpperLimit,listOfModels, outputDB)
+
 	print ">>> Writing output json: %s"%args.outputFile
 
 	writeDBOutToFile(outputDB,args.outputFile)
@@ -134,6 +163,10 @@ def main():
 		writeDBOutToFile(outputDB,args.outputFile.replace(".json","")+"_Nominal.json")
 		writeDBOutToFile(outputDBTheoryUp,  args.outputFile.replace(".json","")+"_Up.json")
 		writeDBOutToFile(outputDBTheoryDown,args.outputFile.replace(".json","")+"_Down.json")
+
+	if len(databaseListUpperLimit):
+		print ">>> Writing output json for upper limit "
+		writeDBOutToFile(outputDBUpperLimit,args.outputFile.replace(".json","")+"_UpperLimit.json")
 
 	print ">>> Done!"
 	print ">>>"
