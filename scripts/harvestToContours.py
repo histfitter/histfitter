@@ -50,6 +50,8 @@ parser.add_argument("--noSig","-n",      help = "don't convert CLs to significan
 
 args = parser.parse_args()
 
+
+## If I need to use scipy, please let me have scipy. I'll even help you out!
 if not args.useROOT:
 	try:
 		import matplotlib.pyplot as plt
@@ -117,35 +119,37 @@ def main():
 
 
 def processInputFile(inputFile, outputFile, label = ""):
+	"""Do actual processing of a given input file"""
 
 	############################################################
 	# Step 1 - Read in harvest list in either text or json format and dump it into a dictionary
 
-	tmpdict = harvestToDict( inputFile )
+	resultsDict = harvestToDict( inputFile )
 
 	if label=="": #Only do this for the nominal signal XS
 		for whichContour in ["CLsexp","CLs"]:
-			tmpGraph = createTGraphFromDict(tmpdict,whichContour)
+			tmpGraph = createTGraphFromDict(resultsDict,whichContour)
 			tmpGraph.Write( "%s_gr"%(whichContour) )
 
-		# listOfFIDs = createListOfFIDs(tmpdict,ROOT.gDirectory)
-		# tmpGraph = createTGraphFromDict(tmpdict,"fID",listOfFIDs)
-		# tmpGraph.Write( "fID_gr" )
+		listOfFIDs = createListOfFIDs(resultsDict,ROOT.gDirectory)
+		if len(listOfFIDs):
+			tmpGraph = createTGraphFromDict(resultsDict,"fID",listOfFIDs)
+			tmpGraph.Write( "fID_gr" )
 
-	truncateSignificances( tmpdict , args.sigmax )
+	truncateSignificances( resultsDict , args.sigmax )
 
 	############################################################
 	# Step 1.5 - If there's a function for a kinematically forbidden region, add zeros to dictionary
 
 	if args.forbiddenFunction:
-		addValuesToDict(tmpdict, args.forbiddenFunction, numberOfPoints=100 )
+		addValuesToDict(resultsDict, args.forbiddenFunction, numberOfPoints=100 )
 
 	############################################################
 	# Step 2 - Interpolate the fit results
 
 	print ">>> Interpolating surface"
 
-	outputGraphs = interpolateSurface( tmpdict , args.interpolation , args.useROOT)
+	outputGraphs = interpolateSurface( resultsDict , args.interpolation , args.useROOT)
 
 	############################################################
 	# Step 3 - get TGraph contours
@@ -212,6 +216,7 @@ def processInputFile(inputFile, outputFile, label = ""):
 
 def harvestToDict( harvestInputFileName = "" ):
 	"""This parses the input file into a dictionary object for simpler handling"""
+
 	print ">>> Entering harvestToDict()"
 
 	modelDict = {}
@@ -255,12 +260,16 @@ def harvestToDict( harvestInputFileName = "" ):
 				if not math.isinf(float(sample["CLsexp"])) :
 					tmpList = [float(sample["%s"%x]) if args.noSig else ROOT.RooStats.PValueToSignificance( float(sample["%s"%x]) ) for x in listOfContours]
 					modelDict[sampleParams] = dict(zip(listOfContours,  tmpList ) )
-					# modelDict[sampleParams]["fID"] = sample["fID"]
+					if "fID" in sample:
+						modelDict[sampleParams]["fID"] = sample["fID"]
+					else:
+						modelDict[sampleParams]["fID"] = ""
+
 
 				else:
 					if not sampleParams in modelDict:
 						modelDict[sampleParams] = dict(zip(listOfContours,  [args.sigmax for x in listOfContours] ) )
-						# modelDict[sampleParams]["fID"] = ""
+						modelDict[sampleParams]["fID"] = ""
 				if(args.debug):
 					print sampleParams, float(sample["CLs"]), float(sample["CLs"]) if args.noSig else ROOT.RooStats.PValueToSignificance( float(sample["CLs"])     )
 
@@ -370,7 +379,7 @@ def interpolateSurface(modelDict = {}, interpolationFunction = "linear", useROOT
 		return graphs
 
 	else:
-		print ">>> ... Using scipy interpolate scheme."
+		print ">>> ... Using scipy interpolate scheme (RBF)."
 
 		xi = {}
 		yi = {}
@@ -428,6 +437,8 @@ def interpolateSurface(modelDict = {}, interpolationFunction = "linear", useROOT
 		return graphs
 
 def createTGraph2DFromArrays(x,y,z):
+	"""Helper function to quickly create a TGraph2D from three python iterables"""
+
 	from array import array
 	return ROOT.TGraph2D(len(x),
 		array('f',x),
@@ -435,7 +446,7 @@ def createTGraph2DFromArrays(x,y,z):
 		array('f',z) )
 
 def createTGraphFromDict(modelDict,myName,listOfFIDs=None):
-
+	"""Given the results dictionary, can make a TGraph2D of values. Has support for fID as strings."""
 
 	modelPoints = modelDict.keys()
 	modelPointsValues = modelDict.values()
@@ -443,14 +454,18 @@ def createTGraphFromDict(modelDict,myName,listOfFIDs=None):
 	outputGraph = ROOT.TGraph2D(len(modelPoints))
 	for imodel,model in enumerate(modelPoints):
 		if listOfFIDs!=None:
-			outputGraph.SetPoint(imodel, model[0], model[1], listOfFIDs.index( modelDict[model][myName] ) )
+			try:
+				outputGraph.SetPoint(imodel, model[0], model[1], listOfFIDs.index( modelDict[model][myName] ) )
+			except:
+				print ">>> WARNING: Model point has a SR not in the list for some reason! Skipping, but check for problems in input JSON!"
+				continue
 		else:
 			outputGraph.SetPoint(imodel, model[0], model[1], modelDict[model][myName] )
 
 	return outputGraph
 
 def createListOfFIDs(modelDict, file=None):
-	# print modelDict
+	"""Given a results dictionary, construct a list of possible signal regions (fIDs) and write it to the output file"""
 
 	modelPoints = modelDict.keys()
 	modelPointsValues = modelDict.values()
@@ -458,19 +473,21 @@ def createListOfFIDs(modelDict, file=None):
 	for imodel,model in enumerate(modelPoints):
 		if not modelDict[model]["fID"] in listOfFIDs:
 			listOfFIDs.append( modelDict[model]["fID"] )
+	listOfFIDs.sort()
 
 	if file!=None:
 		file.cd()
-		listOfFIDsForROOT = ROOT.TCollection()
+		listOfFIDsForROOT = ROOT.TObjArray()
 		for fID in listOfFIDs:
-			listOfFIDsForROOT.AddLast(ROOT.TObjString(str(fID) ) )
-		listOfFIDsForROOT.Write("fIDList")
+			listOfFIDsForROOT.Add(ROOT.TObjString(str(fID) ) )
+		listOfFIDsForROOT.Write("fIDList",ROOT.TObject.kSingleKey)
 		if args.debug:
 			listOfFIDsForROOT.Print("all")
 
 	return listOfFIDs
 
 def truncateSignificances(modelDict,sigmax=5):
+	"""Truncates significance to sigmax option"""
 
 	for model in modelDict:
 		for thing in listOfContours:
