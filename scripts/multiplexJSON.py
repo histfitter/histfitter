@@ -141,7 +141,6 @@ def main():
 		print listOfModels
 
 	outputDB = doTheMuxing(database,listOfModels)
-	# print outputDB["fID"]
 
 	# Handle the theory variation databses using the optimization from the nominal...
 

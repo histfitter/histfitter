@@ -473,7 +473,8 @@ def createTGraphFromDict(modelDict,myName,listOfFIDs=None):
 				print ">>> WARNING: Model point has a SR not in the list for some reason! Skipping, but check for problems in input JSON!"
 				continue
 		else:
-			outputGraph.SetPoint(imodel, model[0], model[1], modelDict[model][myName] )
+			value = modelDict[model][myName] if args.noSig else ROOT.RooStats.SignificanceToPValue(modelDict[model][myName])
+			outputGraph.SetPoint(imodel, model[0], model[1], value )
 
 	return outputGraph
 
