@@ -255,12 +255,12 @@ def harvestToDict( harvestInputFileName = "" ):
 				if not math.isinf(float(sample["CLsexp"])) :
 					tmpList = [float(sample["%s"%x]) if args.noSig else ROOT.RooStats.PValueToSignificance( float(sample["%s"%x]) ) for x in listOfContours]
 					modelDict[sampleParams] = dict(zip(listOfContours,  tmpList ) )
-					modelDict[sampleParams]["fID"] = sample["fID"]
+					# modelDict[sampleParams]["fID"] = sample["fID"]
 
 				else:
 					if not sampleParams in modelDict:
 						modelDict[sampleParams] = dict(zip(listOfContours,  [args.sigmax for x in listOfContours] ) )
-						modelDict[sampleParams]["fID"] = ""
+						# modelDict[sampleParams]["fID"] = ""
 				if(args.debug):
 					print sampleParams, float(sample["CLs"]), float(sample["CLs"]) if args.noSig else ROOT.RooStats.PValueToSignificance( float(sample["CLs"])     )
 
