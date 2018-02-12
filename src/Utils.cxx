@@ -3598,7 +3598,7 @@ TH1* Util::ComponentToHistogram(RooRealSumPdf* component, RooRealVar* variable, 
     auto hist = component->createHistogram(Form("hist_%s", component->GetName()), *variable);
 
     // Now loop over the bins and fill them 
-    for(unsigned int i=0; i < hist->GetNbinsX()+2; ++i) {
+    for(int i=0; i < hist->GetNbinsX()+2; ++i) {
         auto low = hist->GetBinLowEdge(i);
         auto width = hist->GetBinWidth(i);
 
