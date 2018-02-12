@@ -97,6 +97,7 @@ class ConfigManager(object):
         self.outputLumi = None # Output luminosity
         self.lumiUnits = 1.0 # 1=fb-1, 1000=pb-1, etc.
         self.nTOYs =- 1 #<=0 means to use real data
+        self.nCPUs = 1 # number of CPUs used for toy simulation
         self.calculatorType = 0 # frequentist calculator
         self.testStatType = 3   # one-sided test statistic
         self.useCLs = True # use CLs for upper limits, or not
@@ -508,6 +509,7 @@ class ConfigManager(object):
         self.cppMgr.m_doHypoTest = self.doHypoTest
         self.cppMgr.m_doDiscoveryHypoTest = self.doDiscoveryHypoTest
         self.cppMgr.setNToys( self.nTOYs )
+        self.cppMgr.setNCPUs( self.nCPUs )
         self.cppMgr.setCalcType( self.calculatorType )# frequentist calculator
         self.cppMgr.setTestStatType( self.testStatType )  # one-sided test statistic
         self.cppMgr.setCLs( self.useCLs )

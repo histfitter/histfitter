@@ -59,6 +59,7 @@ ConfigMgr::ConfigMgr() : m_logger("ConfigMgrCPP") {
     m_deactivateBinnedLikelihood = false;
     m_useAsimovSet = false;
     m_plotRatio = "ratio"; //options: "ratio", "pull", "none"
+    m_nCPUs = 1;
 
     Util::deactivateBinnedLikelihood = false;
 
@@ -569,7 +570,8 @@ void ConfigMgr::doUpperLimit(FitConfig* fc) {
                 modelSBName.Data(), modelBName.Data(),
                 dataName, 
                 nuisPriorName,
-                generateAsimovDataForObserved
+                generateAsimovDataForObserved,
+                m_nCPUs
             );
 
     const double startingMaxRange = maxRange;
