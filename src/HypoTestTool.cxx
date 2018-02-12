@@ -851,8 +851,8 @@ RooStats::HypoTestTool::SetupHypoTestInverter(RooWorkspace * w,
     // can speed up using proof-lite
     if (mUseProof && mNWorkers > 1) { 
         ToyMCSampler *toymcs = (ToyMCSampler*)m_hc->GetTestStatSampler();
-        ProofConfig pc(*w, mNWorkers, "", kFALSE);
-        toymcs->SetProofConfig(&pc);    // enable proof
+        ProofConfig *pc = new ProofConfig(*w, mNWorkers, "", kFALSE);
+        toymcs->SetProofConfig(pc);    // enable proof
     }
 
     // get models from WS
