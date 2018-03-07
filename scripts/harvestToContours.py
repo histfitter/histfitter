@@ -18,7 +18,7 @@
 
 
 
-import ROOT, json, argparse, math, sys, os
+import ROOT, json, argparse, math, sys, os, pickle
 
 ROOT.gROOT.SetBatch()
 
@@ -36,6 +36,11 @@ parser.add_argument("--yVariable","-y",  type = str, default = "mlsp" )
 parser.add_argument("--xResolution",     type = int, default = 100 )
 parser.add_argument("--yResolution",     type = int, default = 100 )
 
+parser.add_argument("--xMin", type=float, default = None )
+parser.add_argument("--yMin", type=float, default = None )
+parser.add_argument("--xMax", type=float, default = None )
+parser.add_argument("--yMax", type=float, default = None )
+
 parser.add_argument("--logX", help="use log10 of x variable", action="store_true", default=False)
 parser.add_argument("--logY", help="use log10 of y variable", action="store_true", default=False)
 
@@ -47,6 +52,7 @@ parser.add_argument("--areaThreshold","-a",     type = float, help="Throw away c
 parser.add_argument("--smoothing",    "-s",     type = str, help="smoothing option. For ROOT, use {k5a, k5b, k3a}. For scipy, not yet implemented.", default="")
 parser.add_argument("--noSig","-n",      help = "don't convert CLs to significance -- don't use this option unless you know what you're doing!", action="store_true", default=False)
 
+parser.add_argument("--nominalLabel",      help = "keyword in filename to look for nominal sig XS", type=str, default="Nominal")
 
 args = parser.parse_args()
 
@@ -104,17 +110,17 @@ def main():
 
 	processInputFile(inputFile = args.inputFile, outputFile = f, label = "")
 
-	if "Nominal" in args.inputFile:
+	if args.nominalLabel in args.inputFile:
 		print ">>> Handling theory variations..."
 		try:
-			processInputFile(inputFile = args.inputFile.replace("Nominal","Up")  , outputFile = f, label = "_Up")
-			processInputFile(inputFile = args.inputFile.replace("Nominal","Down"), outputFile = f, label = "_Down")
+			processInputFile(inputFile = args.inputFile.replace(args.nominalLabel,"Up")  , outputFile = f, label = "_Up")
+			processInputFile(inputFile = args.inputFile.replace(args.nominalLabel,"Down"), outputFile = f, label = "_Down")
 		except:
 			print ">>> ... Can't find theory variation files. Skipping."
 
 		print ">>> Handling upper limits"
 		try:
-			processInputFile(inputFile = args.inputFile.replace("Nominal","UpperLimit")  , outputFile = f, label = "_UL")
+			processInputFile(inputFile = args.inputFile.replace(args.nominalLabel,"UpperLimit")  , outputFile = f, label = "_UL")
 		except:
 			print ">>> ... Can't find upper limit file. Skipping."
 
@@ -162,7 +168,7 @@ def processInputFile(inputFile, outputFile, label = ""):
 
 	print ">>> Interpolating surface"
 
-	outputGraphs = interpolateSurface( resultsDict , args.interpolation , args.useROOT)
+	outputGraphs = interpolateSurface( resultsDict , args.interpolation , args.useROOT , outputSurface=True if label=="" else False)
 
 	############################################################
 	# Step 3 - get TGraph contours
@@ -341,7 +347,7 @@ def addValuesToDict(inputDict, function, numberOfPoints = 100, value = 0):
 		inputDict[(xValue,forbiddenFunction.Eval(xValue))] = dict(zip(listOfContours,  [value for x in listOfContours] ) )
 	return
 
-def interpolateSurface(modelDict = {}, interpolationFunction = "linear", useROOT=False):
+def interpolateSurface(modelDict = {}, interpolationFunction = "linear", useROOT=False, outputSurface=False):
 	"""The actual interpolation"""
 
 	modelPoints = modelDict.keys()
@@ -410,7 +416,12 @@ def interpolateSurface(modelDict = {}, interpolationFunction = "linear", useROOT
 			yArray = yArray*yScaling
 
 			# Creating some linspaces for interpolation
-			xlinspace, ylinspace = np.linspace(xArray.min(), xArray.max(), args.xResolution), np.linspace(yArray.min(), yArray.max(), args.yResolution)
+			xlinspace = np.linspace(xArray.min() if args.xMin == None else args.xMin,
+									xArray.max() if args.xMax == None else args.xMax,
+									args.xResolution)
+			ylinspace = np.linspace(yArray.min() if args.yMin == None else args.yMin,
+									yArray.max() if args.yMax == None else args.yMax,
+									args.yResolution)
 
 			# Creating meshgrid for interpolation
 			xymeshgrid = np.meshgrid(xlinspace,ylinspace)
@@ -437,6 +448,11 @@ def interpolateSurface(modelDict = {}, interpolationFunction = "linear", useROOT
 
 				plt.colorbar()
 				fig.savefig("scipy_debug_surface.pdf")
+
+			if whichContour=="CLsexp" and outputSurface:
+				print ">>> Writing out expected CLs surface to pickle file"
+				with open(args.outputFile+'.expectedSurface.pkl', 'w') as outfile:
+					pickle.dump({"x": xymeshgrid[0], "y": xymeshgrid[1],"z": ZI} ,outfile, pickle.HIGHEST_PROTOCOL)
 
 			# Turn this surface into contours!
 			contourList = getContourPoints(xymeshgrid[0],xymeshgrid[1],ZI, args.level)
