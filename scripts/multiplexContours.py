@@ -105,7 +105,7 @@ def main():
 			allIsoExpectedContours.append( otherThing )
 
 	for i,thing in enumerate(allIsoExpectedContours):
-		convertArraysToTGraph(otherThing[0],otherThing[1]).Write("isoExpectedContour_%d"%i)
+		convertArraysToTGraph(thing[0],thing[1]).Write("isoExpectedContour_%d"%i)
 
 	# given a tgraph and the isoexpectedcontours
 	# return a list of subcontours
