@@ -174,6 +174,7 @@ void HistogramPlotter::PlotRegions() {
 }
 
 void HistogramPlotter::saveHistograms() {
+
     std::string filename("results/" + m_anaName + "/histograms_" + m_outputPrefix + ".root");
     TFile *f = TFile::Open(filename.c_str(), "RECREATE");
 
@@ -814,6 +815,10 @@ void HistogramPlot::saveHistograms() {
         loadComponentInformation(); 
     }
 
+    // Save the current directory to resume it after this function call
+    gDirectory->pwd();
+    TDirectory* currentDir = gDirectory->CurrentDirectory();
+
     // Try something here
     TString canvasName(Form("%s_%s", m_regionCategoryLabel.Data(), m_outputPrefix.Data()));
     TFile f(Form("results/%s/%s.root", m_anaName.Data(), canvasName.Data()), "recreate");
@@ -892,5 +897,10 @@ void HistogramPlot::saveHistograms() {
     }
 
     Logger << kINFO << "Wrote histogram information to " << f.GetName() << GEndl;
+
+    // Close the output file
     f.Close();
+
+    // Resume the previous directory
+    currentDir->cd();
 }
