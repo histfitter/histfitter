@@ -106,6 +106,18 @@ def main():
 		if not setting[0]=="_":
 			print ">>> ... Setting: {: >20} {: >40}".format(setting, eval("args.%s"%setting) )
 
+
+	if args.xMin == None:
+		print ""
+		print ">>> ******************** WARNING ***************************"
+		print ">>> ** You haven't defined --xMin, --xMax, --yMin, --yMax **"
+		print ">>> ** If you're going to later use multiplexContours.py  **"
+		print ">>> ** to combine contours, and if your inputs don't have **"
+		print ">>> ** exactly the same signal points, you're gonna have  **"
+		print ">>> ** a bad time. To be safe, define these.              **"
+		print ">>> ********************************************************"
+		print ""
+
 	f = ROOT.TFile(args.outputFile,"recreate")
 
 	processInputFile(inputFile = args.inputFile, outputFile = f, label = "")
