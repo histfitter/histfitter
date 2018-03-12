@@ -56,7 +56,32 @@ try:
 	from shapely.geometry import LineString
 except:
 	print ">>> You need to have access to shapely!"
-	sys.exit(1)
+	print ">>> Do you want me to try and install it?"
+	print ">>> (Just in your home directory. See source if you're worried about what I'm about to do!)"
+	print ">>> (y/n)"
+	choice = raw_input().lower()
+	if choice[0] == "y":
+		try:
+			os.system(
+				"""
+					wget http://download.osgeo.org/geos/geos-3.6.1.tar.bz2
+					tar xvf geos-3.6.1.tar.bz2
+					cd geos-3.6.1/
+					./configure --prefix=$HOME/.local
+					make
+					make install
+					cd ..
+					pip install -r shapely -I --no-cache-dir
+				"""
+				)
+			print ">>> It's possible that worked. Try running again?"	
+			sys.exit(1)
+		except:
+			print ">>> ... Setup didn't work for some reason!"
+	else:
+		print ">>> Quitting -- You don't have shapely installed and I really need it!"
+		print ">>>     ... Like it seriously makes my life a lot easier!"
+		sys.exit(1)
 
 
 
