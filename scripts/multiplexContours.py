@@ -11,6 +11,7 @@ import ROOT
 import math,sys,os,argparse
 import itertools
 
+
 ROOT.gROOT.SetBatch()
 
 
@@ -49,7 +50,17 @@ except:
 		print ">>> Quitting -- You don't have matplotlib/numpy setup and you requested mpl-based interpolation"
 		sys.exit(1)
 
-import intersection
+try:
+	from shapely.ops import cascaded_union, polygonize
+	from shapely.geometry import Polygon
+	from shapely.geometry import LineString
+except:
+	print ">>> You need to have access to shapely!"
+	sys.exit(1)
+
+
+
+
 
 def main():
 
@@ -82,6 +93,7 @@ def main():
 		dict_Obs_u1s[inputFileName] = dict_TFiles[inputFileName].Get("Obs_0_Up").Clone(inputFileName+"_Obs_u1s")
 		dict_Obs_d1s[inputFileName] = dict_TFiles[inputFileName].Get("Obs_0_Down").Clone(inputFileName+"_Obs_d1s")
 
+	outputFile = ROOT.TFile(args.outputFile,"RECREATE")
 
 	fig, ax = plt.subplots()
 
@@ -90,74 +102,136 @@ def main():
 
 		x,y = dict_Surfaces[region1]["x"], dict_Surfaces[region1]["y"]
 		z1,z2 = dict_Surfaces[region1]["z"], dict_Surfaces[region2]["z"]
-		cs = ax.contour(x,y,z1-z2, levels=[0] )
+		cs = ax.contour(x,y,z1-z2, ":", levels=[0] )
 
 		isoExpectedContours[(region1,region2)] = cs.allsegs[0]
 
 
-	outputFile = ROOT.TFile(args.outputFile,"RECREATE")
-	outputFile.cd()
+	uncutRegions = {}
+
+	# polygons = []
+
+	for inputFileName in listOfInputFiles:
+		region = {}
+		# region["SR"] = inputFileName
+		region["Exp"]     = tGraphToPolygon(dict_Exp[inputFileName])
+		region["Exp_u1s"] = tGraphToPolygon(dict_Exp_u1s[inputFileName])
+		region["Exp_d1s"] = tGraphToPolygon(dict_Exp_d1s[inputFileName])
+		region["Obs"]     = tGraphToPolygon(dict_Obs[inputFileName])
+		region["Obs_u1s"] = tGraphToPolygon(dict_Obs_u1s[inputFileName])
+		region["Obs_d1s"] = tGraphToPolygon(dict_Obs_d1s[inputFileName])
+
+		uncutRegions[inputFileName] = region
+
+
+	sumOfExpecteds = cascaded_union([v["Exp"] for k,v in uncutRegions.iteritems()])
+
+	if args.debug:
+		print ">>> Integral of the best expected contour: %d"%sumOfExpecteds.area
 
 
 	allIsoExpectedContours = []
+	allIsoExpectedContoursLineStrings = []
 	for thing in isoExpectedContours:
 		for otherThing in isoExpectedContours[thing]:
 			allIsoExpectedContours.append( otherThing )
-
-	for i,thing in enumerate(allIsoExpectedContours):
-		convertArraysToTGraph(thing[0],thing[1]).Write("isoExpectedContour_%d"%i)
-
-	# given a tgraph and the isoexpectedcontours
-	# return a list of subcontours
+			allIsoExpectedContoursLineStrings.append( LineString(otherThing) )
 
 
-	for tmpname,mygraph in dict_Exp.iteritems():
-		listOfSubContours = breakUpTGraph(mygraph, allIsoExpectedContours)
-		for i,thing in enumerate(listOfSubContours):
-			ax.plot(thing[0],thing[1],"--")
-			convertArraysToTGraph(thing[0],thing[1]).Write("Exp_%s_%d"%(tmpname,i))
+	print ">>> Total number of isoExpectedContours: %d"%len(allIsoExpectedContoursLineStrings)
+
+	for iIEC,IEC in enumerate(allIsoExpectedContours):
+		convertArraysToTGraph(IEC[:,0],IEC[:,1]).Write("isoExpectedContour_%d"%iIEC)
 
 
-	for tmpname,mygraph in dict_Obs.iteritems():
-		listOfSubContours = breakUpTGraph(mygraph, allIsoExpectedContours)
-		for i,thing in enumerate(listOfSubContours):
-			ax.plot(thing[0],thing[1])
-			convertArraysToTGraph(thing[0],thing[1]).Write("Obs_%s_%d"%(tmpname,i))
+	listOfBestCurves = {}
+
+	for tmpKey in uncutRegions[inputFileName]:
+		listOfBestCurves[tmpKey] = []
+
+	# Cut up the union of exp regions into individual parts
+	subRegions = list(polygonize( cascaded_union( [sumOfExpecteds.boundary]+allIsoExpectedContoursLineStrings  )))
+	print len(subRegions)
+	for iSubRegion,subRegion in enumerate(subRegions):
+		print "Loop through sub regions: %d"%iSubRegion
+		# x,y =  subRegion.exterior.coords.xy
+		# ax.plot(x,y,":",alpha=0.5)
+
+		# this subRegion -- Figure out which SR it corresponds to
+
+		biggestOverlap = 0
+		bestSR = ""
+		for regionName,region in uncutRegions.iteritems():
+			tmpOverlap = len(set(subRegion.exterior.coords) & set(region["Exp"].exterior.coords))
+			if tmpOverlap > biggestOverlap:
+				biggestOverlap = tmpOverlap
+				bestSR = regionName
+
+		# now I know that this subRegion should go with bestSR
+
+		# so now I need to loop over all other types of curves associated with best SR
+		# and cut them up with all the IECs (e.g. obs, exp+1sig, etc)
+
+		print "Identified the best SR in this region as %s"%bestSR
 
 
-	for tmpname,mygraph in dict_Exp_d1s.iteritems():
-		listOfSubContours = breakUpTGraph(mygraph, allIsoExpectedContours)
-		for i,thing in enumerate(listOfSubContours):
-			ax.plot(thing[0],thing[1],alpha=0.5)
-			convertArraysToTGraph(thing[0],thing[1]).Write("Exp_d1s_%s_%d"%(tmpname,i))
+		for tmpKey,subCurve in uncutRegions[bestSR].iteritems():
+			# if tmpKey=="Exp":
+			# 	continue
+			cutUpSubCurve = polygonize( cascaded_union( [subCurve.boundary]+allIsoExpectedContoursLineStrings  ))
 
-	for tmpname,mygraph in dict_Exp_u1s.iteritems():
-		listOfSubContours = breakUpTGraph(mygraph, allIsoExpectedContours)
-		for i,thing in enumerate(listOfSubContours):
-			ax.plot(thing[0],thing[1],alpha=0.5)
-			convertArraysToTGraph(thing[0],thing[1]).Write("Exp_u1s_%s_%d"%(tmpname,i))
+			# now for this type of curve (e.g. obs, exp+1sig, etc), I've cut it up with the IECs into regions
+			# and now I can compare each subcurve with the subRegion. If there's overlap,
+			# then this is the relevant piece. I've done a terrible job at terminology here...
 
-
-	for tmpname,mygraph in dict_Obs_d1s.iteritems():
-		listOfSubContours = breakUpTGraph(mygraph, allIsoExpectedContours)
-		for i,thing in enumerate(listOfSubContours):
-			ax.plot(thing[0],thing[1],":",alpha=0.5)
-			convertArraysToTGraph(thing[0],thing[1]).Write("Obs_d1s_%s_%d"%(tmpname,i))
-
-	for tmpname,mygraph in dict_Obs_u1s.iteritems():
-		listOfSubContours = breakUpTGraph(mygraph, allIsoExpectedContours)
-		for i,thing in enumerate(listOfSubContours):
-			ax.plot(thing[0],thing[1],":",alpha=0.5)
-			convertArraysToTGraph(thing[0],thing[1]).Write("Obs_u1s_%s_%d"%(tmpname,i))
+			for chunkOfSubCurve in cutUpSubCurve:
+				if type(chunkOfSubCurve.intersection(subRegion) ) == Polygon:
+					listOfBestCurves[tmpKey].append(chunkOfSubCurve)
 
 
 
-	fig.savefig("test_%s_%s.pdf"%(region1,region2))
+	# print listOfBestCurves
+
+	summedCurves = {}
+	for typeOfCurve in listOfBestCurves:
+		summedCurves[typeOfCurve]	= cascaded_union(listOfBestCurves[typeOfCurve])
+
+		if "Exp_u1s" == typeOfCurve or "Exp_d1s" == typeOfCurve:
+			continue
+
+		x,y =  summedCurves[typeOfCurve].exterior.coords.xy
+		ax.plot(x,y,alpha=0.5)
+
+		convertArraysToTGraph(x,y).Write("%s"%typeOfCurve)
+
+
+	if "Exp_u1s" in summedCurves and "Exp_d1s" in summedCurves:
+		band = summedCurves["Exp_d1s"].difference(summedCurves["Exp_u1s"])
+
+		band = max(band, key=lambda item: item.area)
+
+		x,y = band.exterior.coords.xy
+		ax.plot(x,y,alpha=0.9)
+
+		convertArraysToTGraph(x,y).Write("ExpectedBand")
+
+
+	fig.savefig("test.pdf")
 
 	outputFile.Write()
 	outputFile.Close()
 
 	return
+
+
+def tGraphToPolygon(myGraph, pinPoint=None):
+	x,y = convertTGraphToArrays(myGraph)
+	if pinPoint==None:
+		x = np.append(x,[min(x)])
+		y = np.append(y,[min(y)])
+	return Polygon(zip(x,y))
+
+
 
 def convertTGraphToArrays(mygraph):
 	size = mygraph.GetN()
@@ -262,11 +336,6 @@ def breakUpTGraph(graph, isoExpectedContours):
 		listOfSubContours = splitUpContour(x,y,intersectionPoints)
 
 		return listOfSubContours
-
-
-
-
-
 
 
 
