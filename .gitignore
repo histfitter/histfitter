@@ -7,7 +7,7 @@ data/*.root
 *.pyc
 
 # copied from the src dir!
-include/*.h 
+include/*.h
 
 # tutorial output
 results/MyUserAnalysis*
