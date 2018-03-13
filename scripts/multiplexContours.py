@@ -46,6 +46,7 @@ try:
 	from shapely.geometry import LineString
 	from shapely import affinity
 except:
+	print ">>>"
 	print ">>> You need to have access to shapely!"
 	print ">>> Do you want me to try and install it?"
 	print ">>> (Just in your home directory. See source if you're worried about what I'm about to do!)"
@@ -62,7 +63,8 @@ except:
 					make
 					make install
 					cd ..
-					pip install -r shapely -I --no-cache-dir
+					pip install --user --upgrade pip
+					pip install --user shapely
 				"""
 				)
 			print ">>> It's possible that worked. Try running again?"
@@ -80,7 +82,7 @@ except:
 
 def main():
 
-	print ">>> Launching multiplexContours.py "
+	print ">>> Launching multiplexContours.py! "
 
 
 	dict_TFiles = {}

@@ -65,6 +65,7 @@ if not args.useROOT:
 		import numpy as np
 		import scipy.interpolate
 	except:
+		print ">>>"
 		print ">>> You need scipy/matplotlib to run this. And you had to have run harvestToContours in scipy mode [default]"
 		print ">>> In an ATLAS environment, you can..."
 		print '>>> > lsetup "lcgenv -p LCG_87 x86_64-slc6-gcc62-opt pytools" '
