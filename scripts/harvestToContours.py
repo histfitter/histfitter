@@ -26,7 +26,7 @@ ROOT.gROOT.SetBatch()
 parser = argparse.ArgumentParser()
 parser.add_argument("--inputFile","-i",  type = str, help="input harvest file", default = "test.json")
 parser.add_argument("--outputFile","-o", type = str, help="output ROOT file", default = "outputGraphs.root")
-parser.add_argument("--interpolation",   type = str, help="type of interpolation for scipy (RBF). e.g. linear, cubic, gaussian, multiquadric.", default = "linear")
+parser.add_argument("--interpolation",   type = str, help="type of interpolation for scipy (RBF). e.g. linear, cubic, gaussian, multiquadric.", default = "multiquadric")
 parser.add_argument("--interpolationEpsilon", type=float, help="scipy (RBF) epsilon parameter", default = 0)
 parser.add_argument("--level",           type = float, help="contour level output. Default to 95%% CL", default = 1.64485362695)
 parser.add_argument("--useROOT","-r",    help = "use the root interpolation engine instead of mpl", action="store_true", default=False)
@@ -50,7 +50,7 @@ parser.add_argument("--forbiddenFunction","-l", type=str, help="""a ROOT TF1 def
 parser.add_argument("--ignoreUncertainty","-u", help="""Don't care about uncertainty bands!""", action="store_true", default=False)
 
 parser.add_argument("--areaThreshold","-a",     type = float, help="Throw away contours with areas less than threshold", default=0)
-parser.add_argument("--smoothing",    "-s",     type = str, help="smoothing option. For ROOT, use {k5a, k5b, k3a}. For scipy, not yet implemented.", default="")
+parser.add_argument("--smoothing",    "-s",     type = str, help="smoothing option. For ROOT, use {k5a, k5b, k3a}. For scipy, uses smoothing from RBF.", default="0.1")
 parser.add_argument("--noSig","-n",      help = "don't convert CLs to significance -- don't use this option unless you know what you're doing!", action="store_true", default=False)
 
 parser.add_argument("--nominalLabel",      help = "keyword in filename to look for nominal sig XS", type=str, default="Nominal")
@@ -186,7 +186,7 @@ def processInputFile(inputFile, outputFile, label = ""):
 	# Step 1.5 - If there's a function for a kinematically forbidden region, add zeros to dictionary
 
 	if args.forbiddenFunction:
-		resultsDict = addValuesToDict(resultsDict, args.forbiddenFunction, numberOfPoints=100 ,value = 0 )
+		resultsDict = addValuesToDict(resultsDict, args.forbiddenFunction, numberOfPoints=100 ,value = "mirror" )
 
 	############################################################
 	# Step 2 - Interpolate the fit results
@@ -398,7 +398,7 @@ def addValuesToDict(inputDict, function, numberOfPoints = 100, value = 0):
 			tmpDict = copy.deepcopy(inputDictCopy[signalPoint])
 			for key in tmpDict:
 				if isinstance(tmpDict[key], (int, long, float)):
-					tmpDict[key] *= -1
+					tmpDict[key] *= -1*np.sign(tmpDict[key])
 			inputDictCopy[fakeMirroredSignalPoint] = tmpDict
 
 		inputDict = copy.deepcopy(inputDictCopy)

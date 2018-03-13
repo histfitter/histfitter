@@ -182,10 +182,6 @@ def main():
 
 	print ">>> Total number of isoExpectedContours: %d"%len(allIsoExpectedContoursLineStrings)
 
-	for iIEC,IEC in enumerate(allIsoExpectedContours):
-		convertArraysToTGraph(IEC[:,0],IEC[:,1]).Write("isoExpectedContour_%d"%iIEC)
-		ax.plot(IEC[:,0],IEC[:,1],alpha=0.5,linewidth=0.5)
-
 	listOfBestCurves = {}
 
 	for tmpKey in uncutRegions[inputFileName]:
@@ -207,7 +203,7 @@ def main():
 	if args.debug:
 		print ">>> Number of regions in this plane: %d"%len(subRegions)
 
-
+	counter = 0
 	for iSubRegion,subRegion in enumerate(subRegions):
 		if args.debug:
 			print ">>> >>> Loop through sub regions: %d"%iSubRegion
@@ -234,19 +230,53 @@ def main():
 			print ">>> >>> Identified the best SR in this region as %s"%bestSR
 
 		for tmpKey,subCurve in uncutRegions[bestSR].iteritems():
-			cutUpSubCurve = polygonize( cascaded_union( [subCurve.boundary]+allIsoExpectedContoursLineStrings  ))
+			cutUpSubCurve = list(polygonize( cascaded_union( [subCurve.boundary]+allIsoExpectedContoursLineStrings  )) )
+
+			if args.debug:
+				print ">>> Number of cut up subcurves for %s, %d (with area %f)"%(tmpKey,len(cutUpSubCurve), subCurve.area)
+
+			if len(cutUpSubCurve)<2:
+				if args.debug:
+					print ">>> I expect to have at least two subcurves.. Let's try cutting it up another way"
+				# This method of cutting things up removes some area which is problematic later...
+				tmpMultiPoly = subCurve
+				for cutLine in allIsoExpectedContoursLineStrings:
+					tmpMultiPoly = tmpMultiPoly.difference(cutLine.buffer(1e-10))
+				cutUpSubCurve = []
+				for poly in tmpMultiPoly:
+					affinity.scale(poly,1.001,1.001,origin="centroid")
+					cutUpSubCurve.append(poly)
+
+
+			if args.debug:
+				print ">>> Number of cut up subcurves for %s, %d (with area %f)"%(tmpKey,len(cutUpSubCurve), subCurve.area)
 
 			# now for this type of curve (e.g. obs, exp+1sig, etc), I've cut it up with the IECs into regions
 			# and now I can compare each subcurve with the subRegion. If there's overlap,
 			# then this is the relevant piece. I've done a terrible job at terminology here...
 
 			for chunkOfSubCurve in cutUpSubCurve:
-				scaledChunkOfSubCurve = affinity.scale(chunkOfSubCurve, xfact=0.99, yfact=0.99,origin="centroid")
-				if type(scaledChunkOfSubCurve.intersection(subRegion) ) == Polygon:
-					if not scaledChunkOfSubCurve.within( subCurve ):
-						continue
+				if not chunkOfSubCurve.centroid.within( subRegion ):
+					continue
+				else:
+					if args.debug:
+						print ">>> I found a chunk of this subcurve %s"%(tmpKey)
 
-					listOfBestCurves[tmpKey].append(chunkOfSubCurve)
+				listOfBestCurves[tmpKey].append(chunkOfSubCurve)
+
+				if args.debug:
+					x,y = chunkOfSubCurve.boundary.coords.xy
+					ax.cla()
+					ax.plot(x,y,alpha=0.5)
+					fig.savefig("debug_%s_%d.pdf"%(tmpKey,counter) )
+					counter = counter+1
+
+
+	ax.cla()
+
+	for iIEC,IEC in enumerate(allIsoExpectedContours):
+		convertArraysToTGraph(IEC[:,0],IEC[:,1]).Write("isoExpectedContour_%d"%iIEC)
+		ax.plot(IEC[:,0],IEC[:,1],alpha=0.5,linewidth=0.1)
 
 
 	print ">>> Creating summed curves and writing to output file"
@@ -259,7 +289,7 @@ def main():
 			continue
 
 		if type(summedCurves[typeOfCurve])==MultiPolygon:
-			summedCurves[typeOfCurve] = max(summedCurves[typeOfCurve], key=lambda item: item.area)
+			summedCurves[typeOfCurve] = summedCurves[typeOfCurve].convex_hull #max(summedCurves[typeOfCurve], key=lambda item: item.area)
 
 		x,y =  summedCurves[typeOfCurve].exterior.coords.xy
 		ax.plot(x,y,alpha=0.5)
@@ -272,12 +302,16 @@ def main():
 		band = summedCurves["Exp_d1s"].difference(summedCurves["Exp_u1s"])
 
 		if type(band)==MultiPolygon:
-			band = max(band, key=lambda item: item.area)
+			band = sorted(band, key=lambda x: x.area, reverse=True)
+			for i,thing in enumerate(band):
+				x,y = thing.exterior.coords.xy
+				ax.plot(x,y,alpha=0.9)
+				convertArraysToTGraph(x,y).Write("ExpectedBand_%d"%i)
+		else:
+			x,y = band.exterior.coords.xy
+			ax.plot(x,y,alpha=0.9)
 
-		x,y = band.exterior.coords.xy
-		ax.plot(x,y,alpha=0.9)
-
-		convertArraysToTGraph(x,y).Write("ExpectedBand")
+			convertArraysToTGraph(x,y).Write("ExpectedBand")
 
 	if args.debug:
 		print ">>> Saving debugging plot: debug.pdf"
