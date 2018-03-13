@@ -18,7 +18,7 @@
 
 
 
-import ROOT, json, argparse, math, sys, os, pickle
+import ROOT, json, argparse, math, sys, os, pickle, copy
 
 ROOT.gROOT.SetBatch()
 
@@ -27,6 +27,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--inputFile","-i",  type = str, help="input harvest file", default = "test.json")
 parser.add_argument("--outputFile","-o", type = str, help="output ROOT file", default = "outputGraphs.root")
 parser.add_argument("--interpolation",   type = str, help="type of interpolation for scipy (RBF). e.g. linear, cubic, gaussian, multiquadric.", default = "linear")
+parser.add_argument("--interpolationEpsilon", type=float, help="scipy (RBF) epsilon parameter", default = 0)
 parser.add_argument("--level",           type = float, help="contour level output. Default to 95%% CL", default = 1.64485362695)
 parser.add_argument("--useROOT","-r",    help = "use the root interpolation engine instead of mpl", action="store_true", default=False)
 parser.add_argument("--debug","-d",      help = "print extra debugging info", action="store_true", default=False)
@@ -45,7 +46,7 @@ parser.add_argument("--logX", help="use log10 of x variable", action="store_true
 parser.add_argument("--logY", help="use log10 of y variable", action="store_true", default=False)
 
 parser.add_argument("--fixedParamsFile","-f",   type=str, help="give a json file with key=variable and value=value. e.g. use for pinning down third parameter in harvest list", default="")
-parser.add_argument("--forbiddenFunction","-l", type=str, help="""a ROOT TF1 definition for a forbidden line e.g. kinematically forbidden regions. (for diagonal, use `-l "x"` )""", default="")
+parser.add_argument("--forbiddenFunction","-l", type=str, help="""a ROOT TF1 definition for a forbidden line e.g. kinematically forbidden regions. (for diagonal, use `-l "x"` )""", default="x")
 parser.add_argument("--ignoreUncertainty","-u", help="""Don't care about uncertainty bands!""", action="store_true", default=False)
 
 parser.add_argument("--areaThreshold","-a",     type = float, help="Throw away contours with areas less than threshold", default=0)
@@ -118,6 +119,18 @@ def main():
 		print ">>> ********************************************************"
 		print ""
 
+	if args.forbiddenFunction == "x":
+		print ""
+		print ">>> ******************** WARNING ***************************"
+		print ">>> ** The default kinematically forbidden line is y=x    **"
+		print ">>> ** If you have no kinematically forbidden region,     **"
+		print ">>> ** use the option --forbiddenFunction ""              **"
+		print ">>> ** or feel free to use another function! Just beware  **"
+		print ">>> ** of the default if you see funky results            **"
+		print ">>> ********************************************************"
+		print ""
+
+
 	f = ROOT.TFile(args.outputFile,"recreate")
 
 	processInputFile(inputFile = args.inputFile, outputFile = f, label = "")
@@ -173,7 +186,7 @@ def processInputFile(inputFile, outputFile, label = ""):
 	# Step 1.5 - If there's a function for a kinematically forbidden region, add zeros to dictionary
 
 	if args.forbiddenFunction:
-		addValuesToDict(resultsDict, args.forbiddenFunction, numberOfPoints=100 )
+		resultsDict = addValuesToDict(resultsDict, args.forbiddenFunction, numberOfPoints=100 ,value = 0 )
 
 	############################################################
 	# Step 2 - Interpolate the fit results
@@ -352,12 +365,49 @@ def addValuesToDict(inputDict, function, numberOfPoints = 100, value = 0):
 	tmpListOfXValues = [entry[0] for entry in inputDict.keys()]
 	lowerLimit = min(tmpListOfXValues)
 	upperLimit = max(tmpListOfXValues)
-	forbiddenFunction = ROOT.TF1("forbiddenFunction%f"%value,args.forbiddenFunction,lowerLimit,upperLimit)
-	forbiddenFunction.Write("forbiddenFunction%f"%value)
 
-	for xValue in [lowerLimit + x*(upperLimit-lowerLimit)/float(numberOfPoints) for x in range(numberOfPoints)]:
-		inputDict[(xValue,forbiddenFunction.Eval(xValue))] = dict(zip(listOfContours,  [value for x in listOfContours] ) )
-	return
+	forbiddenFunction = ROOT.TF1("forbiddenFunction${}".format(value),args.forbiddenFunction,lowerLimit,upperLimit)
+	forbiddenFunction.Write("forbiddenFunction${}".format(value))
+
+
+	if value == "mirror":
+		from scipy.spatial.distance import cdist
+		def closest_point(pt, others):
+		    distances = cdist(pt, others)
+		    return others[distances.argmin()]
+
+		def rotate(origin, point, angle=math.pi):
+		    ox, oy = origin
+		    px, py = point
+
+		    qx = ox + math.cos(angle) * (px - ox) - math.sin(angle) * (py - oy)
+		    qy = oy + math.sin(angle) * (px - ox) + math.cos(angle) * (py - oy)
+		    return qx, qy
+
+		inputDictCopy = copy.deepcopy(inputDict)
+
+		forbiddenLineArray = []
+		for xValue in [lowerLimit + x*(upperLimit-lowerLimit)/float(numberOfPoints*100) for x in range(numberOfPoints*100)]:
+			forbiddenLineArray.append( ( xValue,forbiddenFunction.Eval(xValue) ) )
+
+		# now to loop over entries in the inputDict. rotate them about this closest point on the forbidden line
+		for signalPoint in inputDict:
+			closestPointOnLine = list(closest_point(np.array([signalPoint]),np.array(forbiddenLineArray) ) )
+			inputDictCopy[tuple(closestPointOnLine)] = dict(zip(listOfContours,  [1 for x in listOfContours] ) )
+			fakeMirroredSignalPoint = rotate(closestPointOnLine, signalPoint)
+			tmpDict = copy.deepcopy(inputDictCopy[signalPoint])
+			for key in tmpDict:
+				if isinstance(tmpDict[key], (int, long, float)):
+					tmpDict[key] *= -1
+			inputDictCopy[fakeMirroredSignalPoint] = tmpDict
+
+		inputDict = copy.deepcopy(inputDictCopy)
+
+	else:
+		for xValue in [lowerLimit + x*(upperLimit-lowerLimit)/float(numberOfPoints) for x in range(numberOfPoints)]:
+			inputDict[(xValue,forbiddenFunction.Eval(xValue))] = dict(zip(listOfContours,  [value for x in listOfContours] ) )
+
+	return inputDict
 
 def interpolateSurface(modelDict = {}, interpolationFunction = "linear", useROOT=False, outputSurface=False):
 	"""The actual interpolation"""
@@ -445,7 +495,10 @@ def interpolateSurface(modelDict = {}, interpolationFunction = "linear", useROOT
 				smoothingFactor = float(args.smoothing)
 
 			# Actual interpolation done by RBF
-			rbf = scipy.interpolate.Rbf(xArray, yArray, zArray, function=interpolationFunction, smooth=smoothingFactor )
+			if args.interpolationEpsilon:
+				rbf = scipy.interpolate.Rbf(xArray, yArray, zArray, function=interpolationFunction, smooth=smoothingFactor , epsilon=args.interpolationEpsilon)
+			else:
+				rbf = scipy.interpolate.Rbf(xArray, yArray, zArray, function=interpolationFunction, smooth=smoothingFactor )
 			ZI = rbf(xymeshgrid[0], xymeshgrid[1])
 
 			# Undo the scaling from above to get back to original units
