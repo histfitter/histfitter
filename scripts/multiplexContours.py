@@ -244,7 +244,7 @@ def main():
 					tmpMultiPoly = tmpMultiPoly.difference(cutLine.buffer(1e-10))
 				cutUpSubCurve = []
 				for poly in tmpMultiPoly:
-					affinity.scale(poly,1.001,1.001,origin="centroid")
+					poly = affinity.scale(poly,xfact=1+1e-9,yfact=1+1e-9,origin="centroid")
 					cutUpSubCurve.append(poly)
 
 
