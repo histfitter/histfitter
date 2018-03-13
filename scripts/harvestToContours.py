@@ -65,26 +65,15 @@ if not args.useROOT:
 		import numpy as np
 		import scipy.interpolate
 	except:
-		print ">>> You need matplotlib to be available to run in mpl mode."
-		print ">>> Either use the ROOT interpolator with the option -r or set up mpl"
+		print ">>> You need scipy/matplotlib to run this. And you had to have run harvestToContours in scipy mode [default]"
 		print ">>> In an ATLAS environment, you can..."
-		print ">>> > localSetupSFT --cmtConfig=x86_64-slc6-gcc48-opt releases/LCG_79/pytools/1.9_python2.7,releases/LCG_79/pyanalysis/1.5_python2.7"
+		print '>>> > lsetup "lcgenv -p LCG_87 x86_64-slc6-gcc62-opt pytools" '
+		print '>>> > lsetup "lcgenv -p LCG_87 x86_64-slc6-gcc62-opt pyanalysis" '
+		print '>>> > lsetup "lcgenv -p LCG_87 x86_64-slc6-gcc62-opt pygraphics" '
 		print ">>> > lsetup root"
 		print ">>> "
-		print ">>> Do you want me to try to set it up for you (in ATLAS env)? (y/n)"
-		choice = raw_input().lower()
-		if choice[0] == "y":
-			try:
-				os.system("localSetupSFT --cmtConfig=x86_64-slc6-gcc48-opt releases/LCG_79/pytools/1.9_python2.7,releases/LCG_79/pyanalysis/1.5_python2.7")
-				os.system("lsetup root")
-				import matplotlib.pyplot as plt
-				import numpy as np
-				import scipy.interpolate
-			except:
-				print ">>> ... Setup didn't work for some reason!"
-		else:
-			print ">>> Quitting -- You don't have matplotlib/numpy setup and you requested mpl-based interpolation"
-			sys.exit(1)
+		print ">>> Try that and then run this again!"
+		sys.exit(1)
 
 
 if args.ignoreUncertainty:

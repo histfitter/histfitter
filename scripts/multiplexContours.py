@@ -65,7 +65,7 @@ except:
 					pip install -r shapely -I --no-cache-dir
 				"""
 				)
-			print ">>> It's possible that worked. Try running again?"	
+			print ">>> It's possible that worked. Try running again?"
 			sys.exit(1)
 		except:
 			print ">>> ... Setup didn't work for some reason!"
