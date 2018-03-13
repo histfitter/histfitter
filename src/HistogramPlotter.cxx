@@ -178,7 +178,7 @@ void HistogramPlotter::saveHistograms() {
     std::string filename("results/" + m_anaName + "/histograms_" + m_outputPrefix + ".root");
     TFile *f = TFile::Open(filename.c_str(), "RECREATE");
 
-    for(int i = 0; i < m_regions.size(); ++i){
+    for(unsigned int i = 0; i < m_regions.size(); ++i){
         const auto categoryLabel = m_regions[i];
         const auto hists = m_histograms[i];
 
