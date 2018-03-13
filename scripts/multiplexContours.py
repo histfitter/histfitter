@@ -54,6 +54,7 @@ try:
 	from shapely.ops import cascaded_union, polygonize
 	from shapely.geometry import Polygon,MultiPolygon
 	from shapely.geometry import LineString
+	from shapely import affinity
 except:
 	print ">>> You need to have access to shapely!"
 	print ">>> Do you want me to try and install it?"
@@ -140,6 +141,7 @@ def main():
 
 		isoExpectedContours[(region1,region2)] = cs.allsegs[0]
 
+	ax.cla()
 
 	uncutRegions = {}
 
@@ -171,15 +173,18 @@ def main():
 	allIsoExpectedContoursLineStrings = []
 	for thing in isoExpectedContours:
 		for otherThing in isoExpectedContours[thing]:
+			tmpLineString = LineString(otherThing)
+			if tmpLineString.within(sumOfExpecteds):
+				continue
 			allIsoExpectedContours.append( otherThing )
-			allIsoExpectedContoursLineStrings.append( LineString(otherThing) )
+			allIsoExpectedContoursLineStrings.append( tmpLineString )
 
 
 	print ">>> Total number of isoExpectedContours: %d"%len(allIsoExpectedContoursLineStrings)
 
 	for iIEC,IEC in enumerate(allIsoExpectedContours):
 		convertArraysToTGraph(IEC[:,0],IEC[:,1]).Write("isoExpectedContour_%d"%iIEC)
-
+		ax.plot(IEC[:,0],IEC[:,1],alpha=0.5,linewidth=0.5)
 
 	listOfBestCurves = {}
 
@@ -194,13 +199,14 @@ def main():
 	subRegions = []
 	tmpMultiPoly = sumOfExpecteds
 	for cutLine in allIsoExpectedContoursLineStrings:
-		tmpMultiPoly = tmpMultiPoly.difference(cutLine.buffer(1e-3))
+		tmpMultiPoly = tmpMultiPoly.difference(cutLine.buffer(1e-10))
 	for poly in tmpMultiPoly:
 		subRegions.append(poly)
 
 
 	if args.debug:
 		print ">>> Number of regions in this plane: %d"%len(subRegions)
+
 
 	for iSubRegion,subRegion in enumerate(subRegions):
 		if args.debug:
@@ -235,14 +241,18 @@ def main():
 			# then this is the relevant piece. I've done a terrible job at terminology here...
 
 			for chunkOfSubCurve in cutUpSubCurve:
-				if type(chunkOfSubCurve.intersection(subRegion) ) == Polygon:
+				scaledChunkOfSubCurve = affinity.scale(chunkOfSubCurve, xfact=0.99, yfact=0.99,origin="centroid")
+				if type(scaledChunkOfSubCurve.intersection(subRegion) ) == Polygon:
+					if not scaledChunkOfSubCurve.within( subCurve ):
+						continue
+
 					listOfBestCurves[tmpKey].append(chunkOfSubCurve)
 
 
 	print ">>> Creating summed curves and writing to output file"
-
 	summedCurves = {}
 	for typeOfCurve in listOfBestCurves:
+		print ">>> Adding together: %s"%typeOfCurve
 		summedCurves[typeOfCurve]	= cascaded_union(listOfBestCurves[typeOfCurve])
 
 		if "Exp_u1s" == typeOfCurve or "Exp_d1s" == typeOfCurve:
