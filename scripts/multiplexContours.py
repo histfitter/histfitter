@@ -239,16 +239,16 @@ def main():
 					poly = affinity.scale(poly,xfact=1+1e-9,yfact=1+1e-9,origin="centroid")
 					cutUpSubCurve.append(poly)
 
-
-			if args.debug:
-				print ">>> Number of cut up subcurves for %s, %d (with area %f)"%(tmpKey,len(cutUpSubCurve), subCurve.area)
+				if args.debug:
+					print ">>> Number of cut up subcurves for %s, %d (with area %f)"%(tmpKey,len(cutUpSubCurve), subCurve.area)
 
 			# now for this type of curve (e.g. obs, exp+1sig, etc), I've cut it up with the IECs into regions
 			# and now I can compare each subcurve with the subRegion. If there's overlap,
 			# then this is the relevant piece. I've done a terrible job at terminology here...
 
 			for chunkOfSubCurve in cutUpSubCurve:
-				if not chunkOfSubCurve.centroid.within( subRegion ):
+				areaDisagreement = math.fabs(chunkOfSubCurve.intersection( subRegion ).area - chunkOfSubCurve.area ) / chunkOfSubCurve.area
+				if abs(areaDisagreement) > 0.01 and not chunkOfSubCurve.centroid.within(subRegion):
 					continue
 				else:
 					if args.debug:
@@ -258,7 +258,7 @@ def main():
 
 				if args.debug:
 					x,y = chunkOfSubCurve.boundary.coords.xy
-					ax.cla()
+					# ax.cla()
 					ax.plot(x,y,alpha=0.5)
 					fig.savefig("debug_%s_%d.pdf"%(tmpKey,counter) )
 					counter = counter+1
