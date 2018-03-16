@@ -68,10 +68,7 @@ if not args.useROOT:
 		print ">>>"
 		print ">>> You need scipy/matplotlib to run this. And you had to have run harvestToContours in scipy mode [default]"
 		print ">>> In an ATLAS environment, you can..."
-		print '>>> > lsetup "lcgenv -p LCG_87 x86_64-slc6-gcc62-opt pytools" '
-		print '>>> > lsetup "lcgenv -p LCG_87 x86_64-slc6-gcc62-opt pyanalysis" '
-		print '>>> > lsetup "lcgenv -p LCG_87 x86_64-slc6-gcc62-opt pygraphics" '
-		print ">>> > lsetup root"
+		print '>>> > lsetup "lcgenv -p LCG_93 x86_64-slc6-gcc62-opt pyanalysis" "lcgenv -p LCG_93 x86_64-slc6-gcc62-opt pytools" "lcgenv -p LCG_93 x86_64-slc6-gcc62-opt pygraphics" "lcgenv -p LCG_93 x86_64-slc6-gcc62-opt ROOT" '
 		print ">>> "
 		print ">>> Try that and then run this again!"
 		sys.exit(1)
@@ -133,18 +130,35 @@ def main():
 		except:
 			print ">>> ... Can't find theory variation files. Skipping."
 
-		print ">>> Handling upper limits"
+		print ">>> Handling upper limit file"
 		try:
 			processInputFile(inputFile = args.inputFile.replace(args.nominalLabel,"UpperLimit")  , outputFile = f, label = "_UL")
+			print ">>>"
+			print ">>> *********************************************************"
+			print ">>> FYI: This is just for putting upper limit values as"
+			print ">>> ... little grey numbers on your final plot. This is"
+			print ">>> ... not for making contours from. It'll write out a"
+			print ">>> ... TGraph2D with those numbers"
+			print ">>> *********************************************************"
+			print ">>>"
 		except:
+			print ">>>"
 			print ">>> ... Can't find upper limit file. Skipping."
+			print ">>> ... (This is only used for little grey numbers"
+			print ">>> ... on the final plot so if you're not interested"
+			print ">>> ... in that right now, you can ignore this!)"
+			print ">>>"
 
-
+	print ">>> "
 	print ">>> Closing file"
 
 	f.Write()
 	f.Close()
 
+	print ">>> "
+	print ">>> All done! Have a beautiful day -- You're an inspiration you wonderful person you!"
+
+	return
 
 def processInputFile(inputFile, outputFile, label = ""):
 	"""Do actual processing of a given input file"""
@@ -207,6 +221,16 @@ def processInputFile(inputFile, outputFile, label = ""):
 	# Step 4 - Make pretty curves (and bands) or try to...
 
 	if not args.ignoreUncertainty and label=="":
+		if len(outputGraphs["clsu1s"])==0 and len(outputGraphs["clsd1s"])>0:
+			print ">>>"
+			print ">>> WARNING: You don't have +1 sigma sensitivity,"
+			print ">>> ... but you do have -1 sigma reach. Making a "
+			print ">>> ... +/-1 sigma band from only the -1 side."
+			print ">>> "
+			for icurve,curve1 in enumerate(outputGraphs["clsd1s"]):
+				band_1s = createBandFromContours( curve1 )
+				band_1s.SetFillColorAlpha(ROOT.TColor.GetColor("#ffd700"), 0.75)
+				band_1s.Write("Band_1s_%d"%icurve)
 		for icurve,(curve1,curve2) in enumerate(zip(outputGraphs["clsu1s"],outputGraphs["clsd1s"]) ):
 			band_1s = createBandFromContours( curve1, curve2 )
 			band_1s.SetFillColorAlpha(ROOT.TColor.GetColor("#ffd700"), 0.75)
@@ -215,6 +239,7 @@ def processInputFile(inputFile, outputFile, label = ""):
 			band_2s = createBandFromContours( curve1, curve2 )
 			band_2s.SetFillColorAlpha(ROOT.TColor.GetColor("#115000"), 0.5)
 			band_2s.Write("Band_2s_%d"%icurve)
+
 
 	for icurve,obsCurve in enumerate(outputGraphs["CLs"]):
 		obsCurve.SetLineWidth(2)
@@ -231,7 +256,7 @@ def processInputFile(inputFile, outputFile, label = ""):
 	if label=="":
 		canvas = ROOT.TCanvas("FinalCurves","FinalCurves")
 		if not args.ignoreUncertainty:
-			for iGraph in xrange( min( len(outputGraphs["clsu1s"]) , len(outputGraphs["clsd1s"]) )   ):
+			for iGraph in xrange(  len(outputGraphs["clsd1s"])   ):
 				outputFile.Get("Band_1s_%d"%iGraph).Draw("ALF" if iGraph==0 else "LF")
 		else:
 			outputFile.Get("Exp_0").Draw("AL")
@@ -282,6 +307,9 @@ def harvestToDict( harvestInputFileName = "" ):
 				except:
 					print ">>> ... Error: %s or %s doesn't exist as an entry in the input file"%(args.xVariable,args.yVariable)
 					print ">>> ... Use cmd line options -x and -y to point to variables that exist in the input"
+					print ">>> Available variables are listed below:"
+					print ">>> "
+					print ">>> "+"\n>>> ".join(sample.keys())
 					sys.exit(1)
 
 				sampleParamsList = list(sampleParams)
@@ -522,7 +550,6 @@ def interpolateSurface(modelDict = {}, interpolationFunction = "linear", useROOT
 
 def createTGraph2DFromArrays(x,y,z):
 	"""Helper function to quickly create a TGraph2D from three python iterables"""
-
 	from array import array
 	return ROOT.TGraph2D(len(x),
 		array('f',x),
@@ -536,6 +563,7 @@ def createTGraphFromDict(modelDict,myName,listOfFIDs=None):
 	modelPointsValues = modelDict.values()
 
 	outputGraph = ROOT.TGraph2D(len(modelPoints))
+	outputGraph.SetName(myName)
 	for imodel,model in enumerate(modelPoints):
 		if listOfFIDs!=None:
 			try:
@@ -640,19 +668,22 @@ def getContourPoints(xi,yi,zi,level ):
 
 	return contourList
 
-def createBandFromContours(contour1,contour2):
+def createBandFromContours(contour1,contour2=None):
 
-	outputSize = contour1.GetN()+contour2.GetN()+1
-	outputGraph = ROOT.TGraph(outputSize)
-	tmpx, tmpy = ROOT.Double(), ROOT.Double()
-	for iPoint in xrange(contour2.GetN()):
-		contour2.GetPoint(iPoint,tmpx,tmpy)
-		outputGraph.SetPoint(iPoint,tmpx,tmpy)
-	for iPoint in xrange(contour1.GetN()):
-		contour1.GetPoint(contour1.GetN()-1-iPoint,tmpx,tmpy)
-		outputGraph.SetPoint(contour2.GetN()+iPoint,tmpx,tmpy)
-	contour2.GetPoint(0,tmpx,tmpy)
-	outputGraph.SetPoint(contour1.GetN()+contour2.GetN(),tmpx,tmpy)
+	if not contour2:
+		outputGraph = contour1
+	else:
+		outputSize = contour1.GetN()+contour2.GetN()+1
+		outputGraph = ROOT.TGraph(outputSize)
+		tmpx, tmpy = ROOT.Double(), ROOT.Double()
+		for iPoint in xrange(contour2.GetN()):
+			contour2.GetPoint(iPoint,tmpx,tmpy)
+			outputGraph.SetPoint(iPoint,tmpx,tmpy)
+		for iPoint in xrange(contour1.GetN()):
+			contour1.GetPoint(contour1.GetN()-1-iPoint,tmpx,tmpy)
+			outputGraph.SetPoint(contour2.GetN()+iPoint,tmpx,tmpy)
+		contour2.GetPoint(0,tmpx,tmpy)
+		outputGraph.SetPoint(contour1.GetN()+contour2.GetN(),tmpx,tmpy)
 
 	outputGraph.SetFillStyle(1001);
 	outputGraph.SetLineWidth(1)

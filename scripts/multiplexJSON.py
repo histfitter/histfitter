@@ -30,10 +30,7 @@ try:
 except:
 	print ">>> You need scipy/matplotlib to run this. And you had to have run harvestToContours in scipy mode [default]"
 	print ">>> In an ATLAS environment, you can..."
-	print '>>> > lsetup "lcgenv -p LCG_87 x86_64-slc6-gcc62-opt pytools" '
-	print '>>> > lsetup "lcgenv -p LCG_87 x86_64-slc6-gcc62-opt pyanalysis" '
-	print '>>> > lsetup "lcgenv -p LCG_87 x86_64-slc6-gcc62-opt pygraphics" '
-	print ">>> > lsetup root"
+	print '>>> > lsetup "lcgenv -p LCG_93 x86_64-slc6-gcc62-opt pyanalysis" "lcgenv -p LCG_93 x86_64-slc6-gcc62-opt pytools" "lcgenv -p LCG_93 x86_64-slc6-gcc62-opt pygraphics" "lcgenv -p LCG_93 x86_64-slc6-gcc62-opt ROOT" '
 	print ">>> "
 	print ">>> Try that and then run this again!"
 	sys.exit(1)
