@@ -65,7 +65,7 @@ def getRegionColor(name):
 
 # Define the colors for the stacked samples
 def getSampleColor(sample):
-    if sample == "Top":         
+    if sample == "Top":       return kPink + 1
     if sample == "WZ":       return kAzure + 1
     if sample == "BG":     return kYellow - 3
     if sample == "QCD":     return kGray + 1
