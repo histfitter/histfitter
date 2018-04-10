@@ -32,6 +32,8 @@ ucb = Systematic("uncorrl_bkg", configMgr.weights, 1.2,0.8, "user","userOverallS
 # correlated systematic between background and signal (1 +- relative uncertainties)
 
 
+# Keep SRs also in background fit confuguration
+configMgr.keepSignalRegionType = True
 
 ##########################
 
