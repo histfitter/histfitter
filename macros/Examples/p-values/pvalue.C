@@ -42,9 +42,9 @@ void
 pvalue()
 {
   //definition of variables
-  int seed=0;            // 0 = cpu clock, so random 
+  int seed=1;            // 0 = cpu clock, so random, 1 to make reproducible results
   const char* fileprefix = "example";
-  int  calculatorType=2; // 2=asymptotic approximation limit. 0=frequentist limit
+  int  calculatorType=0; // 2=asymptotic approximation limit. 0=frequentist limit
   int  testStatType=3;   // one-sided test profile statistic (ATLAS standard)
   int  ntoys=5000;
   bool doUL = true;      // true = exclusion, false = discovery
