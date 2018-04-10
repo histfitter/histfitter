@@ -23,7 +23,7 @@ import ROOT
 from ROOT import *
 ROOT.PyConfig.IgnoreCommandLineOptions = True
 gSystem.Load("libSusyFitter.so")
-gROOT.Reset()
+#gROOT.Reset()
 ROOT.gROOT.SetBatch(True)
 
 import os, pickle, subprocess
@@ -65,7 +65,7 @@ def getRegionColor(name):
 
 # Define the colors for the stacked samples
 def getSampleColor(sample):
-    if sample == "Top":       return kPink + 1
+    if sample == "Top":         return kGreen - 9
     if sample == "WZ":       return kAzure + 1
     if sample == "BG":     return kYellow - 3
     if sample == "QCD":     return kGray + 1
@@ -86,7 +86,7 @@ def main():
     pickleFilename = os.getenv("HISTFITTER")+"/MyYieldsTable.pickle"
     
     # Run blinded?
-    doBlind = False
+    doBlind = True
 
     # Used as plot title
     region = "SS_metmeff2Jet"
