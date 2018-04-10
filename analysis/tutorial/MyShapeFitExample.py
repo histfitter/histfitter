@@ -145,7 +145,6 @@ topSample.addInputs(bgdFiles)
 #topSample.setNormFactor("mu_Top",1.,0.,5.)
 wzSample = Sample("WZ",kAzure+1)
 wzSample.addInputs(bgdFiles)
-
 #wzSample.setNormFactor("mu_WZ",1.,0.,5.)
 dataSample = Sample("Data",kBlack)
 dataSample.setData()
