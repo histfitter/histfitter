@@ -42,7 +42,7 @@
 #include "TImage.h"
 #include "TMath.h"
 #include "TSystem.h"
-#include "contourmacros/CombinationConf.C"
+#include "CombinationConf.C"
 
 #include <iostream>
 using std::cout;

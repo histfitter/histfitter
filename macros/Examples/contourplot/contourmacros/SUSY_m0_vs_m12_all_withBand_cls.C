@@ -15,7 +15,7 @@
  * LICENSE.                                                                       *
  **********************************************************************************/
 
-#include "contourmacros/CombinationGlob.C"
+#include "CombinationGlob.C"
 #include "TColor.h"
 #include <algorithm>
 
