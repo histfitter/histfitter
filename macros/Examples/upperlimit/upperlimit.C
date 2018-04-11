@@ -71,12 +71,15 @@ upperlimit()
   RooRandom::randomGenerator()->SetSeed(seed);
 
   // option to turn off the luminosity and signal uncertainty.
-  if (false) { 
-    w->exportToCint();
-    using namespace channel1;
-    Lumi.setConstant(); 
-    alpha_syst1.setConstant();
-  }
+  //  if (false) { 
+  //    w->exportToCint();
+  //    using namespace channel1;
+  //    Lumi.setConstant(); 
+  //    alpha_syst1.setConstant();
+  //  }
+
+  // compute p-value
+  LimitResult result = RooStats::get_Pvalue( w, useCLs, ntoys, calculatorType, testStatType );
 
   // determine the upper limit and make a plot
   RooStats::HypoTestInverterResult* hypo = RooStats::MakeUpperLimitPlot(fileprefix,w,calculatorType,testStatType,ntoys,useCLs,npoints);
