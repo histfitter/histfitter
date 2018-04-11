@@ -25,7 +25,7 @@ import ROOT
 from ROOT import *
 ROOT.PyConfig.IgnoreCommandLineOptions = True
 gSystem.Load("libSusyFitter.so")
-gROOT.Reset()
+#gROOT.Reset()
 ROOT.gROOT.SetBatch(True)
 
 import os, string, pickle, copy
@@ -34,7 +34,7 @@ from math import sqrt
 def getSampleColor(sample):
     """
     Get colour for a sample
-    
+
     @param sample The sample to return the colour for
     """
     return 1
@@ -42,7 +42,7 @@ def getSampleColor(sample):
 def getRegionColor(region):
     """
     Get colour for a region
-    
+
     @param region The region to return the colour for
     """
     return 1
@@ -59,28 +59,37 @@ def PoissonError(obs):
     symError = abs(posError-negError)/2.
     return (posError,negError,symError)
 
-def MakeBox(color=4, offset=0, pull=-1, horizontal=False):
-    graph = TGraph(4);
+def MakeBox(color=4, offset=0, pull=-1, horizontal=False, doPreFit=False, error=0):
+    graph = TGraphErrors(1) if doPreFit else TGraph(4)
     if horizontal:
-        graph.SetPoint(0,0.1+offset,0);
-        graph.SetPoint(1,0.1+offset,pull);
-        graph.SetPoint(2,0.9+offset,pull);
-        graph.SetPoint(3,0.9+offset,0);    
+        if doPreFit:
+            graph.SetPoint(0, 0.5+offset, pull)
+            graph.SetPointError(0, 0., error)
+        else:
+            graph.SetPoint(0,0.1+offset,0);
+            graph.SetPoint(1,0.1+offset,pull);
+            graph.SetPoint(2,0.9+offset,pull);
+            graph.SetPoint(3,0.9+offset,0);
     else:
-        graph.SetPoint(0,0,0.3+offset);
-        graph.SetPoint(1,pull,0.3+offset);
-        graph.SetPoint(2,pull,0.7+offset);
-        graph.SetPoint(3,0,0.7+offset);    
-    graph.SetFillColor(color); 
-    graph.SetLineColor(2);
-    graph.SetLineWidth(5);
+        if doPreFit:
+            graph.SetPoint(0, pull, 0.3+offset)
+            graph.SetPoint(1, pull, 0.7+offset)
+        else:
+            graph.SetPoint(0,0,0.3+offset);
+            graph.SetPoint(1,pull,0.3+offset);
+            graph.SetPoint(2,pull,0.7+offset);
+            graph.SetPoint(3,0,0.7+offset);
+    graph.SetFillColor(color);
+    graph.SetLineColor(color);
+    graph.SetLineWidth(2);
     graph.SetLineStyle(1);
+    graph.SetMarkerStyle(20);
     return graph
 
 def GetFrame(outFileNamePrefix,Npar,horizontal=False):
     offset = 0.;
     if horizontal:
-        frame =TH2F("frame"+outFileNamePrefix, "", 
+        frame =TH2F("frame"+outFileNamePrefix, "",
                     Npar,0.,Npar,80,-4.,4.);
         frame.GetYaxis().SetTitleSize( 0.09 );
         frame.GetYaxis().SetTitleOffset(0.5)
@@ -91,10 +100,10 @@ def GetFrame(outFileNamePrefix,Npar,horizontal=False):
         frame.GetYaxis().SetNdivisions(4)
         frame.SetYTitle("(n_{obs} - n_{pred}) / #sigma_{tot}");
     else:
-        frame =TH2F( "frame"+outFileNamePrefix, outFileNamePrefix, 
-                                1, -3.5, 3.5, 
+        frame =TH2F( "frame"+outFileNamePrefix, outFileNamePrefix,
+                                1, -3.5, 3.5,
                                 Npar, -offset, Npar+offset );
-        
+
         scale = 1.0;
         frame.SetLabelOffset( 0.012, "Y" );# label offset on x axis
         frame.GetYaxis().SetTitleOffset( 1.25 );
@@ -103,7 +112,7 @@ def GetFrame(outFileNamePrefix,Npar,horizontal=False):
         frame.GetXaxis().SetLabelSize( 0.06 );
         frame.GetYaxis().SetLabelSize( 0.07 );
         Npar = len(regionList)
-    
+
         frame.SetLineColor(0);
         frame.SetTickLength(0,"Y");
         frame.SetXTitle( "(n_{obs} - n_{pred}) / #sigma_{tot}          " );
@@ -112,7 +121,7 @@ def GetFrame(outFileNamePrefix,Npar,horizontal=False):
         frame.SetTitleSize( 0.06, "X" );
         frame.GetYaxis().CenterLabels( 1 );
         frame.GetYaxis().SetNdivisions( frame.GetNbinsY()+10, 1 );
-    
+
         # global style settings
         gPad.SetTicks();
         frame.SetLabelFont(42,"X");
@@ -121,7 +130,7 @@ def GetFrame(outFileNamePrefix,Npar,horizontal=False):
         frame.SetTitleFont(42,"Y");
     return copy.deepcopy(frame)
 
-def GetBoxes(all, results, renamedRegions, frame, doBlind, horizontal=False):
+def GetBoxes(all, results, renamedRegions, frame, doBlind, horizontal=False, doPreFit=False):
     counter = 0
     myr = reversed(results)
     if horizontal:
@@ -132,11 +141,11 @@ def GetBoxes(all, results, renamedRegions, frame, doBlind, horizontal=False):
 
         if name in renamedRegions.keys():
             name = renamedRegions[name]
-                    
-        if (name.find("SR") >= 0 and doBlind) or name.find("CR") >= 0:
+
+        if (name.find("SR") >= 0 and doBlind) or (name.find("CR") >= 0 and not doPreFit):
             counter += 1
             continue
-            
+
         if horizontal:
             for bin in range(1,frame.GetNbinsX()+2):
                 if frame.GetXaxis().GetBinLabel(bin) != name: continue
@@ -145,12 +154,19 @@ def GetBoxes(all, results, renamedRegions, frame, doBlind, horizontal=False):
             #frame.GetXaxis().SetBinLabel(counter+1,name);
         else:
             frame.GetYaxis().SetBinLabel(counter+1,name);
-        
-        color = getRegionColor(name) 
 
-        graph = MakeBox(offset=counter, pull=float(info[1]), color=color, horizontal=horizontal)
-        graph.Draw("LF")
-        
+        color = getRegionColor(name)
+
+        graph = MakeBox(offset=counter, pull=float(info[1]), color=color, horizontal=horizontal, doPreFit=doPreFit, error=info[7] if len(info) >= 8 else 0)
+        if doPreFit and "CR" in name:
+          graph.SetMarkerColor(kRed)
+          graph.SetLineColor(kRed)
+          graph.SetMarkerStyle(8)
+          graph.SetMarkerSize(1)
+          graph.Draw("0PZE")
+        else:
+          graph.Draw("LF")
+
         counter += 1
         all.append(graph)
 
@@ -170,27 +186,27 @@ def MakeHist(regionList, renamedRegions, results, hdata, hbkg, hbkgUp, hbkgDown,
         nExpTotErUp = 0
         nExpTotErDo = 0
         pull = 0
-        
+
         name = regionList[counter].replace(" ","")
         if name in renamedRegions.keys():
-            name = renamedRegions[name]        
-        
+            name = renamedRegions[name]
+
         for info in results: #extract the information
             if regionList[counter] in info[0]:
                 nObs = info[2]
                 nExp = info[3]
                 nExpEr = info[4]
-                if nExp>0:                    
+                if nExp>0:
                     nExpStatEr = sqrt(nExp)
-                pEr = PoissonError(nExp)                
+                pEr = PoissonError(nObs)
                 nExpStatErUp = pEr[0]
                 nExpStatErDo = pEr[1]
 
                 if name.find("CR") < 0:
-                    nExpTotEr = sqrt(nExpStatEr*nExpStatEr+nExpEr*nExpEr)
-                    nExpTotErUp = sqrt(nExpStatErUp*nExpStatErUp+nExpEr*nExpEr)
-                    nExpTotErDo = sqrt(nExpStatErDo*nExpStatErDo+nExpEr*nExpEr)
-                else:    
+                    nExpTotEr = sqrt(nExpEr*nExpEr)
+                    nExpTotErUp = sqrt(nExpEr*nExpEr)
+                    nExpTotErDo = sqrt(nExpEr*nExpEr)
+                else:
                     nExpTotEr = nExpEr
 
                 if (nObs-nExp) >= 0 and nExpTotErUp != 0:
@@ -213,7 +229,7 @@ def MakeHist(regionList, renamedRegions, results, hdata, hbkg, hbkgUp, hbkgDown,
                 compInfo = info[6]
                 for i in range(len(compInfo)):
                     hbkgComponents[i].SetBinContent(counter+1,compInfo[i][1])
-                    
+
                 break
 
         if nObs>max: max = nObs
@@ -224,15 +240,16 @@ def MakeHist(regionList, renamedRegions, results, hdata, hbkg, hbkgUp, hbkgDown,
         graph_bkg.SetPoint(counter, hbkg.GetBinCenter(counter+1), nExp)
         graph_bkg.SetPointError(counter, 0.5, 0.5, nExpStatErDo, nExpStatErUp)
         graph_bkg2.SetPoint(counter, hbkg.GetBinCenter(counter+1), nExp)
-        graph_bkg2.SetPointError(counter, 0.5, 0.5, nExpTotErDo, nExpTotErUp)
+        graph_bkg2.SetPointError(counter, 0.5, 0.5, nExpEr, nExpEr)
         graph_bkg3.SetPoint(counter, hbkg.GetBinCenter(counter+1), nExp)
         graph_bkg3.SetPointError(counter, 0.5, 0.5, 0, 0)
         graph_data.SetPoint(counter, hbkg.GetBinCenter(counter+1), nObs)
-        graph_data.SetPointError(counter, 0., 0, 0, 0)
-        
+        if not nObs > 0: nObs = 0
+        graph_data.SetPointError(counter, 0., 0, sqrt(nObs), sqrt(nObs))
+
         graph_pull.SetPoint(counter, hbkg.GetBinCenter(counter+1), pull)
         graph_pull.SetPointError(counter, 0., 0, 0, 0)
-                          
+
         hdata.GetXaxis().SetBinLabel(counter+1, name)
         hdata.SetBinContent(counter+1, -1000)
         hdata.SetBinError(counter+1, 0.00001)
@@ -249,46 +266,62 @@ def MakeHist(regionList, renamedRegions, results, hdata, hbkg, hbkgUp, hbkgDown,
     #hdata.SetMinimum(0.1)
     return
 
-def MakeHistPullPlot(samples, regionList, outFileNamePrefix, hresults, renamedRegions, doBlind, extra=""):
+def MakeHistPullPlot(samples, regionList, outFileNamePrefix, hresults, renamedRegions, doBlind, outDir="", minimum=None, maximum=None, logy=False):
     print "========================================", outFileNamePrefix
     ROOT.gStyle.SetOptStat(0000);
     Npar=len(regionList)
-    
+
     hdata = TH1F(outFileNamePrefix, outFileNamePrefix, Npar, 0, Npar);
-    hdata.GetYaxis().SetTitle("Number of events")
-    hdata.GetYaxis().SetTitleSize( 0.05 );
-    hdata.GetXaxis().SetLabelSize( 0.06 );
-    hdata.GetYaxis().SetLabelSize( 0.05 );
+    hdata.GetYaxis().SetTitle("Events")
+    hdata.GetYaxis().SetTitleSize( 0.065 )
+    hdata.GetYaxis().SetTitleOffset( 0.5 )
+    hdata.GetXaxis().SetLabelSize( 0.06 )
+    hdata.GetYaxis().SetLabelSize( 0.05 )
     hdata.SetMarkerStyle(20)
     hbkg = TH1F("hbkg", "hbkg", Npar, 0, Npar);
+    hbkg.SetLineColor(1)
+    hbkg.SetLineWidth(2)
 
-    hbkgUp = TH1F("hbkgUp", "hbkgUp", Npar, 0, Npar);    
-    hbkgUp.SetLineStyle(2)
-    
-    hbkgDown = TH1F("hbkgDown", "hbkgDown", Npar, 0, Npar); 
-    hbkgDown.SetLineStyle(2)
-    
+    hbkgUp = TH1F("hbkgUp", "hbkgUp", Npar, 0, Npar);
+    hbkgUp.SetLineStyle(0)
+    hbkgUp.SetLineWidth(0)
+
+    hbkgDown = TH1F("hbkgDown", "hbkgDown", Npar, 0, Npar);
+    hbkgDown.SetLineStyle(0)
+    hbkgDown.SetLineWidth(0)
+
     hbkgComponents = []
-    samples.replace(" ","") #remove spaces, and split by comma => don't split by ", " 
+    samples.replace(" ","") #remove spaces, and split by comma => don't split by ", "
     for sam in samples.split(","):
         h = TH1F("hbkg"+sam, "hbkg"+sam, Npar, 0, Npar)
         h.SetFillColor(getSampleColor(sam))
         hbkgComponents.append(h)
-    
+
     graph_bkg = TGraphAsymmErrors(Npar)
-    graph_bkg.SetFillColor(kCyan-10)
+    graph_bkg.SetFillColor(1)
     graph_bkg2 = TGraphAsymmErrors(Npar)
-    graph_bkg2.SetFillColor(kCyan+1)
+    graph_bkg2.SetFillColor(1)
+    graph_bkg2.SetLineWidth(2)
     graph_bkg2.SetFillStyle(3004)
-    
+
     graph_bkg3 = TGraphAsymmErrors(Npar)
     graph_bkg3.SetFillColor(kCyan+1)
     graph_data = TGraphAsymmErrors(Npar)
     graph_data.SetFillColor(kCyan+1)
-    
+
     graph_pull = TGraphAsymmErrors(Npar)
 
     MakeHist(regionList,  renamedRegions,  hresults, hdata, hbkg, hbkgDown, hbkgUp, graph_bkg, graph_bkg2, graph_bkg3, graph_data, graph_pull, hbkgComponents)
+
+    myleg = TLegend(0.49,0.60,0.81,0.84)
+    myleg.SetNColumns(2)
+    myleg.SetBorderSize(0)
+    myleg.SetFillStyle(0)
+    myleg.AddEntry(graph_data, renamedRegions.get("data", "data"), "p")
+    myleg.AddEntry(graph_bkg2, renamedRegions.get("bkg2", "bkg2"), "fl")
+    # add background in same order as above
+    for h, sample in zip(hbkgComponents, samples.split(",")):
+      myleg.AddEntry(h, renamedRegions.get(sample, sample), "f")
 
     c = TCanvas("c"+outFileNamePrefix, outFileNamePrefix, 1000, 600);
     upperPad = ROOT.TPad("upperPad", "upperPad", 0.001, 0.35, 0.995, 0.995)
@@ -297,64 +330,83 @@ def MakeHistPullPlot(samples, regionList, outFileNamePrefix, hresults, renamedRe
     upperPad.SetFillColor(0);
     upperPad.SetBorderMode(0);
     upperPad.SetBorderSize(2);
-    upperPad.SetTicks() 
+    upperPad.SetTicks()
     upperPad.SetTopMargin   ( 0.1 );
-    upperPad.SetRightMargin ( 0.05 );
+    upperPad.SetRightMargin ( 0.11 );
     upperPad.SetBottomMargin( 0.0025 );
     upperPad.SetLeftMargin( 0.10 );
     upperPad.SetFrameBorderMode(0);
     upperPad.SetFrameBorderMode(0);
+    if logy: upperPad.SetLogy()
     upperPad.Draw()
-    
+
     lowerPad.SetGridx();
-    lowerPad.SetGridy(); 
+    lowerPad.SetGridy();
     lowerPad.SetFillColor(0);
     lowerPad.SetBorderMode(0);
     lowerPad.SetBorderSize(2);
     lowerPad.SetTickx(1);
     lowerPad.SetTicky(1);
     lowerPad.SetTopMargin   ( 0.003 );
-    lowerPad.SetRightMargin ( 0.05 );
-    lowerPad.SetBottomMargin( 0.3 );
+    lowerPad.SetRightMargin ( 0.11 );
+    lowerPad.SetBottomMargin( 0.5 );
     lowerPad.SetLeftMargin( 0.10 );
     lowerPad.Draw()
 
     c.SetFrameFillColor(ROOT.kWhite)
 
-    upperPad.cd()  
+    upperPad.cd()
 
-    hdata.Draw("E")
+    if minimum: hdata.SetMinimum(minimum)
+    if maximum: hdata.SetMaximum(maximum)
+    hdata.Draw("E0")
+    myleg.Draw()
     stack = THStack("stack","stack")
-    for h in hbkgComponents:
+    for h in reversed(hbkgComponents):
         stack.Add(h)
     stack.Draw("same")
     hbkg.Draw("hist,same")
     hbkgUp.Draw("hist,same")
     hbkgDown.Draw("hist,same")
-    
+
     graph_bkg2.Draw("2")
     graph_data.SetMarkerStyle(20)
-    graph_data.Draw("P")
-    hdata.Draw("E,same")
-    hdata.Draw("same,axis")
-   
+    graph_data.Draw("E0,P,Z")
+    graph_data.Draw("E0,Z")
+    hdata.Draw("E0,same")
+    hdata.Draw("E0,same,axis")
+
+    lumiText = TLatex()
+    lumiText.SetNDC()
+    lumiText.SetTextAlign( 11 )
+    lumiText.SetTextFont( 42 )
+    lumiText.SetTextSize( 0.06 )
+    lumiText.SetTextColor( 1 )
+    lumiText.DrawLatex(0.15, 0.7, "#sqrt{{s}}=13 TeV, {0:0.1f} fb^{{-1}}".format(getattr(MakeHistPullPlot,'luminosity',10.0)))
+    lumiText.DrawLatex(0.15,0.8, "#bf{#it{ATLAS}} Internal")
+
     lowerPad.cd()
-    
+
     # Draw frame with pulls
     frame = GetFrame(outFileNamePrefix,Npar,horizontal=True)
     for bin in range(1,hdata.GetNbinsX()+1):
         frame.GetXaxis().SetBinLabel(bin,hdata.GetXaxis().GetBinLabel(bin))
-    frame.Draw();
+    if "CR" in outFileNamePrefix:
+      frame.GetYaxis().SetRangeUser( 0, 2.3 )
+      frame.GetYaxis().SetTitle("t#bar{t} norm. factor")
+      frame.Draw("histo")
+    else:
+      frame.Draw();
     all = []
-    GetBoxes(all, hresults, renamedRegions, frame, doBlind, True)
+    GetBoxes(all, hresults, renamedRegions, frame, doBlind, True, doPreFit=bool("CR" in outFileNamePrefix))
 
-    c.Print("histpull_"+outFileNamePrefix+".eps")
-    c.Print("histpull_"+outFileNamePrefix+".png")
-    c.Print("histpull_"+outFileNamePrefix+".pdf")
-    
+    c.Print(os.path.join(outDir, "histpull_"+outFileNamePrefix+".eps"))
+    c.Print(os.path.join(outDir, "histpull_"+outFileNamePrefix+".png"))
+    c.Print(os.path.join(outDir, "histpull_"+outFileNamePrefix+".pdf"))
+
     return
 
-def makePullPlot(pickleFilename, regionList, samples, renamedRegions, outputPrefix, doBlind=False):
+def makePullPlot(pickleFilename, regionList, samples, renamedRegions, outputPrefix, doBlind=False, outDir=""):
     """
     Make a pull plot from a pickle file of results
 
@@ -368,7 +420,7 @@ def makePullPlot(pickleFilename, regionList, samples, renamedRegions, outputPref
     try:
         picklefile = open(pickleFilename,'rb')
     except IOError:
-        print "Cannot open pickle %s, continuing to next" % pickleFilename 
+        print "Cannot open pickle %s, continuing to next" % pickleFilename
         return
 
     mydict = pickle.load(picklefile)
@@ -382,39 +434,60 @@ def makePullPlot(pickleFilename, regionList, samples, renamedRegions, outputPref
         # TODO: this is pretty bad. we should zip all these things.
         index = mydict["names"].index(region)
         try:
-            nbObs = mydict["nobs"][index] 
+            nbObs = mydict["nobs"][index]
         except:
             nbObs = 0
 
-        nbExp = mydict["TOTAL_FITTED_bkg_events"][index]  
-        nbExpEr = mydict["TOTAL_FITTED_bkg_events_err"][index]            
-        pEr = PoissonError(nbExp)
-        totEr = sqrt(nbExpEr*nbExpEr+pEr[2]*pEr[2])                
+        if "CR" in region:
+          nbExp = mydict["TOTAL_MC_EXP_BKG_events"][index]
+          nbExpEr = mydict["TOTAL_MC_EXP_BKG_err"][index]
+          #nbExpPostFit = mydict["TOTAL_FITTED_bkg_events"][index]
+        else:
+          nbExp = mydict["TOTAL_FITTED_bkg_events"][index]
+          nbExpEr = mydict["TOTAL_FITTED_bkg_events_err"][index]
+          #nbExpPostFit = 0
+
+        pEr = PoissonError(nbObs)
+        totEr = sqrt(nbExpEr*nbExpEr+pEr[2]*pEr[2])
         totErDo = sqrt(nbExpEr*nbExpEr+pEr[1]*pEr[1])
         totErUp = sqrt(nbExpEr*nbExpEr+pEr[0]*pEr[0])
-            
-        if (nbObs-nbExp) > 0 and totErUp != 0:
-            pull = (nbObs-nbExp)/totErUp
-        if (nbObs-nbExp) <= 0 and totErDo != 0:
-            pull = (nbObs-nbExp)/totErDo
+
+        pEr_pull = PoissonError(nbExp)
+        totEr_pull = sqrt(nbExpEr*nbExpEr+pEr_pull[2]*pEr_pull[2])
+        totErDo_pull = sqrt(nbExpEr*nbExpEr+pEr_pull[1]*pEr_pull[1])
+        totErUp_pull = sqrt(nbExpEr*nbExpEr+pEr_pull[0]*pEr_pull[0])
+
+        if (nbObs-nbExp) > 0 and totErUp_pull != 0:
+            pull = (nbObs-nbExp)/totErUp_pull
+        if (nbObs-nbExp) <= 0 and totErDo_pull != 0:
+            pull = (nbObs-nbExp)/totErDo_pull
 
         nbExpComponents = []
         for sam in samples.split(","):
-             nbExpComponents.append((sam, mydict["Fitted_events_"+sam][index] ))
-        
+            if "CR" in region:
+                nbExpComponents.append((sam, mydict["MC_exp_events_"+sam][index] ))
+            else:
+                nbExpComponents.append((sam, mydict["Fitted_events_"+sam][index] ))
+
         if -0.02 < pull < 0: pull = -0.02 ###ATT: ugly
         if 0 < pull < 0.02:  pull = 0.02 ###ATT: ugly
-             
+
         if "SR" in region and doBlind:
             nbObs = -100
             pull = 0
+
+        if "CR" in region:
+            pull = mydict["Fitted_events_ttbar"][index]/mydict["MC_exp_events_ttbar"][index]
+            print "ttbar SF: ", pull
+        else:
+            print "{0:s}: {1}".format(region, pull)
 
         print "region: {0} nObs {1}".format(region, nbObs)
 
         results1.append((region,pull,nbObs,nbExp,nbExpEr,totEr,nbExpComponents))
 
     #pull
-    MakeHistPullPlot(samples, regionList, outputPrefix, results1, renamedRegions, doBlind)
-    
+    MakeHistPullPlot(samples, regionList, outputPrefix, results1, renamedRegions, doBlind, outDir)
+
     # return the results array in case you want to use this somewhere else
     return results1
