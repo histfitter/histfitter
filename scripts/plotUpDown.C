@@ -29,7 +29,7 @@ void plotUpDown(TString sam="BG", TString region = "WREl", TString syst="JES", T
   
   TFile* f = new TFile("data/MyConfigExample.root");
   
-  cout << " file = " < <  f << endl;
+  cout << " file = " <<  f << endl;
 
   TString nomName = "hBGNom_WREl_obs_meffInc";
   TString upName = "hBGJESHigh_WREl_obs_meffInc";
