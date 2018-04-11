@@ -121,7 +121,7 @@ dataSample.buildHisto([3.],"SR","cuts",0.5)
 if myFitType==FitType.Discovery:
  
    #Fit config instance
-   discoveryFitConfig = configMgr.addTopLevelXML("Discovery")
+   discoveryFitConfig = configMgr.addFitConfig("Discovery")
    meas=discoveryFitConfig.addMeasurement(name="NormalMeasurement",lumi=1.0,lumiErr=0.039)
    meas.addPOI("mu_Discovery")
  
