@@ -130,7 +130,7 @@ def main():
 
 		isoExpectedContours[(region1,region2)] = cs.allsegs[0]
 
-	ax.cla()
+	# ax.cla()
 
 	uncutRegions = {}
 
@@ -231,13 +231,19 @@ def main():
 				tmpMultiPoly = subCurve
 				for cutLine in allIsoExpectedContoursLineStrings:
 					tmpMultiPoly = tmpMultiPoly.difference(cutLine.buffer(1e-10))
-				cutUpSubCurve = []
-				for poly in tmpMultiPoly:
-					poly = affinity.scale(poly,xfact=1+1e-9,yfact=1+1e-9,origin="centroid")
-					cutUpSubCurve.append(poly)
 
-				if args.debug:
-					print ">>> Number of cut up subcurves for %s, %d (with area %f)"%(tmpKey,len(cutUpSubCurve), subCurve.area)
+				cutUpSubCurve = []
+
+				if type(tmpMultiPoly) == MultiPolygon:
+					for poly in tmpMultiPoly:
+						poly = affinity.scale(poly,xfact=1+1e-9,yfact=1+1e-9,origin="centroid")
+						cutUpSubCurve.append(poly)
+					if args.debug:
+						print ">>> Number of cut up subcurves for %s, %d (with area %f)"%(tmpKey,len(cutUpSubCurve), subCurve.area)
+				else:
+					if args.debug:
+						print ">>> Hrm.. wasn't able to cut it up into two. This could be ok. Writing out whole contour."
+					cutUpSubCurve.append(tmpMultiPoly)
 
 			# now for this type of curve (e.g. obs, exp+1sig, etc), I've cut it up with the IECs into regions
 			# and now I can compare each subcurve with the subRegion. If there's overlap,

@@ -451,17 +451,17 @@ def interpolateSurface(modelDict = {}, interpolationFunction = "linear", useROOT
 	# remove inf point in each entry
 	for whichContour in listOfContours:
 
-		while any([math.isinf(tmp) for tmp in zValues[whichContour]  ]):#  np.isinf( zValues[whichContour]  ).any():
-			myindex = [math.isinf(tmp) for tmp in zValues[whichContour] ].index(True)
+		while any([math.isinf(tmp) or math.isnan(tmp) for tmp in zValues[whichContour]  ]):#  np.isinf( zValues[whichContour]  ).any():
+			myindex = [math.isinf(tmp) or math.isnan(tmp) for tmp in zValues[whichContour] ].index(True)
 			if (args.debug):
-				print ">>> ... Remove Inf at i=%d x=%d y=%d" % (myindex,x[whichContour][myindex],y[whichContour][myindex])
+				print ">>> ... Remove Inf or NaN at i=%d x=%d y=%d" % (myindex,x[whichContour][myindex],y[whichContour][myindex])
 			x[whichContour].pop(myindex)
 			y[whichContour].pop(myindex)
 			zValues[whichContour].pop(myindex)
 			pass;
 
-		if any([math.isinf(tmp) for tmp in zValues[whichContour]  ]):
-			print ">>> ... Still infs in %s!! This is a problem... Exiting." % whichContour
+		if any([math.isinf(tmp) or math.isnan(tmp) for tmp in zValues[whichContour]  ]):
+			print ">>> ... Still infs or nans in %s!! This is a problem... Exiting." % whichContour
 			sys.exit(0)
 
 	if useROOT:
@@ -512,11 +512,20 @@ def interpolateSurface(modelDict = {}, interpolationFunction = "linear", useROOT
 			if args.smoothing:
 				smoothingFactor = float(args.smoothing)
 
-			# Actual interpolation done by RBF
-			if args.interpolationEpsilon:
-				rbf = scipy.interpolate.Rbf(xArray, yArray, zArray, function=interpolationFunction, smooth=smoothingFactor , epsilon=args.interpolationEpsilon)
-			else:
-				rbf = scipy.interpolate.Rbf(xArray, yArray, zArray, function=interpolationFunction, smooth=smoothingFactor )
+			try:
+				# Actual interpolation done by RBF
+				if args.interpolationEpsilon:
+					rbf = scipy.interpolate.Rbf(xArray, yArray, zArray, function=interpolationFunction, smooth=smoothingFactor , epsilon=args.interpolationEpsilon)
+				else:
+					rbf = scipy.interpolate.Rbf(xArray, yArray, zArray, function=interpolationFunction, smooth=smoothingFactor )
+			except:
+				print ">>> Interpolation failing!!! Check to make sure there are no NANs or double defined points in your input JSON!"
+				print ">>> Printing points we're trying to interpolate (x,y,z) triplets:"
+
+				print sorted( zip(xArray,yArray,zArray), key = lambda x: x[0]*x[1] )
+				sys.exit(1)
+
+
 			ZI = rbf(xymeshgrid[0], xymeshgrid[1])
 
 			# Undo the scaling from above to get back to original units
