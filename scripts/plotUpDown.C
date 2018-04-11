@@ -18,7 +18,7 @@
  **********************************************************************************/
 
 
-void plotUpDown(TString sam="BG", TString region = "WREl", TString syst="JES", TString var="meffInc", Bool_t norm=kFALSE){
+void plotUpDown(TString sam="BG", TString region = "WREl", TString syst="JES", TString var="meffInc", Bool_t norm=kFALSE, TString f_name="data/MyConfigExample.root"){
  
   gStyle->SetOptStat(0000000);
 
@@ -27,7 +27,7 @@ void plotUpDown(TString sam="BG", TString region = "WREl", TString syst="JES", T
   //  TFile* f = new TFile("../data/OneLeptonMoriond2013_PowhegAlpgen.root");
   //   plotUpDown("AlpgenW_Np3","TR3JEl","JLow","nJet30");
   
-  TFile* f = new TFile("data/MyConfigExample.root");
+  TFile* f = new TFile(f_name);
   
   cout << " file = " <<  f << endl;
 
