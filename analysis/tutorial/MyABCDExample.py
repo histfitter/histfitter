@@ -140,7 +140,7 @@ bkgSampleD.addNormFactor("eff_C",EffC,2.*EffC,0,False)
 # Add the channel
 chanA = ana.addChannel("cuts",["A"],1,0.5,1.5)
 chanA.addSample(bkgSampleA)
-ana.setSignalChannels([chanA])
+ana.addSignalChannels([chanA])
 ##region B
 chanB = ana.addChannel("cuts",["B"],1,0.5,1.5)
 chanB.addSample(bkgSampleB)
@@ -150,7 +150,7 @@ chanC.addSample(bkgSampleC)
 #region D
 chanD = ana.addChannel("cuts",["D"],1,0.5,1.5)
 chanD.addSample(bkgSampleD)
-ana.setBkgConstrainChannels([chanB,chanC,chanD])
+ana.addBkgConstrainChannels([chanB,chanC,chanD])
 
 
 # These lines are needed for the user analysis to run
