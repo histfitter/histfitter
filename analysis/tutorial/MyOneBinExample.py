@@ -43,7 +43,7 @@ import ROOT
 #-------------------------------
 #configMgr.doHypoTest=False
 configMgr.nTOYs=5000
-configMgr.calculatorType=0
+configMgr.calculatorType=2
 configMgr.testStatType=3
 configMgr.nPoints=20
 
