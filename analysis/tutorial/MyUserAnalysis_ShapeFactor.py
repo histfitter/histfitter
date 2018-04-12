@@ -52,8 +52,8 @@ configMgr.weights = "1."
 # Define samples
 bkgSample = Sample("Bkg",kGreen-9)
 bkgSample.setNormByTheory(True)
-bkgSample.buildHisto(nBkgCR,"CR","cuts",0.5)
-bkgSample.buildHisto(nBkgSR,"SR","cuts",0.5)
+bkgSample.buildHisto(nBkgCR,"CR","chan",0.5)
+bkgSample.buildHisto(nBkgSR,"SR","chan",0.5)
 bkgSample.addSystematic(bg1xsec)
 
 ddSample = Sample("DataDriven",kGreen+2)
@@ -61,14 +61,14 @@ ddSample.addShapeFactor("DDShape")
 
 sigSample = Sample("Sig",kPink)
 sigSample.setNormFactor("mu_Sig",1.,0.2,1.5)
-sigSample.buildHisto(nSigSR,"SR","cuts",0.5)
+sigSample.buildHisto(nSigSR,"SR","chan",0.5)
 sigSample.setNormByTheory(True)
 sigSample.addSystematic(sigxsec)
 
 dataSample = Sample("Data",kBlack)
 dataSample.setData()
-dataSample.buildHisto(nDataCR,"CR","cuts",0.5)
-dataSample.buildHisto(nDataSR,"SR","cuts",0.5)
+dataSample.buildHisto(nDataCR,"CR","chan",0.5)
+dataSample.buildHisto(nDataSR,"SR","chan",0.5)
 
 # Define top-level
 ana = configMgr.addFitConfig("SPlusB")
@@ -80,9 +80,9 @@ meas.addPOI("mu_Sig")
 meas.addParamSetting("Lumi",True)
 
 # Add the channels
-chanCR = ana.addChannel("cuts",["CR"],2,0.5,2.5)
+chanCR = ana.addChannel("chan",["CR"],2,0.5,2.5)
 
-chanSR = ana.addChannel("cuts",["SR"],2,0.5,2.5)
+chanSR = ana.addChannel("chan",["SR"],2,0.5,2.5)
 chanSR.addSample(sigSample)
 chanSR.getSample("DataDriven").addSystematic(xtrap)
 
