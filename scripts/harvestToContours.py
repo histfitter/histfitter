@@ -532,7 +532,7 @@ def interpolateSurface(modelDict = {}, interpolationFunction = "linear", useROOT
 			xymeshgrid[1] = xymeshgrid[1] / yScaling
 
 			# Spit out some diagnostic plots
-			if args.debug and whichContour=="CLsexp":
+			if args.debug and whichContour=="CLsexp" and outputSurface:
 				fig, ax = plt.subplots()
 				plt.pcolor(xymeshgrid[0], xymeshgrid[1], ZI)
 				plt.scatter(xArray, yArray, 10,zArray)
