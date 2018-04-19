@@ -86,6 +86,9 @@ class ConfigMgr {
         void setNToys (const int& val) { m_nToys = val; }
         int  getNToys() { return m_nToys; }
 
+        void setNCPUs (const int& val) { m_nCPUs = val; }
+        int  getNCPUs() { return m_nCPUs; }
+
         void setCalcType(const int& type) { m_calcType = type; }
         int  getCalcType() { return m_calcType; }
 
@@ -168,6 +171,7 @@ class ConfigMgr {
         bool  m_disableULRangeExtension;
         double m_muValGen;
         bool m_removeEmptyBins;
+        int m_nCPUs;
 
         bool m_deactivateBinnedLikelihood;
 	

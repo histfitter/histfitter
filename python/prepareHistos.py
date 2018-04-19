@@ -143,7 +143,12 @@ class PrepareHistos(object):
             self.cache2File = None
         
         if os.path.isfile(filepath):
-            if file2path=='': # default, no archive file
+            if file2path=='' and not self.useCacheToTreeFallback:
+                '''
+                default, no archive file and no fallback activated
+                all possible sources of histograms not in self.cacheFile
+                are therefore excluded and read-only mode applied for opening the TFile
+                '''
                 self.cacheFile = TFile(filepath,"READ")
                 self.recreate = False
             else:

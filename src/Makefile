@@ -1,7 +1,7 @@
 ######################################################################
 # Project: Tools                                                     #
-# Doc: http://sunsite.ualberta.ca/Documentation/Gnu/make-3.79/html_chapter/make_toc.html 
-###################################################################### 
+# Doc: http://sunsite.ualberta.ca/Documentation/Gnu/make-3.79/html_chapter/make_toc.html
+######################################################################
 
 MAKEFLAGS = --no-print-directory -r -s --pedantic -Wall
 #MAKEFLAGS = --warn-undefined-variables --debug
@@ -16,12 +16,12 @@ DEPDIR=$(OBJDIR)/dep
 VPATH= $(OBJDIR)
 INCLUDES += -I../include -I$(shell $(ROOTCONFIG) --incdir)
 ROOTSYS  ?= ERROR_RootSysIsNotDefined
- 
+
 DICTHEAD  = $(PACKAGE)_Dict.h
 DICTFILE  = $(PACKAGE)_Dict.C
 DICTOBJ   = $(PACKAGE)_Dict.o
 DICTLDEF  = LinkDef.h
-SKIPCPPLIST  = 
+SKIPCPPLIST  =
 SKIPHLIST    =  $(DICTHEAD) $(DICTLDEF)
 LIBFILE   = ../lib/lib$(PACKAGE).a
 SHLIBFILE = ../lib/lib$(PACKAGE).so
@@ -31,15 +31,15 @@ HEADERDEST = ../include/
 LIBDEST = ../lib/
 PCMFILE = ../lib/lib$(PACKAGE)_rdict.pcm
 
-CXXFLAGS = -std=c++11 -fPIC -Wall 
+CXXFLAGS = -std=c++1y -fPIC -Wall
 
 UNAME = $(shell uname)
 
-LINKLIBSIN = -L$(shell $(ROOTCONFIG) --libdir) -lCore -lRIO -lNet -lHist -lGraf -lGraf3d -lGpad -lTree -lRint -lPostscript -lMatrix -lPhysics -lGui -lRooFit -lRooStats -lHistFactory -lXMLParser -pthread -lRooFitCore -lm -ldl -lFoam -lMinuit -L../lib 
+LINKLIBSIN = -L$(shell $(ROOTCONFIG) --libdir) -lCore -lRIO -lNet -lHist -lGraf -lGraf3d -lGpad -lTree -lRint -lPostscript -lMatrix -lPhysics -lGui -lRooFit -lRooStats -lHistFactory -lXMLParser -pthread -lRooFitCore -lm -ldl -lFoam -lMinuit -L../lib
 
 LINKLIBS = $(LINKLIBSIN) -lSusyFitter
 
-default: shlib 
+default: shlib
 
 # List of all source files to build
 HLIST   = $(filter-out $(SKIPHLIST),$(wildcard *.h))
@@ -55,10 +55,10 @@ BinSuf=.cpp
 BINLIST=$(basename $(wildcard *$(BinSuf)))
 
 # Implicit rule to compile all classes
-%.o : %.cxx 
+%.o : %.cxx
 	@echo "Compiling $<"
 	@mkdir -p $(OBJDIR)
-	#@echo $(CXX) $(CXXFLAGS) -g -c $< -o $(OBJDIR)/$(notdir $@) $(INCLUDES) 
+	#@echo $(CXX) $(CXXFLAGS) -g -c $< -o $(OBJDIR)/$(notdir $@) $(INCLUDES)
 	@$(CXX) $(CXXFLAGS) -g -c $< -o $(OBJDIR)/$(notdir $@) $(INCLUDES)
 
 ifeq ($(shell [ $(ROOTMAJOR) -lt 6 ] && echo true), true)
@@ -81,10 +81,10 @@ $(OBJDIR)/$(DICTOBJ): $(DICTFILE)
 	@$(CXX) $(CXXFLAGS) -g -c $(INCLUDES) -o $@ $<
 
 ##############################
-# The dependencies section   
+# The dependencies section
 # - the purpose of the .d files is to keep track of the
 #   header file dependence
-# - this can be achieved using the makedepend command 
+# - this can be achieved using the makedepend command
 ##############################
 # .d tries to pre-process .cc
 ifneq ($(MAKECMDGOALS),clean)
@@ -101,7 +101,7 @@ $(DEPDIR)/%.d: %.$(SrcSuf)
 	fi
 
 # Rule to combine objects into a library
-$(LIBFILE): $(OLIST) $(OBJDIR)/$(DICTOBJ)	
+$(LIBFILE): $(OLIST) $(OBJDIR)/$(DICTOBJ)
 	@echo "Making static library: $(LIBFILE)"
 	@rm -f $(LIBFILE)
 	@ar q $(LIBFILE) $(addprefix $(OBJDIR)/,$(OLIST)) $(OBJDIR)/$(DICTOBJ)
@@ -127,7 +127,7 @@ includeinst:
 lib: $(LIBFILE) includeinst
 shlib: $(SHLIBFILE) includeinst
 winlib: $(DLLIBFILE) includeinst
-clean: 
+clean:
 	@echo "Deleting all libraries and executables..."
 	rm -f $(DICTFILE) $(DICTHEAD)
 	rm -f $(SHLIBFILE)
@@ -144,7 +144,7 @@ clean:
 
 distclean:
 	@echo "Deleting all libraries and executables, including ../include and ../lib"
-	rm -rf obj 
+	rm -rf obj
 	rm -f *~
 	rm -f *_Dict*
 	rm -f ../lib/*_Dict*
