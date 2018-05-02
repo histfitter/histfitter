@@ -18,7 +18,7 @@
 
 
 
-import ROOT, json, argparse, math, sys, os
+import ROOT, json, argparse, math, sys, os, pickle, copy
 
 ROOT.gROOT.SetBatch()
 
@@ -26,7 +26,8 @@ ROOT.gROOT.SetBatch()
 parser = argparse.ArgumentParser()
 parser.add_argument("--inputFile","-i",  type = str, help="input harvest file", default = "test.json")
 parser.add_argument("--outputFile","-o", type = str, help="output ROOT file", default = "outputGraphs.root")
-parser.add_argument("--interpolation",   type = str, help="type of interpolation for scipy (RBF). e.g. linear, cubic, gaussian, multiquadric.", default = "linear")
+parser.add_argument("--interpolation",   type = str, help="type of interpolation for scipy (RBF). e.g. linear, cubic, gaussian, multiquadric.", default = "multiquadric")
+parser.add_argument("--interpolationEpsilon", type=float, help="scipy (RBF) epsilon parameter", default = 0)
 parser.add_argument("--level",           type = float, help="contour level output. Default to 95%% CL", default = 1.64485362695)
 parser.add_argument("--useROOT","-r",    help = "use the root interpolation engine instead of mpl", action="store_true", default=False)
 parser.add_argument("--debug","-d",      help = "print extra debugging info", action="store_true", default=False)
@@ -36,17 +37,23 @@ parser.add_argument("--yVariable","-y",  type = str, default = "mlsp" )
 parser.add_argument("--xResolution",     type = int, default = 100 )
 parser.add_argument("--yResolution",     type = int, default = 100 )
 
+parser.add_argument("--xMin", type=float, default = None )
+parser.add_argument("--yMin", type=float, default = None )
+parser.add_argument("--xMax", type=float, default = None )
+parser.add_argument("--yMax", type=float, default = None )
+
 parser.add_argument("--logX", help="use log10 of x variable", action="store_true", default=False)
 parser.add_argument("--logY", help="use log10 of y variable", action="store_true", default=False)
 
 parser.add_argument("--fixedParamsFile","-f",   type=str, help="give a json file with key=variable and value=value. e.g. use for pinning down third parameter in harvest list", default="")
-parser.add_argument("--forbiddenFunction","-l", type=str, help="""a ROOT TF1 definition for a forbidden line e.g. kinematically forbidden regions. (for diagonal, use `-l "x"` )""", default="")
+parser.add_argument("--forbiddenFunction","-l", type=str, help="""a ROOT TF1 definition for a forbidden line e.g. kinematically forbidden regions. (for diagonal, use `-l "x"` )""", default="x")
 parser.add_argument("--ignoreUncertainty","-u", help="""Don't care about uncertainty bands!""", action="store_true", default=False)
 
 parser.add_argument("--areaThreshold","-a",     type = float, help="Throw away contours with areas less than threshold", default=0)
-parser.add_argument("--smoothing",    "-s",     type = str, help="smoothing option. For ROOT, use {k5a, k5b, k3a}. For scipy, not yet implemented.", default="")
+parser.add_argument("--smoothing",    "-s",     type = str, help="smoothing option. For ROOT, use {k5a, k5b, k3a}. For scipy, uses smoothing from RBF.", default="0.1")
 parser.add_argument("--noSig","-n",      help = "don't convert CLs to significance -- don't use this option unless you know what you're doing!", action="store_true", default=False)
 
+parser.add_argument("--nominalLabel",      help = "keyword in filename to look for nominal sig XS", type=str, default="Nominal")
 
 args = parser.parse_args()
 
@@ -58,26 +65,13 @@ if not args.useROOT:
 		import numpy as np
 		import scipy.interpolate
 	except:
-		print ">>> You need matplotlib to be available to run in mpl mode."
-		print ">>> Either use the ROOT interpolator with the option -r or set up mpl"
+		print ">>>"
+		print ">>> You need scipy/matplotlib to run this. And you had to have run harvestToContours in scipy mode [default]"
 		print ">>> In an ATLAS environment, you can..."
-		print ">>> > localSetupSFT --cmtConfig=x86_64-slc6-gcc48-opt releases/LCG_79/pytools/1.9_python2.7,releases/LCG_79/pyanalysis/1.5_python2.7"
-		print ">>> > lsetup root"
+		print '>>> > lsetup "lcgenv -p LCG_93 x86_64-slc6-gcc62-opt pyanalysis" "lcgenv -p LCG_93 x86_64-slc6-gcc62-opt pytools" "lcgenv -p LCG_93 x86_64-slc6-gcc62-opt pygraphics" "lcgenv -p LCG_93 x86_64-slc6-gcc62-opt ROOT" '
 		print ">>> "
-		print ">>> Do you want me to try to set it up for you (in ATLAS env)? (y/n)"
-		choice = raw_input().lower()
-		if choice[0] == "y":
-			try:
-				os.system("localSetupSFT --cmtConfig=x86_64-slc6-gcc48-opt releases/LCG_79/pytools/1.9_python2.7,releases/LCG_79/pyanalysis/1.5_python2.7")
-				os.system("lsetup root")
-				import matplotlib.pyplot as plt
-				import numpy as np
-				import scipy.interpolate
-			except:
-				print ">>> ... Setup didn't work for some reason!"
-		else:
-			print ">>> Quitting -- You don't have matplotlib/numpy setup and you requested mpl-based interpolation"
-			sys.exit(1)
+		print ">>> Try that and then run this again!"
+		sys.exit(1)
 
 
 if args.ignoreUncertainty:
@@ -100,30 +94,71 @@ def main():
 		if not setting[0]=="_":
 			print ">>> ... Setting: {: >20} {: >40}".format(setting, eval("args.%s"%setting) )
 
+
+	if args.xMin == None:
+		print ""
+		print ">>> ******************** WARNING ***************************"
+		print ">>> ** You haven't defined --xMin, --xMax, --yMin, --yMax **"
+		print ">>> ** If you're going to later use multiplexContours.py  **"
+		print ">>> ** to combine contours, and if your inputs don't have **"
+		print ">>> ** exactly the same signal points, you're gonna have  **"
+		print ">>> ** a bad time. To be safe, define these.              **"
+		print ">>> ********************************************************"
+		print ""
+
+	if args.forbiddenFunction == "x":
+		print ""
+		print ">>> ******************** WARNING ***************************"
+		print ">>> ** The default kinematically forbidden line is y=x    **"
+		print ">>> ** If you have no kinematically forbidden region,     **"
+		print ">>> ** use the option --forbiddenFunction ""              **"
+		print ">>> ** or feel free to use another function! Just beware  **"
+		print ">>> ** of the default if you see funky results            **"
+		print ">>> ********************************************************"
+		print ""
+
+
 	f = ROOT.TFile(args.outputFile,"recreate")
 
 	processInputFile(inputFile = args.inputFile, outputFile = f, label = "")
 
-	if "Nominal" in args.inputFile:
+	if args.nominalLabel in args.inputFile:
 		print ">>> Handling theory variations..."
 		try:
-			processInputFile(inputFile = args.inputFile.replace("Nominal","Up")  , outputFile = f, label = "_Up")
-			processInputFile(inputFile = args.inputFile.replace("Nominal","Down"), outputFile = f, label = "_Down")
+			processInputFile(inputFile = args.inputFile.replace(args.nominalLabel,"Up")  , outputFile = f, label = "_Up")
+			processInputFile(inputFile = args.inputFile.replace(args.nominalLabel,"Down"), outputFile = f, label = "_Down")
 		except:
 			print ">>> ... Can't find theory variation files. Skipping."
 
-		print ">>> Handling upper limits"
+		print ">>> Handling upper limit file"
 		try:
-			processInputFile(inputFile = args.inputFile.replace("Nominal","UpperLimit")  , outputFile = f, label = "_UL")
+			processInputFile(inputFile = args.inputFile.replace(args.nominalLabel,"UpperLimit")  , outputFile = f, label = "_UL")
+			print ">>>"
+			print ">>> *********************************************************"
+			print ">>> FYI: This is just for putting upper limit values as"
+			print ">>> ... little grey numbers on your final plot. This is"
+			print ">>> ... not for making contours from. It'll write out a"
+			print ">>> ... TGraph2D with those numbers"
+			print ">>> *********************************************************"
+			print ">>>"
 		except:
+			print ">>>"
 			print ">>> ... Can't find upper limit file. Skipping."
+			print ">>> ... (This is only used for little grey numbers"
+			print ">>> ... on the final plot so if you're not interested"
+			print ">>> ... in that right now, you can ignore this!)"
+			print ">>>"
 
-
+	print ">>> "
 	print ">>> Closing file"
 
 	f.Write()
 	f.Close()
 
+	print ">>> "
+	print ">>> All done! Have a beautiful day -- You're an inspiration you wonderful person you!"
+
+	return
 
 def processInputFile(inputFile, outputFile, label = ""):
 	"""Do actual processing of a given input file"""
@@ -155,14 +190,14 @@ def processInputFile(inputFile, outputFile, label = ""):
 	# Step 1.5 - If there's a function for a kinematically forbidden region, add zeros to dictionary
 
 	if args.forbiddenFunction:
-		addValuesToDict(resultsDict, args.forbiddenFunction, numberOfPoints=100 )
+		resultsDict = addValuesToDict(resultsDict, args.forbiddenFunction, numberOfPoints=100 ,value = "mirror" )
 
 	############################################################
 	# Step 2 - Interpolate the fit results
 
 	print ">>> Interpolating surface"
 
-	outputGraphs = interpolateSurface( resultsDict , args.interpolation , args.useROOT)
+	outputGraphs = interpolateSurface( resultsDict , args.interpolation , args.useROOT , outputSurface=True if label=="" else False)
 
 	############################################################
 	# Step 3 - get TGraph contours
@@ -186,6 +221,16 @@ def processInputFile(inputFile, outputFile, label = ""):
 	# Step 4 - Make pretty curves (and bands) or try to...
 
 	if not args.ignoreUncertainty and label=="":
+		if len(outputGraphs["clsu1s"])==0 and len(outputGraphs["clsd1s"])>0:
+			print ">>>"
+			print ">>> WARNING: You don't have +1 sigma sensitivity,"
+			print ">>> ... but you do have -1 sigma reach. Making a "
+			print ">>> ... +/-1 sigma band from only the -1 side."
+			print ">>> "
+			for icurve,curve1 in enumerate(outputGraphs["clsd1s"]):
+				band_1s = createBandFromContours( curve1 )
+				band_1s.SetFillColorAlpha(ROOT.TColor.GetColor("#ffd700"), 0.75)
+				band_1s.Write("Band_1s_%d"%icurve)
 		for icurve,(curve1,curve2) in enumerate(zip(outputGraphs["clsu1s"],outputGraphs["clsd1s"]) ):
 			band_1s = createBandFromContours( curve1, curve2 )
 			band_1s.SetFillColorAlpha(ROOT.TColor.GetColor("#ffd700"), 0.75)
@@ -194,6 +239,7 @@ def processInputFile(inputFile, outputFile, label = ""):
 			band_2s = createBandFromContours( curve1, curve2 )
 			band_2s.SetFillColorAlpha(ROOT.TColor.GetColor("#115000"), 0.5)
 			band_2s.Write("Band_2s_%d"%icurve)
+
 
 	for icurve,obsCurve in enumerate(outputGraphs["CLs"]):
 		obsCurve.SetLineWidth(2)
@@ -210,7 +256,7 @@ def processInputFile(inputFile, outputFile, label = ""):
 	if label=="":
 		canvas = ROOT.TCanvas("FinalCurves","FinalCurves")
 		if not args.ignoreUncertainty:
-			for iGraph in xrange( min( len(outputGraphs["clsu1s"]) , len(outputGraphs["clsd1s"]) )   ):
+			for iGraph in xrange(  len(outputGraphs["clsd1s"])   ):
 				outputFile.Get("Band_1s_%d"%iGraph).Draw("ALF" if iGraph==0 else "LF")
 		else:
 			outputFile.Get("Exp_0").Draw("AL")
@@ -261,6 +307,9 @@ def harvestToDict( harvestInputFileName = "" ):
 				except:
 					print ">>> ... Error: %s or %s doesn't exist as an entry in the input file"%(args.xVariable,args.yVariable)
 					print ">>> ... Use cmd line options -x and -y to point to variables that exist in the input"
+					print ">>> Available variables are listed below:"
+					print ">>> "
+					print ">>> "+"\n>>> ".join(sample.keys())
 					sys.exit(1)
 
 				sampleParamsList = list(sampleParams)
@@ -334,14 +383,51 @@ def addValuesToDict(inputDict, function, numberOfPoints = 100, value = 0):
 	tmpListOfXValues = [entry[0] for entry in inputDict.keys()]
 	lowerLimit = min(tmpListOfXValues)
 	upperLimit = max(tmpListOfXValues)
-	forbiddenFunction = ROOT.TF1("forbiddenFunction%f"%value,args.forbiddenFunction,lowerLimit,upperLimit)
-	forbiddenFunction.Write("forbiddenFunction%f"%value)
 
-	for xValue in [lowerLimit + x*(upperLimit-lowerLimit)/float(numberOfPoints) for x in range(numberOfPoints)]:
-		inputDict[(xValue,forbiddenFunction.Eval(xValue))] = dict(zip(listOfContours,  [value for x in listOfContours] ) )
-	return
+	forbiddenFunction = ROOT.TF1("forbiddenFunction${}".format(value),args.forbiddenFunction,lowerLimit,upperLimit)
+	forbiddenFunction.Write("forbiddenFunction${}".format(value))
 
-def interpolateSurface(modelDict = {}, interpolationFunction = "linear", useROOT=False):
+
+	if value == "mirror":
+		from scipy.spatial.distance import cdist
+		def closest_point(pt, others):
+		    distances = cdist(pt, others)
+		    return others[distances.argmin()]
+
+		def rotate(origin, point, angle=math.pi):
+		    ox, oy = origin
+		    px, py = point
+
+		    qx = ox + math.cos(angle) * (px - ox) - math.sin(angle) * (py - oy)
+		    qy = oy + math.sin(angle) * (px - ox) + math.cos(angle) * (py - oy)
+		    return qx, qy
+
+		inputDictCopy = copy.deepcopy(inputDict)
+
+		forbiddenLineArray = []
+		for xValue in [lowerLimit + x*(upperLimit-lowerLimit)/float(numberOfPoints*100) for x in range(numberOfPoints*100)]:
+			forbiddenLineArray.append( ( xValue,forbiddenFunction.Eval(xValue) ) )
+
+		# now to loop over entries in the inputDict. rotate them about this closest point on the forbidden line
+		for signalPoint in inputDict:
+			closestPointOnLine = list(closest_point(np.array([signalPoint]),np.array(forbiddenLineArray) ) )
+			inputDictCopy[tuple(closestPointOnLine)] = dict(zip(listOfContours,  [1 for x in listOfContours] ) )
+			fakeMirroredSignalPoint = rotate(closestPointOnLine, signalPoint)
+			tmpDict = copy.deepcopy(inputDictCopy[signalPoint])
+			for key in tmpDict:
+				if isinstance(tmpDict[key], (int, long, float)):
+					tmpDict[key] *= -1*np.sign(tmpDict[key])
+			inputDictCopy[fakeMirroredSignalPoint] = tmpDict
+
+		inputDict = copy.deepcopy(inputDictCopy)
+
+	else:
+		for xValue in [lowerLimit + x*(upperLimit-lowerLimit)/float(numberOfPoints) for x in range(numberOfPoints)]:
+			inputDict[(xValue,forbiddenFunction.Eval(xValue))] = dict(zip(listOfContours,  [value for x in listOfContours] ) )
+
+	return inputDict
+
+def interpolateSurface(modelDict = {}, interpolationFunction = "linear", useROOT=False, outputSurface=False):
 	"""The actual interpolation"""
 
 	modelPoints = modelDict.keys()
@@ -365,17 +451,17 @@ def interpolateSurface(modelDict = {}, interpolationFunction = "linear", useROOT
 	# remove inf point in each entry
 	for whichContour in listOfContours:
 
-		while any([math.isinf(tmp) for tmp in zValues[whichContour]  ]):#  np.isinf( zValues[whichContour]  ).any():
-			myindex = [math.isinf(tmp) for tmp in zValues[whichContour] ].index(True)
+		while any([math.isinf(tmp) or math.isnan(tmp) for tmp in zValues[whichContour]  ]):#  np.isinf( zValues[whichContour]  ).any():
+			myindex = [math.isinf(tmp) or math.isnan(tmp) for tmp in zValues[whichContour] ].index(True)
 			if (args.debug):
-				print ">>> ... Remove Inf at i=%d x=%d y=%d" % (myindex,x[whichContour][myindex],y[whichContour][myindex])
+				print ">>> ... Remove Inf or NaN at i=%d x=%d y=%d" % (myindex,x[whichContour][myindex],y[whichContour][myindex])
 			x[whichContour].pop(myindex)
 			y[whichContour].pop(myindex)
 			zValues[whichContour].pop(myindex)
 			pass;
 
-		if any([math.isinf(tmp) for tmp in zValues[whichContour]  ]):
-			print ">>> ... Still infs in %s!! This is a problem... Exiting." % whichContour
+		if any([math.isinf(tmp) or math.isnan(tmp) for tmp in zValues[whichContour]  ]):
+			print ">>> ... Still infs or nans in %s!! This is a problem... Exiting." % whichContour
 			sys.exit(0)
 
 	if useROOT:
@@ -410,7 +496,12 @@ def interpolateSurface(modelDict = {}, interpolationFunction = "linear", useROOT
 			yArray = yArray*yScaling
 
 			# Creating some linspaces for interpolation
-			xlinspace, ylinspace = np.linspace(xArray.min(), xArray.max(), args.xResolution), np.linspace(yArray.min(), yArray.max(), args.yResolution)
+			xlinspace = np.linspace(xArray.min() if args.xMin == None else args.xMin,
+									xArray.max() if args.xMax == None else args.xMax,
+									args.xResolution)
+			ylinspace = np.linspace(yArray.min() if args.yMin == None else args.yMin,
+									yArray.max() if args.yMax == None else args.yMax,
+									args.yResolution)
 
 			# Creating meshgrid for interpolation
 			xymeshgrid = np.meshgrid(xlinspace,ylinspace)
@@ -421,15 +512,27 @@ def interpolateSurface(modelDict = {}, interpolationFunction = "linear", useROOT
 			if args.smoothing:
 				smoothingFactor = float(args.smoothing)
 
-			# Actual interpolation done by RBF
-			rbf = scipy.interpolate.Rbf(xArray, yArray, zArray, function=interpolationFunction, smooth=smoothingFactor )
+			try:
+				# Actual interpolation done by RBF
+				if args.interpolationEpsilon:
+					rbf = scipy.interpolate.Rbf(xArray, yArray, zArray, function=interpolationFunction, smooth=smoothingFactor , epsilon=args.interpolationEpsilon)
+				else:
+					rbf = scipy.interpolate.Rbf(xArray, yArray, zArray, function=interpolationFunction, smooth=smoothingFactor )
+			except:
+				print ">>> Interpolation failing!!! Check to make sure there are no NANs or double defined points in your input JSON!"
+				print ">>> Printing points we're trying to interpolate (x,y,z) triplets:"
+
+				print sorted( zip(xArray,yArray,zArray), key = lambda x: x[0]*x[1] )
+				sys.exit(1)
+
+
 			ZI = rbf(xymeshgrid[0], xymeshgrid[1])
 
 			# Undo the scaling from above to get back to original units
 			xymeshgrid[1] = xymeshgrid[1] / yScaling
 
 			# Spit out some diagnostic plots
-			if args.debug and whichContour=="CLsexp":
+			if args.debug and whichContour=="CLsexp" and outputSurface:
 				fig, ax = plt.subplots()
 				plt.pcolor(xymeshgrid[0], xymeshgrid[1], ZI)
 				plt.scatter(xArray, yArray, 10,zArray)
@@ -437,6 +540,11 @@ def interpolateSurface(modelDict = {}, interpolationFunction = "linear", useROOT
 
 				plt.colorbar()
 				fig.savefig("scipy_debug_surface.pdf")
+
+			if whichContour=="CLsexp" and outputSurface:
+				print ">>> Writing out expected CLs surface to pickle file"
+				with open(args.outputFile+'.expectedSurface.pkl', 'w') as outfile:
+					pickle.dump({"x": xymeshgrid[0], "y": xymeshgrid[1],"z": ZI} ,outfile, pickle.HIGHEST_PROTOCOL)
 
 			# Turn this surface into contours!
 			contourList = getContourPoints(xymeshgrid[0],xymeshgrid[1],ZI, args.level)
@@ -451,7 +559,6 @@ def interpolateSurface(modelDict = {}, interpolationFunction = "linear", useROOT
 
 def createTGraph2DFromArrays(x,y,z):
 	"""Helper function to quickly create a TGraph2D from three python iterables"""
-
 	from array import array
 	return ROOT.TGraph2D(len(x),
 		array('f',x),
@@ -465,6 +572,7 @@ def createTGraphFromDict(modelDict,myName,listOfFIDs=None):
 	modelPointsValues = modelDict.values()
 
 	outputGraph = ROOT.TGraph2D(len(modelPoints))
+	outputGraph.SetName(myName)
 	for imodel,model in enumerate(modelPoints):
 		if listOfFIDs!=None:
 			try:
@@ -569,19 +677,22 @@ def getContourPoints(xi,yi,zi,level ):
 
 	return contourList
 
-def createBandFromContours(contour1,contour2):
+def createBandFromContours(contour1,contour2=None):
 
-	outputSize = contour1.GetN()+contour2.GetN()+1
-	outputGraph = ROOT.TGraph(outputSize)
-	tmpx, tmpy = ROOT.Double(), ROOT.Double()
-	for iPoint in xrange(contour2.GetN()):
-		contour2.GetPoint(iPoint,tmpx,tmpy)
-		outputGraph.SetPoint(iPoint,tmpx,tmpy)
-	for iPoint in xrange(contour1.GetN()):
-		contour1.GetPoint(contour1.GetN()-1-iPoint,tmpx,tmpy)
-		outputGraph.SetPoint(contour2.GetN()+iPoint,tmpx,tmpy)
-	contour2.GetPoint(0,tmpx,tmpy)
-	outputGraph.SetPoint(contour1.GetN()+contour2.GetN(),tmpx,tmpy)
+	if not contour2:
+		outputGraph = contour1
+	else:
+		outputSize = contour1.GetN()+contour2.GetN()+1
+		outputGraph = ROOT.TGraph(outputSize)
+		tmpx, tmpy = ROOT.Double(), ROOT.Double()
+		for iPoint in xrange(contour2.GetN()):
+			contour2.GetPoint(iPoint,tmpx,tmpy)
+			outputGraph.SetPoint(iPoint,tmpx,tmpy)
+		for iPoint in xrange(contour1.GetN()):
+			contour1.GetPoint(contour1.GetN()-1-iPoint,tmpx,tmpy)
+			outputGraph.SetPoint(contour2.GetN()+iPoint,tmpx,tmpy)
+		contour2.GetPoint(0,tmpx,tmpy)
+		outputGraph.SetPoint(contour1.GetN()+contour2.GetN(),tmpx,tmpy)
 
 	outputGraph.SetFillStyle(1001);
 	outputGraph.SetLineWidth(1)

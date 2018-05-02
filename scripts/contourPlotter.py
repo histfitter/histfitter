@@ -107,8 +107,8 @@ class contourPlotter:
 		tmpText.SetTextSize(size)
 		tmpText.SetTextColorAlpha(color,alpha)
 		tmpText.SetTextAngle(angle)
-		x,y,z = graph.GetX(), graph.GetY(), graph.GetZ()
-		for i in xrange(len(x)):
+		x,y,z,n = graph.GetX(), graph.GetY(), graph.GetZ(), graph.GetN()
+		for i in xrange(n):
 			tmpText.DrawLatex(x[i],y[i],format%z[i])
 
 		tmpText.SetTextSize(titlesize)
