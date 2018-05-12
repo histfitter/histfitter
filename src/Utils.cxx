@@ -3665,7 +3665,6 @@ void Util::plotInterpolationScheme(RooWorkspace *w) {
     TIterator* iter = funcs.createIterator() ;
 
     gDirectory->pwd();
-    std::cout << std::endl;
     TDirectory* currentDir = gDirectory->CurrentDirectory();
 
     TFile* interpFile = new TFile("interpolation/interpFile.root","RECREATE");
