@@ -32,7 +32,7 @@ import sys
 from logger import Logger
 log = Logger('HistFitter')
 
-def GenerateFitAndPlotCPP(fc, anaName, drawBeforeFit, drawAfterFit, drawCorrelationMatrix, drawSeparateComponents, drawLogLikelihood, minos, minosPars, doFixParameters, fixedPars, ReduceCorrMatrix, noFit):
+def GenerateFitAndPlotCPP(fc, anaName, drawBeforeFit, drawAfterFit, drawCorrelationMatrix, drawSeparateComponents, drawLogLikelihood, minos, minosPars, doFixParameters, fixedPars, ReduceCorrMatrix, noFit, plotInterpolation):
     """ 
     function call to top-level C++ side function Util.GenerateFitAndPlot()
 
@@ -49,6 +49,7 @@ def GenerateFitAndPlotCPP(fc, anaName, drawBeforeFit, drawAfterFit, drawCorrelat
     @param fixedPars String of parameter1:value1,parameter2:value2 giving information on which parameter to fix to which value if dofixParameter == True
     @param ReduceCorrMatrix Boolean deciding whether reduced correlation matrix plot is produced
     @param noFit Don't re-run fit but use after-fit workspace
+    @param plotInterpolation plot the interpolation scheme
     """
     
     from ROOT import Util
@@ -65,9 +66,10 @@ def GenerateFitAndPlotCPP(fc, anaName, drawBeforeFit, drawAfterFit, drawCorrelat
     log.debug("GenerateFitAndPlotCPP: fixedPars %s " % fixedPars)
     log.debug("GenerateFitAndPlotCPP: ReduceCorrMatrix %s " % ReduceCorrMatrix)
     log.debug("GenerateFitAndPlotCPP: noFit {0}".format(noFit))
+    log.debug("GenerateFitAndPlotCPP: plotInterpolation {0}".format(plotInterpolation))
     
     Util.GenerateFitAndPlot(fc.name, anaName, drawBeforeFit, drawAfterFit, drawCorrelationMatrix,
-                            drawSeparateComponents, drawLogLikelihood, minos, minosPars, doFixParameters, fixedPars, ReduceCorrMatrix, noFit)
+                            drawSeparateComponents, drawLogLikelihood, minos, minosPars, doFixParameters, fixedPars, ReduceCorrMatrix, noFit, plotInterpolation)
 
 if __name__ == "__main__":
     """
@@ -92,6 +94,7 @@ if __name__ == "__main__":
     drawSeparateComponents = False
     drawLogLikelihood = False
     drawSystematics = False
+    drawInterpolation = False
     pickedSRs = []
     runToys = False
     runMinos = False
@@ -144,7 +147,7 @@ if __name__ == "__main__":
     --GJ 14/11/2012
     """
     parser.add_argument("-d", action="store_true", help="draw before/after plots")
-    parser.add_argument("-D", "--draw", help="specify plots to draw, comma separated; choose from "+str(["allPlots", "before","after", "corrMatrix", "correlationMatrix", "sepComponents", "separateComponents", "likelihood", "systematics"]))
+    parser.add_argument("-D", "--draw", help="specify plots to draw, comma separated; choose from "+str(["allPlots", "before","after", "corrMatrix", "correlationMatrix", "sepComponents", "separateComponents", "likelihood", "systematics", "plotInterpolation"]))
     parser.add_argument("-syst", "--systematics", help="specify the systematics to be considered with '-D systematics' option, comma separated;")
     
     parser.add_argument("-b", "--background", help="when doing hypotest, set background levels to values, form of bkgParName,value")
@@ -241,6 +244,7 @@ if __name__ == "__main__":
             drawSeparateComponents = True
             drawLogLikelihood = True
             drawSystematics = True
+            drawInterpolation = True
         elif len(drawArgs)>0:
             for drawArg in drawArgs:
                 if drawArg == "before":
@@ -255,8 +259,13 @@ if __name__ == "__main__":
                     drawLogLikelihood = True
                 elif drawArg == "systematics":
                     drawSystematics = True
+                elif drawArg == "plotInterpolation":
+                    drawInterpolation = True
                 else:
                     log.fatal("Wrong draw argument: '%s'. Possible draw arguments are 'allPlots' or comma separated 'before after corrMatrix correlationMatrix sepComponents separateComponents likelihood'" % drawArg) 
+
+    if drawInterpolation and not os.path.isdir("./interpolation"): 
+        os.mkdir("./interpolation")
 
     if HistFitterArgs.no_empty:
         configMgr.removeEmptyBins = True
@@ -397,10 +406,10 @@ if __name__ == "__main__":
 
             log.info("Running on fitConfig %s" % configMgr.fitConfigs[i].name)
             log.info("Setting noFit = {0}".format(noFit))
-            r = GenerateFitAndPlotCPP(configMgr.fitConfigs[i], configMgr.analysisName, drawBeforeFit, drawAfterFit, drawCorrelationMatrix, drawSeparateComponents, drawLogLikelihood, runMinos, minosPars, doFixParameters, fixedPars, ReduceCorrMatrix, noFit)
+            r = GenerateFitAndPlotCPP(configMgr.fitConfigs[i], configMgr.analysisName, drawBeforeFit, drawAfterFit, drawCorrelationMatrix, drawSeparateComponents, drawLogLikelihood, runMinos, minosPars, doFixParameters, fixedPars, ReduceCorrMatrix, noFit, drawInterpolation)
         
-        log.debug(" GenerateFitAndPlotCPP(configMgr.fitConfigs[%d], configMgr.analysisName, drawBeforeFit, drawAfterFit, drawCorrelationMatrix, drawSeparateComponents, drawLogLikelihood, runMinos, minosPars, doFixParameters, fixedPars, ReduceCorrMatrix)" % idx)
-        log.debug("   where drawBeforeFit, drawAfterFit, drawCorrelationMatrix, drawSeparateComponents, drawLogLikelihood, ReduceCorrMatrix are booleans")
+        log.debug(" GenerateFitAndPlotCPP(configMgr.fitConfigs[%d], configMgr.analysisName, drawBeforeFit, drawAfterFit, drawCorrelationMatrix, drawSeparateComponents, drawLogLikelihood, runMinos, minosPars, doFixParameters, fixedPars, ReduceCorrMatrix, noFit, drawInterpolation)" % idx)
+        log.debug("   where drawBeforeFit, drawAfterFit, drawCorrelationMatrix, drawSeparateComponents, drawLogLikelihood, ReduceCorrMatrix, noFit, drawInterpolation are booleans")
         pass
 
     """

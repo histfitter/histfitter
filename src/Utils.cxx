@@ -161,7 +161,7 @@ double Util::getNonQcdVal(const TString& proc, const TString& reg, TMap* map,con
 //_____________________________________________________________________________
 void Util::GenerateFitAndPlot(TString fcName, TString anaName, Bool_t drawBeforeFit, Bool_t drawAfterFit, Bool_t plotCorrelationMatrix, 
         Bool_t plotSeparateComponents, Bool_t plotNLL, Bool_t minos, TString minosPars,
-        Bool_t doFixParameters, TString fixedPars, bool ReduceCorrMatrix, bool noFit ){
+        Bool_t doFixParameters, TString fixedPars, bool ReduceCorrMatrix, bool noFit, bool plotInterpolation ){
 
     ConfigMgr* mgr = ConfigMgr::getInstance();
     FitConfig* fc = mgr->getFitConfig(fcName);
@@ -179,6 +179,7 @@ void Util::GenerateFitAndPlot(TString fcName, TString anaName, Bool_t drawBefore
     Logger << kINFO << "     fixedPars = " << fixedPars << GEndl;
     Logger << kINFO << "     ReduceCorrMatrix = " << ReduceCorrMatrix << GEndl;
     Logger << kINFO << "     noFit = " << noFit << GEndl;
+    Logger << kINFO << "     plotInterpolation = " << plotInterpolation << GEndl;
 
     auto inputFilename = fc->m_inputWorkspaceFileName;
     Logger << kINFO << " Will read workspace from filename " << inputFilename << GEndl;
@@ -354,6 +355,13 @@ void Util::GenerateFitAndPlot(TString fcName, TString anaName, Bool_t drawBefore
         result->Print("v");
         PlotFitParameters(result,anaName);
     }
+
+    // plot the interpolation of nuisance parameters
+    if (plotInterpolation) {
+        plotInterpolationScheme(w);
+    }
+
+
 }
 
 ///////////////
@@ -3648,5 +3656,90 @@ void Util::ScaleGraph(TGraphAsymmErrors *g, TH1* h) {
     }
 
     return;
+}
+
+void Util::plotInterpolationScheme(RooWorkspace *w) {
+
+    RooAbsData* data = w->data("obsData");
+    RooArgSet funcs = w->allFunctions();
+    TIterator* iter = funcs.createIterator() ;
+
+    gDirectory->pwd();
+    std::cout << std::endl;
+    TDirectory* currentDir = gDirectory->CurrentDirectory();
+
+    TFile* interpFile = new TFile("interpolation/interpFile.root","RECREATE");
+    interpFile->cd();
+
+    gStyle->SetOptStat(0);
+    gStyle->SetOptTitle(0);
+
+    RooAbsArg* parg(0);
+    while((parg=(RooAbsArg*)iter->Next())) {
+        if ( parg->ClassName()!=TString("PiecewiseInterpolation") ) { continue; }    
+        PiecewiseInterpolation* p = (PiecewiseInterpolation*)w->function( parg->GetName() );
+        p->printAllInterpCodes();
+        const RooArgList paramList =  p->paramList();
+        const RooArgSet* observables = p->getObservables(data);
+        TString obsName = TString( observables->contentsString() );
+        TString sampleName= TString( parg->GetName() );
+        for (int iParam = 0; iParam < paramList.getSize(); iParam++){
+            TString parNameTemp = TString( paramList.at(iParam)->GetName() );
+            TCanvas tempc(obsName+sampleName+parNameTemp,obsName+sampleName+parNameTemp,600,600);
+            tempc.cd();
+            TH2D* tempHisto = (TH2D*) p->createHistogram(obsName+","+parNameTemp);
+            int nominalBin = tempHisto->GetYaxis()->FindBin(0.);
+            TH1D* nominalHisto = tempHisto->ProjectionX(obsName+sampleName+parNameTemp+"nominal",nominalBin,nominalBin);
+            nominalHisto->Write();
+            tempHisto->Draw("SURF");
+            tempc.Print("interpolation/"+sampleName+"_"+obsName+"_"+parNameTemp+".pdf");
+            tempHisto->Write();
+            for (int iBin = 1; iBin <= tempHisto->GetNbinsX(); iBin++){
+                TString projectionName = obsName+sampleName+parNameTemp + std::to_string(iBin).c_str();
+                TH1D* projectionY = tempHisto->ProjectionY(projectionName,iBin,iBin);
+                TCanvas tempcProj(obsName+sampleName+projectionName,obsName+sampleName+projectionName,600,600);
+                tempcProj.SetBottomMargin(0.15);
+                tempcProj.SetLeftMargin(0.2);
+                tempcProj.cd();
+                projectionY->Draw("line");
+                projectionY->GetXaxis()->SetTitle(parNameTemp);
+                projectionY->GetXaxis()->SetTitleOffset(1.5);
+                projectionY->GetXaxis()->SetRangeUser(-2,2);
+                projectionY->GetYaxis()->SetTitle(obsName+" bin "+std::to_string(iBin).c_str());
+                projectionY->GetYaxis()->SetTitleOffset(2.5);
+                // Draw lines
+                tempcProj.Update();
+                double ymax = gPad->GetUymax();
+                double ymin = gPad->GetUymin();
+                double xmax = gPad->GetUxmax();
+                double xmin = gPad->GetUxmin();
+                double nominalVal = (projectionY->GetBinContent(projectionY->FindBin(0))+projectionY->GetBinContent(projectionY->FindBin(0)-1))/2.;
+                TLine* line1 = new TLine(-1,ymin,-1,ymax);
+                TLine* line2 = new TLine(1,ymin,1,ymax);
+                TLine* line3 = new TLine(0,ymin,0,ymax);
+                TLine* line4 = new TLine(xmin,nominalVal,xmax,nominalVal);
+                line1->Draw();
+                line2->Draw();
+                line3->Draw();
+                line4->Draw();
+                projectionY->Draw("line same");
+                projectionY->SetLineWidth(2);
+                // Save canvas
+                if (tempHisto->GetNbinsX()==1)
+                    tempcProj.Print("interpolation/"+sampleName+"_"+obsName+"_"+parNameTemp+"_perBin.pdf");
+                else if (iBin==1)
+                    tempcProj.Print("interpolation/"+sampleName+"_"+obsName+"_"+parNameTemp+"_perBin.pdf(");
+                else if (iBin>1 && iBin <tempHisto->GetNbinsX())
+                    tempcProj.Print("interpolation/"+sampleName+"_"+obsName+"_"+parNameTemp+"_perBin.pdf");
+                else
+                    tempcProj.Print("interpolation/"+sampleName+"_"+obsName+"_"+parNameTemp+"_perBin.pdf)");
+                projectionY->Write();
+            }
+        }
+    }
+
+    interpFile->Close();
+    currentDir->cd();
+
 }
 
