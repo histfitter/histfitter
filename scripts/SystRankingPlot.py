@@ -97,6 +97,10 @@ def get_syst_ranking(opts):
                 print "FATAL in get parameter nominal value"
                 sys.exit()
 
+            if par_name.startswith("gamma") and opts.minGamma != None and value < opts.minGamma:
+              print "Truncating parameter %s at %s" % (par_name, opts.minGamma)
+              value = opts.minGamma
+
             fit_result = refit_fixed(name + "_fixed", par_name, value, w, fit_regions, data_set)
 
             exp_result = RooExpandedFitResult(fit_result, float_pars_final)
@@ -433,6 +437,8 @@ def parse_opts():
     parser.add_argument("--atlas", default="Internal", help="ATLAS label")
     parser.add_argument("--sqrts", type=float, default=13, help="sqrt(s)")
     parser.add_argument("--lumi", type=float, default=36.5, help="Luminosity in /fb")
+
+    parser.add_argument("--minGamma", type=float, default=None, help="Truncate gamma parameters below this value. Do nothing if default value.")
 
 
     opts = parser.parse_args()
