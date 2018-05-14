@@ -145,9 +145,10 @@ namespace Util
      @param doFixParameters Boolean deciding if some parameters are fixed to a value given or not, default=kFALSE
      @param fixedPars String of parameter1:value1,parameter2:value2 giving information on which parameter to fix to which value if dofixParameter == kTRUE, default=''
      @param noFit Don't re-run fit, but load parameter from after-fit workspace
+     @param plotInterpolation plot the interpolation scheme
   */  
   void GenerateFitAndPlot(TString fcName, TString anaName, Bool_t drawBeforeFit, Bool_t drawAfterFit, Bool_t plotCorrelationMatrix, 
-			  Bool_t plotSeparateComponents, Bool_t plotNLL,  Bool_t minos = kFALSE, TString minosPars="", Bool_t doFixParameters = kFALSE, TString fixedPars="", bool ReduceCorrMatrix = true, bool noFit = false);
+			  Bool_t plotSeparateComponents, Bool_t plotNLL,  Bool_t minos = kFALSE, TString minosPars="", Bool_t doFixParameters = kFALSE, TString fixedPars="", bool ReduceCorrMatrix = true, bool noFit = false, bool plotInterpolation = false);
  
   // Same as above, but now only for afterFit workspace
   void GeneratePlots(TString filename, TString anaName, Bool_t drawBeforeFit, Bool_t drawAfterFit, Bool_t plotCorrelationMatrix, 
@@ -249,6 +250,13 @@ namespace Util
   */
   RooCurve* MakePdfErrorRatioHist(RooAbsData* regionData, RooAbsPdf* regionPdf, 
 				  RooRealVar* regionVar, RooFitResult* rFit, Double_t Nsigma = 1.);
+
+
+  /**
+     Function to plot the interpolation scheme
+     @param w RooWorkspace pointer
+  */
+  void plotInterpolationScheme(RooWorkspace *w);
 
 
   /**
