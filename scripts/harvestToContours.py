@@ -17,6 +17,9 @@
 #> lsetup root
 
 
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
 
 import ROOT, json, argparse, math, sys, os, pickle, copy
 
@@ -59,19 +62,20 @@ args = parser.parse_args()
 
 
 ## If I need to use scipy, please let me have scipy. I'll even help you out!
-if not args.useROOT:
-	try:
-		import matplotlib.pyplot as plt
-		import numpy as np
-		import scipy.interpolate
-	except:
-		print ">>>"
-		print ">>> You need scipy/matplotlib to run this. And you had to have run harvestToContours in scipy mode [default]"
-		print ">>> In an ATLAS environment, you can..."
-		print '>>> > lsetup "lcgenv -p LCG_93 x86_64-slc6-gcc62-opt pyanalysis" "lcgenv -p LCG_93 x86_64-slc6-gcc62-opt pytools" "lcgenv -p LCG_93 x86_64-slc6-gcc62-opt pygraphics" "lcgenv -p LCG_93 x86_64-slc6-gcc62-opt ROOT" '
-		print ">>> "
-		print ">>> Try that and then run this again!"
-		sys.exit(1)
+try:
+	import matplotlib as mpl
+	mpl.use('Agg')
+	import matplotlib.pyplot as plt
+	import numpy as np
+	import scipy.interpolate
+except:
+	print( ">>>" )
+	print( ">>> You need scipy/matplotlib to run this. And you had to have run harvestToContours in scipy mode [default]" )
+	print( ">>> In an ATLAS environment, you can..." )
+	print( '>>> > lsetup "lcgenv -p LCG_93 x86_64-slc6-gcc62-opt pyanalysis" "lcgenv -p LCG_93 x86_64-slc6-gcc62-opt pytools" "lcgenv -p LCG_93 x86_64-slc6-gcc62-opt pygraphics" "lcgenv -p LCG_93 x86_64-slc6-gcc62-opt ROOT" ' )
+	print( ">>> " )
+	print( ">>> Try that and then run this again!" )
+	sys.exit(1)
 
 
 if args.ignoreUncertainty:
@@ -87,35 +91,35 @@ else:
 def main():
 	"""Main function for driving the whole thing..."""
 
-	print ">>> Welcome to harvestToContours!"
+	print( ">>> Welcome to harvestToContours!" )
 
 	# Print out the settings
 	for setting in dir(args):
 		if not setting[0]=="_":
-			print ">>> ... Setting: {: >20} {: >40}".format(setting, eval("args.%s"%setting) )
+			print( ">>> ... Setting: {: >20} {: >40}".format(setting, eval("args.%s"%setting) ) )
 
 
 	if args.xMin == None:
-		print ""
-		print ">>> ******************** WARNING ***************************"
-		print ">>> ** You haven't defined --xMin, --xMax, --yMin, --yMax **"
-		print ">>> ** If you're going to later use multiplexContours.py  **"
-		print ">>> ** to combine contours, and if your inputs don't have **"
-		print ">>> ** exactly the same signal points, you're gonna have  **"
-		print ">>> ** a bad time. To be safe, define these.              **"
-		print ">>> ********************************************************"
-		print ""
+		print ("")
+		print (">>> ******************** WARNING ***************************")
+		print (">>> ** You haven't defined --xMin, --xMax, --yMin, --yMax **")
+		print (">>> ** If you're going to later use multiplexContours.py  **")
+		print (">>> ** to combine contours, and if your inputs don't have **")
+		print (">>> ** exactly the same signal points, you're gonna have  **")
+		print (">>> ** a bad time. To be safe, define these.              **")
+		print (">>> ********************************************************")
+		print ("")
 
 	if args.forbiddenFunction == "x":
-		print ""
-		print ">>> ******************** WARNING ***************************"
-		print ">>> ** The default kinematically forbidden line is y=x    **"
-		print ">>> ** If you have no kinematically forbidden region,     **"
-		print ">>> ** use the option --forbiddenFunction ""              **"
-		print ">>> ** or feel free to use another function! Just beware  **"
-		print ">>> ** of the default if you see funky results            **"
-		print ">>> ********************************************************"
-		print ""
+		print ("")
+		print (">>> ******************** WARNING ***************************")
+		print (">>> ** The default kinematically forbidden line is y=x    **")
+		print (">>> ** If you have no kinematically forbidden region,     **")
+		print (">>> ** use the option --forbiddenFunction ""              **")
+		print (">>> ** or feel free to use another function! Just beware  **")
+		print (">>> ** of the default if you see funky results            **")
+		print (">>> ********************************************************")
+		print ("")
 
 
 	f = ROOT.TFile(args.outputFile,"recreate")
@@ -123,40 +127,40 @@ def main():
 	processInputFile(inputFile = args.inputFile, outputFile = f, label = "")
 
 	if args.nominalLabel in args.inputFile:
-		print ">>> Handling theory variations..."
+		print (">>> Handling theory variations...")
 		try:
 			processInputFile(inputFile = args.inputFile.replace(args.nominalLabel,"Up")  , outputFile = f, label = "_Up")
 			processInputFile(inputFile = args.inputFile.replace(args.nominalLabel,"Down"), outputFile = f, label = "_Down")
 		except:
-			print ">>> ... Can't find theory variation files. Skipping."
+			print (">>> ... Can't find theory variation files. Skipping.")
 
-		print ">>> Handling upper limit file"
+		print (">>> Handling upper limit file")
 		try:
 			processInputFile(inputFile = args.inputFile.replace(args.nominalLabel,"UpperLimit")  , outputFile = f, label = "_UL")
-			print ">>>"
-			print ">>> *********************************************************"
-			print ">>> FYI: This is just for putting upper limit values as"
-			print ">>> ... little grey numbers on your final plot. This is"
-			print ">>> ... not for making contours from. It'll write out a"
-			print ">>> ... TGraph2D with those numbers"
-			print ">>> *********************************************************"
-			print ">>>"
+			print (">>>")
+			print (">>> *********************************************************")
+			print (">>> FYI: This is just for putting upper limit values as")
+			print (">>> ... little grey numbers on your final plot. This is")
+			print (">>> ... not for making contours from. It'll write out a")
+			print (">>> ... TGraph2D with those numbers")
+			print (">>> *********************************************************")
+			print (">>>")
 		except:
-			print ">>>"
-			print ">>> ... Can't find upper limit file. Skipping."
-			print ">>> ... (This is only used for little grey numbers"
-			print ">>> ... on the final plot so if you're not interested"
-			print ">>> ... in that right now, you can ignore this!)"
-			print ">>>"
+			print (">>>")
+			print (">>> ... Can't find upper limit file. Skipping.")
+			print (">>> ... (This is only used for little grey numbers")
+			print (">>> ... on the final plot so if you're not interested")
+			print (">>> ... in that right now, you can ignore this!)")
+			print (">>>")
 
-	print ">>> "
-	print ">>> Closing file"
+	print (">>> ")
+	print (">>> Closing file")
 
 	f.Write()
 	f.Close()
 
-	print ">>> "
-	print ">>> All done! Have a beautiful day -- You're an inspiration you wonderful person you!"
+	print (">>> ")
+	print (">>> All done! Have a beautiful day -- You're an inspiration you wonderful person you!")
 
 	return
 
@@ -167,6 +171,10 @@ def processInputFile(inputFile, outputFile, label = ""):
 	# Step 1 - Read in harvest list in either text or json format and dump it into a dictionary
 
 	resultsDict = harvestToDict( inputFile )
+
+	if len(resultsDict)<3:
+		print (">>> WARNING: You have fewer than three valid model points in your input. I can't interpolate that in 2D! You've given me %d valid points!"%( len(resultsDict) ) )
+		return -1
 
 	if label=="": #Only do this for the nominal signal XS
 		for whichContour in ["CLsexp","CLs"]:
@@ -195,14 +203,14 @@ def processInputFile(inputFile, outputFile, label = ""):
 	############################################################
 	# Step 2 - Interpolate the fit results
 
-	print ">>> Interpolating surface"
+	print (">>> Interpolating surface")
 
 	outputGraphs = interpolateSurface( resultsDict , args.interpolation , args.useROOT , outputSurface=True if label=="" else False)
 
 	############################################################
 	# Step 3 - get TGraph contours
 
-	print ">>> Writing contours out"
+	print (">>> Writing contours out")
 
 	outputFile.mkdir("SubGraphs"); outputFile.cd("SubGraphs")
 	for whichContour in listOfContours:
@@ -211,9 +219,9 @@ def processInputFile(inputFile, outputFile, label = ""):
 			for iSubGraph,subGraph in enumerate(outputGraphs[whichContour]):
 				subGraph.Write("%s_Contour_%d%s"%(whichContour,iSubGraph,label))
 		except:
-			print ">>> ... Well that one's no good. You might want to check on that... - %s"%whichContour
+			print (">>> ... Well that one's no good. You might want to check on that... - %s"%whichContour)
 			if len(outputGraphs[whichContour]):
-				print ">>> ... It appears this has no contours..."
+				print (">>> ... It appears this has no contours...")
 
 	outputFile.cd()
 
@@ -222,11 +230,11 @@ def processInputFile(inputFile, outputFile, label = ""):
 
 	if not args.ignoreUncertainty and label=="":
 		if len(outputGraphs["clsu1s"])==0 and len(outputGraphs["clsd1s"])>0:
-			print ">>>"
-			print ">>> WARNING: You don't have +1 sigma sensitivity,"
-			print ">>> ... but you do have -1 sigma reach. Making a "
-			print ">>> ... +/-1 sigma band from only the -1 side."
-			print ">>> "
+			print (">>>")
+			print (">>> WARNING: You don't have +1 sigma sensitivity,")
+			print (">>> ... but you do have -1 sigma reach. Making a ")
+			print (">>> ... +/-1 sigma band from only the -1 side.")
+			print (">>> ")
 			for icurve,curve1 in enumerate(outputGraphs["clsd1s"]):
 				band_1s = createBandFromContours( curve1 )
 				band_1s.SetFillColorAlpha(ROOT.TColor.GetColor("#ffd700"), 0.75)
@@ -255,17 +263,20 @@ def processInputFile(inputFile, outputFile, label = ""):
 
 	if label=="":
 		canvas = ROOT.TCanvas("FinalCurves","FinalCurves")
-		if not args.ignoreUncertainty:
-			for iGraph in xrange(  len(outputGraphs["clsd1s"])   ):
-				outputFile.Get("Band_1s_%d"%iGraph).Draw("ALF" if iGraph==0 else "LF")
-		else:
-			outputFile.Get("Exp_0").Draw("AL")
-		for iGraph in xrange(len(outputGraphs["CLsexp"]) ):
-			outputFile.Get("Exp_%d"%iGraph).Draw("L")
-		for iGraph in xrange(len(outputGraphs["CLs"]) ):
-			outputFile.Get("Obs_%d"%iGraph).Draw("L")
-		ROOT.gPad.RedrawAxis()
-		canvas.Write()
+		try:
+			if not args.ignoreUncertainty and outputFile.Get("Band_1s_0"):
+				for iGraph in xrange(  len(outputGraphs["clsd1s"])   ):
+						outputFile.Get("Band_1s_%d"%iGraph).Draw("ALF" if iGraph==0 else "LF")
+			else:
+				outputFile.Get("Exp_0").Draw("AL")
+			for iGraph in xrange(len(outputGraphs["CLsexp"]) ):
+				outputFile.Get("Exp_%d"%iGraph).Draw("L")
+			for iGraph in xrange(len(outputGraphs["CLs"]) ):
+				outputFile.Get("Obs_%d"%iGraph).Draw("L")
+			ROOT.gPad.RedrawAxis()
+			canvas.Write()
+		except:
+			print (">>> WARNING: Had some problems making a canvas for you. Probably some curves are missing for some reason")
 
 		if args.debug:
 			canvas.SaveAs("DebugFinalCurves.pdf")
@@ -276,7 +287,7 @@ def processInputFile(inputFile, outputFile, label = ""):
 def harvestToDict( harvestInputFileName = "" ):
 	"""This parses the input file into a dictionary object for simpler handling"""
 
-	print ">>> Entering harvestToDict()"
+	print (">>> Entering harvestToDict()")
 
 	modelDict = {}
 
@@ -289,7 +300,7 @@ def harvestToDict( harvestInputFileName = "" ):
 			constraintsDict = inputFixedParamsJSON
 
 	if ".json" in harvestInputFileName:
-		print ">>> ... Interpreting json file %s"%harvestInputFileName
+		print (">>> ... Interpreting json file %s"%harvestInputFileName)
 
 		with open(harvestInputFileName) as inputJSONFile:
 			inputJSON = json.load(inputJSONFile)
@@ -305,11 +316,11 @@ def harvestToDict( harvestInputFileName = "" ):
 				try:
 					sampleParams = (float(sample[args.xVariable]),float(sample[args.yVariable]) )
 				except:
-					print ">>> ... Error: %s or %s doesn't exist as an entry in the input file"%(args.xVariable,args.yVariable)
-					print ">>> ... Use cmd line options -x and -y to point to variables that exist in the input"
-					print ">>> Available variables are listed below:"
-					print ">>> "
-					print ">>> "+"\n>>> ".join(sample.keys())
+					print (">>> ... Error: %s or %s doesn't exist as an entry in the input file"%(args.xVariable,args.yVariable))
+					print (">>> ... Use cmd line options -x and -y to point to variables that exist in the input")
+					print (">>> Available variables are listed below:")
+					print (">>> ")
+					print (">>> "+"\n>>> ".join(sample.keys()))
 					sys.exit(1)
 
 				sampleParamsList = list(sampleParams)
@@ -333,13 +344,13 @@ def harvestToDict( harvestInputFileName = "" ):
 						modelDict[sampleParams] = dict(zip(listOfContours,  [args.sigmax for x in listOfContours] ) )
 						modelDict[sampleParams]["fID"] = ""
 				if(args.debug):
-					print sampleParams, float(sample["CLs"]), float(sample["CLs"]) if args.noSig else ROOT.RooStats.PValueToSignificance( float(sample["CLs"])     )
+					print (sampleParams, float(sample["CLs"]), float(sample["CLs"]) if args.noSig else ROOT.RooStats.PValueToSignificance( float(sample["CLs"])     ))
 
 
 	else:
-		print ">>> ... Interpreting text file -- (This feature hasn't been fully tested)"
-		print ">>> ... Also why aren't you just using JSON you fool"
-		print ">>> ... Seriously -- HF now spits out a JSON, and if you're converting that back to a text file you deserve to have things not work..."
+		print (">>> ... Interpreting text file -- (This feature hasn't been fully tested)")
+		print (">>> ... Also why aren't you just using JSON you fool")
+		print (">>> ... Seriously -- HF now spits out a JSON, and if you're converting that back to a text file you deserve to have things not work...")
 
 		try:
 			from summary_harvest_tree_description import treedescription
@@ -347,7 +358,7 @@ def harvestToDict( harvestInputFileName = "" ):
 			dummy,fieldNames = treedescription()
 			fieldNames = fieldNames.split(':')
 		except:
-			print ">>> Crash and burn -- I need a harvest tree description file!"
+			print (">>> Crash and burn -- I need a harvest tree description file!")
 			sys.exit(0)
 
 		for model in harvestInput.readlines():
@@ -454,19 +465,19 @@ def interpolateSurface(modelDict = {}, interpolationFunction = "linear", useROOT
 		while any([math.isinf(tmp) or math.isnan(tmp) for tmp in zValues[whichContour]  ]):#  np.isinf( zValues[whichContour]  ).any():
 			myindex = [math.isinf(tmp) or math.isnan(tmp) for tmp in zValues[whichContour] ].index(True)
 			if (args.debug):
-				print ">>> ... Remove Inf or NaN at i=%d x=%d y=%d" % (myindex,x[whichContour][myindex],y[whichContour][myindex])
+				print (">>> ... Remove Inf or NaN at i=%d x=%d y=%d" % (myindex,x[whichContour][myindex],y[whichContour][myindex]))
 			x[whichContour].pop(myindex)
 			y[whichContour].pop(myindex)
 			zValues[whichContour].pop(myindex)
 			pass;
 
 		if any([math.isinf(tmp) or math.isnan(tmp) for tmp in zValues[whichContour]  ]):
-			print ">>> ... Still infs or nans in %s!! This is a problem... Exiting." % whichContour
+			print (">>> ... Still infs or nans in %s!! This is a problem... Exiting." % whichContour)
 			sys.exit(0)
 
 	if useROOT:
-		print ">>> ... Using ROOT's internal interpolation scheme (triangular)."
-		print ">>> ... If you like your plot to look like a dinosaur's back or an escalator, then you're entitled to that.."
+		print (">>> ... Using ROOT's internal interpolation scheme (triangular).")
+		print (">>> ... If you like your plot to look like a dinosaur's back or an escalator, then you're entitled to that..")
 
 
 		canvas = ROOT.TCanvas("c1","c1",800,600);
@@ -478,13 +489,13 @@ def interpolateSurface(modelDict = {}, interpolationFunction = "linear", useROOT
 		return graphs
 
 	else:
-		print ">>> ... Using scipy interpolate scheme (RBF)."
+		print (">>> ... Using scipy interpolate scheme (RBF).")
 
 		xi = {}
 		yi = {}
 		zi = {}
 		for whichContour in listOfContours:
-			print ">>> ... Interpolating %s"%whichContour
+			print (">>> ... Interpolating %s"%whichContour)
 
 			# Convert everything to numpy arrays
 			xArray = np.array(x[whichContour])
@@ -519,10 +530,10 @@ def interpolateSurface(modelDict = {}, interpolationFunction = "linear", useROOT
 				else:
 					rbf = scipy.interpolate.Rbf(xArray, yArray, zArray, function=interpolationFunction, smooth=smoothingFactor )
 			except:
-				print ">>> Interpolation failing!!! Check to make sure there are no NANs or double defined points in your input JSON!"
-				print ">>> Printing points we're trying to interpolate (x,y,z) triplets:"
+				print (">>> Interpolation failing!!! Check to make sure there are no NANs or double defined points in your input JSON!")
+				print (">>> Printing points we're trying to interpolate (x,y,z) triplets:")
 
-				print sorted( zip(xArray,yArray,zArray), key = lambda x: x[0]*x[1] )
+				print (sorted( zip(xArray,yArray,zArray), key = lambda x: x[0]*x[1] ))
 				sys.exit(1)
 
 
@@ -542,7 +553,7 @@ def interpolateSurface(modelDict = {}, interpolationFunction = "linear", useROOT
 				fig.savefig("scipy_debug_surface.pdf")
 
 			if whichContour=="CLsexp" and outputSurface:
-				print ">>> Writing out expected CLs surface to pickle file"
+				print (">>> Writing out expected CLs surface to pickle file")
 				with open(args.outputFile+'.expectedSurface.pkl', 'w') as outfile:
 					pickle.dump({"x": xymeshgrid[0], "y": xymeshgrid[1],"z": ZI} ,outfile, pickle.HIGHEST_PROTOCOL)
 
@@ -578,7 +589,7 @@ def createTGraphFromDict(modelDict,myName,listOfFIDs=None):
 			try:
 				outputGraph.SetPoint(imodel, model[0], model[1], listOfFIDs.index( modelDict[model][myName] ) )
 			except:
-				print ">>> WARNING: Model point has a SR not in the list for some reason! Skipping, but check for problems in input JSON!"
+				print (">>> WARNING: Model point has a SR not in the list for some reason! Skipping, but check for problems in input JSON!")
 				continue
 		else:
 			value = modelDict[model][myName] if args.noSig else ROOT.RooStats.SignificanceToPValue(modelDict[model][myName])
@@ -621,7 +632,7 @@ def truncateSignificances(modelDict,sigmax=5):
 def createGraphsFromArrays(x,y,z,label):
 
 	if args.debug:
-		print ">>> ... In createGraphsFromArrays for %s"%label
+		print (">>> ... In createGraphsFromArrays for %s"%label)
 
 	gr = createTGraph2DFromArrays(x,y,z)
 
@@ -654,7 +665,7 @@ def createGraphsFromArrays(x,y,z,label):
 		biggestGraph.Draw("ALP")
 
 	if args.debug:
-		print ">>> ... ... Number of graphs %d"%len(allGraphs)
+		print (">>> ... ... Number of graphs %d"%len(allGraphs))
 
 	return allGraphs
 
