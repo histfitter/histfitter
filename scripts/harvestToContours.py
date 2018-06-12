@@ -566,6 +566,9 @@ def interpolateSurface(modelDict = {}, interpolationFunction = "linear", useROOT
 				if graph.Integral() > args.areaThreshold:
 					graphs[whichContour].append(graph)
 
+			# Let's sort output graphs by area so that the band construction later is more likely to get the right pairs
+			graphs[whichContour] = sorted(graphs[whichContour], key=lambda g: g.Integral() , reverse=True)
+
 		return graphs
 
 def createTGraph2DFromArrays(x,y,z):
