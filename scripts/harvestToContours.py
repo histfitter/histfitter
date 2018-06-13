@@ -58,6 +58,8 @@ parser.add_argument("--noSig","-n",      help = "don't convert CLs to significan
 
 parser.add_argument("--nominalLabel",      help = "keyword in filename to look for nominal sig XS", type=str, default="Nominal")
 
+parser.add_argument("--useUpperLimit", help="use upper limit information instead of CLs. Automatically turns off significance transform.", action="store_true", default=False)
+
 args = parser.parse_args()
 
 
@@ -78,13 +80,32 @@ except:
 	sys.exit(1)
 
 
-if args.ignoreUncertainty:
-	listOfContours = ["CLs","CLsexp"]
+if args.useUpperLimit:
+
+	print( ">>> ")
+	print( ">>> INFO: You've asked for interpolation of an upper limit plane. So I'll also turn off the significance transform (--noSig) for you. And setting level to 1.")
+	print( ">>> ")
+
+	args.noSig = True
+	args.level = 1.0
+
+	if args.ignoreUncertainty:
+		listOfContours = ["upperLimit","expectedUpperLimit"]
+	else:
+		listOfContours = ["upperLimit","expectedUpperLimit","expectedUpperLimitPlus1Sig","expectedUpperLimitPlus2Sig","expectedUpperLimitMinus1Sig","expectedUpperLimitMinus2Sig"]
+	listOfContours_OneSigma = ["expectedUpperLimitPlus1Sig","expectedUpperLimitMinus1Sig"]
+	listOfContours_TwoSigma = ["expectedUpperLimitPlus2Sig","expectedUpperLimitMinus2Sig"]
+	expectedContour = "expectedUpperLimit"
+	observedContour = "upperLimit"
 else:
-	listOfContours = ["CLs","CLsexp","clsu1s","clsu2s","clsd1s","clsd2s"]
-
-
-
+	if args.ignoreUncertainty:
+		listOfContours = ["CLs","CLsexp"]
+	else:
+		listOfContours = ["CLs","CLsexp","clsu1s","clsu2s","clsd1s","clsd2s"]
+	listOfContours_OneSigma = ["clsu1s","clsd1s"]
+	listOfContours_TwoSigma = ["clsu2s","clsd2s"]
+	expectedContour = "CLsexp"
+	observedContour = "CLs"
 
 
 
@@ -177,7 +198,7 @@ def processInputFile(inputFile, outputFile, label = ""):
 		return -1
 
 	if label=="": #Only do this for the nominal signal XS
-		for whichContour in ["CLsexp","CLs"]:
+		for whichContour in listOfContours:
 			tmpGraph = createTGraphFromDict(resultsDict,whichContour)
 			tmpGraph.Write( "%s_gr"%(whichContour) )
 
@@ -229,31 +250,31 @@ def processInputFile(inputFile, outputFile, label = ""):
 	# Step 4 - Make pretty curves (and bands) or try to...
 
 	if not args.ignoreUncertainty and label=="":
-		if len(outputGraphs["clsu1s"])==0 and len(outputGraphs["clsd1s"])>0:
+		if len(outputGraphs[listOfContours_OneSigma[0] ])==0 and len(outputGraphs[listOfContours_OneSigma[1] ])>0:
 			print (">>>")
 			print (">>> WARNING: You don't have +1 sigma sensitivity,")
 			print (">>> ... but you do have -1 sigma reach. Making a ")
 			print (">>> ... +/-1 sigma band from only the -1 side.")
 			print (">>> ")
-			for icurve,curve1 in enumerate(outputGraphs["clsd1s"]):
+			for icurve,curve1 in enumerate(outputGraphs[listOfContours_OneSigma[1] ]):
 				band_1s = createBandFromContours( curve1 )
 				band_1s.SetFillColorAlpha(ROOT.TColor.GetColor("#ffd700"), 0.75)
 				band_1s.Write("Band_1s_%d"%icurve)
-		for icurve,(curve1,curve2) in enumerate(zip(outputGraphs["clsu1s"],outputGraphs["clsd1s"]) ):
+		for icurve,(curve1,curve2) in enumerate(zip(outputGraphs[listOfContours_OneSigma[0] ],outputGraphs[listOfContours_OneSigma[1] ]) ):
 			band_1s = createBandFromContours( curve1, curve2 )
 			band_1s.SetFillColorAlpha(ROOT.TColor.GetColor("#ffd700"), 0.75)
 			band_1s.Write("Band_1s_%d"%icurve)
-		for icurve,(curve1,curve2) in enumerate(zip(outputGraphs["clsu2s"],outputGraphs["clsd2s"]) ):
+		for icurve,(curve1,curve2) in enumerate(zip(outputGraphs[listOfContours_TwoSigma[0] ],outputGraphs[listOfContours_TwoSigma[1] ]) ):
 			band_2s = createBandFromContours( curve1, curve2 )
 			band_2s.SetFillColorAlpha(ROOT.TColor.GetColor("#115000"), 0.5)
 			band_2s.Write("Band_2s_%d"%icurve)
 
 
-	for icurve,obsCurve in enumerate(outputGraphs["CLs"]):
+	for icurve,obsCurve in enumerate(outputGraphs[observedContour]):
 		obsCurve.SetLineWidth(2)
 		obsCurve.SetLineColorAlpha(ROOT.TColor.GetColor("#800000"), 0.9 )
 		obsCurve.Write("Obs_%s%s"%(icurve,label) )
-	for icurve,expCurve in enumerate(outputGraphs["CLsexp"]):
+	for icurve,expCurve in enumerate(outputGraphs[expectedContour]):
 		expCurve.SetLineStyle(7)
 		expCurve.Write("Exp_%s%s"%(icurve,label) )
 
@@ -265,13 +286,13 @@ def processInputFile(inputFile, outputFile, label = ""):
 		canvas = ROOT.TCanvas("FinalCurves","FinalCurves")
 		try:
 			if not args.ignoreUncertainty and outputFile.Get("Band_1s_0"):
-				for iGraph in xrange(  len(outputGraphs["clsd1s"])   ):
+				for iGraph in xrange(  len(outputGraphs[outputGraphs[listOfContours_OneSigma[1] ]])   ):
 						outputFile.Get("Band_1s_%d"%iGraph).Draw("ALF" if iGraph==0 else "LF")
 			else:
 				outputFile.Get("Exp_0").Draw("AL")
-			for iGraph in xrange(len(outputGraphs["CLsexp"]) ):
+			for iGraph in xrange(len(outputGraphs[expectedContour]) ):
 				outputFile.Get("Exp_%d"%iGraph).Draw("L")
-			for iGraph in xrange(len(outputGraphs["CLs"]) ):
+			for iGraph in xrange(len(outputGraphs[observedContour]) ):
 				outputFile.Get("Obs_%d"%iGraph).Draw("L")
 			ROOT.gPad.RedrawAxis()
 			canvas.Write()
@@ -330,7 +351,7 @@ def harvestToDict( harvestInputFileName = "" ):
 					sampleParamsList[1] = math.log10(sampleParamsList[1])
 				sampleParams = tuple(sampleParamsList)
 
-				if not math.isinf(float(sample["CLsexp"])) :
+				if not math.isinf(float(sample[expectedContour])) :
 					tmpList = [float(sample["%s"%x]) if args.noSig else ROOT.RooStats.PValueToSignificance( float(sample["%s"%x]) ) for x in listOfContours]
 					modelDict[sampleParams] = dict(zip(listOfContours,  tmpList ) )
 					if "fID" in sample:
@@ -344,7 +365,7 @@ def harvestToDict( harvestInputFileName = "" ):
 						modelDict[sampleParams] = dict(zip(listOfContours,  [args.sigmax for x in listOfContours] ) )
 						modelDict[sampleParams]["fID"] = ""
 				if(args.debug):
-					print (sampleParams, float(sample["CLs"]), float(sample["CLs"]) if args.noSig else ROOT.RooStats.PValueToSignificance( float(sample["CLs"])     ))
+					print (sampleParams, float(sample[observedContour]), float(sample[expectedContour]) if args.noSig else ROOT.RooStats.PValueToSignificance( float(sample[observedContour])     ))
 
 
 	else:
@@ -543,7 +564,7 @@ def interpolateSurface(modelDict = {}, interpolationFunction = "linear", useROOT
 			xymeshgrid[1] = xymeshgrid[1] / yScaling
 
 			# Spit out some diagnostic plots
-			if args.debug and whichContour=="CLsexp" and outputSurface:
+			if args.debug and whichContour==expectedContour and outputSurface:
 				fig, ax = plt.subplots()
 				plt.pcolor(xymeshgrid[0], xymeshgrid[1], ZI)
 				plt.scatter(xArray, yArray, 10,zArray)
@@ -552,8 +573,8 @@ def interpolateSurface(modelDict = {}, interpolationFunction = "linear", useROOT
 				plt.colorbar()
 				fig.savefig("scipy_debug_surface.pdf")
 
-			if whichContour=="CLsexp" and outputSurface:
-				print (">>> Writing out expected CLs surface to pickle file")
+			if whichContour==expectedContour and outputSurface:
+				print (">>> Writing out expected surface to pickle file")
 				with open(args.outputFile+'.expectedSurface.pkl', 'w') as outfile:
 					pickle.dump({"x": xymeshgrid[0], "y": xymeshgrid[1],"z": ZI} ,outfile, pickle.HIGHEST_PROTOCOL)
 
@@ -643,7 +664,7 @@ def createGraphsFromArrays(x,y,z,label):
 	if args.smoothing:
 		hist.Smooth(1, args.smoothing)
 
-	if label in ["CLsexp","CLs"]:
+	if label in [expectedContour,observedContour]:
 		hist.Write("%s_hist"%label)
 
 	hist.SetContour(1)
