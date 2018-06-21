@@ -6,6 +6,11 @@
 #
 # By: Larry Lee - Mar 2018
 
+
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 import pickle
 import ROOT
 import math,sys,os,argparse
@@ -26,15 +31,17 @@ args = parser.parse_args()
 
 ## If I need to use scipy, please let me have scipy. I'll even help you out!
 try:
+	import matplotlib as mpl
+	mpl.use('Agg')
 	import matplotlib.pyplot as plt
 	import numpy as np
 	import scipy.interpolate
 except:
-	print ">>> You need scipy/matplotlib to run this. And you had to have run harvestToContours in scipy mode [default]"
-	print ">>> In an ATLAS environment, you can..."
-	print '>>> > lsetup "lcgenv -p LCG_93 x86_64-slc6-gcc62-opt pyanalysis" "lcgenv -p LCG_93 x86_64-slc6-gcc62-opt pytools" "lcgenv -p LCG_93 x86_64-slc6-gcc62-opt pygraphics" "lcgenv -p LCG_93 x86_64-slc6-gcc62-opt ROOT" '
-	print ">>> "
-	print ">>> Try that and then run this again!"
+	print (">>> You need scipy/matplotlib to run this. And you had to have run harvestToContours in scipy mode [default]")
+	print (">>> In an ATLAS environment, you can...")
+	print ('>>> > lsetup "lcgenv -p LCG_93 x86_64-slc6-gcc62-opt pyanalysis" "lcgenv -p LCG_93 x86_64-slc6-gcc62-opt pytools" "lcgenv -p LCG_93 x86_64-slc6-gcc62-opt pygraphics" "lcgenv -p LCG_93 x86_64-slc6-gcc62-opt ROOT" ')
+	print (">>> ")
+	print (">>> Try that and then run this again!")
 	sys.exit(1)
 
 try:
@@ -43,11 +50,11 @@ try:
 	from shapely.geometry import LineString
 	from shapely import affinity
 except:
-	print ">>>"
-	print ">>> You need to have access to shapely!"
-	print ">>> Do you want me to try and install it?"
-	print ">>> (Just in your home directory. See source if you're worried about what I'm about to do!)"
-	print ">>> (y/n)"
+	print (">>>")
+	print (">>> You need to have access to shapely!")
+	print (">>> Do you want me to try and install it?")
+	print (">>> (Just in your home directory. See source if you're worried about what I'm about to do!)")
+	print (">>> (y/n)")
 	choice = raw_input().lower()
 	if choice[0] == "y":
 		try:
@@ -64,13 +71,13 @@ except:
 					pip install --user shapely
 				"""
 				)
-			print ">>> It's possible that worked. Try running again?"
+			print (">>> It's possible that worked. Try running again?")
 			sys.exit(1)
 		except:
-			print ">>> ... Setup didn't work for some reason!"
+			print (">>> ... Setup didn't work for some reason!")
 	else:
-		print ">>> Quitting -- You don't have shapely installed and I really need it!"
-		print ">>>     ... Like it seriously makes my life a lot easier!"
+		print (">>> Quitting -- You don't have shapely installed and I really need it!")
+		print (">>>     ... Like it seriously makes my life a lot easier!")
 		sys.exit(1)
 
 
@@ -79,7 +86,7 @@ except:
 
 def main():
 
-	print ">>> Launching multiplexContours.py! "
+	print (">>> Launching multiplexContours.py! ")
 
 
 	dict_TFiles = {}
@@ -98,12 +105,18 @@ def main():
 
 	listOfInputFiles = [tmp.translate(None,", ") for tmp in args.inputFiles]
 
-	print ">>> Grabbing input information from input files:"
-	print ">>> >>> " + " ".join(listOfInputFiles)
+	print (">>> Grabbing input information from input files:")
+	print (">>> >>> " + " ".join(listOfInputFiles))
+	print (">>> ")
+	print (">>> FYI, I'm also going to grab the *.expectedSurface.pkl files that should be in the same location")
 
 	for inputFileName in listOfInputFiles:
 		dict_TFiles[inputFileName] = ROOT.TFile(inputFileName)
-		dict_Surfaces[inputFileName] = pickle.load( open( inputFileName+".expectedSurface.pkl", "rb" ) )
+		try:
+			dict_Surfaces[inputFileName] = pickle.load( open( inputFileName+".expectedSurface.pkl", "rb" ) )
+		except FileNotFoundError:
+			print (">>> I need those *.expectedSurface.pkl files that are produced from harvestToContours! Exiting...")
+			sys.exit(1)
 
 		dict_Exp[inputFileName] = dict_TFiles[inputFileName].Get("Exp_0").Clone(inputFileName+"_Exp_0")
 		dict_Obs[inputFileName] = dict_TFiles[inputFileName].Get("Obs_0").Clone(inputFileName+"_Obs_0")
@@ -114,13 +127,13 @@ def main():
 		dict_Obs_u1s[inputFileName] = dict_TFiles[inputFileName].Get("Obs_0_Up").Clone(inputFileName+"_Obs_u1s")
 		dict_Obs_d1s[inputFileName] = dict_TFiles[inputFileName].Get("Obs_0_Down").Clone(inputFileName+"_Obs_d1s")
 
-	print ">>> Creating output ROOT file: %s"%args.outputFile
+	print (">>> Creating output ROOT file: %s"%args.outputFile)
 
 	outputFile = ROOT.TFile(args.outputFile,"RECREATE")
 
 	fig, ax = plt.subplots()
 
-	print ">>> Creating iso expected contours for all pairwise combinations of SRs"
+	print (">>> Creating iso expected contours for all pairwise combinations of SRs")
 
 	for (region1, region2) in itertools.combinations(listOfInputFiles, 2):
 
@@ -151,11 +164,20 @@ def main():
 	sumOfExpecteds = cascaded_union([v["Exp"] for k,v in uncutRegions.iteritems()])
 
 	if args.debug:
+		print (">>> Number of regions being added to the best expected contour: %d"%len(uncutRegions) )
+		print (">>> Integral of the best expected contour: %d"%sumOfExpecteds.area)
+
 		x,y = sumOfExpecteds.exterior.coords.xy
 		convertArraysToTGraph(x,y).Write("debug_sumOfExpecteds")
+		ax.cla()
+		ax.plot(x,y,alpha=0.5)
+		fig.savefig("debug_sumOfExpecteds.pdf")
 
-	if args.debug:
-		print ">>> Integral of the best expected contour: %d"%sumOfExpecteds.area
+		for i,singleExpectedCurve in enumerate([v["Exp"] for k,v in uncutRegions.iteritems()]):
+			x,y = singleExpectedCurve.exterior.coords.xy
+			ax.cla()
+			ax.plot(x,y,alpha=0.5)
+			fig.savefig("debug_singleExpected_%d.pdf"%i)
 
 
 	allIsoExpectedContours = []
@@ -169,20 +191,22 @@ def main():
 			allIsoExpectedContoursLineStrings.append( tmpLineString )
 
 
-	print ">>> Total number of isoExpectedContours: %d"%len(allIsoExpectedContoursLineStrings)
+	print (">>> Total number of isoExpectedContours: %d"%len(allIsoExpectedContoursLineStrings))
 
 	listOfBestCurves = {}
 
 	for tmpKey in uncutRegions[inputFileName]:
 		listOfBestCurves[tmpKey] = []
 
-	print ">>> Cutting space up into regions based on iso expected contours"
+	print (">>> Cutting space up into regions based on iso expected contours")
 
 	# # Cut up the union of exp regions into individual parts
+
 	allIsoExpectedContoursLineStrings = sorted(allIsoExpectedContoursLineStrings, key=lambda x: x.length, reverse=True)
 
 	subRegions = []
 	tmpMultiPoly = sumOfExpecteds
+
 	for cutLine in allIsoExpectedContoursLineStrings:
 		tmpMultiPoly = tmpMultiPoly.difference(cutLine.buffer(1e-10))
 	for poly in tmpMultiPoly:
@@ -190,12 +214,12 @@ def main():
 
 
 	if args.debug:
-		print ">>> Number of regions in this plane: %d"%len(subRegions)
+		print (">>> Number of regions in this plane: %d"%len(subRegions))
 
 	counter = 0
 	for iSubRegion,subRegion in enumerate(subRegions):
 		if args.debug:
-			print ">>> >>> Loop through sub regions: %d"%iSubRegion
+			print (">>> >>> Loop through sub regions: %d"%iSubRegion)
 
 		# this subRegion -- Figure out which SR it corresponds to
 
@@ -216,17 +240,17 @@ def main():
 		# and cut them up with all the IECs (e.g. obs, exp+1sig, etc)
 
 		if args.debug:
-			print ">>> >>> Identified the best SR in this region as %s"%bestSR
+			print (">>> >>> Identified the best SR in this region as %s"%bestSR)
 
 		for tmpKey,subCurve in uncutRegions[bestSR].iteritems():
 			cutUpSubCurve = list(polygonize( cascaded_union( [subCurve.boundary]+allIsoExpectedContoursLineStrings  )) )
 
 			if args.debug:
-				print ">>> Number of cut up subcurves for %s, %d (with area %f)"%(tmpKey,len(cutUpSubCurve), subCurve.area)
+				print (">>> Number of cut up subcurves for %s, %d (with area %f)"%(tmpKey,len(cutUpSubCurve), subCurve.area))
 
 			if len(cutUpSubCurve)<2:
 				if args.debug:
-					print ">>> I expect to have at least two subcurves.. Let's try cutting it up another way"
+					print (">>> I expect to have at least two subcurves.. Let's try cutting it up another way")
 				# This method of cutting things up removes some area which is problematic later...
 				tmpMultiPoly = subCurve
 				for cutLine in allIsoExpectedContoursLineStrings:
@@ -239,10 +263,10 @@ def main():
 						poly = affinity.scale(poly,xfact=1+1e-9,yfact=1+1e-9,origin="centroid")
 						cutUpSubCurve.append(poly)
 					if args.debug:
-						print ">>> Number of cut up subcurves for %s, %d (with area %f)"%(tmpKey,len(cutUpSubCurve), subCurve.area)
+						print (">>> Number of cut up subcurves for %s, %d (with area %f)"%(tmpKey,len(cutUpSubCurve), subCurve.area))
 				else:
 					if args.debug:
-						print ">>> Hrm.. wasn't able to cut it up into two. This could be ok. Writing out whole contour."
+						print (">>> Hrm.. wasn't able to cut it up into two. This could be ok. Writing out whole contour.")
 					cutUpSubCurve.append(tmpMultiPoly)
 
 			# now for this type of curve (e.g. obs, exp+1sig, etc), I've cut it up with the IECs into regions
@@ -255,7 +279,7 @@ def main():
 					continue
 				else:
 					if args.debug:
-						print ">>> I found a chunk of this subcurve %s"%(tmpKey)
+						print (">>> I found a chunk of this subcurve %s"%(tmpKey))
 
 				listOfBestCurves[tmpKey].append(chunkOfSubCurve)
 
@@ -274,10 +298,10 @@ def main():
 		ax.plot(IEC[:,0],IEC[:,1],alpha=0.5,linewidth=0.1)
 
 
-	print ">>> Creating summed curves and writing to output file"
+	print (">>> Creating summed curves and writing to output file")
 	summedCurves = {}
 	for typeOfCurve in listOfBestCurves:
-		print ">>> Adding together: %s"%typeOfCurve
+		print (">>> Adding together: %s"%typeOfCurve)
 		summedCurves[typeOfCurve]	= cascaded_union(listOfBestCurves[typeOfCurve])
 
 		if "Exp_u1s" == typeOfCurve or "Exp_d1s" == typeOfCurve:
@@ -291,7 +315,7 @@ def main():
 
 		convertArraysToTGraph(x,y).Write("%s"%typeOfCurve)
 
-	print ">>> Creating Exp +/-1 sigma band and writing to output file"
+	print (">>> Creating Exp +/-1 sigma band and writing to output file")
 
 	if "Exp_u1s" in summedCurves and "Exp_d1s" in summedCurves:
 		band = summedCurves["Exp_d1s"].difference(summedCurves["Exp_u1s"])
@@ -309,7 +333,7 @@ def main():
 			convertArraysToTGraph(x,y).Write("ExpectedBand")
 
 	if args.debug:
-		print ">>> Saving debugging plot: debug.pdf"
+		print (">>> Saving debugging plot: debug.pdf")
 		fig.savefig("debug.pdf")
 
 	outputFile.Write()
@@ -323,8 +347,9 @@ def tGraphToPolygon(myGraph, pinPoint=None):
 	if pinPoint==None:
 		x = np.append(x,[min(x)])
 		y = np.append(y,[min(y)])
+	if not Polygon(zip(x,y)).is_valid:
+		x,y = x[:-1],y[:-1]
 	return Polygon(zip(x,y))
-
 
 
 def convertTGraphToArrays(mygraph):
