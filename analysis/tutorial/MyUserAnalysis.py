@@ -63,6 +63,9 @@ configMgr.writeXML = False
 
 ##########################
 
+# Keep SRs also in background fit confuguration
+configMgr.keepSignalRegionType = True
+
 # Give the analysis a name
 configMgr.analysisName = "MyUserAnalysis"
 configMgr.outputFileName = "results/%s_Output.root"%configMgr.analysisName

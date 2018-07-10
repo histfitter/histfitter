@@ -42,36 +42,45 @@ fittest()
 
   // 1. Useful trick: make all objects in the workspace directly accessible in CINT
   w->exportToCint();
-  using namespace channel1;
+  //  using namespace channel1;
 
   // --- CUT ---
 
   // some printout on interesting objects in the workspace - rpplace false by true to see
-  if (false) {
-    SigXsecOverSM.Print();
-    asimovData.Print("v");
-    channel1_model.printCompactTree();
-  }
+  //  if (false) {
+  //    SigXsecOverSM.Print();
+  //    asimovData.Print("v");
+  //    channel1_model.printCompactTree();
+  //  }
 
   // 2. Fit the datasets in the workspace
   // first fit the asimov dataset. Are the fit results as expected?
-  model_channel1.fitTo(obsData);
+  TString dataName ="obsData";
+  RooAbsData * data = w->data(dataName);
+  TString asimovName ="asimovData";
+  RooAbsData * asimov = w->data(asimovName);
+
+  // retrieve the model
+  TString modelSBName = "ModelConfig";
+  ModelConfig* sbModel = (ModelConfig*) w->obj(modelSBName);
 
   //allow a floating luminosity and systematic uncertainty
-  alpha_syst1.setConstant(false);
-  Lumi.setConstant(false);
+  //  alpha_syst1.setConstant(false);
+  //  Lumi.setConstant(false);
 
-  // then fit the observed dataset
-  RooFitResult* result = model_channel1.fitTo(asimovData,Save());
+  // fit to data
+  RooFitResult* result_data = sbModel->GetPdf()->fitTo(*data);
+  // fit to the asimov dataset
+  RooFitResult* result = sbModel->GetPdf()->fitTo(*asimov,Save());
 
+  // you can check the status of the fit
   //result->Print();
-
   cout <<  "Fit status = " << result->status() << " and covariance quality = " << result->covQual() << endl;
 
   // 3. plot the dataset and pdf
-  RooPlot* frame = obs_x_channel1.frame();
-  asimovData.plotOn(frame);
-  model_channel1.plotOn(frame);
+  RooPlot* frame = w->var("obs_x_channel1")->frame();
+  asimov->plotOn(frame);
+  sbModel->GetPdf()->plotOn(frame);
   frame->Draw();
 }
 

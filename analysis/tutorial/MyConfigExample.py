@@ -47,7 +47,7 @@ import ROOT
 # Flags to control which fit is executed
 #---------------------------------------
 useStat=True
-doValidation=False #use or use not validation regions to check exptrapolation to signal regions
+doValidation=True #use or use not validation regions to check exptrapolation to signal regions
 
 #-------------------------------
 # Parameters for hypothesis test

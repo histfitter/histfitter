@@ -23,7 +23,7 @@ import ROOT
 from ROOT import *
 ROOT.PyConfig.IgnoreCommandLineOptions = True
 gSystem.Load("libSusyFitter.so")
-gROOT.Reset()
+#gROOT.Reset()
 ROOT.gROOT.SetBatch(True)
 
 import os, pickle, subprocess

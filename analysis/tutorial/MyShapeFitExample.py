@@ -105,7 +105,6 @@ if configMgr.readFromTree:
 else:
     bgdFiles = [configMgr.histCacheFile]
     pass
-configMgr.setFileList(bgdFiles)
 
 # Dictionnary of cuts for Tree->hist
 configMgr.cutsDict["SR"] = "((lep1Pt < 20 && lep2Pt<10 && met>250 && mt>100 && jet1Pt>130 && jet2Pt>25 && AnalysisType==7) || (lep1Pt < 25 && lep2Pt<10 && met>250 && mt>100 && jet1Pt>130 && jet2Pt>25 && AnalysisType==6))"
@@ -142,8 +141,10 @@ configMgr.nomName = "_NoSys"
 # List of samples and their plotting colours
 #-------------------------------------------
 topSample = Sample("Top",kGreen-9)
+topSample.addInputs(bgdFiles)
 #topSample.setNormFactor("mu_Top",1.,0.,5.)
 wzSample = Sample("WZ",kAzure+1)
+wzSample.addInputs(bgdFiles)
 #wzSample.setNormFactor("mu_WZ",1.,0.,5.)
 dataSample = Sample("Data",kBlack)
 dataSample.setData()
@@ -177,7 +178,7 @@ if myFitType==FitType.Exclusion:
        exclusionFitConfig.addSignalChannels([srBin])
 
        sigSample = Sample(sig,kPink)
-       sigSample.setFileList(["samples/tutorial/SusyFitterTree_p832_GG-One-Step_soft_v1.root"])
+       sigSample.addInputs(["samples/tutorial/SusyFitterTree_p832_GG-One-Step_soft_v1.root"])
        sigSample.setNormByTheory()
        sigSample.setNormFactor("mu_SIG",1.,0.,5.)    
        #sigSample.addSampleSpecificWeight("0.001")                

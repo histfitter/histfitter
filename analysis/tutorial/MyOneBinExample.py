@@ -43,7 +43,7 @@ import ROOT
 #-------------------------------
 #configMgr.doHypoTest=False
 configMgr.nTOYs=5000
-configMgr.calculatorType=0
+configMgr.calculatorType=2
 configMgr.testStatType=3
 configMgr.nPoints=20
 
@@ -72,7 +72,6 @@ if configMgr.readFromTree:
 else:
     bgdFiles = [configMgr.histCacheFile]
     pass
-configMgr.setFileList(bgdFiles)
 
 # Dictionnary of cuts for Tree->hist
 configMgr.cutsDict["SR"] = "((lep1Pt < 20 && lep2Pt<10 && met>250 && mt>100 && jet1Pt>130 && jet2Pt>25 && AnalysisType==7) || (lep1Pt < 25 && lep2Pt<10 && met>250 && mt>100 && jet1Pt>130 && jet2Pt>25 && AnalysisType==6))&& met/meff2Jet>0.5"
@@ -107,8 +106,10 @@ configMgr.nomName = "_NoSys"
 #-------------------------------------------
 topSample = Sample("Top",kGreen-9)
 #topSample.setNormFactor("mu_Top",1.,0.,5.)
+topSample.addInputs(bgdFiles)
 wzSample = Sample("WZ",kAzure+1)
 #wzSample.setNormFactor("mu_WZ",1.,0.,5.)
+wzSample.addInputs(bgdFiles)
 dataSample = Sample("Data",kBlack)
 dataSample.setData()
 dataSample.buildHisto([3.],"SR","cuts",0.5)
@@ -120,7 +121,7 @@ dataSample.buildHisto([3.],"SR","cuts",0.5)
 if myFitType==FitType.Discovery:
  
    #Fit config instance
-   discoveryFitConfig = configMgr.addTopLevelXML("Discovery")
+   discoveryFitConfig = configMgr.addFitConfig("Discovery")
    meas=discoveryFitConfig.addMeasurement(name="NormalMeasurement",lumi=1.0,lumiErr=0.039)
    meas.addPOI("mu_Discovery")
  
@@ -159,7 +160,7 @@ if myFitType==FitType.Exclusion:
     exclusionFitConfig.addSignalChannels([srBin])
     
     sigSample = Sample("SM_GG_onestepCC_425_385_345",kPink)
-    sigSample.setFileList(["samples/tutorial/SusyFitterTree_p832_GG-One-Step_soft_v1.root"])
+    sigSample.addInputs(["samples/tutorial/SusyFitterTree_p832_GG-One-Step_soft_v1.root"])
     sigSample.setNormByTheory()
     sigSample.setNormFactor("mu_SIG",1.,0.,5.)                    
     exclusionFitConfig.addSamples(sigSample)

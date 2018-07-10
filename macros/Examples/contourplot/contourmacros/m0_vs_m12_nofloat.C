@@ -16,12 +16,13 @@
  * LICENSE.                                                                       *
  **********************************************************************************/
 
-#include "contourmacros/CombinationGlob.C"
+#include "CombinationGlob.C"
 #include "TROOT.h"
 #include "TColor.h"
 #include "DrawUtils.h"
 #include "StatTools.h"
-#include "summary_harvest_tree_description.h"
+#include "../summary_harvest_tree_description.h"
+#include "TFile.h"
 
 /**
 Initialzing the macro: loading the description of the list text file from summary_harvest_tree_description.h
