@@ -890,6 +890,7 @@ class ConfigManager(object):
             #for (iSam, sam) in enumerate(fitConfig.sampleList):
             for (iSam, sam) in enumerate(sampleListRun):
                 log.info("   Sample {}/{}: {}".format(iSam+1, len(sampleListRun), sam.name))
+                sam.removeCurrentSystematic()  # make sure that we are not mistakenly using a systematic variation tree
                 
                 # Run over the nominal configuration first
                 # Set the weights, cuts, weights and actually call prepare.read() internally
