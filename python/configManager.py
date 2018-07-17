@@ -47,11 +47,11 @@ def mkdir_p(path):
 
 def replaceSymbols(s):
     """
-    Strip a string from /, *, (, ), [, ] and -
+    Strip a string from /, *, (, ), [, ], - and ,
 
     @param s The string to remove the symbols from
     """
-    s = s.replace("/","").replace("*","").replace("(","").replace(")","").replace("[", "_").replace("]","_").replace("-", "_")
+    s = s.replace("/","").replace("*","").replace("(","").replace(")","").replace("[", "_").replace("]","_").replace("-", "_").replace(",", "_")
     return s
     
 def enum(typename, field_names):
