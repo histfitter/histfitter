@@ -60,6 +60,8 @@ parser.add_argument("--nominalLabel",      help = "keyword in filename to look f
 
 parser.add_argument("--useUpperLimit", help="use upper limit information instead of CLs. Automatically turns off significance transform.", action="store_true", default=False)
 
+parser.add_argument("--closedBands","-b",      help = "if contours are closed shapes in this space, this can help with stitching issues if you're seeing weird effects", action="store_true", default=False)
+
 args = parser.parse_args()
 
 
@@ -718,16 +720,32 @@ def createBandFromContours(contour1,contour2=None):
 		outputGraph = contour1
 	else:
 		outputSize = contour1.GetN()+contour2.GetN()+1
+
+		pointOffset = 0
+		if args.closedBands:
+			outputSize += 2
+			pointOffset = 1
+
 		outputGraph = ROOT.TGraph(outputSize)
 		tmpx, tmpy = ROOT.Double(), ROOT.Double()
 		for iPoint in xrange(contour2.GetN()):
 			contour2.GetPoint(iPoint,tmpx,tmpy)
 			outputGraph.SetPoint(iPoint,tmpx,tmpy)
+
+		if args.closedBands:
+			contour2.GetPoint(0,tmpx,tmpy)
+			outputGraph.SetPoint(contour2.GetN()+1, tmpx,tmpy)
+
 		for iPoint in xrange(contour1.GetN()):
 			contour1.GetPoint(contour1.GetN()-1-iPoint,tmpx,tmpy)
-			outputGraph.SetPoint(contour2.GetN()+iPoint,tmpx,tmpy)
+			outputGraph.SetPoint(contour2.GetN()+pointOffset+iPoint,tmpx,tmpy)
+
+		if args.closedBands:
+			contour1.GetPoint(contour1.GetN()-1,tmpx,tmpy)
+			outputGraph.SetPoint(contour1.GetN()+contour2.GetN(), tmpx,tmpy)
+
 		contour2.GetPoint(0,tmpx,tmpy)
-		outputGraph.SetPoint(contour1.GetN()+contour2.GetN(),tmpx,tmpy)
+		outputGraph.SetPoint(contour1.GetN()+contour2.GetN()+pointOffset,tmpx,tmpy)
 
 	outputGraph.SetFillStyle(1001);
 	outputGraph.SetLineWidth(1)
