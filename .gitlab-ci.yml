@@ -1,0 +1,23 @@
+stages:
+  - docker
+
+build_latest_image:
+  stage: docker
+  except:
+  - tags
+  tags:
+    - docker-image-build
+  script:
+    - ignore
+
+build_tagged_image:
+  stage: docker
+  variables:
+    TO: $CI_REGISTRY_IMAGE:$CI_COMMIT_TAG
+  only:
+  - tags
+  tags:
+    - docker-image-build
+  script:
+    - ignore
+
