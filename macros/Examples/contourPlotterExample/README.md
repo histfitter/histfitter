@@ -3,7 +3,7 @@ L. Lee (Feb 2018)
 
 ### Creation of JSON
 
-Run the tutorial (for `MySimpleChannelConfig.py`). Once you run the fits (`-p` option), you'll be handed a trio of root files.
+Run the tutorial (for `MySimpleChannelConfig.py`). Once you run the fits (`-p` option), you'll be handed a trio of root files. (For convenience, the JSON files are included in this directory if you want to skip to the next section.)
 
 ```
 MySimpleChannelAnalysis_fixSigXSecNominal_hypotest.root
@@ -38,7 +38,7 @@ If you have multiple JSON (for multiple SRs) you can combine them using the `mul
 Once you're ready to get some contours out, you can hand JSON to the `harvestToContours.py` command (again, see `harvestToContours.py -h` for help!):
 
 ```
-harvestToContours.py -i inputJSON/MySimpleChannelAnalysis_fixSigXSecNominal_hypotest__1_harvest_list.json -s 100 -x m0 -y m12 -d --areaThreshold 100 --interpolation linear
+harvestToContours.py -i inputJSON/MySimpleChannelAnalysis_fixSigXSecNominal_hypotest__1_harvest_list.json -x m0 -y m12 -l None
 ```
 
 This command will automatically pick up the theory variation files. This will perform a linear interpolation using `scipy` -- additional options are available. ROOT interpolation can be acheived using the `-r` flag. `-x` and `-y` define which JSON fields should be used for the x and y axes. Here, contours under `--areaThreshold`(=100) are not considered to remove interpolation artifacts. A smoothing of `100` is used here. There are all fully analysis-specific.
@@ -49,12 +49,12 @@ This will give you a ROOT file full of information. (Configurable via `-o` optio
 
 To help with final plotting, a python class is defined (again in the `scripts/` directory, but in your python path already) called `contourPlotter`.
 
-Checkout the script `contourPlotterExample.py` for an exampel of how to use this plotting helper class. This will give you a fully formatted plot for ~20 lines of simple python. You can run it with a simple:
+Checkout the script `contourPlotterExample.py` for an example of how to use this plotting helper class. This will give you a fully formatted plot for ~20 lines of simple python. You can run it with a simple:
 
 ```
 python contourPlotterExample.py
 ```
 
-
+Notice that you can find a switch in that script to enable the drawing of theory variations as well.
 
 
