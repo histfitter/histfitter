@@ -220,7 +220,7 @@ def processInputFile(inputFile, outputFile, label = ""):
 	############################################################
 	# Step 1.5 - If there's a function for a kinematically forbidden region, add zeros to dictionary
 
-	if args.forbiddenFunction:
+	if "none" not in args.forbiddenFunction.lower():
 		resultsDict = addValuesToDict(resultsDict, args.forbiddenFunction, numberOfPoints=100 ,value = "mirror" )
 
 	############################################################
