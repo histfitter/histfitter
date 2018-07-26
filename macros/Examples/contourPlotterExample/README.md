@@ -38,7 +38,7 @@ If you have multiple JSON (for multiple SRs) you can combine them using the `mul
 Once you're ready to get some contours out, you can hand JSON to the `harvestToContours.py` command (again, see `harvestToContours.py -h` for help!):
 
 ```
-harvestToContours.py -i inputJSON/MySimpleChannelAnalysis_fixSigXSecNominal_hypotest__1_harvest_list.json -x m0 -y m12
+harvestToContours.py -i inputJSON/MySimpleChannelAnalysis_fixSigXSecNominal_hypotest__1_harvest_list.json -x m0 -y m12 -l None
 ```
 
 This command will automatically pick up the theory variation files. This will perform a linear interpolation using `scipy` -- additional options are available. ROOT interpolation can be acheived using the `-r` flag. `-x` and `-y` define which JSON fields should be used for the x and y axes. Here, contours under `--areaThreshold`(=100) are not considered to remove interpolation artifacts. A smoothing of `100` is used here. There are all fully analysis-specific.
