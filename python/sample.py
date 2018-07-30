@@ -655,6 +655,7 @@ class Sample(object):
         ### use-case of different tree from nominal histogram in case of 
         if len(nomSysName) > 0:
             if configMgr.hists[nomSysName] != None:
+              if not lowName+"_test" in configMgr.hists.keys() and not highName+"_test" in configMgr.hists.keys():
                 configMgr.hists[lowName+"_test"] = configMgr.hists[lowName].Clone(lowName+"_test")
                 log.info(lowName + " / " + nomSysName)
                 success = configMgr.hists[lowName].Divide( configMgr.hists[nomSysName] )
