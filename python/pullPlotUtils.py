@@ -27,6 +27,7 @@ ROOT.PyConfig.IgnoreCommandLineOptions = True
 gSystem.Load("libSusyFitter.so")
 #gROOT.Reset()
 ROOT.gROOT.SetBatch(True)
+from pValue import * # to compute significance as in https://github.com/dcasadei/psde
 
 import os, string, pickle, copy
 from math import sqrt
@@ -157,7 +158,7 @@ def GetBoxes(all, results, renamedRegions, frame, doBlind, horizontal=False, doP
 
         color = getRegionColor(name)
 
-        graph = MakeBox(offset=counter, pull=float(info[1]), color=color, horizontal=horizontal, doPreFit=doPreFit, error=info[7] if len(info) >= 8 else 0)
+        graph = MakeBox(offset=counter, pull=float(info[1]), color=color, horizontal=horizontal, doPreFit=doPreFit, error=info[7] if len(info) >= 8 else 0) 
         if doPreFit and "CR" in name:
           graph.SetMarkerColor(kRed)
           graph.SetLineColor(kRed)
@@ -196,6 +197,7 @@ def MakeHist(regionList, renamedRegions, results, hdata, hbkg, hbkgUp, hbkgDown,
                 nObs = info[2]
                 nExp = info[3]
                 nExpEr = info[4]
+
                 if nExp>0:
                     nExpStatEr = sqrt(nExp)
                 pEr = PoissonError(nObs)
@@ -208,7 +210,7 @@ def MakeHist(regionList, renamedRegions, results, hdata, hbkg, hbkgUp, hbkgDown,
                     nExpTotErDo = sqrt(nExpEr*nExpEr)
                 else:
                     nExpTotEr = nExpEr
-
+        
                 if (nObs-nExp) >= 0 and nExpTotErUp != 0:
                     pull = (nObs-nExp)/nExpTotErUp
                 if (nObs-nExp) <= 0 and nExpTotErDo != 0:
@@ -406,12 +408,12 @@ def MakeHistPullPlot(samples, regionList, outFileNamePrefix, hresults, renamedRe
 
     return
 
-def makePullPlot(pickleFilename, regionList, samples, renamedRegions, outputPrefix, doBlind=False, outDir=""):
+def makePullPlot(pickleFilename, regionList, samples, renamedRegions, outputPrefix, doBlind=False, outDir="",plotSignificance=False):
     """
     Make a pull plot from a pickle file of results
 
     @param pickleFilename Filename to open
-    @param regionList List of regions to draw pulls for
+    @param regionList List of regions to dxraw pulls for
     @param samples List of samples in each region
     @param renamedRegions List of renamed regions; dict of old => new names
     @param outputPrefix Prefix for the output file
@@ -457,10 +459,25 @@ def makePullPlot(pickleFilename, regionList, samples, renamedRegions, outputPref
         totErDo_pull = sqrt(nbExpEr*nbExpEr+pEr_pull[1]*pEr_pull[1])
         totErUp_pull = sqrt(nbExpEr*nbExpEr+pEr_pull[0]*pEr_pull[0])
 
-        if (nbObs-nbExp) > 0 and totErUp_pull != 0:
-            pull = (nbObs-nbExp)/totErUp_pull
-        if (nbObs-nbExp) <= 0 and totErDo_pull != 0:
-            pull = (nbObs-nbExp)/totErDo_pull
+        if plotSignificance:
+            print "plot significance in the bottom panel"
+            pValue = pValuePoissonError(int(nbObs), nbExp, nbExpEr*nbExpEr)
+            print "pval:", pValue
+            if pValue < 0.5:
+                pull = pValueToSignificance(pValue, nbObs>nbExp )
+            else:
+                pull = 0.0001
+                print "pull at zero!"
+
+        else:
+            print "plot pull = (obs-exp)/err in the bottom panel"
+            if (nbObs-nbExp) > 0 and totErUp_pull != 0:
+                pull = (nbObs-nbExp)/totErUp_pull
+            if (nbObs-nbExp) <= 0 and totErDo_pull != 0:
+                pull = (nbObs-nbExp)/totErDo_pull
+                
+            if -0.02 < pull < 0: pull = -0.02 ###ATT: ugly
+            if 0 < pull < 0.02:  pull = 0.02 ###ATT: ugly
 
         nbExpComponents = []
         for sam in samples.split(","):
@@ -468,9 +485,6 @@ def makePullPlot(pickleFilename, regionList, samples, renamedRegions, outputPref
                 nbExpComponents.append((sam, mydict["MC_exp_events_"+sam][index] ))
             else:
                 nbExpComponents.append((sam, mydict["Fitted_events_"+sam][index] ))
-
-        if -0.02 < pull < 0: pull = -0.02 ###ATT: ugly
-        if 0 < pull < 0.02:  pull = 0.02 ###ATT: ugly
 
         if "SR" in region and doBlind:
             nbObs = -100
