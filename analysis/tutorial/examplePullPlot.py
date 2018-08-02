@@ -114,7 +114,7 @@ def main():
         return
     
     # Open the pickle and make the pull plot
-    makePullPlot(pickleFilename, regionList, samples, renamedRegions, region, doBlind)
+    makePullPlot(pickleFilename, regionList, samples, renamedRegions, region, doBlind, plotSignificance=False)
 
 if __name__ == "__main__":
     main()
