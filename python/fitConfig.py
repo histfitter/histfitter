@@ -65,7 +65,7 @@ class fitConfig(object):
 
         # attributes to below are OK to deepcopy
         self.mode = "comb"
-        self.statErrThreshold = None #None means to turn OFF mcStat error
+        self.statErrThreshold = 0.0
         self.statErrorType = "Gaussian"
         self.measurements = []
         self.channels = []
