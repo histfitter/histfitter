@@ -18,7 +18,7 @@
  **********************************************************************************
 """
 
-from ROOT import THStack, TLegend, TCanvas, TFile, std, TH1F
+from ROOT import THStack, TLegend, TCanvas, TFile, std, TH1F, TH2F
 from ROOT import ConfigMgr, FitConfig, ChannelStyle #this module comes from gSystem.Load("libSusyFitter.so")
 from ROOT import gROOT, TObject, TProof
 from prepareHistos import PrepareHistos
@@ -746,6 +746,60 @@ class ConfigManager(object):
                         #log.info("                                       High: %s" % str(syst.filesHi))
         
         return
+      
+    def printPrunedSyst(self):
+        """
+        Print a list with all pruned systematics
+        """
+        
+        width = 3 
+        depth = 1
+        
+        for idx, fitConfig in enumerate(self.fitConfigs):
+            depth = 1
+            log.info("{}fitConfig {:d}/{:d}: {}".format(" "*depth*width, idx+1, len(self.fitConfigs), fitConfig.name))
+
+            for i, channel in enumerate(fitConfig.channels):
+              
+                prunedDict={}
+                syst_list=[]
+              
+                depth = 2
+                log.info("{}Channel {:d}/{:d}: {}".format(" "*depth*width, i+1, len(fitConfig.channels), channel.name))
+                for j, sample in enumerate(channel.sampleList):
+                    depth = 3
+                    log.info("{}Sample {:d}/{:d}: {} ".format(" "*depth*width, j+1, len(channel.sampleList), sample.name))
+                    log.info("{}Pruned systematics (overallSys):".format(" "*depth*width))
+                    prunedDict[sample.name]=[]
+                    
+                    for k, syst_name in enumerate(sample.systDict.keys()):
+                        depth = 4
+                        if syst_name in sample.systListOverallPruned:
+                            log.info("{}. {}".format(" "*depth*width, syst_name))
+                            prunedDict[sample.name].append(syst_name)
+                            if not syst_name in syst_list: syst_list.append(syst_name) 
+                            
+                canvasSyst = TCanvas("canvasSyst_"+str(i),"canvasSyst_"+channel.name,600,1200)
+                histPrunedOverall = TH2F("histPrunedOverall_"+str(i), "Pruned systematics affecting the normalization for channel "+channel.name,len(channel.sampleList),0,len(channel.sampleList),len(syst_list),0,len(syst_list))
+                for j2, thisSample in enumerate(prunedDict.keys()):
+                    for i2 in range(0,len(syst_list)):
+                        if syst_list[i2] in prunedDict[thisSample]:
+                            histPrunedOverall.SetBinContent(j2,i2,1)
+                        #else:
+                        #    histPrunedOverall.SetBinContent(j2,i2,-1)
+                    histPrunedOverall.GetXaxis().SetBinLabel(j2,thisSample)
+                
+                for i2 in range(0,len(syst_list)):
+                    histPrunedOverall.GetYaxis().SetBinLabel(i2,syst_list[i2])
+            
+                histPrunedOverall.GetXaxis().SetTitle("Channel")
+                histPrunedOverall.GetYaxis().SetTitle("systematic")
+            
+                histPrunedOverall.Draw("col")
+                canvasSyst.Print("canvasSyst_"+channel.name+".pdf")
+
+
+        return
 
     #def printTreeNames(self):
         #"""
@@ -1121,7 +1175,10 @@ class ConfigManager(object):
                 fitConfig.writeXML() # <- this internally calls channel.writeXML()
                 fitConfig.executehist2workspace()
             else:
-                fitConfig.writeWorkspaces()       
+                fitConfig.writeWorkspaces()
+                
+        if self.prun:
+            self.printPrunedSyst()
 
     def appendSystinChanInfoDict(self, chan, sam, systName, syst):
         """

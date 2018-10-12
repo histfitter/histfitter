@@ -80,7 +80,7 @@ def checkNormalizationEffect(hNom, hUp, hDown, norm_threshold=0.005):
 
     return True
     
-def checkShapeEffect(hNom, hUp, hDown, chi2_threshold=0.95, use_overflows=True):
+def checkShapeEffect(hNom, hUp, hDown, chi2_threshold=0.05, use_overflows=True):
     # Perform a weighted comparison including the overflow and underflow, unless the user says they don't want it
     opt = "WW OF UF"
     if not use_overflows:
@@ -98,7 +98,7 @@ def checkShapeEffect(hNom, hUp, hDown, chi2_threshold=0.95, use_overflows=True):
     #up_pvalue = chi2test(hNom, hUp)
     #down_pvalue = chi2test(hNom, hDown)
     
-    pvalue = min([up_pvalue, down_pvalue])
+    pvalue = max([up_pvalue, down_pvalue])
     if not pvalue < chi2_threshold:
         log.verbose("checkShapeEffect(): {}, {}, {}: up_pvalue = {:.3f}, down_pvalue = {:3f}, chi2 threshold = {:.3f}".format(hNom.GetName(), hUp.GetName(), hDown.GetName(), up_pvalue, down_pvalue, chi2_threshold))
         return False
@@ -170,6 +170,10 @@ class Sample(object):
         self.shapeFactorList = []
         ## Internal list of all systematics
         self.systList = []
+        ##internal list of pruned syst - overall:
+        self.systListOverallPruned = []
+        ##internal list of pruned syst - histoSys:
+        self.systListHistoPruned = []        
         ## Internal list of weights
         self.weights = []
         ## Internal list of sample-specific weights
@@ -840,7 +844,15 @@ class Sample(object):
            
             # Do we need to include an overall systematic?
             if includeOverallSys and not (oneSide and not symmetrize):
-                self.addOverallSys(systName, highN, lowN)                
+                if not configMgr.prun:
+                    self.addOverallSys(systName, highN, lowN)
+
+                else:
+                    if max( abs(highN-1.0), abs(1.0-lowN) ) < configMgr.prunThreshold:
+                        log.error("    generating OverallSys for {} syst={} nom={:g} high={:g} low={:g}. Systematic is smaller than pruning threshold ({:g}) and is removed from fit.".format(nomName, systName, nomIntegralN, highIntegralN, lowIntegralN, configMgr.prunThreshold))
+                        self.systListOverallPruned.append(systName)
+                    else: 
+                        self.addOverallSys(systName, highN, lowN)
             
 
         # Case 2
@@ -875,15 +887,16 @@ class Sample(object):
             # Check whether a renormalization actually makes sense
             if nomIntegral == 0 or lowIntegral == 0 or highIntegral == 0:
                 # MB : cannot renormalize, so don't after all
-                self.histoSystList.append((systName, highName, lowName, configMgr.histCacheFile, "", "", "", ""))
-
-                ## TODO: check shape effect
-                #if checkShapeEffect(configMgr.hists[nomName], configMgr.hists[highName], configMgr.hists[lowName] ):
-                    #log.error("    generating HistoSys for %s syst=%s nom=%g high=%g low=%g: cannot renormalize; only using shape" % (nomName, systName, nomIntegral, highIntegral, lowIntegral))
-                    #self.histoSystList.append((systName, highName, lowName, configMgr.histCacheFile, "", "", "", ""))
-                #else:
-                    #log.error("    generating HistoSys for %s syst=%s nom=%g high=%g low=%g: cannot renormalize, no shape effect. Systematic is removed from fit." % (nomName, systName, nomIntegral, highIntegral, lowIntegral))
-                    #return
+                if not configMgr.prun:
+                    self.histoSystList.append((systName, highName, lowName, configMgr.histCacheFile, "", "", "", ""))
+                else:
+                    ## check shape effect
+                    if checkShapeEffect(configMgr.hists[nomName], configMgr.hists[highName], configMgr.hists[lowName] ):
+                        log.error("    generating HistoSys for %s syst=%s nom=%g high=%g low=%g: cannot renormalize; only using shape" % (nomName, systName, nomIntegral, highIntegral, lowIntegral))
+                        self.histoSystList.append((systName, highName, lowName, configMgr.histCacheFile, "", "", "", ""))
+                    else:
+                        log.error("    generating HistoSys for %s syst=%s nom=%g high=%g low=%g: cannot renormalize, no shape effect. Systematic is removed from fit." % (nomName, systName, nomIntegral, highIntegral, lowIntegral))
+                        return
             else:
                 # renormalize
                 try:
@@ -902,22 +915,24 @@ class Sample(object):
                 except ZeroDivisionError:
                     log.error("    generating HistoSys for %s syst=%s: nom=%g high=%g low=%g keeping in fit (offending histogram should be empty)." % (nomName, systName, nomIntegral, highIntegral, lowIntegral))
                     return
-                    
-                self.histoSystList.append((systName, highName+"Norm", lowName+"Norm", configMgr.histCacheFile, "", "", "", ""))
-                self.addOverallSys(systName, high, low)
+                
+                if not configMgr.prun:
+                    self.histoSystList.append((systName, highName+"Norm", lowName+"Norm", configMgr.histCacheFile, "", "", "", ""))
+                    self.addOverallSys(systName, high, low)
 
-                ## And finally add the systematic
-                ## TODO: check shape effect
-                #if checkShapeEffect(configMgr.hists[nomName], configMgr.hists[highName], configMgr.hists[lowName] ):
-                    #self.histoSystList.append((systName, highName+"Norm", lowName+"Norm", configMgr.histCacheFile, "", "", "", ""))
-                #else:
-                    #log.error("    generating HistoSys for %s syst=%s nom=%g high=%g low=%g has no impact on shape. Shape effect of systematic is removed from fit." % (nomName, systName, nomIntegral, highIntegral, lowIntegral))
+                else:
+                    ##check shape effect
+                    if checkShapeEffect(configMgr.hists[nomName], configMgr.hists[highName], configMgr.hists[lowName] ):
+                        self.histoSystList.append((systName, highName+"Norm", lowName+"Norm", configMgr.histCacheFile, "", "", "", ""))
+                    else:
+                        log.error("    generating HistoSys for %s syst=%s nom=%g high=%g low=%g has no impact on shape. Shape effect of systematic is removed from fit." % (nomName, systName, nomIntegral, highIntegral, lowIntegral))
 
-                ## TODO: check norm effect
-                #if max( abs(high-1.0), abs(1.0-low) ) < 0.005:
-                    #log.error("    generating OverallSys for {} syst={} nom={:g} high={:g} low={:g}. Systematic has less than 0.5% impact and is removed from fit.".format(nomName, systName, nomIntegral, highIntegral, lowIntegral))
-                #else: 
-                    #self.addOverallSys(systName, high, low)
+                    ##check norm effect
+                    if max( abs(high-1.0), abs(1.0-low) ) < configMgr.prunThreshold:
+                        log.error("    generating OverallSys for {} syst={} nom={:g} high={:g} low={:g}. Systematic is smaller than pruning threshold ({:g}) and is removed from fit.".format(nomName, systName, nomIntegral, highIntegral, lowIntegral, configMgr.prunThreshold))
+                        self.systListOverallPruned.append(systName)
+                    else: 
+                        self.addOverallSys(systName, high, low)
 
         # Case 3
         if not includeOverallSys and not normalizeSys: # no renormalization, and no overall systematic
@@ -989,25 +1004,26 @@ class Sample(object):
                 lowIntegral = configMgr.hists[lowName].Integral()
                 highIntegral = configMgr.hists[highName].Integral()
 
-                keepNorm = True
-                if not checkNormalizationEffect(configMgr.hists[nomName], configMgr.hists[highName], configMgr.hists[lowName]):
-                    log.error("    HistoSys for {} syst={} nom={:g} high={:g} low={:g} has small impact on normalisation.".format(nomName, systName, nomIntegral, highIntegral, lowIntegral))
-                    keepNorm = False
+                if configMgr.prun:
+                    keepNorm = True
+                    if not checkNormalizationEffect(configMgr.hists[nomName], configMgr.hists[highName], configMgr.hists[lowName], configMgr.prunThreshold):
+                        log.error("    HistoSys for {} syst={} nom={:g} high={:g} low={:g} has small impact on normalisation.".format(nomName, systName, nomIntegral, highIntegral, lowIntegral))
+                        keepNorm = False
 
-                if not checkShapeEffect(configMgr.hists[nomName], configMgr.hists[highName], configMgr.hists[lowName]):
-                #if not True: # TODO: checkShapeEffect() to be implemented 
-                    if not keepNorm:
-                        log.error("    HistoSys for {} syst={} nom={:g} high={:g} low={:g} has small impact on normalisation and no effect on shape. Removing from fit.".format(nomName, systName, nomIntegral, highIntegral, lowIntegral))
-                        return
+                    if not checkShapeEffect(configMgr.hists[nomName], configMgr.hists[highName], configMgr.hists[lowName]):
+                    #if not True: # TODO: checkShapeEffect() to be implemented 
+                        if not keepNorm:
+                            log.error("    HistoSys for {} syst={} nom={:g} high={:g} low={:g} has small impact on normalisation and no effect on shape. Removing from fit.".format(nomName, systName, nomIntegral, highIntegral, lowIntegral))
+                            return
                         
-                    log.error("    HistoSys for {} syst={} nom={:g} high={:g} low={:g} has small impact on shape. Using normalisation only.".format(nomName, systName, nomIntegral, highIntegral, lowIntegral))
+                        #log.error("    HistoSys for {} syst={} nom={:g} high={:g} low={:g} has small impact on shape. Using normalisation only.".format(nomName, systName, nomIntegral, highIntegral, lowIntegral))
 
-                    for i in xrange(0, configMgr.hists[nomName].GetNbinsX()+2):
-                        configMgr.hists[lowName].SetBinContent(i, configMgr.hists[nomName].GetBinContent(i))
-                        configMgr.hists[highName].SetBinContent(i, configMgr.hists[nomName].GetBinContent(i))
+                        #for i in xrange(0, configMgr.hists[nomName].GetNbinsX()+2):
+                        #    configMgr.hists[lowName].SetBinContent(i, configMgr.hists[nomName].GetBinContent(i))
+                        #    configMgr.hists[highName].SetBinContent(i, configMgr.hists[nomName].GetBinContent(i))
                         
-                    configMgr.hists[lowName].Scale(lowIntegral)
-                    configMgr.hists[highName].Scale(highIntegral)
+                        #configMgr.hists[lowName].Scale(lowIntegral)
+                        #configMgr.hists[highName].Scale(highIntegral)
 
                 self.histoSystList.append((systName, highName, lowName, configMgr.histCacheFile, "", "", "", ""))
 
@@ -1150,6 +1166,7 @@ class Sample(object):
           
         if configMgr.prun and fabs(high-1.0) < configMgr.prunThreshold and fabs(low-1.0) < configMgr.prunThreshold:
             log.warning("    addOverallSys for %s: high=%g low=%g. Pruning theshold=%g. Systematic is removed from fit." % (systName, high, low, configMgr.prunThreshold))
+            self.systListOverallPruned.append(systName)
 
         self.overallSystList.append((systName, high, low))
         if not systName in configMgr.systDict.keys():
