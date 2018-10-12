@@ -147,6 +147,8 @@ class ConfigManager(object):
         self.doHypoTest = False
         self.doDiscoveryHypoTest = False
         self.ReduceCorrMatrix = False # Boolean to make a reduced correlation matrix
+        self.prun = False
+        self.prunThreshold = 0.01
 
         self.fitConfigs = [] # fitConfig object
         self.prepare = None # PrepareHistos object

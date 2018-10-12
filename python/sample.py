@@ -994,8 +994,8 @@ class Sample(object):
                     log.error("    HistoSys for {} syst={} nom={:g} high={:g} low={:g} has small impact on normalisation.".format(nomName, systName, nomIntegral, highIntegral, lowIntegral))
                     keepNorm = False
 
-                #if not checkShapeEffect(configMgr.hists[nomName], configMgr.hists[highName], configMgr.hists[lowName]):
-                if not True: # TODO: checkShapeEffect() to be implemented 
+                if not checkShapeEffect(configMgr.hists[nomName], configMgr.hists[highName], configMgr.hists[lowName]):
+                #if not True: # TODO: checkShapeEffect() to be implemented 
                     if not keepNorm:
                         log.error("    HistoSys for {} syst={} nom={:g} high={:g} low={:g} has small impact on normalisation and no effect on shape. Removing from fit.".format(nomName, systName, nomIntegral, highIntegral, lowIntegral))
                         return
@@ -1147,6 +1147,9 @@ class Sample(object):
         if fabs(high) < 1E-5 and fabs(low) < 1E-5:
             log.warning("    addOverallSys for %s: high=%g low=%g. Systematic is removed from fit." % (systName, high, low))
             return
+          
+        if configMgr.prun and fabs(high-1.0) < configMgr.prunThreshold and fabs(low-1.0) < configMgr.prunThreshold:
+            log.warning("    addOverallSys for %s: high=%g low=%g. Pruning theshold=%g. Systematic is removed from fit." % (systName, high, low, configMgr.prunThreshold))
 
         self.overallSystList.append((systName, high, low))
         if not systName in configMgr.systDict.keys():
