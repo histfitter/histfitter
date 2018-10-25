@@ -25,6 +25,12 @@ import os
 
 log = Logger('PrepareHistos')
 
+def isEquidistant(h):
+    widths = []
+    for i in range(1,h.GetNbinsX()+1):
+        widths += [h.GetBinWidth(i)]
+    return widths.count(widths[0]) == len(widths)
+
 def pairwise(iterable):
     import itertools
     
@@ -531,6 +537,11 @@ class PrepareHistos(object):
 
         if not (self.configMgr.hists[name] is None):
             log.debug("Loaded histogram {} from cache with integral {}".format(name, self.configMgr.hists[name].Integral()))
+
+            # Check if histogram has equidistant bins
+            if not isEquidistant(self.configMgr.hists[name]):
+                log.error("addHistoFromCache: histogram %s is not equidistant and will be mapped to a proxy equidistant histogram." % self.configMgr.hists[name].GetName())
+                self.mapIntoEquidistant(name)
             
             # Define a function to check for almost-equality between floats
             desired_binSize = float(self.channel.binHigh - self.channel.binLow) / self.channel.nBins
@@ -870,4 +881,32 @@ class PrepareHistos(object):
             self.updateHistBin(h, binIn, binOver)
 
         return
+
+    def mapIntoEquidistant(self, name):
+        """
+        Remap non-equidistant histogram into a proxy equidistant histogram.
+        WARNING: will also change self.channel.binLow/High accordingly.
+
+        @param name the histogram
+        """
+        h = self.configMgr.hists[name]
+        nx = h.GetNbinsX()
+        currentBinEdges = []
+        htemp = TH1F(h.GetName()+"TempNameForRemapping",h.GetName()+"TempNameForRemapping",h.GetNbinsX(),0,h.GetNbinsX())
+        for i in range(1,nx+1):
+            currentBinEdges += [h.GetBinLowEdge(i)]
+            htemp.SetBinContent(i,h.GetBinContent(i))
+            htemp.SetBinError(i,h.GetBinError(i))
+        currentBinEdges += [h.GetBinLowEdge(nx)+h.GetBinWidth(nx)]
+        h = htemp
+        h.SetTitle(h.GetTitle().replace("TempNameForRemapping",""))
+        h.SetName(h.GetName().replace("TempNameForRemapping",""))
+        self.configMgr.hists[name] = h
+        regName = self.channel.regionString + "_" + self.channel.niceVarName
+        # do this only once per channel
+        if not self.configMgr.cppMgr.getRebinMapBool(regName):
+            for edge in currentBinEdges:
+                self.configMgr.cppMgr.rebinMapPushBack(regName,edge)
+        self.channel.binLow = 0
+        self.channel.binHigh = nx
 
