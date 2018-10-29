@@ -7,6 +7,7 @@
 #include <vector>
 #include <string>
 #include "TString.h"
+#include "TGraphAsymmErrors.h"
 
 #include <stdexcept>
 
@@ -15,6 +16,7 @@
 #include "RooArgList.h"
 #include "RooExpandedFitResult.h"
 #include "ChannelStyle.h"
+#include "RooBinning.h"
 
 class TH1D;
 class TMap;
@@ -115,6 +117,11 @@ class HistogramPlot {
         TLegend* buildLegend();
         void loadComponentInformation();
 
+        // remap histograms
+        TH1D* remapHistogram(TH1* h);
+        TGraphAsymmErrors* remapGraph(TGraphAsymmErrors* g, TGraphAsymmErrors* gref = nullptr);
+        void remapCurve(RooCurve* c);
+
         RooWorkspace* m_workspace;
         RooAbsPdf* m_regionPdf;
         RooDataSet* m_regionData;
@@ -143,6 +150,10 @@ class HistogramPlot {
 
         // component histograms
         std::vector<TH1*> m_componentHistograms;
+
+        // bin edges for rebinning
+        std::vector<double> m_binEdges;
+
 
 };
 
