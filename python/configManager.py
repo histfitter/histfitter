@@ -164,6 +164,8 @@ class ConfigManager(object):
 
         self.bkgParName = ''
         self.bkgCorrVal = -1.
+
+        self.rebin = False # Automatically rebin histograms into proxy histograms with edged [0, 1, ..., N]
         return
 
     def setLumiUnits(self,unit):

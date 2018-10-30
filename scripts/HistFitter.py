@@ -138,6 +138,7 @@ if __name__ == "__main__":
     parser.add_argument("-z", "--discovery-hypotest", help="run discovery hypothesis test", action="store_true", default=doDiscoveryHypoTests)
     parser.add_argument("-g", "--grid_points", help="grid points to process (comma-separated)")
     parser.add_argument("-r", "--regions", help="signal regions to process (comma-separated)", default="all")
+    parser.add_argument("-R", "--rebin", help="rebin all histograms to proxy x-axis bins [0, 1, 2, ... N] and unfold them post-fit", action="store_true", default=False)
 
     """
     note that we cannot make -d and -D the same due to http://bugs.python.org/issue9338
@@ -276,6 +277,9 @@ if __name__ == "__main__":
 
     if HistFitterArgs.use_asimov:
         configMgr.useAsimovSet = True
+
+    if HistFitterArgs.rebin:
+        configMgr.rebin = True
 
     if HistFitterArgs.grid_points and HistFitterArgs.grid_points != "":
         sigSamples = HistFitterArgs.grid_points.split(",")

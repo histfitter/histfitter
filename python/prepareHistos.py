@@ -25,12 +25,6 @@ import os
 
 log = Logger('PrepareHistos')
 
-def isEquidistant(h):
-    widths = []
-    for i in range(1,h.GetNbinsX()+1):
-        widths += [h.GetBinWidth(i)]
-    return widths.count(widths[0]) == len(widths)
-
 def pairwise(iterable):
     import itertools
     
@@ -118,6 +112,9 @@ class PrepareHistos(object):
        
         # fallback?
         self.useCacheToTreeFallback = useCacheToTreeFallback
+
+        # for checking bin edge consistency
+        self.regBins = {}
 
     def __del__(self):
         if self.cacheFile != None: self.cacheFile.Close()
@@ -539,9 +536,12 @@ class PrepareHistos(object):
             log.debug("Loaded histogram {} from cache with integral {}".format(name, self.configMgr.hists[name].Integral()))
 
             # Check if histogram has equidistant bins
-            if not isEquidistant(self.configMgr.hists[name]):
-                log.error("addHistoFromCache: histogram %s is not equidistant and will be mapped to a proxy equidistant histogram." % self.configMgr.hists[name].GetName())
+            if self.configMgr.rebin:
+                log.info("addHistoFromCache: histogram {} will be mapped to a proxy equidistant histogram.".format(self.configMgr.hists[name].GetName()))
                 self.mapIntoEquidistant(name)
+                # No further checks are needed at this point
+                self.name = name
+                return self.configMgr.hists[name]
             
             # Define a function to check for almost-equality between floats
             desired_binSize = float(self.channel.binHigh - self.channel.binLow) / self.channel.nBins
@@ -884,7 +884,7 @@ class PrepareHistos(object):
 
     def mapIntoEquidistant(self, name):
         """
-        Remap non-equidistant histogram into a proxy equidistant histogram.
+        Remap histogram into a proxy equidistant histogram.
         WARNING: will also change self.channel.binLow/High accordingly.
 
         @param name the histogram
@@ -902,11 +902,18 @@ class PrepareHistos(object):
         h.SetTitle(h.GetTitle().replace("TempNameForRemapping",""))
         h.SetName(h.GetName().replace("TempNameForRemapping",""))
         self.configMgr.hists[name] = h
+        # need to shuffle the name, because cxx code uses a different order
         regName = self.channel.regionString + "_" + self.channel.niceVarName
-        # do this only once per channel
+        # save bins only once per channel
         if not self.configMgr.cppMgr.getRebinMapBool(regName):
+            # save bin edges for later checks
+            self.regBins[regName] = currentBinEdges
             for edge in currentBinEdges:
                 self.configMgr.cppMgr.rebinMapPushBack(regName,edge)
+        # check whether bin edges are consistent within one channel
+        elif not currentBinEdges==self.regBins[regName]:
+            log.error("histogram {} does not match previously mapped bins from region {}".format(h.GetName(), regName))
+            raise Exception("Array {} does not match {}".format(currentBinEdges, self.regBins[regName]))
         self.channel.binLow = 0
         self.channel.binHigh = nx
 
