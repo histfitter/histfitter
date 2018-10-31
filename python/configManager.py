@@ -149,6 +149,7 @@ class ConfigManager(object):
         self.ReduceCorrMatrix = False # Boolean to make a reduced correlation matrix
         self.prun = False
         self.prunThreshold = 0.01
+        self.prunMethod = 2 # method 1: chi2 test for histoSys, method 2: comparison of yields in every histogram bin for histoSys. Method 2 takes the prunThreshold. Method 1 uses defines a p-value of below 5% as not fitting
 
         self.fitConfigs = [] # fitConfig object
         self.prepare = None # PrepareHistos object

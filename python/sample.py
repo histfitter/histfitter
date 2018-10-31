@@ -81,26 +81,42 @@ def checkNormalizationEffect(hNom, hUp, hDown, norm_threshold=0.005):
     return True
     
 def checkShapeEffect(hNom, hUp, hDown, chi2_threshold=0.05, use_overflows=True):
-    # Perform a weighted comparison including the overflow and underflow, unless the user says they don't want it
-    opt = "WW OF UF"
-    if not use_overflows:
-        opt = "WW"
+  
+    #method 1: perform a comparison based on a chi2 test
+    if configMgr.prunMethod==1:
+        # Perform a weighted comparison including the overflow and underflow, unless the user says they don't want it
+        opt = "WW OF UF"
+        if not use_overflows:
+            opt = "WW"
 
-    # ROOT prints annoying messages about bin content at Info level; suppress them temporarily
-    _err_level = ROOT.gErrorIgnoreLevel
-    ROOT.gErrorIgnoreLevel = 2000
+        # ROOT prints annoying messages about bin content at Info level; suppress them temporarily
+        _err_level = ROOT.gErrorIgnoreLevel
+        ROOT.gErrorIgnoreLevel = 2000
 
-    up_pvalue = hNom.Chi2Test(hUp, opt)
-    down_pvalue = hNom.Chi2Test(hDown, opt)
+        up_pvalue = hNom.Chi2Test(hUp, opt)
+        down_pvalue = hNom.Chi2Test(hDown, opt)
     
-    ROOT.gErrorIgnoreLevel = _err_level
+        ROOT.gErrorIgnoreLevel = _err_level
     
-    #up_pvalue = chi2test(hNom, hUp)
-    #down_pvalue = chi2test(hNom, hDown)
+        #up_pvalue = chi2test(hNom, hUp)
+        #down_pvalue = chi2test(hNom, hDown)
     
-    pvalue = max([up_pvalue, down_pvalue])
-    if not pvalue < chi2_threshold:
-        log.verbose("checkShapeEffect(): {}, {}, {}: up_pvalue = {:.3f}, down_pvalue = {:3f}, chi2 threshold = {:.3f}".format(hNom.GetName(), hUp.GetName(), hDown.GetName(), up_pvalue, down_pvalue, chi2_threshold))
+        pvalue = max([up_pvalue, down_pvalue])
+        if not pvalue < chi2_threshold:
+            log.verbose("checkShapeEffect(): {}, {}, {}: up_pvalue = {:.3f}, down_pvalue = {:3f}, chi2 threshold = {:.3f}".format(hNom.GetName(), hUp.GetName(), hDown.GetName(), up_pvalue, down_pvalue, chi2_threshold))
+            return False
+    
+    #method 2: compare yield of all bins and check if below the configMgr.prunThreshold
+    elif configMgr.prunMethod==2:
+        if (not hNom.GetNbinsX() is hUp.GetNbinsX()) or (not hNom.GetNbinsX() is hDown.GetNbinsX()):
+            log.error("Checking shape impact of nominal histogram {} againt up histogram {} and down histogram {} and find a different number of bins. Stop comparison".format(hNom.GetName(), hUp.GetName(), hDown.GetName()))
+            return True
+        for bin1 in range(0,hNom.GetNbinsX()+1):
+            if (bin1==0 or bin1==hNom.GetNbinsX()) and use_overflows==False:
+                continue
+            if fabs(hNom.GetBinContent(bin1)-hUp.GetBinContent(bin1))>configMgr.prunThreshold or fabs(hNom.GetBinContent(bin1)-hDown.GetBinContent(bin1))>configMgr.prunThreshold:
+                #log.verbose("checkShapeEffect(): bin content nominal: {0:f}, up: {1:f}, down: {2:f} for histogram {3:s}. Above prun threshold: {4:f}".format(hNom.GetBinContent(bin1),hUp.GetBinContent(bin1),hDown.GetBinContent(bin1),hNom.GetName(),configMgr.prunThreshold))
+                return True
         return False
 
     return True
@@ -838,18 +854,33 @@ class Sample(object):
             # Now, finally add the systematic
             if oneSide and not symmetrize:
                 ## MB : avoid swapping of histograms, always pass high and nominal
-                self.histoSystList.append((systName, highName+"Norm", nomName, configMgr.histCacheFile, "", "", "", ""))
+                if not configMgr.prun:
+                    self.histoSystList.append((systName, highName+"Norm", nomName, configMgr.histCacheFile, "", "", "", ""))
+                else:
+                    #checking here if systematics really affect the shape. Note that we don't need to check the normaliaztion, as this part is moved to an overallSys, that we check below
+                    if checkShapeEffect(configMgr.hists[nomName],configMgr.hists[highName+"Norm"],configMgr.hists[lowName+"Norm"]):
+                        self.histoSystList.append((systName, highName+"Norm", nomName, configMgr.histCacheFile, "", "", "", ""))
+                    else:
+                        log.info("Remove shape systematics {} for histogram {} as differences smaller {} or found small in chi2 test".format(systName,nomName,configMgr.prunThreshold))
             else:
-                self.histoSystList.append((systName, highName+"Norm", lowName+"Norm", configMgr.histCacheFile, "", "", "", ""))
-           
+                if not configMgr.prun:
+                    self.histoSystList.append((systName, highName+"Norm", lowName+"Norm", configMgr.histCacheFile, "", "", "", ""))
+                else:
+                    #checking here if systematics really affect the shape. Note that we don't need to check the normaliaztion, as this part is moved to an overallSys, that we check below
+                    if checkShapeEffect(configMgr.hists[nomName],configMgr.hists[highName+"Norm"],configMgr.hists[lowName+"Norm"]):
+                        self.histoSystList.append((systName, highName+"Norm", lowName+"Norm", configMgr.histCacheFile, "", "", "", ""))
+                    else:
+                        log.info("Remove shape systematics {} for histogram {} as differences smaller {} or found small in chi2 test".format(systName,nomName,configMgr.prunThreshold))
+                        
             # Do we need to include an overall systematic?
             if includeOverallSys and not (oneSide and not symmetrize):
+                #just include the systematics in case we don't prun systematics. Else check size.
                 if not configMgr.prun:
                     self.addOverallSys(systName, highN, lowN)
 
                 else:
                     if max( abs(highN-1.0), abs(1.0-lowN) ) < configMgr.prunThreshold:
-                        log.error("    generating OverallSys for {} syst={} nom={:g} high={:g} low={:g}. Systematic is smaller than pruning threshold ({:g}) and is removed from fit.".format(nomName, systName, nomIntegralN, highIntegralN, lowIntegralN, configMgr.prunThreshold))
+                        log.info("    generating OverallSys for {} syst={} nom={:g} high={:g} low={:g}. Systematic is smaller than pruning threshold ({:g}) and is removed from fit.".format(nomName, systName, nomIntegralN, highIntegralN, lowIntegralN, configMgr.prunThreshold))
                         self.systListOverallPruned.append(systName)
                     else: 
                         self.addOverallSys(systName, highN, lowN)
@@ -921,7 +952,7 @@ class Sample(object):
                     self.addOverallSys(systName, high, low)
 
                 else:
-                    ##check shape effect
+                    ##check shape effect - note in this case we don't need to check the normaliaztion effect (in contrast to case 3 below), because we have already moved this part to an overallSys that we are checking separately
                     if checkShapeEffect(configMgr.hists[nomName], configMgr.hists[highName], configMgr.hists[lowName] ):
                         self.histoSystList.append((systName, highName+"Norm", lowName+"Norm", configMgr.histCacheFile, "", "", "", ""))
                     else:
@@ -1011,7 +1042,6 @@ class Sample(object):
                         keepNorm = False
 
                     if not checkShapeEffect(configMgr.hists[nomName], configMgr.hists[highName], configMgr.hists[lowName]):
-                    #if not True: # TODO: checkShapeEffect() to be implemented 
                         if not keepNorm:
                             log.error("    HistoSys for {} syst={} nom={:g} high={:g} low={:g} has small impact on normalisation and no effect on shape. Removing from fit.".format(nomName, systName, nomIntegral, highIntegral, lowIntegral))
                             return
