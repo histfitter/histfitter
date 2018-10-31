@@ -862,6 +862,7 @@ class Sample(object):
                         self.histoSystList.append((systName, highName+"Norm", nomName, configMgr.histCacheFile, "", "", "", ""))
                     else:
                         log.info("Remove shape systematics {} for histogram {} as differences smaller {} or found small in chi2 test".format(systName,nomName,configMgr.prunThreshold))
+                        self.systListHistoPruned.append(systName)
             else:
                 if not configMgr.prun:
                     self.histoSystList.append((systName, highName+"Norm", lowName+"Norm", configMgr.histCacheFile, "", "", "", ""))
@@ -871,6 +872,7 @@ class Sample(object):
                         self.histoSystList.append((systName, highName+"Norm", lowName+"Norm", configMgr.histCacheFile, "", "", "", ""))
                     else:
                         log.info("Remove shape systematics {} for histogram {} as differences smaller {} or found small in chi2 test".format(systName,nomName,configMgr.prunThreshold))
+                        self.systListHistoPruned.append(systName)
                         
             # Do we need to include an overall systematic?
             if includeOverallSys and not (oneSide and not symmetrize):
@@ -927,6 +929,7 @@ class Sample(object):
                         self.histoSystList.append((systName, highName, lowName, configMgr.histCacheFile, "", "", "", ""))
                     else:
                         log.error("    generating HistoSys for %s syst=%s nom=%g high=%g low=%g: cannot renormalize, no shape effect. Systematic is removed from fit." % (nomName, systName, nomIntegral, highIntegral, lowIntegral))
+                        #self.systListHistoPruned.append(systName)
                         return
             else:
                 # renormalize
@@ -957,7 +960,8 @@ class Sample(object):
                         self.histoSystList.append((systName, highName+"Norm", lowName+"Norm", configMgr.histCacheFile, "", "", "", ""))
                     else:
                         log.error("    generating HistoSys for %s syst=%s nom=%g high=%g low=%g has no impact on shape. Shape effect of systematic is removed from fit." % (nomName, systName, nomIntegral, highIntegral, lowIntegral))
-
+                        self.systListHistoPruned.append(systName)
+                        
                     ##check norm effect
                     if max( abs(high-1.0), abs(1.0-low) ) < configMgr.prunThreshold:
                         log.error("    generating OverallSys for {} syst={} nom={:g} high={:g} low={:g}. Systematic is smaller than pruning threshold ({:g}) and is removed from fit.".format(nomName, systName, nomIntegral, highIntegral, lowIntegral, configMgr.prunThreshold))
@@ -1044,6 +1048,7 @@ class Sample(object):
                     if not checkShapeEffect(configMgr.hists[nomName], configMgr.hists[highName], configMgr.hists[lowName]):
                         if not keepNorm:
                             log.error("    HistoSys for {} syst={} nom={:g} high={:g} low={:g} has small impact on normalisation and no effect on shape. Removing from fit.".format(nomName, systName, nomIntegral, highIntegral, lowIntegral))
+                            self.systListHistoPruned.append(systName)
                             return
                         
                         #log.error("    HistoSys for {} syst={} nom={:g} high={:g} low={:g} has small impact on shape. Using normalisation only.".format(nomName, systName, nomIntegral, highIntegral, lowIntegral))
