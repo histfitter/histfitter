@@ -535,6 +535,15 @@ class PrepareHistos(object):
         if not (self.configMgr.hists[name] is None):
             log.debug("Loaded histogram {} from cache with integral {}".format(name, self.configMgr.hists[name].Integral()))
 
+            # this is a ugly hack for now, to add an exception for 'Norm' histograms that originate from a channel with multiple bins   
+            if 'Norm' in self.configMgr.hists[name].GetTitle():
+                if (int(self.configMgr.hists[name].GetNbinsX()) == 1 and \
+                    self.configMgr.hists[name].GetBinLowEdge(1) == 0.5 and \
+                    self.configMgr.hists[name].GetXaxis().GetBinUpEdge(self.configMgr.hists[name].GetNbinsX()) == 1.5): 
+                        log.debug("This is ugly: Stupid hack to evade check of histogram binning for 'Norm' histograms")
+                        self.name = name
+                        return self.configMgr.hists[name]
+
             # Check if histogram has equidistant bins
             if self.configMgr.rebin:
                 log.info("addHistoFromCache: histogram {} will be mapped to a proxy equidistant histogram.".format(self.configMgr.hists[name].GetName()))
@@ -551,15 +560,6 @@ class PrepareHistos(object):
                ( not isClose(self.channel.binLow, self.configMgr.hists[name].GetBinLowEdge(1)) ) or \
                ( not isClose(self.channel.binHigh, self.configMgr.hists[name].GetXaxis().GetBinUpEdge(self.configMgr.hists[name].GetNbinsX()))):
                 
-                # this is a ugly hack for now, to add an exception for 'Norm' histograms that originate from a channel with multiple bins   
-                if 'Norm' in self.configMgr.hists[name].GetTitle():
-                    if (int(self.configMgr.hists[name].GetNbinsX()) == 1 and \
-                        self.configMgr.hists[name].GetBinLowEdge(1) == 0.5 and \
-                        self.configMgr.hists[name].GetXaxis().GetBinUpEdge(self.configMgr.hists[name].GetNbinsX()) == 1.5): 
-                            log.debug("This is ugly: Stupid hack to evade check of histogram binning for 'Norm' histograms")
-                            self.name = name
-                            return self.configMgr.hists[name]
-
                 # Check if we can rebin the cached histogram to get the requested histogram
                 log.error("addHistoFromCache: required binning %d,%f,%f, while found histogram has %d,%f,%f" % ( self.channel.nBins, self.channel.binLow, self.channel.binHigh, self.configMgr.hists[name].GetNbinsX(), self.configMgr.hists[name].GetBinLowEdge(1), self.configMgr.hists[name].GetXaxis().GetBinUpEdge(self.configMgr.hists[name].GetNbinsX()) ))
 
