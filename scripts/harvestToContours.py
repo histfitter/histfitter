@@ -233,6 +233,13 @@ def processInputFile(inputFile, outputFile, label = ""):
 		# Now I want to interpolate the UL surface if it exists so I can write out a detailed 2D surface
 		upperLimitSurface = interpolateSurface( resultsDict, args.interpolation, args.useROOT, outputSurfaceTGraph=True, tmpListOfContours=["upperLimit"] )
 		upperLimitSurface.Write("upperLimit_Surface")
+		if args.debug:
+			canvas = ROOT.TCanvas("upperLimitSurface","upperLimitSurface")
+			upperLimitSurface.Draw("cont4z")
+			ROOT.gPad.SetRightMargin(0.15)
+			ROOT.gPad.SetLogz()
+			ROOT.gPad.RedrawAxis()
+			canvas.SaveAs("upperLimitSurface.pdf")
 		return
 
 	outputGraphs = interpolateSurface( resultsDict , args.interpolation , args.useROOT , outputSurface=True if label=="" else False)
