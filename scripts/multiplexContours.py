@@ -36,52 +36,19 @@ try:
 	import matplotlib.pyplot as plt
 	import numpy as np
 	import scipy.interpolate
-except:
-	print (">>> You need scipy/matplotlib to run this. And you had to have run harvestToContours in scipy mode [default]")
-	print (">>> In an ATLAS environment, you can...")
-	print ('>>> > lsetup "lcgenv -p LCG_93 x86_64-slc6-gcc62-opt pyanalysis" "lcgenv -p LCG_93 x86_64-slc6-gcc62-opt pytools" "lcgenv -p LCG_93 x86_64-slc6-gcc62-opt pygraphics" "lcgenv -p LCG_93 x86_64-slc6-gcc62-opt ROOT" ')
-	print (">>> ")
-	print (">>> Try that and then run this again!")
-	sys.exit(1)
 
-try:
 	from shapely.ops import cascaded_union, polygonize
 	from shapely.geometry import Polygon,MultiPolygon
 	from shapely.geometry import LineString
 	from shapely import affinity
+
 except:
-	print (">>>")
-	print (">>> You need to have access to shapely!")
-	print (">>> Do you want me to try and install it?")
-	print (">>> (Just in your home directory. See source if you're worried about what I'm about to do!)")
-	print (">>> (y/n)")
-	choice = raw_input().lower()
-	if choice[0] == "y":
-		try:
-			os.system(
-				"""
-					wget http://download.osgeo.org/geos/geos-3.6.1.tar.bz2
-					tar xvf geos-3.6.1.tar.bz2
-					cd geos-3.6.1/
-					./configure --prefix=$HOME/.local
-					make
-					make install
-					cd ..
-					pip install --user --upgrade pip
-					pip install --user shapely
-				"""
-				)
-			print (">>> It's possible that worked. Try running again?")
-			sys.exit(1)
-		except:
-			print (">>> ... Setup didn't work for some reason!")
-	else:
-		print (">>> Quitting -- You don't have shapely installed and I really need it!")
-		print (">>>     ... Like it seriously makes my life a lot easier!")
-		sys.exit(1)
-
-
-
+	print (">>> You need scipy/matplotlib and shapely to run this. And you had to have run harvestToContours in scipy mode [default]")
+	print (">>> In an ATLAS environment, you can...")
+	print ('>>> > lsetup "lcgenv -p LCG_93 x86_64-slc6-gcc62-opt pyanalysis" "lcgenv -p LCG_93 x86_64-slc6-gcc62-opt pytools" "lcgenv -p LCG_93 x86_64-slc6-gcc62-opt pygraphics" "lcgenv -p LCG_93 x86_64-slc6-gcc62-opt ROOT" "lcgenv -p LCG_94 x86_64-slc6-gcc62-opt shapely"')
+	print (">>> ")
+	print (">>> Try that and then run this again!")
+	sys.exit(1)
 
 
 def main():
