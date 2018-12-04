@@ -295,7 +295,7 @@ def processInputFile(inputFile, outputFile, label = ""):
 		canvas = ROOT.TCanvas("FinalCurves","FinalCurves")
 		try:
 			if not args.ignoreUncertainty and outputFile.Get("Band_1s_0"):
-				for iGraph in xrange(  len(outputGraphs[outputGraphs[listOfContours_OneSigma[1] ]])   ):
+				for iGraph in xrange(  len(outputGraphs[listOfContours_OneSigma[1] ])   ):
 						outputFile.Get("Band_1s_%d"%iGraph).Draw("ALF" if iGraph==0 else "LF")
 			else:
 				outputFile.Get("Exp_0").Draw("AL")
