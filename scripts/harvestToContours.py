@@ -101,9 +101,9 @@ if args.useUpperLimit:
 	observedContour = "upperLimit"
 else:
 	if args.ignoreUncertainty:
-		listOfContours = ["CLs","CLsexp"]
+		listOfContours = ["CLs","CLsexp","upperLimit","expectedUpperLimit"]
 	else:
-		listOfContours = ["CLs","CLsexp","clsu1s","clsu2s","clsd1s","clsd2s"]
+		listOfContours = ["CLs","CLsexp","clsu1s","clsu2s","clsd1s","clsd2s","upperLimit","expectedUpperLimit"]
 	listOfContours_OneSigma = ["clsu1s","clsd1s"]
 	listOfContours_TwoSigma = ["clsu2s","clsd2s"]
 	expectedContour = "CLsexp"
@@ -158,6 +158,7 @@ def main():
 			print (">>> ... Can't find theory variation files. Skipping.")
 
 		print (">>> Handling upper limit file")
+
 		try:
 			processInputFile(inputFile = args.inputFile.replace(args.nominalLabel,"UpperLimit")  , outputFile = f, label = "_UL")
 			print (">>>")
@@ -213,9 +214,9 @@ def processInputFile(inputFile, outputFile, label = ""):
 		for whichEntry in ["upperLimit","expectedUpperLimit"]:
 			tmpGraph = createTGraphFromDict(resultsDict,whichEntry)
 			tmpGraph.Write( "%s_gr"%(whichEntry) )
-		return
 
-	truncateSignificances( resultsDict , args.sigmax )
+	if label!="_UL":
+		truncateSignificances( resultsDict , args.sigmax )
 
 	############################################################
 	# Step 1.5 - If there's a function for a kinematically forbidden region, add zeros to dictionary
@@ -227,6 +228,19 @@ def processInputFile(inputFile, outputFile, label = ""):
 	# Step 2 - Interpolate the fit results
 
 	print (">>> Interpolating surface")
+
+	if label=="_UL":
+		# Now I want to interpolate the UL surface if it exists so I can write out a detailed 2D surface
+		upperLimitSurface = interpolateSurface( resultsDict, args.interpolation, args.useROOT, outputSurfaceTGraph=True, tmpListOfContours=["upperLimit"] )
+		upperLimitSurface.Write("upperLimit_Surface")
+		if args.debug:
+			canvas = ROOT.TCanvas("upperLimitSurface","upperLimitSurface")
+			upperLimitSurface.Draw("cont4z")
+			ROOT.gPad.SetRightMargin(0.15)
+			ROOT.gPad.SetLogz()
+			ROOT.gPad.RedrawAxis()
+			canvas.SaveAs("upperLimitSurface.pdf")
+		return
 
 	outputGraphs = interpolateSurface( resultsDict , args.interpolation , args.useROOT , outputSurface=True if label=="" else False)
 
@@ -288,7 +302,7 @@ def processInputFile(inputFile, outputFile, label = ""):
 		canvas = ROOT.TCanvas("FinalCurves","FinalCurves")
 		try:
 			if not args.ignoreUncertainty and outputFile.Get("Band_1s_0"):
-				for iGraph in xrange(  len(outputGraphs[outputGraphs[listOfContours_OneSigma[1] ]])   ):
+				for iGraph in xrange(  len(outputGraphs[listOfContours_OneSigma[1] ])   ):
 						outputFile.Get("Band_1s_%d"%iGraph).Draw("ALF" if iGraph==0 else "LF")
 			else:
 				outputFile.Get("Exp_0").Draw("AL")
@@ -307,7 +321,7 @@ def processInputFile(inputFile, outputFile, label = ""):
 	return
 
 
-def harvestToDict( harvestInputFileName = "" ):
+def harvestToDict( harvestInputFileName = "" , tmpListOfContours = listOfContours ):
 	"""This parses the input file into a dictionary object for simpler handling"""
 
 	print (">>> Entering harvestToDict()")
@@ -354,8 +368,8 @@ def harvestToDict( harvestInputFileName = "" ):
 				sampleParams = tuple(sampleParamsList)
 
 				if not math.isinf(float(sample[expectedContour])) :
-					tmpList = [float(sample["%s"%x]) if args.noSig else ROOT.RooStats.PValueToSignificance( float(sample["%s"%x]) ) for x in listOfContours]
-					modelDict[sampleParams] = dict(zip(listOfContours,  tmpList ) )
+					tmpList = [float(sample["%s"%x]) if (args.noSig or x in ["upperLimit","expectedUpperLimit"]) else ROOT.RooStats.PValueToSignificance( float(sample["%s"%x]) ) for x in tmpListOfContours]
+					modelDict[sampleParams] = dict(zip(tmpListOfContours,  tmpList ) )
 					if "fID" in sample:
 						modelDict[sampleParams]["fID"] = sample["fID"]
 					else:
@@ -364,7 +378,7 @@ def harvestToDict( harvestInputFileName = "" ):
 
 				else:
 					if not sampleParams in modelDict:
-						modelDict[sampleParams] = dict(zip(listOfContours,  [args.sigmax for x in listOfContours] ) )
+						modelDict[sampleParams] = dict(zip(tmpListOfContours,  [args.sigmax for x in tmpListOfContours] ) )
 						modelDict[sampleParams]["fID"] = ""
 				if(args.debug):
 					print (sampleParams, float(sample[observedContour]), float(sample[expectedContour]) if args.noSig else ROOT.RooStats.PValueToSignificance( float(sample[observedContour])     ))
@@ -403,9 +417,9 @@ def harvestToDict( harvestInputFileName = "" ):
 				if any(failConstraintCutList):
 					continue
 
-			tmpList = [float(values["%s/F"%x]) if args.noSig else ROOT.RooStats.PValueToSignificance( float(values["%s/F"%x]) ) for x in listOfContours]
+			tmpList = [float(values["%s/F"%x]) if (args.noSig or x in ["upperLimit","expectedUpperLimit"]) else ROOT.RooStats.PValueToSignificance( float(values["%s/F"%x]) ) for x in tmpListOfContours]
 
-			modelDict[sampleParams] = dict(zip(listOfContours,  tmpList ) )
+			modelDict[sampleParams] = dict(zip(tmpListOfContours,  tmpList ) )
 
 
 	return modelDict
@@ -461,12 +475,11 @@ def addValuesToDict(inputDict, function, numberOfPoints = 100, value = 0):
 
 	return inputDict
 
-def interpolateSurface(modelDict = {}, interpolationFunction = "linear", useROOT=False, outputSurface=False):
+def interpolateSurface(modelDict = {}, interpolationFunction = "linear", useROOT=False, outputSurface=False, outputSurfaceTGraph=False, tmpListOfContours=listOfContours):
 	"""The actual interpolation"""
 
 	modelPoints = modelDict.keys()
 	modelPointsValues = modelDict.values()
-
 	x0 =   list( zip( *modelPoints )[0] )
 	y0 =   list( zip( *modelPoints )[1] )
 
@@ -476,14 +489,13 @@ def interpolateSurface(modelDict = {}, interpolationFunction = "linear", useROOT
 
 	graphs = {}
 
-
-	for whichContour in listOfContours:
+	for whichContour in tmpListOfContours:
 		zValues[whichContour] = [ tmpEntry[whichContour] for tmpEntry in modelPointsValues]
 		x[whichContour]       = [ a for a in x0 ];
 		y[whichContour]       = [ a for a in y0 ];
 
 	# remove inf point in each entry
-	for whichContour in listOfContours:
+	for whichContour in tmpListOfContours:
 
 		while any([math.isinf(tmp) or math.isnan(tmp) for tmp in zValues[whichContour]  ]):#  np.isinf( zValues[whichContour]  ).any():
 			myindex = [math.isinf(tmp) or math.isnan(tmp) for tmp in zValues[whichContour] ].index(True)
@@ -506,7 +518,7 @@ def interpolateSurface(modelDict = {}, interpolationFunction = "linear", useROOT
 		canvas = ROOT.TCanvas("c1","c1",800,600);
 		h2D    = ROOT.TH2D("h","h",200,min(x0),max(x0),200,min(y0),max(y0) );
 
-		for whichContour in listOfContours:
+		for whichContour in tmpListOfContours:
 			graphs[whichContour] = createGraphsFromArrays(x[whichContour],y[whichContour],zValues[whichContour],whichContour)
 
 		return graphs
@@ -517,7 +529,7 @@ def interpolateSurface(modelDict = {}, interpolationFunction = "linear", useROOT
 		xi = {}
 		yi = {}
 		zi = {}
-		for whichContour in listOfContours:
+		for whichContour in tmpListOfContours:
 			print (">>> ... Interpolating %s"%whichContour)
 
 			# Convert everything to numpy arrays
@@ -579,6 +591,13 @@ def interpolateSurface(modelDict = {}, interpolationFunction = "linear", useROOT
 				print (">>> Writing out expected surface to pickle file")
 				with open(args.outputFile+'.expectedSurface.pkl', 'w') as outfile:
 					pickle.dump({"x": xymeshgrid[0], "y": xymeshgrid[1],"z": ZI} ,outfile, pickle.HIGHEST_PROTOCOL)
+			elif whichContour==observedContour and outputSurface:
+				print (">>> Writing out observed surface to pickle file")
+				with open(args.outputFile+'.observedSurface.pkl', 'w') as outfile:
+					pickle.dump({"x": xymeshgrid[0], "y": xymeshgrid[1],"z": ZI} ,outfile, pickle.HIGHEST_PROTOCOL)
+
+			if outputSurfaceTGraph:
+				return createTGraph2DFromMeshGrid(xymeshgrid[0],xymeshgrid[1],ZI)
 
 			# Turn this surface into contours!
 			contourList = getContourPoints(xymeshgrid[0],xymeshgrid[1],ZI, args.level)
@@ -602,6 +621,16 @@ def createTGraph2DFromArrays(x,y,z):
 		array('f',y),
 		array('f',z) )
 
+def createTGraph2DFromMeshGrid(x,y,z):
+
+	xList = x.flatten().tolist()
+	yList = y.flatten().tolist()
+	zList = z.flatten().tolist()
+
+	zList = [1e-3 if z<1e-3 else z for z in zList]
+
+	return createTGraph2DFromArrays( xList, yList, zList )
+
 def createTGraphFromDict(modelDict,myName,listOfFIDs=None):
 	"""Given the results dictionary, can make a TGraph2D of values. Has support for fID as strings."""
 
@@ -618,7 +647,7 @@ def createTGraphFromDict(modelDict,myName,listOfFIDs=None):
 				print (">>> WARNING: Model point has a SR not in the list for some reason! Skipping, but check for problems in input JSON!")
 				continue
 		else:
-			value = modelDict[model][myName] if args.noSig else ROOT.RooStats.SignificanceToPValue(modelDict[model][myName])
+			value = modelDict[model][myName] if (args.noSig or myName in ["upperLimit","expectedUpperLimit"]) else ROOT.RooStats.SignificanceToPValue(modelDict[model][myName])
 			outputGraph.SetPoint(imodel, model[0], model[1], value )
 
 	return outputGraph

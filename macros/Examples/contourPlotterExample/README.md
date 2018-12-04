@@ -27,7 +27,7 @@ MySimpleChannelAnalysis_fixSigXSecUp_hypotest__1_harvest_list.json
 MySimpleChannelAnalysis_fixSigXSecDown_hypotest__1_harvest_list.json
 ```
 
-For convenience, you can find these in this example directory under `inputJSON/`. These JSON contain all of the fit results. 
+For convenience, you can find these in this example directory under `inputJSON/`. These JSON contain all of the fit results.
 
 ### Multiplexing JSON (e.g. Single file with "best" SR from best expected CLs value)
 
@@ -44,6 +44,14 @@ harvestToContours.py -i inputJSON/MySimpleChannelAnalysis_fixSigXSecNominal_hypo
 This command will automatically pick up the theory variation files. This will perform a linear interpolation using `scipy` -- additional options are available. ROOT interpolation can be acheived using the `-r` flag. `-x` and `-y` define which JSON fields should be used for the x and y axes. Here, contours under `--areaThreshold`(=100) are not considered to remove interpolation artifacts. A smoothing of `100` is used here. There are all fully analysis-specific.
 
 This will give you a ROOT file full of information. (Configurable via `-o` option.)
+
+
+### Upper Limits
+
+If you'd like access to upper limit plots, you'll of course have to run the fits with the (`-l`) option as well. This will output something like `MySimpleChannelAnalysis_upperlimit.root`. If you run the same `GenerateJSONOutput.py` on this file, you'll get an additional JSON that describes the upper limit fit results.
+
+If this upper limit JSON file is sitting in the same directory as the nominal hypotest file, when you run `harvestToContours.py`, the output file will contain an upper limit surface as well. And if running in debug mode (`-d`), a PDF plot will be created for you for diagnostic purposes.
+
 
 ### Contour Plotting
 
