@@ -228,6 +228,9 @@ class SystematicBase:
             if abstract.hists[histName] == None and abstract.useCacheToTreeFallback: 
                 log.warning("Will rebuild {} from trees".format(histName))
                 reread = True
+            elif abstract.hists[histName] != None:
+                log.debug("FillUpDownHist: systematic '{}': histogram '{}' successfully read! Not rebuilding it.".format(self.name, histName))
+                return 
 
         if not abstract.readFromTree and not reread:
             log.error("FillUpDownHist: systematic {}: histogram {}: not reading from trees and no fallback enabled. Will not build histogram".format(self.name, histName))
