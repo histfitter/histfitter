@@ -111,10 +111,10 @@ def checkShapeEffect(hNom, hUp, hDown, chi2_threshold=0.05, use_overflows=True):
         if (not hNom.GetNbinsX() is hUp.GetNbinsX()) or (not hNom.GetNbinsX() is hDown.GetNbinsX()):
             log.error("Checking shape impact of nominal histogram {} againt up histogram {} and down histogram {} and find a different number of bins. Stop comparison".format(hNom.GetName(), hUp.GetName(), hDown.GetName()))
             return True
-        for bin1 in range(0,hNom.GetNbinsX()+1):
-            if (bin1==0 or bin1==hNom.GetNbinsX()) and use_overflows==False:
+        for bin1 in range(0,hNom.GetNbinsX()+2):
+            if (bin1==0 or bin1==hNom.GetNbinsX()+1) and use_overflows==False:
                 continue
-            if fabs(hNom.GetBinContent(bin1)-hUp.GetBinContent(bin1))>configMgr.prunThreshold or fabs(hNom.GetBinContent(bin1)-hDown.GetBinContent(bin1))>configMgr.prunThreshold:
+            if fabs((hNom.GetBinContent(bin1)-hUp.GetBinContent(bin1))/hNom.GetBinContent(bin1))>configMgr.prunThreshold or fabs((hNom.GetBinContent(bin1)-hDown.GetBinContent(bin1))/hNom.GetBinContent(bin1))>configMgr.prunThreshold:
                 #log.verbose("checkShapeEffect(): bin content nominal: {0:f}, up: {1:f}, down: {2:f} for histogram {3:s}. Above prun threshold: {4:f}".format(hNom.GetBinContent(bin1),hUp.GetBinContent(bin1),hDown.GetBinContent(bin1),hNom.GetName(),configMgr.prunThreshold))
                 return True
         return False
@@ -1202,6 +1202,7 @@ class Sample(object):
         if configMgr.prun and fabs(high-1.0) < configMgr.prunThreshold and fabs(low-1.0) < configMgr.prunThreshold:
             log.warning("    addOverallSys for %s: high=%g low=%g. Pruning theshold=%g. Systematic is removed from fit." % (systName, high, low, configMgr.prunThreshold))
             self.systListOverallPruned.append(systName)
+            return
 
         self.overallSystList.append((systName, high, low))
         if not systName in configMgr.systDict.keys():
