@@ -772,6 +772,7 @@ class ConfigManager(object):
                     depth = 3
                     log.info("{}Sample {:d}/{:d}: {} ".format(" "*depth*width, j+1, len(channel.sampleList), sample.name))
                     log.info("{}Pruned systematics (overallSys):".format(" "*depth*width))
+                    if sample.isData: continue
                     prunedDict[sample.name]=[]
                     prunedDict_histo[sample.name]=[]
                     
@@ -804,7 +805,6 @@ class ConfigManager(object):
                 
                 xbin = 1
                 for j2, thisSample in enumerate(prunedDict.keys()):
-                    if thisSample is 'data': continue
                     for i2 in range(0,len(syst_list)):
                         if syst_list[i2] in prunedDict[thisSample] and syst_list[i2] in prunedDict_histo[thisSample]:
                             histPrunedOverallHisto.SetBinContent(xbin,i2+1,1)
