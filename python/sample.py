@@ -75,7 +75,7 @@ def checkNormalizationEffect(hNom, hUp, hDown, norm_threshold=0.005):
    
     max_variation = max([abs(up_norm-1), abs(down_norm-1)])
     if max_variation < norm_threshold:
-        log.verbose("checkNormalizationEffect(): {}, {}, {}: max variation = {:.3f}, threshold = {:.3f}".format(hNom.GetName(), hUp.GetName(), hDown.GetName(), max_variation, norm_threshold))
+        log.info("checkNormalizationEffect(): {}, {}, {}: max variation = {:.3f}, threshold = {:.3f}".format(hNom.GetName(), hUp.GetName(), hDown.GetName(), max_variation, norm_threshold))
         return False
 
     return True
@@ -103,7 +103,7 @@ def checkShapeEffect(hNom, hUp, hDown, chi2_threshold=0.05, use_overflows=True):
     
         pvalue = max([up_pvalue, down_pvalue])
         if not pvalue < chi2_threshold:
-            log.verbose("checkShapeEffect(): {}, {}, {}: up_pvalue = {:.3f}, down_pvalue = {:3f}, chi2 threshold = {:.3f}".format(hNom.GetName(), hUp.GetName(), hDown.GetName(), up_pvalue, down_pvalue, chi2_threshold))
+            log.info("checkShapeEffect(): {}, {}, {}: up_pvalue = {:.3f}, down_pvalue = {:3f}, chi2 threshold = {:.3f}".format(hNom.GetName(), hUp.GetName(), hDown.GetName(), up_pvalue, down_pvalue, chi2_threshold))
             return False
     
     #method 2: compare yield of all bins and check if below the configMgr.prunThreshold
@@ -115,8 +115,9 @@ def checkShapeEffect(hNom, hUp, hDown, chi2_threshold=0.05, use_overflows=True):
             if (bin1==0 or bin1==hNom.GetNbinsX()+1) and use_overflows==False:
                 continue
             if fabs(hNom.GetBinContent(bin1)-hUp.GetBinContent(bin1))>(configMgr.prunThreshold*hNom.GetBinContent(bin1)) or fabs(hNom.GetBinContent(bin1)-hDown.GetBinContent(bin1))>(configMgr.prunThreshold*hNom.GetBinContent(bin1)):
-                #log.verbose("checkShapeEffect(): bin content nominal: {0:f}, up: {1:f}, down: {2:f} for histogram {3:s}. Above prun threshold: {4:f}".format(hNom.GetBinContent(bin1),hUp.GetBinContent(bin1),hDown.GetBinContent(bin1),hNom.GetName(),configMgr.prunThreshold))
+                log.debug("checkShapeEffect(): (up - nominal): {0:f}, (nominal - down): {1:f}, for histograms {2:s},{3:s},{4:s}. Above prun threshold: {5:f}".format(hUp.GetBinContent(bin1)-hNom.GetBinContent(bin1),hNom.GetBinContent(bin1)-hDown.GetBinContent(bin1),hUp.GetName(),hDown.GetName(),hNom.GetName(),configMgr.prunThreshold*hNom.GetBinContent(bin1)))
                 return True
+            log.debug("checkShapeEffect(): (up - nominal): {0:f}, (nominal - down): {1:f}, for histograms {2:s},{3:s},{4:s}. Below prun threshold: {5:f}".format(hUp.GetBinContent(bin1)-hNom.GetBinContent(bin1),hNom.GetBinContent(bin1)-hDown.GetBinContent(bin1),hUp.GetName(),hDown.GetName(),hNom.GetName(),configMgr.prunThreshold*hNom.GetBinContent(bin1)))
         return False
 
     return True
@@ -959,12 +960,12 @@ class Sample(object):
                     if checkShapeEffect(configMgr.hists[nomName], configMgr.hists[highName], configMgr.hists[lowName] ):
                         self.histoSystList.append((systName, highName+"Norm", lowName+"Norm", configMgr.histCacheFile, "", "", "", ""))
                     else:
-                        log.error("    generating HistoSys for %s syst=%s nom=%g high=%g low=%g has no impact on shape. Shape effect of systematic is removed from fit." % (nomName, systName, nomIntegral, highIntegral, lowIntegral))
+                        log.info("    generating HistoSys for %s syst=%s nom=%g high=%g low=%g has no impact on shape. Shape effect of systematic is removed from fit." % (nomName, systName, nomIntegral, highIntegral, lowIntegral))
                         self.systListHistoPruned.append(systName)
                         
                     ##check norm effect
                     if max( abs(high-1.0), abs(1.0-low) ) < configMgr.prunThreshold:
-                        log.error("    generating OverallSys for {} syst={} nom={:g} high={:g} low={:g}. Systematic is smaller than pruning threshold ({:g}) and is removed from fit.".format(nomName, systName, nomIntegral, highIntegral, lowIntegral, configMgr.prunThreshold))
+                        log.info("    generating OverallSys for {} syst={} nom={:g} high={:g} low={:g}. Systematic is smaller than pruning threshold ({:g}) and is removed from fit.".format(nomName, systName, nomIntegral, highIntegral, lowIntegral, configMgr.prunThreshold))
                         self.systListOverallPruned.append(systName)
                     else: 
                         self.addOverallSys(systName, high, low)
@@ -1042,12 +1043,12 @@ class Sample(object):
                 if configMgr.prun:
                     keepNorm = True
                     if not checkNormalizationEffect(configMgr.hists[nomName], configMgr.hists[highName], configMgr.hists[lowName], configMgr.prunThreshold):
-                        log.error("    HistoSys for {} syst={} nom={:g} high={:g} low={:g} has small impact on normalisation.".format(nomName, systName, nomIntegral, highIntegral, lowIntegral))
+                        log.debug("    HistoSys for {} syst={} nom={:g} high={:g} low={:g} has small impact on normalisation.".format(nomName, systName, nomIntegral, highIntegral, lowIntegral))
                         keepNorm = False
 
                     if not checkShapeEffect(configMgr.hists[nomName], configMgr.hists[highName], configMgr.hists[lowName]):
                         if not keepNorm:
-                            log.error("    HistoSys for {} syst={} nom={:g} high={:g} low={:g} has small impact on normalisation and no effect on shape. Removing from fit.".format(nomName, systName, nomIntegral, highIntegral, lowIntegral))
+                            log.info("    HistoSys for {} syst={} nom={:g} high={:g} low={:g} has small impact on normalisation and no effect on shape. Removing from fit.".format(nomName, systName, nomIntegral, highIntegral, lowIntegral))
                             self.systListHistoPruned.append(systName)
                             return
                         
@@ -1200,7 +1201,7 @@ class Sample(object):
             return
           
         if configMgr.prun and fabs(high-1.0) < configMgr.prunThreshold and fabs(low-1.0) < configMgr.prunThreshold:
-            log.warning("    addOverallSys for %s: high=%g low=%g. Pruning theshold=%g. Systematic is removed from fit." % (systName, high, low, configMgr.prunThreshold))
+            log.info("    addOverallSys for %s: high=%g low=%g. Pruning theshold=%g. Systematic is removed from fit." % (systName, high, low, configMgr.prunThreshold))
             self.systListOverallPruned.append(systName)
             return
 

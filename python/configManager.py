@@ -773,7 +773,7 @@ class ConfigManager(object):
                 for j, sample in enumerate(channel.sampleList):
                     depth = 3
                     log.info("{}Sample {:d}/{:d}: {} ".format(" "*depth*width, j+1, len(channel.sampleList), sample.name))
-                    log.info("{}Pruned systematics (overallSys):".format(" "*depth*width))
+                    log.info("{}Pruned systematics:".format(" "*depth*width))
                     if sample.isData: continue
                     prunedDict[sample.name]=[]
                     prunedDict_histo[sample.name]=[]
@@ -796,9 +796,7 @@ class ConfigManager(object):
                 gStyle.SetOptTitle(False)
                 gStyle.SetOptStat(0)
                 
-                print "SYSTEMATICS"
-                print syst_list
-                print prunedDict
+                if len(syst_list)==0: continue
                 
                 histPrunedOverallHisto = TH2F("histPrunedOverallHisto_"+str(i), "Pruned systematics affecting the normalization and shape for channel "+channel.name,len(channel.sampleList)-1,0,len(channel.sampleList)-1,len(syst_list),0,len(syst_list))
                 histPrunedOverall = TH2F("histPrunedOverall_"+str(i), "Pruned systematics affecting the normalization for channel "+channel.name,len(channel.sampleList)-1,0,len(channel.sampleList)-1,len(syst_list),0,len(syst_list))
@@ -818,30 +816,42 @@ class ConfigManager(object):
                         #    histPrunedOverall.SetBinContent(j2,i2,-1)
                         
                     histPrunedOverallHisto.GetXaxis().SetBinLabel(xbin,thisSample)
+                    histPrunedHisto.GetXaxis().SetBinLabel(xbin,thisSample)
+                    histPrunedOverall.GetXaxis().SetBinLabel(xbin,thisSample)
                     xbin=xbin+1
                 
                 for i2 in range(0,len(syst_list)):
                     histPrunedOverallHisto.GetYaxis().SetBinLabel(i2+1,syst_list[i2])
+                    histPrunedOverall.GetYaxis().SetBinLabel(i2+1,syst_list[i2])
+                    histPrunedHisto.GetYaxis().SetBinLabel(i2+1,syst_list[i2])
             
                 histPrunedOverallHisto.GetXaxis().SetTitle("Channel")
                 histPrunedOverallHisto.GetYaxis().SetTitle("systematic")
+                histPrunedOverall.GetXaxis().SetTitle("Channel")
+                histPrunedOverall.GetYaxis().SetTitle("systematic")
+                histPrunedHisto.GetXaxis().SetTitle("Channel")
+                histPrunedHisto.GetYaxis().SetTitle("systematic")
                 histPrunedOverallHisto.SetFillColor(5)
                 histPrunedOverall.SetFillColor(9)
                 histPrunedHisto.SetFillColor(2)
             
-                histPrunedOverallHisto.Draw("boxPFC")
-                histPrunedOverall.Draw("boxsamePFC")
-                histPrunedHisto.Draw("boxsamePFC")
+                if histPrunedOverallHisto.GetEntries()>0: histPrunedOverallHisto.Draw("boxPFC")
+                if histPrunedOverall.GetEntries()>0: histPrunedOverall.Draw("boxsamePFC")
+                if histPrunedHisto.GetEntries()>0: histPrunedHisto.Draw("boxsamePFC")
                 
                 leg = TLegend(0.76,0.75,1.,0.9)
                 leg.SetBorderSize(0)
                 leg.SetTextSize(0.02)
                 entry = leg.AddEntry(histPrunedOverallHisto,"histoSys/ overallSys","f")
-                entry = leg.AddEntry(histPrunedOverall,"histoSys","f")
-                entry = leg.AddEntry(histPrunedHisto,"overallSys","f")
+                entry = leg.AddEntry(histPrunedOverall,"overallSys","f")
+                entry = leg.AddEntry(histPrunedHisto,"histoSys","f")
                 leg.Draw("same")
                 
-                canvasSyst.Print("canvasSyst_"+channel.name+".pdf")
+                plotsDir = "plots/%s/%s" % (self.analysisName, fitConfig.name)
+                mkdir_p(plotsDir)
+
+                canvasSyst.Print(plotsDir+"/canvasSyst_"+channel.name+".pdf")
+                canvasSyst.Print(plotsDir+"/canvasSyst_"+channel.name+".eps")
 
 
         return
