@@ -20,6 +20,7 @@
 from ROOT import gROOT,gSystem,gDirectory
 gSystem.Load("libSusyFitter.so")
 from ROOT import ConfigMgr,FitConfig 
+gROOT.SetBatch(True)
 gROOT.Reset()
 
 from ROOT import TFile, RooWorkspace, TObject, TString, RooAbsReal, RooRealVar, RooFitResult, RooDataSet, RooAddition, RooArgSet,RooAbsData,RooRandom 
