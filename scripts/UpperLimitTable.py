@@ -275,7 +275,7 @@ if __name__ == "__main__":
     elif opt == '-N':
       nPoints = int(arg)
     elif opt == '-R':
-      muRange = int(arg)
+      muRange = float(arg)
     elif opt == '-a':
       useAsimovSet = True
     elif opt == '-p':
