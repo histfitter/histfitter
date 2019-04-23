@@ -699,7 +699,7 @@ void ConfigMgr::doUpperLimit(FitConfig* fc) {
 
         // Append it - should re-evaluate the settings for us automatically
         m_logger << kINFO << "Adding scan result to existing limit scan" << GEndl;
-        hypo->Add(*extraHypo);
+        if(extraHypo->GetLastResult()->CLb()>0) hypo->Add(*extraHypo);
         delete extraHypo;
         previousMaxRange = maxRange;
     }

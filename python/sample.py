@@ -600,7 +600,7 @@ class Sample(object):
         self.currentSystematic = self.systDict[_name].nominal
 
     def getTreenameSuffix(self):
-        if self.suffixTreeName != "":
+        if self.suffixTreeName != "" and self.currentSystematic is None:
             # no defaults if we're overruled
             return self.suffixTreeName
         
