@@ -6,6 +6,7 @@ import pickle
 from collections import namedtuple
 
 from ROOT import *
+gROOT.SetBatch(True)
 
 AFTER_FIT = 'RooExpandedFitResult_afterFit'
 AFTER_FIT_SNAPSHOT = 'snapshot_paramsVals_' + AFTER_FIT
@@ -204,7 +205,6 @@ def get_dmu_graph(yaxis, ranking, final=True):
 
 ### plotting utilities
 
-gROOT.SetBatch(True)
 
 # this style is initialized below
 Style = TStyle("ATLAS","Modified ATLAS style")
