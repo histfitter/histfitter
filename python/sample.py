@@ -41,7 +41,7 @@ def chi2test(h1, h2):
 
     binsX = xrange(1, h1.GetNbinsX()+1)
     binsY = xrange(1, h1.GetNbinsY()+1) if h1.InheritsFrom("TH2") else [0]
-    
+
     test_chi2, dof = 0, 0
     for i in binsX:
         for j in binsY:
@@ -66,20 +66,20 @@ def chi2test(h1, h2):
 def checkNormalizationEffect(hNom, hUp, hDown, norm_threshold=0.005):
     # True for keeping norm effect, false for pruning
     nom_integral = hNom.Integral()
-    
+
     if nom_integral == 0:
         return True
-    
+
     up_norm = hUp.Integral() / nom_integral
     down_norm = hDown.Integral() / nom_integral
-   
+
     max_variation = max([abs(up_norm-1), abs(down_norm-1)])
     if max_variation < norm_threshold:
         log.verbose("checkNormalizationEffect(): {}, {}, {}: max variation = {:.3f}, threshold = {:.3f}".format(hNom.GetName(), hUp.GetName(), hDown.GetName(), max_variation, norm_threshold))
         return False
 
     return True
-    
+
 def checkShapeEffect(hNom, hUp, hDown, chi2_threshold=0.95, use_overflows=True):
     # Perform a weighted comparison including the overflow and underflow, unless the user says they don't want it
     opt = "WW OF UF"
@@ -92,12 +92,12 @@ def checkShapeEffect(hNom, hUp, hDown, chi2_threshold=0.95, use_overflows=True):
 
     up_pvalue = hNom.Chi2Test(hUp, opt)
     down_pvalue = hNom.Chi2Test(hDown, opt)
-    
+
     ROOT.gErrorIgnoreLevel = _err_level
-    
+
     #up_pvalue = chi2test(hNom, hUp)
     #down_pvalue = chi2test(hNom, hDown)
-    
+
     pvalue = min([up_pvalue, down_pvalue])
     if not pvalue < chi2_threshold:
         log.verbose("checkShapeEffect(): {}, {}, {}: up_pvalue = {:.3f}, down_pvalue = {:3f}, chi2 threshold = {:.3f}".format(hNom.GetName(), hUp.GetName(), hDown.GetName(), up_pvalue, down_pvalue, chi2_threshold))
@@ -111,7 +111,7 @@ def symmetrizeSystematicEnvelope(nomName, lowName, highName):
         lowVal = configMgr.hists[lowName].GetBinContent(iBin)
         highVal = configMgr.hists[highName].GetBinContent(iBin)
         nomVal = configMgr.hists[nomName].GetBinContent(iBin)
-        
+
         lowErr = fabs(nomVal-lowVal)
         highErr = fabs(highVal-nomVal)
 
@@ -122,11 +122,11 @@ def symmetrizeSystematicEnvelope(nomName, lowName, highName):
         if newLowVal < 0.0:
             log.warning("symmetrizeSystematicEnvelope(): low={0:f} is < 0.0 in {1:s} bin {2:d}. Setting negative bins to 0.0.".format(newLowVal, lowName, iBin))
         newHighVal = nomVal + err
-        
+
         log.debug("symmetrizeSystematicEnvelope(): bin {0:d} -> found nom={1}, low={2}, high={3} => symmetrized error to low={4} high={5}".format(iBin, nomVal, lowVal, highVal, newLowVal, newHighVal))
 
-        configMgr.hists[highName].SetBinContent(iBin, newHighVal) 
-        configMgr.hists[lowName].SetBinContent(iBin, newLowVal) 
+        configMgr.hists[highName].SetBinContent(iBin, newHighVal)
+        configMgr.hists[lowName].SetBinContent(iBin, newLowVal)
 
     return
 
@@ -144,11 +144,11 @@ class Sample(object):
         @param name Name of the sample
         @param colour Colour of the sample used in before/after plotting
         """
-        
+
         ## Name of the sample
         self.name = name
         ## Colour used in before/after fit plots
-        self.color = color 
+        self.color = color
         ## Flag indicating whether the sample is data
         self.isData = False
         ## Flag indicating whether the sample is QCD
@@ -190,9 +190,9 @@ class Sample(object):
         ## Override for input tree name
         self.overrideTreename = ""
         ## Prefix of input tree
-        self.prefixTreeName = "" 
+        self.prefixTreeName = ""
         ## Suffix of input tree
-        self.suffixTreeName = ""   
+        self.suffixTreeName = ""
         ## Name of a friends tree (in the same files) to add
         self.friendTreeName = ""
         ## Additional selection applied on this sample
@@ -223,10 +223,10 @@ class Sample(object):
         Allow user to give bin values eg. for checking stats in papers
 
         @param binValues Values in the bins
-        @param region Region to add the histogram to 
+        @param region Region to add the histogram to
         @param var The variable to bin in
         @param binLow Lower bin edge (default 0.5)
-        @param binWidth Widths of the bins (default 1.)	
+        @param binWidth Widths of the bins (default 1.)
         """
         try:
             self.binValues[(region, var)] = binValues
@@ -248,7 +248,7 @@ class Sample(object):
     def buildStatErrors(self, binStatErrors, region, var):
         """
         Allow user to give bin stat errors eg. for checking stats in papers
-        
+
         @param binStatErrors Statistical errors for the bins
         @param region Region to add the errors to
         @param var The variable the region is binned in; 'cuts' for a cut-and-count analysis
@@ -312,7 +312,7 @@ class Sample(object):
     def setWeights(self, weights):
         """
         Set the weights for this sample - overrides
-        
+
         @param weights List of weights to set
         """
         self.weights = deepcopy(weights)
@@ -365,7 +365,7 @@ class Sample(object):
                 if weight in syst.low:
                     syst.low.remove(weight)
         return
-    
+
     def setQCD(self, isQCD=True, qcdSyst="uncorr"):
         """
         Set a flag that the sample is QCD
@@ -399,7 +399,7 @@ class Sample(object):
         """
         Set the stat configuration for this sample (see HistFactory documentation)
 
-        @param statConfig String to indicate the configuration 
+        @param statConfig String to indicate the configuration
         """
         self.statConfig = statConfig
         return
@@ -411,7 +411,7 @@ class Sample(object):
     def setHistoName(self, histoName):
         """
         Set the name of the nominal histogram for this sample
-        
+
         @param histoName Name of the histogram
         """
         log.verbose("Setting histoName to {}".format(histoName))
@@ -426,7 +426,7 @@ class Sample(object):
         #"""
         #self.treeName = treeName
         #return
-    
+
     def setPrefixTreeName(self, prefixTreeName):
         """
         Set the prefix contained in every name of trees used for this sample - do not use setPreFixTreeName and setTreeName together. setTreeName will take precedence.
@@ -434,8 +434,8 @@ class Sample(object):
         @param prefixTreeName Name of the tree
         """
         self.prefixTreeName = prefixTreeName
-        return  
-    
+        return
+
     def setSuffixTreeName(self, suffixTreeName):
         """
         Set the suffix contained in every name of trees used for this sample - do not use setSuffixTreeName and setTreeName together. setTreeName will take precedence.
@@ -443,7 +443,7 @@ class Sample(object):
         @param suffixTreeName Name of the tree
         """
         self.suffixTreeName = suffixTreeName
-        return     
+        return
 
     def setNormRegions(self, normRegions):
         """
@@ -457,7 +457,7 @@ class Sample(object):
 
     def isBlinded(self, fitConfig):
         """
-        Is the sample blinded in this fit config? 
+        Is the sample blinded in this fit config?
 
         @param fitConfig The fit configuration to pass
         """
@@ -487,10 +487,10 @@ class Sample(object):
 
             if syst.merged:
                 mergedName = "".join(syst.sampleList)
-                yield self.getHistogramName(fitConfig, mergedName) 
+                yield self.getHistogramName(fitConfig, mergedName)
                 for var in ["Nom", "High", "Low"]:
-                    yield self.getHistogramName(fitConfig, mergedName, var) 
-    
+                    yield self.getHistogramName(fitConfig, mergedName, var)
+
         #return retval
 
     def getHistogramName(self, fitConfig, syst_name="", variation=""):
@@ -507,7 +507,7 @@ class Sample(object):
         # Special treatment for blinded samples
         if self.isBlinded(fitConfig):
             return "h{}{}Blind_{}_obs".format(fitConfig.name, self.name, "".join(self.parentChannel.regions), replaceSymbols(self.parentChannel.variableName))
-       
+
         # Special treatment for data
         if self.isData:
             return "h{}_{}_obs_{}".format(self.name, "".join(self.parentChannel.regions), replaceSymbols(self.parentChannel.variableName))
@@ -543,28 +543,28 @@ class Sample(object):
                ##syst.propagateTreeName(self.treeName)
                ##pass
         #return
-   
+
     def setOverrideTreename(self, name):
         self.overrideTreename = name
 
     def removeCurrentSystematic(self):
         self.currentSystematic = None
-   
+
     def setCurrentSystematic(self, name, mode="nominal"):
         if name is None:
             self.removeCurrentSystematic()
             return
-        
+
         _name = name
         if isinstance(name, SystematicBase):
             _name = name.name
-            
+
             if name.type == "weight":
                 log.verbose("setCurrentSystematic: sample {}, name {} is a weight - not setting suffix".format(self.name, _name))
                 return
 
         log.verbose("setCurrentSystematic: sample {}, name {}".format(self.name, _name))
-        
+
         if _name is not None and _name not in self.systDict:
             raise ValueError("Sample {}: cannot set systematic to unknown {}".format(self.name, _name))
 
@@ -582,7 +582,7 @@ class Sample(object):
         if self.suffixTreeName != "":
             # no defaults if we're overruled
             return self.suffixTreeName
-        
+
         if not self.isData and not self.isQCD and not self.isDiscovery:
 
             # are we in a systematic? if so, return that suffix
@@ -605,7 +605,7 @@ class Sample(object):
         if self.prefixTreeName == "":
             self.prefixTreeName = self.name
             log.debug("Using name of sample as prefix for names of trees")
-            
+
         _suffix = ""
         if suffix != "":
             _suffix = copy(suffix)
@@ -647,12 +647,12 @@ class Sample(object):
         """
 
         log.debug("addHistoSys(): building histograms {0} / {1} / {2}".format(nomName, highName, lowName))
-        log.verbose("Using settings: includeOverallSys={0}, normalizeSys={1}, symmetrize={2}, oneSide={3}, symmetrizeEnvelope={4}".format(includeOverallSys, normalizeSys, symmetrize, oneSide, symmetrizeEnvelope)) 
+        log.verbose("Using settings: includeOverallSys={0}, normalizeSys={1}, symmetrize={2}, oneSide={3}, symmetrizeEnvelope={4}".format(includeOverallSys, normalizeSys, symmetrize, oneSide, symmetrizeEnvelope))
 
         if oneSide and symmetrizeEnvelope:
             log.fatal("Cannot use oneSided histogram with symmetrizeEnvelope - use either, not both. Please check the systematic type of {0}".format(nomName))
 
-        ### use-case of different tree from nominal histogram in case of 
+        ### use-case of different tree from nominal histogram in case of
         if len(nomSysName) > 0:
             if configMgr.hists[nomSysName] != None:
                 configMgr.hists[lowName+"_test"] = configMgr.hists[lowName].Clone(lowName+"_test")
@@ -681,7 +681,7 @@ class Sample(object):
             log.debug("    sample.noRenormSys==True and normalizeSys==True for sample <%s> and syst <%s>. Setting normalizeSys to False."%(self.name, systName))
             normalizeSys = False
 
-        if normalizeSys and not self.normRegions: 
+        if normalizeSys and not self.normRegions:
             log.error("    normalizeSys==True but no normalization regions specified. This should never happen!")
             normChannels = []
             tl = self.parentChannel.parentTopLvl
@@ -701,9 +701,9 @@ class Sample(object):
         if normalizeSys:
             log.verbose("Case 1: normalized systematic")
 
-            if not self.normRegions: 
+            if not self.normRegions:
                 raise RuntimeError("Please specify normalization regions!")
-            
+
             if symmetrize and symmetrizeEnvelope:
                 # build the envelope of up/down
                 log.verbose("Symmetrizing envelope of histogram: building error = max ( (up-nom), (nom-down) )")
@@ -719,9 +719,9 @@ class Sample(object):
                     binVal = configMgr.hists[lowName].GetBinContent(iBin)
                     if binVal<0.:
                         configMgr.hists[lowName].SetBinContent(iBin, 0.)
-            
+
             # use different renormalization region
-            if len(self.normSampleRemap) > 0: 
+            if len(self.normSampleRemap) > 0:
                 samNameRemap = self.normSampleRemap
                 log.info("remapping normalization of <%s> to sample:  %s" % (samName,samNameRemap))
             else:
@@ -739,12 +739,15 @@ class Sample(object):
             log.verbose("Loading high remap integral from {0}: {1}".format(highRemapName, highIntegral))
             log.verbose("Loading low remap integral from {0}: {1}".format(lowRemapName, lowIntegral))
             log.verbose("Loading nominal remap integral from {0}: {1}".format(nomRemapName, nomIntegral))
-            
+
             if len(nomSysName) > 0:  ## renormalization done based on consistent set of trees
                 if configMgr.hists[nomSysName] != None:
                     nomIntegral = configMgr.hists["h"+samNameRemap+systName+"Nom_"+normString+"Norm"].Integral()
-            
-            # Attempt to symmetrize 
+            print("Loading high remap integral from {0}: {1}".format(highRemapName, highIntegral))
+            print("Loading low remap integral from {0}: {1}".format(lowRemapName, lowIntegral))
+            print("Loading nominal remap integral from {0}: {1}".format(nomRemapName, nomIntegral))
+
+            # Attempt to symmetrize
             if oneSide and symmetrize:
                 log.debug("Attempting to symmetrize one-sided systematic")
                 lowIntegral = 2.*nomIntegral - highIntegral # NOTE: this is an approximation!
@@ -752,7 +755,7 @@ class Sample(object):
                     lowIntegral = configMgr.hists["h"+samNameRemap+systName+"Low_"+normString+"Norm"].Integral()
                     if lowIntegral == 0:
                         lowIntegral = nomIntegral
-                    
+
                     # clearly a problem. Revert to unsymmetrize
                     log.warning("    generating HistoSys for %s syst=%s low=0. Revert to non-symmetrize." % (nomName, systName))
                     symmetrize = False
@@ -769,7 +772,7 @@ class Sample(object):
             log.debug("Constructing cloned normalized histograms")
             configMgr.hists["%sNorm" % highName] = configMgr.hists[highName].Clone("%sNorm" % highName)
             configMgr.hists["%sNorm" % lowName] = configMgr.hists[lowName].Clone("%sNorm" % lowName)
-           
+
 
             # Attempt to scale the high and low histograms down to normalized histograms
             try:
@@ -779,14 +782,14 @@ class Sample(object):
             except ZeroDivisionError:
                 log.error("    generating HistoSys for %s syst=%s: nom=%g high=%g low=%g. Systematic is removed from fit." % (nomName, systName, nomIntegral, highIntegral, lowIntegral))
                 return
-            
+
             # Attempt to generate an overallNormHistoSys if required
             if includeOverallSys and not (oneSide and not symmetrize):
                 log.debug("Attempting to build overallNormHistoSys")
                 nomIntegralN = configMgr.hists[nomName].Integral()
                 lowIntegralN = configMgr.hists[lowName+"Norm"].Integral()
                 highIntegralN = configMgr.hists[highName+"Norm"].Integral()
-            
+
                 log.verbose("Loading high norm integral from {0}: {1}".format(highName+"Norm", highIntegralN))
                 log.verbose("Loading low norm integral from {0}: {1}".format(lowName+"Norm", lowIntegralN))
                 log.verbose("Loading nominal norm integral from {0}: {1}".format(nomName, nomIntegralN))
@@ -804,7 +807,7 @@ class Sample(object):
                     except ZeroDivisionError:
                         log.error("    generating overallNormHistoSys for %s syst=%s nom=%g high=%g low=%g. Systematic is removed from fit." % (nomName, systName, nomIntegralN, highIntegralN, lowIntegralN))
                         return
-                
+
                     try:
                         log.debug("Scaling normalized histograms: high with {}, low with {}".format(1.0/highN, 1.0/lowN))
                         configMgr.hists[highName+"Norm"].Scale(1./highN)
@@ -817,9 +820,9 @@ class Sample(object):
             ## Check the shape and normalisation impact
             #
             # The chi2test can be performed on either the normal or the Norm histogram; since they're scaled
-            # up and down by simple numbers, there is no effect. 
-            # 
-            # The normalisation check is just performed on highN and lowN. 
+            # up and down by simple numbers, there is no effect.
+            #
+            # The normalisation check is just performed on highN and lowN.
 
             #print configMgr.hists[highName+"Norm"].Integral()
             #print configMgr.hists[lowName+"Norm"].Integral()
@@ -829,23 +832,23 @@ class Sample(object):
 
             #print highN, lowN
             #print high, low
-    
+
             # Now, finally add the systematic
             if oneSide and not symmetrize:
                 ## MB : avoid swapping of histograms, always pass high and nominal
                 self.histoSystList.append((systName, highName+"Norm", nomName, configMgr.histCacheFile, "", "", "", ""))
             else:
                 self.histoSystList.append((systName, highName+"Norm", lowName+"Norm", configMgr.histCacheFile, "", "", "", ""))
-           
+
             # Do we need to include an overall systematic?
             if includeOverallSys and not (oneSide and not symmetrize):
-                self.addOverallSys(systName, highN, lowN)                
-            
+                self.addOverallSys(systName, highN, lowN)
+
 
         # Case 2
         if includeOverallSys and not normalizeSys:
             log.verbose("Case 2: non-normalized systematic with includeOverallSys")
-           
+
             # Symmetrization efforts: either an envelope, or the usual one
             if symmetrizeEnvelope:
                 # build the envelope of up/down
@@ -891,17 +894,17 @@ class Sample(object):
                 except ZeroDivisionError:
                     log.error("    generating HistoSys for %s syst=%s: nom=%g high=%g low=%g. Systematic is removed from fit." % (nomName, systName, nomIntegral, highIntegral, lowIntegral))
                     return
-                
+
                 configMgr.hists[highName+"Norm"] = configMgr.hists[highName].Clone(highName+"Norm")
                 configMgr.hists[lowName+"Norm"] = configMgr.hists[lowName].Clone(lowName+"Norm")
-                
+
                 try:
                     configMgr.hists[highName+"Norm"].Scale(1./high)
                     configMgr.hists[lowName+"Norm"].Scale(1./low)
                 except ZeroDivisionError:
                     log.error("    generating HistoSys for %s syst=%s: nom=%g high=%g low=%g keeping in fit (offending histogram should be empty)." % (nomName, systName, nomIntegral, highIntegral, lowIntegral))
                     return
-                    
+
                 self.histoSystList.append((systName, highName+"Norm", lowName+"Norm", configMgr.histCacheFile, "", "", "", ""))
                 self.addOverallSys(systName, high, low)
 
@@ -915,7 +918,7 @@ class Sample(object):
                 ## TODO: check norm effect
                 #if max( abs(high-1.0), abs(1.0-low) ) < 0.005:
                     #log.error("    generating OverallSys for {} syst={} nom={:g} high={:g} low={:g}. Systematic has less than 0.5% impact and is removed from fit.".format(nomName, systName, nomIntegral, highIntegral, lowIntegral))
-                #else: 
+                #else:
                     #self.addOverallSys(systName, high, low)
 
         # Case 3
@@ -974,13 +977,13 @@ class Sample(object):
                     if binVal < 0.:
                         configMgr.hists[lowName].SetBinContent(iBin, 0.)
 
-                self.histoSystList.append((systName, highName, lowName, configMgr.histCacheFile, "", "", "", "")) 
+                self.histoSystList.append((systName, highName, lowName, configMgr.histCacheFile, "", "", "", ""))
             elif symmetrize and symmetrizeEnvelope:
                 log.verbose("Symmetrizing envelope of histogram: building error = max ( (up-nom), (nom-down) )")
                 symmetrizeSystematicEnvelope(nomName, lowName, highName)
-                
+
                 self.histoSystList.append((systName, highName, lowName, configMgr.histCacheFile, "", "", "", ""))
-                
+
             else: # default: don't do anything special
                 log.verbose("Adding a simple variation")
 
@@ -994,17 +997,17 @@ class Sample(object):
                     keepNorm = False
 
                 #if not checkShapeEffect(configMgr.hists[nomName], configMgr.hists[highName], configMgr.hists[lowName]):
-                if not True: # TODO: checkShapeEffect() to be implemented 
+                if not True: # TODO: checkShapeEffect() to be implemented
                     if not keepNorm:
                         log.error("    HistoSys for {} syst={} nom={:g} high={:g} low={:g} has small impact on normalisation and no effect on shape. Removing from fit.".format(nomName, systName, nomIntegral, highIntegral, lowIntegral))
                         return
-                        
+
                     log.error("    HistoSys for {} syst={} nom={:g} high={:g} low={:g} has small impact on shape. Using normalisation only.".format(nomName, systName, nomIntegral, highIntegral, lowIntegral))
 
                     for i in xrange(0, configMgr.hists[nomName].GetNbinsX()+2):
                         configMgr.hists[lowName].SetBinContent(i, configMgr.hists[nomName].GetBinContent(i))
                         configMgr.hists[highName].SetBinContent(i, configMgr.hists[nomName].GetBinContent(i))
-                        
+
                     configMgr.hists[lowName].Scale(lowIntegral)
                     configMgr.hists[highName].Scale(highIntegral)
 
@@ -1082,7 +1085,7 @@ class Sample(object):
         for iBin in xrange(configMgr.hists[histName].GetNbinsX()+1):
             try:
                 ratio = configMgr.hists[nomName].GetBinError(iBin) / configMgr.hists[nomName].GetBinContent(iBin)
-                if (statErrorThreshold is not None) and (ratio<statErrorThreshold): 
+                if (statErrorThreshold is not None) and (ratio<statErrorThreshold):
                     log.info( "shapeStat %s bin %g value %g, below threshold of: %g. Will ignore." % (systName, iBin, ratio, statErrorThreshold) )
                     ratio = 0.0   ## don't show if below threshold
                 configMgr.hists[histName].SetBinContent( iBin, ratio )
@@ -1099,12 +1102,12 @@ class Sample(object):
     def addOverallSys(self, systName, high, low):
         """
         Add an OverallSys entry using the high and low values
-        
+
         @param systName Name of the systematic
         @param high Value at +1sigma
         @param low Value at -1sigma
         """
-        
+
         if high == 1.0 and low == 1.0:
             log.warning("    addOverallSys for %s: high == 1.0 and low == 1.0. Systematic is removed from fit" % systName)
             return
@@ -1134,7 +1137,7 @@ class Sample(object):
         if high < 0.01:
             log.warning("    addOverallSys for %s: high=%g is < 0.01. Setting to high=0.01. Low=%g." % (systName, high, low))
             high = 0.01
-      
+
         #print high, high == 1.0
         #print low, low == 1.0
 
@@ -1170,7 +1173,7 @@ class Sample(object):
     def setNormFactor(self, name, val, low, high, const=False):
         """
         Set normalization factor
-        
+
         @param name Name of normalisation factor
         @param val Nominal value
         @param high Value at +1sigma
@@ -1184,9 +1187,9 @@ class Sample(object):
         return
 
     def addInput(self, filename, treename="", friends=[]):
-        # add a file with a treename. If none given, fall back to sample name or our override 
-        
-        # NOTE: do NOT use self.treename for this -- it will include a suffix, 
+        # add a file with a treename. If none given, fall back to sample name or our override
+
+        # NOTE: do NOT use self.treename for this -- it will include a suffix,
         # leading to a doubly-suffixed tree in case a config-wide default jas beem set
         _treename = self.name
         if self.prefixTreeName != "":
@@ -1211,7 +1214,7 @@ class Sample(object):
         # bulk add a bunch of filenames with the same treename
         for f in filenames:
             self.addInput(f, treename)
-        
+
         # we are the leaves of the configMgr->fitConfig->channel->sample tree,
         # so no propagation necessary
 
@@ -1234,7 +1237,7 @@ class Sample(object):
     #def propagateInputFiles(self, input_files):
         #"""
         #Propagate the file list downwards.
-        
+
         #@param filelist A list of filenames
         #"""
         ## if we don't have our own file list,  use the one given to us
@@ -1260,7 +1263,7 @@ class Sample(object):
         if self.isData:
             log.debug("Sample {} is data - not adding systematic {}".format(self.name, syst.name))
             return
-        
+
         log.verbose("Adding systematic {} to sample {} ({})".format(syst.name, self.name, hex(id(self))))
         if syst.name in self.systDict.keys():
             raise Exception("Attempt to overwrite systematic %s in Sample %s (%s)" % (syst.name, self.name, hex(id(self))))
@@ -1346,7 +1349,7 @@ class Sample(object):
         @param systName Name of the systematic to return
         """
 
-        # protection against strange people who use getSystematic 
+        # protection against strange people who use getSystematic
         # with the object they want to retrieve
         name = systName
         if isinstance(systName, SystematicBase):
@@ -1355,13 +1358,13 @@ class Sample(object):
             return self.systDict[name]
         except KeyError:
             log.warning("could not find systematic %s in sample %s" % (name, self.name))
-        
+
         return
 
     def removeSystematic(self, systName):
         """
         Remove a systematic
-        
+
         @param systName Name of the systematic to remove
         """
         # do we get a name or a Systematic passed?
@@ -1375,20 +1378,20 @@ class Sample(object):
         """
         Remove all systematics from the sample
         """
-        log.verbose("Clearing systematics for {} ({})".format(self.name, hex(id(self)))) 
+        log.verbose("Clearing systematics for {} ({})".format(self.name, hex(id(self))))
         self.systDict.clear()
- 
+
     def replaceSystematic(self, old, new):
         """
         Replace a systematic
-        
+
         @param old Systematic object to remove
         @param new Systematic object to add
         """
         self.removeSystematic(old)
         self.addSystematic(new)
         pass
-        
+
     # TODO: it would be nice to change the internal lists to dictionaries instead of arrays in a next iteration
     def createHistFactoryObject(self):
         """
@@ -1398,10 +1401,10 @@ class Sample(object):
         s.SetNormalizeByTheory(self.normByTheory)
         if self.statConfig:
             s.ActivateStatError()
-       
+
         #high = 1, low = 2
         for histoSys in self.histoSystList:
-            s.AddHistoSys(histoSys[0], histoSys[2], configMgr.histCacheFile, "", 
+            s.AddHistoSys(histoSys[0], histoSys[2], configMgr.histCacheFile, "",
                                        histoSys[1], configMgr.histCacheFile, "")
 
         for shapeSys in self.shapeSystList:
@@ -1427,26 +1430,26 @@ class Sample(object):
         Convert instance to XML string
         """
         self.sampleString = "  <Sample Name=\"%s\" HistoName=\"%s\" InputFile=\"%s\" NormalizeByTheory=\"%s\">\n"  % (self.name, self.histoName, configMgr.histCacheFile, self.normByTheory)
-        
+
         if self.statConfig:
             self.sampleString += "    <StatError Activate=\"%s\"/>\n" % self.statConfig
-        
+
         for histoSyst in self.histoSystList:
             self.sampleString += "    <HistoSys Name=\"%s\" HistoNameHigh=\"%s\" HistoNameLow=\"%s\" />\n" % (histoSyst[0], histoSyst[1], histoSyst[2])
-        
+
         for shapeSyst in self.shapeSystList:
             self.sampleString += "    <ShapeSys Name=\"%s\" HistoName=\"%s\" ConstraintType=\"%s\"/>\n" % (shapeSyst[0], shapeSyst[1], shapeSyst[2])
-        
+
         for overallSyst in self.overallSystList:
             self.sampleString += "    <OverallSys Name=\"%s\" High=\"%g\" Low=\"%g\" />\n" % (overallSyst[0], float(overallSyst[1]), float(overallSyst[2]))
-        
+
         for shapeFact in self.shapeFactorList:
             self.sampleString += "    <ShapeFactor Name=\"%s\" />\n" % shapeFact
-        
+
         if len(self.normFactor)>0:
             for normFactor in self.normFactor:
                 self.sampleString += "    <NormFactor Name=\"%s\" Val=\"%g\" High=\"%g\" Low=\"%g\" Const=\"%s\" />\n" % (normFactor[0], normFactor[1], normFactor[2], normFactor[3], normFactor[4])
                 pass
-        
+
         self.sampleString += "  </Sample>\n\n"
         return self.sampleString

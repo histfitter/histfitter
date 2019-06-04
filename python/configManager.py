@@ -53,11 +53,11 @@ def replaceSymbols(s):
     """
     s = s.replace("/","").replace("*","").replace("(","").replace(")","").replace("[", "_").replace("]","_")
     return s
-    
+
 def enum(typename, field_names):
     """
     Create a new enumeration type
-    
+
     @param typename Type to use for the enum
     @param field_names Names of the fields to create
     """
@@ -65,7 +65,7 @@ def enum(typename, field_names):
     if isinstance(field_names, str):
         field_names = field_names.replace(',', ' ').split()
     d = dict((reversed(nv) for nv in enumerate(field_names)), __slots__ = ())
-    return type(typename, (object,), d)()    
+    return type(typename, (object,), d)()
 
 class ConfigManager(object):
     """
@@ -155,10 +155,10 @@ class ConfigManager(object):
         self.histBackupCacheFile = ""
         self.useCacheToTreeFallback = False
         self.useHistBackupCacheFile = False
-        
+
         self.input_files = set() # Input list to be used for tree production
-       
-        self.deactivateBinnedLikelihood = False # Deactive the use of binned likelihoods in RooStats? 
+
+        self.deactivateBinnedLikelihood = False # Deactive the use of binned likelihoods in RooStats?
 
         self.ignoreSystematics = False # Turn off systematics?
 
@@ -196,7 +196,7 @@ class ConfigManager(object):
         @param input The configuration to add
         @param name The name for the fit configuration
         """
-        
+
         from fitConfig import fitConfig
         if len(name) > 0:
             newName = name
@@ -226,7 +226,7 @@ class ConfigManager(object):
 
         self.fitConfigs.append(newFitConfig)
         log.info("Created fitConfig: {}".format(newName))
-        
+
         log.debug("Appending existing files to fit configuration {}".format(newName))
         for i in self.input_files:
             newFitConfig.addInput(i.filename, i.treename)
@@ -236,7 +236,7 @@ class ConfigManager(object):
     def addInput(self, filename, treename):
         # add an input with a treename
         self.input_files.add(InputTree(filename, treename))
-       
+
         for fitConfig in self.fitConfigs:
             fitConfig.addInput(filename, treename)
 
@@ -317,7 +317,7 @@ class ConfigManager(object):
                                 chan.getSample(sam.name).addSystematic(syst)
                         ## MB: sample-specific weights (for example cuts)
                         ##     Make sure these weights propagate down to actual sample and systematics
-                        for w in sam.tempWeights: sam.addWeight(w) 
+                        for w in sam.tempWeights: sam.addWeight(w)
                     elif sam.isQCD or sam.isData:
                         chan.getSample(sam.name).setWrite(False)
 
@@ -342,7 +342,7 @@ class ConfigManager(object):
                     regString = "".join(channel.regions)
 
                     nomName = sam.getHistogramName(tl)
-                        
+
                     if sam.isData:
                         _name = sam.getHistogramName(tl)
                         if not _name in self.hists:
@@ -396,7 +396,7 @@ class ConfigManager(object):
 
         return
 
-    
+
     def initializeHistoPrepareObjectFromTrees(self):
         """
         Initialize the internal tree-to-histogram method
@@ -424,7 +424,7 @@ class ConfigManager(object):
             self.prepare.setHistoPaths(self.histCacheFile)
 
         return
-    
+
     def initializeHistoPrepareObject(self):
         """
         Initialize the inputdata-to-histograms builder
@@ -447,7 +447,7 @@ class ConfigManager(object):
         if self.myFitType != self.FitType.Background:
             # Not a background fit. Must be on purpose.
             return
-        
+
         if self.keepSignalRegionType:
             # User wants to keep the SR
             return
@@ -465,8 +465,8 @@ class ConfigManager(object):
                 for r in SRs:
                     log.debug("Blinded region {0}".format(r))
                     fc.getChannelByChannelName(r).blind = True
-             
-            # Now add them as validation channels 
+
+            # Now add them as validation channels
             fc.addValidationChannels(SRs)
         return
 
@@ -474,13 +474,13 @@ class ConfigManager(object):
         """
         Initializes the configuration manager by propagating setting down to channels, samples, etc.
         """
-        
+
         log.info("Initializing...")
-        
+
         # Set various output settings & lumi
         self.setCacheFilename()
         self.setLumi()
-       
+
         # Check if we want to change the SRs to VRs
         self.checkSignalRegionType()
 
@@ -491,11 +491,11 @@ class ConfigManager(object):
         self.initializeCppMgr()
 
         ## Propagate the relevant settings down
-        #self.propagateInputFiles() 
+        #self.propagateInputFiles()
         #self.propagateTreeName()
 
         # Summary
-        self.Print() 
+        self.Print()
         return
 
     def initializeCppMgr(self):
@@ -529,7 +529,7 @@ class ConfigManager(object):
         if self.outputFileName:
             self.cppMgr.m_outputFileName = self.outputFileName
             self.cppMgr.m_saveTree=True
-            
+
         if self.scanRange:
             self.cppMgr.setScanRange(True, self.scanRange[0], self.scanRange[1])
         else:
@@ -543,7 +543,7 @@ class ConfigManager(object):
             cppFC.m_hypoTestName = fc.hypoTestName
             if not fc.signalSample is None:
                 cppFC.m_signalSampleName = fc.signalSample
-     
+
             # CR/SR/VR channels
             for cName in fc.signalChannels:
                 cppFC.m_signalChannels.push_back(cName)
@@ -551,13 +551,13 @@ class ConfigManager(object):
                 cppFC.m_validationChannels.push_back(cName)
             for cName in fc.bkgConstrainChannels:
                 cppFC.m_bkgConstrainChannels.push_back(cName)
-       
+
             # Plot cosmetics per channel
             for c in fc.channels:
                  style = ChannelStyle(c.channelName)
                  style.setNBins(c.nBins)
                  if not c.title is None:
-                     style.setTitle(c.title)     
+                     style.setTitle(c.title)
                  if not c.minY is None:
                     style.setMinY(c.minY)
                  if not c.maxY is None:
@@ -575,7 +575,7 @@ class ConfigManager(object):
                  if not c.ATLASLabelX is None:
                      style.setATLASLabelText(c.ATLASLabelText)
                  if not c.showLumi is None:
-                     style.setShowLumi(c.showLumi)     
+                     style.setShowLumi(c.showLumi)
                  if not self.outputLumi is None:
                      if c.lumi is None:
                          style.setLumi(self.outputLumi)
@@ -613,7 +613,7 @@ class ConfigManager(object):
                  style.setTextSize1(c.textsize1)
                  style.setTextSize2(c.textsize2)
 
-                 # Plot cosmetics per fitConfig 
+                 # Plot cosmetics per fitConfig
                  style.setDataColor(fc.dataColor)
                  style.setTotalPdfColor(fc.totalPdfColor)
                  style.setErrorLineColor(fc.errorLineColor)
@@ -633,7 +633,7 @@ class ConfigManager(object):
                  # add channel and style for channel to C++ FitConfig (these two are expected to be synchronous
                  cppFC.m_channels.push_back(c.channelName)
                  cppFC.m_channelsStyle.push_back(style)
-                 
+
         self.cppMgr.checkConsistency()
         self.cppMgr.initialize()
         return
@@ -703,10 +703,10 @@ class ConfigManager(object):
         """
         Print all the input files used for the various fit configurations
         """
-        
-        width = 3 
+
+        width = 3
         depth = 1
-        
+
         log.info("ConfigManager:")
         for i, inputTree in enumerate(self.input_files):
             log.info("{}Input {:d}/{:d}: '{}' from {} ".format(" "*depth*width, i+1, len(self.input_files), inputTree.treename, inputTree.filename))
@@ -731,18 +731,18 @@ class ConfigManager(object):
                     for k, inputTree in enumerate(sample.input_files):
                         depth = 4
                         log.info("{}Input {:d}/{:d}: '{}' from {} ".format(" "*depth*width, k+1, len(sample.input_files), inputTree.treename, inputTree.filename))
-                    
+
                     for k, syst_name in enumerate(sample.systDict.keys()):
                         depth = 4
                         syst = sample.systDict[syst_name]
-                        
+
                         log.info("{}Systematic {:d}/{:d}: {}".format(" "*depth*width, k+1, len(sample.systDict.keys()), syst_name))
 
                     #for (systName, syst) in sample.systDict.items():
                         #log.info("                            ---> Systematic: %s" % syst.name)
                         #log.info("                                       Low : %s" % str(syst.filesLo))
                         #log.info("                                       High: %s" % str(syst.filesHi))
-        
+
         return
 
     #def printTreeNames(self):
@@ -799,7 +799,7 @@ class ConfigManager(object):
         #Propagate the file list downwards.
         #"""
         #log.info("  -propagate file list and tree names to fit configurations")
-        
+
         ## propagate our file list downwards (if we don't have one,
         ## this will result in the propagation of the files belonging
         ## to our top level xml)
@@ -841,7 +841,7 @@ class ConfigManager(object):
         log.info("Preparing histograms and/or workspace for fitConfig {}\n".format(fitConfig.name))
         if self.ignoreSystematics:
             log.info("NOTE: ignoring any defined systematics. Change configMgr.ignoreSystematics if this behaviour is not desired.\n")
-    
+
 
         if self.plotHistos:
             cutHistoDict = {}
@@ -871,7 +871,7 @@ class ConfigManager(object):
 
                 for reg in chan.regions:
                     normRegions.append(reg)
-        
+
         normCuts = normCuts.rstrip(" || ")
         for (iChan, chan) in enumerate(fitConfig.channels):
             for (iSam, sam) in enumerate(chan.sampleList):
@@ -885,17 +885,17 @@ class ConfigManager(object):
             log.info("Channel {}/{}: {}".format(iChan+1, len(fitConfig.channels), chan.name))
             regionString = "".join(chan.regions)
             self.prepare.channel = chan
-            
+
             sampleListRun = deepcopy(chan.sampleList)
             #for (iSam, sam) in enumerate(fitConfig.sampleList):
             for (iSam, sam) in enumerate(sampleListRun):
                 log.info("   Sample {}/{}: {}".format(iSam+1, len(sampleListRun), sam.name))
                 sam.removeCurrentSystematic()  # make sure that we are not mistakenly using a systematic variation tree
-                
+
                 # Run over the nominal configuration first
                 # Set the weights, cuts, weights and actually call prepare.read() internally
                 self.setWeightsCutsVariable(chan, sam, regionString)
-                
+
                 #depending on the sample type, the Histos and up/down weights are added
                 log.debug("Calling addSampleSpecificHists() for {0}".format(chan.name))
                 self.addSampleSpecificHists(fitConfig, chan, sam, regionString, normRegions, normString, normCuts)
@@ -915,7 +915,7 @@ class ConfigManager(object):
                     if syst.method != "userNormHistoSys":
                         log.verbose("Skipping systematic {} - not of type userNormHistoSys".format(syst.name))
                         continue
-                
+
                     log.verbose("Adding systematic {} in channel {}, sample {}".format(syst.name, chan.channelName, sam.name))
 
                     nomName = "h%sNom_%s_obs_%s" % (sam.name, regionString, replaceSymbols(chan.variableName) )
@@ -942,7 +942,7 @@ class ConfigManager(object):
             if len(chan.remapSystChanName) == 0:
                 log.verbose("Skipping {} - no remapping defined".format(chan.channelName))
                 continue
-                
+
             log.debug("Remapping systematics for {}".format(chan.channelName))
 
             log.info("For overallSys: now setting systematic(s)s of channel <%s> to those of channel: <%s>"%(chan.name,chan.remapSystChanName))
@@ -952,17 +952,17 @@ class ConfigManager(object):
                 if not sam.allowRemapOfSyst:
                     log.verbose("Sample {} does not allow remapping - skipping".format(sam.name))
                     continue
-                if sam.isData: 
+                if sam.isData:
                     log.verbose("Sample {} is data - skipping".format(sam.name))
                     continue
-                if not rc.hasSample(sam.name): 
+                if not rc.hasSample(sam.name):
                     log.verbose("Sample {} not present in remapped channel - skipping".format(sam.name, chan.remapSystChanName))
                     continue
 
                 rs = rc.getSample(sam.name)
 
                 for (key, ssys) in sam.systDict.items():
-                    if not ssys.allowRemapOfSyst: 
+                    if not ssys.allowRemapOfSyst:
                         log.verbose("Sample {}: systematic {} does not allow remapping - skipping".format(sam.name, ssys.name))
                         continue
 
@@ -970,7 +970,7 @@ class ConfigManager(object):
 
                     osys = sam.getOverallSys(key) # overall sys part is to be modified
                     rsys = rs.getOverallSys(osys[0]) # get replacement overall systematic, by name
-                    
+
                     if rsys is None:
                         log.warning("For channel %s and sample %s, replacement systematic %s could not be found. Skipping replacement of this overall syst." % (chan.name,sam.name,osys[0]))
                         continue
@@ -986,7 +986,7 @@ class ConfigManager(object):
 ##             channelsCompatible = chan.compareChannelFormat(rc)
 ##             if not channelsCompatible:
 ##                 continue
-            
+
 ##             log.info("For histoSys: now setting systematics of channel <%s> to those of channel: <%s>"%(chan.name,chan.remapSystChanName))
 ##             # loop over overallSystematics of all samples, and swap for those of remap channel
 ##             for sam in chan.sampleList:
@@ -1000,7 +1000,7 @@ class ConfigManager(object):
 ##                     if not ssys.allowRemapOfSyst: continue
 
 ##                     osys = sam.getHistoSys(key) # histo sys part is to be modified
-                  
+
 ##                     rsys = rs.getHistoSys(osys[0]) # get replacement histo systematic, by name
 ##                     if rsys is None:
 ##                         log.warning("For channel %s and sample %s, replacement systematic %s could not be found. Skipping replacement of this histo syst." % (chan.name,sam.name,osys[0]))
@@ -1009,13 +1009,13 @@ class ConfigManager(object):
 ##                     log.info("For channel %s and sample %s, replacement of histo systematic %s from %s." % (chan.name,sam.name,osys[0],rc.name))
 ##                     sam.replaceHistoSys(rsys)
 ##                     pass
-            
+
         #post-processing 3: merging of overall systematics (e.g. signal theory), if so requested
         for chan in fitConfig.channels:
             for sam in chan.sampleList:
                 if len(sam.mergeOverallSysSet)>=1:
                     if isinstance(sam.mergeOverallSysSet[0],list):
-                        for i in range(len(sam.mergeOverallSysSet)): 
+                        for i in range(len(sam.mergeOverallSysSet)):
                             if len(sam.mergeOverallSysSet[i])<=1: continue
                             log.info("Post-processing: for channel %s and sample %s, merging of systematics %s." % (chan.name,sam.name,str(sam.mergeOverallSysSet[i])))
                             keepName = sam.mergeOverallSysSet[i][0]
@@ -1054,7 +1054,7 @@ class ConfigManager(object):
                         lowErr = sqrt(lowErr2)
                         log.info("Merged systematic : %s %f %f" % (keepName, 1+highErr, 1-lowErr))
                         sam.addOverallSys(keepName, 1.0+highErr, 1.0-lowErr)
-                
+
         # Build blinded histograms here
         log.debug("Checking if blinded histograms need to be built")
         for (iChan, chan) in enumerate(fitConfig.channels):
@@ -1063,7 +1063,7 @@ class ConfigManager(object):
                     self.buildBlindedHistos(fitConfig, chan, sam)
                 else:
                     pass
-        
+
         # Plot histograms, if asked
         if self.plotHistos:
             mkdir_p("plots/%s" % self.analysisName)
@@ -1093,20 +1093,20 @@ class ConfigManager(object):
 
             self.friend_chains[name].Reset()
             del self.friend_chains[name]
- 
+
         ##TODO: things are broken up to here
         #sys.exit()
-    
+
         # Write the data file
         self.outputRoot()
-       
+
         if self.executeHistFactory:
             #removing regions used for remapping systematic uncertainties, but only for exclusion fits
             #execute the folllowing only if some channel with a remapped systematic uncertaintiy was used
             #in this case, keep only channels belonging to the signalchannels or the bkgConstrainchannels
             if self.myFitType == self.FitType.Exclusion and len([chan for chan in fitConfig.channels if len(chan.remapSystChanName)>0]) > 0:
                 log.info("Found top level object for exclusion fit: %s" % fitConfig.name)
-                
+
                 for chan in fitConfig.channels:
                     if not chan.channelName in fitConfig.signalChannels and not chan.channelName in fitConfig.bkgConstrainChannels:
                         try:
@@ -1119,7 +1119,7 @@ class ConfigManager(object):
                 fitConfig.writeXML() # <- this internally calls channel.writeXML()
                 fitConfig.executehist2workspace()
             else:
-                fitConfig.writeWorkspaces()       
+                fitConfig.writeWorkspaces()
 
     def appendSystinChanInfoDict(self, chan, sam, systName, syst):
         """
@@ -1138,7 +1138,7 @@ class ConfigManager(object):
         log.debug("  METHOD %s" % syst.method)
         log.debug("  LOW %s" % str(syst.low))
         log.debug("  HIGH %s" % str(syst.high))
-        
+
         if syst.type == "tree":
             chan.infoDict[sam.name].append((systName+"High", syst.high, sam.weights, syst.method))
             chan.infoDict[sam.name].append((systName+"Low", syst.low, sam.weights, syst.method))
@@ -1156,17 +1156,17 @@ class ConfigManager(object):
         lowName    = "h%s%sLow_%s_obs_%s" % (sam.name, syst.name, regionString, replaceSymbols(chan.variableName) )
 
         if syst.method == "histoSys":
-            chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName, 
+            chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName,
                                                 includeOverallSys=False, normalizeSys=False, nomSysName=nomSysName)
         elif syst.method == "histoSysOneSide":
-            chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName, 
+            chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName,
                                                 includeOverallSys=False, normalizeSys=False, symmetrize=False, oneSide=True, nomSysName=nomSysName)
         elif syst.method == "histoSysOneSideSym":
-            chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName, 
+            chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName,
                                                 includeOverallSys=False, normalizeSys=False, symmetrize=True, oneSide=True, nomSysName=nomSysName)
-        elif syst.method == "histoSysEnvelopeSym": 
-            chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName, 
-                                                includeOverallSys=False, normalizeSys=False, symmetrize=True, oneSide=False, symmetrizeEnvelope=True, 
+        elif syst.method == "histoSysEnvelopeSym":
+            chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName,
+                                                includeOverallSys=False, normalizeSys=False, symmetrize=True, oneSide=False, symmetrizeEnvelope=True,
                                                 samName=sam.name, normString=normString, nomSysName=nomSysName)
         elif syst.method == "overallSys":
             highIntegral = configMgr.hists[highName].Integral()
@@ -1186,43 +1186,43 @@ class ConfigManager(object):
         elif syst.method == "userOverallSys":
             chan.getSample(sam.name).addOverallSys(syst.name, syst.high, syst.low)
         elif syst.method == "overallHistoSys":
-            chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName, 
+            chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName,
                                                 includeOverallSys=True, normalizeSys=False, nomSysName=nomSysName)
         elif syst.method == "overallNormSys":
-            chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName, 
-                                                includeOverallSys=True, normalizeSys=True, symmetrize=False, oneSide=False, 
+            chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName,
+                                                includeOverallSys=True, normalizeSys=True, symmetrize=False, oneSide=False,
                                                 samName=sam.name, normString=normString, nomSysName=nomSysName)
         elif syst.method == "overallNormHistoSys":
-            chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName, 
-                                                includeOverallSys=True, normalizeSys=True, symmetrize=False, oneSide=False, 
+            chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName,
+                                                includeOverallSys=True, normalizeSys=True, symmetrize=False, oneSide=False,
                                                 samName=sam.name, normString=normString, nomSysName=nomSysName)
         elif syst.method == "overallNormHistoSysOneSide":
-            chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName, 
+            chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName,
                                                 includeOverallSys=True, normalizeSys=True, symmetrize=False, oneSide=True,
                                                 samName=sam.name, normString=normString, nomSysName=nomSysName)
         elif syst.method == "overallNormHistoSysOneSideSym":
-            chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName, 
+            chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName,
                                                 includeOverallSys=True, normalizeSys=True, symmetrize=True, oneSide=True,
                                                 samName=sam.name, normString=normString, nomSysName=nomSysName)
         elif syst.method == "overallNormHistoSysEnvelopeSym":
-            chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName, 
+            chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName,
                                                 includeOverallSys=True, normalizeSys=True, symmetrize=True, oneSide=False, symmetrizeEnvelope=True,
                                                 samName=sam.name, normString=normString, nomSysName=nomSysName)
         elif syst.method == "normHistoSys":
-            chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName, 
-                                                includeOverallSys=False, normalizeSys=True,symmetrize= False, oneSide=False, 
+            chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName,
+                                                includeOverallSys=False, normalizeSys=True,symmetrize= False, oneSide=False,
                                                 samName=sam.name, normString=normString, nomSysName=nomSysName)
         elif syst.method == "normHistoSysOneSide":
-            chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName, 
-                                                includeOverallSys=False, normalizeSys=True, symmetrize=False, oneSide=True, 
+            chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName,
+                                                includeOverallSys=False, normalizeSys=True, symmetrize=False, oneSide=True,
                                                 samName=sam.name, normString=normString, nomSysName=nomSysName)
         elif syst.method == "normHistoSysOneSideSym":
-            chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName, 
-                                                includeOverallSys=False, normalizeSys=True, symmetrize=True, oneSide=True, 
+            chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName,
+                                                includeOverallSys=False, normalizeSys=True, symmetrize=True, oneSide=True,
                                                 samName=sam.name, normString=normString, nomSysName=nomSysName)
-        elif syst.method == "normHistoSysEnvelopeSym": 
-            chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName, 
-                                                includeOverallSys=False, normalizeSys=True, symmetrize=True, oneSide=False, symmetrizeEnvelope=True, 
+        elif syst.method == "normHistoSysEnvelopeSym":
+            chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName,
+                                                includeOverallSys=False, normalizeSys=True, symmetrize=True, oneSide=False, symmetrizeEnvelope=True,
                                                 samName=sam.name, normString=normString, nomSysName=nomSysName)
         elif syst.method == "userHistoSys" or syst.method == "userNormHistoSys":
             if configMgr.hists[highName] is None:
@@ -1235,11 +1235,11 @@ class ConfigManager(object):
         elif syst.method == "shapeSys":
             if syst.merged:
                 mergedName = "".join(syst.sampleList)
-                
+
                 nomMergedName = "h%sNom_%s_obs_%s" % (mergedName, regionString, replaceSymbols(chan.variableName) )
                 highMergedName = "h%sHigh_%s_obs_%s" % (mergedName, regionString, replaceSymbols(chan.variableName) )
                 lowMergedName = "h%sLow_%s_obs_%s" % (mergedName, regionString, replaceSymbols(chan.variableName) )
-                
+
                 if sam.name in syst.sampleList:
                     syst.foundSample()
                     if self.hists[nomMergedName] is None:
@@ -1265,8 +1265,8 @@ class ConfigManager(object):
             try:
                 threshold = chan.statErrorThreshold
             except:
-                threshold = None     
-            chan.getSample(sam.name).addShapeStat(syst.name, nomName, statErrorThreshold = threshold ) # this stores a new histogram called: nomName+"Norm" 
+                threshold = None
+            chan.getSample(sam.name).addShapeStat(syst.name, nomName, statErrorThreshold = threshold ) # this stores a new histogram called: nomName+"Norm"
             chan.getSample(sam.name).shapeSystList.append(('shape_%s_%s_%s_obs_%s' % (syst.name, sam.name,
                                                                                       regionString,
                                                                                       replaceSymbols(chan.variableName)),
@@ -1296,13 +1296,13 @@ class ConfigManager(object):
             highIntegral = configMgr.hists[prefixHigh].Integral()
             lowIntegral = configMgr.hists[prefixLow].Integral()
             nomIntegral = configMgr.hists[prefixNom].Integral()
-            
+
             try:
                 overallSystHigh = highIntegral / nomIntegral
                 overallSystLow = lowIntegral / nomIntegral
             except ZeroDivisionError:
                 log.warning("Error generating HistoSys for %s syst=%s nom=%g high=%g low=%g" % (nomName,"QCDNorm_"+regionString,nomIntegral,highIntegral,lowIntegral))
-            
+
             chan.getSample(sam.name).addOverallSys("QCDNorm_"+regionString, overallSystHigh, overallSystLow)
         elif chan.getSample(sam.name).qcdSyst == "overallHistoSys":
             chan.getSample(sam.name).addHistoSys("QCDNorm_"+regionString, prefixNom, prefixHigh, prefixLow, True, False)
@@ -1343,19 +1343,19 @@ class ConfigManager(object):
 
             if (self.readFromTree and not sam.isDiscovery) or self.useCacheToTreeFallback:
                     #treeName = sam.treeName
-                    #if treeName == '': 
+                    #if treeName == '':
                     #    treeName = sam.name+self.nomName
                     if not noRead:
                         log.debug("setWeightsCutsVariable(): calling prepare.read() for {}".format(sam.treename))
                         #print sam.input_files
-                        
+
                         #self.prepare.read(sam.treename, sam.files, friendTreeName=sam.friendTreeName)
                         self.prepare.read(sam.input_files, suffix=sam.getTreenameSuffix(), friendTreeName=sam.friendTreeName)
         else:
             self.prepare.weights = "1."
             if self.readFromTree or self.useCacheToTreeFallback:
                 #treeName = sam.treeName
-                #if treeName == '': 
+                #if treeName == '':
                 #    treeName = sam.name
                 if not noRead:
                     log.debug("setWeightsCutsVariable(): calling prepare.read() for {}".format(sam.treename))
@@ -1369,14 +1369,14 @@ class ConfigManager(object):
         #else:
             #if not chan.variableName == "cuts":
                 #self.prepare.cuts = sam.cutsDict[regionString]
-        
+
         if len(sam.cutsDict.keys()) == 0:
             #if not chan.variableName == "cuts":
             self.prepare.cuts = self.cutsDict[regionString]
         else:
             #if not chan.variableName == "cuts":
             self.prepare.cuts = sam.cutsDict[regionString]
-       
+
         log.debug("Cuts currently: '{}'".format(self.prepare.cuts))
         if sam.additionalCuts != "":
             if chan.ignoreAdditionalCuts:
@@ -1393,7 +1393,7 @@ class ConfigManager(object):
         log.debug("Setting cuts to '{0}'".format(self.prepare.cuts))
         if oldCuts == self.prepare.cuts:
             log.debug(" => NOTE: no change in cuts!")
-        
+
         if sam.unit == "GeV":
             self.prepare.var = chan.variableName
         elif sam.unit == "MeV" and chan.variableName.find("/") < 0 and not chan.variableName.startswith("n"):
@@ -1421,15 +1421,15 @@ class ConfigManager(object):
         if sam.isData:
             #if self.channelIsBlinded(fitConfig, chan):
             if sam.isBlinded(fitConfig):
-                log.info("Using blinded data for channel {0} for sample {1}".format(chan.name, sam.name)) 
+                log.info("Using blinded data for channel {0} for sample {1}".format(chan.name, sam.name))
                 #chan.addData(sam.blindedHistName)
             else:
-                self.prepare.addHisto(sam.getHistogramName(fitConfig), 
-                                      useOverflow=chan.useOverflowBin, 
-                                      useUnderflow=chan.useUnderflowBin, 
+                self.prepare.addHisto(sam.getHistogramName(fitConfig),
+                                      useOverflow=chan.useOverflowBin,
+                                      useUnderflow=chan.useUnderflowBin,
                                       forceNoFallback=forceNoFallback)
                 #chan.addData(histoName)
-            
+
             chan.addData(sam.getHistogramName(fitConfig))
 
             #if chan.channelName in fitConfig.signalChannels:
@@ -1472,7 +1472,7 @@ class ConfigManager(object):
                     self.hists[tmpName].SetBinContent(iBin+1, 1.)
             chan.getSample(sam.name).setHistoName(tmpName)
 
-            if not sam.normRegions and (not sam.noRenormSys): 
+            if not sam.normRegions and (not sam.noRenormSys):
                 needsNorm = False
                 log.debug("Checking whether sample {0} needs normalisation regions".format(sam.name))
                 for sys in sam.systDict.values():
@@ -1489,7 +1489,7 @@ class ConfigManager(object):
                         log.error("    %s needs normRegions because of %s of type %s but no normalization regions specified. This is not safe, please fix." % (sam.name, sys.name, sys.method))
                         needsNorm = True
                         break
-    
+
                 if needsNorm:
                     log.verbose("Setting normalisation regions for {0}".format(sam.name))
                     normChannels = []
@@ -1501,7 +1501,7 @@ class ConfigManager(object):
                         pass
                     sam.setNormRegions(normChannels)
                     log.warning("            For now, using all non-validation channels by default: %s" % sam.normRegions)
-                    
+
             if sam.normRegions and (not sam.noRenormSys):
                 log.debug("addSampleSpecificHists(): sample {} has normalisation regions -- will construct histograms for these".format(sam.name))
                 log.info("      - Loading norm regions") # layout aligned with call for systematic
@@ -1511,23 +1511,23 @@ class ConfigManager(object):
                         c = fitConfig.getChannel(normReg[1], [normReg[0]])
                     else:
                         c = fitConfig.getChannel(normReg[1], normReg[0])
-                    
+
                     regionStrings.append(c.regionString)
-         
+
                 normString = "".join(regionStrings)
 
                 log.verbose("addSampleSpecificHists(): constructed normString {0} for sample {1}".format(normString, sam.name))
 
                 tmpName = "h%sNom_%sNorm" % (sam.name, normString )
                 if not tmpName in self.hists.keys():
-                    
-                    if not self.readFromTree:    
+
+                    if not self.readFromTree:
                         nomName = "h%sNom_%sNorm" % (sam.name, normString)
                         self.hists[nomName] = None
                         try:
                             self.prepare.addHisto(nomName, forceNoFallback=forceNoFallback)
-                        except:    
-                            # assume that if no histogram is made, then it is not needed  
+                        except:
+                            # assume that if no histogram is made, then it is not needed
                             pass
                     else:
                         self.hists[tmpName] = TH1F(tmpName, tmpName, 1, 0.5, 1.5)
@@ -1543,8 +1543,8 @@ class ConfigManager(object):
                                 log.verbose("At normalisation region {}".format(r))
                                 try:
                                     s = c.getSample(sam.name)
-                                except:    
-                                    # assume that if no histogram is made, then it is not needed  
+                                except:
+                                    # assume that if no histogram is made, then it is not needed
                                     continue
 
                                 log.debug("addSampleSpecificHists(): calling prepare.read() for {}".format(sam.treename))
@@ -1573,12 +1573,12 @@ class ConfigManager(object):
             ## Remove any current systematic
             #chan.getSample(sam.name).removeCurrentSystematic()
 
-            ## first reset weight to nominal value; this won't load a histogram as the nominal one is already done 
-            #self.setWeightsCutsVariable(chan, sam, regionString) 
-          
+            ## first reset weight to nominal value; this won't load a histogram as the nominal one is already done
+            #self.setWeightsCutsVariable(chan, sam, regionString)
+
             ## copy the weights to find common string -> save some memory
             #need_weights = set(copy(sam.weights))
-            
+
             #for syst in (s for s in sorted(chan.getSample(sam.name).systDict.values(), key=lambda s: s.name) if s.type == "weight"):
                 #print syst.name
                 ##print syst.nominal
@@ -1586,14 +1586,14 @@ class ConfigManager(object):
 
                 #if syst.differentNominalTreeWeight:
                     #for x in syst.nominal: need_weights.add(x)
-               
+
                 #for x in syst.low: need_weights.add(x)
                 #for x in syst.high: need_weights.add(x)
                 ##need_weights.add([x for x in syst.low])
                 ##need_weights.add([x for x in syst.high])
 
                 ## TODO: find lowest common denominator of all these weights, for now we don't care
-                ## 
+                ##
                 #pass
 
             #print sorted(need_weights)
@@ -1602,17 +1602,17 @@ class ConfigManager(object):
 
             if not self.ignoreSystematics:
                 # Construct a simple double loop to ensure all the weights go first, and then all the trees
-                syst_types = ["weight", "tree", "user"]
+                syst_types = ["weight", "tree", "hist", "user"]
                 systs_by_type = {}
                 for syst_type in syst_types:
-                    systs_by_type[syst_type] = [s for s in sorted(chan.getSample(sam.name).systDict.values(), key=lambda s: s.name) if s.type == syst_type] 
+                    systs_by_type[syst_type] = [s for s in sorted(chan.getSample(sam.name).systDict.values(), key=lambda s: s.name) if s.type == syst_type]
 
-                log.info("      - Will load {} weights, {} tree-based and {} user systematics".format(len(systs_by_type["weight"]), len(systs_by_type["tree"]), len(systs_by_type["user"])))
+                log.info("      - Will load {} weights, {} tree-based, {} hist-based and {} user systematics".format(len(systs_by_type["weight"]), len(systs_by_type["tree"]), len(systs_by_type["hist"]), len(systs_by_type["user"])))
 
                 i = 0
                 for syst_type in syst_types:
                     j = 0
-                    for syst in systs_by_type[syst_type]: 
+                    for syst in systs_by_type[syst_type]:
                         i += 1
                         j += 1
                         log.info("      - Systematic {}/{}: {}".format(i, len(chan.getSample(sam.name).systDict.values()), syst.name))
@@ -1623,18 +1623,18 @@ class ConfigManager(object):
                         chan.getSample(sam.name).removeCurrentSystematic()
 
                         # first reset weight to nominal value
-                        # NOTE: this won't actually load a histogram as the nominal one is already done 
-                        self.setWeightsCutsVariable(chan, sam, regionString) 
-                      
-                        # this method actually calls the hard work. 
+                        # NOTE: this won't actually load a histogram as the nominal one is already done
+                        self.setWeightsCutsVariable(chan, sam, regionString)
+
+                        # this method actually calls the hard work.
                         # NOTE: this NEEDS to not rely on this method. Now it's not parallelizable.
                         syst.PrepareWeightsAndHistos(regionString, normString, normCuts, self, fitConfig, chan, sam)
                         self.addHistoSysforNoQCD(regionString, normString, normCuts, fitConfig, chan, sam, syst)
-                
+
                 # and remove the last systematic
                 chan.getSample(sam.name).removeCurrentSystematic()
 
-        elif sam.isQCD:	
+        elif sam.isQCD:
             #Add Histos for Sample-type QCD
             self.addHistoSysForQCD(regionString,normString,normCuts,chan,sam)
         return
@@ -1660,7 +1660,7 @@ class ConfigManager(object):
 
         if not sample.isBlinded(fitConfig):
             log.verbose("buildBlindedHistos: sample {} is not blinded, performing nothing".format(sample.name))
-            return 
+            return
 
         histname = sample.getHistogramName(fitConfig)
 
@@ -1674,11 +1674,11 @@ class ConfigManager(object):
         log.info("Blinding sample {} in {} with the following samples:".format(sample.name, channel.channelName))
         for s in channel.sampleList:
             if (not s.isData) and (self.useSignalInBlindedData or s.name != fitConfig.signalSample):
-                log.info(s.name)			
+                log.info(s.name)
                 self.hists[histname].Add(self.hists[s.histoName])
-        
+
         return
-    
+
     def makeDicts(self, fitConfig, chan):
         """
         Prepare various internal dictionaries for a channel in a fit configuration
@@ -1800,7 +1800,7 @@ class ConfigManager(object):
 
             self.canvasList.append(canDict[info])
             self.stackList.append(stackDict[info])
-    
+
     def outputRoot(self):
         """
         Write out the histograms defined in the analysis to a data file
