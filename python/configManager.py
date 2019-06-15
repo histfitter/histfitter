@@ -18,7 +18,7 @@
  **********************************************************************************
 """
 
-from ROOT import THStack, TLegend, TCanvas, TFile, std, TH1F
+from ROOT import THStack, TLegend, TCanvas, TFile, std, TH1F, TList
 from ROOT import ConfigMgr, FitConfig, ChannelStyle #this module comes from gSystem.Load("libSusyFitter.so")
 from ROOT import gROOT, TObject, TProof
 from prepareHistos import PrepareHistos
@@ -1672,11 +1672,12 @@ class ConfigManager(object):
         self.hists[histname] = TH1F(histname, histname, channel.nBins, channel.binLow, channel.binHigh)
 
         log.info("Blinding sample {} in {} with the following samples:".format(sample.name, channel.channelName))
+        blindhistlist = TList()
         for s in channel.sampleList:
             if (not s.isData) and (self.useSignalInBlindedData or s.name != fitConfig.signalSample):
                 log.info(s.name)
-                self.hists[histname].Add(self.hists[s.histoName])
-
+                blindhistlist.Add(self.hists[s.histoName])
+        self.hists[histname].Merge(blindhistlist,"NOL")
         return
 
     def makeDicts(self, fitConfig, chan):
