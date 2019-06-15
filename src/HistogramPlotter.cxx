@@ -61,21 +61,24 @@
 
 static TMsgLogger Logger("HistogramPlotter");
 
+// Default 1e-5, super slow?
+constexpr float plotprecision=1e-1;
+
 HistogramPlotter::HistogramPlotter(RooWorkspace *w, const TString& fitConfigName) {
     ConfigMgr* mgr = ConfigMgr::getInstance();
     FitConfig* fc = mgr->getFitConfig(fitConfigName);
     if(!w) {
-        throw std::invalid_argument( "No workspace passed" ); 
+        throw std::invalid_argument( "No workspace passed" );
     }
 
     if(!fc) {
-        throw std::invalid_argument( "No such fit configuration" ); 
+        throw std::invalid_argument( "No such fit configuration" );
     }
 
     m_workspace = w;
     m_fitConfig = fc;
 
-    m_plotRatio = mgr->m_plotRatio; 
+    m_plotRatio = mgr->m_plotRatio;
 
     m_plotRegions = "ALL";
     m_plotComponents = true;
@@ -87,18 +90,18 @@ HistogramPlotter::HistogramPlotter(RooWorkspace *w, const TString& fitConfigName
 
 HistogramPlotter::HistogramPlotter(RooWorkspace* w, FitConfig* fc) {
     if(!w) {
-        throw std::invalid_argument( "No workspace passed" ); 
+        throw std::invalid_argument( "No workspace passed" );
     }
 
     if(!fc) {
-        throw std::invalid_argument( "No such fit configuration" ); 
+        throw std::invalid_argument( "No such fit configuration" );
     }
 
     m_workspace = w;
     m_fitConfig = fc;
 
     ConfigMgr* mgr = ConfigMgr::getInstance();
-    m_plotRatio = mgr->m_plotRatio; 
+    m_plotRatio = mgr->m_plotRatio;
     m_plotRegions = "ALL";
 
 }
@@ -140,18 +143,18 @@ void HistogramPlotter::Initialize() {
     RooMsgService::instance().getStream(1).removeTopic(RooFit::Plotting);
 
     Logger << kINFO << "HistogramPlotter::Initialize()" << GEndl;
-    Logger << kINFO << " ------ Starting Plot with parameters:   analysisName = " << m_fitConfig->m_name << " and " << m_anaName << GEndl; 
+    Logger << kINFO << " ------ Starting Plot with parameters:   analysisName = " << m_fitConfig->m_name << " and " << m_anaName << GEndl;
     Logger << kINFO << "    plotRegions = '" <<  m_plotRegions <<  "'  plotComponents = " << m_plotComponents << "  outputPrefix = " << m_outputPrefix  << GEndl;
 
     m_pdf = static_cast<RooSimultaneous*>(m_workspace->pdf("simPdf"));
-    if(!m_inputData) { 
+    if(!m_inputData) {
         Logger << kDEBUG << "No data provided; loading from PDF" << GEndl;
         m_inputData = static_cast<RooAbsData*>(m_workspace->data("obsData"));
     }
 
     Logger << kDEBUG << "Loading RooCategory 'channelCat'" << GEndl;
     m_regionCategory = static_cast<RooCategory*>(m_workspace->cat("channelCat"));
-    
+
     Logger << kINFO << "Datasets found:" << GEndl;
     m_inputData->table(*(static_cast<RooAbsCategory*>(m_regionCategory)))->Print("v");
 
@@ -208,10 +211,10 @@ void HistogramPlotter::PlotRegion(const TString &regionCategoryLabel) {
     ChannelStyle style = m_fitConfig->getChannelStyle(regionCategoryLabel);
 
     // does this make sense?
-    if(!regionPdf || !regionData){ 
+    if(!regionPdf || !regionData){
         Logger << kWARNING << "Either the PDF or the dataset does not have an appropriate state for the region = " << regionCategoryLabel << ", check the workspace file" << GEndl;
-        Logger << kWARNING << "regionPdf = " << regionPdf << "   regionData = " << regionData << GEndl;  
-        return; 
+        Logger << kWARNING << "regionPdf = " << regionPdf << "   regionData = " << regionData << GEndl;
+        return;
     }
 
     HistogramPlot plot(m_workspace, regionCategoryLabel, regionPdf, regionData, style);
@@ -233,10 +236,10 @@ void HistogramPlotter::PlotRegion(const TString &regionCategoryLabel) {
 ////////////////
 
 HistogramPlot::HistogramPlot(RooWorkspace *w,
-        const TString& regionCategoryLabel, RooAbsPdf *regionPdf, 
+        const TString& regionCategoryLabel, RooAbsPdf *regionPdf,
         RooDataSet *regionData, const ChannelStyle &style) : m_workspace(w),
     m_regionPdf(regionPdf),
-    m_regionData(regionData), 
+    m_regionData(regionData),
     m_style(style),
     m_regionCategoryLabel(regionCategoryLabel),
     m_regionVariableName("obs_x_"+regionCategoryLabel)
@@ -244,7 +247,7 @@ HistogramPlot::HistogramPlot(RooWorkspace *w,
     m_regionVariable = static_cast<RooRealVar*>( static_cast<RooArgSet*>(m_regionPdf->getObservables(*regionData))->find(m_regionVariableName));
 
     ConfigMgr* mgr = ConfigMgr::getInstance();
-    m_plotRatio = mgr->m_plotRatio; 
+    m_plotRatio = mgr->m_plotRatio;
 
     m_fitResult = nullptr;
     m_plotComponents = false;
@@ -267,15 +270,15 @@ void HistogramPlot::setFitResult(RooFitResult *r) {
 }
 
 void HistogramPlot::buildFrame() {
-    Logger << kINFO << "Building frame for " << m_regionCategoryLabel << GEndl; 
+    Logger << kINFO << "Building frame for " << m_regionCategoryLabel << GEndl;
 
     // create RooFit frame
-    m_frame =  m_regionVariable->frame(); 
+    m_frame =  m_regionVariable->frame();
     m_frame->SetName(Form("frame_%s_%s", m_regionCategoryLabel.Data(), m_outputPrefix.Data()));
 
     // plot the data
-    m_regionData->plotOn(m_frame, RooFit::DataError(RooAbsData::Poisson), 
-            RooFit::MarkerColor(m_style.getDataColor()), 
+    m_regionData->plotOn(m_frame, RooFit::DataError(RooAbsData::Poisson),
+            RooFit::MarkerColor(m_style.getDataColor()),
             RooFit::LineColor(m_style.getDataColor()));
 
     if(m_style.getRemoveEmptyBins()){
@@ -285,25 +288,25 @@ void HistogramPlot::buildFrame() {
 
     // normalize pdf to number of expected events, not to number of events in dataset
     Logger << kDEBUG << "Drawing PDF" << GEndl;
-    m_regionPdf->plotOn(m_frame, RooFit::Normalization(1, RooAbsReal::RelativeExpected), 
-            RooFit::Precision(1e-5), 
+    m_regionPdf->plotOn(m_frame, RooFit::Normalization(1, RooAbsReal::RelativeExpected),
+            RooFit::Precision(plotprecision),
             RooFit::LineColor(m_style.getTotalPdfColor()));
 
     // plot components
-    if(m_plotComponents) {  
+    if(m_plotComponents) {
         //AddComponentsToPlot(w, fc, frame, regionPdf, regionVar, regionCatLabel.Data(),style);
         addComponents();
     }
 
     // visualize error of fit
-    if(m_fitResult) { 	
+    if(m_fitResult) {
         Logger << kDEBUG << "Drawing fit errors" << GEndl;
-        m_regionPdf->plotOn(m_frame, RooFit::Normalization(1, RooAbsReal::RelativeExpected), 
-                RooFit::Precision(1e-5), 
-                RooFit::FillColor(m_style.getErrorFillColor()), 
+        m_regionPdf->plotOn(m_frame, RooFit::Normalization(1, RooAbsReal::RelativeExpected),
+                RooFit::Precision(plotprecision),
+                RooFit::FillColor(m_style.getErrorFillColor()),
                 RooFit::FillStyle(m_style.getErrorFillStyle()),
                 RooFit::LineColor(m_style.getErrorLineColor()),
-                RooFit::LineStyle(m_style.getErrorLineStyle()), 
+                RooFit::LineStyle(m_style.getErrorLineStyle()),
                 RooFit::VisualizeError(*m_fitResult),
                 RooFit::Name("total_error_band"));
 
@@ -311,16 +314,16 @@ void HistogramPlot::buildFrame() {
 
     // re-plot data and pdf, so they are on top of error and components
     Logger << kDEBUG << "Redrawing PDF" << GEndl;
-    m_regionPdf->plotOn(m_frame, RooFit::Normalization(1, RooAbsReal::RelativeExpected), 
-            RooFit::Precision(1e-5), 
+    m_regionPdf->plotOn(m_frame, RooFit::Normalization(1, RooAbsReal::RelativeExpected),
+            RooFit::Precision(plotprecision),
             RooFit::LineColor(m_style.getTotalPdfColor()));
 
     Logger << kDEBUG << "Redrawing data" << GEndl;
-    m_regionData->plotOn(m_frame, RooFit::DataError(RooAbsData::Poisson), 
-            RooFit::MarkerColor(m_style.getDataColor()), 
+    m_regionData->plotOn(m_frame, RooFit::DataError(RooAbsData::Poisson),
+            RooFit::MarkerColor(m_style.getDataColor()),
             RooFit::LineColor(m_style.getDataColor()));
 
-    // remove any empty bins	
+    // remove any empty bins
     if(m_style.getRemoveEmptyBins()) {
         Logger << kDEBUG << "Removing empty bins" << GEndl;
         Util::RemoveEmptyDataBins(m_frame);
@@ -347,13 +350,13 @@ void HistogramPlot::addRatioPanelCosmetics(RooPlot* frame_dummy, RooPlot* frame)
     l4->SetLineStyle(3);
     l5->SetLineStyle(3);
 
-    TLine* lp1 = new TLine(xmin, 1., xmax, 1.);	
-    TLine* lp2 = new TLine(xmin, 2., xmax, 2.);	
+    TLine* lp1 = new TLine(xmin, 1., xmax, 1.);
+    TLine* lp2 = new TLine(xmin, 2., xmax, 2.);
     TLine* lp3 = new TLine(xmin, 3., xmax, 3.);
     TLine* lp4 = new TLine(xmin, 4., xmax, 4.);
     TLine* lp5 = new TLine(xmin, 5., xmax, 5.);
-    TLine* lp6 = new TLine(xmin, -1., xmax, -1.);	
-    TLine* lp7 = new TLine(xmin, -2., xmax, -2.);	
+    TLine* lp6 = new TLine(xmin, -1., xmax, -1.);
+    TLine* lp7 = new TLine(xmin, -2., xmax, -2.);
     TLine* lp8 = new TLine(xmin, -3., xmax, -3.);
     TLine* lp9 = new TLine(xmin, -4., xmax, -4.);
     TLine* lp10 = new TLine(xmin, -5., xmax, -5.);
@@ -369,7 +372,7 @@ void HistogramPlot::addRatioPanelCosmetics(RooPlot* frame_dummy, RooPlot* frame)
     lp9->SetLineStyle(3);
     lp10->SetLineStyle(3);
 
-    if(m_plotRatio == "ratio"){	
+    if(m_plotRatio == "ratio"){
         frame->addObject(l);
         frame->addObject(l2);
         frame->addObject(l3);
@@ -388,10 +391,10 @@ void HistogramPlot::addRatioPanelCosmetics(RooPlot* frame_dummy, RooPlot* frame)
         frame->addObject(lp10);
     }
 
-    Double_t lowerlimit = 0.; 
-    Double_t upperlimit = 2.2; 
-    if (m_plotRatio == "pull"){ 
-        lowerlimit = -5.7; 
+    Double_t lowerlimit = 0.;
+    Double_t upperlimit = 2.2;
+    if (m_plotRatio == "pull"){
+        lowerlimit = -5.7;
         upperlimit = 5.7;
     }
 
@@ -402,22 +405,23 @@ void HistogramPlot::addRatioPanelCosmetics(RooPlot* frame_dummy, RooPlot* frame)
 
 void HistogramPlot::addRatioPanel() {
     Logger << kDEBUG << "Adding ratio panel to plot" << GEndl;
-    
+
     //TFile f("/tmp/test.root", "recreate");
-    
+
     //std::cout << "pdf = " << m_regionData << std::endl;
     //std::cout << "data = " << m_regionPdf << std::endl;
     //std::cout << "variable = " << m_regionVariable << std::endl;
- 
+
     // Data/model ratio
     auto hratio = Util::MakeRatioOrPullHist(m_regionData, m_regionPdf, m_regionVariable);
     hratio->SetMarkerColor(m_style.getDataColor());
     hratio->SetLineColor(m_style.getDataColor());
-    
+
     // Data/bkg ratio -- check if we have a POI, if so, calculate the ratio with it set to 0
     RooStats::ModelConfig* mc = Util::GetModelConfig( m_workspace );
     const RooArgSet * poiSet = mc->GetParametersOfInterest();
-    RooRealVar *poi = (RooRealVar*) poiSet->first();
+    RooRealVar *poi =  nullptr;
+    if(poiSet->size()>0) {poi = (RooRealVar*) poiSet->first();}
     RooHist* hratio_excl_sig = nullptr;
     if(poi) {
         //exit(0);
@@ -437,12 +441,12 @@ void HistogramPlot::addRatioPanel() {
     }
 
     //// data/pdf ratio histograms are plotted by RooPlot.ratioHist() through a dummy frame
-    RooPlot* frame_dummy = m_regionVariable->frame(); 
+    RooPlot* frame_dummy = m_regionVariable->frame();
 
     // Construct a histogram with the ratio of the pdf curve w.r.t the pdf curve +/- 1 sigma
     RooCurve* hratioPdfError = new RooCurve;
     if (m_fitResult) {
-        hratioPdfError = Util::MakePdfErrorRatioHist(m_regionData, m_regionPdf, m_regionVariable, m_fitResult); 
+        hratioPdfError = Util::MakePdfErrorRatioHist(m_regionData, m_regionPdf, m_regionVariable, m_fitResult);
     }
     hratioPdfError->SetFillColor(m_style.getErrorFillColor());
     hratioPdfError->SetFillStyle(m_style.getErrorFillStyle());
@@ -451,22 +455,22 @@ void HistogramPlot::addRatioPanel() {
 
     // Create a new frame to draw the residual distribution and add the distribution to the frame
     RooPlot* frame2 = m_regionVariable->frame() ;
-    if(m_plotRatio == "ratio") { 
+    if(m_plotRatio == "ratio") {
         hratio->SetTitle("Ratio Distribution");
-    } else if(m_plotRatio == "pull") { 
-        hratio->SetTitle("Pull Distribution"); 
+    } else if(m_plotRatio == "pull") {
+        hratio->SetTitle("Pull Distribution");
     }
 
     // only add PdfErrorsPlot when the plot shows ratio, not with pull
-    if (m_fitResult && m_plotRatio == "ratio") { 
-        frame2->addPlotable(hratioPdfError, "F"); 
+    if (m_fitResult && m_plotRatio == "ratio") {
+        frame2->addPlotable(hratioPdfError, "F");
     }
-    
+
     // add the data/model ratio
     frame2->addPlotable(hratio, "P");
 
     // add the data/bkg ratio, if there was a POI to be set to 0
-    if(hratio_excl_sig) { 
+    if(hratio_excl_sig) {
         Logger << kWARNING << "Plotting second ratio" << GEndl;
         frame2->addPlotable(hratio_excl_sig, "P");
     }
@@ -479,16 +483,16 @@ void HistogramPlot::addRatioPanel() {
         frame2->GetYaxis()->SetTitle("Pull");
     }
 
-    if(m_style.getTitleX() != "") { 
+    if(m_style.getTitleX() != "") {
         frame2->GetXaxis()->SetTitle(m_style.getTitleX());
     }
 
-    //if(m_style.getTitleY() != "") { 
+    //if(m_style.getTitleY() != "") {
     //m_frame->GetYaxis()->SetTitle(m_style.getTitleY());
     //}
 
     frame2->GetYaxis()->SetLabelSize(0.13);
-    frame2->GetYaxis()->SetNdivisions(504);         
+    frame2->GetYaxis()->SetNdivisions(504);
     frame2->GetXaxis()->SetLabelSize(0.13);
     frame2->GetYaxis()->SetTitleSize(0.13);
     frame2->GetXaxis()->SetTitleSize(0.13);
@@ -499,7 +503,7 @@ void HistogramPlot::addRatioPanel() {
     frame2->GetXaxis()->SetTickLength(0.06);
 
     frame2->SetTitle("");
-    frame2->GetYaxis()->CenterTitle(); 
+    frame2->GetYaxis()->CenterTitle();
     frame2->Draw();
 
 }
@@ -508,7 +512,7 @@ void HistogramPlot::addComponents() {
     Logger << kDEBUG << "Adding components to plot" << GEndl;
 
     if(m_componentNames.empty()) {
-        loadComponentInformation(); 
+        loadComponentInformation();
     }
 
     const double normalisation = m_regionPdf->expectedEvents(*m_regionVariable);
@@ -526,11 +530,11 @@ void HistogramPlot::addComponents() {
         m_regionPdf->plotOn(m_frame, //RooFit::Normalization(1, RooAbsReal::RelativeExpected),
                 RooFit::Components(m_componentStackedNames[i].Data()),
                 RooFit::Normalization(m_componentStackedFractions[i]*normalisation, RooAbsReal::NumEvent),
-                RooFit::FillColor(color), 
+                RooFit::FillColor(color),
                 RooFit::FillStyle(1001),
                 RooFit::DrawOption("F"),
-                RooFit::Precision(1e-5));
-    } 
+                RooFit::Precision(plotprecision));
+    }
 
 }
 
@@ -557,15 +561,15 @@ void HistogramPlot::loadComponentInformation() {
     }
 
     // Now load the names and calculate the fractions to be able to build the plot
-    while( (component = dynamic_cast<RooProduct*>(iter.Next()))) { 
+    while( (component = dynamic_cast<RooProduct*>(iter.Next()))) {
         TString componentName(component->GetName());
 
         Logger << kDEBUG << "Identified component " << componentName << GEndl;
 
         // Build the stacked component names
-        TString stackedComponentName(componentName); 
+        TString stackedComponentName(componentName);
         if(!m_componentStackedNames.empty()){
-            stackedComponentName = Form("%s,%s", m_componentStackedNames.back().Data(), componentName.Data()); 
+            stackedComponentName = Form("%s,%s", m_componentStackedNames.back().Data(), componentName.Data());
         }
 
         m_componentNames.push_back(componentName);
@@ -574,10 +578,10 @@ void HistogramPlot::loadComponentInformation() {
         // Find the fraction and the stacked fraction for these backgrounds
         // RooFit can't stack via PlotOn() when normalising, so keep track of this ourselves
         double componentFraction = Util::GetComponentFrac(m_workspace, componentName, RSSPdfName, m_regionVariable, regionBinWidth) ;
-        double stackComponentFraction = componentFraction; 
+        double stackComponentFraction = componentFraction;
         if(!m_componentStackedFractions.empty()){
             stackComponentFraction  = m_componentStackedFractions.back() + componentFraction;
-        } 
+        }
 
         Logger << kVERBOSE << "Fraction = " << componentFraction << GEndl;
         Logger << kVERBOSE << "Stacked fraction = " << stackComponentFraction << GEndl;
@@ -619,7 +623,7 @@ TLegend* HistogramPlot::buildLegend() {
 
     // Load component info
     if(m_componentNames.empty()) {
-        loadComponentInformation(); 
+        loadComponentInformation();
     }
 
     // add components to legend
@@ -647,10 +651,10 @@ void HistogramPlot::plot() {
     // two pads, one for 'standard' plot, one for data/MC ratio
     float yMinP1 = 0.305;
     float bottomMarginP1 = 0.005;
-    if(m_plotRatio == "none"){ 
+    if(m_plotRatio == "none"){
         yMinP1 = 0.01;
         bottomMarginP1 = 0.09;
-    }	   
+    }
 
     // pad for standard plot
     TPad *pad1 = new TPad(Form("%s_pad1", canvasName.Data()), Form("%s_pad1", canvasName.Data()), 0., yMinP1, .99, 1);
@@ -666,8 +670,8 @@ void HistogramPlot::plot() {
     pad2->SetFillColor(kWhite);
 
     // Do we have a log plot?
-    if(m_style.getLogY()) { 
-        pad1->SetLogy(); 
+    if(m_style.getLogY()) {
+        pad1->SetLogy();
     }
 
     // Is there a title for the x-axis?
@@ -675,11 +679,11 @@ void HistogramPlot::plot() {
         m_frame->GetXaxis()->SetTitle(m_style.getTitleX());
     }
 
-    // Draw the pads	
+    // Draw the pads
     pad1->Draw();
-    if(m_plotRatio != "none"){ 
-        pad2->Draw(); 
-        m_frame->GetXaxis()->SetLabelSize(0.); 
+    if(m_plotRatio != "none"){
+        pad2->Draw();
+        m_frame->GetXaxis()->SetLabelSize(0.);
     }
 
     // Go to the main pad and set ranges for the frame
@@ -691,12 +695,12 @@ void HistogramPlot::plot() {
     }
 
     // now draw frame
-    m_frame->SetTitle(""); 
+    m_frame->SetTitle("");
     m_frame->Draw();
 
     // ATLAS string - FIXME: remove for public release
     if( (fabs(m_style.getATLASLabelX() + 1.) > 0.000001) and (fabs(m_style.getATLASLabelY() + 1.) > 0.000001) ) {
-        Util::ATLASLabel(m_style.getATLASLabelX(), m_style.getATLASLabelY(), m_style.getATLASLabelText()) ; 
+        Util::ATLASLabel(m_style.getATLASLabelX(), m_style.getATLASLabelY(), m_style.getATLASLabelText()) ;
     }
 
     // Lumi
@@ -707,7 +711,7 @@ void HistogramPlot::plot() {
     // Legend
     TLegend *legend = m_style.getTLegend();
     if(!legend) { legend = buildLegend(); }
-    legend->Draw(); 
+    legend->Draw();
 
     // Add ratio?
     if(m_plotRatio != "none") {
@@ -722,14 +726,14 @@ void HistogramPlot::plot() {
 
 void HistogramPlot::plotSeparateComponents() {
     if(m_componentNames.empty()) {
-        loadComponentInformation(); 
+        loadComponentInformation();
     }
 
     int nComponents = m_componentNames.size();
     if(nComponents == 0) {
         // this doesn't make any sense, so stop
         Logger << kWARNING << "No components found for '" << m_regionCategoryLabel << "' - returning." << GEndl;
-        return; 
+        return;
     }
 
     Logger << kDEBUG << "Will plot " << nComponents << " single components for " << m_regionCategoryLabel << GEndl;
@@ -760,32 +764,32 @@ void HistogramPlot::plotSeparateComponents() {
 
 void HistogramPlot::plotSingleComponent(unsigned int i, double normalisation) {
     if(m_componentNames.empty()) {
-        loadComponentInformation(); 
+        loadComponentInformation();
     }
 
     if(normalisation == 0.0) {
         normalisation = m_regionPdf->expectedEvents(*m_regionVariable);
     }
 
-    RooPlot* frame = m_regionVariable->frame(); 
+    RooPlot* frame = m_regionVariable->frame();
     frame->SetName(Form("frame_%s_%s_%s", m_regionCategoryLabel.Data(), m_componentNames[i].Data(), m_outputPrefix.Data()));
     auto color = m_style.getSampleColor(m_componentNames[i]);
     auto sampleName = m_style.getSampleName(m_componentNames[i]);
 
     Logger << kDEBUG << "Plotting single component " << sampleName << " for " << m_regionCategoryLabel << GEndl;
 
-    if (m_fitResult) { 
-        m_regionPdf->plotOn(frame, RooFit::Components(m_componentNames[i].Data()), 
+    if (m_fitResult) {
+        m_regionPdf->plotOn(frame, RooFit::Components(m_componentNames[i].Data()),
                 RooFit::VisualizeError(*m_fitResult),
                 RooFit::FillColor(kCyan),
-                RooFit::Precision(1e-5),
+                RooFit::Precision(plotprecision),
                 RooFit::Normalization(m_componentFractions[i]*normalisation, RooAbsReal::NumEvent));
     }
 
     m_regionPdf->plotOn(frame, RooFit::Components(m_componentNames[i].Data()),
             RooFit::LineColor(color),
             RooFit::Normalization(m_componentFractions[i]*normalisation, RooAbsReal::NumEvent),
-            RooFit::Precision(1e-5));
+            RooFit::Precision(plotprecision));
 
     frame->SetMinimum(0.0);
     m_frame->GetYaxis()->SetTitle(m_style.getTitleY());
@@ -800,7 +804,7 @@ void HistogramPlot::plotSingleComponent(unsigned int i, double normalisation) {
     if(m_fitResult) {
         entry = leg->AddEntry("", "Propagated fit error", "f") ;
         entry->SetMarkerColor(kCyan);
-        entry->SetMarkerStyle();	
+        entry->SetMarkerStyle();
         entry->SetFillColor(kCyan);
         entry->SetFillStyle(1001);
     }
@@ -812,7 +816,7 @@ void HistogramPlot::plotSingleComponent(unsigned int i, double normalisation) {
 
 void HistogramPlot::saveHistograms() {
     if(m_componentNames.empty()) {
-        loadComponentInformation(); 
+        loadComponentInformation();
     }
 
     // Save the current directory to resume it after this function call
@@ -824,7 +828,7 @@ void HistogramPlot::saveHistograms() {
     TFile f(Form("results/%s/%s.root", m_anaName.Data(), canvasName.Data()), "recreate");
 
     // Data hist
-    RooPlot* frame_dummy = m_regionVariable->frame(); 
+    RooPlot* frame_dummy = m_regionVariable->frame();
     m_regionData->plotOn(frame_dummy, RooFit::DataError(RooAbsData::Poisson));
     auto data_hist = frame_dummy->findObject(nullptr, RooHist::Class());
     data_hist->Write();
@@ -845,7 +849,8 @@ void HistogramPlot::saveHistograms() {
     // Data/bkg ratio -- check if we have a POI, if so, calculate the ratio with it set to 0
     RooStats::ModelConfig* mc = Util::GetModelConfig( m_workspace );
     const RooArgSet * poiSet = mc->GetParametersOfInterest();
-    RooRealVar *poi = (RooRealVar*) poiSet->first();
+    RooRealVar *poi =  nullptr;
+    if(poiSet->size()>0) {poi = (RooRealVar*) poiSet->first();}
     if(poi) {
         //exit(0);
         Logger << kINFO << "Found a signal model; calculating ratio with mu_sig=0 as well" << GEndl;
@@ -858,11 +863,11 @@ void HistogramPlot::saveHistograms() {
         hratio2->SetLineColor(m_style.getDataColor());
 
         hratio2->Write("h_ratio_excl_sig");
-        
+
         poi->setVal(poi_val_old);
     }
 
-    // Fit error for ratio, and the total fit error 
+    // Fit error for ratio, and the total fit error
     if (m_fitResult) {
         auto hratioPdfError = Util::MakePdfErrorRatioHist(m_regionData, m_regionPdf, m_regionVariable, m_fitResult);
         hratioPdfError->SetFillColor(m_style.getErrorFillColor());
@@ -874,12 +879,12 @@ void HistogramPlot::saveHistograms() {
 
         // We get the total error directly from RooFit
         // Needs to be drawn again for some reason; we cannot just get it from above and using m_frame
-        m_regionPdf->plotOn(frame_dummy, RooFit::Normalization(1, RooAbsReal::RelativeExpected), 
-                RooFit::Precision(1e-5), 
-                RooFit::FillColor(m_style.getErrorFillColor()), 
+        m_regionPdf->plotOn(frame_dummy, RooFit::Normalization(1, RooAbsReal::RelativeExpected),
+                RooFit::Precision(plotprecision),
+                RooFit::FillColor(m_style.getErrorFillColor()),
                 RooFit::FillStyle(m_style.getErrorFillStyle()),
                 RooFit::LineColor(m_style.getErrorLineColor()),
-                RooFit::LineStyle(m_style.getErrorLineStyle()), 
+                RooFit::LineStyle(m_style.getErrorLineStyle()),
                 RooFit::VisualizeError(*m_fitResult),
                 RooFit::Name("total_error_band"));
         auto total_err = static_cast<RooCurve*>(frame_dummy->findObject("total_error_band"));
@@ -889,7 +894,7 @@ void HistogramPlot::saveHistograms() {
 
     // Every seperate component
     for(const auto& component: m_componentNames) {
-        auto h = Util::ComponentToHistogram(m_componentPdfs[component], m_regionVariable, m_fitResult); 
+        auto h = Util::ComponentToHistogram(m_componentPdfs[component], m_regionVariable, m_fitResult);
 
         h->SetFillColor(m_style.getSampleColor(component));
         h->SetName(m_style.getSampleName(component));
