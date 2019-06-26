@@ -87,7 +87,7 @@ def MakeBox(color=4, offset=0, pull=-1, horizontal=False, doPreFit=False, error=
     graph.SetMarkerStyle(20);
     return graph
 
-def GetFrame(outFileNamePrefix,Npar,horizontal=False):
+def GetFrame(outFileNamePrefix,Npar,ytitle="(n_{obs} - n_{pred}) / #sigma_{tot}",horizontal=False):
     offset = 0.;
     if horizontal:
         frame =TH2F("frame"+outFileNamePrefix, "",
@@ -99,7 +99,7 @@ def GetFrame(outFileNamePrefix,Npar,horizontal=False):
         frame.GetXaxis().SetLabelSize( 0.12 );
         frame.GetYaxis().SetLabelSize( 0.09 );
         frame.GetYaxis().SetNdivisions(4)
-        frame.SetYTitle("(n_{obs} - n_{pred}) / #sigma_{tot}");
+        frame.SetYTitle(ytitle);
     else:
         frame =TH2F( "frame"+outFileNamePrefix, outFileNamePrefix,
                                 1, -3.5, 3.5,
@@ -116,7 +116,7 @@ def GetFrame(outFileNamePrefix,Npar,horizontal=False):
 
         frame.SetLineColor(0);
         frame.SetTickLength(0,"Y");
-        frame.SetXTitle( "(n_{obs} - n_{pred}) / #sigma_{tot}          " );
+        frame.SetXTitle( ytitle+"          " );
         frame.SetLabelOffset( 0.001, "X" );
         frame.SetTitleOffset( 1. , "X");
         frame.SetTitleSize( 0.06, "X" );
@@ -143,7 +143,7 @@ def GetBoxes(all, results, renamedRegions, frame, doBlind, horizontal=False, doP
         if name in renamedRegions.keys():
             name = renamedRegions[name]
 
-        if (name.find("SR") >= 0 and doBlind) or (name.find("CR") >= 0 and not doPreFit):
+        if ( (name.find("SR") >= 0)  and doBlind) or (name.find("CR") >= 0 and not doPreFit):
             counter += 1
             continue
 
@@ -268,7 +268,7 @@ def MakeHist(regionList, renamedRegions, results, hdata, hbkg, hbkgUp, hbkgDown,
     #hdata.SetMinimum(0.1)
     return
 
-def MakeHistPullPlot(samples, regionList, outFileNamePrefix, hresults, renamedRegions, doBlind, outDir="", minimum=None, maximum=None, logy=False):
+def MakeHistPullPlot(samples, regionList, outFileNamePrefix, hresults, renamedRegions, doBlind, outDir="", minimum=0.1, maximum=None, logy=True, doSignificance=False):
     print "========================================", outFileNamePrefix
     ROOT.gStyle.SetOptStat(0000);
     Npar=len(regionList)
@@ -320,7 +320,7 @@ def MakeHistPullPlot(samples, regionList, outFileNamePrefix, hresults, renamedRe
     myleg.SetBorderSize(0)
     myleg.SetFillStyle(0)
     myleg.AddEntry(graph_data, renamedRegions.get("data", "data"), "p")
-    myleg.AddEntry(graph_bkg2, renamedRegions.get("bkg2", "bkg2"), "fl")
+    myleg.AddEntry(graph_bkg2, renamedRegions.get("bkg2", "total background"), "fl")
     # add background in same order as above
     for h, sample in zip(hbkgComponents, samples.split(",")):
       myleg.AddEntry(h, renamedRegions.get(sample, sample), "f")
@@ -390,7 +390,10 @@ def MakeHistPullPlot(samples, regionList, outFileNamePrefix, hresults, renamedRe
     lowerPad.cd()
 
     # Draw frame with pulls
-    frame = GetFrame(outFileNamePrefix,Npar,horizontal=True)
+    if doSignificance:
+        frame = GetFrame(outFileNamePrefix,Npar,"Significance",horizontal=True)
+    else:
+        frame = GetFrame(outFileNamePrefix,Npar,horizontal=True)
     for bin in range(1,hdata.GetNbinsX()+1):
         frame.GetXaxis().SetBinLabel(bin,hdata.GetXaxis().GetBinLabel(bin))
     if "CR" in outFileNamePrefix:
@@ -402,13 +405,18 @@ def MakeHistPullPlot(samples, regionList, outFileNamePrefix, hresults, renamedRe
     all = []
     GetBoxes(all, hresults, renamedRegions, frame, doBlind, True, doPreFit=bool("CR" in outFileNamePrefix))
 
-    c.Print(os.path.join(outDir, "histpull_"+outFileNamePrefix+".eps"))
-    c.Print(os.path.join(outDir, "histpull_"+outFileNamePrefix+".png"))
-    c.Print(os.path.join(outDir, "histpull_"+outFileNamePrefix+".pdf"))
+    if doBlind:
+        c.Print(os.path.join(outDir, "histpull_"+outFileNamePrefix+"_blindSR.eps"))
+        c.Print(os.path.join(outDir, "histpull_"+outFileNamePrefix+"_blindSR.png"))
+        c.Print(os.path.join(outDir, "histpull_"+outFileNamePrefix+"_blindSR.pdf"))
+    else:
+        c.Print(os.path.join(outDir, "histpull_"+outFileNamePrefix+".eps"))
+        c.Print(os.path.join(outDir, "histpull_"+outFileNamePrefix+".png"))
+        c.Print(os.path.join(outDir, "histpull_"+outFileNamePrefix+".pdf"))
 
     return
 
-def makePullPlot(pickleFilename, regionList, samples, renamedRegions, outputPrefix, doBlind=False, outDir="",plotSignificance=False):
+def makePullPlot(pickleFilename, regionList, samples, renamedRegions, outputPrefix, doBlind=True, outDir="",plotSignificance="",):
     """
     Make a pull plot from a pickle file of results
 
@@ -418,6 +426,8 @@ def makePullPlot(pickleFilename, regionList, samples, renamedRegions, outputPref
     @param renamedRegions List of renamed regions; dict of old => new names
     @param outputPrefix Prefix for the output file
     @param doBlind Blind the SR or not?
+    @param plotSignificance: arxiv or atlas for recommendation to use to calculate significance
+                             leave blank if no significance is calculated
     """
     try:
         picklefile = open(pickleFilename,'rb')
@@ -440,14 +450,14 @@ def makePullPlot(pickleFilename, regionList, samples, renamedRegions, outputPref
         except:
             nbObs = 0
 
-        if "CR" in region:
-          nbExp = mydict["TOTAL_MC_EXP_BKG_events"][index]
-          nbExpEr = mydict["TOTAL_MC_EXP_BKG_err"][index]
-          #nbExpPostFit = mydict["TOTAL_FITTED_bkg_events"][index]
-        else:
-          nbExp = mydict["TOTAL_FITTED_bkg_events"][index]
-          nbExpEr = mydict["TOTAL_FITTED_bkg_events_err"][index]
-          #nbExpPostFit = 0
+        #if "CR" in region:
+        #  nbExp = mydict["TOTAL_MC_EXP_BKG_events"][index]
+        #  nbExpEr = mydict["TOTAL_MC_EXP_BKG_err"][index]
+        #  #nbExpPostFit = mydict["TOTAL_FITTED_bkg_events"][index]
+        #else:
+        nbExp = mydict["TOTAL_FITTED_bkg_events"][index]
+        nbExpEr = mydict["TOTAL_FITTED_bkg_events_err"][index]
+        #  #nbExpPostFit = 0
 
         pEr = PoissonError(nbObs)
         totEr = sqrt(nbExpEr*nbExpEr+pEr[2]*pEr[2])
@@ -459,15 +469,29 @@ def makePullPlot(pickleFilename, regionList, samples, renamedRegions, outputPref
         totErDo_pull = sqrt(nbExpEr*nbExpEr+pEr_pull[1]*pEr_pull[1])
         totErUp_pull = sqrt(nbExpEr*nbExpEr+pEr_pull[0]*pEr_pull[0])
 
-        if plotSignificance:
+        if plotSignificance == "arxiv":
+            #calculates significance from https://arxiv.org/abs/1111.2062
             print "plot significance in the bottom panel"
             pValue = pValuePoissonError(int(nbObs), nbExp, nbExpEr*nbExpEr)
             print "pval:", pValue
             if pValue < 0.5:
                 pull = pValueToSignificance(pValue, nbObs>nbExp )
+                print pull
             else:
                 pull = 0.0001
                 print "pull at zero!"
+        elif plotSignificance == "atlas":
+            #significance calculated from https://cds.cern.ch/record/2643488
+            # relabel variables to match CDS formula
+            print 'calculating significance from W. Buttinger and M.Lefebvre recommendation'
+            factor1 = nbObs*log( (nbObs*(nbExp+nbExpEr**2))/(nbExp**2+nbObs*nbExpEr**2) )
+            factor2 = (nbExp**2/nbExpEr**2)*log( 1 + (nbExpEr**2*(nbObs-nbExp))/(nbExp*(nbExp+nbExpEr**2)) )
+
+            if nbObs < nbExp:
+                pull  = -sqrt(2*(factor1 - factor2))
+            else:
+                pull  = sqrt(2*(factor1 - factor2))
+            print pull
 
         else:
             print "plot pull = (obs-exp)/err in the bottom panel"
@@ -475,16 +499,16 @@ def makePullPlot(pickleFilename, regionList, samples, renamedRegions, outputPref
                 pull = (nbObs-nbExp)/totErUp_pull
             if (nbObs-nbExp) <= 0 and totErDo_pull != 0:
                 pull = (nbObs-nbExp)/totErDo_pull
-                
+            print pull
             if -0.02 < pull < 0: pull = -0.02 ###ATT: ugly
             if 0 < pull < 0.02:  pull = 0.02 ###ATT: ugly
 
         nbExpComponents = []
         for sam in samples.split(","):
-            if "CR" in region:
-                nbExpComponents.append((sam, mydict["MC_exp_events_"+sam][index] ))
-            else:
-                nbExpComponents.append((sam, mydict["Fitted_events_"+sam][index] ))
+            #if "CR" in region:
+            #    nbExpComponents.append((sam, mydict["MC_exp_events_"+sam][index] ))
+            #else:
+            nbExpComponents.append((sam, mydict["Fitted_events_"+sam][index] ))
 
         if "SR" in region and doBlind:
             nbObs = -100
@@ -501,7 +525,9 @@ def makePullPlot(pickleFilename, regionList, samples, renamedRegions, outputPref
         results1.append((region,pull,nbObs,nbExp,nbExpEr,totEr,nbExpComponents))
 
     #pull
-    MakeHistPullPlot(samples, regionList, outputPrefix, results1, renamedRegions, doBlind, outDir)
-
+    if plotSignificance =="":
+        MakeHistPullPlot(samples, regionList, outputPrefix, results1, renamedRegions, doBlind, outDir, 0.1)
+    else:
+        MakeHistPullPlot(samples, regionList, outputPrefix, results1, renamedRegions, doBlind, outDir, 0.1, None, True,True)
     # return the results array in case you want to use this somewhere else
     return results1
