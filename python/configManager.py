@@ -1616,6 +1616,7 @@ class ConfigManager(object):
                     sam.setNormRegions(normChannels)
                     log.warning("            For now, using all non-validation channels by default: %s" % sam.normRegions)
                     
+            log.info("SettingNormRegion. RegionString: {0}, sample: {1}, normRegion: {2} ".format(regionString,sam.name,sam.normRegions))
             if sam.normRegions and (not sam.noRenormSys):
                 log.debug("addSampleSpecificHists(): sample {} has normalisation regions -- will construct histograms for these".format(sam.name))
                 log.info("      - Loading norm regions") # layout aligned with call for systematic
@@ -1635,7 +1636,8 @@ class ConfigManager(object):
                 tmpName = "h%sNom_%sNorm" % (sam.name, normString )
                 if not tmpName in self.hists.keys():
                     
-                    if not self.readFromTree:    
+                        """ 
+                        if not self.readFromTree:    
                         nomName = "h%sNom_%sNorm" % (sam.name, normString)
                         self.hists[nomName] = None
                         try:
@@ -1643,7 +1645,8 @@ class ConfigManager(object):
                         except:    
                             # assume that if no histogram is made, then it is not needed  
                             pass
-                    else:
+                        else:
+                        """
                         self.hists[tmpName] = TH1F(tmpName, tmpName, 1, 0.5, 1.5)
                         log.debug("addSampleSpecificHists(): building temporary histogram {0}".format(tmpName))
                         for normReg in sam.normRegions:

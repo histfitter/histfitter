@@ -851,7 +851,7 @@ class PrepareHistos(object):
         @param binIn The bin to add the content to
         @param binOver The overflow bin touse
         """
-
+        h.SetCanExtend(False) #to avoid axis extension when overflow bin is set 
         newVal = h.GetBinContent(binIn) + h.GetBinContent(binOver)
         h.SetBinContent(binIn,newVal)
         h.SetBinContent(binOver,0.0)
