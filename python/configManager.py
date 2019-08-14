@@ -1670,10 +1670,14 @@ class ConfigManager(object):
 
                                 # TODO: why don't we store this histogram in its proper name for a region? then it can be recycled
                                 tempHist = TH1F("temp", "temp", 1, 0.5, 1.5)
-
-                                self.chains[self.prepare.currentChainName].Project("temp",self.cutsDict[r], \
+                                print self.prepare.currentChainName, self.chains.keys()
+                                try:
+                                  self.chains[self.prepare.currentChainName].Project("temp",self.cutsDict[r], \
                                                                                    str(self.lumiUnits*self.outputLumi/self.inputLumi)+" * "+"*".join(s.weights)+" * ("+self.cutsDict[r]+")")
-
+                                except:
+                                  log.warning("chainName {0} not found in self.chains.keys(): {1}".format(self.prepare.currentChainName, self.chains.keys()))
+                                  log.warning("Norm histograms will not be created properly")
+                                  continue
                                 # if the overflow bin is used for this channel, make sure the normalization takes it into account
                                 nomName = "h%sNom_%sNorm" % (s.name, normString)
                                 if c.useOverflowBin:
