@@ -20,6 +20,7 @@
 from ROOT import gROOT,gSystem,gDirectory
 gSystem.Load("libSusyFitter.so")
 from ROOT import ConfigMgr,FitConfig 
+gROOT.SetBatch(True)
 gROOT.Reset()
 
 from ROOT import TFile, RooWorkspace, TObject, TString, RooAbsReal, RooRealVar, RooFitResult, RooDataSet, RooAddition, RooArgSet,RooAbsData,RooRandom 
@@ -274,7 +275,7 @@ if __name__ == "__main__":
     elif opt == '-N':
       nPoints = int(arg)
     elif opt == '-R':
-      muRange = int(arg)
+      muRange = float(arg)
     elif opt == '-a':
       useAsimovSet = True
     elif opt == '-p':

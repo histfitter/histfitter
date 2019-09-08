@@ -242,13 +242,17 @@ HistogramPlot::HistogramPlot(RooWorkspace *w,
     m_regionData(regionData),
     m_style(style),
     m_regionCategoryLabel(regionCategoryLabel),
-    m_regionVariableName("obs_x_"+regionCategoryLabel)
+    m_regionVariableName("obs_x_"+regionCategoryLabel),
+    m_binEdges({})
 {
     m_regionVariable = static_cast<RooRealVar*>( static_cast<RooArgSet*>(m_regionPdf->getObservables(*regionData))->find(m_regionVariableName));
 
     ConfigMgr* mgr = ConfigMgr::getInstance();
     m_plotRatio = mgr->m_plotRatio;
 
+    if (mgr->getRebinMap().find(std::string(m_regionCategoryLabel)) != mgr->getRebinMap().end())
+        m_binEdges = mgr->getRebinMap()[std::string(m_regionCategoryLabel)];
+    
     m_fitResult = nullptr;
     m_plotComponents = false;
 }
@@ -278,7 +282,7 @@ void HistogramPlot::buildFrame() {
 
     // plot the data
     m_regionData->plotOn(m_frame, RooFit::DataError(RooAbsData::Poisson),
-            RooFit::MarkerColor(m_style.getDataColor()),
+            RooFit::MarkerColor(m_style.getDataColor()), 
             RooFit::LineColor(m_style.getDataColor()));
 
     if(m_style.getRemoveEmptyBins()){
@@ -830,6 +834,10 @@ void HistogramPlot::saveHistograms() {
     RooPlot* frame_dummy = m_regionVariable->frame();
     m_regionData->plotOn(frame_dummy, RooFit::DataError(RooAbsData::Poisson));
     auto data_hist = frame_dummy->findObject(nullptr, RooHist::Class());
+    if (m_binEdges.size()) {
+        TGraphAsymmErrors* data_hist_g = remapGraph(static_cast<TGraphAsymmErrors*>(data_hist));
+        data_hist = static_cast<RooHist*>(data_hist_g);
+    }
     data_hist->Write();
 
     // Get the total MC
@@ -837,12 +845,18 @@ void HistogramPlot::saveHistograms() {
     RooRealSumPdf* RRSPdf = static_cast<RooRealSumPdf*>(m_regionPdf->getComponents()->find(RSSPdfName));
     auto mc_hist = Util::ComponentToHistogram(RRSPdf, m_regionVariable, m_fitResult);
     mc_hist->SetLineColor(m_style.getTotalPdfColor());
+    if (m_binEdges.size())
+        mc_hist = remapHistogram(mc_hist);
     mc_hist->Write("SM_total");
 
     // Data/model ratio
     auto hratio = Util::MakeRatioOrPullHist(m_regionData, m_regionPdf, m_regionVariable);
     hratio->SetMarkerColor(m_style.getDataColor());
     hratio->SetLineColor(m_style.getDataColor());
+    if (m_binEdges.size()) {
+        TGraphAsymmErrors* g_hratio = remapGraph(static_cast<TGraphAsymmErrors*>(hratio), static_cast<TGraphAsymmErrors*>(data_hist));
+        hratio = static_cast<RooHist*>(g_hratio);
+    }
     hratio->Write("h_ratio"); // "ratio" is a reserved keyword in root
 
     // Data/bkg ratio -- check if we have a POI, if so, calculate the ratio with it set to 0
@@ -860,6 +874,10 @@ void HistogramPlot::saveHistograms() {
         hratio2->SetMarkerColor(m_style.getDataColor());
         hratio2->SetLineColor(m_style.getDataColor());
 
+        if (m_binEdges.size()) {
+            TGraphAsymmErrors* g_hratio2 = remapGraph(static_cast<TGraphAsymmErrors*>(hratio2), static_cast<TGraphAsymmErrors*>(data_hist));
+            hratio2 = static_cast<RooHist*>(g_hratio2);
+        }
         hratio2->Write("h_ratio_excl_sig");
 
         poi->setVal(poi_val_old);
@@ -873,6 +891,9 @@ void HistogramPlot::saveHistograms() {
         hratioPdfError->SetLineColor(m_style.getErrorLineColor());
         hratioPdfError->SetLineStyle(m_style.getErrorLineStyle());
         hratioPdfError->SetLineWidth(0);
+        if (m_binEdges.size()) {
+            remapCurve(hratioPdfError);
+        }
         hratioPdfError->Write("h_rel_error_band");
 
         // We get the total error directly from RooFit
@@ -887,6 +908,9 @@ void HistogramPlot::saveHistograms() {
                 RooFit::Name("total_error_band"));
         auto total_err = static_cast<RooCurve*>(frame_dummy->findObject("total_error_band"));
         total_err->SetLineWidth(0);
+        if (m_binEdges.size()) {
+            remapCurve(total_err);
+        }
         total_err->Write("h_total_error_band");
     }
 
@@ -896,6 +920,9 @@ void HistogramPlot::saveHistograms() {
 
         h->SetFillColor(m_style.getSampleColor(component));
         h->SetName(m_style.getSampleName(component));
+        Logger << kINFO << "Rebinning histogram " << h->GetName() << GEndl;
+        if (m_binEdges.size())
+            h = remapHistogram(h);
         h->Write();
     }
 
@@ -906,4 +933,73 @@ void HistogramPlot::saveHistograms() {
 
     // Resume the previous directory
     currentDir->cd();
+}
+
+TH1D* HistogramPlot::remapHistogram(TH1* h) {
+    std::string name(h->GetName());
+    for (auto &d: m_binEdges)
+        std::cout << d << " ";
+    std::cout << std::endl;
+    TH1D* temph = new TH1D((name+"TempName").c_str(),(name+"TempName").c_str(),
+                            m_binEdges.size()-1, &(m_binEdges[0]));
+    for (int i = 0; i <= h->GetNbinsX()+1; i++) {
+        temph->SetBinContent(i,h->GetBinContent(i));
+        temph->SetBinError(i,h->GetBinError(i));
+    }
+    temph->SetMarkerStyle(h->GetMarkerStyle());
+    temph->SetMarkerSize(h->GetMarkerSize());
+    temph->SetMarkerColor(h->GetMarkerColor());
+    temph->SetLineStyle(h->GetLineStyle());
+    temph->SetLineWidth(h->GetLineWidth());
+    temph->SetLineColor(h->GetLineColor());
+    temph->SetFillStyle(h->GetFillStyle());
+    temph->SetFillColor(h->GetFillColor());
+    temph->GetXaxis()->SetTitle(h->GetXaxis()->GetTitle());
+    temph->GetYaxis()->SetTitle(h->GetYaxis()->GetTitle());
+    delete h;
+    temph->SetName(name.c_str());
+    temph->SetTitle(name.c_str());
+    return temph;
+}
+
+TGraphAsymmErrors* HistogramPlot::remapGraph(TGraphAsymmErrors* g, TGraphAsymmErrors* gref) {
+    TGraphAsymmErrors* tempg = new TGraphAsymmErrors();
+    unsigned int i_adjusted = 0;
+    for (unsigned int i = 0; i < m_binEdges.size()-1; i++) {
+        int N = tempg->GetN();
+        if (gref and gref->GetY()[i]==0) {
+            continue;
+        }
+        double xl = m_binEdges[i];
+        double xh = m_binEdges[i+1];
+        tempg->SetPoint(N, xl+(xh-xl)/2., g->GetY()[i_adjusted]);
+        tempg->SetPointError(N, (xh-xl)/2., (xh-xl)/2., g->GetEYlow()[i_adjusted],  g->GetEYhigh()[i_adjusted]);
+        i_adjusted++;
+    }
+    tempg->SetMarkerStyle(g->GetMarkerStyle());
+    tempg->SetMarkerSize(g->GetMarkerSize());
+    tempg->SetMarkerColor(g->GetMarkerColor());
+    tempg->SetLineStyle(g->GetLineStyle());
+    tempg->SetLineWidth(g->GetLineWidth());
+    tempg->SetLineColor(g->GetLineColor());
+    tempg->SetFillStyle(g->GetFillStyle());
+    tempg->SetFillColor(g->GetFillColor());
+    tempg->SetName(g->GetName());
+    return tempg;
+}
+
+void HistogramPlot::remapCurve(RooCurve* c) {
+    double extra = (m_binEdges[1]-m_binEdges[0])/2.;
+    for (int i = 0; i < c->GetN(); i++) {
+        int x = c->GetX()[i] + 0.99;
+        if (x >= 0 and x <= (int)(m_binEdges.size()-1)) {
+            c->GetX()[i] = m_binEdges[x];
+        }
+        else if (x >= 0) {
+            c->GetX()[i] = m_binEdges[m_binEdges.size()-1] + extra;
+        }
+        else{
+            c->GetX()[i] = m_binEdges[0] - extra;
+        }
+    }
 }

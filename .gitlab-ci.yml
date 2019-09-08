@@ -1,0 +1,38 @@
+stages:
+  - docker
+  - test
+
+build_latest_image:
+  stage: docker
+  except:
+  - tags
+  tags:
+    - docker-image-build
+  script:
+    - ignore
+
+build_tagged_image:
+  stage: docker
+  variables:
+    TO: $CI_REGISTRY_IMAGE:$CI_COMMIT_TAG
+  only:
+  - tags
+  tags:
+    - docker-image-build
+  script:
+    - ignore
+
+test:
+  stage: test
+  image: $CI_REGISTRY_IMAGE:latest
+  except:
+    - tags
+  before_script:
+    - sudo apt-get update && sudo apt-get -y install curl
+    - cd /HistFitter
+    - source /usr/local/bin/thisroot.sh && source setup.sh
+    - curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
+    - sudo python get-pip.py
+    - sudo pip install pytest
+  script:
+    - pytest

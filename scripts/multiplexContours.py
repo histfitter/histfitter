@@ -25,7 +25,8 @@ parser.add_argument('--inputFiles','-i', type=str, nargs='+', help='input json f
 parser.add_argument("--outputFile","-o", type = str, help="output ROOT file", default = "multiplexedContours.root")
 parser.add_argument("--debug","-d",      help = "print extra debugging info", action="store_true", default=False)
 parser.add_argument("--distanceThreshold", type=float, default = 1)
-
+parser.add_argument("--skipTheory", action="store_true", help="Skip theory variations")
+parser.add_argument("--areaDisagreement", type=float, default=0.01, help="Maximum area disagreement to allow for band inclusion")
 args = parser.parse_args()
 
 
@@ -36,52 +37,19 @@ try:
 	import matplotlib.pyplot as plt
 	import numpy as np
 	import scipy.interpolate
-except:
-	print (">>> You need scipy/matplotlib to run this. And you had to have run harvestToContours in scipy mode [default]")
-	print (">>> In an ATLAS environment, you can...")
-	print ('>>> > lsetup "lcgenv -p LCG_93 x86_64-slc6-gcc62-opt pyanalysis" "lcgenv -p LCG_93 x86_64-slc6-gcc62-opt pytools" "lcgenv -p LCG_93 x86_64-slc6-gcc62-opt pygraphics" "lcgenv -p LCG_93 x86_64-slc6-gcc62-opt ROOT" ')
-	print (">>> ")
-	print (">>> Try that and then run this again!")
-	sys.exit(1)
 
-try:
 	from shapely.ops import cascaded_union, polygonize
 	from shapely.geometry import Polygon,MultiPolygon
 	from shapely.geometry import LineString
 	from shapely import affinity
+
 except:
-	print (">>>")
-	print (">>> You need to have access to shapely!")
-	print (">>> Do you want me to try and install it?")
-	print (">>> (Just in your home directory. See source if you're worried about what I'm about to do!)")
-	print (">>> (y/n)")
-	choice = raw_input().lower()
-	if choice[0] == "y":
-		try:
-			os.system(
-				"""
-					wget http://download.osgeo.org/geos/geos-3.6.1.tar.bz2
-					tar xvf geos-3.6.1.tar.bz2
-					cd geos-3.6.1/
-					./configure --prefix=$HOME/.local
-					make
-					make install
-					cd ..
-					pip install --user --upgrade pip
-					pip install --user shapely
-				"""
-				)
-			print (">>> It's possible that worked. Try running again?")
-			sys.exit(1)
-		except:
-			print (">>> ... Setup didn't work for some reason!")
-	else:
-		print (">>> Quitting -- You don't have shapely installed and I really need it!")
-		print (">>>     ... Like it seriously makes my life a lot easier!")
-		sys.exit(1)
-
-
-
+	print (">>> You need scipy/matplotlib and shapely to run this. And you had to have run harvestToContours in scipy mode [default]")
+	print (">>> In an ATLAS environment, you can...")
+	print ('>>> > lsetup "lcgenv -p LCG_93 x86_64-slc6-gcc62-opt pyanalysis" "lcgenv -p LCG_93 x86_64-slc6-gcc62-opt pytools" "lcgenv -p LCG_93 x86_64-slc6-gcc62-opt pygraphics" "lcgenv -p LCG_93 x86_64-slc6-gcc62-opt ROOT" "lcgenv -p LCG_94 x86_64-slc6-gcc62-opt shapely"')
+	print (">>> ")
+	print (">>> Try that and then run this again!")
+	sys.exit(1)
 
 
 def main():
@@ -124,8 +92,9 @@ def main():
 		dict_Exp_u1s[inputFileName] = dict_TFiles[inputFileName].Get("SubGraphs/clsu1s_Contour_0").Clone(inputFileName+"_Exp_u1s")
 		dict_Exp_d1s[inputFileName] = dict_TFiles[inputFileName].Get("SubGraphs/clsd1s_Contour_0").Clone(inputFileName+"_Exp_d1s")
 
-		dict_Obs_u1s[inputFileName] = dict_TFiles[inputFileName].Get("Obs_0_Up").Clone(inputFileName+"_Obs_u1s")
-		dict_Obs_d1s[inputFileName] = dict_TFiles[inputFileName].Get("Obs_0_Down").Clone(inputFileName+"_Obs_d1s")
+		if not args.skipTheory:
+			dict_Obs_u1s[inputFileName] = dict_TFiles[inputFileName].Get("Obs_0_Up").Clone(inputFileName+"_Obs_u1s")
+			dict_Obs_d1s[inputFileName] = dict_TFiles[inputFileName].Get("Obs_0_Down").Clone(inputFileName+"_Obs_d1s")
 
 	print (">>> Creating output ROOT file: %s"%args.outputFile)
 
@@ -155,8 +124,9 @@ def main():
 		region["Exp_u1s"] = tGraphToPolygon(dict_Exp_u1s[inputFileName])
 		region["Exp_d1s"] = tGraphToPolygon(dict_Exp_d1s[inputFileName])
 		region["Obs"]     = tGraphToPolygon(dict_Obs[inputFileName])
-		region["Obs_u1s"] = tGraphToPolygon(dict_Obs_u1s[inputFileName])
-		region["Obs_d1s"] = tGraphToPolygon(dict_Obs_d1s[inputFileName])
+		if not args.skipTheory:
+			region["Obs_u1s"] = tGraphToPolygon(dict_Obs_u1s[inputFileName])
+			region["Obs_d1s"] = tGraphToPolygon(dict_Obs_d1s[inputFileName])
 
 		uncutRegions[inputFileName] = region
 
@@ -275,7 +245,10 @@ def main():
 
 			for chunkOfSubCurve in cutUpSubCurve:
 				areaDisagreement = math.fabs(chunkOfSubCurve.intersection( subRegion ).area - chunkOfSubCurve.area ) / chunkOfSubCurve.area
-				if abs(areaDisagreement) > 0.01 and not chunkOfSubCurve.centroid.within(subRegion):
+				if args.debug:
+					print (">>> area disagreement:",abs(areaDisagreement))
+					print (">>> chunk centroid in subRegion?",chunkOfSubCurve.centroid.within(subRegion))
+				if abs(areaDisagreement) > args.areaDisagreement and not chunkOfSubCurve.centroid.within(subRegion):
 					continue
 				else:
 					if args.debug:

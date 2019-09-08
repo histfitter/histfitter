@@ -228,6 +228,9 @@ class SystematicBase:
             if abstract.hists[histName] == None and abstract.useCacheToTreeFallback:
                 log.warning("Will rebuild {} from trees".format(histName))
                 reread = True
+            elif abstract.hists[histName] != None:
+                log.debug("FillUpDownHist: systematic '{}': histogram '{}' successfully read! Not rebuilding it.".format(self.name, histName))
+                return 
 
         if not abstract.readFromTree and not reread:
             log.error("FillUpDownHist: systematic {}: histogram {}: not reading from trees and no fallback enabled. Will not build histogram".format(self.name, histName))
@@ -556,60 +559,86 @@ class HistSystematic(SystematicBase):
                                 normCuts="", abstract=None,
                                 topLvl=None, chan=None, sam=None):
 
-        nomName = "h%sNom_%s_obs_%s" % (sam.name, regionString, replaceSymbols(chan.variableName) )
-        nomHist = abstract.hists[nomName]
-        # Fill the histograms with the systematic diffs in bins of analysis regions
-        for lowhigh in ["High","Low"]:
-            lowhighName = "h%s%s%s_%s_obs_%s" % (sam.name, self.name, lowhigh, regionString, replaceSymbols(chan.variableName))
-            if abstract.hists[lowhighName] is None:
-                print lowhighName
-                abstract.hists[lowhighName] = nomHist.Clone(lowhighName)
-                if lowhigh == "High":
-                    abstract.hists[lowhighName].Add(self.high[regionString])
-                elif lowhigh == "Low":
-                    abstract.hists[lowhighName].Add(self.low[regionString])
+        if not sam.normRegions is None:
+            normString = ""
+            normRegList = []
+            for normReg in sam.normRegions:
+                if not isinstance(normReg[0], list):
+                    c = topLvl.getChannel(normReg[1], [normReg[0]])
+                else:
+                    c = topLvl.getChannel(normReg[1], normReg[0])
+                normString += c.regionString
+                normRegList.append(c.regionString)
 
         # Fill the normalisation histograms
-        if sam.noRenormSys or not ("norm" in self.method or "Norm" in self.method):
+        # In the non-normalised cases, just add the hists
+        if sam.noRenormSys or not ("norm" in self.method or "Norm" in self.method) or not (regionString in normRegList):
+            nomName = "h%sNom_%s_obs_%s" % (sam.name, regionString, replaceSymbols(chan.variableName) )
+            nomHist = abstract.hists[nomName]
+            # Fill the histograms with the systematic diffs in bins of analysis regions
+            for lowhigh in ["High","Low"]:
+                lowhighName = "h%s%s%s_%s_obs_%s" % (sam.name, self.name, lowhigh, regionString, replaceSymbols(chan.variableName))
+                if abstract.hists[lowhighName] is None:
+                    abstract.hists[lowhighName] = nomHist.Clone(lowhighName)
+                    if lowhigh == "High":
+                        abstract.hists[lowhighName].Add(self.high[regionString])
+                    elif lowhigh == "Low":
+                        abstract.hists[lowhighName].Add(self.low[regionString])
             return
-
+        
+        # Otherwise, this needs to compute the total normalisation for the nominal
+        # and systematic histograms, summing over all the normalisation regions
+        # So this can mainly ignore the region string, and should just loop
+        # in pretty much any case, avoiding repeated additions of the hists
         if not sam.normRegions:
             log.error("    %s but no normalization regions specified for sample %s, noRenormSys=%s. This is not safe, please fix." % (self.method, sam.name, sam.noRenormSys))
             raise RuntimeError("No normalisation regions for renorm sys")
-        normString = ""
-        for normReg in sam.normRegions:
-            if not isinstance(normReg[0], list):
-                c = topLvl.getChannel(normReg[1], [normReg[0]])
-            else:
-                c = topLvl.getChannel(normReg[1], normReg[0])
-            normString += c.regionString
 
         log.debug("HistSystematic: constructed normString {}".format(normString))
 
-        for normReg in sam.normRegions:
-            nomnorm = "h%sNom_%sNorm" % (sam.name,normString)
-            if not nomnorm in abstract.hists.keys():
-                nomhist = TH1F(nomnorm, nomnorm, 1, 0.5, 1.5)
-                abstract.hists[nomnorm] = nomhist
-            nomhist = abstract.hists[nomnorm]
-            if nomhist.GetEntries()<2*len(sam.normRegions):
-                reghist = "h%sNom_%s_obs_%s" % (sam.name, normReg[0], replaceSymbols(chan.variableName))
+        nomnormName = "h%sNom_%sNorm" % (sam.name,normString)
+        nomnormhist = abstract.hists[nomnormName]
+
+        # This starts filled with some entries but integral 0
+        if nomnormhist.GetEntries() < 2*len(sam.normRegions):
+            abstract.hists[nomnormName] = nomnormhist
+
+            # Loop over all the normalisation regions
+            for normReg in normRegList:
+                # First fill the nominal histogram
+                reghist = "h%sNom_%s_obs_%s" % (sam.name, normReg, replaceSymbols(chan.variableName))
                 temphist = abstract.hists[reghist]
-                nomhist.Fill(1,temphist.GetSumOfWeights())
+                nomnormhist.Fill(1,temphist.GetSumOfWeights())
 
+        # Now do the systematics histograms
+        # Loop over all the normalisation regions
         for lowhigh in ["High","Low"]:
-            histName = "h" + sam.name + self.name + lowhigh + "_" + normString + "Norm"
-            if histName in abstract.hists.keys():
-                log.debug("HistSystematic: systematic '{}': histogram '{}' already exists! Not rebuilding   it.".format(self.name, histName))
-                continue
+            systnormName = "h" + sam.name + self.name + lowhigh + "_" + normString + "Norm"
 
-            normhist = nomhist.Clone(histName)
-            abstract.hists[histName] = normhist
+            if systnormName in abstract.hists.keys():
+                systnormhist = abstract.hists[systnormName]
+            else:
+                systnormhist = nomnormhist.Clone(systnormName)
+                systnormhist.Reset()
+                abstract.hists[systnormName] = systnormhist
 
-            # Currently looping over regions, so just add the current one
-            reghist = "h%s%s%s_%s_obs_%s" % (sam.name, self.name, lowhigh, regionString, replaceSymbols(chan.variableName))
-            temphist = abstract.hists[reghist]
-            normhist.SetBinContent(1, normhist.GetSum() + temphist.GetSumOfWeights())
+            # Already done
+            if systnormhist.GetEntries()==len(normRegList):
+                return
+            for normReg in normRegList:
+                nomhist = abstract.hists["h%sNom_%s_obs_%s" % (sam.name, normReg, replaceSymbols(chan.variableName))]
+                lowhighName = "h%s%s%s_%s_obs_%s" % (sam.name, self.name, lowhigh, normReg, replaceSymbols(chan.variableName))
+                if not abstract.hists[lowhighName] is None:
+                    systhist = abstract.hists[lowhighName]
+                else:
+                    systhist = nomhist.Clone(lowhighName)
+                    if lowhigh == "High":
+                        systhist.Add(self.high[normReg])
+                    elif lowhigh == "Low":
+                        systhist.Add(self.low[normReg])
+                    abstract.hists[lowhighName] = systhist
+
+                systnormhist.Fill(1, systhist.GetSumOfWeights())
 
         return
 

@@ -113,6 +113,9 @@ class PrepareHistos(object):
         # fallback?
         self.useCacheToTreeFallback = useCacheToTreeFallback
 
+        # for checking bin edge consistency
+        self.regBins = {}
+
     def __del__(self):
         if self.cacheFile != None: self.cacheFile.Close()
         if self.cache2File != None: self.cache2File.Close()
@@ -531,6 +534,23 @@ class PrepareHistos(object):
         if not (self.configMgr.hists[name] is None):
             log.debug("Loaded histogram {} from cache with integral {}".format(name, self.configMgr.hists[name].Integral()))
 
+            # this is a ugly hack for now, to add an exception for 'Norm' histograms that originate from a channel with multiple bins   
+            if 'Norm' in self.configMgr.hists[name].GetTitle():
+                if (int(self.configMgr.hists[name].GetNbinsX()) == 1 and \
+                    self.configMgr.hists[name].GetBinLowEdge(1) == 0.5 and \
+                    self.configMgr.hists[name].GetXaxis().GetBinUpEdge(self.configMgr.hists[name].GetNbinsX()) == 1.5): 
+                        log.debug("This is ugly: Stupid hack to evade check of histogram binning for 'Norm' histograms")
+                        self.name = name
+                        return self.configMgr.hists[name]
+
+            # Check if histogram has equidistant bins
+            if self.configMgr.rebin:
+                log.info("addHistoFromCache: histogram {} will be mapped to a proxy equidistant histogram.".format(self.configMgr.hists[name].GetName()))
+                self.mapIntoEquidistant(name)
+                # No further checks are needed at this point
+                self.name = name
+                return self.configMgr.hists[name]
+            
             # Define a function to check for almost-equality between floats
             desired_binSize = float(self.channel.binHigh - self.channel.binLow) / self.channel.nBins
             isClose = lambda x, y: abs(x - y) < desired_binSize/1e6
@@ -538,16 +558,7 @@ class PrepareHistos(object):
             if not (round(self.channel.nBins) == round(self.configMgr.hists[name].GetNbinsX())) or \
                ( not isClose(self.channel.binLow, self.configMgr.hists[name].GetBinLowEdge(1)) ) or \
                ( not isClose(self.channel.binHigh, self.configMgr.hists[name].GetXaxis().GetBinUpEdge(self.configMgr.hists[name].GetNbinsX()))):
-
-                # this is a ugly hack for now, to add an exception for 'Norm' histograms that originate from a channel with multiple bins
-                if 'Norm' in self.configMgr.hists[name].GetTitle():
-                    if (int(self.configMgr.hists[name].GetNbinsX()) == 1 and \
-                        self.configMgr.hists[name].GetBinLowEdge(1) == 0.5 and \
-                        self.configMgr.hists[name].GetXaxis().GetBinUpEdge(self.configMgr.hists[name].GetNbinsX()) == 1.5):
-                            log.debug("This is ugly: Stupid hack to evade check of histogram binning for 'Norm' histograms")
-                            self.name = name
-                            return self.configMgr.hists[name]
-
+                
                 # Check if we can rebin the cached histogram to get the requested histogram
                 log.error("addHistoFromCache: required binning %d,%f,%f, while found histogram has %d,%f,%f" % ( self.channel.nBins, self.channel.binLow, self.channel.binHigh, self.configMgr.hists[name].GetNbinsX(), self.configMgr.hists[name].GetBinLowEdge(1), self.configMgr.hists[name].GetXaxis().GetBinUpEdge(self.configMgr.hists[name].GetNbinsX()) ))
 
@@ -869,3 +880,39 @@ class PrepareHistos(object):
             self.updateHistBin(h, binIn, binOver)
 
         return
+
+    def mapIntoEquidistant(self, name):
+        """
+        Remap histogram into a proxy equidistant histogram.
+        WARNING: will also change self.channel.binLow/High accordingly.
+
+        @param name the histogram
+        """
+        h = self.configMgr.hists[name]
+        nx = h.GetNbinsX()
+        currentBinEdges = []
+        htemp = TH1F(h.GetName()+"TempNameForRemapping",h.GetName()+"TempNameForRemapping",h.GetNbinsX(),0,h.GetNbinsX())
+        for i in range(1,nx+1):
+            currentBinEdges += [h.GetBinLowEdge(i)]
+            htemp.SetBinContent(i,h.GetBinContent(i))
+            htemp.SetBinError(i,h.GetBinError(i))
+        currentBinEdges += [h.GetBinLowEdge(nx)+h.GetBinWidth(nx)]
+        h = htemp
+        h.SetTitle(h.GetTitle().replace("TempNameForRemapping",""))
+        h.SetName(h.GetName().replace("TempNameForRemapping",""))
+        self.configMgr.hists[name] = h
+        # need to shuffle the name, because cxx code uses a different order
+        regName = self.channel.regionString + "_" + self.channel.niceVarName
+        # save bins only once per channel
+        if not self.configMgr.cppMgr.getRebinMapBool(regName):
+            # save bin edges for later checks
+            self.regBins[regName] = currentBinEdges
+            for edge in currentBinEdges:
+                self.configMgr.cppMgr.rebinMapPushBack(regName,edge)
+        # check whether bin edges are consistent within one channel
+        elif not currentBinEdges==self.regBins[regName]:
+            log.error("histogram {} does not match previously mapped bins from region {}".format(h.GetName(), regName))
+            raise Exception("Array {} does not match {}".format(currentBinEdges, self.regBins[regName]))
+        self.channel.binLow = 0
+        self.channel.binHigh = nx
+

@@ -132,6 +132,17 @@ class ConfigMgr {
         void AddBkgParName(const char* par)   { m_bkgParNameVec.push_back(par); }
         void AddBkgChlName(const char* par)   { m_chnNameVec.push_back(par); }
 
+        void rebinMapPushBack(std::string channel, double edge) {
+            if (m_rebinMap.find(channel) == m_rebinMap.end()) {
+                std::vector<double> v = {edge};
+                m_rebinMap[channel] = v;
+            }
+            else
+                m_rebinMap[channel].push_back(edge);
+        }
+        std::map<std::string, std::vector<double>> getRebinMap() { return m_rebinMap; }
+        bool getRebinMapBool(std::string channel) { if (m_rebinMap.find(channel) == m_rebinMap.end()) return false; return true; }
+
         //void setLogLevel( TMsgLevel minLevel) { m_logger.SetMinLevel(minLevel); m_logger << minLevel << "log level set to " << m_logger.GetMinLevelStr() << GEndl; }
         //const std::map<TMsgLevel, std::string> getLogLevels() const { 
             //std::map<TMsgLevel, std::string> myMap(m_logger.GetLevelMap());
@@ -174,10 +185,11 @@ class ConfigMgr {
         int m_nCPUs;
 
         bool m_deactivateBinnedLikelihood;
-	
         std::vector<std::string> m_chnNameVec; 
         std::vector<std::string> m_bkgParNameVec;
         std::vector<double> m_bkgCorrValVec;
+
+        std::map<std::string, std::vector<double>> m_rebinMap;
 
         static ConfigMgr *_singleton;
 };

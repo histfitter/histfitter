@@ -18,7 +18,7 @@
  **********************************************************************************
 """
 
-from ROOT import THStack, TLegend, TCanvas, TFile, std, TH1F, TList
+from ROOT import THStack, TLegend, TCanvas, TFile, std, TH1F, TH2F, gStyle, TList
 from ROOT import ConfigMgr, FitConfig, ChannelStyle #this module comes from gSystem.Load("libSusyFitter.so")
 from ROOT import gROOT, TObject, TProof
 from prepareHistos import PrepareHistos
@@ -47,11 +47,11 @@ def mkdir_p(path):
 
 def replaceSymbols(s):
     """
-    Strip a string from /, *, ( and )
+    Strip a string from /, *, (, ), [, ], - and ,
 
     @param s The string to remove the symbols from
     """
-    s = s.replace("/","").replace("*","").replace("(","").replace(")","").replace("[", "_").replace("]","_")
+    s = s.replace("/","").replace("*","").replace("(","").replace(")","").replace("[", "_").replace("]","_").replace("-", "_").replace(",", "_")
     return s
 
 def enum(typename, field_names):
@@ -147,6 +147,9 @@ class ConfigManager(object):
         self.doHypoTest = False
         self.doDiscoveryHypoTest = False
         self.ReduceCorrMatrix = False # Boolean to make a reduced correlation matrix
+        self.prun = False
+        self.prunThreshold = 0.01
+        self.prunMethod = 2 # method 1: chi2 test for histoSys, method 2: comparison of yields in every histogram bin for histoSys. Method 2 takes the prunThreshold. Method 1 uses defines a p-value of below 5% as not fitting
 
         self.fitConfigs = [] # fitConfig object
         self.prepare = None # PrepareHistos object
@@ -164,6 +167,8 @@ class ConfigManager(object):
 
         self.bkgParName = ''
         self.bkgCorrVal = -1.
+
+        self.rebin = False # Automatically rebin histograms into proxy histograms with edged [0, 1, ..., N]
         return
 
     def setLumiUnits(self,unit):
@@ -744,6 +749,112 @@ class ConfigManager(object):
                         #log.info("                                       High: %s" % str(syst.filesHi))
 
         return
+      
+    def printPrunedSyst(self):
+        """
+        Print a list with all pruned systematics
+        """
+        
+        width = 3 
+        depth = 1
+        
+        for idx, fitConfig in enumerate(self.fitConfigs):
+            depth = 1
+            log.info("{}fitConfig {:d}/{:d}: {}".format(" "*depth*width, idx+1, len(self.fitConfigs), fitConfig.name))
+
+            for i, channel in enumerate(fitConfig.channels):
+              
+                prunedDict={}
+                prunedDict_histo={}
+                syst_list=[]
+              
+                depth = 2
+                log.info("{}Channel {:d}/{:d}: {}".format(" "*depth*width, i+1, len(fitConfig.channels), channel.name))
+                for j, sample in enumerate(channel.sampleList):
+                    depth = 3
+                    log.info("{}Sample {:d}/{:d}: {} ".format(" "*depth*width, j+1, len(channel.sampleList), sample.name))
+                    log.info("{}Pruned systematics:".format(" "*depth*width))
+                    if sample.isData: continue
+                    prunedDict[sample.name]=[]
+                    prunedDict_histo[sample.name]=[]
+                    
+                    for k, syst_name in enumerate(sample.systDict.keys()):
+                        depth = 4
+                        if syst_name in sample.systListOverallPruned:
+                            log.info("{}. {} (overallSys)".format(" "*depth*width, syst_name))
+                            prunedDict[sample.name].append(syst_name)
+                            if not syst_name in syst_list: syst_list.append(syst_name)
+                        if syst_name in sample.systListHistoPruned:
+                            log.info("{}. {} (histoSys)".format(" "*depth*width, syst_name))
+                            prunedDict_histo[sample.name].append(syst_name)
+                            if not syst_name in syst_list: syst_list.append(syst_name)
+                            
+                canvasSyst = TCanvas("canvasSyst_"+str(i),"canvasSyst_"+channel.name,800,1200)
+                canvasSyst.SetLeftMargin(0.3)
+                canvasSyst.SetRightMargin(0.25)
+                
+                gStyle.SetOptTitle(False)
+                gStyle.SetOptStat(0)
+                
+                if len(syst_list)==0: continue
+                
+                histPrunedOverallHisto = TH2F("histPrunedOverallHisto_"+str(i), "Pruned systematics affecting the normalization and shape for channel "+channel.name,len(channel.sampleList)-1,0,len(channel.sampleList)-1,len(syst_list),0,len(syst_list))
+                histPrunedOverall = TH2F("histPrunedOverall_"+str(i), "Pruned systematics affecting the normalization for channel "+channel.name,len(channel.sampleList)-1,0,len(channel.sampleList)-1,len(syst_list),0,len(syst_list))
+                histPrunedHisto = TH2F("histPrunedHisto_"+str(i), "Pruned systematics affecting the shape for channel "+channel.name,len(channel.sampleList)-1,0,len(channel.sampleList)-1,len(syst_list),0,len(syst_list))
+                
+                
+                xbin = 1
+                for j2, thisSample in enumerate(prunedDict.keys()):
+                    for i2 in range(0,len(syst_list)):
+                        if syst_list[i2] in prunedDict[thisSample] and syst_list[i2] in prunedDict_histo[thisSample]:
+                            histPrunedOverallHisto.SetBinContent(xbin,i2+1,1)
+                        elif syst_list[i2] in prunedDict[thisSample]:
+                            histPrunedOverall.SetBinContent(xbin,i2+1,1)
+                        elif syst_list[i2] in prunedDict_histo[thisSample]:
+                            histPrunedHisto.SetBinContent(xbin,i2+1,1)    
+                        #else:
+                        #    histPrunedOverall.SetBinContent(j2,i2,-1)
+                        
+                    histPrunedOverallHisto.GetXaxis().SetBinLabel(xbin,thisSample)
+                    histPrunedHisto.GetXaxis().SetBinLabel(xbin,thisSample)
+                    histPrunedOverall.GetXaxis().SetBinLabel(xbin,thisSample)
+                    xbin=xbin+1
+                
+                for i2 in range(0,len(syst_list)):
+                    histPrunedOverallHisto.GetYaxis().SetBinLabel(i2+1,syst_list[i2])
+                    histPrunedOverall.GetYaxis().SetBinLabel(i2+1,syst_list[i2])
+                    histPrunedHisto.GetYaxis().SetBinLabel(i2+1,syst_list[i2])
+            
+                histPrunedOverallHisto.GetXaxis().SetTitle("Channel")
+                histPrunedOverallHisto.GetYaxis().SetTitle("systematic")
+                histPrunedOverall.GetXaxis().SetTitle("Channel")
+                histPrunedOverall.GetYaxis().SetTitle("systematic")
+                histPrunedHisto.GetXaxis().SetTitle("Channel")
+                histPrunedHisto.GetYaxis().SetTitle("systematic")
+                histPrunedOverallHisto.SetFillColor(5)
+                histPrunedOverall.SetFillColor(9)
+                histPrunedHisto.SetFillColor(2)
+            
+                if histPrunedOverallHisto.GetEntries()>0: histPrunedOverallHisto.Draw("boxPFC")
+                if histPrunedOverall.GetEntries()>0: histPrunedOverall.Draw("boxsamePFC")
+                if histPrunedHisto.GetEntries()>0: histPrunedHisto.Draw("boxsamePFC")
+                
+                leg = TLegend(0.76,0.75,1.,0.9)
+                leg.SetBorderSize(0)
+                leg.SetTextSize(0.02)
+                entry = leg.AddEntry(histPrunedOverallHisto,"histoSys/ overallSys","f")
+                entry = leg.AddEntry(histPrunedOverall,"overallSys","f")
+                entry = leg.AddEntry(histPrunedHisto,"histoSys","f")
+                leg.Draw("same")
+                
+                plotsDir = "plots/%s/%s" % (self.analysisName, fitConfig.name)
+                mkdir_p(plotsDir)
+
+                canvasSyst.Print(plotsDir+"/canvasSyst_"+channel.name+".pdf")
+                canvasSyst.Print(plotsDir+"/canvasSyst_"+channel.name+".eps")
+
+
+        return
 
     #def printTreeNames(self):
         #"""
@@ -932,7 +1043,6 @@ class ConfigManager(object):
                                 c = fitConfig.getChannel(normReg[1], normReg[0])
                             normString += c.regionString
 
-                    syst.PrepareGlobalNormalization(normString, self, fitConfig, chan, sam)
                     sam.addHistoSys(syst.name, nomName, highName, lowName, False, True, False, False, sam.name, normString)
 
         # post-processing 2: swapping of overall systematics for specified channel by systematics from other channel
@@ -1120,6 +1230,9 @@ class ConfigManager(object):
                 fitConfig.executehist2workspace()
             else:
                 fitConfig.writeWorkspaces()
+                
+        if self.prun:
+            self.printPrunedSyst()
 
     def appendSystinChanInfoDict(self, chan, sam, systName, syst):
         """
@@ -1677,7 +1790,7 @@ class ConfigManager(object):
             if (not s.isData) and (self.useSignalInBlindedData or s.name != fitConfig.signalSample):
                 log.info(s.name)
                 blindhistlist.Add(self.hists[s.histoName])
-        self.hists[histname].Merge(blindhistlist,"NOL")
+        self.hists[histname].Merge(blindhistlist)
         return
 
     def makeDicts(self, fitConfig, chan):
