@@ -219,7 +219,6 @@ void HistogramPlotter::PlotRegion(const TString &regionCategoryLabel) {
     plot.setFitResult(m_fitResult);
     plot.setPlotComponents(m_plotComponents);
     plot.setOutputPrefix(m_outputPrefix);
-
     plot.saveHistograms();
     //m_histograms.push_back(hists);
 
@@ -421,7 +420,8 @@ void HistogramPlot::addRatioPanel() {
     // Data/bkg ratio -- check if we have a POI, if so, calculate the ratio with it set to 0
     RooStats::ModelConfig* mc = Util::GetModelConfig( m_workspace );
     const RooArgSet * poiSet = mc->GetParametersOfInterest();
-    RooRealVar *poi = (RooRealVar*) poiSet->first();
+    RooRealVar *poi = NULL;
+    if (poiSet->getSize()>0) { poi = (RooRealVar*) poiSet->first();}
     RooHist* hratio_excl_sig = nullptr;
     if(poi) {
         //exit(0);
@@ -859,7 +859,10 @@ void HistogramPlot::saveHistograms() {
     // Data/bkg ratio -- check if we have a POI, if so, calculate the ratio with it set to 0
     RooStats::ModelConfig* mc = Util::GetModelConfig( m_workspace );
     const RooArgSet * poiSet = mc->GetParametersOfInterest();
-    RooRealVar *poi = (RooRealVar*) poiSet->first();
+
+    RooRealVar *poi = NULL;
+    if (poiSet->getSize()>0) {poi = (RooRealVar*) poiSet->first();}
+
     if(poi) {
         //exit(0);
         Logger << kINFO << "Found a signal model; calculating ratio with mu_sig=0 as well" << GEndl;

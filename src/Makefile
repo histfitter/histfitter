@@ -31,7 +31,7 @@ HEADERDEST = ../include/
 LIBDEST = ../lib/
 PCMFILE = ../lib/lib$(PACKAGE)_rdict.pcm
 
-CXXFLAGS = -std=c++1y -fPIC -Wall
+CXXFLAGS = -std=c++17 -fPIC -Wall
 
 UNAME = $(shell uname)
 
