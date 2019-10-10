@@ -538,51 +538,61 @@ def interpolateSurface(modelDict = {}, interpolationFunction = "linear", useROOT
             zArray = np.array( zValues[whichContour] )
 
             # this scaling here equalizes the axes such that using a radial basis function makes sense!
-            yScaling = np.max(xArray)/np.max(yArray) if np.max(yArray) else 1
+            yScaling = (np.max(xArray)-np.min(xArray))/(np.max(yArray)-np.min(yArray)) if np.max(yArray) else 1
             yArray = yArray*yScaling
 
             # Creating some linspaces for interpolation
             xlinspace = np.linspace(xArray.min() if args.xMin == None else args.xMin,
                                     xArray.max() if args.xMax == None else args.xMax,
                                     args.xResolution)
-            ylinspace = np.linspace(yArray.min() if args.yMin == None else args.yMin,
-                                    yArray.max() if args.yMax == None else args.yMax,
+            ylinspace = np.linspace(yArray.min() if args.yMin == None else args.yMin*yScaling,
+                                    yArray.max() if args.yMax == None else args.yMax*yScaling,
                                     args.yResolution)
 
             # Creating meshgrid for interpolation
             xymeshgrid = np.meshgrid(xlinspace,ylinspace)
-
 
             # Optional smoothing given by -s option
             smoothingFactor = 0
             if args.smoothing:
                 smoothingFactor = float(args.smoothing)
 
-            try:
-                # Actual interpolation done by RBF
-                if args.interpolationEpsilon:
-                    rbf = scipy.interpolate.Rbf(xArray, yArray, zArray, function=interpolationFunction, smooth=smoothingFactor , epsilon=args.interpolationEpsilon)
-                else:
-                    rbf = scipy.interpolate.Rbf(xArray, yArray, zArray, function=interpolationFunction, smooth=smoothingFactor )
-            except:
-                print (">>> Interpolation failing!!! Check to make sure there are no NANs or double defined points in your input JSON!")
-                print (">>> Printing points we're trying to interpolate (x,y,z) triplets:")
+            if True:
+                try:
+                    # Actual interpolation done by RBF
+                    if args.interpolationEpsilon:
+                        rbf = scipy.interpolate.Rbf(xArray, yArray, zArray, function=interpolationFunction, smooth=smoothingFactor , epsilon=args.interpolationEpsilon)
+                    else:
+                        rbf = scipy.interpolate.Rbf(xArray, yArray, zArray, function=interpolationFunction, smooth=smoothingFactor )
+                except:
+                    print (">>> Interpolation failing!!! Check to make sure there are no NANs or double defined points in your input JSON!")
+                    print (">>> Printing points we're trying to interpolate (x,y,z) triplets:")
 
-                print (sorted( zip(xArray,yArray,zArray), key = lambda x: x[0]*x[1] ))
-                sys.exit(1)
+                    print (sorted( zip(xArray,yArray,zArray), key = lambda x: x[0]*x[1] ))
+                    sys.exit(1)
 
 
-            ZI = rbf(xymeshgrid[0], xymeshgrid[1])
+                ZI = rbf(xymeshgrid[0], xymeshgrid[1])
+
+
+            elif False:
+                print(len(list(xArray)))
+                print(len(list(yArray)))
+                print(len(list(zArray)))
+                ZI = scipy.interpolate.griddata( (xArray,yArray), zArray , (xymeshgrid[0], xymeshgrid[1]) )
+
 
             # Undo the scaling from above to get back to original units
             xymeshgrid[1] = xymeshgrid[1] / yScaling
+            yArray = yArray/yScaling
+
 
             # Spit out some diagnostic plots
             if args.debug and whichContour==expectedContour and outputSurface:
                 fig, ax = plt.subplots()
                 plt.pcolor(xymeshgrid[0], xymeshgrid[1], ZI)
                 plt.scatter(xArray, yArray, 10,zArray)
-                plt.contour(xymeshgrid[0], xymeshgrid[1], ZI)
+                plt.contour(xymeshgrid[0], xymeshgrid[1], ZI, )
 
                 plt.colorbar()
                 fig.savefig("scipy_debug_surface.pdf")
