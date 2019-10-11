@@ -29,7 +29,8 @@ ROOT.gROOT.SetBatch()
 parser = argparse.ArgumentParser()
 parser.add_argument("--inputFile","-i",  type = str, help="input harvest file", default = "test.json")
 parser.add_argument("--outputFile","-o", type = str, help="output ROOT file", default = "outputGraphs.root")
-parser.add_argument("--interpolation",   type = str, help="type of interpolation for scipy (RBF). e.g. linear, cubic, gaussian, multiquadric.", default = "multiquadric")
+parser.add_argument("--interpolation",   type = str, help="interpolation function for scipy (RBF): linear, cubic, gaussian, multiquadric or (griddata): nearest, linear, cubic", default = "multiquadric")
+parser.add_argument("--interpolationScheme",   type = str, help="type of interpolation for scipy: rbf, griddata", default = "rbf")
 parser.add_argument("--interpolationEpsilon", type=float, help="scipy (RBF) epsilon parameter", default = 0)
 parser.add_argument("--level",           type = float, help="contour level output. Default to 95%% CL", default = 1.64485362695)
 parser.add_argument("--useROOT","-r",    help = "use the root interpolation engine instead of mpl", action="store_true", default=False)
@@ -367,6 +368,13 @@ def harvestToDict( harvestInputFileName = "" , tmpListOfContours = listOfContour
                     sampleParamsList[1] = math.log10(sampleParamsList[1])
                 sampleParams = tuple(sampleParamsList)
 
+                # If the sensitivity of the region is exactly zero, the transformation to Z-value will give -inf which is bad for interpolation
+                # Hat tip to G Stark for finding this in the context of pyHF studies
+                for x in tmpListOfContours:
+                    if not (args.noSig or x in ["upperLimit","expectedUpperLimit"]):
+                        if float(sample["%s"%x])==1.0:
+                            sample["%s"%x]=0.9999999999
+
                 if not math.isinf(float(sample[expectedContour])) :
                     tmpList = [float(sample["%s"%x]) if (args.noSig or x in ["upperLimit","expectedUpperLimit"]) else ROOT.RooStats.PValueToSignificance( float(sample["%s"%x]) ) for x in tmpListOfContours]
                     modelDict[sampleParams] = dict(zip(tmpListOfContours,  tmpList ) )
@@ -524,7 +532,7 @@ def interpolateSurface(modelDict = {}, interpolationFunction = "linear", useROOT
         return graphs
 
     else:
-        print (">>> ... Using scipy interpolate scheme (RBF).")
+        print (">>> ... Using scipy interpolate.")
 
         xi = {}
         yi = {}
@@ -537,7 +545,8 @@ def interpolateSurface(modelDict = {}, interpolationFunction = "linear", useROOT
             yArray = np.array(y[whichContour])
             zArray = np.array( zValues[whichContour] )
 
-            # this scaling here equalizes the axes such that using a radial basis function makes sense!
+            # This scaling here equalizes the axes such that using a radial basis function makes sense!
+            # Hat tip to TJ Khoo for helping to find a bug in the y-scaling
             yScaling = (np.max(xArray)-np.min(xArray))/(np.max(yArray)-np.min(yArray)) if np.max(yArray) else 1
             yArray = yArray*yScaling
 
@@ -557,30 +566,33 @@ def interpolateSurface(modelDict = {}, interpolationFunction = "linear", useROOT
             if args.smoothing:
                 smoothingFactor = float(args.smoothing)
 
-            if True:
-                try:
+            try:
+                if args.interpolationScheme.lower()=="rbf":
+                    if args.debug:
+                        print (">>> ... ... Using scipy.interpolate.Rbf()")
                     # Actual interpolation done by RBF
                     if args.interpolationEpsilon:
                         rbf = scipy.interpolate.Rbf(xArray, yArray, zArray, function=interpolationFunction, smooth=smoothingFactor , epsilon=args.interpolationEpsilon)
                     else:
                         rbf = scipy.interpolate.Rbf(xArray, yArray, zArray, function=interpolationFunction, smooth=smoothingFactor )
-                except:
-                    print (">>> Interpolation failing!!! Check to make sure there are no NANs or double defined points in your input JSON!")
-                    print (">>> Printing points we're trying to interpolate (x,y,z) triplets:")
 
-                    print (sorted( zip(xArray,yArray,zArray), key = lambda x: x[0]*x[1] ))
+                    ZI = rbf(xymeshgrid[0], xymeshgrid[1])
+
+                elif args.interpolationScheme.lower()=="griddata":
+                    if args.debug:
+                        print (">>> ... ... Using scipy.interpolate.griddata()")
+                    ZI = scipy.interpolate.griddata( (xArray,yArray), zArray, (xymeshgrid[0], xymeshgrid[1]), method=interpolationFunction )
+
+                else:
+                    print (">>> ... ... scipy interpolation scheme not recognized. See -h for options.")
                     sys.exit(1)
 
+            except:
+                print (">>> ... Interpolation failing!!! Check to make sure there are no NANs or double defined points in your input JSON!")
+                print (">>> ... Printing points we're trying to interpolate (x,y,z) triplets:")
 
-                ZI = rbf(xymeshgrid[0], xymeshgrid[1])
-
-
-            elif False:
-                print(len(list(xArray)))
-                print(len(list(yArray)))
-                print(len(list(zArray)))
-                ZI = scipy.interpolate.griddata( (xArray,yArray), zArray , (xymeshgrid[0], xymeshgrid[1]) )
-
+                print (sorted( zip(xArray,yArray,zArray), key = lambda x: x[0]*x[1] ))
+                sys.exit(1)
 
             # Undo the scaling from above to get back to original units
             xymeshgrid[1] = xymeshgrid[1] / yScaling
@@ -598,11 +610,11 @@ def interpolateSurface(modelDict = {}, interpolationFunction = "linear", useROOT
                 fig.savefig("scipy_debug_surface.pdf")
 
             if whichContour==expectedContour and outputSurface:
-                print (">>> Writing out expected surface to pickle file")
+                print (">>> ... ... Writing out expected surface to pickle file")
                 with open(args.outputFile+'.expectedSurface.pkl', 'w') as outfile:
                     pickle.dump({"x": xymeshgrid[0], "y": xymeshgrid[1],"z": ZI} ,outfile, pickle.HIGHEST_PROTOCOL)
             elif whichContour==observedContour and outputSurface:
-                print (">>> Writing out observed surface to pickle file")
+                print (">>> ... ... Writing out observed surface to pickle file")
                 with open(args.outputFile+'.observedSurface.pkl', 'w') as outfile:
                     pickle.dump({"x": xymeshgrid[0], "y": xymeshgrid[1],"z": ZI} ,outfile, pickle.HIGHEST_PROTOCOL)
 
