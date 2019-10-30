@@ -373,7 +373,7 @@ if __name__ == "__main__":
                       Systs = ""
                       for i in sam.systDict.keys(): 
                           Systs+=i
-                          if 'Norm' in sam.systDict[i].method: Systs+="Norm"
+                          if 'Norm' in sam.systDict[i].method or 'norm' in sam.systDict[i].method: Systs+="Norm"
                           Systs+=","
                       if Systs!="": Systs=Systs[:-1]
                   if Systs != "": Util.plotUpDown(configMgr.histCacheFile,sam.name,Systs,chan.regionString,chan.variableName)

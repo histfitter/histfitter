@@ -1616,6 +1616,7 @@ class ConfigManager(object):
                     sam.setNormRegions(normChannels)
                     log.warning("            For now, using all non-validation channels by default: %s" % sam.normRegions)
                     
+            log.info("SettingNormRegion. RegionString: {0}, sample: {1}, normRegion: {2} ".format(regionString,sam.name,sam.normRegions))
             if sam.normRegions and (not sam.noRenormSys):
                 log.debug("addSampleSpecificHists(): sample {} has normalisation regions -- will construct histograms for these".format(sam.name))
                 log.info("      - Loading norm regions") # layout aligned with call for systematic
@@ -1635,7 +1636,8 @@ class ConfigManager(object):
                 tmpName = "h%sNom_%sNorm" % (sam.name, normString )
                 if not tmpName in self.hists.keys():
                     
-                    if not self.readFromTree:    
+                        """ 
+                        if not self.readFromTree:    
                         nomName = "h%sNom_%sNorm" % (sam.name, normString)
                         self.hists[nomName] = None
                         try:
@@ -1643,7 +1645,8 @@ class ConfigManager(object):
                         except:    
                             # assume that if no histogram is made, then it is not needed  
                             pass
-                    else:
+                        else:
+                        """
                         self.hists[tmpName] = TH1F(tmpName, tmpName, 1, 0.5, 1.5)
                         log.debug("addSampleSpecificHists(): building temporary histogram {0}".format(tmpName))
                         for normReg in sam.normRegions:
@@ -1667,10 +1670,13 @@ class ConfigManager(object):
 
                                 # TODO: why don't we store this histogram in its proper name for a region? then it can be recycled
                                 tempHist = TH1F("temp", "temp", 1, 0.5, 1.5)
-
-                                self.chains[self.prepare.currentChainName].Project("temp",self.cutsDict[r], \
+                                try:
+                                  self.chains[self.prepare.currentChainName].Project("temp",self.cutsDict[r], \
                                                                                    str(self.lumiUnits*self.outputLumi/self.inputLumi)+" * "+"*".join(s.weights)+" * ("+self.cutsDict[r]+")")
-
+                                except:
+                                  log.warning("chainName {0} not found in self.chains.keys(): {1}".format(self.prepare.currentChainName, self.chains.keys()))
+                                  log.warning("Norm histograms {0} will be empty and removed".format(tmpName))
+                                  continue
                                 # if the overflow bin is used for this channel, make sure the normalization takes it into account
                                 nomName = "h%sNom_%sNorm" % (s.name, normString)
                                 if c.useOverflowBin:
@@ -1682,6 +1688,8 @@ class ConfigManager(object):
                                 log.verbose("Integral of nominal norm histogram {} = {:f}".format(nomName, self.hists[nomName].GetSumOfWeights()))
                                 #sys.exit()
 
+                         
+                        if self.hists[tmpName].Integral() == 0: del self.hists[tmpName]
             ## Now move on to systematics, adding weights first
 
             ## Remove any current systematic
