@@ -30,8 +30,8 @@ def tablefragment(m,signalRegions,skiplist,chanStr,showPercent):
 
   tableline += '''
 \\begin{table}
-\\begin{center}
-\\setlength{\\tabcolsep}{0.0pc}
+\\centering
+\\small
 \\begin{tabular*}{\\textwidth}{@{\\extracolsep{\\fill}}l'''
 
   """
@@ -40,8 +40,8 @@ def tablefragment(m,signalRegions,skiplist,chanStr,showPercent):
   for region in signalRegions:
     tableline += "c"   
   tableline += '''}
-\\noalign{\\smallskip}\\hline\\noalign{\\smallskip}
-{\\bf Uncertainty of channel}                                   ''' 
+\\toprule
+\\textbf{Uncertainty of channel}                                   '''
 
 
   """
@@ -51,7 +51,7 @@ def tablefragment(m,signalRegions,skiplist,chanStr,showPercent):
     tableline += " & " + region.replace('_','\_') + "           "   
 
   tableline += ''' \\\\
-\\noalign{\\smallskip}\\hline\\noalign{\\smallskip}
+\\midrule
 %%'''
 
   tableline += '''
@@ -63,7 +63,7 @@ Total background expectation            '''
 
 
   tableline += ''' \\\\
-\\noalign{\\smallskip}\\hline\\noalign{\\smallskip}
+\\midrule
 %%'''
 
 
@@ -71,7 +71,7 @@ Total background expectation            '''
   print sqrt(N_obs) - for comparison with total systematic
   """   
   tableline += '''
-Total statistical $(\\sqrt{N_{\\rm exp}})$             '''
+Total statistical $(\\sqrt{N_{\\mathrm{exp}}})$             '''
   for region in signalRegions:
     tableline += " & $\\pm " + str(("%.2f" %m[region]['sqrtnfitted'])) + "$       "
   tableline += '''\\\\
@@ -88,8 +88,7 @@ Total background systematic              '''
     tableline += " & $\\pm " + str(("%.2f" %m[region]['totsyserr'])) + "\ [" + str(("%.2f" %percentage)) + "\\%] $       "
 
   tableline += '''      \\\\
-\\noalign{\\smallskip}\\hline\\noalign{\\smallskip}
-\\noalign{\\smallskip}\\hline\\noalign{\\smallskip}
+\\midrule
 %%''' 
 
 
@@ -127,9 +126,8 @@ Total background systematic              '''
   """   
 
   tableline += '''
-\\noalign{\\smallskip}\\hline\\noalign{\\smallskip}
+\\bottomrule
 \\end{tabular*}
-\\end{center}
 \\caption[Breakdown of uncertainty on background estimates]{
 Breakdown of the dominant systematic uncertainties on background estimates in the various signal regions.
 Note that the individual uncertainties can be correlated, and do not necessarily add up quadratically to 

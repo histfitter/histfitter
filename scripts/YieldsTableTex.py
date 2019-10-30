@@ -65,8 +65,8 @@ def tablefragment(m, tabname, signalregionslist,sampleList,showBeforeFitError):
     tableline += "r"   
   
   tableline += '''}
-\\noalign{\\smallskip}\\hline\\noalign{\\smallskip}
-{\\bf %s channel}          ''' %tabname
+\\toprule
+\\textbf{%s channel}          ''' %tabname
 
   """
   print the region names
@@ -75,8 +75,8 @@ def tablefragment(m, tabname, signalregionslist,sampleList,showBeforeFitError):
     regionName = region.replace("_cuts", "").replace("_meffInc", "").replace('_','\_')
     tableline += " & " + regionName + "           "   
     
-  tableline += '''   \\\\[-0.05cm]
-\\noalign{\\smallskip}\\hline\\noalign{\\smallskip}
+  tableline += '''   \\\\
+\\midrule
 %%''' 
 
   """
@@ -88,7 +88,7 @@ Observed events         '''
     tableline += " & $" + ("%d" %n) + "$             "
 
   tableline +='''       \\\\
-\\noalign{\\smallskip}\\hline\\noalign{\\smallskip}
+\\midrule
 %%'''
 
 
@@ -115,7 +115,7 @@ Fitted bkg events        '''
         texLog.warning("negative symmetric error extends below 0. for total bkg pdf:  will print asymmetric error w/ truncated negative error reaching to 0.")
         tableline += " & $" + str(("%.1f" %n)) + "_{-" + str(("%.1f"%n)) + "}^{+" + str(("%.1f" %m['TOTAL_FITTED_bkg_events_err'][index])) +  "}$         "
   tableline +='''     \\\\
-\\noalign{\\smallskip}\\hline\\noalign{\\smallskip}
+\\midrule
 %%'''
 
 
@@ -160,7 +160,7 @@ Fitted bkg events        '''
 
 
   tableline +='''     
- \\noalign{\\smallskip}\\hline\\noalign{\\smallskip}
+ \\midrule
 %%'''
 
   """
@@ -180,7 +180,7 @@ MC exp. SM events             '''
     else:
       tableline += " & $" + str(("%.2f" %n)) +  "$         "
   tableline +='''     \\\\
-\\noalign{\\smallskip}\\hline\\noalign{\\smallskip}
+\\midrule
 %%''' 
 
   map_listofkeys = m.keys()
@@ -231,7 +231,7 @@ MC exp. SM events             '''
 
 
   tableline +='''     \\\\
-\\noalign{\\smallskip}\\hline\\noalign{\\smallskip}
+\\bottomrule
 \\end{tabular*}
 %%''' 
 
@@ -248,9 +248,8 @@ def tablestart():
   start = '''
 
 \\begin{table}
-\\begin{center}
-\\setlength{\\tabcolsep}{0.0pc}
-{\\small
+\\centering
+\\small
 %%'''
 
   return start
@@ -261,8 +260,6 @@ def tableEndWithCaptionAndLabel(tableCaption, tableLabel):
   """   
  
   end = '''%%
-}
-\\end{center}
 \\caption{%s}
 \\label{%s}
 \\end{table}
@@ -276,8 +273,6 @@ def tableend(signalregion='3+ jets, loose',suffix='sr3jl'):
   """   
 
   end = '''%%
-}
-\\end{center}
 \\caption{Signal region: %s. Fit results for the electron (top part) and muon (bottom part) channels, for an integrated luminosity of $1035$\,\ipb.
 The results are obtained from the control regions using the discovery fit (see text for details). The fit results of the loose-not-tight regions are not shown.
 Nominal MC expectations (normalised to MC cross-sections) are given for comparison. 
@@ -301,8 +296,6 @@ def tableend2(signalregion='3+ jets, loose',suffix='sr3jl'):
  
 
   end = '''%%
-}
-\\end{center}
 \\caption{Signal region: %s. Fit results for an integrated luminosity of $1035$\,\ipb.
 The results are obtained from the control regions using the discovery fit (see text for details). 
 Nominal MC expectations (normalised to MC cross-sections) are given for comparison. 
@@ -328,8 +321,6 @@ def tableend3(suffix='sr3jl'):
  
 
   end = '''%%
-}
-\\end{center}
 \caption{ Background fit results for the S3 (top part) and S4 (bottom part) signal regions, for an integrated luminosity of $20.5$~\\ifb.
 %%The results are obtained from the control regions using the discovery fit (see text for details). The fit results of the loose-not-tight regions are not shown.
 Nominal MC expectations (normalised to MC cross-sections) are given for comparison. 
@@ -363,8 +354,6 @@ def tableend4(rList, suffix='sr3jl', mentionCh=''):
       tomention = 'related to the analysis containing region %s, ' % mentionCh
 
   end = '''%%
-}
-\\end{center}
 \caption{ Background fit results for the '''
 
   nRegions = len(regionsList)
