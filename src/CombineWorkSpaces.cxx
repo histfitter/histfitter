@@ -209,8 +209,8 @@ std::map< TString,TString > GetMatchingWorkspaces( const TString& infile, const 
         wsid.Clear();  // form unique ws id
         for (int i=0; i<narg2; ++i) { 
             objString = (TObjString*)iArr->At(i);
-            // wsid  += Form("%s_%.0f_", objString->GetString().Data(), wsarg[i]); 
-            wsid  += Form("%s=%.0f_", objString->GetString().Data(), wsarg[i]); 
+            // wsid  += Form("%s_%.2f_", objString->GetString().Data(), wsarg[i]);
+            wsid  += Form("%s=%.2f_", objString->GetString().Data(), wsarg[i]);
             formula.SetValue(objString->GetString(),wsarg[i]);
         }        
         //wsid += Form( "%d_",keymap[key->GetName()] );
