@@ -785,18 +785,26 @@ def createBandFromContours(contour1,contour2=None):
 
         pointOffset = 0
         if args.closedBands:
-            outputSize += 2
+            outputSize += 1
             pointOffset = 1
 
         outputGraph = ROOT.TGraph(outputSize)
         tmpx, tmpy = ROOT.Double(), ROOT.Double()
+        tmpx1, tmpy1 = ROOT.Double(), ROOT.Double()
         for iPoint in xrange(contour2.GetN()):
             contour2.GetPoint(iPoint,tmpx,tmpy)
             outputGraph.SetPoint(iPoint,tmpx,tmpy)
 
         if args.closedBands:
             contour2.GetPoint(0,tmpx,tmpy)
-            outputGraph.SetPoint(contour2.GetN()+1, tmpx,tmpy)
+            contour2.GetPoint(contour2.GetN()-1, tmpx1, tmpy1)
+            Point0vec = np.array([tmpx,tmpy])
+            Point1vec = np.array([tmpx1,tmpy1])
+            if(abs(np.dot(Point0vec,Point1vec)/(np.linalg.norm(Point0vec)*np.linalg.norm(Point1vec)))<0.01):
+                outputGraph.SetPoint(contour2.GetN(), 0.,0.)
+                outputSize += 1
+                pointOffset += 1
+            outputGraph.SetPoint(contour2.GetN()+pointOffset-1, tmpx,tmpy)
 
         for iPoint in xrange(contour1.GetN()):
             contour1.GetPoint(contour1.GetN()-1-iPoint,tmpx,tmpy)
@@ -804,7 +812,14 @@ def createBandFromContours(contour1,contour2=None):
 
         if args.closedBands:
             contour1.GetPoint(contour1.GetN()-1,tmpx,tmpy)
-            outputGraph.SetPoint(contour1.GetN()+contour2.GetN(), tmpx,tmpy)
+            contour1.GetPoint(0, tmpx1, tmpy1)
+            Point0vec = np.array([tmpx,tmpy])
+            Point1vec = np.array([tmpx1,tmpy1])
+            if(abs(np.dot(Point0vec,Point1vec)/(np.linalg.norm(Point0vec)*np.linalg.norm(Point1vec)))<0.01):
+                outputGraph.SetPoint(contour1.GetN()+contour2.GetN(), 0.,0.)
+                outputSize +=1
+                pointOffset += 1
+            outputGraph.SetPoint(contour1.GetN()+contour2.GetN()+pointOffset-1, tmpx,tmpy)
 
         contour2.GetPoint(0,tmpx,tmpy)
         outputGraph.SetPoint(contour1.GetN()+contour2.GetN()+pointOffset,tmpx,tmpy)
