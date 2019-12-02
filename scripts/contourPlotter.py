@@ -188,5 +188,5 @@ class contourPlotter:
 		tmpLine.DrawLineNDC(xyCoord[0],xyCoord[1]+ySeparation,xyCoord[0]+length,xyCoord[1]+ySeparation)
 
 	def writePlot(self, format="pdf"):
-		self.canvas.SaveAs(self.plotName+".pdf")
+		self.canvas.SaveAs(self.plotName + "." + format)
 		return
