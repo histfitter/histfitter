@@ -54,7 +54,7 @@ parser.add_argument("--forbiddenFunction","-l", type=str, help="""a ROOT TF1 def
 parser.add_argument("--ignoreUncertainty","-u", help="""Don't care about uncertainty bands!""", action="store_true", default=False)
 
 parser.add_argument("--areaThreshold","-a",     type = float, help="Throw away contours with areas less than threshold", default=0)
-parser.add_argument("--smoothing",    "-s",     type = str, help="smoothing option. For ROOT, use {k5a, k5b, k3a}. For scipy, uses smoothing from RBF.", default="0.1")
+parser.add_argument("--smoothing",    "-s",     type = str, help="smoothing option. For ROOT, use {k5a, k5b, k3a}. For scipy, uses smoothing from RBF.", default="0")
 parser.add_argument("--noSig","-n",      help = "don't convert CLs to significance -- don't use this option unless you know what you're doing!", action="store_true", default=False)
 
 parser.add_argument("--nominalLabel",      help = "keyword in filename to look for nominal sig XS", type=str, default="Nominal")
@@ -714,8 +714,12 @@ def createGraphsFromArrays(x,y,z,label):
     gr = createTGraph2DFromArrays(x,y,z)
 
     hist = gr.GetHistogram().Clone(label)
-    if args.smoothing:
-        hist.Smooth(1, args.smoothing)
+    if args.smoothing == "k5a":
+        hist.Smooth(1, "k5a")
+    elif args.smoothing == "k5b":
+        hist.Smooth(1, "k5b")
+    elif args.smoothing == "k3a":
+        hist.Smooth(1, "k3a")
 
     if label in [expectedContour,observedContour]:
         hist.Write("%s_hist"%label)
