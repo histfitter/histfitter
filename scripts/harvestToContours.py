@@ -547,16 +547,22 @@ def interpolateSurface(modelDict = {}, interpolationFunction = "linear", useROOT
 
             # This scaling here equalizes the axes such that using a radial basis function makes sense!
             # Hat tip to TJ Khoo for helping to find a bug in the y-scaling
-            yScaling = (np.max(xArray)-np.min(xArray))/(np.max(yArray)-np.min(yArray)) if np.max(yArray) else 1
-            yArray = yArray*yScaling
+            if args.interpolationScheme.lower()=="rbf":
+                yScaling = (np.max(xArray)-np.min(xArray))/(np.max(yArray)-np.min(yArray)) if np.max(yArray) else 1
+                yArray = yArray*yScaling
 
             # Creating some linspaces for interpolation
             xlinspace = np.linspace(xArray.min() if args.xMin == None else args.xMin,
                                     xArray.max() if args.xMax == None else args.xMax,
                                     args.xResolution)
-            ylinspace = np.linspace(yArray.min() if args.yMin == None else args.yMin*yScaling,
-                                    yArray.max() if args.yMax == None else args.yMax*yScaling,
-                                    args.yResolution)
+            if args.interpolationScheme.lower()=="rbf":
+                ylinspace = np.linspace(yArray.min() if args.yMin == None else args.yMin*yScaling,
+                                        yArray.max() if args.yMax == None else args.yMax*yScaling,
+                                        args.yResolution)
+            else:
+                ylinspace = np.linspace(yArray.min() if args.yMin == None else args.yMin,
+                                        yArray.max() if args.yMax == None else args.yMax,
+                                        args.yResolution)
 
             # Creating meshgrid for interpolation
             xymeshgrid = np.meshgrid(xlinspace,ylinspace)
@@ -595,8 +601,9 @@ def interpolateSurface(modelDict = {}, interpolationFunction = "linear", useROOT
                 sys.exit(1)
 
             # Undo the scaling from above to get back to original units
-            xymeshgrid[1] = xymeshgrid[1] / yScaling
-            yArray = yArray/yScaling
+            if args.interpolationScheme.lower()=="rbf":
+                xymeshgrid[1] = xymeshgrid[1] / yScaling
+                yArray = yArray/yScaling
 
 
             # Spit out some diagnostic plots
