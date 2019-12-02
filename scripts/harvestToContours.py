@@ -524,7 +524,7 @@ def interpolateSurface(modelDict = {}, interpolationFunction = "linear", useROOT
 
 
         canvas = ROOT.TCanvas("c1","c1",800,600);
-        h2D    = ROOT.TH2D("h","h",200,min(x0),max(x0),200,min(y0),max(y0) );
+        h2D    = ROOT.TH2D("h","h",10000,min(x0),max(x0),10000,min(y0),max(y0) );
 
         for whichContour in tmpListOfContours:
             graphs[whichContour] = createGraphsFromArrays(x[whichContour],y[whichContour],zValues[whichContour],whichContour)
