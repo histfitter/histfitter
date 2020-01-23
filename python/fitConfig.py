@@ -69,6 +69,7 @@ class fitConfig(object):
         self.statErrorType = "Gaussian"
         self.measurements = []
         self.channels = []
+        self.functions = []
         self.sampleList = []
         self.samplesToMerge = []
         self.signalSample = None
@@ -214,6 +215,9 @@ class fitConfig(object):
             for chan in channelObjects:
                 m.AddChannel(chan)
 
+            for func in self.functions:
+                m.AddPreprocessFunction(*func)
+
             m.CollectHistograms()
             
             # can be used to compare to our own XML if necessary
@@ -229,6 +233,17 @@ class fitConfig(object):
         """
         self.writeWorkspaces()
         return
+
+    def addFunction(self, funcName, expression, dependents):
+        """
+        Define a function
+
+        @param funcName Name of the function
+        @param expression String with mathematical expression for the function
+        @param dependents String with the list of dependent parameters
+        """
+        self.functions.append( (funcName, expression, dependents) )
+
 
     def addMeasurement(self, name, lumi, lumiErr):
         """
@@ -853,6 +868,9 @@ class fitConfig(object):
         """
         self.writeString = "<!DOCTYPE Combination  SYSTEM '../HistFactorySchema.dtd'>\n\n"
         self.writeString += "<Combination OutputFilePrefix=\"./results/" + self.prefix + "\"  >\n\n"
+
+        for func in self.functions:
+            self.writeString += "  <Function Name=\"%s\" Expression=\"%s\" Dependents=\"%s\" />\n" % (func[0], func[1], func[2])
         
         for chan in self.channels:
             self.writeString += "  <Input>" + chan.xmlFileName + "</Input>\n"
