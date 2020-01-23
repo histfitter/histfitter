@@ -1689,7 +1689,7 @@ class ConfigManager(object):
                                 #sys.exit()
 
                          
-                        if self.hists[tmpName].Integral() == 0: del self.hists[tmpName]
+                        #if self.hists[tmpName].Integral() == 0: del self.hists[tmpName]
             ## Now move on to systematics, adding weights first
 
             ## Remove any current systematic

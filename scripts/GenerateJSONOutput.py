@@ -56,6 +56,10 @@ def main():
 				processFile(filename.replace("_fixSigXSecNominal_hypotest","_upperlimit"))
 			except:
 				print ">>> WARNING: Can't find file: %s"%filename.replace("_fixSigXSecNominal_hypotest","_upperlimit")
+			try:
+				processFile(filename.replace("_Nominal","_upperlimit"))
+			except:
+				print ">>> WARNING: Can't find file: %s"%filename.replace("_fixSigXSecNominal_hypotest","_upperlimit")				
 
 	if not args.noAddTabs:
 		cleanUpJSON()
