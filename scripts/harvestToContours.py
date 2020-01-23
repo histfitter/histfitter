@@ -54,7 +54,7 @@ parser.add_argument("--forbiddenFunction","-l", type=str, help="""a ROOT TF1 def
 parser.add_argument("--ignoreUncertainty","-u", help="""Don't care about uncertainty bands!""", action="store_true", default=False)
 
 parser.add_argument("--areaThreshold","-a",     type = float, help="Throw away contours with areas less than threshold", default=0)
-parser.add_argument("--smoothing",    "-s",     type = str, help="smoothing option. For ROOT, use {k5a, k5b, k3a}. For scipy, uses smoothing from RBF.", default="0.1")
+parser.add_argument("--smoothing",    "-s",     type = str, help="smoothing option. For ROOT, use {k5a, k5b, k3a}. For scipy, uses smoothing from RBF.", default="0")
 parser.add_argument("--noSig","-n",      help = "don't convert CLs to significance -- don't use this option unless you know what you're doing!", action="store_true", default=False)
 
 parser.add_argument("--nominalLabel",      help = "keyword in filename to look for nominal sig XS", type=str, default="Nominal")
@@ -524,7 +524,7 @@ def interpolateSurface(modelDict = {}, interpolationFunction = "linear", useROOT
 
 
         canvas = ROOT.TCanvas("c1","c1",800,600);
-        h2D    = ROOT.TH2D("h","h",200,min(x0),max(x0),200,min(y0),max(y0) );
+        h2D    = ROOT.TH2D("h","h",10000,min(x0),max(x0),10000,min(y0),max(y0) );
 
         for whichContour in tmpListOfContours:
             graphs[whichContour] = createGraphsFromArrays(x[whichContour],y[whichContour],zValues[whichContour],whichContour)
@@ -547,16 +547,22 @@ def interpolateSurface(modelDict = {}, interpolationFunction = "linear", useROOT
 
             # This scaling here equalizes the axes such that using a radial basis function makes sense!
             # Hat tip to TJ Khoo for helping to find a bug in the y-scaling
-            yScaling = (np.max(xArray)-np.min(xArray))/(np.max(yArray)-np.min(yArray)) if np.max(yArray) else 1
-            yArray = yArray*yScaling
+            if args.interpolationScheme.lower()=="rbf":
+                yScaling = (np.max(xArray)-np.min(xArray))/(np.max(yArray)-np.min(yArray)) if np.max(yArray) else 1
+                yArray = yArray*yScaling
 
             # Creating some linspaces for interpolation
             xlinspace = np.linspace(xArray.min() if args.xMin == None else args.xMin,
                                     xArray.max() if args.xMax == None else args.xMax,
                                     args.xResolution)
-            ylinspace = np.linspace(yArray.min() if args.yMin == None else args.yMin*yScaling,
-                                    yArray.max() if args.yMax == None else args.yMax*yScaling,
-                                    args.yResolution)
+            if args.interpolationScheme.lower()=="rbf":
+                ylinspace = np.linspace(yArray.min() if args.yMin == None else args.yMin*yScaling,
+                                        yArray.max() if args.yMax == None else args.yMax*yScaling,
+                                        args.yResolution)
+            else:
+                ylinspace = np.linspace(yArray.min() if args.yMin == None else args.yMin,
+                                        yArray.max() if args.yMax == None else args.yMax,
+                                        args.yResolution)
 
             # Creating meshgrid for interpolation
             xymeshgrid = np.meshgrid(xlinspace,ylinspace)
@@ -595,8 +601,9 @@ def interpolateSurface(modelDict = {}, interpolationFunction = "linear", useROOT
                 sys.exit(1)
 
             # Undo the scaling from above to get back to original units
-            xymeshgrid[1] = xymeshgrid[1] / yScaling
-            yArray = yArray/yScaling
+            if args.interpolationScheme.lower()=="rbf":
+                xymeshgrid[1] = xymeshgrid[1] / yScaling
+                yArray = yArray/yScaling
 
 
             # Spit out some diagnostic plots
@@ -714,8 +721,12 @@ def createGraphsFromArrays(x,y,z,label):
     gr = createTGraph2DFromArrays(x,y,z)
 
     hist = gr.GetHistogram().Clone(label)
-    if args.smoothing:
-        hist.Smooth(1, args.smoothing)
+    if args.smoothing == "k5a":
+        hist.Smooth(1, "k5a")
+    elif args.smoothing == "k5b":
+        hist.Smooth(1, "k5b")
+    elif args.smoothing == "k3a":
+        hist.Smooth(1, "k3a")
 
     if label in [expectedContour,observedContour]:
         hist.Write("%s_hist"%label)
@@ -774,18 +785,26 @@ def createBandFromContours(contour1,contour2=None):
 
         pointOffset = 0
         if args.closedBands:
-            outputSize += 2
+            outputSize += 1
             pointOffset = 1
 
         outputGraph = ROOT.TGraph(outputSize)
         tmpx, tmpy = ROOT.Double(), ROOT.Double()
+        tmpx1, tmpy1 = ROOT.Double(), ROOT.Double()
         for iPoint in xrange(contour2.GetN()):
             contour2.GetPoint(iPoint,tmpx,tmpy)
             outputGraph.SetPoint(iPoint,tmpx,tmpy)
 
         if args.closedBands:
             contour2.GetPoint(0,tmpx,tmpy)
-            outputGraph.SetPoint(contour2.GetN()+1, tmpx,tmpy)
+            contour2.GetPoint(contour2.GetN()-1, tmpx1, tmpy1)
+            Point0vec = np.array([tmpx,tmpy])
+            Point1vec = np.array([tmpx1,tmpy1])
+            if(abs(np.dot(Point0vec,Point1vec)/(np.linalg.norm(Point0vec)*np.linalg.norm(Point1vec)))<0.01):
+                outputGraph.SetPoint(contour2.GetN(), 0.,0.)
+                outputSize += 1
+                pointOffset += 1
+            outputGraph.SetPoint(contour2.GetN()+pointOffset-1, tmpx,tmpy)
 
         for iPoint in xrange(contour1.GetN()):
             contour1.GetPoint(contour1.GetN()-1-iPoint,tmpx,tmpy)
@@ -793,7 +812,14 @@ def createBandFromContours(contour1,contour2=None):
 
         if args.closedBands:
             contour1.GetPoint(contour1.GetN()-1,tmpx,tmpy)
-            outputGraph.SetPoint(contour1.GetN()+contour2.GetN(), tmpx,tmpy)
+            contour1.GetPoint(0, tmpx1, tmpy1)
+            Point0vec = np.array([tmpx,tmpy])
+            Point1vec = np.array([tmpx1,tmpy1])
+            if(abs(np.dot(Point0vec,Point1vec)/(np.linalg.norm(Point0vec)*np.linalg.norm(Point1vec)))<0.01):
+                outputGraph.SetPoint(contour1.GetN()+contour2.GetN(), 0.,0.)
+                outputSize +=1
+                pointOffset += 1
+            outputGraph.SetPoint(contour1.GetN()+contour2.GetN()+pointOffset-1, tmpx,tmpy)
 
         contour2.GetPoint(0,tmpx,tmpy)
         outputGraph.SetPoint(contour1.GetN()+contour2.GetN()+pointOffset,tmpx,tmpy)
