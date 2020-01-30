@@ -1636,7 +1636,7 @@ class ConfigManager(object):
                 tmpName = "h%sNom_%sNorm" % (sam.name, normString )
                 if not tmpName in self.hists.keys():
                     
-                        """ 
+                   """ 
                         if not self.readFromTree:    
                         nomName = "h%sNom_%sNorm" % (sam.name, normString)
                         self.hists[nomName] = None
@@ -1646,7 +1646,11 @@ class ConfigManager(object):
                             # assume that if no histogram is made, then it is not needed  
                             pass
                         else:
-                        """
+                   """
+
+                   self.hists[tmpName] = None
+                   self.hists[tmpName] = self.prepare.addHisto(tmpName, forceNoFallback=True)
+                   if self.hists[tmpName] == None:
                         self.hists[tmpName] = TH1F(tmpName, tmpName, 1, 0.5, 1.5)
                         log.debug("addSampleSpecificHists(): building temporary histogram {0}".format(tmpName))
                         for normReg in sam.normRegions:
