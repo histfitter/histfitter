@@ -277,9 +277,9 @@ class PrepareHistos(object):
             if not os.path.exists(i.filename):
                 log.error("input file {} does not exist - cannot load {} from it".format(i.filename, i.treename+suffix))
                 continue
-          
-            self.configMgr.chains[self.currentChainName].Add("{}/{}".format(i.filename, i.treename+suffix))
-          
+
+            self.configMgr.chains[self.currentChainName].AddFile(i.filename, -1, i.treename+suffix)
+
             for f in i.friends:
                 # TODO: check that this doesn't increase the number of open files!
                 self.configMgr.chains[self.currentChainName].AddFriend(f.treename+suffix, f.filename)
