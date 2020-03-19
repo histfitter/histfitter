@@ -158,6 +158,7 @@ class ConfigManager(object):
         self.histBackupCacheFile = ""
         self.useCacheToTreeFallback = False
         self.useHistBackupCacheFile = False
+        self.forceNorm = True
         
         self.input_files = set() # Input list to be used for tree production
        
@@ -1649,7 +1650,7 @@ class ConfigManager(object):
                    """
 
                    self.hists[tmpName] = None
-                   self.hists[tmpName] = self.prepare.addHisto(tmpName, forceNoFallback=True)
+                   if self.forceNorm==False and self.prepare.useCache: self.hists[tmpName] = self.prepare.addHisto(tmpName, forceNoFallback=True)
                    if self.hists[tmpName] == None:
                         self.hists[tmpName] = TH1F(tmpName, tmpName, 1, 0.5, 1.5)
                         log.debug("addSampleSpecificHists(): building temporary histogram {0}".format(tmpName))
@@ -1668,9 +1669,9 @@ class ConfigManager(object):
                                     # assume that if no histogram is made, then it is not needed  
                                     continue
 
-                                log.debug("addSampleSpecificHists(): calling prepare.read() for {}".format(sam.treename))
-                                #print sam.input_files
-                                self.prepare.read(sam.input_files, suffix=sam.getTreenameSuffix(), friendTreeName=sam.friendTreeName)
+                                log.debug("addSampleSpecificHists(): calling prepare.read() for {}".format(s.treename))
+                                #print s.input_files
+                                self.prepare.read(s.input_files, suffix=s.getTreenameSuffix(), friendTreeName=s.friendTreeName)
 
                                 # TODO: why don't we store this histogram in its proper name for a region? then it can be recycled
                                 tempHist = TH1F("temp", "temp", 1, 0.5, 1.5)

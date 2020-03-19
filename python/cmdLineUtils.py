@@ -77,7 +77,7 @@ def getPdfInRegions(w,sample,region):
         for s in sample:
             componentTmp = Util.GetComponent(w,s,region,True)
             sample_str=sample_str+"_"+s
-            sampleArgList.add(componentTmp)
+            if componentTmp: sampleArgList.add(componentTmp)
             pass
         pdfInRegion = RooAddition(sample_str,sample_str,sampleArgList)
     else:
@@ -95,9 +95,9 @@ def getPdfInRegionsWithRangeName(w,sample,region,rangeName):
         for s in sample:
             componentTmp = Util.GetComponent(w,s,region,True,rangeName)
             sample_str=sample_str+"_"+s
-            sampleArgList.add(componentTmp)
+            if componentTmp: sampleArgList.add(componentTmp)
             pass
-        pdfInRegion = RooAddition(sample_str,sample_str,sampleArgList)
+        pdfInRegion =  RooAddition(sample_str,sample_str,sampleArgList)
     else:
         pdfInRegion  = Util.GetComponent(w,sample,region,False,rangeName)
         pass
