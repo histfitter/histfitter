@@ -1672,12 +1672,25 @@ class ConfigManager(object):
                                 log.debug("addSampleSpecificHists(): calling prepare.read() for {}".format(s.treename))
                                 #print s.input_files
                                 self.prepare.read(s.input_files, suffix=s.getTreenameSuffix(), friendTreeName=s.friendTreeName)
+                                #check if specific cuts are applied to a specific sample
+                                _cuts = self.cutsDict[r]
+                                if s.additionalCuts != "":
+                                    if c.ignoreAdditionalCuts:
+                                        log.debug("Ignoring additional cuts in channel {} for sample {}".format(c.channelName, s.name))
+                                    else:
+                                        log.debug("Using additional cuts for sample {}: '{}'".format(s.name, s.additionalCuts))
+                                        if len(_cuts.strip()) != 0:
+                                            # ROOT doesn't like "()" as a cut, so we only use the string if it's non-empty
+                                            _cuts = "(({}) && ({}))".format(_cuts, s.additionalCuts)
+                                        else:
+                                            log.warning("No region cuts applied; only using the additional ones")
+                                            _cuts = copy(s.additionalCuts)
 
                                 # TODO: why don't we store this histogram in its proper name for a region? then it can be recycled
                                 tempHist = TH1F("temp", "temp", 1, 0.5, 1.5)
                                 try:
-                                  self.chains[self.prepare.currentChainName].Project("temp",self.cutsDict[r], \
-                                                                                   str(self.lumiUnits*self.outputLumi/self.inputLumi)+" * "+"*".join(s.weights)+" * ("+self.cutsDict[r]+")")
+                                  self.chains[self.prepare.currentChainName].Project("temp",_cuts, \
+                                                                                   str(self.lumiUnits*self.outputLumi/self.inputLumi)+" * "+"*".join(s.weights)+" * ("+_cuts+")")
                                 except:
                                   log.warning("chainName {0} not found in self.chains.keys(): {1}".format(self.prepare.currentChainName, self.chains.keys()))
                                   log.warning("Norm histograms {0} will be empty and removed".format(tmpName))

@@ -352,9 +352,9 @@ class SystematicBase:
                 #else:
                     #treeName = s.prefixTreeName + abstract.nomName
 
-            log.debug("FillUpDownHist(): calling prepare.read() for {}".format(sam.name))
+            log.debug("FillUpDownHist(): calling prepare.read() for {}".format(s.name))
             #abstract.prepare.read(treeName, filelist)
-            abstract.prepare.read(sam.input_files, suffix=sam.getTreenameSuffix(), friendTreeName=sam.friendTreeName)
+            abstract.prepare.read(s.input_files, suffix=s.getTreenameSuffix(), friendTreeName=s.friendTreeName)
 
             tempHist = TH1F("temp", "temp", 1, 0.5, 1.5)
 
@@ -366,6 +366,17 @@ class SystematicBase:
                     _weights = s.getSystematic(systNorm.name).low
             
             _cut_str = abstract.cutsDict[normReg[0]]
+            if s.additionalCuts != "":
+                if c.ignoreAdditionalCuts:
+                    log.debug("Ignoring additional cuts in channel {} for sample {}".format(c.channelName, s.name))
+                else:
+                    log.debug("Using additional cuts for sample {}: '{}'".format(s.name, s.additionalCuts))
+                    if len(_cut_str.strip()) != 0:
+                        # ROOT doesn't like "()" as a cut, so we only use the string if it's non-empty
+                        _cut_str = "(({}) && ({}))".format(_cut_str, s.additionalCuts)
+                    else:
+                        log.warning("No region cuts applied; only using the additional ones")
+                        _cut_str = copy(s.additionalCuts)
             _weight_str = "{} * {}".format(str(abstract.lumiUnits*abstract.outputLumi/abstract.inputLumi), " * ".join(_weights))
 
             log.verbose("FillUpDownHist(): current chain {}".format(abstract.prepare.currentChainName))
