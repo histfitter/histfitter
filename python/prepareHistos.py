@@ -274,7 +274,9 @@ class PrepareHistos(object):
         tmp_chains = []
         for i in sorted_input_files:
             log.debug("read(): attempting to load {} from {}".format(i.treename+suffix, i.filename))
-            if not os.path.exists(i.filename):
+            f = TFile.Open(i.filename)
+            # Make sure f isn't a null pointer or a zombie file
+            if not f or f.IsZombie():
                 log.error("input file {} does not exist - cannot load {} from it".format(i.filename, i.treename+suffix))
                 continue
 
