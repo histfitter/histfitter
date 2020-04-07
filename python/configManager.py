@@ -1933,7 +1933,7 @@ class ConfigManager(object):
         """
         outputRootFile = None
         if self.readFromTree:
-            outputRootFile = TFile(self.histCacheFile, "RECREATE")
+            outputRootFile = TFile.Open(self.histCacheFile, "RECREATE")
         elif self.prepare.recreate:
             outputRootFile = self.prepare.cacheFile
             if not outputRootFile.IsOpen():
