@@ -138,27 +138,31 @@ class PrepareHistos(object):
         self.cacheFileName = filepath
         self.cache2FileName = file2path
         
-        if os.path.isfile(file2path):
+        # Check if optional file is accessible and not a zombie
+        if file2path != '': 
             self.cache2File = TFile.Open(file2path,"READ")
-            if self.cache2File.IsZombie():
+            if self.cache2File and self.cache2File.IsZombie():
                 self.cache2File = None
-        else:
+        else: 
             self.cache2File = None
         
-        if os.path.isfile(filepath):
+        # Check if cache file is accessible and not a zombie
+        self.cacheFile = TFile.Open(filepath, "READ")
+
+        if (self.cacheFile) and (not self.cacheFile.IsZombie()):
             if file2path=='' and not self.useCacheToTreeFallback:
                 '''
                 default, no archive file and no fallback activated
                 all possible sources of histograms not in self.cacheFile
                 are therefore excluded and read-only mode applied for opening the TFile
                 '''
-                self.cacheFile = TFile(filepath,"READ")
+                self.cacheFile = TFile.Open(filepath,"READ")
                 self.recreate = False
             else:
-                self.cacheFile = TFile(filepath,"UPDATE")
+                self.cacheFile = TFile.Open(filepath,"UPDATE")
                 self.recreate = True
         else:
-            self.cacheFile = TFile(filepath,"RECREATE")
+            self.cacheFile = TFile.Open(filepath,"RECREATE")
             self.recreate = True
 
     def checkTree(self, treeName, fileList):
@@ -274,7 +278,9 @@ class PrepareHistos(object):
         tmp_chains = []
         for i in sorted_input_files:
             log.debug("read(): attempting to load {} from {}".format(i.treename+suffix, i.filename))
-            if not os.path.exists(i.filename):
+            f = TFile.Open(i.filename)
+            # Make sure f isn't a null pointer or a zombie file
+            if (not f) or (f.IsZombie()):
                 log.error("input file {} does not exist - cannot load {} from it".format(i.filename, i.treename+suffix))
                 continue
 
