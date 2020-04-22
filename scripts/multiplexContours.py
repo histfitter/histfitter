@@ -130,21 +130,20 @@ def main():
 
         uncutRegions[inputFileName] = region
 
-
     sumOfExpecteds = cascaded_union([v["Exp"] for k,v in uncutRegions.iteritems()])
 
     if args.debug:
         print (">>> Number of regions being added to the best expected contour: %d"%len(uncutRegions) )
         print (">>> Integral of the best expected contour: %d"%sumOfExpecteds.area)
 
-        x,y = sumOfExpecteds.exterior.coords.xy
+        x,y = sumOfExpecteds.convex_hull.exterior.coords.xy
         convertArraysToTGraph(x,y).Write("debug_sumOfExpecteds")
         ax.cla()
         ax.plot(x,y,alpha=0.5)
         fig.savefig("debug_sumOfExpecteds.pdf")
 
         for i,singleExpectedCurve in enumerate([v["Exp"] for k,v in uncutRegions.iteritems()]):
-            x,y = singleExpectedCurve.exterior.coords.xy
+            x,y = singleExpectedCurve.convex_hull.exterior.coords.xy
             ax.cla()
             ax.plot(x,y,alpha=0.5)
             fig.savefig("debug_singleExpected_%d.pdf"%i)
@@ -196,7 +195,7 @@ def main():
         biggestOverlap = 0
         bestSR = ""
         for regionName,region in uncutRegions.iteritems():
-            tmpOverlap = len(set(subRegion.exterior.coords) & set(region["Exp"].exterior.coords))
+            tmpOverlap = len(set(subRegion.convex_hull.exterior.coords) & set(region["Exp"].convex_hull.exterior.coords))
             if tmpOverlap > biggestOverlap:
                 biggestOverlap = tmpOverlap
                 bestSR = regionName
@@ -257,7 +256,7 @@ def main():
                 listOfBestCurves[tmpKey].append(chunkOfSubCurve)
 
                 if args.debug:
-                    x,y = chunkOfSubCurve.boundary.coords.xy
+                    x,y = chunkOfSubCurve.convex_hull.boundary.coords.xy
                     # ax.cla()
                     ax.plot(x,y,alpha=0.5)
                     fig.savefig("debug_%s_%d.pdf"%(tmpKey,counter) )
@@ -322,8 +321,8 @@ def tGraphToPolygon(myGraph, pinPoint=None):
         y = np.append(y,[min(y)])
     if not Polygon(zip(x,y)).is_valid:
         x,y = x[:-1],y[:-1]
-    return Polygon(zip(x,y))
-
+        geom = Polygon(zip(x,y))
+        return geom if geom.is_valid else geom.buffer(0)
 
 def convertTGraphToArrays(mygraph):
     size = mygraph.GetN()
