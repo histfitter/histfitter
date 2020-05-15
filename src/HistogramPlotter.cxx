@@ -14,7 +14,6 @@
  **********************************************************************************/
 
 #include <memory>
-#include <filesystem>
 
 #include "HistogramPlotter.h"
 #include "Utils.h"
@@ -860,10 +859,7 @@ void HistogramPlot::saveHistograms() {
 
     // Try something here
     TString canvasName(Form("%s_%s", m_regionCategoryLabel.Data(), m_outputPrefix.Data()));
-    TString fileName(Form("results/%s/%s.root", m_anaName.Data(), canvasName.Data()));
-    TString fileOptions = "recreate";
-    if (std::filesystem::exists(fileName.Data())) fileOptions = "update";
-    TFile f(fileName, fileOptions);
+    TFile f(Form("results/%s/%s.root", m_anaName.Data(), canvasName.Data()), "update");
 
     // Data hist
     RooPlot* frame_dummy = m_regionVariable->frame(); 
