@@ -141,6 +141,9 @@ class ChannelStyle : public TObject{
   Int_t getArrowColor() { return m_ArrowColor; }
   void setArrowColor(const Int_t& color) { m_ArrowColor = color; }
 
+  Bool_t getArrowRatio() { return m_ArrowRatio;}
+  void setArrowRatio(Bool_t ArrowRatio = kFALSE) { m_ArrowRatio = ArrowRatio; }
+
   TLegend* getTLegend(){ return m_legend;}
   void setTLegend(TLegend* leg) { m_legend = leg; }
  
@@ -205,6 +208,7 @@ private:
   Double_t m_ArrowAngle;
   Double_t m_ArrowWidth;
   Int_t m_ArrowColor;
+  Bool_t m_ArrowRatio;
 
 
   Int_t m_defaultSampleColor;

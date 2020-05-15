@@ -14,6 +14,7 @@
  **********************************************************************************/
 
 #include <memory>
+#include <filesystem>
 
 #include "HistogramPlotter.h"
 #include "Utils.h"
@@ -219,10 +220,10 @@ void HistogramPlotter::PlotRegion(const TString &regionCategoryLabel) {
     plot.setFitResult(m_fitResult);
     plot.setPlotComponents(m_plotComponents);
     plot.setOutputPrefix(m_outputPrefix);
-    plot.saveHistograms();
     //m_histograms.push_back(hists);
 
     plot.plot();
+    plot.saveHistograms();
     //if(m_plotSeparateComponents) {
     //plot.plotSeparateComponents();
     //}
@@ -277,7 +278,14 @@ void HistogramPlot::buildFrame() {
     m_frame->SetName(Form("frame_%s_%s", m_regionCategoryLabel.Data(), m_outputPrefix.Data()));
 
     // plot the data
-    m_regionData->plotOn(m_frame, RooFit::DataError(RooAbsData::Poisson),
+    if(m_style.getXErrorSize()>= 0.){
+            Logger << kDEBUG << "setting X error " << GEndl;
+            m_regionData->plotOn(m_frame, RooFit::DataError(RooAbsData::Poisson),
+            RooFit::MarkerColor(m_style.getDataColor()),
+            RooFit::LineColor(m_style.getDataColor()),
+            RooFit::XErrorSize(m_style.getXErrorSize()));
+
+    }else m_regionData->plotOn(m_frame, RooFit::DataError(RooAbsData::Poisson),
             RooFit::MarkerColor(m_style.getDataColor()), 
             RooFit::LineColor(m_style.getDataColor()));
 
@@ -319,7 +327,14 @@ void HistogramPlot::buildFrame() {
             RooFit::LineColor(m_style.getTotalPdfColor()));
 
     Logger << kDEBUG << "Redrawing data" << GEndl;
-    m_regionData->plotOn(m_frame, RooFit::DataError(RooAbsData::Poisson),
+    if(m_style.getXErrorSize()>= 0.){
+            Logger << kDEBUG << "setting X error " << GEndl;
+            m_regionData->plotOn(m_frame, RooFit::DataError(RooAbsData::Poisson),
+            RooFit::MarkerColor(m_style.getDataColor()),
+            RooFit::LineColor(m_style.getDataColor()),
+            RooFit::XErrorSize(m_style.getXErrorSize()));
+
+    } else  m_regionData->plotOn(m_frame, RooFit::DataError(RooAbsData::Poisson),
             RooFit::MarkerColor(m_style.getDataColor()), 
             RooFit::LineColor(m_style.getDataColor()));
 
@@ -490,6 +505,24 @@ void HistogramPlot::addRatioPanel() {
     //if(m_style.getTitleY() != "") { 
     //m_frame->GetYaxis()->SetTitle(m_style.getTitleY());
     //}
+
+    if(m_style.getArrowRatio()){
+            Logger << kDEBUG << "add arrow(s) showing out of scale data in the ratio plot " << GEndl;
+            double maxFrame=frame2->GetMaximum();
+            double dy=(maxFrame-1.)/4.;
+            for (Int_t i =0;i<hratio->GetN();i++){
+               Double_t x,y;
+               hratio->GetPoint(i,x,y);
+               if(y > maxFrame){
+                 TArrow* arrow = new TArrow(x,1+dy,x,maxFrame-dy,0.02,"|>") ;
+                 arrow->SetAngle(m_style.getArrowAngle()) ;
+                 arrow->SetLineColor(m_style.getArrowColor()) ;
+                 arrow->SetFillColor(m_style.getArrowColor()) ;
+                 arrow->SetLineWidth(m_style.getArrowWidth()) ;
+                 frame2->addObject(arrow) ;
+               }
+            }
+    }
 
     frame2->GetYaxis()->SetLabelSize(0.13);
     frame2->GetYaxis()->SetNdivisions(504);         
@@ -722,6 +755,7 @@ void HistogramPlot::plot() {
     // Write output
     canvas->SaveAs("results/" + m_anaName + "/" + canvasName + ".pdf");
     canvas->SaveAs("results/" + m_anaName + "/" + canvasName + ".eps");
+    canvas->SaveAs("results/" + m_anaName + "/" + canvasName + ".root");
 }
 
 void HistogramPlot::plotSeparateComponents() {
@@ -760,6 +794,7 @@ void HistogramPlot::plotSeparateComponents() {
 
     canvas->SaveAs("results/" + m_anaName + "/" + canvasName + ".pdf");
     canvas->SaveAs("results/" + m_anaName + "/" + canvasName + ".eps");
+    canvas->SaveAs("results/" + m_anaName + "/" + canvasName + ".root");
 }
 
 void HistogramPlot::plotSingleComponent(unsigned int i, double normalisation) {
@@ -825,7 +860,10 @@ void HistogramPlot::saveHistograms() {
 
     // Try something here
     TString canvasName(Form("%s_%s", m_regionCategoryLabel.Data(), m_outputPrefix.Data()));
-    TFile f(Form("results/%s/%s.root", m_anaName.Data(), canvasName.Data()), "recreate");
+    TString fileName(Form("results/%s/%s.root", m_anaName.Data(), canvasName.Data()));
+    TString fileOptions = "recreate";
+    if (std::filesystem::exists(fileName.Data())) fileOptions = "update";
+    TFile f(fileName, fileOptions);
 
     // Data hist
     RooPlot* frame_dummy = m_regionVariable->frame(); 

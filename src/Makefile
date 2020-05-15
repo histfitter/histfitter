@@ -35,7 +35,7 @@ CXXFLAGS = -std=c++17 -fPIC -Wall
 
 UNAME = $(shell uname)
 
-LINKLIBSIN = -L$(shell $(ROOTCONFIG) --libdir) -lCore -lRIO -lNet -lHist -lGraf -lGraf3d -lGpad -lTree -lRint -lPostscript -lMatrix -lPhysics -lGui -lRooFit -lRooStats -lHistFactory -lXMLParser -pthread -lRooFitCore -lm -ldl -lFoam -lMinuit -L../lib
+LINKLIBSIN = -L$(shell $(ROOTCONFIG) --libdir) -lstdc++fs -lCore -lRIO -lNet -lHist -lGraf -lGraf3d -lGpad -lTree -lRint -lPostscript -lMatrix -lPhysics -lGui -lRooFit -lRooStats -lHistFactory -lXMLParser -pthread -lRooFitCore -lm -ldl -lFoam -lMinuit -L../lib
 
 LINKLIBS = $(LINKLIBSIN) -lSusyFitter
 
