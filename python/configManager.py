@@ -612,6 +612,8 @@ class ConfigManager(object):
                      style.setArrowWidth(c.arrowWidth)
                  if not c.arrowColor is None:
                      style.setArrowColor(c.arrowColor)
+                 if not c.arrowRatio is None:
+                     style.setArrowRatio(c.arrowRatio)
                  if len(c.text1)>0:
                      style.setText1(c.text1)
                  if len(c.text2)>0:

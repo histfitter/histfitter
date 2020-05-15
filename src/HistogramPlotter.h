@@ -8,6 +8,7 @@
 #include <string>
 #include "TString.h"
 #include "TGraphAsymmErrors.h"
+#include "TArrow.h"
 
 #include <stdexcept>
 

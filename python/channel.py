@@ -109,6 +109,7 @@ class Channel(object):
         self.arrowAngle = None
         self.arrowWidth = None
         self.arrowColor = None
+        self.arrowRatio = None
         self.remapSystChanName = ""
         self.blind = False
         self.text1 = ''
