@@ -1501,7 +1501,7 @@ TH2D* Util::PlotCorrelationMatrix(RooFitResult* rFit, TString anaName,  bool Red
     const char* orig_PaintTextFormat = gStyle->GetPaintTextFormat() ;
     Double_t orig_LabelSize = gStyle->GetLabelSize();
 
-    gStyle->SetPalette(51) ;
+    gStyle->SetPalette(105) ;
     gStyle->SetMarkerSize(1.45);
     gStyle->SetMarkerColor(kWhite);
     gStyle->SetPaintTextFormat("4.2f") ;
