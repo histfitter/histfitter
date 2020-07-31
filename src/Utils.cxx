@@ -2442,7 +2442,8 @@ double Util::GetPropagatedError(RooAbsReal* var, const RooFitResult& fr, const b
     for (int i=0 ; i<paramList.getSize() ; i++) {
         int newII = fpf_idx[i];
         errVec[i] = sqrt(V(newII,newII)) ;
-        for (int j=0 ; j<paramList.getSize() ; j++) {
+        //for (int j=0 ; j<paramList.getSize() ; j++) {
+        for (int j=i ; j<paramList.getSize() ; j++) {
             int newJ = fpf_idx[j];
             C(i,j) = V(newII,newJ)/sqrt(V(newII,newII)*V(newJ,newJ)) ;
             C(j,i) = C(i,j) ; 
