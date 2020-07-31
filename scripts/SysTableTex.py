@@ -84,8 +84,12 @@ Total statistical $(\\sqrt{N_{\\mathrm{exp}}})$             '''
 Total background systematic              '''
 
   for region in signalRegions:
-    percentage = m[region]['totsyserr']/m[region]['nfitted'] * 100.0    
-    tableline += " & $\\pm " + str(("%.2f" %m[region]['totsyserr'])) + "\ [" + str(("%.2f" %percentage)) + "\\%] $       "
+    percentageUp = m[region]['totsyserrUp']/m[region]['nfitted'] * 100.0
+    percentageDo = m[region]['totsyserrDo']/m[region]['nfitted'] * 100.0
+    if str(("%.2f" %m[region]['totsyserrUp']))==str(("%.2f" %m[region]['totsyserrDo'])):
+      tableline += " & $\\pm " + str(("%.2f" %m[region]['totsyserrUp'])) + "\ [" + str(("%.2f" %percentageUp)) + "\\%] $       "
+    else: 
+      tableline += " & $+" + str(("%.2f" %m[region]['totsyserrUp'])) + ", -"+ str(("%.2f" %m[region]['totsyserrDo']))+"\ [+" + str(("%.2f" %percentageUp)) + ",-" + str(("%.2f" %percentageDo)) + "\\%] $       "
 
   tableline += '''      \\\\
 \\midrule
@@ -99,22 +103,30 @@ Total background systematic              '''
   m_listofkeys = sorted(d.iterkeys(), key=lambda k: d[k], reverse=True)
 
   for name in m_listofkeys:
-    if name not in skiplist:
+    if name not in skiplist and "syserrDo" not in name:
       printname = name
-      printname = printname.replace('syserr_','')
+      nameDo = name
+      nameDo = nameDo.replace("Up","Do")
+      printname = printname.replace('syserrUp_','')
       printname = printname.replace('_','\_')
       for index,region in enumerate(signalRegions):
         if index == 0:
           tableline += "\n" + printname + "      "
           
         if not showPercent:
-          tableline += "   & $\\pm " + str(("%.2f" %m[region][name])) + "$       "
-        else:
-          percentage = m[region][name]/m[region]['nfitted'] * 100.0
-          if percentage <1:
-            tableline += "   & $\\pm " + str(("%.2f" %m[region][name])) + "\ [" + str(("%.2f" %percentage)) + "\\%] $       "
+          if str(("%.2f" %m[region][name]))==str(("%.2f" %m[region][nameDo])):
+            tableline += "   & $\\pm " + str(("%.2f" %m[region][name])) + "$       "
           else:
-            tableline += "   & $\\pm " + str(("%.2f" %m[region][name])) + "\ [" + str(("%.1f" %percentage)) + "\\%] $       "
+            tableline += "   & $+" + str(("%.2f" %m[region][name])) + ",-" + str(("%.2f" %m[region][nameDo])) + "$       "
+            
+        else:
+          percentageUp = m[region][name]/m[region]['nfitted'] * 100.0
+          percentageDo = m[region][nameDo]/m[region]['nfitted'] * 100.0
+          if str(("%.2f" %m[region][name]))==str(("%.2f" %m[region][nameDo])):
+            tableline += "   & $\\pm " + str(("%.2f" %m[region][name])) + "\ [" + str(("%.2f" %percentageUp)) + "\\%] $       "
+          else:
+            tableline += "   & $+" + str(("%.2f" %m[region][name])) + ",-" + str(("%.2f" %m[region][nameDo])) + "\ [+" + str(("%.2f" %percentageUp)) + ",-" + str(("%.2f" %percentageDo)) + "\\%] $       "
+
                     
           
         if index == len(signalRegions)-1:

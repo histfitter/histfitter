@@ -219,10 +219,10 @@ void HistogramPlotter::PlotRegion(const TString &regionCategoryLabel) {
     plot.setFitResult(m_fitResult);
     plot.setPlotComponents(m_plotComponents);
     plot.setOutputPrefix(m_outputPrefix);
+    plot.saveHistograms();
     //m_histograms.push_back(hists);
 
     plot.plot();
-    plot.saveHistograms();
     //if(m_plotSeparateComponents) {
     //plot.plotSeparateComponents();
     //}
@@ -277,27 +277,23 @@ void HistogramPlot::buildFrame() {
     m_frame->SetName(Form("frame_%s_%s", m_regionCategoryLabel.Data(), m_outputPrefix.Data()));
 
     // plot the data
-    if(m_style.getXErrorSize()>= 0.){
-            Logger << kDEBUG << "setting X error " << GEndl;
-            m_regionData->plotOn(m_frame, RooFit::DataError(RooAbsData::Poisson),
-            RooFit::MarkerColor(m_style.getDataColor()),
-            RooFit::LineColor(m_style.getDataColor()),
-            RooFit::XErrorSize(m_style.getXErrorSize()));
+    m_regionData->plotOn(m_frame,
+			 RooFit::DataError(RooAbsData::Poisson),
+			 RooFit::MarkerColor(m_style.getDataColor()), 
+			 RooFit::LineColor(m_style.getDataColor()),
+			 RooFit::DrawOption("ep") );
 
-    }else m_regionData->plotOn(m_frame, RooFit::DataError(RooAbsData::Poisson),
-            RooFit::MarkerColor(m_style.getDataColor()), 
-            RooFit::LineColor(m_style.getDataColor()));
-
-    if(m_style.getRemoveEmptyBins()){
-        Logger << kINFO << "RemoveEmptyDataBins() removing empty bin points from data histogram on plot " << m_frame->GetName() << GEndl;
-        Util::RemoveEmptyDataBins(m_frame);
-    }
+    //if(m_style.getRemoveEmptyBins()){
+    Logger << kINFO << "RemoveEmptyDataBins() removing empty bin points from data histogram on plot " << m_frame->GetName() << GEndl;
+    Util::RemoveEmptyDataBins(m_frame);
+    //}
 
     // normalize pdf to number of expected events, not to number of events in dataset
     Logger << kDEBUG << "Drawing PDF" << GEndl;
-    m_regionPdf->plotOn(m_frame, RooFit::Normalization(1, RooAbsReal::RelativeExpected),
-            RooFit::Precision(1e-5), 
-            RooFit::LineColor(m_style.getTotalPdfColor()));
+    m_regionPdf->plotOn(m_frame,
+			RooFit::Normalization(1, RooAbsReal::RelativeExpected),
+			RooFit::Precision(1e-5), 
+			RooFit::LineColor(m_style.getTotalPdfColor()));
 
     // plot components
     if(m_plotComponents) {  
@@ -309,39 +305,35 @@ void HistogramPlot::buildFrame() {
     if(m_fitResult) { 	
         Logger << kDEBUG << "Drawing fit errors" << GEndl;
         m_regionPdf->plotOn(m_frame, RooFit::Normalization(1, RooAbsReal::RelativeExpected), 
-                RooFit::Precision(1e-5), 
-                RooFit::FillColor(m_style.getErrorFillColor()), 
-                RooFit::FillStyle(m_style.getErrorFillStyle()),
-                RooFit::LineColor(m_style.getErrorLineColor()),
-                RooFit::LineStyle(m_style.getErrorLineStyle()), 
-                RooFit::VisualizeError(*m_fitResult),
-                RooFit::Name("total_error_band"));
+			    RooFit::Precision(1e-5), 
+			    RooFit::FillColor(kBlack),//m_style.getErrorFillColor()), 
+			    RooFit::FillStyle(3005),//m_style.getErrorFillStyle()),
+			    RooFit::LineColor(m_style.getErrorLineColor()),
+			    RooFit::LineStyle(m_style.getErrorLineStyle()), 
+			    RooFit::VisualizeError(*m_fitResult,1,kFALSE), // (*m_fitResult)
+			    RooFit::Name("total_error_band"));
 
     }
 
     // re-plot data and pdf, so they are on top of error and components
     Logger << kDEBUG << "Redrawing PDF" << GEndl;
-    m_regionPdf->plotOn(m_frame, RooFit::Normalization(1, RooAbsReal::RelativeExpected),
-            RooFit::Precision(1e-5), 
-            RooFit::LineColor(m_style.getTotalPdfColor()));
+    m_regionPdf->plotOn(m_frame,
+			RooFit::Normalization(1, RooAbsReal::RelativeExpected),
+			RooFit::Precision(1e-5), 
+			RooFit::LineColor(m_style.getTotalPdfColor()));
 
     Logger << kDEBUG << "Redrawing data" << GEndl;
-    if(m_style.getXErrorSize()>= 0.){
-            Logger << kDEBUG << "setting X error " << GEndl;
-            m_regionData->plotOn(m_frame, RooFit::DataError(RooAbsData::Poisson),
-            RooFit::MarkerColor(m_style.getDataColor()),
-            RooFit::LineColor(m_style.getDataColor()),
-            RooFit::XErrorSize(m_style.getXErrorSize()));
-
-    } else  m_regionData->plotOn(m_frame, RooFit::DataError(RooAbsData::Poisson),
-            RooFit::MarkerColor(m_style.getDataColor()), 
-            RooFit::LineColor(m_style.getDataColor()));
+    m_regionData->plotOn(m_frame,
+			 RooFit::DataError(RooAbsData::Poisson),
+			 RooFit::MarkerColor(m_style.getDataColor()), 
+			 RooFit::LineColor(m_style.getDataColor()),
+			 RooFit::DrawOption("ep") );
 
     // remove any empty bins	
-    if(m_style.getRemoveEmptyBins()) {
-        Logger << kDEBUG << "Removing empty bins" << GEndl;
-        Util::RemoveEmptyDataBins(m_frame);
-    }
+    //if(m_style.getRemoveEmptyBins()) {
+    Logger << kDEBUG << "Removing empty bins" << GEndl;
+    Util::RemoveEmptyDataBins(m_frame);
+    //}
 
 }
 
@@ -462,8 +454,8 @@ void HistogramPlot::addRatioPanel() {
     if (m_fitResult) {
         hratioPdfError = Util::MakePdfErrorRatioHist(m_regionData, m_regionPdf, m_regionVariable, m_fitResult); 
     }
-    hratioPdfError->SetFillColor(m_style.getErrorFillColor());
-    hratioPdfError->SetFillStyle(m_style.getErrorFillStyle());
+    hratioPdfError->SetFillColor(kBlack);//m_style.getErrorFillColor());
+    hratioPdfError->SetFillStyle(3005),//m_style.getErrorFillStyle());
     hratioPdfError->SetLineColor(m_style.getErrorLineColor());
     hratioPdfError->SetLineStyle(m_style.getErrorLineStyle());
 
@@ -492,7 +484,7 @@ void HistogramPlot::addRatioPanel() {
     addRatioPanelCosmetics(frame_dummy, frame2);
 
     if(m_plotRatio == "ratio") {
-        frame2->GetYaxis()->SetTitle("Data / Model");
+        frame2->GetYaxis()->SetTitle("Data / SM");
     } else if(m_plotRatio == "pull") {
         frame2->GetYaxis()->SetTitle("Pull");
     }
@@ -500,36 +492,18 @@ void HistogramPlot::addRatioPanel() {
     if(m_style.getTitleX() != "") { 
         frame2->GetXaxis()->SetTitle(m_style.getTitleX());
     }
-
-    //if(m_style.getTitleY() != "") { 
-    //m_frame->GetYaxis()->SetTitle(m_style.getTitleY());
-    //}
-
-    if(m_style.getArrowRatio()){
-            Logger << kDEBUG << "add arrow(s) showing out of scale data in the ratio plot " << GEndl;
-            double maxFrame=frame2->GetMaximum();
-            double dy=(maxFrame-1.)/4.;
-            for (Int_t i =0;i<hratio->GetN();i++){
-               Double_t x,y;
-               hratio->GetPoint(i,x,y);
-               if(y > maxFrame){
-                 TArrow* arrow = new TArrow(x,1+dy,x,maxFrame-dy,0.02,"|>") ;
-                 arrow->SetAngle(m_style.getArrowAngle()) ;
-                 arrow->SetLineColor(m_style.getArrowColor()) ;
-                 arrow->SetFillColor(m_style.getArrowColor()) ;
-                 arrow->SetLineWidth(m_style.getArrowWidth()) ;
-                 frame2->addObject(arrow) ;
-               }
-            }
+    /*
+    if(m_style.getTitleY() != "") { 
+      m_frame->GetYaxis()->SetTitle(m_style.getTitleY());
     }
-
+    */
     frame2->GetYaxis()->SetLabelSize(0.13);
     frame2->GetYaxis()->SetNdivisions(504);         
     frame2->GetXaxis()->SetLabelSize(0.13);
     frame2->GetYaxis()->SetTitleSize(0.13);
     frame2->GetXaxis()->SetTitleSize(0.13);
     frame2->GetYaxis()->SetTitleOffset(0.35);
-    frame2->GetXaxis()->SetTitleOffset(1.);
+    frame2->GetXaxis()->SetTitleOffset(1.15);
     frame2->GetYaxis()->SetLabelOffset(0.01);
     frame2->GetXaxis()->SetLabelOffset(0.03);
     frame2->GetXaxis()->SetTickLength(0.06);
@@ -563,6 +537,7 @@ void HistogramPlot::addComponents() {
                 RooFit::Components(m_componentStackedNames[i].Data()),
                 RooFit::Normalization(m_componentStackedFractions[i]*normalisation, RooAbsReal::NumEvent),
                 RooFit::FillColor(color), 
+                RooFit::LineColor(color), 
                 RooFit::FillStyle(1001),
                 RooFit::DrawOption("F"),
                 RooFit::Precision(1e-5));
@@ -637,39 +612,71 @@ void HistogramPlot::loadComponentInformation() {
 TLegend* HistogramPlot::buildLegend() {
     Logger << kDEBUG << "Building legend for plot" << GEndl;
 
-    TLegend *leg = new TLegend(0.5, 0.44, 0.895, 0.895, "");
+    TLegend *leg = new TLegend(0.67, 0.35, 0.895, 0.85, ""); 
     leg->SetFillStyle(0);
     leg->SetFillColor(0);
-    leg->SetBorderSize(0);
+    leg->SetBorderSize(0);                                                  
+    leg->SetTextFont(42);                                                   
+    leg->SetTextSize(0.055); 
 
     // Add data
-    TLegendEntry* entry=leg->AddEntry("", "Data", "p") ;
+    TLegendEntry* entry=leg->AddEntry("", "Data", "lp") ;
     entry->SetMarkerColor(m_style.getDataColor());
     entry->SetMarkerStyle(20);
 
     // Add total as SM
-    entry=leg->AddEntry("", "Standard Model", "lf") ;
+    entry=leg->AddEntry("", "Total SM", "lf") ;
     entry->SetLineColor(m_style.getTotalPdfColor());
-    entry->SetFillColor(m_style.getErrorFillColor());
-    entry->SetFillStyle(m_style.getErrorFillStyle());
+    //entry->SetFillColor(m_style.getErrorFillColor());
+    //entry->SetFillStyle(m_style.getErrorFillStyle());
 
+    entry->SetLineWidth(3);                                                 
+    entry->SetLineStyle(1);                                                 
+    entry->SetFillColor(kBlack);                                           
+    entry->SetFillStyle(3005);
+    
     // Load component info
     if(m_componentNames.empty()) {
         loadComponentInformation(); 
     }
 
-    // add components to legend
+    bool doReducible = true;
+    bool doZZ = true;
+    bool dottZ = true;
+    bool doHiggs = true;
+    bool doVVV = true;
+    bool doOther = true;
+     // add components to legend
     for(int i = (m_componentNames.size()-1); i >- 1; --i){
         Int_t  compPlotColor    = m_style.getSampleColor(m_componentNames[i]);
         TString compShortName   = m_style.getSampleName(m_componentNames[i]);
 
         TString legName = compShortName;
-        entry = leg->AddEntry("", legName.Data() ,"f");
-        entry->SetLineColor(compPlotColor);
+	//entry = leg->AddEntry("", legName.Data() ,"f");
+	// fakes
+	if( doReducible && legName.Contains("Reducible") ){ entry = leg->AddEntry("", "Reducible" ,"f"); doReducible=false;}	
+	else if( doReducible && legName.Contains("PowHegPy8_ttbar_incl") ){ entry = leg->AddEntry("", "Reducible" ,"f"); doReducible=false;}
+	else if( doReducible && legName.Contains("PowHegPy8_Z") && !legName.Contains("ZH") ){ entry = leg->AddEntry("", "Reducible" ,"f"); doReducible=false;}
+	else if( doReducible && legName.Contains("PowHegPy8_DY") ){ entry = leg->AddEntry("", "Reducible" ,"f"); doReducible=false;}
+	else if( doReducible && legName.Contains("aMCatNLOPy8_ttW") ){ entry = leg->AddEntry("", "Reducible" ,"f"); doReducible=false;}
+	// ZZ
+	else if( doZZ && (legName.Contains("Sherpa222_VV") || legName.Contains("Sherpa222_ggZZnoH")) ){ entry = leg->AddEntry("", "ZZ" ,"f"); doZZ=false; }
+	// ttZ
+	else if( dottZ && legName.Contains("aMCatNLOPy8_ttZ") ){ entry = leg->AddEntry("", "t#bar{t}Z" ,"f"); dottZ=false; }
+	// Higgs
+        else if( doHiggs && (legName.Contains("PowHegPy8_ttH") || legName.Contains("aMcAtNloPy8_ttH") || legName.Contains("PowHegPy8_ggH") || legName.Contains("PowHegPy8_VBFH") || legName.Contains("PowHegPy8_ZHtautau") || legName.Contains("PowHegPy8_WH") ) ){ entry = leg->AddEntry("", "Higgs" ,"f"); doHiggs=false; }
+	// VVV
+	else if( doVVV && legName.Contains("Sherpa221_VVV") ){ entry = leg->AddEntry("", "VVV" ,"f"); doVVV=false; }
+	// other
+        else if( doOther && (legName.Contains("MG5Py8_ttWW") || legName.Contains("MG5Py8_ttWZ") || legName.Contains("MG5Py8_ttXX") || legName.Contains("MG5Py8_tZ_3l") || legName.Contains("aMcAtNlo_tWZ") || legName.Contains("MG5Py8_4t")  ) ){ entry = leg->AddEntry("", "Other" ,"f"); doOther=false; }
+
+	else continue;
+        //entry->SetLineColor(compPlotColor);
+        //entry->SetLineStyle(1);
         entry->SetFillColor(compPlotColor);
         entry->SetFillStyle(1001);
     }
-
+    
     return leg;
 }
 
@@ -678,7 +685,7 @@ void HistogramPlot::plot() {
 
     // Now build the canvas
     TString canvasName(Form("%s_%s", m_regionCategoryLabel.Data(), m_outputPrefix.Data()));
-    auto canvas = new TCanvas(canvasName, canvasName,  700,  600);
+    auto canvas = new TCanvas(canvasName, canvasName,  600,  600);
 
     // two pads, one for 'standard' plot, one for data/MC ratio
     float yMinP1 = 0.305;
@@ -687,10 +694,14 @@ void HistogramPlot::plot() {
         yMinP1 = 0.01;
         bottomMarginP1 = 0.09;
     }	   
+    float leftMarginP1 = 0.12;                                              
+    float rightMarginP1 = 0.05;
 
     // pad for standard plot
     TPad *pad1 = new TPad(Form("%s_pad1", canvasName.Data()), Form("%s_pad1", canvasName.Data()), 0., yMinP1, .99, 1);
     pad1->SetBottomMargin(bottomMarginP1);
+    pad1->SetLeftMargin(leftMarginP1);                                      
+    pad1->SetRightMargin(rightMarginP1);
     pad1->SetFillColor(kWhite);
     pad1->SetTickx();
     pad1->SetTicky();
@@ -698,6 +709,8 @@ void HistogramPlot::plot() {
     // pad for ratio
     TPad *pad2 = new TPad(Form("%s_pad2", canvasName.Data()), Form("%s_pad2", canvasName.Data()), 0., 0.01, .99, 0.295);
     pad2->SetTopMargin(0.005);
+    pad2->SetLeftMargin(leftMarginP1);                                      
+    pad2->SetRightMargin(rightMarginP1);
     pad2->SetBottomMargin(0.3);
     pad2->SetFillColor(kWhite);
 
@@ -710,6 +723,17 @@ void HistogramPlot::plot() {
     if(m_style.getTitleX() != "") {
         m_frame->GetXaxis()->SetTitle(m_style.getTitleX());
     }
+    
+    // Is there a title for the x-axis?
+    if(m_style.getTitleX() != "") {
+        m_frame->GetXaxis()->SetTitle(m_style.getTitleX());
+    }
+    
+    m_frame->GetYaxis()->SetTitle((m_style.getTitle()).ReplaceAll(" )", " GeV").ReplaceAll("( ", ""));
+    m_frame->GetYaxis()->SetTitleSize(0.06);
+    m_frame->GetYaxis()->SetTitleOffset(0.9);
+    m_frame->GetYaxis()->SetLabelSize(0.06);
+
 
     // Draw the pads	
     pad1->Draw();
@@ -721,24 +745,63 @@ void HistogramPlot::plot() {
     // Go to the main pad and set ranges for the frame
     pad1->cd();
 
+    TString tempPdfName = m_regionCategoryLabel + "_model";
+    RooRealSumPdf* tempPdf = static_cast<RooRealSumPdf*>(m_regionPdf->getComponents()->find(tempPdfName));
+    auto h1_temp = Util::ComponentToHistogram(tempPdf, m_regionVariable, m_fitResult);
+    double max_y = 1.;
+    for( int ibin=0; ibin<h1_temp->GetNbinsX()+2; ibin++ ){
+      double binContent = h1_temp->GetBinContent( ibin );
+      if( binContent > max_y ) max_y = binContent;
+    }
+    m_frame->SetMinimum(0.2);
+    if(m_style.getLogY()) m_frame->SetMaximum(max_y*10.);
+    else m_frame->SetMaximum(max_y*1.2);
+    /*
     m_frame->SetMinimum(m_style.getMinY());
     if( fabs(m_style.getMaxY() + 999.) > 0.000001) {
         m_frame->SetMaximum(m_style.getMaxY());
     }
-
+    */
     // now draw frame
     m_frame->SetTitle(""); 
     m_frame->Draw();
-
+    /*
     // ATLAS string - FIXME: remove for public release
     if( (fabs(m_style.getATLASLabelX() + 1.) > 0.000001) and (fabs(m_style.getATLASLabelY() + 1.) > 0.000001) ) {
         Util::ATLASLabel(m_style.getATLASLabelX(), m_style.getATLASLabelY(), m_style.getATLASLabelText()) ; 
-    }
-
+	}*/
+    TString my_region = "XRBob";
+    if( m_regionCategoryLabel.Contains("CRZZ") ) my_region = "CRZZ";
+    if( m_regionCategoryLabel.Contains("CRttZ") ) my_region = "CRttZ";
+    if( m_regionCategoryLabel.Contains("VRZZ") ) my_region = "VRZZ";
+    if( m_regionCategoryLabel.Contains("VRttZ") ) my_region = "VRttZ";
+    if( m_regionCategoryLabel.Contains("VR0") ) my_region = "VR0";
+    if( m_regionCategoryLabel.Contains("VR1") ) my_region = "VR1";
+    if( m_regionCategoryLabel.Contains("VR2") ) my_region = "VR2";
+    if( m_regionCategoryLabel.Contains("VR1Z") ) my_region = "VR1Z";
+    if( m_regionCategoryLabel.Contains("VR2Z") ) my_region = "VR2Z";
+    if( m_regionCategoryLabel.Contains("SR0A") ) my_region = "SR0A";
+    if( m_regionCategoryLabel.Contains("SR0B") ) my_region = "SR0B";
+    if( m_regionCategoryLabel.Contains("SR0C") ) my_region = "SR0C";
+    if( m_regionCategoryLabel.Contains("SR0D") ) my_region = "SR0D";
+    if( m_regionCategoryLabel.Contains("SR0E") ) my_region = "SR0E";
+    if( m_regionCategoryLabel.Contains("SR0F") ) my_region = "SR0F";
+    if( m_regionCategoryLabel.Contains("SR0G") ) my_region = "SR0G";
+    if( m_regionCategoryLabel.Contains("SR1A") ) my_region = "SR1A";
+    if( m_regionCategoryLabel.Contains("SR1B") ) my_region = "SR1B";
+    if( m_regionCategoryLabel.Contains("SR1C") ) my_region = "SR1C";
+    if( m_regionCategoryLabel.Contains("SR2A") ) my_region = "SR2A";
+    if( m_regionCategoryLabel.Contains("SR2B") ) my_region = "SR2B";
+    if( m_regionCategoryLabel.Contains("SR2C") ) my_region = "SR2C";
+    if( m_regionCategoryLabel.Contains("SR5L") ) my_region = "SR5L";
+    Util::ATLASLabel(0.18, 0.80, "Internal") ;
+    Util::AddText(0.18, 0.73, Form("13 TeV, %.0f fb^{-1}", m_style.getLumi() ));
+    Util::AddTextLabel(0.5, 0.73, my_region.Data() );
+    /*
     // Lumi
     if(m_style.getShowLumi()){
         Util::AddText(0.175, 0.775, Form("#int Ldt = %.1f fb^{-1}", m_style.getLumi() ));
-    }
+	}*/
 
     // Legend
     TLegend *legend = m_style.getTLegend();
@@ -754,7 +817,6 @@ void HistogramPlot::plot() {
     // Write output
     canvas->SaveAs("results/" + m_anaName + "/" + canvasName + ".pdf");
     canvas->SaveAs("results/" + m_anaName + "/" + canvasName + ".eps");
-    canvas->SaveAs("results/" + m_anaName + "/" + canvasName + ".root");
 }
 
 void HistogramPlot::plotSeparateComponents() {
@@ -793,7 +855,6 @@ void HistogramPlot::plotSeparateComponents() {
 
     canvas->SaveAs("results/" + m_anaName + "/" + canvasName + ".pdf");
     canvas->SaveAs("results/" + m_anaName + "/" + canvasName + ".eps");
-    canvas->SaveAs("results/" + m_anaName + "/" + canvasName + ".root");
 }
 
 void HistogramPlot::plotSingleComponent(unsigned int i, double normalisation) {
@@ -814,10 +875,10 @@ void HistogramPlot::plotSingleComponent(unsigned int i, double normalisation) {
 
     if (m_fitResult) { 
         m_regionPdf->plotOn(frame, RooFit::Components(m_componentNames[i].Data()), 
-                RooFit::VisualizeError(*m_fitResult),
-                RooFit::FillColor(kCyan),
-                RooFit::Precision(1e-5),
-                RooFit::Normalization(m_componentFractions[i]*normalisation, RooAbsReal::NumEvent));
+			    RooFit::VisualizeError(*m_fitResult),
+			    RooFit::FillColor(kCyan),
+			    RooFit::Precision(1e-5),
+			    RooFit::Normalization(m_componentFractions[i]*normalisation, RooAbsReal::NumEvent));
     }
 
     m_regionPdf->plotOn(frame, RooFit::Components(m_componentNames[i].Data()),
@@ -859,7 +920,7 @@ void HistogramPlot::saveHistograms() {
 
     // Try something here
     TString canvasName(Form("%s_%s", m_regionCategoryLabel.Data(), m_outputPrefix.Data()));
-    TFile f(Form("results/%s/%s.root", m_anaName.Data(), canvasName.Data()), "update");
+    TFile f(Form("results/%s/%s.root", m_anaName.Data(), canvasName.Data()), "recreate");
 
     // Data hist
     RooPlot* frame_dummy = m_regionVariable->frame(); 
@@ -875,7 +936,8 @@ void HistogramPlot::saveHistograms() {
     TString RSSPdfName = m_regionCategoryLabel + "_model";
     RooRealSumPdf* RRSPdf = static_cast<RooRealSumPdf*>(m_regionPdf->getComponents()->find(RSSPdfName));
     auto mc_hist = Util::ComponentToHistogram(RRSPdf, m_regionVariable, m_fitResult);
-    mc_hist->SetLineColor(m_style.getTotalPdfColor());
+    mc_hist->SetLineColor(kRed+1);
+    //mc_hist->SetLineColor(m_style.getTotalPdfColor());
     if (m_binEdges.size())
         mc_hist = remapHistogram(mc_hist);
     mc_hist->Write("SM_total");
@@ -920,8 +982,8 @@ void HistogramPlot::saveHistograms() {
     // Fit error for ratio, and the total fit error 
     if (m_fitResult) {
         auto hratioPdfError = Util::MakePdfErrorRatioHist(m_regionData, m_regionPdf, m_regionVariable, m_fitResult);
-        hratioPdfError->SetFillColor(m_style.getErrorFillColor());
-        hratioPdfError->SetFillStyle(m_style.getErrorFillStyle());
+        hratioPdfError->SetFillColor(kBlack);//m_style.getErrorFillColor());
+        hratioPdfError->SetFillStyle(3005);//m_style.getErrorFillStyle());
         hratioPdfError->SetLineColor(m_style.getErrorLineColor());
         hratioPdfError->SetLineStyle(m_style.getErrorLineStyle());
         hratioPdfError->SetLineWidth(0);
@@ -933,13 +995,13 @@ void HistogramPlot::saveHistograms() {
         // We get the total error directly from RooFit
         // Needs to be drawn again for some reason; we cannot just get it from above and using m_frame
         m_regionPdf->plotOn(frame_dummy, RooFit::Normalization(1, RooAbsReal::RelativeExpected), 
-                RooFit::Precision(1e-5), 
-                RooFit::FillColor(m_style.getErrorFillColor()), 
-                RooFit::FillStyle(m_style.getErrorFillStyle()),
-                RooFit::LineColor(m_style.getErrorLineColor()),
-                RooFit::LineStyle(m_style.getErrorLineStyle()), 
-                RooFit::VisualizeError(*m_fitResult),
-                RooFit::Name("total_error_band"));
+			    RooFit::Precision(1e-5), 
+			    RooFit::FillColor(kBlack),//m_style.getErrorFillColor()), 
+			    RooFit::FillStyle(3005),//m_style.getErrorFillStyle()),
+			    RooFit::LineColor(m_style.getErrorLineColor()),
+			    RooFit::LineStyle(m_style.getErrorLineStyle()), 
+			    RooFit::VisualizeError(*m_fitResult,1,kFALSE), //(*m_fitResult)
+			    RooFit::Name("total_error_band"));
         auto total_err = static_cast<RooCurve*>(frame_dummy->findObject("total_error_band"));
         total_err->SetLineWidth(0);
         if (m_binEdges.size()) {

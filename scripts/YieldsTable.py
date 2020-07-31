@@ -36,7 +36,7 @@ from YieldsTableTex import *
 import os
 import sys
 
-def latexfitresults(filename,regionList,sampleList,dataname='obsData',showSum=False, doAsym=True, blinded=False, splitBins=False):
+def latexfitresults(filename,regionList,sampleList,dataname='obsData',showSum=False, doAsym=False, blinded=False, splitBins=False):
   """
   Calculate before/after-fit yields in all channels given
   
@@ -45,7 +45,7 @@ def latexfitresults(filename,regionList,sampleList,dataname='obsData',showSum=Fa
   @param sampleList A list of samples to be considered
   @param dataname The name of dataset (default='obsData')
   @param showSum Calculates sum of all regions if set to true (default=False)
-  @param doAsym Calculates asymmetric errors taken from MINOS (default=True)
+  @param doAsym Calculates asymmetric errors taken from MINOS (default=False)
   @param blinded Observed event count will not be shown if set to True (default=False)
   @param splitBins Calculates bin-by-bin yields for all regions if set to True (default=False)
   """
@@ -260,7 +260,8 @@ def latexfitresults(filename,regionList,sampleList,dataname='obsData',showSum=Fa
   calculate total pdf number of fitted events and error
   """
   nFittedInRegionList =  [ pdf.getVal() for index, pdf in enumerate(rrspdfinRegionList)]
-  pdfFittedErrInRegionList = [ Util.GetPropagatedError(pdf, resultAfterFit, doAsym) for pdf in rrspdfinRegionList]
+  pdfFittedErrUpInRegionList = [ Util.GetPropagatedError(pdf, resultAfterFit, doAsym, True) for pdf in rrspdfinRegionList]
+  pdfFittedErrDoInRegionList = [ Util.GetPropagatedError(pdf, resultAfterFit, doAsym, False) for pdf in rrspdfinRegionList]
 
 
   """
@@ -272,12 +273,15 @@ def latexfitresults(filename,regionList,sampleList,dataname='obsData',showSum=Fa
       pdfInAllRegions.add(pdf)
     pdfSumInAllRegions = RooAddition( "pdf_AllRegions_AFTER", "pdf_AllRegions_AFTER", RooArgList(pdfInAllRegions))
     nPdfSumVal = pdfSumInAllRegions.getVal()
-    nPdfSumError = Util.GetPropagatedError(pdfSumInAllRegions, resultAfterFit, doAsym)
+    nPdfSumErrorUp = Util.GetPropagatedError(pdfSumInAllRegions, resultAfterFit, doAsym, True)
+    nPdfSumErrorDo = Util.GetPropagatedError(pdfSumInAllRegions, resultAfterFit, doAsym, False)
     nFittedInRegionList.append(nPdfSumVal)
-    pdfFittedErrInRegionList.append(nPdfSumError)
+    pdfFittedErrUpInRegionList.append(nPdfSumErrorUp)
+    pdfFittedErrDoInRegionList.append(nPdfSumErrorDo)
   
   tablenumbers['TOTAL_FITTED_bkg_events']    =  nFittedInRegionList
-  tablenumbers['TOTAL_FITTED_bkg_events_err']    =  pdfFittedErrInRegionList
+  tablenumbers['TOTAL_FITTED_bkg_events_errUp']    =  pdfFittedErrUpInRegionList
+  tablenumbers['TOTAL_FITTED_bkg_events_errDo']    =  pdfFittedErrDoInRegionList
  
   """
   calculate the fitted number of events and propagated error for each requested sample, by splitting off each sample pdf
@@ -286,20 +290,24 @@ def latexfitresults(filename,regionList,sampleList,dataname='obsData',showSum=Fa
   for isam, sample in enumerate(sampleList):
     sampleName=getName(sample)
     nSampleInRegionVal = []
-    nSampleInRegionError = []
+    nSampleInRegionErrorUp = []
+    nSampleInRegionErrorDo = []
     sampleInAllRegions = RooArgSet()
     for ireg, region in enumerate(regionList):
       sampleInRegion=getPdfInRegions(w,sample,region)
       sampleInRegionVal = 0.
-      sampleInRegionError = 0.
+      sampleInRegionErrorUp = 0.
+      sampleInRegionErrorDo = 0.
       if not sampleInRegion==None:
         sampleInRegionVal = sampleInRegion.getVal()
-        sampleInRegionError = Util.GetPropagatedError(sampleInRegion, resultAfterFit, doAsym) 
+        sampleInRegionErrorUp = Util.GetPropagatedError(sampleInRegion, resultAfterFit, doAsym, True) 
+        sampleInRegionErrorDo = Util.GetPropagatedError(sampleInRegion, resultAfterFit, doAsym, False)
         sampleInAllRegions.add(sampleInRegion)
       else:
         log.warning("sample {0} non-existent (empty) in region {1}".format(sample, region))
       nSampleInRegionVal.append(sampleInRegionVal)
-      nSampleInRegionError.append(sampleInRegionError)
+      nSampleInRegionErrorUp.append(sampleInRegionErrorUp)
+      nSampleInRegionErrorDo.append(sampleInRegionErrorDo)
       
       """
       if splitBins=True calculate numbers of fitted events plus error per bin      
@@ -311,15 +319,18 @@ def latexfitresults(filename,regionList,sampleList,dataname='obsData',showSum=Fa
           rangeName = rangeNameBinsInRegionList[ireg][ibin]
           sampleInRegion=getPdfInRegionsWithRangeName(w,sample,region,rangeName)
           sampleInRegionVal = 0.
-          sampleInRegionError = 0.
+          sampleInRegionErrorUp = 0.
+          sampleInRegionErrorDo = 0.
           if not sampleInRegion==None:
             varinRegionList[ireg].setRange(rangeName,varBinLowInRegionList[ireg][ibin],varBinHighInRegionList[ireg][ibin])
             sampleInRegionVal = sampleInRegion.getVal()
-            sampleInRegionError = Util.GetPropagatedError(sampleInRegion, resultAfterFit, doAsym)
+            sampleInRegionErrorUp = Util.GetPropagatedError(sampleInRegion, resultAfterFit, doAsym, True)
+            sampleInRegionErrorDo = Util.GetPropagatedError(sampleInRegion, resultAfterFit, doAsym, False)
           else:
             log.warning("sample {0} non-existent (empty) in region {1} bin {2}".format(sample, region, ibin))
           nSampleInRegionVal.append(sampleInRegionVal)
-          nSampleInRegionError.append(sampleInRegionError)
+          nSampleInRegionErrorUp.append(sampleInRegionErrorUp)
+          nSampleInRegionErrorDo.append(sampleInRegionErrorDo)
  
         varinRegionList[ireg].setRange(origMin,origMax)
 
@@ -329,11 +340,14 @@ def latexfitresults(filename,regionList,sampleList,dataname='obsData',showSum=Fa
     if showSum:
       sampleSumInAllRegions = RooAddition( (sampleName+"_AllRegions_FITTED"), (sampleName+"_AllRegions_FITTED"), RooArgList(sampleInAllRegions))
       nSampleSumVal = sampleSumInAllRegions.getVal()
-      nSampleSumError = Util.GetPropagatedError(sampleSumInAllRegions, resultAfterFit, doAsym)
+      nSampleSumErrorUp = Util.GetPropagatedError(sampleSumInAllRegions, resultAfterFit, doAsym, True)
+      nSampleSumErrorDo = Util.GetPropagatedError(sampleSumInAllRegions, resultAfterFit, doAsym, False)
       nSampleInRegionVal.append(nSampleSumVal)
-      nSampleInRegionError.append(nSampleSumError)
+      nSampleInRegionErrorUp.append(nSampleSumErrorUp)
+      nSampleInRegionErrorDo.append(nSampleSumErrorDo)
     tablenumbers['Fitted_events_'+sampleName]   = nSampleInRegionVal
-    tablenumbers['Fitted_err_'+sampleName]   = nSampleInRegionError
+    tablenumbers['Fitted_errUp_'+sampleName]   = nSampleInRegionErrorUp
+    tablenumbers['Fitted_errDo_'+sampleName]   = nSampleInRegionErrorDo
 
 
   
@@ -402,7 +416,8 @@ def latexfitresults(filename,regionList,sampleList,dataname='obsData',showSum=Fa
   """
   log.info("Calculating total number of expected events and error")
   nExpInRegionList =  [ pdf.getVal() for index, pdf in enumerate(rrspdfinRegionList)]
-  pdfExpErrInRegionList = [ Util.GetPropagatedError(pdf, resultBeforeFit, doAsym)  for pdf in rrspdfinRegionList]
+  pdfExpErrUpInRegionList = [ Util.GetPropagatedError(pdf, resultBeforeFit, doAsym, True)  for pdf in rrspdfinRegionList]
+  pdfExpErrDoInRegionList = [ Util.GetPropagatedError(pdf, resultBeforeFit, doAsym, False)  for pdf in rrspdfinRegionList]
   
   """
   if showSum=True calculate the total number of expected events in all regions  
@@ -413,12 +428,15 @@ def latexfitresults(filename,regionList,sampleList,dataname='obsData',showSum=Fa
       pdfInAllRegions.add(pdf)
     pdfSumInAllRegions = RooAddition( "pdf_AllRegions_BEFORE", "pdf_AllRegions_BEFORE", RooArgList(pdfInAllRegions))
     nPdfSumVal = pdfSumInAllRegions.getVal()
-    nPdfSumError = Util.GetPropagatedError(pdfSumInAllRegions, resultBeforeFit, doAsym)
+    nPdfSumErrorUp = Util.GetPropagatedError(pdfSumInAllRegions, resultBeforeFit, doAsym, True)
+    nPdfSumErrorDo = Util.GetPropagatedError(pdfSumInAllRegions, resultBeforeFit, doAsym, False)
     nExpInRegionList.append(nPdfSumVal)
-    pdfExpErrInRegionList.append(nPdfSumError)
+    pdfExpErrUpInRegionList.append(nPdfSumErrorUp)
+    pdfExpErrDoInRegionList.append(nPdfSumErrorDo)
   
   tablenumbers['TOTAL_MC_EXP_BKG_events']    =  nExpInRegionList
-  tablenumbers['TOTAL_MC_EXP_BKG_err']    =  pdfExpErrInRegionList
+  tablenumbers['TOTAL_MC_EXP_BKG_errUp']    =  pdfExpErrUpInRegionList
+  tablenumbers['TOTAL_MC_EXP_BKG_errDo']    =  pdfExpErrDoInRegionList
   
   """
   calculate the fitted number of events and propagated error for each requested sample, by splitting off each sample pdf
@@ -426,20 +444,24 @@ def latexfitresults(filename,regionList,sampleList,dataname='obsData',showSum=Fa
   for isam, sample in enumerate(sampleList):
     sampleName=getName(sample)
     nMCSampleInRegionVal = []
-    nMCSampleInRegionError = []
+    nMCSampleInRegionErrorUp = []
+    nMCSampleInRegionErrorDo = []
     MCSampleInAllRegions = RooArgSet()
     for ireg, region in enumerate(regionList):
       MCSampleInRegion = getPdfInRegions(w,sample,region)
       MCSampleInRegionVal = 0.
-      MCSampleInRegionError = 0.
+      MCSampleInRegionErrorUp = 0.
+      MCSampleInRegionErrorDo = 0.
       if not MCSampleInRegion==None:
         MCSampleInRegionVal = MCSampleInRegion.getVal()
-        MCSampleInRegionError = Util.GetPropagatedError(MCSampleInRegion, resultBeforeFit, doAsym) 
+        MCSampleInRegionErrorUp = Util.GetPropagatedError(MCSampleInRegion, resultBeforeFit, doAsym, True) 
+        MCSampleInRegionErrorDo = Util.GetPropagatedError(MCSampleInRegion, resultBeforeFit, doAsym, False) 
         MCSampleInAllRegions.add(MCSampleInRegion)
       else:
         log.warning("sample {0} non-existent (empty) in region {1}".format(sample, region))
       nMCSampleInRegionVal.append(MCSampleInRegionVal)
-      nMCSampleInRegionError.append(MCSampleInRegionError)
+      nMCSampleInRegionErrorUp.append(MCSampleInRegionErrorUp)
+      nMCSampleInRegionErrorDo.append(MCSampleInRegionErrorDo)
 
       """
       if splitBins=True calculate numbers of fitted events plus error per bin      
@@ -451,16 +473,19 @@ def latexfitresults(filename,regionList,sampleList,dataname='obsData',showSum=Fa
           rangeName = rangeNameBinsInRegionList[ireg][ibin]
           MCSampleInRegion=getPdfInRegionsWithRangeName(w,sample,region,rangeName)
           MCSampleInRegionVal = 0.
-          MCSampleInRegionError = 0.
+          MCSampleInRegionErrorUp = 0.
+          MCSampleInRegionErrorDo = 0.
           if not MCSampleInRegion==None:
             varinRegionList[ireg].setRange(rangeName,varBinLowInRegionList[ireg][ibin],varBinHighInRegionList[ireg][ibin])
             MCSampleInRegionVal = MCSampleInRegion.getVal()
-            MCSampleInRegionError = Util.GetPropagatedError(MCSampleInRegion, resultBeforeFit, doAsym)
+            MCSampleInRegionErrorUp = Util.GetPropagatedError(MCSampleInRegion, resultBeforeFit, doAsym, True)
+            MCSampleInRegionErrorDo = Util.GetPropagatedError(MCSampleInRegion, resultBeforeFit, doAsym, False)
           else:
             log.warning("sample {0} non-existent (empty) in region {1} bin {2}".format(sample, region, ibin))
           
           nMCSampleInRegionVal.append(MCSampleInRegionVal)
-          nMCSampleInRegionError.append(MCSampleInRegionError)
+          nMCSampleInRegionErrorUp.append(MCSampleInRegionErrorUp)
+          nMCSampleInRegionErrorDo.append(MCSampleInRegionErrorDo)
  
         varinRegionList[ireg].setRange(origMin,origMax)
 
@@ -470,11 +495,14 @@ def latexfitresults(filename,regionList,sampleList,dataname='obsData',showSum=Fa
     if showSum:
       MCSampleSumInAllRegions = RooAddition( (sampleName+"_AllRegions_MC"), (sampleName+"_AllRegions_MC"), RooArgList(MCSampleInAllRegions))
       nMCSampleSumVal = MCSampleSumInAllRegions.getVal()
-      nMCSampleSumError = Util.GetPropagatedError(MCSampleSumInAllRegions, resultBeforeFit, doAsym)
+      nMCSampleSumErrorUp = Util.GetPropagatedError(MCSampleSumInAllRegions, resultBeforeFit, doAsym, True)
+      nMCSampleSumErrorDo = Util.GetPropagatedError(MCSampleSumInAllRegions, resultBeforeFit, doAsym, False)
       nMCSampleInRegionVal.append(nMCSampleSumVal)
-      nMCSampleInRegionError.append(nMCSampleSumError)
+      nMCSampleInRegionErrorUp.append(nMCSampleSumErrorUp)
+      nMCSampleInRegionErrorDo.append(nMCSampleSumErrorDo)
     tablenumbers['MC_exp_events_'+sampleName] = nMCSampleInRegionVal
-    tablenumbers['MC_exp_err_'+sampleName] = nMCSampleInRegionError
+    tablenumbers['MC_exp_errUp_'+sampleName] = nMCSampleInRegionErrorUp
+    tablenumbers['MC_exp_errDo_'+sampleName] = nMCSampleInRegionErrorDo
 
   """
   sort the tablenumbers set
@@ -523,7 +551,7 @@ if __name__ == "__main__":
     print "-a: use Asimov dataset (off by default)"
     print "-b: shows also the error on samples Before the fit (off by default)"
     print "-S: also show the sum of all regions (off by default)"
-    print "-y: take symmetrized average of minos errors"
+    print "-y: take symmetrized average of minos errors (default False)"
     print "-C: full table caption"
     print "-L: full table label" 
     print "-u: arbitrary string propagated to the latex table caption"
@@ -558,7 +586,7 @@ if __name__ == "__main__":
   useAsimovSet = False
   ignoreLastChannel = False
   blinded = False
-  doAsym = True
+  doAsym = False
   splitBins = False
   userString = ""
   tableName = "table.results.yields"

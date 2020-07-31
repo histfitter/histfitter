@@ -163,8 +163,10 @@ def latexfitresults( filename, namemap, region='3jL', sample='', resultName="Roo
   regSys['sqrtnfitted'] = TMath.Sqrt(nFittedInRegion)
   regSys['nfitted'] = nFittedInRegion
 
-  pdfFittedErrInRegion = Util.GetPropagatedError(pdfInRegion, result, doAsym) 
-  regSys['totsyserr'] = pdfFittedErrInRegion
+  pdfFittedErrUpInRegion = Util.GetPropagatedError(pdfInRegion, result, doAsym, True)
+  pdfFittedErrDoInRegion = Util.GetPropagatedError(pdfInRegion, result, doAsym, False) 
+  regSys['totsyserrUp'] = pdfFittedErrUpInRegion
+  regSys['totsyserrDo'] = pdfFittedErrDoInRegion
 
 
   """
@@ -195,8 +197,10 @@ def latexfitresults( filename, namemap, region='3jL', sample='', resultName="Roo
         par = w.var(parname)
         par.setConstant(False)
         pass
-      sysError  = Util.GetPropagatedError(pdfInRegion, result, doAsym)
-      regSys['syserr_'+key] =  sysError
+      sysErrorUp  = Util.GetPropagatedError(pdfInRegion, result, doAsym, True)
+      sysErrorDo  = Util.GetPropagatedError(pdfInRegion, result, doAsym, False)
+      regSys['syserrUp_'+key] =  sysErrorUp
+      regSys['syserrDo_'+key] =  sysErrorDo
       for idx in range(fpf.getSize()):
         parname = fpf[idx].GetName()
         par = w.var(parname)
@@ -207,8 +211,10 @@ def latexfitresults( filename, namemap, region='3jL', sample='', resultName="Roo
       parname = fpf[idx].GetName()
       par = w.var(parname)
       par.setConstant(False)
-      sysError  = Util.GetPropagatedError(pdfInRegion, result, doAsym)
-      regSys['syserr_'+parname] =  sysError
+      sysErrorUp  = Util.GetPropagatedError(pdfInRegion, result, doAsym, True)
+      sysErrorDo  = Util.GetPropagatedError(pdfInRegion, result, doAsym, False)
+      regSys['syserrUp_'+parname] =  sysErrorUp
+      regSys['syserrDo_'+parname] =  sysErrorDo
       par.setConstant() 
 
   return regSys
@@ -355,8 +361,10 @@ def latexfitresults_method2(filename,resultname='RooExpandedFitResult_afterFit',
   regSys['sqrtnfitted'] = TMath.Sqrt(nFittedInRegion)
   regSys['nfitted'] = nFittedInRegion
 
-  pdfFittedErrInRegion = Util.GetPropagatedError(pdfInRegion, result, doAsym) 
-  regSys['totsyserr'] = pdfFittedErrInRegion
+  pdfFittedErrUpInRegion = Util.GetPropagatedError(pdfInRegion, result, doAsym, True) 
+  pdfFittedErrDoInRegion = Util.GetPropagatedError(pdfInRegion, result, doAsym, False) 
+  regSys['totsyserrUp'] = pdfFittedErrUpInRegion
+  regSys['totsyserrDo'] = pdfFittedErrDoInRegion
   
   """
   set lumi parameter constant for the refit -- FIXME
@@ -395,34 +403,43 @@ def latexfitresults_method2(filename,resultname='RooExpandedFitResult_afterFit',
     calculate newly fitted number of events and full error
     """
     nFittedInRegion_1parfixed = pdfInRegion.getVal()
-    pdfFittedErrInRegion_1parfixed = Util.GetPropagatedError(pdfInRegion, expResultAfter_1parfixed, doAsym) #  result_1parfixed)
+    pdfFittedErrUpInRegion_1parfixed = Util.GetPropagatedError(pdfInRegion, expResultAfter_1parfixed, doAsym, True) #  result_1parfixed)
+    pdfFittedErrDoInRegion_1parfixed = Util.GetPropagatedError(pdfInRegion, expResultAfter_1parfixed, doAsym, False) #  result_1parfixed)
 
     """
     check whether original total error is smaller then newly-fitted total error
       if one does anew fit with less floating parameters (systematics), it can be expected to see smaller error
       (this assumption does not take correlations into account)
     """
-    if pdfFittedErrInRegion_1parfixed > pdfFittedErrInRegion:
+    if pdfFittedErrUpInRegion_1parfixed > pdfFittedErrUpInRegion:
       print "\n\n  WARNING  parameter ", parname," gives a larger error when set constant. Do you expect this?"
-      print "  WARNING          pdfFittedErrInRegion = ", pdfFittedErrInRegion, "    pdfFittedErrInRegion_1parfixed = ", pdfFittedErrInRegion_1parfixed
+      print "  WARNING          pdfFittedErrUpInRegion = ", pdfFittedErrUpInRegion, "    pdfFittedErrUpInRegion_1parfixed = ", pdfFittedErrUpInRegion_1parfixed
+
+    if pdfFittedErrDoInRegion_1parfixed > pdfFittedErrDoInRegion:
+      print "\n\n  WARNING  parameter ", parname," gives a larger error when set constant. Do you expect this?"
+      print "  WARNING          pdfFittedErrDoInRegion = ", pdfFittedErrDoInRegion, "    pdfFittedErrDoInRegion_1parfixed = ", pdfFittedErrDoInRegion_1parfixed
 
     """
     calculate systematic error as the quadratic difference between original and re-fitted errors
     """
-    systError  =  TMath.Sqrt(abs(pdfFittedErrInRegion*pdfFittedErrInRegion - pdfFittedErrInRegion_1parfixed*pdfFittedErrInRegion_1parfixed))
+    systErrorUp  =  TMath.Sqrt(abs(pdfFittedErrUpInRegion*pdfFittedErrUpInRegion - pdfFittedErrUpInRegion_1parfixed*pdfFittedErrUpInRegion_1parfixed))
+    systErrorDo  =  TMath.Sqrt(abs(pdfFittedErrDoInRegion*pdfFittedErrDoInRegion - pdfFittedErrDoInRegion_1parfixed*pdfFittedErrDoInRegion_1parfixed))
     par.setConstant(False)
 
     """
     print a warning if new fit with 1 par fixed did not converge - meaning that sys error cannot be trusted 
     """
     if result_1parfixed.status()==0 and result_1parfixed.covQual()==3:   #and result_1parfixed.numStatusHistory()==2 and  result_1parfixed.statusCodeHistory(0)==0 and  result_1parfixed.statusCodeHistory(1) ==0:
-      systError = systError
+      systErrorUp = systErrorUp
+      systErrorDo = systErrorDo
     else:
-      systError = 0.0
+      systErrorUp = 0.0
+      systErrorDo = 0.0
       print "        WARNING :   for parameter ",parname," fixed the fit does not converge, as status=",result_1parfixed.status(), "(converged=0),  and covariance matrix quality=", result_1parfixed.covQual(), " (full accurate==3)"
       print "        WARNING: setting systError = 0 for parameter ",parname
 
-    regSys['syserr_'+parname] =  systError
+    regSys['syserrUp_'+parname] =  systErrorUp
+    regSys['syserrDo_'+parname] =  systErrorDo
 
   return regSys
 

@@ -103,17 +103,21 @@ Fitted bkg events        '''
     possible separation of regions with 1 or 2 digits - currently turned off in YieldsTable.py
     """   
     if m['names'][index] in signalregionslist:
-      if (n - m['TOTAL_FITTED_bkg_events_err'][index]) > 0. :
-        tableline += " & $" + str(("%.2f" %n)) + " \\pm " + str(("%.2f" %m['TOTAL_FITTED_bkg_events_err'][index])) +  "$         "
+      if  (n - m['TOTAL_FITTED_bkg_events_errDo'][index]) > 0. and str(("%.6f" %m['TOTAL_FITTED_bkg_events_errUp'][index]))==str(("%.6f" %m['TOTAL_FITTED_bkg_events_errDo'][index])) : 
+        tableline += " & $" + str(("%.6f" %n)) + " \\pm " + str(("%.6f" %m['TOTAL_FITTED_bkg_events_errUp'][index])) +  "$         "
+      elif  (n - m['TOTAL_FITTED_bkg_events_errDo'][index]) > 0. and str(("%.6f" %m['TOTAL_FITTED_bkg_events_errUp'][index]))!=str(("%.6f" %m['TOTAL_FITTED_bkg_events_errDo'][index])) : 
+        tableline += " & $" + str(("%.6f" %n)) + " ^{+" + str(("%.6f" %m['TOTAL_FITTED_bkg_events_errUp'][index])) +  "}_{-"+str(("%.6f" %m['TOTAL_FITTED_bkg_events_errDo'][index]))+ "}$         "
       else:
         texLog.warning("negative symmetric error after fit extends below 0. for total bkg pdf:  will print asymmetric error w/ truncated negative error reaching to 0.")
-        tableline += " & $" + str(("%.2f" %n)) + "_{-" + str(("%.2f"%n)) + "}^{+" + str(("%.2f" %m['TOTAL_FITTED_bkg_events_err'][index])) +  "}$         "
+        tableline += " & $" + str(("%.6f" %n)) + "_{-" + str(("%.6f"%n)) + "}^{+" + str(("%.6f" %m['TOTAL_FITTED_bkg_events_errUp'][index])) +  "}$         "
     else:
-      if (n - m['TOTAL_FITTED_bkg_events_err'][index]) > 0. :
-        tableline += " & $" + str(("%.1f" %n)) + " \\pm " + str(("%.1f" %m['TOTAL_FITTED_bkg_events_err'][index])) +  "$         "
+      if  (n - m['TOTAL_FITTED_bkg_events_errDo'][index]) > 0. and str(("%.6f" %m['TOTAL_FITTED_bkg_events_errUp'][index]))==str(("%.6f" %m['TOTAL_FITTED_bkg_events_errDo'][index])) : 
+        tableline += " & $" + str(("%.6f" %n)) + " \\pm " + str(("%.6f" %m['TOTAL_FITTED_bkg_events_errUp'][index])) +  "$         "
+      elif  (n - m['TOTAL_FITTED_bkg_events_errDo'][index]) > 0. and str(("%.6f" %m['TOTAL_FITTED_bkg_events_errUp'][index]))!=str(("%.6f" %m['TOTAL_FITTED_bkg_events_errDo'][index])) : 
+        tableline += " & $" + str(("%.6f" %n)) + " ^{+" + str(("%.6f" %m['TOTAL_FITTED_bkg_events_errUp'][index])) +  "}_{-"+str(("%.6f" %m['TOTAL_FITTED_bkg_events_errDo'][index]))+ "}$         "
       else:
-        texLog.warning("negative symmetric error extends below 0. for total bkg pdf:  will print asymmetric error w/ truncated negative error reaching to 0.")
-        tableline += " & $" + str(("%.1f" %n)) + "_{-" + str(("%.1f"%n)) + "}^{+" + str(("%.1f" %m['TOTAL_FITTED_bkg_events_err'][index])) +  "}$         "
+        texLog.warning("negative symmetric error after fit extends below 0. for total bkg pdf:  will print asymmetric error w/ truncated negative error reaching to 0.")
+        tableline += " & $" + str(("%.6f" %n)) + "_{-" + str(("%.6f"%n)) + "}^{+" + str(("%.6f" %m['TOTAL_FITTED_bkg_events_errUp'][index])) +  "}$         "
   tableline +='''     \\\\
 \\midrule
 %%'''
@@ -144,17 +148,21 @@ Fitted bkg events        '''
           possible separation of regions with 1 or 2 digits - currently turned off in YieldsTable.py
           """   
           if m['names'][index] in signalregionslist:
-            if ((n - m['Fitted_err_'+sample][index]) > 0.) or not abs(n) > 0.00001:
-              tableline += " & $" + str(("%.2f" %n)) + " \\pm " + str(("%.2f" %m['Fitted_err_'+sample][index])) +  "$         "
+            if ((n - m['Fitted_errDo_'+sample][index]) > 0. and str(("%.6f" %m['Fitted_errUp_'+sample][index]))==str(("%.6f" %m['Fitted_errDo_'+sample][index]))) or not abs(n) > 0.00001:
+              tableline += " & $" + str(("%.6f" %n)) + " \\pm " + str(("%.6f" %m['Fitted_errUp_'+sample][index])) +  "$         "
+            elif ((n - m['Fitted_errDo_'+sample][index]) > 0. and str(("%.6f" %m['Fitted_errUp_'+sample][index]))!=str(("%.6f" %m['Fitted_errDo_'+sample][index]))) or not abs(n) > 0.00001:
+              tableline += " & $" + str(("%.6f" %n)) + "_{-" + str(("%.6f" %m['Fitted_errDo_'+sample][index])) + "}^{+" + str(("%.6f" %m['Fitted_errUp_'+sample][index])) +  "}$         "    
             else:
               texLog.warning("negative symmetric error after fit extends below 0. for sample {0} - will print asymmetric error w/ truncated negative error reaching to 0.".format(sample))
-              tableline += " & $" + str(("%.2f" %n)) + "_{-" + str(("%.2f"%n)) + "}^{+" + str(("%.2f" %m['Fitted_err_'+sample][index])) +  "}$         "
+              tableline += " & $" + str(("%.6f" %n)) + "_{-" + str(("%.6f"%n)) + "}^{+" + str(("%.6f" %m['Fitted_errUp_'+sample][index])) +  "}$         "
           else:
-            if ((n - m['Fitted_err_'+sample][index]) > 0.) or not abs(n) > 0.00001:
-              tableline += " & $" + str(("%.1f" %n)) + " \\pm " + str(("%.1f" %m['Fitted_err_'+sample][index])) +  "$         "
+            if ((n - m['Fitted_errDo_'+sample][index]) > 0. and str(("%.6f" %m['Fitted_errUp_'+sample][index]))==str(("%.6f" %m['Fitted_errDo_'+sample][index]))) or not abs(n) > 0.00001:
+              tableline += " & $" + str(("%.6f" %n)) + " \\pm " + str(("%.6f" %m['Fitted_errUp_'+sample][index])) +  "$         "
+            elif ((n - m['Fitted_errDo_'+sample][index]) > 0. and str(("%.6f" %m['Fitted_errUp_'+sample][index]))!=str(("%.6f" %m['Fitted_errDo_'+sample][index]))) or not abs(n) > 0.00001:
+              tableline += " & $" + str(("%.6f" %n)) + "_{-" + str(("%.6f" %m['Fitted_errDo_'+sample][index])) + "}^{+" + str(("%.6f" %m['Fitted_errUp_'+sample][index])) +  "}$         "    
             else:
               texLog.warning("negative symmetric error after fit extends below 0. for sample {0} - will print asymmetric error w/ truncated negative error reaching to 0.".format(sample))
-              tableline += " & $" + str(("%.1f" %n)) + "_{-" + str(("%.1f"%n)) + "}^{+" + str(("%.1f" %m['Fitted_err_'+sample][index])) +  "}$         "
+              tableline += " & $" + str(("%.6f" %n)) + "_{-" + str(("%.6f"%n)) + "}^{+" + str(("%.6f" %m['Fitted_errUp_'+sample][index])) +  "}$         "
         tableline +='''     \\\\
 %%'''
 
@@ -172,13 +180,15 @@ Fitted bkg events        '''
 MC exp. SM events             '''
   for index, n in enumerate(m['TOTAL_MC_EXP_BKG_events']):
     if showBeforeFitError:
-      if ((n - m['TOTAL_MC_EXP_BKG_err'][index]) > 0.) or not abs(n) > 0.00001:
-        tableline += " & $" + str(("%.2f" %n)) + " \\pm " + str(("%.2f" %m['TOTAL_MC_EXP_BKG_err'][index])) +  "$         "
+      if ((n - m['TOTAL_MC_EXP_BKG_errDo'][index]) > 0. and str(("%.6f" %m['TOTAL_MC_EXP_BKG_errUp'][index]))==str(("%.6f" %m['TOTAL_MC_EXP_BKG_errDo'][index]))) or not abs(n) > 0.00001:
+        tableline += " & $" + str(("%.6f" %n)) + " \\pm " + str(("%.6f" %m['TOTAL_MC_EXP_BKG_errUp'][index])) +  "$         "
+      elif ((n - m['TOTAL_MC_EXP_BKG_errDo'][index]) > 0. and str(("%.6f" %m['TOTAL_MC_EXP_BKG_errUp'][index]))!=str(("%.6f" %m['TOTAL_MC_EXP_BKG_errDo'][index]))) or not abs(n) > 0.00001:
+        tableline += " & $" + str(("%.6f" %n)) + "_{-" + str(("%.6f" %m['TOTAL_MC_EXP_BKG_errDo'][index])) + "}^{+" + str(("%.6f" %m['TOTAL_MC_EXP_BKG_errUp'][index])) +  "}$         "
       else:
         texLog.warning("negative error before fit extends below 0. for total bkg pdf:   will print asymmetric error w/ truncated negative error reaching to 0.")
-        tableline += " & $" + str(("%.2f" %n)) + "_{-" + str(("%.2f"%n)) + "}^{+" + str(("%.2f" %m['TOTAL_MC_EXP_BKG_err'][index])) +  "}$         "
+        tableline += " & $" + str(("%.6f" %n)) + "_{-" + str(("%.6f"%n)) + "}^{+" + str(("%.6f" %m['TOTAL_MC_EXP_BKG_errUp'][index])) +  "}$         "
     else:
-      tableline += " & $" + str(("%.2f" %n)) +  "$         "
+      tableline += " & $" + str(("%.6f" %n)) +  "$         "
   tableline +='''     \\\\
 \\midrule
 %%''' 
@@ -210,22 +220,26 @@ MC exp. SM events             '''
         for index, n in enumerate(m[name]):
           if m['names'][index] in signalregionslist:
             if showBeforeFitError:
-              if ((n - m['MC_exp_err_'+sample][index]) > 0.) or not abs(n) > 0.00001:
-                tableline += " & $" + str(("%.2f" %n)) + " \\pm " + str(("%.2f" %m['MC_exp_err_'+sample][index])) +  "$         "
+              if ((n - m['MC_exp_errDo_'+sample][index]) > 0. and str(("%.6f" %m['MC_exp_errDo_'+sample][index]))==str(("%.6f" %m['MC_exp_errUp_'+sample][index]))) or not abs(n) > 0.00001:
+                tableline += " & $" + str(("%.6f" %n)) + " \\pm " + str(("%.6f" %m['MC_exp_errUp_'+sample][index])) +  "$         "
+              elif ((n - m['MC_exp_errDo_'+sample][index]) > 0. and str(("%.6f" %m['MC_exp_errDo_'+sample][index]))!=str(("%.6f" %m['MC_exp_errUp_'+sample][index]))) or not abs(n) > 0.00001:
+                tableline += " & $" + str(("%.6f" %n)) + "_{-" + str(("%.6f" %m['MC_exp_errDo_'+sample][index])) + "}^{+" + str(("%.6f" %m['MC_exp_errUp_'+sample][index])) +  "}$         "
               else:
                 texLog.warning("negative symmetric error after fit extends below 0. for sample {0} - will print asymmetric error w/ truncated negative error reaching to 0.".format(sample))
-                tableline += " & $" + str(("%.2f" %n)) + "_{-" + str(("%.2f"%n)) + "}^{+" + str(("%.2f" %m['MC_exp_err_'+sample][index])) +  "}$         "
+                tableline += " & $" + str(("%.6f" %n)) + "_{-" + str(("%.6f"%n)) + "}^{+" + str(("%.6f" %m['MC_exp_errUp_'+sample][index])) +  "}$         "
             else:
-              tableline += " & $" + str(("%.2f" %n)) +  "$         "
+              tableline += " & $" + str(("%.6f" %n)) +  "$         "
           else:
             if showBeforeFitError:
-              if ((n - m['MC_exp_err_'+sample][index]) > 0.) or not abs(n) > 0.00001:
-                tableline += " & $" + str(("%.2f" %n)) + " \\pm " + str(("%.2f" %m['MC_exp_err_'+sample][index])) +  "$         "
+              if ((n - m['MC_exp_errDo_'+sample][index]) > 0. and str(("%.6f" %m['MC_exp_errUp_'+sample][index]))==str(("%.6f" %m['MC_exp_errDo_'+sample][index]))) or not abs(n) > 0.00001:
+                tableline += " & $" + str(("%.6f" %n)) + " \\pm " + str(("%.6f" %m['MC_exp_errUp_'+sample][index])) +  "$         "
+              elif ((n - m['MC_exp_errDo_'+sample][index]) > 0. and str(("%.6f" %m['MC_exp_errUp_'+sample][index]))!=str(("%.6f" %m['MC_exp_errDo_'+sample][index]))) or not abs(n) > 0.00001:
+                tableline += " & $" + str(("%.6f" %n)) + "_{-" + str(("%.6f" %m['MC_exp_errDo_'+sample][index])) + "}^{+" + str(("%.6f" %m['MC_exp_errUp_'+sample][index])) +  "}$         "
               else:
                 texLog.warning("negative symmetric error after fit extends below 0. for sample {0} - will print asymmetric error w/ truncated negative error reaching to 0.".format(sample))
-                tableline += " & $" + str(("%.2f" %n)) + "_{-" + str(("%.2f"%n)) + "}^{+" + str(("%.2f" %m['MC_exp_err_'+sample][index])) +  "}$         "
+                tableline += " & $" + str(("%.6f" %n)) + "_{-" + str(("%.6f"%n)) + "}^{+" + str(("%.6f" %m['MC_exp_errUp_'+sample][index])) +  "}$         "
             else:
-              tableline += " & $" + str(("%.2f" %n)) +  "$         "##           else:
+              tableline += " & $" + str(("%.6f" %n)) +  "$         "##           else:
         tableline +='''     \\\\
 %%'''
 

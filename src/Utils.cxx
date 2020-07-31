@@ -1501,7 +1501,7 @@ TH2D* Util::PlotCorrelationMatrix(RooFitResult* rFit, TString anaName,  bool Red
     const char* orig_PaintTextFormat = gStyle->GetPaintTextFormat() ;
     Double_t orig_LabelSize = gStyle->GetLabelSize();
 
-    gStyle->SetPalette(105) ;
+    gStyle->SetPalette(51) ;
     gStyle->SetMarkerSize(1.45);
     gStyle->SetMarkerColor(kWhite);
     gStyle->SetPaintTextFormat("4.2f") ;
@@ -1998,6 +1998,7 @@ void Util::ATLASLabel(Double_t x,Double_t y,const char* text,Color_t color)
         p.SetNDC();
         p.SetTextFont(42);
         p.SetTextColor(color);
+	p.SetTextSize(0.06);
         p.DrawLatex(x+delx,y,text);
         //    p.DrawLatex(x,y,"#sqrt{s}=900GeV");
     }
@@ -2020,7 +2021,9 @@ void Util::AddText(Double_t x,Double_t y,char* text,Color_t color)
         p.SetNDC();
         p.SetTextFont(42);
         p.SetTextColor(color);
-        p.DrawLatex(x+delx,y,text);
+	p.SetTextSize(0.055);  
+        //p.DrawLatex(x+delx,y,text);
+        p.DrawLatex(x,y,text);
     }
 }
 
@@ -2039,7 +2042,9 @@ void Util::AddTextLabel(Double_t x, Double_t y, const char* text, Color_t color)
         p.SetNDC();
         p.SetTextFont(42);
         p.SetTextColor(color);
-        p.DrawLatex(x + delx, y, text);
+	p.SetTextSize(0.055);  
+        p.DrawLatex(x, y, text);
+        //p.DrawLatex(x + delx, y, text);
     }
 }
 
@@ -2375,7 +2380,7 @@ vector<double> Util::GetAllComponentFracInRegion(RooWorkspace* w, TString region
 
 
 //_____________________________________________________________________________
-double Util::GetPropagatedError(RooAbsReal* var, const RooFitResult& fr, const bool& doAsym) 
+double Util::GetPropagatedError(RooAbsReal* var, const RooFitResult& fr, const bool& doAsym, const bool& doUpErr) 
 {
     Logger << kDEBUG << " GPP for variable = " << var->GetName() << GEndl;
 
@@ -2398,7 +2403,7 @@ double Util::GetPropagatedError(RooAbsReal* var, const RooFitResult& fr, const b
         }
     }
 
-    vector<Double_t> plusVar, minusVar ;   
+    vector<Double_t> plusVar, minusVar, centralVar ;   
 
     TMatrixDSym V( fr.covarianceMatrix() ) ;
 
@@ -2421,15 +2426,15 @@ double Util::GetPropagatedError(RooAbsReal* var, const RooFitResult& fr, const b
         Logger << kDEBUG << " GPP:  par = " << rrv.GetName() << " cenVal = " << cenVal << " errSym = " << errHes << " errAvgAsym = " << errAvg << GEndl;
 
         // Make Plus variation
-        ((RooRealVar*)paramList.at(ivar))->setVal(cenVal+errVal) ;
+        ((RooRealVar*)paramList.at(ivar))->setVal(cenVal+errHi) ;
         plusVar.push_back(cloneFunc->getVal(nset)) ;
 
         // Make Minus variation
-        ((RooRealVar*)paramList.at(ivar))->setVal(cenVal-errVal) ;
+        ((RooRealVar*)paramList.at(ivar))->setVal(cenVal+errLo) ;
         minusVar.push_back(cloneFunc->getVal(nset)) ;
 
         ((RooRealVar*)paramList.at(ivar))->setVal(cenVal) ;
-
+        centralVar.push_back(cloneFunc->getVal(nset)) ;
     }
 
     TMatrixDSym C(paramList.getSize()) ;     
@@ -2437,31 +2442,38 @@ double Util::GetPropagatedError(RooAbsReal* var, const RooFitResult& fr, const b
     for (int i=0 ; i<paramList.getSize() ; i++) {
         int newII = fpf_idx[i];
         errVec[i] = sqrt(V(newII,newII)) ;
-        for (int j=i ; j<paramList.getSize() ; j++) {
+        for (int j=0 ; j<paramList.getSize() ; j++) {
             int newJ = fpf_idx[j];
             C(i,j) = V(newII,newJ)/sqrt(V(newII,newII)*V(newJ,newJ)) ;
-            C(j,i) = C(i,j) ;
+            C(j,i) = C(i,j) ; 
         }
     }
 
     // Make vector of variations
-    TVectorD F(plusVar.size()) ;
+    TVectorD Fup(plusVar.size()) ;
+    TVectorD Fdo(minusVar.size()) ;
 
     for (unsigned int j=0 ; j<plusVar.size() ; j++) {
-        F[j] = (plusVar[j]-minusVar[j])/2 ;
+      Fup[j] = plusVar[j]-centralVar[j]; 
     }
+    for (unsigned int j=0 ; j<minusVar.size() ; j++) {
+      Fdo[j] = centralVar[j]-minusVar[j];
+    }
+    
 
     if(Logger.GetMinLevel() < kDEBUG) {
-        F.Print();
+        Fup.Print();
+        Fdo.Print();
         C.Print();
     }
 
     // Calculate error in linear approximation from variations and correlation coefficient
-    Double_t sum = F*(C*F) ;
+    Double_t sumUp = Fup*(C*Fup) ;
+    Double_t sumDo = Fdo*(C*Fdo) ;
 
-    Logger << kDEBUG << " GPP : sum = " << sqrt(sum) << GEndl; 
-
-    return sqrt(sum) ;
+    Logger << kDEBUG << " GPP : sum = " << sqrt(sumUp) << GEndl; 
+    if( doUpErr==true ) return sqrt(sumUp) ;
+    else return sqrt(sumDo) ;
 }
 
 
