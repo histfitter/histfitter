@@ -1501,7 +1501,7 @@ TH2D* Util::PlotCorrelationMatrix(RooFitResult* rFit, TString anaName,  bool Red
     const char* orig_PaintTextFormat = gStyle->GetPaintTextFormat() ;
     Double_t orig_LabelSize = gStyle->GetLabelSize();
 
-    gStyle->SetPalette(51) ;
+    gStyle->SetPalette(105) ;
     gStyle->SetMarkerSize(1.45);
     gStyle->SetMarkerColor(kWhite);
     gStyle->SetPaintTextFormat("4.2f") ;
@@ -1998,7 +1998,7 @@ void Util::ATLASLabel(Double_t x,Double_t y,const char* text,Color_t color)
         p.SetNDC();
         p.SetTextFont(42);
         p.SetTextColor(color);
-	p.SetTextSize(0.06);
+	
         p.DrawLatex(x+delx,y,text);
         //    p.DrawLatex(x,y,"#sqrt{s}=900GeV");
     }
@@ -2021,9 +2021,7 @@ void Util::AddText(Double_t x,Double_t y,char* text,Color_t color)
         p.SetNDC();
         p.SetTextFont(42);
         p.SetTextColor(color);
-	p.SetTextSize(0.055);  
-        //p.DrawLatex(x+delx,y,text);
-        p.DrawLatex(x,y,text);
+        p.DrawLatex(x+delx,y,text);
     }
 }
 
@@ -2042,9 +2040,7 @@ void Util::AddTextLabel(Double_t x, Double_t y, const char* text, Color_t color)
         p.SetNDC();
         p.SetTextFont(42);
         p.SetTextColor(color);
-	p.SetTextSize(0.055);  
-        p.DrawLatex(x, y, text);
-        //p.DrawLatex(x + delx, y, text);
+        p.DrawLatex(x + delx, y, text);
     }
 }
 
