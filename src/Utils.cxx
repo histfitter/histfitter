@@ -2380,7 +2380,7 @@ vector<double> Util::GetAllComponentFracInRegion(RooWorkspace* w, TString region
 
 
 //_____________________________________________________________________________
-double Util::GetPropagatedError(RooAbsReal* var, const RooFitResult& fr, const bool& doAsym, const bool& doUpErr) 
+std::pair<double,double> Util::GetPropagatedError(RooAbsReal* var, const RooFitResult& fr, const bool& doAsym) 
 {
     Logger << kDEBUG << " GPP for variable = " << var->GetName() << GEndl;
 
@@ -2442,7 +2442,6 @@ double Util::GetPropagatedError(RooAbsReal* var, const RooFitResult& fr, const b
     for (int i=0 ; i<paramList.getSize() ; i++) {
         int newII = fpf_idx[i];
         errVec[i] = sqrt(V(newII,newII)) ;
-        //for (int j=0 ; j<paramList.getSize() ; j++) {
         for (int j=i ; j<paramList.getSize() ; j++) {
             int newJ = fpf_idx[j];
             C(i,j) = V(newII,newJ)/sqrt(V(newII,newII)*V(newJ,newJ)) ;
@@ -2472,9 +2471,8 @@ double Util::GetPropagatedError(RooAbsReal* var, const RooFitResult& fr, const b
     Double_t sumUp = Fup*(C*Fup) ;
     Double_t sumDo = Fdo*(C*Fdo) ;
 
-    Logger << kDEBUG << " GPP : sum = " << sqrt(sumUp) << GEndl; 
-    if( doUpErr==true ) return sqrt(sumUp) ;
-    else return sqrt(sumDo) ;
+    Logger << kDEBUG << " GPP : sumUp = " << sqrt(sumUp) << " sumDo = " << sqrt(sumDo) << GEndl; 
+    return make_pair( sqrt(sumUp), sqrt(sumDo) );
 }
 
 
