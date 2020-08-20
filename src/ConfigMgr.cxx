@@ -574,7 +574,7 @@ void ConfigMgr::doUpperLimit(FitConfig* fc) {
                 m_nCPUs
             );
 
-    const double startingMaxRange = maxRange;
+    const double startingMaxRange __attribute((unused)) = maxRange; // Note: used in commented-out debug statements below
     double previousMaxRange = maxRange; // needed in case we fall into the trap where all the points in the extension happen to fail
     int nScanExtensions = 0;
     while(true) {
@@ -606,7 +606,7 @@ void ConfigMgr::doUpperLimit(FitConfig* fc) {
         const std::vector<double>& values = s->GetSamplingDistribution();
 
         // find indices for expected p-values
-        const double nsig1 = 1.0;
+        // const double nsig1 = 1.0; // Note: unused
         const double nsig2 = 2.0;
         const double maxSigma = 5; 
         double dsig = 2.*maxSigma / (values.size() -1) ;         

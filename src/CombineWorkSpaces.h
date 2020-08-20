@@ -33,6 +33,7 @@ class RooRealVar;
 class RooMCStudy;
 class TTree;
 class RooFitResult;
+class TFile;
 
 namespace RooStats {
     class HypoTestInverterResult;
@@ -45,9 +46,9 @@ void clearVec( std::vector<RooWorkspace*>& wsVec );
 
 RooWorkspace* GetWorkspaceFromFile( const TString& infile, const TString& wsname );
 
-RooStats::HypoTestInverterResult* GetHypoTestResultFromFile( const TString& infile, const TString& wsname );
+RooStats::HypoTestInverterResult* GetHypoTestResultFromFile( TFile* file, const TString& wsname );
 
-RooFitResult* GetFitResultFromFile( const TString& infile, const TString& fitname );
+RooFitResult* GetFitResultFromFile( TFile* file, const TString& fitname );
 
 RooMCStudy* GetMCStudy( const RooWorkspace* w );
 

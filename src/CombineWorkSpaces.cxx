@@ -274,78 +274,66 @@ RooWorkspace* GetWorkspaceFromFile( const TString& infile, const TString& wsname
 
 
 //________________________________________________________________________________________________
-RooStats::HypoTestInverterResult* GetHypoTestResultFromFile( const TString& infile, const TString& wsname ) {
-    TFile* file = TFile::Open(infile.Data(), "READ");
-    if (file->IsZombie()) {
-        CombineWorkSpacesLogger << kERROR << "Cannot open file: " << infile << GEndl;
-        return NULL;
+RooStats::HypoTestInverterResult* GetHypoTestResultFromFile( TFile* file, const TString& wsname ) {
+
+    if (!file || file->IsZombie()) {
+        CombineWorkSpacesLogger << kERROR << "Invalid file. Pointer: " << file << GEndl;
+        return nullptr;
     }
-    file->cd();
 
     TObject* obj = file->Get( wsname.Data() ) ;
     if (obj==0) {
-        CombineWorkSpacesLogger << kERROR << "Cannot open HypoTestInverterResult <" << wsname << "> in file <" << infile << ">" << GEndl;
-        file->Close();
-        return NULL;
+        CombineWorkSpacesLogger << kERROR << "Cannot open HypoTestInverterResult <" << wsname << "> in file <" << file->GetName() << ">" << GEndl;
+        return nullptr;
     }
 
     if ( obj->ClassName()!=TString("RooStats::HypoTestInverterResult") ) {
-        CombineWorkSpacesLogger << kERROR << "Cannot open HypoTestInverterResult <" << wsname << "> in file <" << infile << ">" << GEndl;
-        file->Close();
-        return NULL;
+        CombineWorkSpacesLogger << kERROR << "Cannot open HypoTestInverterResult <" << wsname << "> in file <" << file->GetName() << ">" << GEndl;
+        return nullptr;
     }
 
     RooStats::HypoTestInverterResult* w = (RooStats::HypoTestInverterResult*)( obj );
     if ( w==0 ) {
-        CombineWorkSpacesLogger << kERROR << "Cannot open HypoTestInverterResult <" << wsname << "> in file <" << infile << ">" << GEndl;
-        file->Close();
-        return NULL;
+        CombineWorkSpacesLogger << kERROR << "Cannot open HypoTestInverterResult <" << wsname << "> in file <" << file->GetName() << ">" << GEndl;
+        return nullptr;
     }
 
     RooStats::HypoTestInverterResult* v = (RooStats::HypoTestInverterResult*) w->Clone();
 
-    file->Close(); // this invalidates w
-    delete obj;
-    w = NULL; obj = NULL;
+    // We don't own the file, so we don't close or delete anything
 
     return v;
 }
 
 
 //________________________________________________________________________________________________
-RooFitResult* GetFitResultFromFile( const TString& infile, const TString& fitname ) {
-    TFile* file = TFile::Open(infile.Data(), "READ");
-    if (file->IsZombie()) {
-        CombineWorkSpacesLogger << kERROR << "Cannot open file: " << infile << GEndl;
-        return NULL;
+RooFitResult* GetFitResultFromFile( TFile* file, const TString& fitname ) {
+
+    if (!file || file->IsZombie()) {
+        CombineWorkSpacesLogger << kERROR << "Invalid file. Pointer: " << file << GEndl;
+        return nullptr;
     }
-    file->cd();
 
     TObject* obj = file->Get( fitname.Data() ) ;
     if (obj==0) {
-        CombineWorkSpacesLogger << kERROR << "Cannot open RooFitResult <" << fitname << "> in file <" << infile << ">" << GEndl;
-        file->Close();
-        return NULL;
+        CombineWorkSpacesLogger << kERROR << "Cannot open RooFitResult <" << fitname << "> in file <" << file->GetName() << ">" << GEndl;
+        return nullptr;
     }
 
     if ( obj->ClassName()!=TString("RooFitResult") ) {
-        CombineWorkSpacesLogger << kERROR << "Cannot open RooFitResult <" << fitname << "> in file <" << infile << ">" << GEndl;
-        file->Close();
-        return NULL;
+        CombineWorkSpacesLogger << kERROR << "Cannot open RooFitResult <" << fitname << "> in file <" << file->GetName() << ">" << GEndl;
+        return nullptr;
     }
 
     RooFitResult* w = (RooFitResult*)( obj );
     if ( w==0 ) {
-        CombineWorkSpacesLogger << kERROR << "Cannot open RooFitResult <" << fitname << "> in file <" << infile << ">" << GEndl;
-        file->Close();
-        return NULL;
+        CombineWorkSpacesLogger << kERROR << "Cannot open RooFitResult <" << fitname << "> in file <" << file->GetName() << ">" << GEndl;
+        return nullptr;
     }
 
     RooFitResult* v = (RooFitResult*) w->Clone();
 
-    file->Close(); // this invalidates w
-    delete obj;
-    w = NULL; obj = NULL;
+    // We don't own the file, so we don't close or delete anything
 
     return v;
 }
