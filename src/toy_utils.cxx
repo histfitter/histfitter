@@ -133,8 +133,9 @@ std::list<LimitResult> CollectHypoTestResults( const TString& infile, const TStr
     RooFitResult *fitresult = NULL;
 
     //for (; itr!=end; ++itr) {
+    TFile * infile_f = TFile::Open(infile,"READ");
     for (const auto &itr : wsnameMap) {
-        ht = GetHypoTestResultFromFile( infile, itr.second );
+        ht = GetHypoTestResultFromFile( infile_f, itr.second );
 
         if(!ht) { continue; }
         if(ht->ArraySize()==0) {
@@ -150,7 +151,7 @@ std::list<LimitResult> CollectHypoTestResults( const TString& infile, const TStr
         fitresultname.ReplaceAll("hypo_","fitTo_");
         //fitresultname.ReplaceAll("hypo_","hypo_");
         //cout << "Check fit result " << fitresultname << GEndl;
-        fitresult = GetFitResultFromFile(infile, fitresultname);
+        fitresult = GetFitResultFromFile(infile_f, fitresultname);
 
         ToyUtilsLogger << kINFO << "At fit point " << fitresultname.Data() << GEndl;
 
@@ -227,7 +228,7 @@ std::list<LimitResult> CollectHypoTestResults( const TString& infile, const TStr
         if(ht){ delete ht; ht=NULL; }
         if(fitresult) { delete fitresult; fitresult=NULL; }
     }
-
+    infile_f->Close();
     ToyUtilsLogger << kINFO << counter_failed_status << " failed fit status and " << counter_badcovquality 
         << " fit(s) with bad covariance matrix quality were counted" << GEndl;
     ToyUtilsLogger << kINFO << counter_probably_bad_fit << " fit(s) with a bad p-value and " << counter_not_great_fits 

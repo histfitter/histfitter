@@ -44,9 +44,7 @@ TH2D* DrawUtil::triwsmooth( TTree* tree, const char* varstr, const char* name, c
 
     // Wacky workaround to prevent segfault in tree->Draw() below.
     TString buh("");
-    bool goff = buh.Contains("goff");
-    // prevent compiler warning about goff not used:
-    goff=goff*goff;
+    bool goff __attribute__((unused)) = buh.Contains("goff");
 
     tree->Draw(varstr,cutstr,"goff");
     Long64_t  nrows = tree->GetSelectedRows();
