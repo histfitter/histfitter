@@ -15,10 +15,11 @@
  * modification, are permitted according to the terms listed in the file          *
  * LICENSE.                                                                       *
 """
-
-from ROOT import gROOT,gSystem,gDirectory
-gSystem.Load("libSusyFitter.so")
-from ROOT import ConfigMgr,FitConfig #this module comes from gSystem.Load("libSusyFitter.so")
+import os
+# this module comes from gSystem.Load("libSusyFitter.so")
+from ROOT import ConfigMgr, FitConfig
+from ROOT import gROOT, gSystem, gDirectory
+ROOT.gSystem.Load('{0}/lib/libSusyFitter.so'.format(os.getenv('HISTFITTER')))
 gROOT.Reset()
 
 from ROOT import TFile, RooWorkspace, TObject, TString, RooAbsReal, RooRealVar, RooFitResult, RooDataSet, RooAddition, RooArgSet,RooAbsData,RooRandom,RooArgList 
@@ -28,7 +29,6 @@ from ROOT import RooExpandedFitResult
 
 from cmdLineUtils import getPdfInRegions,getName
 
-import os
 import sys
 from sys import exit
 

@@ -26,9 +26,9 @@ for setting in dir(args):
 		print ">>> ... Setting: {: >20} {: >40}".format(setting, eval("args.%s"%setting) )
 print ""
 
-
+import os
 import ROOT
-ROOT.gSystem.Load("libSusyFitter.so")
+ROOT.gSystem.Load('{0}/lib/libSusyFitter.so'.format(os.getenv('HISTFITTER')))
 
 ROOT.gROOT.SetBatch()
 
