@@ -16,16 +16,17 @@
  * LICENSE.                                                                       *
 """
 
+import os
+
 import ROOT
 ROOT.PyConfig.IgnoreCommandLineOptions = True
 ROOT.SetMemoryPolicy( ROOT.kMemoryStrict )
 
 from ROOT import gROOT,gSystem,gDirectory,RooAbsData,RooRandom,RooWorkspace
-gSystem.Load("libSusyFitter.so")
+ROOT.gSystem.Load('{0}/lib/libSusyFitter.so'.format(os.getenv('HISTFITTER')))
 from ROOT import ConfigMgr
 #gROOT.Reset()
 
-import os
 import argparse
 import sys
 

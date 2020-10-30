@@ -16,10 +16,11 @@
  * LICENSE.                                                                       *
 """ 
 
+import os
 import ROOT
 ROOT.gROOT.SetBatch(True)
 ROOT.PyConfig.IgnoreCommandLineOptions = True
-ROOT.gSystem.Load("libSusyFitter.so")
+ROOT.gSystem.Load('{0}/lib/libSusyFitter.so'.format(os.getenv('HISTFITTER')))
 
 from ROOT import gROOT,gSystem,gDirectory, PyConfig
 gROOT.Reset()
@@ -33,7 +34,6 @@ from logger import Logger
 log = Logger('YieldsTable')
 
 from YieldsTableTex import *
-import os
 import sys
 
 def latexfitresults(filename,regionList,sampleList,dataname='obsData',showSum=False, doAsym=True, blinded=False, splitBins=False):
