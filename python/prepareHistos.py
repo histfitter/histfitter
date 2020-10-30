@@ -17,7 +17,7 @@
  **********************************************************************************
 """
 
-from ROOT import gROOT, TFile, TH1F, Double, gDirectory, SetOwnership
+from ROOT import gROOT, TFile, TH1F, Double_t, gDirectory, SetOwnership
 from ROOT import TChain, TObject, TTree, TIter
 from math import sqrt
 from logger import Logger
@@ -435,7 +435,7 @@ class PrepareHistos(object):
 
                     self.configMgr.chains[self.currentChainName].Project(tempName, self.cuts, self.weights)
                     
-                    error = Double()
+                    error = Double_t()
                     integral = tempHist.IntegralAndError(1, tempHist.GetNbinsX(), error)
                     self.configMgr.hists[name].SetBinContent(iReg+1, integral)
                     self.configMgr.hists[name].SetBinError(iReg+1, error)
