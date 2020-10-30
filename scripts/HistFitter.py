@@ -108,7 +108,7 @@ if __name__ == "__main__":
     myFitType=FitType.Background
     doValidation = False
     
-    print "\n * * * Welcome to HistFitter * * *\n"
+    print("* * * Welcome to HistFitter * * *")
 
     """
     Definition of all options and defaults given as arguments
@@ -370,7 +370,7 @@ if __name__ == "__main__":
                       Systs = HistFitterArgs.systematics
                   else:
                       log.info("no systematic has been specified.... all the systematics will be considered")
-                      print sam.systDict
+                      print(sam.systDict)
                       Systs = ""
                       for i in sam.systDict.keys(): 
                           Systs+=i

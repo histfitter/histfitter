@@ -1638,8 +1638,8 @@ class ConfigManager(object):
 
                 tmpName = "h%sNom_%sNorm" % (sam.name, normString )
                 if not tmpName in self.hists.keys():
-                    
-                   """ 
+
+                    """ 
                         if not self.readFromTree:    
                         nomName = "h%sNom_%sNorm" % (sam.name, normString)
                         self.hists[nomName] = None
@@ -1649,11 +1649,12 @@ class ConfigManager(object):
                             # assume that if no histogram is made, then it is not needed  
                             pass
                         else:
-                   """
+                    """
 
-                   self.hists[tmpName] = None
-                   if self.forceNorm==False and self.prepare.useCache: self.hists[tmpName] = self.prepare.addHisto(tmpName, forceNoFallback=True)
-                   if self.hists[tmpName] == None:
+                    self.hists[tmpName] = None
+                    if self.forceNorm==False and self.prepare.useCache: 
+                        self.hists[tmpName] = self.prepare.addHisto(tmpName, forceNoFallback=True)
+                    if self.hists[tmpName] == None:
                         self.hists[tmpName] = TH1F(tmpName, tmpName, 1, 0.5, 1.5)
                         log.debug("addSampleSpecificHists(): building temporary histogram {0}".format(tmpName))
                         for normReg in sam.normRegions:
@@ -1763,6 +1764,19 @@ class ConfigManager(object):
 
                         # Remove any current systematic
                         chan.getSample(sam.name).removeCurrentSystematic()
+
+                        # Check the cache!
+                        had_lowhigh = True
+                        lowName = "h%s%s%s%s_obs_%s" % (sam.name, syst.name, "Low_", regionString, replaceSymbols(chan.variableName))
+                        highName = "h%s%s%s%s_obs_%s" % (sam.name, syst.name, "High_", regionString, replaceSymbols(chan.variableName))
+                        if self.prepare.addHistoFromCacheWithoutFallback(lowName,chan.nBins,chan.binLow,chan.binHigh,chan.useOverflowBin,chan.useUnderflowBin) is None or\
+                           self.prepare.addHistoFromCacheWithoutFallback(highName,chan.nBins,chan.binLow,chan.binHigh,chan.useOverflowBin,chan.useUnderflowBin) is None:
+                            had_lowhigh=False
+                        if had_lowhigh:
+                            chan.getSample(sam.name).histoSystList.append((syst.name, highName, lowName, configMgr.histCacheFile, "", "", "", ""))
+                            if not syst.name in configMgr.systDict.keys():
+                                sam.systList.append(syst.name)
+                            continue
 
                         # first reset weight to nominal value
                         # NOTE: this won't actually load a histogram as the nominal one is already done 

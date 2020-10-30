@@ -500,7 +500,11 @@ class PrepareHistos(object):
         
         log.verbose("Loaded histogram {} with integral {}".format(self.configMgr.hists[name], self.configMgr.hists[name].Integral()))
         return self.configMgr.hists[name]
-    
+        
+    def addHistoFromCacheWithoutFallback(self, name, nBins=None, binLow=None, binHigh=None, useOverflow=False, useUnderflow=False):
+        """ simple helper to prevent specifying all the defaults """
+        return self.__addHistoFromCache(name, nBins, binLow, binHigh, useOverflow, useUnderflow, True, True)
+   
     def __addHistoFromCacheWithoutFallback(self, name, nBins=None, binLow=None, binHigh=None, useOverflow=False, useUnderflow=False):
         """ simple helper to prevent specifying all the defaults """
         return self.__addHistoFromCache(name, nBins, binLow, binHigh, useOverflow, useUnderflow, True, True)
