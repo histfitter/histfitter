@@ -108,7 +108,7 @@ if __name__ == "__main__":
     myFitType=FitType.Background
     doValidation = False
     
-    print("* * * Welcome to HistFitter * * *")
+    print("\n * * * Welcome to HistFitter * * * \n")
 
     """
     Definition of all options and defaults given as arguments
