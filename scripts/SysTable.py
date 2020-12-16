@@ -19,7 +19,7 @@ import os
 # this module comes from gSystem.Load("libSusyFitter.so")
 from ROOT import ConfigMgr, FitConfig
 from ROOT import gROOT, gSystem, gDirectory
-ROOT.gSystem.Load('{0}/lib/libSusyFitter.so'.format(os.getenv('HISTFITTER')))
+gSystem.Load('{0}/lib/libSusyFitter.so'.format(os.getenv('HISTFITTER')))
 gROOT.Reset()
 
 from ROOT import TFile, RooWorkspace, TObject, TString, RooAbsReal, RooRealVar, RooFitResult, RooDataSet, RooAddition, RooArgSet,RooAbsData,RooRandom,RooArgList 
