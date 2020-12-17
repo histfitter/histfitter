@@ -4,7 +4,7 @@
  * Package: HistFitter                                                            *
  *                                                                                *
  * Description:                                                                   *
- *      Python script to create an input ROOT files for the BackupCacheExample.py * 
+ *      Python script to create an input ROOT files for the BackupCacheExample.py *
  *      configuration. Based on arXiV: [1809.11105].                              *
  * Authors:                                                                       *
  *      HistFitter group, CERN, Geneva                                            *
@@ -17,6 +17,7 @@
 
 import ROOT
 from array import array
+from ctypes import c_double
 
 edges = {}
 content = {}
@@ -127,9 +128,9 @@ if __name__ == '__main__':
         h.SetBinContent(i,v[i-1])
         if e:
           h.SetBinError(i,e[i-1])
-      NormErr = ROOT.Double(0)
+      NormErr = c_double(0.0)
       hNorm.SetBinContent(1,h.IntegralAndError(0,h.GetNbinsX(),NormErr,""))
-      hNorm.SetBinError(1,NormErr)
+      hNorm.SetBinError(1, NormErr.value)
       h.Write()
       hNorm.Write()
 

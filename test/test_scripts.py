@@ -17,9 +17,6 @@ def test_backupCacheExampleAnalysis(script_runner):
     # create input ROOT file with a python script
     command1 = 'python test/scripts/backupCache_input.py data/backupCache_example.root'
     ret = script_runner(command1)
-    # FIXME: FAIL
-    # test/scripts/backupCache_input.py:131: FutureWarning: ROOT.Double is deprecated and will disappear in a future version of ROOT. Instead, use ctypes.c_double for pass-by-ref of doubles
-    # hNorm.SetBinContent(1,h.IntegralAndError(0,h.GetNbinsX(),NormErr,""))
     assert ret.stderr.read().decode("utf-8") == ""
     # run HistFitter
     command2 = 'HistFitter.py -R -w -f -F bkg -D before,after test/scripts/backupCache_config.py'

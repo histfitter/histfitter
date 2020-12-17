@@ -16,9 +16,15 @@
 #> localSetupSFT --cmtConfig=x86_64-slc6-gcc48-opt releases/LCG_79/pytools/1.9_python2.7,releases/LCG_79/pyanalysis/1.5_python2.7
 #> lsetup root
 
-
-
-import ROOT, json, argparse, math, sys, os, pickle, copy
+import ROOT
+import json
+import argparse
+import math
+import sys
+import os
+import pickle
+import copy
+from ctypes import c_double
 
 ROOT.gROOT.SetBatch()
 
@@ -773,12 +779,12 @@ def getContourPoints(xi,yi,zi,level ):
 
     return contourList
 
-def createBandFromContours(contour1,contour2=None):
 
+def createBandFromContours(contour1, contour2=None):
     if not contour2:
         outputGraph = contour1
     else:
-        outputSize = contour1.GetN()+contour2.GetN()+1
+        outputSize = contour1.GetN() + contour2.GetN() + 1
 
         pointOffset = 0
         if args.closedBands:
@@ -786,45 +792,68 @@ def createBandFromContours(contour1,contour2=None):
             pointOffset = 1
 
         outputGraph = ROOT.TGraph(outputSize)
-        tmpx, tmpy = ROOT.Double(), ROOT.Double()
-        tmpx1, tmpy1 = ROOT.Double(), ROOT.Double()
+        tmpx, tmpy = c_double(0.0), c_double(0.0)
+        tmpx1, tmpy1 = c_double(0.0), c_double(0.0)
         for iPoint in range(contour2.GetN()):
-            contour2.GetPoint(iPoint,tmpx,tmpy)
-            outputGraph.SetPoint(iPoint,tmpx,tmpy)
+            contour2.GetPoint(iPoint, tmpx, tmpy)
+            outputGraph.SetPoint(iPoint, tmpx.value, tmpy.value)
 
         if args.closedBands:
-            contour2.GetPoint(0,tmpx,tmpy)
-            contour2.GetPoint(contour2.GetN()-1, tmpx1, tmpy1)
-            Point0vec = np.array([tmpx,tmpy])
-            Point1vec = np.array([tmpx1,tmpy1])
-            if(abs(np.dot(Point0vec,Point1vec)/(np.linalg.norm(Point0vec)*np.linalg.norm(Point1vec)))<0.01):
-                outputGraph.SetPoint(contour2.GetN(), 0.,0.)
+            contour2.GetPoint(0, tmpx, tmpy)
+            contour2.GetPoint(contour2.GetN() - 1, tmpx1, tmpy1)
+            Point0vec = np.array([tmpx.value, tmpy.value])
+            Point1vec = np.array([tmpx1.value, tmpy1.value])
+            if (
+                abs(
+                    np.dot(Point0vec, Point1vec)
+                    / (np.linalg.norm(Point0vec) * np.linalg.norm(Point1vec))
+                )
+                < 0.01
+            ):
+                outputGraph.SetPoint(contour2.GetN(), 0.0, 0.0)
                 outputSize += 1
                 pointOffset += 1
-            outputGraph.SetPoint(contour2.GetN()+pointOffset-1, tmpx,tmpy)
+            outputGraph.SetPoint(
+                contour2.GetN() + pointOffset - 1, tmpx.value, tmpy.value
+            )
 
         for iPoint in range(contour1.GetN()):
-            contour1.GetPoint(contour1.GetN()-1-iPoint,tmpx,tmpy)
-            outputGraph.SetPoint(contour2.GetN()+pointOffset+iPoint,tmpx,tmpy)
+            contour1.GetPoint(contour1.GetN() - 1 - iPoint, tmpx, tmpy)
+            outputGraph.SetPoint(
+                contour2.GetN() + pointOffset + iPoint, tmpx.value, tmpy.value
+            )
 
         if args.closedBands:
-            contour1.GetPoint(contour1.GetN()-1,tmpx,tmpy)
+            contour1.GetPoint(contour1.GetN() - 1, tmpx, tmpy)
             contour1.GetPoint(0, tmpx1, tmpy1)
-            Point0vec = np.array([tmpx,tmpy])
-            Point1vec = np.array([tmpx1,tmpy1])
-            if(abs(np.dot(Point0vec,Point1vec)/(np.linalg.norm(Point0vec)*np.linalg.norm(Point1vec)))<0.01):
-                outputGraph.SetPoint(contour1.GetN()+contour2.GetN(), 0.,0.)
-                outputSize +=1
+            Point0vec = np.array([tmpx.value, tmpy.value])
+            Point1vec = np.array([tmpx1.value, tmpy1.value])
+            if (
+                abs(
+                    np.dot(Point0vec, Point1vec)
+                    / (np.linalg.norm(Point0vec) * np.linalg.norm(Point1vec))
+                )
+                < 0.01
+            ):
+                outputGraph.SetPoint(contour1.GetN() + contour2.GetN(), 0.0, 0.0)
+                outputSize += 1
                 pointOffset += 1
-            outputGraph.SetPoint(contour1.GetN()+contour2.GetN()+pointOffset-1, tmpx,tmpy)
+            outputGraph.SetPoint(
+                contour1.GetN() + contour2.GetN() + pointOffset - 1,
+                tmpx.value,
+                tmpy.value,
+            )
 
-        contour2.GetPoint(0,tmpx,tmpy)
-        outputGraph.SetPoint(contour1.GetN()+contour2.GetN()+pointOffset,tmpx,tmpy)
+        contour2.GetPoint(0, tmpx, tmpy)
+        outputGraph.SetPoint(
+            contour1.GetN() + contour2.GetN() + pointOffset, tmpx.value, tmpy.value
+        )
 
-    outputGraph.SetFillStyle(1001);
+    outputGraph.SetFillStyle(1001)
     outputGraph.SetLineWidth(1)
 
     return outputGraph
+
 
 if __name__ == "__main__":
     main()
