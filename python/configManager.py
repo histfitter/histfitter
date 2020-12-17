@@ -1969,17 +1969,16 @@ class ConfigManager:
                 outputRootFile = outputRootFile.Open(self.histCacheFile, "UPDATE")
 
         if outputRootFile:
-            log.info('Storing histograms in file: %s' % self.histCacheFile)
+            log.info(f"Storing histograms in file: {self.histCacheFile}")
 
             outputRootFile.cd()
-            histosToWrite = list(self.hists.values())
-            def notNull(x): return not type(x).__name__ == "TObject"
-            histosToWrite = list(filter(notNull, histosToWrite))
-            # FIXME: TypeError: '<' not supported between instances of 'TH1F' and 'TH1F'
-            # histosToWrite.sort()
-            for histo in histosToWrite:
-                if histo:
-                    histo.Write(histo.GetName(), TObject.kOverwrite)
+
+            # list comprehension faster than filter with lambda
+            hists_to_write = [hist for hist in list(self.hists.values()) if hist is not None]
+            hists_sorted_by_name = sorted(hists_to_write, key=TObject.GetName)
+            for hist in hists_sorted_by_name:
+                if hist:
+                    hist.Write(hist.GetName(), TObject.kOverwrite)
             outputRootFile.Close()
 
 if "configMgr" in vars():

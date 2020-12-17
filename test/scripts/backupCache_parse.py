@@ -42,8 +42,6 @@ class backupCacheParser:
         l = l.strip().split()
         central_diff = float(l[2])-float(l_ref[2])
         error_diff = float(l[4])-float(l_ref[4])
-        print(l)
-        print(l_ref)
         print(f"difference in central value for {mu}: {central_diff}")
         print(f"difference in error for {mu}: {error_diff}")
         # return error if not close enough

@@ -22,7 +22,6 @@ def test_backupCacheExampleAnalysis(script_runner):
     command2 = 'HistFitter.py -R -w -f -F bkg -D before,after test/scripts/backupCache_config.py'
     ret = script_runner(command2)
     stdout = ret.stdout.read().decode("utf-8")
-    # c.f. configManager FIXME
     assert "Leaving HistFitter... Bye!" in stdout
     # parse output
     from scripts.backupCache_parse import backupCacheParser
