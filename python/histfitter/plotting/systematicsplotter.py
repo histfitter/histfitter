@@ -72,14 +72,14 @@ class SystematicsPlot:
         if type == "Nominal":
             t = types[type]
         else:
-            t = "{0}{1}".format(self.systematic, types[type])
+            t = f"{self.systematic}{types[type]}"
 
-        s = "h{0}{1}_{2}_obs_{3}".format(self.sample, t, self.region, self.variable)
+        s = f"h{self.sample}{t}_{self.region}_obs_{self.variable}"
         return s
 
     def getHistograms(self):
         if not os.path.exists(self.filename) or not os.path.isfile(self.filename):
-            print("Error: file {0} does not exist or is not a file".format(self.filename))
+            print(f"Error: file {self.filename} does not exist or is not a file")
             return False
 
         f = ROOT.TFile.Open(self.filename)
@@ -91,19 +91,19 @@ class SystematicsPlot:
         try:
             self.nominalHistogram.SetDirectory(0)
         except:
-            print("WARNING: Cannot find nominal histogram {0} in {1} (plotting for {2})".format(self.nominalName, self.filename, self.systematic))
+            print(f"WARNING: Cannot find nominal histogram {self.nominalName} in {self.filename} (plotting for {self.systematic})")
             retval = False
         
         try:
             self.upHistogram.SetDirectory(0)
         except:
-            print("WARNING: Cannot find up histogram {0} in {1} (plotting for {2})".format(self.upName, self.filename, self.systematic))
+            print(f"WARNING: Cannot find up histogram {self.upName} in {self.filename} (plotting for {self.systematic})")
             retval = False
         
         try:
             self.downHistogram.SetDirectory(0)
         except:
-            print("WARNING: Cannot find down histogram {0} in {1} (plotting for {2})".format(self.downName, self.filename, self.systematic))
+            print(f"WARNING: Cannot find down histogram {self.downName} in {self.filename} (plotting for {self.systematic})")
             retval = False
 
         f.Close()
@@ -118,14 +118,14 @@ class SystematicsPlot:
         ROOT.gStyle.SetOptStat(0)
 
         # Name of canvas and output file
-        canvasName = "c_{0}_{1}_{2}".format(self.upName, self.systematic, self.variable)
+        canvasName = f"c_{self.upName}_{self.systematic}_{self.variable}"
 
         c = ROOT.TCanvas(canvasName, canvasName, 600, 400)
 
         if self.variable != "cuts":
-            self.nominalHistogram.SetTitle("Impact on {3} in {0} (binned: {2}) of {1}".format(self.region, self.systematic, self.variable, self.sample))
+            self.nominalHistogram.SetTitle(f"Impact on {self.sample} in {self.region} (binned: {self.variable}) of {self.systematic}")
         else:
-            self.nominalHistogram.SetTitle("Impact on {2} in {0} of {1}".format(self.region, self.systematic, self.sample))
+            self.nominalHistogram.SetTitle(f"Impact on {self.sample} in {self.region} of {self.systematic}")
         self.nominalHistogram.SetMarkerColor(ROOT.kBlack)
         self.nominalHistogram.SetMarkerStyle(20)
         self.nominalHistogram.SetLineWidth(2)
@@ -149,27 +149,27 @@ class SystematicsPlot:
         downRange = self.nominalHistogram.GetBinContent(self.nominalHistogram.GetMinimumBin()) / 2.0
         if downRange == 0.0: downRange = -0.5
  
-        print("Y axis range: {0} - {1}".format(downRange, upRange))
+        print(f"Y axis range: {downRange} - {upRange}")
         self.nominalHistogram.GetYaxis().SetRangeUser(downRange, upRange)
         legend = ROOT.TLegend(0.7, 0.75, 0.9, 0.9, "")
         legend.SetFillStyle(0)
         legend.SetFillColor(0)
         legend.SetBorderSize(0)
         legend.AddEntry(self.nominalHistogram, "nominal", "lp")
-        legend.AddEntry(self.upHistogram, "{0} up".format(self.systematic), "lp")
-        legend.AddEntry(self.downHistogram, "{0} down".format(self.systematic), "lp")
+        legend.AddEntry(self.upHistogram, f"{self.systematic} up", "lp")
+        legend.AddEntry(self.downHistogram, f"{self.systematic} down", "lp")
         legend.Draw()
        
-        c.SaveAs(os.path.join(self.outputDir, "{0}.pdf".format(canvasName)))
-        c.SaveAs(os.path.join(self.outputDir, "{0}.eps".format(canvasName)))
-        c.SaveAs(os.path.join(self.outputDir, "{0}.png".format(canvasName)))
+        c.SaveAs(os.path.join(self.outputDir, f"{canvasName}.pdf"))
+        c.SaveAs(os.path.join(self.outputDir, f"{canvasName}.eps"))
+        c.SaveAs(os.path.join(self.outputDir, f"{canvasName}.png"))
 
-        print("Region: {0}, sample: {1}, systematic: {2}, variable: {3}".format(self.region, self.sample, self.systematic, self.variable))
+        print(f"Region: {self.region}, sample: {self.sample}, systematic: {self.systematic}, variable: {self.variable}")
 
-        for i in xrange(1, self.nominalHistogram.GetNbinsX()+1):
+        for i in range(1, self.nominalHistogram.GetNbinsX()+1):
             if abs(self.nominalHistogram.GetBinContent(i) - 0.0001) < 0.0: continue
-            print("Bin: {0} MC stat error: +/- {1}    bin-value {2}".format(i, self.nominalHistogram.GetBinContent(i), self.nominalHistogram.GetBinError(i)))
+            print(f"Bin: {i} MC stat error: +/- {self.nominalHistogram.GetBinContent(i)}    bin-value {self.nominalHistogram.GetBinError(i)}")
             if self.nominalHistogram.GetBinContent(i) > 0.0:
-                print("         MC stat error %: {0}".format(self.nominalHistogram.GetBinError(i) / self.nominalHistogram.GetBinContent(i) * 100.0 ))
+                print(f"         MC stat error %: {self.nominalHistogram.GetBinError(i) / self.nominalHistogram.GetBinContent(i) * 100.0}")
 
         return
