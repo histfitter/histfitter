@@ -3,28 +3,57 @@
 # check Root environment setup. Allow for external setup script.
 
 # Update here when tagged
-VERSION="trunk"
+VERSION="v0.66.0"
 
-# check Root environment setup 
-if [ -z "$(root-config --libs)" ] && [ -z "$(root-config --libs)"] && [ ! $ROOTSYS ]; then
-  echo "Warning: No valid Root environment  defined. Please do so first!"
+# check Root environment setup
+if [ -z "$(root-config --libs)" ] && [ -z "$(root-config --libs)"] && [ ! "${ROOTSYS}" ]; then
+  echo "Warning: No valid Root environment (ROOTSYS) defined. Please do so first!"
   return
 fi
 
-if [[ "$(root-config --version | cut -d "." -f 1)" == "5" ]]; then
-  echo "NOTE: ROOT5 installation detected - be aware that this version of HistFitter is developed against ROOT6."
-  echo "We cannot guarantee you will not run into issues."
-fi
+function validate_ROOT_release {
+  # Ensure valid version of ROOT accessible
+  # Can't assume that bc is installed
+  # SC2155: Declare and assign separately to avoid masking return values.
+  local ROOT_version_minimum
+  local ROOT_version_minimum_major
+  local ROOT_version_minimum_minor
+  local ROOT_version
+  local ROOT_version_major
+  local ROOT_version_minor
+  local compatible_ROOT_version
 
-if [ ! $LD_LIBRARY_PATH ]; then
+  ROOT_version_minimum="6.20"
+  ROOT_version_minimum_major="$(echo ${ROOT_version_minimum} | cut -d "." -f 1)"
+  ROOT_version_minimum_minor="$(echo ${ROOT_version_minimum} | cut -d "." -f 2)"
+  ROOT_version="$(root-config --version)"
+  ROOT_version_major="$(echo "${ROOT_version}" | cut -d "." -f 1)"
+  ROOT_version_minor="$(echo "${ROOT_version}" | cut -d "." -f 2 | cut -d "/" -f 1)"
+  compatible_ROOT_version=true
+
+  if [[ "${ROOT_version_major}" -lt "${ROOT_version_minimum_major}" ]]; then
+    compatible_ROOT_version=false
+  elif [[ "${ROOT_version_minor}" -lt "${ROOT_version_minimum_minor}" ]]; then
+    compatible_ROOT_version=false
+  fi
+  if [[ "${compatible_ROOT_version}" = false ]]; then
+      echo "ERROR: Version of ROOT detected: v${ROOT_version}"
+      echo "       ROOT v${ROOT_version_minimum}+ is required to use HistFitter."
+      return 1
+  fi
+}
+
+validate_ROOT_release
+
+
+if [ ! "${LD_LIBRARY_PATH}" ]; then
   echo "Warning: so far you haven't setup your ROOT enviroment properly (no LD_LIBRARY_PATH)"
   return
 fi
 
 
 # setup HistFitter package
-#if [ "x${BASH_ARGV[0]}" == "x" ]; then
-if [ -z ${ZSH_NAME} ] && [ "$(dirname ${BASH_ARGV[0]})" == "." ]; then
+if [ -z "${ZSH_NAME}" ] && [ "$(dirname "${BASH_ARGV[0]}")" == "." ]; then
   if [ ! -f setup.sh ]; then
     echo ERROR: must "cd where/HistFitter/is" before calling "source setup.sh" for this version of bash!
     HF=; export HF
@@ -54,6 +83,5 @@ export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:$HISTFITTER/lib"
 export PYTHONPATH="$HISTFITTER/python:$HISTFITTER/scripts:${PYTHONPATH}"
 export ROOT_INCLUDE_PATH=$HISTFITTER/include:${ROOT_INCLUDE_PATH}
 
-
-# Hack for ssh from mac 
-export LC_ALL=C 
+# Hack for ssh from mac
+export LC_ALL=C
