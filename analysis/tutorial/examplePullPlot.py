@@ -70,7 +70,7 @@ def getSampleColor(sample):
     if sample == "BG":     return kYellow - 3
     if sample == "QCD":     return kGray + 1
     else:
-        print "cannot find color for sample (",sample,")"
+        print("cannot find color for sample (",sample,")")
 
     return 1
 
@@ -101,16 +101,16 @@ def main():
     renamedRegions = renameRegions()
 
     if not os.path.exists(pickleFilename):
-        print "pickle filename %s does not exist" % pickleFilename
-        print "will proceed to run yieldstable again"
+        print("pickle filename %s does not exist" % pickleFilename)
+        print("will proceed to run yieldstable again")
         
         # Run YieldsTable.py with all regions and samples requested
-        cmd = "YieldsTable.py -c %s -s %s -w %s -o MyYieldsTable.tex" % (",".join(regionList), samples, wsfilename)
-        print cmd
+        cmd = "YieldsTable.py -c {} -s {} -w {} -o MyYieldsTable.tex".format(",".join(regionList), samples, wsfilename)
+        print(cmd)
         subprocess.call(cmd, shell=True)
 
     if not os.path.exists(pickleFilename):
-        print "pickle filename %s still does not exist" % pickleFilename
+        print("pickle filename %s still does not exist" % pickleFilename)
         return
     
     # Open the pickle and make the pull plot
