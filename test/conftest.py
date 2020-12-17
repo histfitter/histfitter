@@ -5,7 +5,7 @@ import subprocess
 @pytest.fixture
 def script_runner():
     def run(cmd):
-        print shlex.split(cmd)
+        print(shlex.split(cmd))
         proc =  subprocess.Popen(cmd,
                                  stdout=subprocess.PIPE,
                                  stderr=subprocess.PIPE,

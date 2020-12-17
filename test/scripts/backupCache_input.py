@@ -109,16 +109,16 @@ if __name__ == '__main__':
 
   for s in samples:
     values = content[s]
-    err = errors[s] if s in errors.keys() else None
+    err = errors[s] if s in list(errors.keys()) else None
     for r in regions:
-      if not r[0] in values.keys():
+      if not r[0] in list(values.keys()):
         continue
       if s == "Data":
-        name = "h%s_%s_obs_%s" % (s,r[0],r[1])
-        nameNorm = "h%s_%sNorm" % (s,r[0])
+        name = "h{}_{}_obs_{}".format(s,r[0],r[1])
+        nameNorm = "h{}_{}Norm".format(s,r[0])
       else:
-        name = "h%sNom_%s_obs_%s" % (s,r[0],r[1])
-        nameNorm = "h%sNom_%sNorm" % (s,r[0])
+        name = "h{}Nom_{}_obs_{}".format(s,r[0],r[1])
+        nameNorm = "h{}Nom_{}Norm".format(s,r[0])
       h = ROOT.TH1F(name,name,len(edges[r[0]])-1,edges[r[0]])
       hNorm = ROOT.TH1F(nameNorm,nameNorm,1,0.5,1.5)
       v = values[r[0]]
