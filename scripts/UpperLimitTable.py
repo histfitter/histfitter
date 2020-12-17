@@ -20,7 +20,7 @@ import os
 import ROOT
 from ROOT import ConfigMgr, FitConfig
 from ROOT import gROOT, gSystem, gDirectory
-ROOT.gSystem.Load('{0}/lib/libSusyFitter.so'.format(os.getenv('HISTFITTER')))
+ROOT.gSystem.Load('{}/lib/libSusyFitter.so'.format(os.getenv('HISTFITTER')))
 gROOT.SetBatch(True)
 gROOT.Reset()
 
@@ -54,7 +54,7 @@ def latexfitresults(filename, poiname='mu_SIG', lumiFB=1.0, nTOYS=3000, nPoints=
   workspacename=wname
   w = Util.GetWorkspaceFromFile(filename,workspacename)
   if w==None:
-    print "ERROR : Cannot open workspace : ", workspacename
+    print("ERROR : Cannot open workspace : ", workspacename)
     sys.exit(1) 
 
   Util.resetAllErrors(w)
@@ -66,12 +66,12 @@ def latexfitresults(filename, poiname='mu_SIG', lumiFB=1.0, nTOYS=3000, nPoints=
   Set the POI in ModelConfig
   """
   if len(poiname)==0:
-    print " "
+    print(" ")
   else:
     modelConfig = w.obj("ModelConfig")
     poi = w.var(poiname)
     if poi==None:
-      print "ERROR : Cannot find POI with name: ", poiname, " in workspace from file ", filename
+      print("ERROR : Cannot find POI with name: ", poiname, " in workspace from file ", filename)
       sys.exit(1)
     modelConfig.SetParametersOfInterest(RooArgSet(poi))
     modelConfig.GetNuisanceParameters().remove(poi)
@@ -102,12 +102,12 @@ def latexfitresults(filename, poiname='mu_SIG', lumiFB=1.0, nTOYS=3000, nPoints=
 
   nRemoved = hti_result.ExclusionCleanup()
   if nRemoved > 0:
-    print "WARNING: removed %d points from hti_result" % nRemoved
+    print("WARNING: removed %d points from hti_result" % nRemoved)
 
   #store plot
-  RooStats.AnalyzeHypoTestInverterResult( hti_result, calctype, 3, True, nPoints, "%s%s" % (outputPrefix, poiname), ".eps")
-  RooStats.AnalyzeHypoTestInverterResult( hti_result, calctype, 3, True, nPoints, "%s%s" % (outputPrefix, poiname), ".pdf")
-  RooStats.AnalyzeHypoTestInverterResult( hti_result, calctype, 3, True, nPoints, "%s%s" % (outputPrefix, poiname), ".png")
+  RooStats.AnalyzeHypoTestInverterResult( hti_result, calctype, 3, True, nPoints, f"{outputPrefix}{poiname}", ".eps")
+  RooStats.AnalyzeHypoTestInverterResult( hti_result, calctype, 3, True, nPoints, f"{outputPrefix}{poiname}", ".pdf")
+  RooStats.AnalyzeHypoTestInverterResult( hti_result, calctype, 3, True, nPoints, f"{outputPrefix}{poiname}", ".png")
   
   outFileName = "./%shtiResult_poi_%s_ntoys_%d_calctype_%s_nPoints_%d.root" % (outputPrefix, poiname, ntoys, calctype, nPoints)
   
@@ -127,8 +127,8 @@ def latexfitresults(filename, poiname='mu_SIG', lumiFB=1.0, nTOYS=3000, nPoints=
   uL_nexpinSR_P = hti_result.GetExpectedUpperLimit(1) 
   uL_nexpinSR_M = hti_result.GetExpectedUpperLimit(-1)
   if uL_nexpinSR > uL_nexpinSR_P or uL_nexpinSR < uL_nexpinSR_M:
-    print " \n something very strange, either the uL_nexpinSR > uL_nexpinSR_P or uL_nexpinSR < uL_nexpinSR_M"
-    print "  uL_nexpinSR = ", uL_nexpinSR , " uL_nexpinSR_P = ", uL_nexpinSR_P, " uL_nexpinSR_M = ", uL_nexpinSR_M
+    print(" \n something very strange, either the uL_nexpinSR > uL_nexpinSR_P or uL_nexpinSR < uL_nexpinSR_M")
+    print("  uL_nexpinSR = ", uL_nexpinSR , " uL_nexpinSR_P = ", uL_nexpinSR_P, " uL_nexpinSR_M = ", uL_nexpinSR_M)
   uL_nexpinSRerrP = hti_result.GetExpectedUpperLimit(1) - uL_nexpinSR
   uL_nexpinSRerrM = uL_nexpinSR - hti_result.GetExpectedUpperLimit(-1)
 
@@ -162,11 +162,11 @@ def latexfitresults(filename, poiname='mu_SIG', lumiFB=1.0, nTOYS=3000, nPoints=
     # CLB is taken as the point on the CLB curve for the same poi value, as the observed upperlimit
     CLB = alpha_CLB * uL_nobsinSR + beta_CLB
   except ZeroDivisionError:
-    print "WARNING ZeroDivisionError while calculating CLb. Setting CLb=0."
+    print("WARNING ZeroDivisionError while calculating CLb. Setting CLb=0.")
     CLB=0.0
 
    
-  print "\n\n\n\n  ***---  now doing p-value (s=0) calculation ---*** \n\n\n\n"
+  print("\n\n\n\n  ***---  now doing p-value (s=0) calculation ---*** \n\n\n\n")
 
   """
   reset parameter values and errors for p(s=0) calculation by reopening workspace
@@ -174,7 +174,7 @@ def latexfitresults(filename, poiname='mu_SIG', lumiFB=1.0, nTOYS=3000, nPoints=
   w2 = Util.GetWorkspaceFromFile(filename,workspacename) 
   
   if w2==None:
-    print "ERROR : Cannot open workspace : ", workspacename
+    print("ERROR : Cannot open workspace : ", workspacename)
     sys.exit(1) 
         
   Util.resetAllErrors(w2)
@@ -226,30 +226,30 @@ if __name__ == "__main__":
   Print out of usage, options and examples
   """
   def usage():
-    print "Usage:"
-    print "UpperLimitTable.py [-c channels] [-w workspace] [-l lumi] [-n nTOYS] [-a asymptotic/Asimov] [-o outputFileName] [-p poiName] [-i]"
-    print "Minimal set of inputs [-c channels] [-w workspace] [-l lumi] "
-    print "UpperLimitTable.py needs the workspace file _before_ the fit, so not XXX_afterFit.root"
-    print "Every channel (=SR) needs to have its own workspace file, with the same naming scheme only replacing the channel (SR) name in the workspace file name \n"
-    print "*** Options are: "
-    print "-c <channels>: single channel string (=SR) or comma separated list accepted (OBLIGATORY)"
-    print "-w <workspaceFileName>: single name accepted only (OBLIGATORY) ;   if multiple channels given in -c, assumes the workspace filenaming scheme is general (discussed above)"
-    print "-l <lumi>: same unit as used for creating the workspace by HistFitter (OBLIGATORY)"
-    print "-n <nTOYS>: sets number of TOYs (default = 3000)"
-    print "-N <nPoints>: sets number of points (default = 20)"
-    print "-R <range>: sets upper range for mu_SIG (default = 40)"
-    print "-a : use asimov dataset, ie asymptotic calculation insted of toys (default is toys)"
-    print "-p <poiNames>: single POI name string (mu_<SRname>) or comma separated list accepted, only needed if your workspace contains a different POI then mu_<SRname>"
-    print "-o <outputFileName>: sets the output table file name"
-    print "-i stays in interactive session after executing the script (default off)"
+    print("Usage:")
+    print("UpperLimitTable.py [-c channels] [-w workspace] [-l lumi] [-n nTOYS] [-a asymptotic/Asimov] [-o outputFileName] [-p poiName] [-i]")
+    print("Minimal set of inputs [-c channels] [-w workspace] [-l lumi] ")
+    print("UpperLimitTable.py needs the workspace file _before_ the fit, so not XXX_afterFit.root")
+    print("Every channel (=SR) needs to have its own workspace file, with the same naming scheme only replacing the channel (SR) name in the workspace file name \n")
+    print("*** Options are: ")
+    print("-c <channels>: single channel string (=SR) or comma separated list accepted (OBLIGATORY)")
+    print("-w <workspaceFileName>: single name accepted only (OBLIGATORY) ;   if multiple channels given in -c, assumes the workspace filenaming scheme is general (discussed above)")
+    print("-l <lumi>: same unit as used for creating the workspace by HistFitter (OBLIGATORY)")
+    print("-n <nTOYS>: sets number of TOYs (default = 3000)")
+    print("-N <nPoints>: sets number of points (default = 20)")
+    print("-R <range>: sets upper range for mu_SIG (default = 40)")
+    print("-a : use asimov dataset, ie asymptotic calculation insted of toys (default is toys)")
+    print("-p <poiNames>: single POI name string (mu_<SRname>) or comma separated list accepted, only needed if your workspace contains a different POI then mu_<SRname>")
+    print("-o <outputFileName>: sets the output table file name")
+    print("-i stays in interactive session after executing the script (default off)")
     
-    print "\nFor example:"
-    print "UpperLimitTable.py -c SR4jTEl -w /afs/cern.ch/user/k/koutsman/HistFitterUser/MET_jets_leptons/results/MyDiscoveryAnalysis_Lumi_SR4jTEl_SPlusB_combined_NormalMeasurement_model.root -l 4.713"
-    print "UpperLimitTable.py -c SR4jTEl,SR4jTMu -w /afs/cern.ch/user/k/koutsman/HistFitterUser/MET_jets_leptons/results/MyDiscoveryAnalysis_Lumi_SR4jTEl_SPlusB_combined_NormalMeasurement_model.root -l 4.713 -p mu_SR4jTEl,mu_SR4jTMu"
-    print "UpperLimitTable.py -c SR4jTEl,SR4jTMu -w /afs/cern.ch/user/k/koutsman/HistFitterUser/MET_jets_leptons/results/MyDiscoveryAnalysis_Lumi_SR4jTEl_SPlusB_combined_NormalMeasurement_model.root -l 4.713 -p mu_SR4jTEl,mu_SR4jTMu -i"
-    print "UpperLimitTable.py -c SR4jTEl -w /afs/cern.ch/user/k/koutsman/HistFitterUser/MET_jets_leptons/results/MyDiscoveryAnalysis_Lumi_SR4jTEl_SPlusB_combined_NormalMeasurement_model.root -l 4.713 -o MyUpperLimit_SR4jTEl.tex"
-    print "UpperLimitTable.py -c SR4jTEl -w /afs/cern.ch/user/k/koutsman/HistFitterUser/MET_jets_leptons/results/MyDiscoveryAnalysis_Lumi_SR4jTEl_SPlusB_combined_NormalMeasurement_model.root -l 4.713 -n 5000"
-    print "UpperLimitTable.py -c SR4jTEl -w /afs/cern.ch/user/k/koutsman/HistFitterUser/MET_jets_leptons/results/MyDiscoveryAnalysis_Lumi_SR4jTEl_SPlusB_combined_NormalMeasurement_model.root -l 4.713 -a"
+    print("\nFor example:")
+    print("UpperLimitTable.py -c SR4jTEl -w /afs/cern.ch/user/k/koutsman/HistFitterUser/MET_jets_leptons/results/MyDiscoveryAnalysis_Lumi_SR4jTEl_SPlusB_combined_NormalMeasurement_model.root -l 4.713")
+    print("UpperLimitTable.py -c SR4jTEl,SR4jTMu -w /afs/cern.ch/user/k/koutsman/HistFitterUser/MET_jets_leptons/results/MyDiscoveryAnalysis_Lumi_SR4jTEl_SPlusB_combined_NormalMeasurement_model.root -l 4.713 -p mu_SR4jTEl,mu_SR4jTMu")
+    print("UpperLimitTable.py -c SR4jTEl,SR4jTMu -w /afs/cern.ch/user/k/koutsman/HistFitterUser/MET_jets_leptons/results/MyDiscoveryAnalysis_Lumi_SR4jTEl_SPlusB_combined_NormalMeasurement_model.root -l 4.713 -p mu_SR4jTEl,mu_SR4jTMu -i")
+    print("UpperLimitTable.py -c SR4jTEl -w /afs/cern.ch/user/k/koutsman/HistFitterUser/MET_jets_leptons/results/MyDiscoveryAnalysis_Lumi_SR4jTEl_SPlusB_combined_NormalMeasurement_model.root -l 4.713 -o MyUpperLimit_SR4jTEl.tex")
+    print("UpperLimitTable.py -c SR4jTEl -w /afs/cern.ch/user/k/koutsman/HistFitterUser/MET_jets_leptons/results/MyDiscoveryAnalysis_Lumi_SR4jTEl_SPlusB_combined_NormalMeasurement_model.root -l 4.713 -n 5000")
+    print("UpperLimitTable.py -c SR4jTEl -w /afs/cern.ch/user/k/koutsman/HistFitterUser/MET_jets_leptons/results/MyDiscoveryAnalysis_Lumi_SR4jTEl_SPlusB_combined_NormalMeasurement_model.root -l 4.713 -a")
     sys.exit(0)        
 
   wsFileName='/results/MyOneLeptonKtScaleFit_HardLepR17_BkgOnlyKt_combined_NormalMeasurement_model_afterFit.root'
@@ -300,7 +300,7 @@ if __name__ == "__main__":
       runInterpreter = True
 
   if lumiFB == -1:
-    print " Luminosity must be given with -l option\n"
+    print(" Luminosity must be given with -l option\n")
     usage()
       
   if outputFileName == "default":
@@ -312,7 +312,7 @@ if __name__ == "__main__":
     pass
 
   if useAsimovSet and nTOYS>0:
-    print "Info: -a means you will use the Asimov dataset, no need to specify nTOYS (with -n) as it will not be used in this case"
+    print("Info: -a means you will use the Asimov dataset, no need to specify nTOYS (with -n) as it will not be used in this case")
   
   """
   make a list of workspace (outputfile, poi) names, if multiple channels/regions are required.
@@ -327,7 +327,7 @@ if __name__ == "__main__":
     if os.path.isfile(wsFileName):
       wsFileNameList.append(wsFileName)
     else:
-      print " \n\n\n Warning: workspace file ", wsFileName, " does not exist, remove this channel from command or make this workspace file available"
+      print(" \n\n\n Warning: workspace file ", wsFileName, " does not exist, remove this channel from command or make this workspace file available")
       sys.exit(0)
     tmp_outputFileName = "UpperLimitTable_"+chan+".tex"
     if useAsimovSet:
@@ -340,11 +340,11 @@ if __name__ == "__main__":
       poiList.append(tmp_poiName)
 
   if len(chanList) != len(poiList):
-    print " \n Warning: given list of channels has different size than list of POI names:  len(chanList) = ", len(chanList), "  len(poiList) = ", len(poiList)
+    print(" \n Warning: given list of channels has different size than list of POI names:  len(chanList) = ", len(chanList), "  len(poiList) = ", len(poiList))
     sys.exit(0)
 
   if len(chanList) != len(wsFileNameList):
-    print " \n Warning: given list of channels has different size than created list of workspace names:  len(chanList) = ", len(chanList), "  len(wsFileNameList) = ", len(wsFileNameList)
+    print(" \n Warning: given list of channels has different size than created list of workspace names:  len(chanList) = ", len(chanList), "  len(wsFileNameList) = ", len(wsFileNameList))
 
   """
   call the function to calculate the upper limits
@@ -372,8 +372,8 @@ if __name__ == "__main__":
       f = open(outputFileNameChan,'w')
       f.write( line_upLim )
       f.close()
-      print "\nResult written in:"
-      print outputFileNameChan
+      print("\nResult written in:")
+      print(outputFileNameChan)
 
   """
   write out LaTeX table by calling function from UpperLimitTableTex.py
@@ -383,8 +383,8 @@ if __name__ == "__main__":
   f = open(outputFileName,'w')
   f.write( line_upLim )
   f.close()
-  print "\nResult written in:"
-  print outputFileName
+  print("\nResult written in:")
+  print(outputFileName)
 
   if runInterpreter:
     from code import InteractiveConsole

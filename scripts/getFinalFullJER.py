@@ -11,7 +11,7 @@ import os,sys,subprocess
 from copy import deepcopy
 import json,argparse,time
 
-class handleFullJERSyst(object):
+class handleFullJERSyst:
 
 
       def __init__(self,name = "FullJERHandler"):
@@ -98,7 +98,7 @@ class handleFullJERSyst(object):
 
               mapDict[sample] = {}
               #print self.tcInMaps.keys() 
-              for kName in self.tcInMaps.keys():
+              for kName in list(self.tcInMaps.keys()):
                   if sample in kName:
                      if self.nomName in kName: 
                        if nominalMC16a=="" or nominalMC16d=="" or nominalMC16e=="":
@@ -106,7 +106,7 @@ class handleFullJERSyst(object):
                          elif self.mc16dTag in kName: nominalMC16d = kName
                          elif self.mc16eTag in kName: nominalMC16e = kName
                          else: 
-                          logging.warning("not found any splitting in MC campaigns using the following tag: %s, %s, %s" % (self.mc16aTag,self.mc16dTag,self.mc16eTag))
+                          logging.warning(f"not found any splitting in MC campaigns using the following tag: {self.mc16aTag}, {self.mc16dTag}, {self.mc16eTag}")
                        else:
                          break
     
@@ -114,18 +114,18 @@ class handleFullJERSyst(object):
               if not nominalMC16d=="": mapDict[sample][self.mc16dTag] = {}
               if not nominalMC16e=="": mapDict[sample][self.mc16eTag] = {}
               #print mapDict
-              if len(mapDict[sample].keys()) == 0: 
-                 logging.warning("%s nominal not found for any of the MC tags: %s, %s, %s " % (sample,self.mc16aTag,self.mc16dTag,self.mc16eTag))
+              if len(list(mapDict[sample].keys())) == 0: 
+                 logging.warning(f"{sample} nominal not found for any of the MC tags: {self.mc16aTag}, {self.mc16dTag}, {self.mc16eTag} ")
                  logging.warning("skipping sample %s" %(sample))
                  continue
     
-              for k in mapDict[sample].keys(): mapDict[sample][k] = {}
+              for k in list(mapDict[sample].keys()): mapDict[sample][k] = {}
     
-              for kName in self.tcInMaps.keys():
+              for kName in list(self.tcInMaps.keys()):
                   if sample in kName:
                      if "JET_JER" in kName and "__2" in kName: 
                          nameNoPDS = kName.replace("__2","__1")
-                         if nameNoPDS in self.tcInMaps.keys():
+                         if nameNoPDS in list(self.tcInMaps.keys()):
                             #print "Full", nameNoPDS.split(";")[0]
                             #print "Sample", nominalMC16d.split(";")[0].replace(self.nomName,"")+"_"
                             #print "Syst", nameNoPDS.split(";")[0].replace(nominalMC16d.split(";")[0].replace(self.nomName,"")+"_","")
@@ -137,20 +137,20 @@ class handleFullJERSyst(object):
 
           logging.info("Full JER Map: ")
           outjson = json.dumps(mapDict, indent=4)
-          print outjson
+          print(outjson)
 
 
 
 
-          for sample in mapDict.keys():
-              for mcTag in mapDict[sample].keys():
-                  for syst in mapDict[sample][mcTag].keys():
+          for sample in list(mapDict.keys()):
+              for mcTag in list(mapDict[sample].keys()):
+                  for syst in list(mapDict[sample][mcTag].keys()):
 
                       def writeRDF(sampleName,mcTag,syst,tc,treeOrigName,sign,column):
             
                           RDF = ROOT.ROOT.RDataFrame                          
                           TreeName=sampleName+"_"+syst
-                          print TreeName
+                          print(TreeName)
                           FileName="FullJER_tmp_"+sample+"_"+mcTag+"_"+treeOrigName+".root" 
                           # print column
                           rdframeold = RDF(tc)
@@ -177,7 +177,7 @@ class handleFullJERSyst(object):
                                  break
                           """
             
-                          outRDF = rdSample.Filter(self.cut,"User cut - "+sampleName+" - ").Define(self.leaf,'({})*oldweight'.format(sign))
+                          outRDF = rdSample.Filter(self.cut,"User cut - "+sampleName+" - ").Define(self.leaf,f'({sign})*oldweight')
                           cutflow_report = outRDF.Report()
                           cutflow_report.Print()
                           outRDF.Snapshot(TreeName,FileName,column)
@@ -224,14 +224,14 @@ class handleFullJERSyst(object):
                   hadd = subprocess.Popen("hadd -f FullJER_"+sample+"_"+mcTag+".root FullJER_tmp_"+sample+"_"+mcTag+"_*.root", shell=True, stdout=subprocess.PIPE,stderr=subprocess.PIPE)
                   stdout, stderr = hadd.communicate()
                   if not stderr == "":
-                     logging.error("Error doing hadd for %s %s" % (mcTag, sample))
+                     logging.error(f"Error doing hadd for {mcTag} {sample}")
                      logging.error(stderr)
                      sys.exit(-1)
                   logging.info(stdout)
                   rm = subprocess.Popen("rm FullJER_tmp_"+sample+"_"+mcTag+"_*.root", shell=True, stdout=subprocess.PIPE,stderr=subprocess.PIPE)
                   stdout, stderr = rm.communicate()
                   if not stderr == "":
-                     logging.error("Error removinf temporary root files for %s %s" % (mcTag, sample))
+                     logging.error(f"Error removinf temporary root files for {mcTag} {sample}")
                      logging.error(stderr)
                      sys.exit(-1)
                   logging.info(stdout)

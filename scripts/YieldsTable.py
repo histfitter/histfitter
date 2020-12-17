@@ -20,7 +20,7 @@ import os
 import ROOT
 ROOT.gROOT.SetBatch(True)
 ROOT.PyConfig.IgnoreCommandLineOptions = True
-ROOT.gSystem.Load('{0}/lib/libSusyFitter.so'.format(os.getenv('HISTFITTER')))
+ROOT.gSystem.Load('{}/lib/libSusyFitter.so'.format(os.getenv('HISTFITTER')))
 
 from ROOT import gROOT,gSystem,gDirectory, PyConfig
 gROOT.Reset()
@@ -51,7 +51,7 @@ def latexfitresults(filename,regionList,sampleList,dataname='obsData',showSum=Fa
   """
  
   if not os.path.exists(filename):
-    log.error("File {0} does not exist!".format(filename))
+    log.error(f"File {filename} does not exist!")
     sys.exit(1)
 
   """
@@ -60,7 +60,7 @@ def latexfitresults(filename,regionList,sampleList,dataname='obsData',showSum=Fa
   workspacename = 'w'
   w = Util.GetWorkspaceFromFile(filename,'w')
   if w is None:
-    log.error("Cannot open workspace {0} ".format(workspacename))
+    log.error(f"Cannot open workspace {workspacename} ")
     sys.exit(1) 
 
   """
@@ -84,7 +84,7 @@ def latexfitresults(filename,regionList,sampleList,dataname='obsData',showSum=Fa
   """
   data_set = w.data(dataname)
   if data_set==None:
-    log.error("Cannot open dataset data_set{0}".format(suffix))
+    log.error(f"Cannot open dataset data_set{suffix}")
     sys.exit(1)
       
   """
@@ -110,7 +110,7 @@ def latexfitresults(filename,regionList,sampleList,dataname='obsData',showSum=Fa
   w.loadSnapshot(snapshot)
 
   if not w.loadSnapshot(snapshot):
-    log.error("Cannot load snapshot {0}".format(snapshot))
+    log.error(f"Cannot load snapshot {snapshot}")
     sys.exit(1)
 
   """
@@ -181,12 +181,12 @@ def latexfitresults(filename,regionList,sampleList,dataname='obsData',showSum=Fa
   rangeNameBinsInRegionList = [] 
   if splitBins:
     varNbinsInRegionList = [Util.GetRegionVar(w, region).getBinning().numBins() for region in regionList]
-    varBinLowInRegionList = [[Util.GetRegionVar(w, region).getBinning((region+"binning")).binLow(ibin) for ibin in range(0, varNbinsInRegionList[idx]) ] for idx,region in enumerate(regionList)]
-    varBinHighInRegionList = [[Util.GetRegionVar(w, region).getBinning((region+"binning")).binHigh(ibin) for ibin in range(0, varNbinsInRegionList[idx]) ] for idx,region in enumerate(regionList)]
+    varBinLowInRegionList = [[Util.GetRegionVar(w, region).getBinning(region+"binning").binLow(ibin) for ibin in range(0, varNbinsInRegionList[idx]) ] for idx,region in enumerate(regionList)]
+    varBinHighInRegionList = [[Util.GetRegionVar(w, region).getBinning(region+"binning").binHigh(ibin) for ibin in range(0, varNbinsInRegionList[idx]) ] for idx,region in enumerate(regionList)]
     rangeNameBinsInRegionList = [[regionList[idx]+"_bin"+str(ibin) for ibin in range(0, varNbinsInRegionList[idx]) ] for idx,region in enumerate(regionList)]
     for index,region in enumerate(regionList):
       if varNbinsInRegionList[index]==1:
-        log.warning("You have called -P (= per-bin yields) but this region {0} has only 1 bin".format(region))
+        log.warning(f"You have called -P (= per-bin yields) but this region {region} has only 1 bin")
 
   
 
@@ -234,7 +234,7 @@ def latexfitresults(filename,regionList,sampleList,dataname='obsData',showSum=Fa
   rrspdfinRegionList = []
   for index, pdf in enumerate(pdfinRegionList):
     if not pdf:
-        log.warning("pdf is NULL for index {0}".format(index))
+        log.warning(f"pdf is NULL for index {index}")
         continue
     prodList = pdf.pdfList()
     foundRRS = 0
@@ -253,8 +253,8 @@ def latexfitresults(filename,regionList,sampleList,dataname='obsData',showSum=Fa
           varinRegionList[index].setRange(origMin,origMax)
         foundRRS += 1
     if foundRRS >1 or foundRRS==0:
-      log.warning("{0} has {1} instances of RooRealSumPdf".format(pdf.GetName, foundRRS))
-      log.warning("{0} component list: {1}".format(pdf.GetName(), prodList.Print("v")))
+      log.warning(f"{pdf.GetName} has {foundRRS} instances of RooRealSumPdf")
+      log.warning("{} component list: {}".format(pdf.GetName(), prodList.Print("v")))
     
   """
   calculate total pdf number of fitted events and error
@@ -297,7 +297,7 @@ def latexfitresults(filename,regionList,sampleList,dataname='obsData',showSum=Fa
         sampleInRegionError = Util.GetPropagatedError(sampleInRegion, resultAfterFit, doAsym) 
         sampleInAllRegions.add(sampleInRegion)
       else:
-        log.warning("sample {0} non-existent (empty) in region {1}".format(sample, region))
+        log.warning(f"sample {sample} non-existent (empty) in region {region}")
       nSampleInRegionVal.append(sampleInRegionVal)
       nSampleInRegionError.append(sampleInRegionError)
       
@@ -317,7 +317,7 @@ def latexfitresults(filename,regionList,sampleList,dataname='obsData',showSum=Fa
             sampleInRegionVal = sampleInRegion.getVal()
             sampleInRegionError = Util.GetPropagatedError(sampleInRegion, resultAfterFit, doAsym)
           else:
-            log.warning("sample {0} non-existent (empty) in region {1} bin {2}".format(sample, region, ibin))
+            log.warning(f"sample {sample} non-existent (empty) in region {region} bin {ibin}")
           nSampleInRegionVal.append(sampleInRegionVal)
           nSampleInRegionError.append(sampleInRegionError)
  
@@ -359,7 +359,7 @@ def latexfitresults(filename,regionList,sampleList,dataname='obsData',showSum=Fa
 
   for i in range(len(_muFacs)):
     if "mu_" in _muFacs[i].GetName() and _muFacs[i].getVal() != 1.0:
-      log.warning("scaling factor {0} != 1.0 ({1}) expected MC yield WILL BE WRONG!".format(_muFacs[i].GetName(), _muFacs[i].getVal()))
+      log.warning(f"scaling factor {_muFacs[i].GetName()} != 1.0 ({_muFacs[i].getVal()}) expected MC yield WILL BE WRONG!")
   
   """
   get a list of pdf's and variables per region
@@ -374,7 +374,7 @@ def latexfitresults(filename,regionList,sampleList,dataname='obsData',showSum=Fa
   rrspdfinRegionList = []
   for index,pdf in enumerate(pdfinRegionList):
     if not pdf: 
-        log.warning("pdf is NULL for index {0}".format(index))
+        log.warning(f"pdf is NULL for index {index}")
         continue
     
     prodList = pdf.pdfList()
@@ -394,8 +394,8 @@ def latexfitresults(filename,regionList,sampleList,dataname='obsData',showSum=Fa
           varinRegionList[index].setRange(origMin,origMax)
         foundRRS += 1
     if foundRRS >1 or foundRRS==0:
-      log.warning("{0} has {1} instances of RooRealSumPdf".format(pdf.GetName, foundRRS))
-      log.warning("{0} component list: {1}".format(pdf.GetName(), prodList.Print("v")))
+      log.warning(f"{pdf.GetName} has {foundRRS} instances of RooRealSumPdf")
+      log.warning("{} component list: {}".format(pdf.GetName(), prodList.Print("v")))
 
   """
   calculate total pdf number of expected events and error
@@ -437,7 +437,7 @@ def latexfitresults(filename,regionList,sampleList,dataname='obsData',showSum=Fa
         MCSampleInRegionError = Util.GetPropagatedError(MCSampleInRegion, resultBeforeFit, doAsym) 
         MCSampleInAllRegions.add(MCSampleInRegion)
       else:
-        log.warning("sample {0} non-existent (empty) in region {1}".format(sample, region))
+        log.warning(f"sample {sample} non-existent (empty) in region {region}")
       nMCSampleInRegionVal.append(MCSampleInRegionVal)
       nMCSampleInRegionError.append(MCSampleInRegionError)
 
@@ -457,7 +457,7 @@ def latexfitresults(filename,regionList,sampleList,dataname='obsData',showSum=Fa
             MCSampleInRegionVal = MCSampleInRegion.getVal()
             MCSampleInRegionError = Util.GetPropagatedError(MCSampleInRegion, resultBeforeFit, doAsym)
           else:
-            log.warning("sample {0} non-existent (empty) in region {1} bin {2}".format(sample, region, ibin))
+            log.warning(f"sample {sample} non-existent (empty) in region {region} bin {ibin}")
           
           nMCSampleInRegionVal.append(MCSampleInRegionVal)
           nMCSampleInRegionError.append(MCSampleInRegionError)
@@ -479,7 +479,7 @@ def latexfitresults(filename,regionList,sampleList,dataname='obsData',showSum=Fa
   """
   sort the tablenumbers set
   """
-  map_listofkeys = tablenumbers.keys()
+  map_listofkeys = list(tablenumbers.keys())
   map_listofkeys.sort()
   
   """
@@ -487,8 +487,8 @@ def latexfitresults(filename,regionList,sampleList,dataname='obsData',showSum=Fa
   """
   log.info("Will dump output dictionary:")
   for name in map_listofkeys:
-    if tablenumbers.has_key(name) : 
-      log.info("{0}: {1}".format(name, tablenumbers[name]))
+    if name in tablenumbers : 
+      log.info(f"{name}: {tablenumbers[name]}")
       
   return tablenumbers
 
@@ -511,34 +511,34 @@ if __name__ == "__main__":
   Print out of usage, options and examples
   """
   def usage():
-    print "Usage:"
-    print "YieldsTable.py [-o outputFileName] [-c channels] [-w workspace_afterFit] [-s samples] [-b]\n"
-    print "Minimal set of inputs [-c channels] [-w workspace_afterFit] [-s samples] "
-    print "*** Options are: "
-    print "-c <channels>: single channel (region) string or comma separated list accepted (OBLIGATORY)"
-    print "-w <workspaceFileName>: single name accepted only (OBLIGATORY) ;   if multiple channels/regions given in -c, assumes the workspace file contains all channels/regions"
-    print "-s <sample>: single unique sample name or comma separated list accepted (OBLIGATORY)"
-    print "-o <outputFileName>: sets the output table file name"
-    print "-B: run blinded; replace nObs(SR) by -1"
-    print "-a: use Asimov dataset (off by default)"
-    print "-b: shows also the error on samples Before the fit (off by default)"
-    print "-S: also show the sum of all regions (off by default)"
-    print "-y: take symmetrized average of minos errors"
-    print "-C: full table caption"
-    print "-L: full table label" 
-    print "-u: arbitrary string propagated to the latex table caption"
-    print "-t: arbitrary string defining the latex table name"
-    print "-P: calculate yields per bin for each region"
+    print("Usage:")
+    print("YieldsTable.py [-o outputFileName] [-c channels] [-w workspace_afterFit] [-s samples] [-b]\n")
+    print("Minimal set of inputs [-c channels] [-w workspace_afterFit] [-s samples] ")
+    print("*** Options are: ")
+    print("-c <channels>: single channel (region) string or comma separated list accepted (OBLIGATORY)")
+    print("-w <workspaceFileName>: single name accepted only (OBLIGATORY) ;   if multiple channels/regions given in -c, assumes the workspace file contains all channels/regions")
+    print("-s <sample>: single unique sample name or comma separated list accepted (OBLIGATORY)")
+    print("-o <outputFileName>: sets the output table file name")
+    print("-B: run blinded; replace nObs(SR) by -1")
+    print("-a: use Asimov dataset (off by default)")
+    print("-b: shows also the error on samples Before the fit (off by default)")
+    print("-S: also show the sum of all regions (off by default)")
+    print("-y: take symmetrized average of minos errors")
+    print("-C: full table caption")
+    print("-L: full table label") 
+    print("-u: arbitrary string propagated to the latex table caption")
+    print("-t: arbitrary string defining the latex table name")
+    print("-P: calculate yields per bin for each region")
 
 
-    print "\nFor example:"
-    print "YieldsTable.py -c SR7jTEl,SR7jTMu -s WZ,Top -w /afs/cern.ch/user/k/koutsman/HistFitterUser/MET_jets_leptons/results/Combined_KFactorFit_5Channel_Validation_combined_BasicMeasurement_model_afterFit.root"
-    print "YieldsTable.py -c SR7jTEl,SR7jTMu -w  /afs/cern.ch/user/k/koutsman/HistFitterUser/MET_jets_leptons/results/Combined_KFactorFit_5Channel_Validation_combined_BasicMeasurement_model_afterFit.root  -o MyTableMultiJetsSR.tex"
-    print "YieldsTable.py -c SR3jTEl,SR3jTMu,SR4jTEl,SR4jTMu -s WZ,Top -w /afs/cern.ch/user/c/cote/susy0/users/cote/HistFitter5/results/Combined_KFactorFit_5Channel_bkgonly_combined_BasicMeasurement_model_afterFit.root -o MyTableSR.tex"
-    print "YieldsTable.py -c S2eeT,S2mmT,S2emT,S4eeT,S4mmT,S4emT -w /afs/cern.ch/user/c/cote/susy0/users/cote/HistFitter5/results/Combined_KFactorFit_5Channel_bkgonly_combined_BasicMeasurement_model_afterFit.root -o MyTableDilep.tex"
-    print "YieldsTable.py -c S2eeT,S2mmT,S2emT,S4eeT,S4mmT,S4emT -w /afs/cern.ch/user/c/cote/susy0/users/cote/HistFitter5/results/Combined_KFactorFit_5Channel_bkgonly_combined_BasicMeasurement_model_afterFit.root -o MyTableDilep.tex -b"
-    print "YieldsTable.py -c S2eeT,S2mmT,S2emT,S4eeT,S4mmT,S4emT -w /afs/cern.ch/user/c/cote/susy0/users/cote/HistFitter5/results/Combined_KFactorFit_5Channel_bkgonly_combined_BasicMeasurement_model_afterFit.root -o MyTableDilep.tex -b -S"
-    print "YieldsTable.py -c S2eeT,S2mmT,S2emT,S4eeT,S4mmT,S4emT -w /afs/cern.ch/user/c/cote/susy0/users/cote/HistFitter5/results/Combined_KFactorFit_5Channel_bkgonly_combined_BasicMeasurement_model_afterFit.root -o MyTableDilep.tex -a"
+    print("\nFor example:")
+    print("YieldsTable.py -c SR7jTEl,SR7jTMu -s WZ,Top -w /afs/cern.ch/user/k/koutsman/HistFitterUser/MET_jets_leptons/results/Combined_KFactorFit_5Channel_Validation_combined_BasicMeasurement_model_afterFit.root")
+    print("YieldsTable.py -c SR7jTEl,SR7jTMu -w  /afs/cern.ch/user/k/koutsman/HistFitterUser/MET_jets_leptons/results/Combined_KFactorFit_5Channel_Validation_combined_BasicMeasurement_model_afterFit.root  -o MyTableMultiJetsSR.tex")
+    print("YieldsTable.py -c SR3jTEl,SR3jTMu,SR4jTEl,SR4jTMu -s WZ,Top -w /afs/cern.ch/user/c/cote/susy0/users/cote/HistFitter5/results/Combined_KFactorFit_5Channel_bkgonly_combined_BasicMeasurement_model_afterFit.root -o MyTableSR.tex")
+    print("YieldsTable.py -c S2eeT,S2mmT,S2emT,S4eeT,S4mmT,S4emT -w /afs/cern.ch/user/c/cote/susy0/users/cote/HistFitter5/results/Combined_KFactorFit_5Channel_bkgonly_combined_BasicMeasurement_model_afterFit.root -o MyTableDilep.tex")
+    print("YieldsTable.py -c S2eeT,S2mmT,S2emT,S4eeT,S4mmT,S4emT -w /afs/cern.ch/user/c/cote/susy0/users/cote/HistFitter5/results/Combined_KFactorFit_5Channel_bkgonly_combined_BasicMeasurement_model_afterFit.root -o MyTableDilep.tex -b")
+    print("YieldsTable.py -c S2eeT,S2mmT,S2emT,S4eeT,S4mmT,S4emT -w /afs/cern.ch/user/c/cote/susy0/users/cote/HistFitter5/results/Combined_KFactorFit_5Channel_bkgonly_combined_BasicMeasurement_model_afterFit.root -o MyTableDilep.tex -b -S")
+    print("YieldsTable.py -c S2eeT,S2mmT,S2emT,S4eeT,S4mmT,S4emT -w /afs/cern.ch/user/c/cote/susy0/users/cote/HistFitter5/results/Combined_KFactorFit_5Channel_bkgonly_combined_BasicMeasurement_model_afterFit.root -o MyTableDilep.tex -a")
     sys.exit(0)        
 
   wsFileName='/results/MyOneLeptonKtScaleFit_HardLepR17_BkgOnlyKt_combined_NormalMeasurement_model_afterFit.root'
@@ -629,8 +629,8 @@ if __name__ == "__main__":
   """
   import pickle
   if wsFileName.endswith(".pickle"):
-    print "READING PICKLE FILE"
-    f = open(wsFileName, 'r')
+    print("READING PICKLE FILE")
+    f = open(wsFileName)
     m3 = pickle.load(f)
     f.close()
   else:
@@ -662,5 +662,5 @@ if __name__ == "__main__":
   else:
       f.write( tableend(userString,tableName) )
   f.close()
-  log.info("Result written in: {0}".format(outputFileName))
+  log.info(f"Result written in: {outputFileName}")
 

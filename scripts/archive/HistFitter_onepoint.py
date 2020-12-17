@@ -16,7 +16,7 @@ gROOT.Reset()
 def GenerateFitAndPlot(tl):
     from ROOT import Util
     from ROOT import RooExpandedFitResult
-    print "\n***GenerateFitAndPlot for TopLevelXML %s***\n"%tl.name
+    print("\n***GenerateFitAndPlot for TopLevelXML %s***\n"%tl.name)
 
     w = Util.GetWorkspaceFromFile(tl.wsFileName,"combined")
     Util.SaveInitialSnapshot(w)
@@ -51,16 +51,16 @@ def GenerateFitAndPlot(tl):
     # fit toy MC if specified. When left None, data is fit by default
     toyMC = None
     if configMgr.toySeedSet and not configMgr.useAsimovSet:    # generate a toy dataset
-        print "INFO : generating toy MC set for fitting and plotting. Seed = %i" % configMgr.toySeed
+        print("INFO : generating toy MC set for fitting and plotting. Seed = %i" % configMgr.toySeed)
         RooRandom.randomGenerator().SetSeed( configMgr.toySeed )
         toyMC = Util.GetToyMC() # this generates one toy dataset
         pass
     elif configMgr.useAsimovSet and not configMgr.toySeedSet:  # 
-        print "INFO : using Asimov set for fitting and plotting."
+        print("INFO : using Asimov set for fitting and plotting.")
         toyMC = Util.GetAsimovSet(w) # this returns the asimov set
         pass
     else:
-        print "INFO : using data for fitting and plotting."
+        print("INFO : using data for fitting and plotting.")
 
     ## MB : turn on all JES bins. Some are turned off by HistFactory by default
     if True:
@@ -90,8 +90,8 @@ def GenerateFitAndPlot(tl):
 
     Util.resetAllErrors(w)
     mu_Top = w.var("mu_Top")
-    print "mu_Top: "
-    print mu_Top
+    print("mu_Top: ")
+    print(mu_Top)
     if mu_Top:
         mu_Top.setError(0.001)
     else:
@@ -198,14 +198,14 @@ def GetLimits(tl,f):
     from ROOT import RooStats,Util
     #w=gDirectory.Get("w")
 
-    print "analysis name: ",tl.name
-    print "workspace name: ",tl.wsFileName
+    print("analysis name: ",tl.name)
+    print("workspace name: ",tl.wsFileName)
 
     if not ("SU" in tl.name):
-        print "Do no hypothesis test for bkg only or discovery fit!\n"
+        print("Do no hypothesis test for bkg only or discovery fit!\n")
         return
 
-    print "Need to load workspace"
+    print("Need to load workspace")
     Util.ReadWorkspace(tl.wsFileName,"combined")
     w=gDirectory.Get("w")
     
@@ -214,7 +214,7 @@ def GetLimits(tl,f):
 
     if not result==0:
         result.Print() 
-        print result.UpperLimit()
+        print(result.UpperLimit())
         
     return
 
@@ -231,31 +231,31 @@ if __name__ == "__main__":
     doHypoTests = False
     sigSamples = []
     
-    print "\n * * * Welcome to HistFitter * * *\n"
+    print("\n * * * Welcome to HistFitter * * *\n")
 
     import os, sys
     import getopt
     def usage():
-        print "HistFitter.py [-i] [-t] [-w] [-f] [-l] [-l] [-p] [-n nTOYs] [-s seed] [-g gridPoint] <configuration_file>\n"
-        print "(all OFF by default. Turn steps ON with options)"
-        print "-t re-create histograms from TTrees (default: %s)"%(configMgr.readFromTree)
-        print "-w re-create workspace from histograms (default: %s)"%(configMgr.executeHistFactory)
-        print "-f fit the workspace (default: %s)"%(configMgr.executeHistFactory)
-        print "-n <nTOYs> sets number of TOYs (<=0 means to use real data, default: %i)"%configMgr.nTOYs
-        print "-s <number> set the random seed for toy generation (default is CPU clock: %i)" % configMgr.toySeed
-        print "-a use Asimov dataset for fitting and plotting (default: %i)" % configMgr.useAsimovSet
-        print "-i stays in interactive session after executing the script (default %s)"%runInterpreter
-        print "-v verbose level (1: minimal, 2: print histogram names, 3: print XML files, default: %i)"%configMgr.verbose
-        print "-l make limit plot of workspace (default %s)" % printLimits
-        print "-p run hypothesis test on workspace (default %s)" % doHypoTests
-        print "-g <grid points to be processed> - give as comma separated list (default: %s)" % str(sigSamples)
-        print "\nAlso see the README file.\n"
-        print "Command examples:"
-        print "HistFitter.py -i python/MySusyFitterConfig.py           #only runs initialization in interactive mode (try e.g.: configMgr.<tab>)"
-        print "HistFitter.py -t -w -f python/MySusyFitterConfig.py     #runs all steps (TTree->Histos->Workspace->Fit) in batch mode"
-        print "HistFitter.py -f -i python/MySusyFitterConfig.py        #only fit and plot, using existing workspace, in interactive session"
-        print "HistFitter.py -s 666 -f python/MySusyFitterConfig.py    #fit a TOY dataset (from seed=666) and prints RooFitResult"
-        print "\nNote: examples of input TTrees can be found in /afs/cern.ch/atlas/groups/susy/1lepton/samples/"
+        print("HistFitter.py [-i] [-t] [-w] [-f] [-l] [-l] [-p] [-n nTOYs] [-s seed] [-g gridPoint] <configuration_file>\n")
+        print("(all OFF by default. Turn steps ON with options)")
+        print("-t re-create histograms from TTrees (default: %s)"%(configMgr.readFromTree))
+        print("-w re-create workspace from histograms (default: %s)"%(configMgr.executeHistFactory))
+        print("-f fit the workspace (default: %s)"%(configMgr.executeHistFactory))
+        print("-n <nTOYs> sets number of TOYs (<=0 means to use real data, default: %i)"%configMgr.nTOYs)
+        print("-s <number> set the random seed for toy generation (default is CPU clock: %i)" % configMgr.toySeed)
+        print("-a use Asimov dataset for fitting and plotting (default: %i)" % configMgr.useAsimovSet)
+        print("-i stays in interactive session after executing the script (default %s)"%runInterpreter)
+        print("-v verbose level (1: minimal, 2: print histogram names, 3: print XML files, default: %i)"%configMgr.verbose)
+        print("-l make limit plot of workspace (default %s)" % printLimits)
+        print("-p run hypothesis test on workspace (default %s)" % doHypoTests)
+        print("-g <grid points to be processed> - give as comma separated list (default: %s)" % str(sigSamples))
+        print("\nAlso see the README file.\n")
+        print("Command examples:")
+        print("HistFitter.py -i python/MySusyFitterConfig.py           #only runs initialization in interactive mode (try e.g.: configMgr.<tab>)")
+        print("HistFitter.py -t -w -f python/MySusyFitterConfig.py     #runs all steps (TTree->Histos->Workspace->Fit) in batch mode")
+        print("HistFitter.py -f -i python/MySusyFitterConfig.py        #only fit and plot, using existing workspace, in interactive session")
+        print("HistFitter.py -s 666 -f python/MySusyFitterConfig.py    #fit a TOY dataset (from seed=666) and prints RooFitResult")
+        print("\nNote: examples of input TTrees can be found in /afs/cern.ch/atlas/groups/susy/1lepton/samples/")
         sys.exit(0)        
     
     try:
@@ -293,7 +293,7 @@ if __name__ == "__main__":
     
 
     #mandatory user-defined configuration
-    execfile(configFile)
+    exec(compile(open(configFile, "rb").read(), configFile, 'exec'))
 
     #standard execution from now on. 
     configMgr.initialize()
@@ -310,9 +310,9 @@ if __name__ == "__main__":
             #    r=GenerateFitAndPlot(configMgr.topLvls[idx]) #1])
             pass
         #configMgr.cppMgr.fitAll()
-        print "\nr0=GenerateFitAndPlot(configMgr.topLvls[0])"
-        print "r1=GenerateFitAndPlot(configMgr.topLvls[1])"
-        print "r2=GenerateFitAndPlot(configMgr.topLvls[2])"
+        print("\nr0=GenerateFitAndPlot(configMgr.topLvls[0])")
+        print("r1=GenerateFitAndPlot(configMgr.topLvls[1])")
+        print("r2=GenerateFitAndPlot(configMgr.topLvls[2])")
         pass
     
     if printLimits:
@@ -339,4 +339,4 @@ if __name__ == "__main__":
         cons.interact("Continuing interactive session... press Ctrl+d to exit")
         pass
 
-    print "Leaving HistFitter... Bye!"
+    print("Leaving HistFitter... Bye!")

@@ -14,11 +14,11 @@ AFTER_FIT_SNAPSHOT = 'snapshot_paramsVals_' + AFTER_FIT
 PerParamResult = namedtuple("PerParamResult", "name val err_hi err_lo init_p1s init_m1s final_p1s final_m1s")
 
 def get_parameter(param_list, par_name):
-    for i in xrange(param_list.getSize()):
+    for i in range(param_list.getSize()):
         if param_list[i].GetName() == par_name:
             return param_list[i]
 
-    print "Error: Failed to find parameter '" + par_name + "' in parameter list"
+    print("Error: Failed to find parameter '" + par_name + "' in parameter list")
     return None
 
 def get_fit_regions(opts, w):
@@ -46,7 +46,7 @@ def refit_fixed(fit_name, par_name, value, w, fit_regions, data_set):
 def get_syst_ranking(opts):
     w = Util.GetWorkspaceFromFile(opts.workspace, 'w')
     if not w:
-        print "Error: Failed to open workspace"
+        print("Error: Failed to open workspace")
         sys.exit(1)
 
     result = w.obj(AFTER_FIT)
@@ -56,9 +56,9 @@ def get_syst_ranking(opts):
 
     poi_best_fit = get_parameter(float_pars_final, opts.parameter)
     if not poi_best_fit:
-        print "POI:", opts.parameter, "is not found in workspace"
+        print("POI:", opts.parameter, "is not found in workspace")
         sys.exit(1)
-    print "Best fit value for %s: %.2f" % (opts.parameter, poi_best_fit.getVal())
+    print(f"Best fit value for {opts.parameter}: {poi_best_fit.getVal():.2f}")
 
     w.loadSnapshot(AFTER_FIT_SNAPSHOT)
 
@@ -67,7 +67,7 @@ def get_syst_ranking(opts):
 
     ranking = []
 
-    for i in xrange(float_pars_final.getSize()):
+    for i in range(float_pars_final.getSize()):
         par_name = float_pars_final[i].GetName()
 
         if not par_name.startswith("alpha") and not par_name.startswith("gamma"):
@@ -76,9 +76,9 @@ def get_syst_ranking(opts):
         par_init = get_parameter(float_pars_initial, par_name)
         par_final = get_parameter(float_pars_final, par_name)
 
-        print "Parameter:", par_name
-        print "Initial value: %.2f + %.2f - %.2f" % (par_init.getVal(), par_init.getErrorHi(), par_init.getErrorLo())
-        print "Final value:   %.2f + %.2f - %.2f" % (par_final.getVal(), par_final.getErrorHi(), par_final.getErrorLo())
+        print("Parameter:", par_name)
+        print(f"Initial value: {par_init.getVal():.2f} + {par_init.getErrorHi():.2f} - {par_init.getErrorLo():.2f}")
+        print(f"Final value:   {par_final.getVal():.2f} + {par_final.getErrorHi():.2f} - {par_final.getErrorLo():.2f}")
 
         fix_list = [
                 (par_name + "_init_p1s", par_init.getErrorHi()),
@@ -95,11 +95,11 @@ def get_syst_ranking(opts):
             elif "final" in name:
                 value+=par_final.getVal()
             else:
-                print "FATAL in get parameter nominal value"
+                print("FATAL in get parameter nominal value")
                 sys.exit()
 
             if par_name.startswith("gamma") and opts.minGamma != None and value < opts.minGamma:
-              print "Truncating parameter %s at %s" % (par_name, opts.minGamma)
+              print(f"Truncating parameter {par_name} at {opts.minGamma}")
               value = opts.minGamma
 
             fit_result = refit_fixed(name + "_fixed", par_name, value, w, fit_regions, data_set)
@@ -123,7 +123,7 @@ def get_syst_ranking(opts):
     w.loadSnapshot(AFTER_FIT_SNAPSHOT)
     fit_name = "STAT_ONLY"
 
-    for i in xrange(float_pars_final.getSize()):
+    for i in range(float_pars_final.getSize()):
         if not par_name.startswith("alpha") and not par_name.startswith("gamma"):
             continue
         par_name = float_pars_final[i].GetName()
@@ -135,7 +135,7 @@ def get_syst_ranking(opts):
     float_pars = exp_result.floatParsFinal()
     poi = get_parameter(float_pars, opts.parameter)
 
-    for i in xrange(float_pars_final.getSize()):
+    for i in range(float_pars_final.getSize()):
         if not par_name.startswith("alpha") and not par_name.startswith("gamma"):
             continue
         par_name = float_pars_final[i].GetName()
@@ -145,7 +145,7 @@ def get_syst_ranking(opts):
     stat_only = (poi.getErrorLo(), poi.getErrorHi())
 
     # sort by largest shift
-    ranking.sort(key=lambda r: max(*[abs(getattr(r, i)) for i in ("init_p1s", "init_m1s", "final_p1s", "final_m1s")]), reverse=True)
+    ranking.sort(key=lambda r: max(*(abs(getattr(r, i)) for i in ("init_p1s", "init_m1s", "final_p1s", "final_m1s"))), reverse=True)
 
     return ranking, stat_only
 
@@ -362,11 +362,11 @@ def plot_ranking(opts, ranking, stat_only):
     shift_max = max(imax, fmax, stat_only_max) * 1.3
 
     axis.GetXaxis().SetRangeUser(-shift_max, shift_max)
-    print -shift_max, shift_max
+    print(-shift_max, shift_max)
 
     axis = TH2F("axis", "", 1, -shift_max, shift_max, n_bins_y, 0, 1)
 
-    axis.GetXaxis().SetTitle("#Delta{poi}".format(poi=opts.param_title))
+    axis.GetXaxis().SetTitle(f"#Delta{opts.param_title}")
     axis.GetXaxis().CenterTitle()
 
     for i, param in enumerate(ranking):
@@ -466,7 +466,7 @@ def main():
         pickle.dump((ranking, stat_only), pfile)
         pfile.close()
     else:
-        pfile = open(os.path.join(opts.output, opts.name + ".data"), "r")
+        pfile = open(os.path.join(opts.output, opts.name + ".data"))
         ranking, stat_only = pickle.load(pfile)
         pfile.close()
 

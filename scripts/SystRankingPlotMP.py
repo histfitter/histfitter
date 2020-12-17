@@ -52,7 +52,7 @@ def get_syst_ranking(opts):
     global ready_list
     w = Util.GetWorkspaceFromFile(opts.workspace, 'w')
     if not w:
-        print "Error: Failed to open workspace"
+        print("Error: Failed to open workspace")
         sys.exit(1)
 
     result = w.obj(AFTER_FIT)
@@ -68,12 +68,12 @@ def get_syst_ranking(opts):
       pool = Pool(processes=opts.maxCores)
     results = {}
 
-    for i in xrange(float_pars_final.getSize()):
+    for i in range(float_pars_final.getSize()):
         par_name = float_pars_final[i].GetName()
         fileNamePar = os.path.join(opts.output, opts.name + "_%s.data" % par_name)
 
         if not opts.noFit and not os.path.isfile(fileNamePar):
-          print "submitting job for %s ..." % par_name
+          print("submitting job for %s ..." % par_name)
           results[i] = pool.apply_async(refit_parameter, args=(opts, i), callback=dummy_func)
           for ready in ready_list:
             results[ready].wait()
@@ -84,23 +84,23 @@ def get_syst_ranking(opts):
     pool.close()
     pool.join()
 
-    for i in xrange(float_pars_final.getSize()):
+    for i in range(float_pars_final.getSize()):
         par_name = float_pars_final[i].GetName()
         fileNamePar = os.path.join(opts.output, opts.name + "_%s.data" % par_name)
         if os.path.isfile(fileNamePar):
-          print "reading %s from file %s" % (par_name, fileNamePar)
-          Param = pickle.load( open(fileNamePar, "r"))
+          print(f"reading {par_name} from file {fileNamePar}")
+          Param = pickle.load( open(fileNamePar))
           ranking.append( Param )
 
     return ranking
 
 
 def get_parameter(param_list, par_name):
-    for i in xrange(param_list.getSize()):
+    for i in range(param_list.getSize()):
         if param_list[i].GetName() == par_name:
             return param_list[i]
 
-    print "Error: Failed to find parameter '" + par_name + "' in parameter list"
+    print("Error: Failed to find parameter '" + par_name + "' in parameter list")
     return None
 
 def get_fit_regions(opts, w):
@@ -129,7 +129,7 @@ def refit_parameter(opts, index):
 
     w = Util.GetWorkspaceFromFile(opts.workspace, 'w')
     if not w:
-        print "Error: Failed to open workspace"
+        print("Error: Failed to open workspace")
         sys.exit(1)
 
     result = w.obj(AFTER_FIT)
@@ -139,9 +139,9 @@ def refit_parameter(opts, index):
 
     poi_best_fit = get_parameter(float_pars_final, opts.parameter)
     if not poi_best_fit:
-        print "POI:", opts.parameter, "is not found in workspace"
+        print("POI:", opts.parameter, "is not found in workspace")
         sys.exit(1)
-    print "Best fit value for %s: %f" % (opts.parameter, poi_best_fit.getVal())
+    print(f"Best fit value for {opts.parameter}: {poi_best_fit.getVal():f}")
 
     w.loadSnapshot(AFTER_FIT_SNAPSHOT)
 
@@ -162,9 +162,9 @@ def refit_parameter(opts, index):
     par_init = get_parameter(float_pars_initial, par_name)
     par_final = get_parameter(float_pars_final, par_name)
 
-    print "Parameter:", par_name
-    print "Initial value: %.2f + %.2f - %.2f" % (par_init.getVal(), par_init.getErrorHi(), par_init.getErrorLo())
-    print "Final value:   %.2f + %.2f - %.2f" % (par_final.getVal(), par_final.getErrorHi(), par_final.getErrorLo())
+    print("Parameter:", par_name)
+    print(f"Initial value: {par_init.getVal():.2f} + {par_init.getErrorHi():.2f} - {par_init.getErrorLo():.2f}")
+    print(f"Final value:   {par_final.getVal():.2f} + {par_final.getErrorHi():.2f} - {par_final.getErrorLo():.2f}")
 
     fix_list = [
             (par_name + "_init_p1s", par_init.getErrorHi()),
@@ -181,11 +181,11 @@ def refit_parameter(opts, index):
         elif "final" in name:
             value+=par_final.getVal()
         else:
-            print "FATAL in get parameter nominal value"
+            print("FATAL in get parameter nominal value")
             sys.exit()
 
         if par_name.startswith("gamma") and opts.minGamma != None and value < opts.minGamma:
-          print "Truncating parameter %s at %s" % (par_name, opts.minGamma)
+          print(f"Truncating parameter {par_name} at {opts.minGamma}")
           value = opts.minGamma
 
         fit_result = refit_fixed(name + "_fixed", par_name, value, w, fit_regions, data_set)
@@ -211,10 +211,10 @@ def nice_param_name(par_name):
         return "#gamma(%s)" % (nice_name)
 
     elif par_name.startswith("alpha"):
-        if par_name[6:] in renameAlpha.keys():
+        if par_name[6:] in list(renameAlpha.keys()):
           return renameAlpha[par_name[6:]]
         else:
-          print "Not renamed: ",par_name[6:]
+          print("Not renamed: ",par_name[6:])
           return par_name[6:]
     elif par_name.startswith("mu"):
         return "#mu_{"+par_name[3:]+"}"
@@ -233,11 +233,11 @@ def get_dmu_graph(n_bins_y, ranking, final=True):
     if final:
       p1s = param.final_p1s
       m1s = param.final_m1s
-      print param.name," ",param.final_p1s," ",param.final_m1s
+      print(param.name," ",param.final_p1s," ",param.final_m1s)
     else:
       p1s = param.init_p1s
       m1s = param.init_m1s    
-      print param.name," ",param.init_p1s," ",param.init_m1s
+      print(param.name," ",param.init_p1s," ",param.init_m1s)
 
     up_norm = max(p1s, m1s)
     dn_norm = min(p1s, m1s)
@@ -421,24 +421,24 @@ def plot_ranking(opts, ranking):
     ranking = rankingTemp
   if opts.sysOnly:
     for elem in ranking:
-      print elem
+      print(elem)
       if not elem.name.startswith("gamma"):
         rankingTemp.append(elem)
     ranking = rankingTemp
 
-  ranking.sort(key=lambda r: max(*[abs(getattr(r, i)) for i in ("final_p1s", "final_m1s")]), reverse=True)
+  ranking.sort(key=lambda r: max(*(abs(getattr(r, i)) for i in ("final_p1s", "final_m1s"))), reverse=True)
   if opts.max_np > 0 and len(ranking) > opts.max_np:
     ranking = ranking[:opts.max_np]
   # get workspace
   w = Util.GetWorkspaceFromFile(opts.workspace, 'w')
   if not w:
-    print "Error: Failed to open workspace"
+    print("Error: Failed to open workspace")
     sys.exit(1)
 
   result = w.obj(AFTER_FIT)
   float_pars_final = result.floatParsFinal()
   poi_best_fit = get_parameter(float_pars_final, opts.parameter)
-  print "Best fit value for %s: %f" % (opts.parameter, poi_best_fit.getVal())
+  print(f"Best fit value for {opts.parameter}: {poi_best_fit.getVal():f}")
 
   num_params = len(ranking)
   total_width = 800
