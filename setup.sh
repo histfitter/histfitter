@@ -46,11 +46,12 @@ export HISTFITTER_VERSION
 echo "Setting \$HISTFITTER to ${HISTFITTER}"
 
 # put root & python stuff into PATH, LD_LIBRARY_PATH
-export ROOT_INCLUDE_PATH=$HISTFITTER/src:${ROOT_INCLUDE_PATH}
-export PATH=$HISTFITTER/bin:$HISTFITTER/scripts:${PATH}
-export LD_LIBRARY_PATH=$HISTFITTER/lib:${LD_LIBRARY_PATH}
+export ROOT_INCLUDE_PATH="${ROOT_INCLUDE_PATH}:$HISTFITTER/src"
+export PATH="${PATH}:$HISTFITTER/bin:$HISTFITTER/scripts"
+export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:$HISTFITTER/lib"
 # PYTHONPATH contains all directories that are used for 'import bla' commands
-export PYTHONPATH=$HISTFITTER/python:$HISTFITTER/scripts:$HISTFITTER/macros:$HISTFITTER/lib:$PYTHONPATH
+# Must prepend so as to catch python/cmdLineUtils.py before ROOT installation's
+export PYTHONPATH="$HISTFITTER/python:$HISTFITTER/scripts:${PYTHONPATH}"
 export ROOT_INCLUDE_PATH=$HISTFITTER/include:${ROOT_INCLUDE_PATH}
 
 
