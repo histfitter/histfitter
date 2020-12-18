@@ -20,7 +20,7 @@ import os
 import ROOT
 ROOT.gROOT.SetBatch(True)
 ROOT.PyConfig.IgnoreCommandLineOptions = True
-ROOT.gSystem.Load('{}/lib/libSusyFitter.so'.format(os.getenv('HISTFITTER')))
+ROOT.gSystem.Load(f"{os.getenv('HISTFITTER')}/lib/libSusyFitter.so")
 
 from ROOT import gROOT,gSystem,gDirectory, PyConfig
 gROOT.Reset()

@@ -22,7 +22,7 @@ from ROOT import gROOT, gSystem, gDirectory
 from ROOT import PyConfig
 gROOT.SetBatch(True)
 PyConfig.IgnoreCommandLineOptions = True
-gSystem.Load('{}/lib/libSusyFitter.so'.format(os.getenv('HISTFITTER')))
+gSystem.Load(f"{os.getenv('HISTFITTER')}/lib/libSusyFitter.so")
 gROOT.Reset()
 
 from ROOT import TFile, RooWorkspace, TObject, TString, RooAbsReal, RooRealVar, RooFitResult, RooDataSet, RooAddition, RooArgSet,RooAbsData,RooRandom,RooArgList

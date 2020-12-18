@@ -20,7 +20,7 @@ import os
 import ROOT
 from ROOT import ConfigMgr, FitConfig
 from ROOT import gROOT, gSystem, gDirectory
-ROOT.gSystem.Load('{}/lib/libSusyFitter.so'.format(os.getenv('HISTFITTER')))
+gSystem.Load(f"{os.getenv('HISTFITTER')}/lib/libSusyFitter.so")
 gROOT.SetBatch(True)
 gROOT.Reset()
 

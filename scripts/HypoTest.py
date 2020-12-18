@@ -14,7 +14,7 @@ sys.argv.insert(1, '-b')
 gROOT.Reset()
 gROOT.SetBatch(True)
 del sys.argv[1]
-ROOT.gSystem.Load('{}/lib/libSusyFitter.so'.format(os.getenv('HISTFITTER')))
+ROOT.gSystem.Load(f"{os.getenv('HISTFITTER')}/lib/libSusyFitter.so")
 gROOT.Reset()
 
 def min_CLs(hypo):
