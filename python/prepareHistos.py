@@ -225,7 +225,7 @@ class PrepareHistos:
         log.debug(f"read(): current chain ID = '{self.currentChainName}'")
         log.debug(f"read(): constructing with suffix = '{suffix}', friend tree = '{friendTreeName}'")
 
-        sorted_input_files = sorted(list(input_files))
+        sorted_input_files = sorted(list(input_files), key=lambda x: x.filename)
 
         # Construct a combined set of tree and filenames. The sorting is performed to ensure every time we build the same chain.
         # The set is needed as, although the _combinations_ in input_files are by construction unique, it could be that the same file or chain is
