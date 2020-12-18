@@ -30,6 +30,7 @@ from math import sqrt
 from inputTree import InputTree
 
 import os
+import sys as system
 
 gROOT.SetBatch(True)
 log = Logger('ConfigManager')
@@ -1765,18 +1766,15 @@ class ConfigManager(object):
                         # Remove any current systematic
                         chan.getSample(sam.name).removeCurrentSystematic()
 
-                        # Check the cache!
-                        had_lowhigh = True
-                        lowName = "h%s%s%s%s_obs_%s" % (sam.name, syst.name, "Low_", regionString, replaceSymbols(chan.variableName))
-                        highName = "h%s%s%s%s_obs_%s" % (sam.name, syst.name, "High_", regionString, replaceSymbols(chan.variableName))
-                        if self.prepare.addHistoFromCacheWithoutFallback(lowName,chan.nBins,chan.binLow,chan.binHigh,chan.useOverflowBin,chan.useUnderflowBin) is None or\
-                           self.prepare.addHistoFromCacheWithoutFallback(highName,chan.nBins,chan.binLow,chan.binHigh,chan.useOverflowBin,chan.useUnderflowBin) is None:
-                            had_lowhigh=False
-                        if had_lowhigh:
-                            chan.getSample(sam.name).histoSystList.append((syst.name, highName, lowName, configMgr.histCacheFile, "", "", "", ""))
-                            if not syst.name in configMgr.systDict.keys():
-                                sam.systList.append(syst.name)
-                            continue
+                        # If rebinning is used, check if user syst has applied!
+                        ###LUIGI
+                        if self.rebin: 
+                           log.verbose("      - Checking if {} is used syst and is  used together with rebinning".format(syst.name))
+                           if syst.type=="user":
+                              log.error("      - User syst identified: rebinning can not be used -> please change {} to weight or tree based syst".format(syst.name))
+                              log.error("exiting from HistFitter")
+                              system.exit(-1)
+                           log.verbose("      - {} is NOT user based syst".format(syst.name)) 
 
                         # first reset weight to nominal value
                         # NOTE: this won't actually load a histogram as the nominal one is already done 
