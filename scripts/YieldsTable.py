@@ -14,9 +14,11 @@
  * Redistribution and use in source and binary forms, with or without             *
  * modification, are permitted according to the terms listed in the file          *
  * LICENSE.                                                                       *
-""" 
+"""
 
 import os
+import sys
+import pickle
 import ROOT
 ROOT.gROOT.SetBatch(True)
 ROOT.PyConfig.IgnoreCommandLineOptions = True
@@ -33,13 +35,12 @@ from cmdLineUtils import getPdfInRegions,getName,getPdfInRegionsWithRangeName
 from logger import Logger
 log = Logger('YieldsTable')
 
-from YieldsTableTex import *
-import sys
+from YieldsTableTex import * # FIXME: import * is REALLY bad and should never be done
 
 def latexfitresults(filename,regionList,sampleList,dataname='obsData',showSum=False, doAsym=True, blinded=False, splitBins=False):
   """
   Calculate before/after-fit yields in all channels given
-  
+
   @param filename The filename containing afterFit workspace
   @param regionList A list of regions to be considered
   @param sampleList A list of samples to be considered
@@ -623,21 +624,18 @@ if __name__ == "__main__":
   dataname = "obsData"
   if useAsimovSet:
     dataname = "asimovData"
-    
+
   """
-  call the function to calculate the numbers, or take numbers from pickle file  
+  call the function to calculate the numbers, or take numbers from pickle file
   """
-  import pickle
   if wsFileName.endswith(".pickle"):
     print("READING PICKLE FILE")
-    f = open(wsFileName)
-    m3 = pickle.load(f)
-    f.close()
+    with open(wsFileName) as pickle_file:
+        m3 = pickle.load(pickle_file)
   else:
     m3 = latexfitresults(wsFileName, chanList, sampleList, dataname, showSumAllRegions, doAsym, blinded, splitBins)
-    f = open(outputFileName.replace(".tex", ".pickle"), 'w')
-    pickle.dump(m3, f)
-    f.close()
+    with open(outputFileName.replace(".tex", ".pickle"), "wb") as pickle_file:
+        pickle.dump(m3, pickle_file)
 
 
 
