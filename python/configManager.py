@@ -1767,7 +1767,6 @@ class ConfigManager(object):
                         chan.getSample(sam.name).removeCurrentSystematic()
 
                         # If rebinning is used, check if user syst has applied!
-                        ###LUIGI
                         if self.rebin: 
                            log.verbose("      - Checking if {} is used syst and is  used together with rebinning".format(syst.name))
                            if syst.type=="user":
