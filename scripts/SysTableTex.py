@@ -15,7 +15,7 @@
  * LICENSE.                                                                       *
 """
 
-def tablefragment(m,signalRegions,skiplist,chanStr,showPercent):
+def tablefragment(m,signalRegions,skiplist,chanStr,showPercent,label="",caption=""):
   """ 
   main function to transfer the set of numbers/names (=m provided by SysTable) into a LaTeX table
 
@@ -125,16 +125,21 @@ Total background systematic              '''
   print table end with default Caption and Label
   """   
 
-  tableline += '''
+  if caption =="":
+    caption="""Breakdown of the dominant systematic uncertainties on background estimates in the various signal regions.
+Note that the individual uncertainties can be correlated, and do not necessarily add up quadratically to
+the total background uncertainty. The percentages show the size of the uncertainty relative to the total expected background."""
+
+  if label =="":
+    label="table.results.bkgestimate.uncertainties.%s"%(chanStr)
+
+  tableline += """
+
 \\bottomrule
 \\end{tabular*}
-\\caption[Breakdown of uncertainty on background estimates]{
-Breakdown of the dominant systematic uncertainties on background estimates in the various signal regions.
-Note that the individual uncertainties can be correlated, and do not necessarily add up quadratically to 
-the total background uncertainty. The percentages show the size of the uncertainty relative to the total expected background.
-\\label{table.results.bkgestimate.uncertainties.%s}}
-\\end{table}
-%%''' % (chanStr) 
+\\caption{"""+caption+"""}
+\\label{"""+label+"""}
+\end{table}"""
     
   return tableline
 
