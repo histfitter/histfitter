@@ -253,8 +253,8 @@ def MakeHist(regionList, renamedRegions, results, hdata, hbkg, hbkgUp, hbkgDown,
         graph_pull.SetPointError(counter, 0., 0, 0, 0)
 
         hdata.GetXaxis().SetBinLabel(counter+1, name)
-        hdata.SetBinContent(counter+1, -1000)
-        hdata.SetBinError(counter+1, 0.00001)
+        hdata.SetBinContent(counter+1, nObs)
+        hdata.SetBinError(counter+1, sqrt(nObs))
         hbkg.SetBinContent(counter+1, nExp)
         hbkg.SetBinError(counter+1, nExpStatEr)
 
