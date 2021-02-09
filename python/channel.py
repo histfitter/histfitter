@@ -25,6 +25,7 @@ from logger import Logger
 from inputTree import InputTree
 
 import generateToys
+import os 
 
 TH1.SetDefaultSumw2(True)
 
@@ -513,7 +514,7 @@ class Channel(object):
         """
         Convert instance to XML string
         """
-        self.writeString = "<!DOCTYPE Channel SYSTEM '../HistFactorySchema.dtd'>\n\n"
+        self.writeString = "<!DOCTYPE Channel SYSTEM '"+os.getenv('HISTFITTER')+"/config/HistFactorySchema.dtd'>\n\n"
         self.writeString += "<Channel Name=\"%s\">\n\n" % self.channelName
         for data in self.dataList:
             if len(data[2]):

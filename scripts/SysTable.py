@@ -15,10 +15,14 @@
  * modification, are permitted according to the terms listed in the file          *
  * LICENSE.                                                                       *
 """
-
-from ROOT import gROOT,gSystem,gDirectory
-gSystem.Load("libSusyFitter.so")
-from ROOT import ConfigMgr,FitConfig #this module comes from gSystem.Load("libSusyFitter.so")
+import os
+import ROOT
+ROOT.gROOT.SetBatch(True)
+ROOT.PyConfig.IgnoreCommandLineOptions = True
+# this module comes from gSystem.Load("libSusyFitter.so")
+ROOT.gSystem.Load('{0}/lib/libSusyFitter.so'.format(os.getenv('HISTFITTER')))
+from ROOT import ConfigMgr, FitConfig
+from ROOT import gROOT, gSystem, gDirectory
 gROOT.Reset()
 
 from ROOT import TFile, RooWorkspace, TObject, TString, RooAbsReal, RooRealVar, RooFitResult, RooDataSet, RooAddition, RooArgSet,RooAbsData,RooRandom,RooArgList 
@@ -28,7 +32,6 @@ from ROOT import RooExpandedFitResult
 
 from cmdLineUtils import getPdfInRegions,getName
 
-import os
 import sys
 from sys import exit
 
@@ -454,6 +457,8 @@ if __name__ == "__main__":
     print "-b: shows the error on samples Before the fit (by default After fit is shown)"
     print "-%: also show the individual errors as percentage of the total systematic error (off by default)"
     print "-y: take symmetrized average of minos errors"
+    print "-C: full table caption"
+    print "-L: full table label"
 
     print "\nFor example:"
     print "SysTable.py -w MyName_combined_BasicMeasurement_model_afterFit.root  -c SR7jTEl_meffInc,SR7jTMu_meffInc -o SystematicsMultiJetsSR.tex"    
@@ -463,7 +468,7 @@ if __name__ == "__main__":
 
   wsFileName=''
   try:
-    opts, args = getopt.getopt(sys.argv[1:], "o:c:w:m:f:s:%by")
+    opts, args = getopt.getopt(sys.argv[1:], "o:c:w:m:f:s:C:L:%by")
   except:
     usage()
   if len(opts)<2:
@@ -479,6 +484,8 @@ if __name__ == "__main__":
   doAsym=True
   sampleStr=''
   chosenSample = False
+  tableCaption=""
+  tableLabel=""
 
   """
   set options as given by the user call
@@ -491,6 +498,10 @@ if __name__ == "__main__":
       wsFileName=arg
     elif opt == '-o':
       outputFileName=arg
+    elif opt == '-C':
+      tableCaption = str(arg)
+    elif opt == '-L':
+      tableLabel = str(arg)
     elif opt == '-m':
       if arg == "2" or arg == "1":
         method = arg
@@ -575,7 +586,7 @@ if __name__ == "__main__":
   """
   write out LaTeX table by calling function from SysTableTex.py function tablefragment
   """
-  line_chanSysTight = tablefragment(chanSys,chanList,skiplist,chanStr,showPercent)
+  line_chanSysTight = tablefragment(chanSys,chanList,skiplist,chanStr,showPercent,tableLabel,tableCaption)
   
   f = open(outputFileName, 'w')
   f.write( line_chanSysTight )

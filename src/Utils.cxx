@@ -55,6 +55,7 @@
 #include "RooConstVar.h"
 #include "RooNumIntConfig.h"
 #include "RooMinuit.h"
+#include "RooFormulaVar.h"
 
 #include "RooStats/ModelConfig.h"
 #include "RooStats/ProfileLikelihoodTestStat.h"

@@ -16,10 +16,11 @@
  * modification, are permitted according to the terms listed in the file          *
  * LICENSE.                                                                       *
 """
+import os
 
-from ROOT import gROOT,gSystem,gDirectory
-gSystem.Load("libSusyFitter.so")
-from ROOT import ConfigMgr,FitConfig 
+from ROOT import ConfigMgr, FitConfig
+from ROOT import gROOT, gSystem, gDirectory
+ROOT.gSystem.Load('{0}/lib/libSusyFitter.so'.format(os.getenv('HISTFITTER')))
 gROOT.SetBatch(True)
 gROOT.Reset()
 
@@ -30,7 +31,6 @@ from ROOT import RooFit
 from UpperLimitTableTex import *
 
 import pickle
-import os
 import sys
 
 def latexfitresults(filename, poiname='mu_SIG', lumiFB=1.0, nTOYS=3000, nPoints=20, muRange=40, asimov=False, wname='combined', outputPrefix=""):

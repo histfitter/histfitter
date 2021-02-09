@@ -866,7 +866,7 @@ class fitConfig(object):
         """
         Convert instance to XML string
         """
-        self.writeString = "<!DOCTYPE Combination  SYSTEM '../HistFactorySchema.dtd'>\n\n"
+        self.writeString = "<!DOCTYPE Combination  SYSTEM '"+os.getenv('HISTFITTER')+"/config/HistFactorySchema.dtd'>\n\n"
         self.writeString += "<Combination OutputFilePrefix=\"./results/" + self.prefix + "\"  >\n\n"
 
         for func in self.functions:

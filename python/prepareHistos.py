@@ -17,7 +17,7 @@
  **********************************************************************************
 """
 
-from ROOT import gROOT, TFile, TH1F, Double, gDirectory, SetOwnership
+from ROOT import gROOT, TFile, TH1F, gDirectory, SetOwnership
 from ROOT import TChain, TObject, TTree, TIter
 from math import sqrt
 from logger import Logger
@@ -438,7 +438,7 @@ class PrepareHistos(object):
 
                     self.configMgr.chains[self.currentChainName].Project(tempName, self.cuts, self.weights)
 
-                    error = Double()
+                    error = ROOT.Double()
                     integral = tempHist.IntegralAndError(1, tempHist.GetNbinsX(), error)
 
                     # for full JER the uncertainty is JET_JERMC - JET_JERPD + Nominal
@@ -518,17 +518,19 @@ class PrepareHistos(object):
         
         log.verbose("Loaded histogram {} with integral {}".format(self.configMgr.hists[name], self.configMgr.hists[name].Integral()))
         return self.configMgr.hists[name]
-    
+
+
     def __addHistoFromCacheWithoutFallback(self, name, nBins=None, binLow=None, binHigh=None, useOverflow=False, useUnderflow=False):
         """ simple helper to prevent specifying all the defaults """
         return self.__addHistoFromCache(name, nBins, binLow, binHigh, useOverflow, useUnderflow, True, True)
+
 
     def __addHistoFromCache(self, name, nBins=None, binLow=None, binHigh=None, useOverflow=False, useUnderflow=False, forceNoFallback=False, forceReturn=False):
         """
         Add this histogram to the dictionary of histograms.
         """
         # NOTE: useOverflow and useUnderflow has no effect. It's there just for symmetry with TreePrepare above.
-
+        
         if self.configMgr.hists[name] is None:
             log.debug("Attempting to load {}".format(name))
             try:

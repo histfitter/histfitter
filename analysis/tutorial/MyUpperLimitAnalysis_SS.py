@@ -22,7 +22,7 @@ ndata     =  7. 	# Number of events observed in data
 nbkg      =  5.	 	# Number of predicted bkg events
 nsig      =  1.  	# Number of predicted signal events
 nbkgErr   =  1.  	# (Absolute) Statistical error on bkg estimate *from limited MC statistics*
-nsigErr   =  2.  	# (Absolute) Statistical error on signal estimate *from limited MC statistics*
+#nsigErr   =  2.  	# (Absolute) Statistical error on signal estimate *from limited MC statistics*
 lumiError = 0.039 	# Relative luminosity uncertainty
 
 # Set uncorrelated systematics for bkg and signal (1 +- relative uncertainties)
@@ -69,7 +69,7 @@ bkgSample.addSystematic(ucb)
 sigSample = Sample("Sig",kPink)
 sigSample.setNormFactor("mu_SS",1.,0.,10.)
 #sigSample.setStatConfig(True)
-sigSample.setNormByTheory()
+#sigSample.setNormByTheory()
 sigSample.buildHisto([nsig],"UserRegion","cuts",0.5)
 
 
