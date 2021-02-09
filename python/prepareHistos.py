@@ -370,7 +370,7 @@ class PrepareHistos(object):
 
         return
 
-    def addHisto(self, name, nBins=0, binLow=0., binHigh=0., nBinsY=0, binLowY=0., binHighY=0., useOverflow=False, useUnderflow=False, forceNoFallback=False):
+    def addHisto(self, name, nBins=0, binLow=0., binHigh=0., nBinsY=0, binLowY=0., binHighY=0., useOverflow=False, useUnderflow=False, forceNoFallback=False, JERPD=False):
         """
         Make histogram and add it to the dictionary of prepared histograms
         
@@ -393,9 +393,9 @@ class PrepareHistos(object):
             return self.__addHistoFromCache(name, nBins, binLow, binHigh, useOverflow, useUnderflow, forceNoFallback)
    
         log.debug("addHisto(): will use tree for {}".format(name))
-        return self.__addHistoFromTree(name, nBins, binLow, binHigh, nBinsY, binLowY, binHighY, useOverflow, useUnderflow)
+        return self.__addHistoFromTree(name, nBins, binLow, binHigh, nBinsY, binLowY, binHighY, useOverflow, useUnderflow, JERPD)
 
-    def __addHistoFromTree(self, name, nBins=0, binLow=0., binHigh=0., nBinsY=0, binLowY=0., binHighY=0., useOverflow=False, useUnderflow=False):
+    def __addHistoFromTree(self, name, nBins=0, binLow=0., binHigh=0., nBinsY=0, binLowY=0., binHighY=0., useOverflow=False, useUnderflow=False, JERPD=False):
         """
         Use the TTree::Project method to create the histograms for var from cuts and weights defined in instance
         Recover from ROOT memory and add to dictionary of histograms
@@ -416,8 +416,11 @@ class PrepareHistos(object):
         log.debug("__addHistoFromTree: attempting to load {}".format(name))
 
         if self.var == "cuts":
-            if self.configMgr.hists[name] is None:
-                self.configMgr.hists[name] = TH1F(name, name, len(self.channel.regions), self.channel.binLow, float(len(self.channel.regions))+self.channel.binLow)
+            # for full JER the histogram already exists but we have to calculate the per bin
+            # uncertainty
+            if (self.configMgr.hists[name] is None) or (JERPD):
+                if self.configMgr.hists[name] is None:
+                    self.configMgr.hists[name] = TH1F(name, name, len(self.channel.regions), self.channel.binLow, float(len(self.channel.regions))+self.channel.binLow)
                 for (iReg,reg) in enumerate(self.channel.regions):
                     log.debug("__addHistoFromTree: loading %s in region %s" % (name, reg))
                     
@@ -434,16 +437,31 @@ class PrepareHistos(object):
                     log.debug('__addHistoFromTree: {}->Project("{}", "{}", "{}")'.format(self.currentChainName, tempName, self.cuts, self.weights) )
 
                     self.configMgr.chains[self.currentChainName].Project(tempName, self.cuts, self.weights)
-                    
+
                     error = ROOT.Double()
                     integral = tempHist.IntegralAndError(1, tempHist.GetNbinsX(), error)
+
+                    # for full JER the uncertainty is JET_JERMC - JET_JERPD + Nominal
+                    if JERPD:
+                        import re
+
+                        nomname = name
+                        nomname = re.sub(r'ATLAS_JET_JER_.*High', 'Nom', nomname)
+                        nomname = re.sub(r'ATLAS_JET_JER_.*Low', 'Nom', nomname)
+
+                        integral_old = self.configMgr.hists[name].GetBinContent(iReg+1)
+                        error_old = self.configMgr.hists[name].GetBinError(iReg+1)
+                        integral_nom = self.configMgr.hists[nomname].GetBinContent(iReg+1)
+                        error_nom = self.configMgr.hists[nomname].GetBinError(iReg+1)
+                        integral = integral_old - integral + integral_nom
+                        error = sqrt(error*error + error_old*error_old + error_nom*error_nom)
+
                     self.configMgr.hists[name].SetBinContent(iReg+1, integral)
                     self.configMgr.hists[name].SetBinError(iReg+1, error)
                     self.configMgr.hists[name].GetXaxis().SetBinLabel(iReg+1, reg)
-                  
+
                     del tempHist
                     del error
-                    #tempHist.Delete()
 
                     for iBin in xrange(1, self.configMgr.hists[name].GetNbinsX()+1):
                         binVal = self.configMgr.hists[name].GetBinContent(iBin)

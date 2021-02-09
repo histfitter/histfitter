@@ -178,7 +178,7 @@ class SystematicBase:
         #return
 
     def FillUpDownHist(self, lowhigh="", regionString="", normString="",
-                       normCuts="", abstract=None, topLvl=None, chan=None, sam=None):
+                       normCuts="", abstract=None, topLvl=None, chan=None, sam=None, JERPD=False):
         
         _allowed_methods = ["userNormHistoSys", 
                             "overallNormSys", "normHistoSys", 
@@ -354,7 +354,10 @@ class SystematicBase:
 
             log.debug("FillUpDownHist(): calling prepare.read() for {}".format(s.name))
             #abstract.prepare.read(treeName, filelist)
-            abstract.prepare.read(s.input_files, suffix=s.getTreenameSuffix(), friendTreeName=s.friendTreeName)
+            if JERPD:
+                abstract.prepare.read(s.input_files, suffix=s.getTreenameSuffix().replace("JET_JERMC", "JET_JERPD"), friendTreeName=s.friendTreeName)
+            else:
+                abstract.prepare.read(s.input_files, suffix=s.getTreenameSuffix(), friendTreeName=s.friendTreeName)
 
             tempHist = TH1F("temp", "temp", 1, 0.5, 1.5)
 
@@ -379,12 +382,19 @@ class SystematicBase:
                         _cut_str = copy(s.additionalCuts)
             _weight_str = "{} * {}".format(str(abstract.lumiUnits*abstract.outputLumi/abstract.inputLumi), " * ".join(_weights))
 
-            log.verbose("FillUpDownHist(): current chain {}".format(abstract.prepare.currentChainName))
+            if JERPD:
+                log.verbose("FillUpDownHist(): current chain {}".format(abstract.prepare.currentChainName.replace("JET_JERMC", "JET_JERPD")))
+            else:
+                log.verbose("FillUpDownHist(): current chain {}".format(abstract.prepare.currentChainName))
             log.verbose("FillUpDownHist(): normalization region {}".format(normReg[0]))
             log.verbose("FillUpDownHist(): normalization region cuts {}".format(_cut_str))
             log.verbose("FillUpDownHist(): weights: {}".format(_weight_str)) 
-                
-            currentChain = abstract.chains[abstract.prepare.currentChainName]
+
+            if JERPD:
+                currentChain = abstract.chains[abstract.prepare.currentChainName.replace("JET_JERMC", "JET_JERPD")]
+            else:
+                currentChain = abstract.chains[abstract.prepare.currentChainName]
+
             try:
                 currentChain.Project("temp", _cut_str, "{} * ({})".format(_weight_str, _cut_str) )
             except:
@@ -401,14 +411,15 @@ class SystematicBase:
         return
 
     def tryAddHistos(self, highorlow="", regionString="", normString="",
-                     normCuts="", abstract=None, chan=None, sam=None):
+                     normCuts="", abstract=None, chan=None, sam=None, JERPD=False):
         histName = "h%s%s%s%s_obs_%s" % (sam.name, self.name, highorlow, regionString, replaceSymbols(chan.variableName) )
 
         log.debug("       adding histo %s" % histName)
         try:
             abstract.prepare.addHisto(histName,
                                       useOverflow=chan.useOverflowBin,
-                                      useUnderflow=chan.useUnderflowBin)
+                                      useUnderflow=chan.useUnderflowBin,
+                                      JERPD=JERPD)
         except:
             pass
 
@@ -457,7 +468,7 @@ class TreeWeightSystematic(SystematicBase):
         return
 
     def PrepareWAHforTree(self, regionString="", normString="", normCuts="",
-                          abstract=None, topLvl=None, chan=None, sam=None):
+                          abstract=None, topLvl=None, chan=None, sam=None, JERPD=False):
         highandlow = ["High_", "Low_"]
         if self.differentNominalTreeWeight:
             highandlow = ["High_", "Low_", "Nom_"]
@@ -487,16 +498,22 @@ class TreeWeightSystematic(SystematicBase):
                 log.debug("PrepareWAHforTree(): calling prepare.read() for {} (sample {})".format(self.name, sam.name))
                 log.verbose("PrepareWAHforTree(): using the following inputs:")
                 for i in sam.input_files:
-                    log.verbose("{}{} from {}".format(i.treename, sam.getTreenameSuffix(), i.filename))
+                    if JERPD:
+                        log.verbose("{}{} from {}".format(i.treename, sam.getTreenameSuffix().replace("JET_JERMC", "JET_JERPD"), i.filename))
+                    else:
+                        log.verbose("{}{} from {}".format(i.treename, sam.getTreenameSuffix(), i.filename))
 
-                abstract.prepare.read(sam.input_files, suffix=sam.getTreenameSuffix(), friendTreeName=sam.friendTreeName)
+                if JERPD:
+                    abstract.prepare.read(sam.input_files, suffix=sam.getTreenameSuffix().replace("JET_JERMC", "JET_JERPD"), friendTreeName=sam.friendTreeName)
+                else:
+                    abstract.prepare.read(sam.input_files, suffix=sam.getTreenameSuffix(), friendTreeName=sam.friendTreeName)
 
             TreeWeightSystematic.tryAddHistos(self, highorlow, regionString,
                                               normString, normCuts, abstract,
-                                              chan, sam)
+                                              chan, sam, JERPD)
             TreeWeightSystematic.FillUpDownHist(self, highorlow, regionString,
                                                 normString, normCuts, abstract,
-                                                topLvl, chan, sam)
+                                                topLvl, chan, sam, JERPD)
             abstract.prepare.weights = weightstemp
         return
 
@@ -514,7 +531,13 @@ class TreeWeightSystematic(SystematicBase):
             log.verbose("Calling TreeWeightSystematic.PrepareWAHforTree() for {}".format(self.name)) 
             TreeWeightSystematic.PrepareWAHforTree(self, regionString,
                                                    normString, normCuts,
-                                                   abstract, topLvl, chan, sam)
+                                                   abstract, topLvl, chan, sam, False)
+
+            # for full JER we have to call this again, so that the uncertainty gets calculated correctly
+            if "ATLAS_JET_JER_" in self.name:
+                TreeWeightSystematic.PrepareWAHforTree(self, regionString,
+                                                       normString, normCuts,
+                                                       abstract, topLvl, chan, sam, True)
         return
 
 
