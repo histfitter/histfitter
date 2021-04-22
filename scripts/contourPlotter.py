@@ -27,7 +27,7 @@ class contourPlotter:
 
 		self.processLabel = "Process Title -- Describe The Grid!"
 		self.lumiLabel = "#sqrt{s}=XX TeV, YY fb^{-1}, All limits at 95% CL"
-                self.atlasLabel = "#it{ATLAS} #bf{Internal}"
+                self.figLabel = "#it{Example Label}"
 
 		self.bottomObject = 0
 		self.legendObjects = []
@@ -171,7 +171,7 @@ class contourPlotter:
 		latexObject.DrawLatexNDC(0.24, 0.8, self.lumiLabel)
 
 		latexObject.SetTextSize(0.05)
-		latexObject.DrawLatexNDC(0.24, 0.85, self.atlasLabel)
+		latexObject.DrawLatexNDC(0.24, 0.85, self.figLabel)
 
 		ROOT.gPad.RedrawAxis()
 		self.canvas.Update()
