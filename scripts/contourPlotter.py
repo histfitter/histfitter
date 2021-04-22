@@ -9,6 +9,8 @@
 import ROOT
 ROOT.gROOT.SetBatch()
 
+from array import array
+
 class contourPlotter:
 	def __init__(self, plotName="test", xSize=800, ySize=600):
 		self.plotName = plotName
@@ -25,6 +27,7 @@ class contourPlotter:
 
 		self.processLabel = "Process Title -- Describe The Grid!"
 		self.lumiLabel = "#sqrt{s}=XX TeV, YY fb^{-1}, All limits at 95% CL"
+                self.figLabel = "#it{Example Label}"
 
 		self.bottomObject = 0
 		self.legendObjects = []
@@ -42,6 +45,11 @@ class contourPlotter:
 		self.yAxisLabel = label
 		if self.bottomObject:
 			self.bottomObject.GetYaxis().SetTitle(self.yAxisLabel)
+		return
+
+	def setYAxisLog(self, b=1):
+		if self.canvas:
+			self.canvas.SetLogy(b)
 		return
 
 	def drawAxes(self, axisRange=[0,0,2000,2000]):
@@ -161,6 +169,10 @@ class contourPlotter:
 
 		latexObject.SetTextSize(0.037)
 		latexObject.DrawLatexNDC(0.24, 0.8, self.lumiLabel)
+
+		latexObject.SetTextSize(0.05)
+		latexObject.DrawLatexNDC(0.24, 0.85, self.figLabel)
+
 		ROOT.gPad.RedrawAxis()
 		self.canvas.Update()
 		return
@@ -179,6 +191,7 @@ class contourPlotter:
 
 		return legend
 
+
 	def drawTheoryLegendLines(self, xyCoord, length=0.05, ySeparation=0.026, color=ROOT.TColor.GetColor("#800000"), alpha=0.7, style=3 ):
 		self.canvas.cd()
 		tmpLine = ROOT.TLine()
@@ -190,3 +203,43 @@ class contourPlotter:
 	def writePlot(self, format="pdf"):
 		self.canvas.SaveAs("{0:s}.{1:s}".format(self.plotName, format))
 		return
+
+        # Pass a lambda function, e.g. y_new = lambda x,y : x - y
+        def rotateTGraph(self, tg, x_new, y_new):
+
+            n = tg.GetN()
+            x = array( 'd' )
+            y = array( 'd' )
+            for i in range(n):
+                x_temp = ROOT.Double()
+                y_temp = ROOT.Double()
+                tg.GetPoint(i, x_temp, y_temp)
+                    
+                x.append( x_new(x_temp, y_temp) )
+                y.append( y_new(x_temp, y_temp) )
+
+            tg_new = ROOT.TGraph(n, x, y)
+
+            return tg_new
+
+        def rotateTGraph2D(self, tg, x_new, y_new):
+            
+            n = tg.GetN()
+            x = array( 'd' )
+            y = array( 'd' )
+            z = array( 'd' )
+
+            #tg.GetPoint(i, x_temp, y_temp, z_temp) # this doesn't exit in old root versions
+
+            x_temp = tg.GetX()
+            y_temp = tg.GetY()
+            z_temp = tg.GetZ()
+            
+            for i in range(n):
+                x.append( x_new(x_temp[i], y_temp[i]) )
+                y.append( y_new(x_temp[i], y_temp[i]) )
+                z.append( z_temp[i] )
+
+            tg_new = ROOT.TGraph2D(n, x, y, z)
+
+            return tg_new
