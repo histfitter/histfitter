@@ -546,6 +546,7 @@ RooStats::HypoTestTool::SetupHypoTestCalculator(RooWorkspace * w, bool doUL,
         RooCmdArg _Hesse(Hesse(false));
         RooCmdArg _Minimizer(Minimizer(mMinimizerType.c_str(), "Migrad"));
         RooCmdArg _Offset(Offset(true));
+        RooCmdArg _AsymptoticError(AsymptoticError(true));
         RooCmdArg _Strategy_speed(Strategy(0));
         RooCmdArg _Strategy_default(Strategy(1));
         RooCmdArg _Verbose(Verbose(verbose));
@@ -557,6 +558,7 @@ RooStats::HypoTestTool::SetupHypoTestCalculator(RooWorkspace * w, bool doUL,
         fitArgs.Add(dynamic_cast<TObject*>(&_Hesse));
         fitArgs.Add(dynamic_cast<TObject*>(&_Minimizer));
         fitArgs.Add(dynamic_cast<TObject*>(&_Offset));
+        fitArgs.Add(dynamic_cast<TObject*>(&_AsymptoticError));
         fitArgs.Add(dynamic_cast<TObject*>(&_Verbose));
         fitArgs.Add(dynamic_cast<TObject*>(&_PrintLevel));
         fitArgs.Add(dynamic_cast<TObject*>(&_Constrain));
