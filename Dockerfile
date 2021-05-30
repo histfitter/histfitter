@@ -1,4 +1,4 @@
-FROM rootproject/root-ubuntu16:6.10
+FROM rootproject/root:6.22.00-centos7
 USER root
 COPY . /HistFitter
 RUN chown -R builder /HistFitter
