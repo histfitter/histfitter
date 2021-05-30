@@ -36,4 +36,4 @@ test:
     #- sudo pip install pytest
   script:
     #- pytest
-    - HistFitter.py
+    - HistFitter.py --help
