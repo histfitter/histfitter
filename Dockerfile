@@ -1,4 +1,4 @@
-FROM rootproject/root:6.22.00-centos7
+FROM rootproject/root:6.22.00-ubuntu20.04
 USER root
 COPY . /HistFitter
 RUN which root
