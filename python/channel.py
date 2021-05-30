@@ -372,7 +372,7 @@ class Channel(object):
         for (iSR, sr) in enumerate(srList):
             sigSample = Sample("DiscoveryMode_%s" % sr, colorList[iSR])
             sigSample.setNormFactor("mu_%s" % sr, startValList[iSR],
-                                    minValList[iSR], maxValList[iSR])
+                                    maxValList[iSR], minValList[iSR])
             sigSample.setDiscovery()
             sigSample.clearSystematics()
 

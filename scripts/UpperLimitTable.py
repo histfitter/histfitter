@@ -17,7 +17,7 @@
  * LICENSE.                                                                       *
 """
 import os
-
+import ROOT
 from ROOT import ConfigMgr, FitConfig
 from ROOT import gROOT, gSystem, gDirectory
 ROOT.gSystem.Load('{0}/lib/libSusyFitter.so'.format(os.getenv('HISTFITTER')))
@@ -57,6 +57,10 @@ def latexfitresults(filename, poiname='mu_SIG', lumiFB=1.0, nTOYS=3000, nPoints=
     print "ERROR : Cannot open workspace : ", workspacename
     sys.exit(1) 
 
+  Util.resetAllErrors(w)
+  Util.resetAllValues(w)
+  Util.resetAllNominalValues(w)
+
     
   """
   Set the POI in ModelConfig
@@ -84,6 +88,9 @@ def latexfitresults(filename, poiname='mu_SIG', lumiFB=1.0, nTOYS=3000, nPoints=
   if asimov:
     calctype = 2
  
+  fitresult = Util.doFreeFit( w, 0, False, True )  #reset fit paremeters after the fit ...
+  if fitresult:  fitresult.Print()
+
   """
   set the range of POI to be scanned and perform HypoTest inversion
   """
@@ -170,6 +177,14 @@ def latexfitresults(filename, poiname='mu_SIG', lumiFB=1.0, nTOYS=3000, nPoints=
     print "ERROR : Cannot open workspace : ", workspacename
     sys.exit(1) 
         
+  Util.resetAllErrors(w2)
+  Util.resetAllValues(w2)
+  Util.resetAllNominalValues(w2)
+
+
+  fitresult2 = Util.doFreeFit( w2, 0, False, True )  #reset fit paremeters after the fit ...
+  if fitresult2:  fitresult2.Print()
+
   """
   calculate p(s=0) from the workspace given
   """
