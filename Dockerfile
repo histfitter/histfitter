@@ -3,6 +3,6 @@ USER root
 COPY . /HistFitter
 RUN chown -R nobody /HistFitter
 USER nobody
-RUN bash -c "cd /HistFitter && \
-    . /opt/root/bin/thisroot.sh && \
+RUN bash -c "rootpath=`find / -name thisroot.sh`&& cd /HistFitter && \
+    . $rootpath && \
     . setup.sh && cd src && make"
