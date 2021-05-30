@@ -1216,7 +1216,7 @@ class Sample(object):
             self.systList.append(systName)
         return
 
-    def addNormFactor(self, name, val, high, low, const=False):
+    def addNormFactor(self, name, val, low, high, const=False):
         """
         Add a normalization factor
 
@@ -1231,7 +1231,7 @@ class Sample(object):
             configMgr.normList.append(name)
         return
 
-    def setNormFactor(self, name, val, high, low, const=False):
+    def setNormFactor(self, name, val, low, high, const=False):
         """
         Set normalization factor
         
