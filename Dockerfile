@@ -4,6 +4,7 @@ COPY . /HistFitter
 RUN which root
 RUN root --version
 RUN gcc --version
+RUN find / -name thisroot.sh
 RUN chown -R nobody /HistFitter
 USER nobody
 RUN bash -c "cd /HistFitter && \
