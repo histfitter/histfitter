@@ -24,10 +24,10 @@ build_tagged_image:
 
 test:
   stage: test
-  image: $CI_REGISTRY_IMAGE:latest
-  #before_script:
-  #  - sudo apt-get update && sudo apt-get -y install curl
-  #  - cd /HistFitter
+  #image: $CI_REGISTRY_IMAGE:latest
+  before_script:
+    - apt-get update && apt-get -y install curl
+    - find / -name HistFitter
   #  - source setup.sh
   script:
     - echo "This job tests something"
