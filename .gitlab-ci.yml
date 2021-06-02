@@ -29,7 +29,7 @@ test:
     - tags
 #  before_script:
 #    #- sudo apt-get update && sudo apt-get -y install curl
-script:
+  script:
     - cd /HistFitter
 #    - source setup.sh
 #    #- curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py ##Not working anymore in python2
