@@ -24,17 +24,5 @@ build_tagged_image:
 
 test:
   stage: test
-  image: $CI_REGISTRY_IMAGE:latest
-#  except:
-#    - tags
-#  before_script:
-#    #- sudo apt-get update && sudo apt-get -y install curl
   script:
-    - cd /HistFitter
-#    - source setup.sh
-#    #- curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py ##Not working anymore in python2
-#    #- sudo python get-pip.py
-#    #- sudo pip install pytest
-#  script:
-#    #- pytest
-#    - HistFitter.py --help
+    - echo "This job tests something"
