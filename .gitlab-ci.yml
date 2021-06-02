@@ -25,8 +25,8 @@ build_tagged_image:
 test:
   stage: test
   image: $CI_REGISTRY_IMAGE:latest
-  except:
-    - tags
+#  except:
+#    - tags
 #  before_script:
 #    #- sudo apt-get update && sudo apt-get -y install curl
   script:
