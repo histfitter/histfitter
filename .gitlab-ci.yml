@@ -24,5 +24,6 @@ build_tagged_image:
 
 test:
   stage: test
+  image: $CI_REGISTRY_IMAGE:latest
   script:
     - echo "This job tests something"
