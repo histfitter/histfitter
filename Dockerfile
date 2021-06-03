@@ -1,8 +1,11 @@
-FROM rootproject/root:6.22.00-ubuntu20.04
+FROM atlasamglab/stats-base:root6.22.00
 USER root
+RUN bash -c "apt-get update && apt-get -y install curl"
 COPY . /HistFitter
-RUN chown -R builder /HistFitter
-USER builder
+RUN root --version
+RUN gcc --version
+RUN chown -R nobody /HistFitter
+USER nobody
 RUN bash -c "cd /HistFitter && \
-    . /usr/local/bin/thisroot.sh && \
-    . setup.sh && cd src && make"
+    . setup.sh && cd src && make && cd ../"
+
