@@ -28,6 +28,7 @@ test:
   before_script:
     - pwd
     - ls -lrt 
+    - which root
     - bash -c " source setup.sh"
     - curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py ##Not working anymore in python2
     #- python get-pip.py # toBE put back with  python3
