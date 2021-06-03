@@ -27,10 +27,11 @@ test:
   #image: $CI_REGISTRY_IMAGE:latest
   before_script:
     - pwd
-    - source setup.sh
+    - ls -lrt 
+    - ./setup.sh
     - curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py ##Not working anymore in python2
-    - sudo python get-pip.py
-    - sudo pip install pytest
+    - python get-pip.py
+    - pip install pytest
   script:
     - echo "This job tests something"
     #- pytest
