@@ -28,6 +28,7 @@ test:
   before_script:
     - pwd
     - ls -lrt 
+    - chmod 777 setup.sh
     - ./setup.sh
     - curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py ##Not working anymore in python2
     - python get-pip.py
