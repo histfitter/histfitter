@@ -7,4 +7,4 @@ RUN chown -R nobody /HistFitter
 USER nobody
 RUN bash -c "cd /HistFitter && \
     . setup.sh && cd src && make && cd ../"
-RUN bash -c "sudo apt-get update && sudo apt-get -y install curl"
+RUN bash -c "apt-get update && apt-get -y install curl"
