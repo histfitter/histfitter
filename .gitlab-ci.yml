@@ -24,7 +24,7 @@ build_tagged_image:
 
 test:
   stage: test
-  image: $CI_REGISTRY_IMAGE:latest
+  image: $CI_REGISTRY_IMAGE
   except:
     - tags
   before_script:
