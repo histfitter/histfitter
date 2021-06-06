@@ -1,3 +1,4 @@
+#!/bin/bash
 # setup ROOT
 # check Root environment setup. Allow for external setup script.
 
@@ -5,8 +6,8 @@
 VERSION="trunk"
 
 # check Root environment setup 
-if [ ! $ROOTSYS ]; then
-  echo "Warning: No valid Root environment (ROOTSYS) defined. Please do so first!"
+if [ -z "$(root-config --libs)" ] && [ -z "$(root-config --libs)"] && [ ! $ROOTSYS ]; then
+  echo "Warning: No valid Root environment  defined. Please do so first!"
   return
 fi
 
@@ -38,7 +39,6 @@ else
   HF=${DIR}; export HF
 fi
 HISTFITTER=$HF; export HISTFITTER
-SUSYFITTER=$HF; export SUSYFITTER # for backwards compatibility
 
 HISTFITTER_VERSION=$VERSION
 export HISTFITTER_VERSION
@@ -53,10 +53,6 @@ export LD_LIBRARY_PATH=$HISTFITTER/lib:${LD_LIBRARY_PATH}
 export PYTHONPATH=$HISTFITTER/python:$HISTFITTER/scripts:$HISTFITTER/macros:$HISTFITTER/lib:$PYTHONPATH
 export ROOT_INCLUDE_PATH=$HISTFITTER/include:${ROOT_INCLUDE_PATH}
 
-# set SVN path to defaults
-export SVNTEST="svn+ssh://svn.cern.ch/reps/atlastest"
-export SVNROOT="svn+ssh://svn.cern.ch/reps/atlasoff"
-export SVNPHYS="svn+ssh://svn.cern.ch/reps/atlasphys"
 
 # Hack for ssh from mac 
 export LC_ALL=C 

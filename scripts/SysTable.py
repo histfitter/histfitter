@@ -54,7 +54,7 @@ def latexfitresults( filename, namemap, region='3jL', sample='', resultName="Roo
   @param sample The sample to be used insted of total pdf (default='' not defined, hence total pdf used)
   @param dataname The name of dataset (default='obsData')
   @param doAsym Calculates asymmetric errors taken from MINOS (default=True)
-"""
+  """
 
   """
   pick up workspace from file
@@ -72,6 +72,11 @@ def latexfitresults( filename, namemap, region='3jL', sample='', resultName="Roo
   if result==None:
     print "ERROR : Cannot open fit result ", resultName
     sys.exit(1)
+
+  """
+  get a list of floating parameters to loop over
+  """
+  fpf = result.floatParsFinal() 
 
   """
   load workspace snapshot related to resultName (=set all parameters to values after fit)
@@ -109,6 +114,17 @@ def latexfitresults( filename, namemap, region='3jL', sample='', resultName="Roo
   define regSys set, for all names/numbers to be saved in
   """
   regSys = {}
+  regSys['sqrtnobsa'] = 0.
+  regSys['sqrtnfitted'] = 0.
+  regSys['nfitted'] = 0.
+  regSys['totsyserr'] = 0.
+  if len(namemap)>0: 
+    for key in namemap.keys():
+      regSys['syserr_'+key] =  0.
+  else: 
+    for idx in range(fpf.getSize()):
+      parname = fpf[idx].GetName()
+      regSys['syserr_'+parname] =  0.
 
   """
   define channelCat call for this region and reduce the dataset to this category/region
@@ -158,6 +174,7 @@ def latexfitresults( filename, namemap, region='3jL', sample='', resultName="Roo
       print " \n Warning, could not find pdf in region = ",region, " for sample = ",sample
     else:
       print " \n Warning, could not find pdf in region = ",region
+    return regSys
 
   """
   calculate fitted pdf number of events and full error
@@ -169,12 +186,6 @@ def latexfitresults( filename, namemap, region='3jL', sample='', resultName="Roo
   pdfFittedErrInRegion = Util.GetPropagatedError(pdfInRegion, result, doAsym) 
   regSys['totsyserr'] = pdfFittedErrInRegion
 
-
-  """
-  calculate error per (floating) parameter in fitresult
-  get a list of floating parameters to loop over
-  """
-  fpf = result.floatParsFinal() 
   
   """
   set all floating parameters constant
@@ -251,6 +262,11 @@ def latexfitresults_method2(filename,resultname='RooExpandedFitResult_afterFit',
     sys.exit(1)
 
   """
+  get a list of floating parameters to loop over
+  """
+  fpf = result.floatParsFinal()
+
+  """
   save the original (after-fit result) fit parameters list
   """
   resultlistOrig = result.floatParsFinal()
@@ -304,6 +320,17 @@ def latexfitresults_method2(filename,resultname='RooExpandedFitResult_afterFit',
   define regSys set, for all names/numbers to be saved in
   """
   regSys = {}
+  regSys['sqrtnobsa'] = 0.
+  regSys['sqrtnfitted'] = 0.
+  regSys['nfitted'] = 0.
+  regSys['totsyserr'] = 0.
+  if len(namemap)>0: 
+    for key in namemap.keys():
+      regSys['syserr_'+key] =  0.
+  else: 
+    for idx in range(fpf.getSize()):
+      parname = fpf[idx].GetName()
+      regSys['syserr_'+parname] =  0.
 
   """
   define channelCat call for this region and reduce the dataset to this category/region
@@ -350,6 +377,7 @@ def latexfitresults_method2(filename,resultname='RooExpandedFitResult_afterFit',
       print " \n Warning, could not find pdf in region = ",region, " for sample = ",sample
     else:
       print " \n Warning, could not find pdf in region = ",region
+    return regSys
 
   """
   calculate fitted pdf number of events and full error
@@ -366,7 +394,6 @@ def latexfitresults_method2(filename,resultname='RooExpandedFitResult_afterFit',
   """
   lumiConst = True
   
-  fpf = result.floatParsFinal()
 
   """
   redo the fit for every parameter being fixed

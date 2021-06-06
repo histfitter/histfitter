@@ -1,6 +1,6 @@
 stages:
   - docker
-  - test
+#  - test
 
 build_latest_image:
   stage: docker
@@ -22,17 +22,18 @@ build_tagged_image:
   script:
     - ignore
 
-test:
-  stage: test
-  image: $CI_REGISTRY_IMAGE:latest
-  except:
-    - tags
-  before_script:
-    - sudo apt-get update && sudo apt-get -y install curl
-    - cd /HistFitter
-    - source /usr/local/bin/thisroot.sh && source setup.sh
-    - curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
-    - sudo python get-pip.py
-    - sudo pip install pytest
-  script:
-    - pytest
+#test:
+#  stage: test
+#  image: $CI_REGISTRY_IMAGE:latest
+#  except:
+#    - tags
+#  before_script:
+#    #- sudo apt-get update && sudo apt-get -y install curl
+#    - cd /HistFitter
+#    - source /usr/local/bin/thisroot.sh && source setup.sh
+#    #- curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py ##Not working anymore in python2
+#    #- sudo python get-pip.py
+#    #- sudo pip install pytest
+#  script:
+#    #- pytest
+#    - HistFitter.py -w -f analysis/tutorial/MyUserAnalysis.py

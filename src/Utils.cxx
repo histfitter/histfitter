@@ -631,6 +631,9 @@ RooFitResult* Util::FitPdf( RooWorkspace* w, TString fitRegions, Bool_t lumiCons
     Logger << kINFO << " ------ Starting FitPdf with parameters:    fitRegions = " <<  fitRegions << GEndl;
     Logger << kINFO <<  "    inputData = " << inputData << "  suffix = " << suffix  << "  minos = " << minos << "  minosPars = " << minosPars  << " doFixParameters = " << doFixParameters << " fixedPars = " << fixedPars << GEndl;
 
+    // enable internal likelihood offsetting for enhanced numeric precision
+    RooStats::UseNLLOffset(true);
+
     RooMsgService::instance().getStream(1).removeTopic(NumIntegration);
 
     if(!w){ 
@@ -792,6 +795,8 @@ RooFitResult* Util::FitPdf( RooWorkspace* w, TString fitRegions, Bool_t lumiCons
     RooMinimizer minim(*nll);
     int strategy = ROOT::Math::MinimizerOptions::DefaultStrategy();
     minim.setStrategy( strategy);
+    // enable internal likelihood offsetting for enhanced numeric precision
+    minim.setOffsetting(true);
     // use tolerance - but never smaller than 1 (default in RooMinimizer)
     double tol =  ROOT::Math::MinimizerOptions::DefaultTolerance();
     tol = std::max(tol, 1.0); // 1.0 is the minimum value used in RooMinimizer
