@@ -159,7 +159,8 @@ class ConfigManager(object):
         self.histBackupCacheFile = ""
         self.useCacheToTreeFallback = False
         self.useHistBackupCacheFile = False
-        self.forceNorm = True
+        self.forceNorm = True #Force building of normalized histograms
+        self.minValue = 0.0001
         
         self.input_files = set() # Input list to be used for tree production
        
@@ -1774,6 +1775,7 @@ class ConfigManager(object):
                               log.error("exiting from HistFitter")
                               system.exit(-1)
                            log.verbose("      - {} is NOT user based syst".format(syst.name)) 
+
 
                         # first reset weight to nominal value
                         # NOTE: this won't actually load a histogram as the nominal one is already done 

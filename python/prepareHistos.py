@@ -21,6 +21,7 @@ from ROOT import gROOT, TFile, TH1F, gDirectory, SetOwnership
 from ROOT import TChain, TObject, TTree, TIter
 from math import sqrt
 from logger import Logger
+from ctypes import c_double
 import os
 
 log = Logger('PrepareHistos')
@@ -269,8 +270,7 @@ class PrepareHistos(object):
         self.configMgr.chains[chainID] = TChain(treenames)
        
         #self.configMgr.chains[chainID].CanDeleteRefs(True)
-        self.configMgr.chains[chainID].Project._creates = True
-        self.configMgr.chains[chainID].Draw._creates = True
+        SetOwnership(self.configMgr.chains[chainID], True)
         
         log.verbose("Created chain {} @ {}".format(chainID, hex(id(self.configMgr.chains[chainID])) ))
         
@@ -435,10 +435,10 @@ class PrepareHistos(object):
 
                     self.configMgr.chains[self.currentChainName].Project(tempName, self.cuts, self.weights)
                     
-                    error = ROOT.Double()
+                    error = c_double(0.0)
                     integral = tempHist.IntegralAndError(1, tempHist.GetNbinsX(), error)
                     self.configMgr.hists[name].SetBinContent(iReg+1, integral)
-                    self.configMgr.hists[name].SetBinError(iReg+1, error)
+                    self.configMgr.hists[name].SetBinError(iReg+1, error.value)
                     self.configMgr.hists[name].GetXaxis().SetBinLabel(iReg+1, reg)
                   
                     del tempHist
@@ -448,8 +448,9 @@ class PrepareHistos(object):
                     for iBin in xrange(1, self.configMgr.hists[name].GetNbinsX()+1):
                         binVal = self.configMgr.hists[name].GetBinContent(iBin)
                         binErr = self.configMgr.hists[name].GetBinError(iBin)
-                        if binVal < 0.0:
-                            self.configMgr.hists[name].SetBinContent(iBin, 0.0)
+                        if binVal <= 0.0:
+                            log.warning('bin {} of the histogram {} empty or negative, setting as lowest value {}'.format(str(iBin),name,str(self.configMgr.minValue)))
+                            self.configMgr.hists[name].SetBinContent(iBin, self.configMgr.minValue)
 
         else:
             if self.configMgr.hists[name] is None:
@@ -487,8 +488,9 @@ class PrepareHistos(object):
                     for iBin in xrange(1, self.configMgr.hists[name].GetNbinsX()+1):
                         binVal = self.configMgr.hists[name].GetBinContent(iBin)
                         binErr = self.configMgr.hists[name].GetBinError(iBin)
-                        if binVal < 0.:
-                            self.configMgr.hists[name].SetBinContent(iBin, 0.)
+                        if binVal <= 0.:
+                            log.warning('bin {} of the histogram {} empty or negative, setting as lowest value {}'.format(str(iBin),name,str(self.configMgr.minValue)))
+                            self.configMgr.hists[name].SetBinContent(iBin, self.configMgr.minValue)
                         #if binErr==0:
                         #    self.configMgr.hists[name].SetBinError(iBin,1E-8)
 
@@ -518,11 +520,13 @@ class PrepareHistos(object):
             try:
                 self.configMgr.hists[name] = self.cache2File.Get(name)
                 testsum = self.configMgr.hists[name].GetSum()
+                if self.cache2File.Get(name+"_test"): self.configMgr.hists[name+"_test"] = self.cache2File.Get(name+"_test")
             except: # IOError:
                 log.verbose("Could not get histogram <%s> from backupCacheFile '%s', trying cacheFile '%s'" % (name, self.cache2FileName, self.cacheFileName))
                 try:
                     self.configMgr.hists[name] = self.cacheFile.Get(name)
                     testsum = self.configMgr.hists[name].GetSum()
+                    if self.cacheFile.Get(name+"_test"): self.configMgr.hists[name+"_test"] = self.cacheFile.Get(name+"_test")
                 except: # IOError:
                     if forceNoFallback or not self.useCacheToTreeFallback:
                         self.configMgr.hists[name] = None

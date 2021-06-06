@@ -163,6 +163,10 @@ class Sample(object):
         """
         
         ## Name of the sample
+        if name[0].isdigit():
+            log.warning("Sample name %s starts with a digit - this can confuse HistFactory internals" % name)
+            name=name.replace(name[0],'A').replace('+','').replace('-','')
+
         self.name = name
         ## Colour used in before/after fit plots
         self.color = color 
@@ -236,8 +240,6 @@ class Sample(object):
         # will this sample be merged with something?
         self.toBeMerged = False
 
-        if self.name[0].isdigit():
-            log.warning("Sample name %s starts with a digit - this can confuse HistFactory internals" % self.name)
 
     def buildHisto(self, binValues, region, var, binLow=0.5, binWidth=1.):
         """
@@ -262,7 +264,11 @@ class Sample(object):
 
         configMgr.hists[self.histoName] = TH1F(self.histoName, self.histoName, len(self.binValues[(region, var)]), binLow, float(len(self.binValues[(region, var)]))*binWidth+binLow)
         for (iBin, val) in enumerate(self.binValues[(region, var)]):
-            configMgr.hists[self.histoName].SetBinContent(iBin+1, val)
+            if val <=0:
+               log.warning('bin {} of the histogram {} empty or negative, setting as lowest value {}'.format(str(iBin), self.histoName, str(configMgr.minValue)))
+               configMgr.hists[self.histoName].SetBinContent(iBin+1, configMgr.minValue)
+            else:
+               configMgr.hists[self.histoName].SetBinContent(iBin+1, val)
 
         return
 
@@ -1210,7 +1216,7 @@ class Sample(object):
             self.systList.append(systName)
         return
 
-    def addNormFactor(self, name, val, high, low, const=False):
+    def addNormFactor(self, name, val, low, high, const=False):
         """
         Add a normalization factor
 

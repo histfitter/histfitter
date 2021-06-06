@@ -106,6 +106,8 @@ RooStats::HypoTestTool::HypoTestTool() : m_hc(0), m_calc(0),
     m_logger("HypoTestTool"),
     m_generateAsimovDataForObserved(false)
 {
+    // enable internal likelihood offsetting for enhanced numeric precision
+    RooStats::UseNLLOffset(true);
 }
 
 
@@ -543,42 +545,35 @@ RooStats::HypoTestTool::SetupHypoTestCalculator(RooWorkspace * w, bool doUL,
         RooCmdArg _InitialHesse(InitialHesse(false));
         RooCmdArg _Hesse(Hesse(false));
         RooCmdArg _Minimizer(Minimizer(mMinimizerType.c_str(), "Migrad"));
-        RooCmdArg _Strategy(Strategy(0));
-        RooCmdArg _Strategy_alt(Strategy(1));
+        RooCmdArg _Offset(Offset(true));
+        RooCmdArg _AsymptoticError(AsymptoticError(true));
+        RooCmdArg _Strategy_speed(Strategy(0));
+        RooCmdArg _Strategy_default(Strategy(1));
         RooCmdArg _Verbose(Verbose(verbose));
         RooCmdArg _PrintLevel(PrintLevel(mPrintLevel+1));
         RooCmdArg _Constrain(Constrain(constrainParams));
         RooCmdArg _Save(Save(true));
-        //RooCmdArg _SumW2Error(SumW2Error(true));
 
         fitArgs.Add(dynamic_cast<TObject*>(&_InitialHesse));
         fitArgs.Add(dynamic_cast<TObject*>(&_Hesse));
         fitArgs.Add(dynamic_cast<TObject*>(&_Minimizer));
+        fitArgs.Add(dynamic_cast<TObject*>(&_Offset));
+        fitArgs.Add(dynamic_cast<TObject*>(&_AsymptoticError));
         fitArgs.Add(dynamic_cast<TObject*>(&_Verbose));
         fitArgs.Add(dynamic_cast<TObject*>(&_PrintLevel));
         fitArgs.Add(dynamic_cast<TObject*>(&_Constrain));
         fitArgs.Add(dynamic_cast<TObject*>(&_Save));
-        //fitArgs.Add(dynamic_cast<TObject*>(&_SumW2Error));
         
-        RooLinkedList fitArgs_alt(fitArgs);
+        RooLinkedList fitArgs_speed(fitArgs);
         
-        fitArgs.Add(dynamic_cast<TObject*>(&_Strategy));
-        fitArgs_alt.Add(dynamic_cast<TObject*>(&_Strategy_alt));
-        //Hesse(false),
-                //Minimizer(mMinimizerType.c_str(),"Migrad"), Strategy(0), Verbose(verbose), 
-                //PrintLevel(mPrintLevel+1), Constrain(constrainParams), Save(true) );
-
-        //RooFitResult * fitres = sbModel->GetPdf()->fitTo(*data, InitialHesse(false), Hesse(false),
-                //Minimizer(mMinimizerType.c_str(),"Migrad"), Strategy(0), Verbose(verbose), 
-                //PrintLevel(mPrintLevel+1), Constrain(constrainParams), Save(true) );
+        fitArgs.Add(dynamic_cast<TObject*>(&_Strategy_default));
+        fitArgs_speed.Add(dynamic_cast<TObject*>(&_Strategy_speed));
         
-        RooFitResult *fitres = sbModel->GetPdf()->fitTo(*data, fitArgs);
+        RooFitResult *fitres = sbModel->GetPdf()->fitTo(*data, fitArgs_speed);
         
-        if (fitres->status() != 0) { 
-            Warning("HypoTestTool", "Fit to the model failed - try with strategy 1 and perform first an Hesse computation");
-            //fitres = sbModel->GetPdf()->fitTo(*data, InitialHesse(true), Hesse(false), Minimizer(mMinimizerType.c_str(),"Migrad"), 
-                    //Strategy(1), PrintLevel(mPrintLevel+1), Constrain(constrainParams), Save(true), SumW2Error(true) );
-            fitres = sbModel->GetPdf()->fitTo(*data, fitArgs_alt);
+        if (fitres->status() != 0) {
+            Warning("HypoTestTool", "Fit to the model failed - try with strategy 1");
+            fitres = sbModel->GetPdf()->fitTo(*data, fitArgs);
         }
         if (fitres->status() != 0) 
             Warning("HypoTestTool", "Fit still failed - continue anyway.....");

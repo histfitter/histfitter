@@ -1,8 +1,13 @@
-FROM rootproject/root-ubuntu16:6.10
+FROM atlasamglab/stats-base:root6.22.08-python2.7
 USER root
+RUN bash -c "source /usr/local/bin/thisroot.sh"
 COPY . /HistFitter
-RUN chown -R builder /HistFitter
-USER builder
+RUN root --version
+RUN gcc --version
+RUN python --version
+RUN make --version
+RUN chown -R nobody /HistFitter
+USER nobody
 RUN bash -c "cd /HistFitter && \
-    . /usr/local/bin/thisroot.sh && \
-    . setup.sh && cd src && make"
+    . setup.sh && cd src && make && cd ../"
+
