@@ -1,3 +1,4 @@
+#!/bin/bash
 # setup ROOT
 # check Root environment setup. Allow for external setup script.
 
