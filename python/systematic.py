@@ -222,7 +222,8 @@ class SystematicBase:
         # Necessary, or we end up with nominal == high == low and removed systematics.
 
         reread = False
-        if not abstract.readFromTree:
+        if abstract.forceNorm==False:
+          if not abstract.readFromTree:
             abstract.hists[histName] = None
             abstract.prepare.addHisto(histName, forceNoFallback=True)
             if abstract.hists[histName] == None and abstract.useCacheToTreeFallback: 
@@ -231,6 +232,8 @@ class SystematicBase:
             elif abstract.hists[histName] != None:
                 log.debug("FillUpDownHist: systematic '{}': histogram '{}' successfully read! Not rebuilding it.".format(self.name, histName))
                 return 
+        else:
+          reread = True
 
         if not abstract.readFromTree and not reread:
             log.error("FillUpDownHist: systematic {}: histogram {}: not reading from trees and no fallback enabled. Will not build histogram".format(self.name, histName))
