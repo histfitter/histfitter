@@ -1,6 +1,6 @@
 FROM atlasamglab/stats-base:root6.20.06-python2.7
 USER root
-RUN bash -c "apt-get update && apt-get -y install curl"
+RUN bash -c "source /usr/local/bin/thisroot.sh"
 COPY . /HistFitter
 RUN root --version
 RUN gcc --version
