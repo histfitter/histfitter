@@ -4,6 +4,8 @@ stages:
 
 build_latest_image:
   stage: docker
+  variables:
+    TO: $CI_REGISTRY_IMAGE:latest
   except:
   - tags
   tags:
@@ -24,7 +26,7 @@ build_tagged_image:
 
 test:
   stage: test
-  image: $CI_REGISTRY_IMAGE:$CI_COMMIT_TAG
+  image: $CI_REGISTRY_IMAGE:latest
   before_script:
     - cd /HistFitter
     - ls -lrt 
