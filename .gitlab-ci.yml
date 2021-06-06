@@ -29,7 +29,7 @@ test:
     - cd /HistFitter
     - ls -lrt 
     - source setup.sh
-    - curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
+    #- curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
     #- python get-pip.py # to be put back with  python3
     #- pip install pytest #to be put back with python2
   script:
