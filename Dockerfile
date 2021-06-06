@@ -1,4 +1,4 @@
-FROM atlasamglab/stats-base:root6.20.06-python2.7
+FROM atlasamglab/stats-base:root6.22.08-python2.7
 USER root
 RUN bash -c "source /usr/local/bin/thisroot.sh"
 COPY . /HistFitter
