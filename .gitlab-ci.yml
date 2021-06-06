@@ -24,7 +24,7 @@ build_tagged_image:
 
 test:
   stage: test
-  #image: $CI_REGISTRY_IMAGE:latest
+  image: $CI_REGISTRY_IMAGE:$CI_COMMIT_TAG
   before_script:
     - cd /HistFitter
     - ls -lrt 
