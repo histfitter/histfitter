@@ -26,14 +26,13 @@ test:
   stage: test
   image: $CI_REGISTRY_IMAGE:latest
   before_script:
-    - pwd
+    - cd /HistFitter
     - ls -lrt 
-    - which root
-    #- bash -c " source setup.sh"
-    - curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py ##Not working anymore in python2
-    #- python get-pip.py # toBE put back with  python3
-    #- pip install pytest
+    - source setup.sh
+    - curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
+    #- python get-pip.py # to be put back with  python3
+    #- pip install pytest #to be put back with python2
   script:
     - echo "This job tests something"
-    #- pytest
-    - HistFitter.py --help
+    #- pytest # to be put back with python2
+    - HistFitter.py -w -f analysis/tutorial/MyUserAnalysis.py

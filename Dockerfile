@@ -1,9 +1,11 @@
-FROM atlasamglab/stats-base:root6.22.00
+FROM atlasamglab/stats-base:root6.20.06-python2.7
 USER root
 RUN bash -c "apt-get update && apt-get -y install curl"
 COPY . /HistFitter
 RUN root --version
 RUN gcc --version
+RUN python --version
+RUN make --version
 RUN chown -R nobody /HistFitter
 USER nobody
 RUN bash -c "cd /HistFitter && \
