@@ -1,6 +1,6 @@
 stages:
   - docker
-  - test
+#  - test
 
 build_latest_image:
   stage: docker
