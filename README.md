@@ -1,6 +1,6 @@
 # HistFitter
 
-[![stable-release](https://img.shields.io/badge/Stable-v0.65.0-green)](https://gitlab.cern.ch/HistFitter/HistFitter/-/releases/v0.65.0)
+[![stable-release](https://img.shields.io/badge/Stable-v0.66.0-green)](https://gitlab.cern.ch/HistFitter/HistFitter/-/releases/v0.66.0)
 [![Documentation](https://img.shields.io/badge/Documentation-blue)](https://twiki.cern.ch/twiki/bin/viewauth/AtlasProtected/SusyFitter)
 [![Tutorial](https://img.shields.io/badge/Tutorial-orange)](https://twiki.cern.ch/twiki/bin/viewauth/AtlasProtected/HistFitterTutorial)
 
@@ -14,7 +14,7 @@ If you're going to be using HistFitter directly as a standalone application, clo
 
 ```
 git clone ssh://git@gitlab.cern.ch:7999/HistFitter/HistFitter.git
-git checkout v0.65.0 -b v0.65.0
+git checkout v0.66.0 -b v0.66.0
 ```
 
 If you're using HistFitter as a submodule in a project, specify the latest stable release while adding the submodule
@@ -22,7 +22,7 @@ If you're using HistFitter as a submodule in a project, specify the latest stabl
 ```
 # Relative path gives nicer clones in CI if parent project on CERN's GitLab
 git submodule add ../../HistFitter/HistFitter.git
-cd HistFitter && git checkout v0.65.0 -b v0.65.0 && cd ..
+cd HistFitter && git checkout v0.66.0 -b v0.66.0 && cd ..
 git add HistFitter && git commit -m "Add HistFitter submodule"
 ```
 
