@@ -41,7 +41,7 @@ def generate(histList, varName, varLow, varHigh, histSig="", weightSig=0.):
     testHist_pred_ds = TH1D("hPSDATA", "hPSDATA", testHist_pred.GetNbinsX(), testHist_pred.GetXaxis().GetBinLowEdge(1), testHist_pred.GetXaxis().GetBinUpEdge(testHist_pred.GetNbinsX()))
 
     nEvents_pred = int(testHist_pred.Integral())
-    print "nEvents_pred = %d" % nEvents_pred
+    print("nEvents_pred = %d" % nEvents_pred)
 
     var = RooRealVar(varName, varName, varLow, varHigh)
 

@@ -36,26 +36,26 @@ def main(argv):
     try:
         opts, args = getopt.getopt(argv,"hi:o:",["ifile=","ofile="])
     except getopt.GetoptError:
-        print 'pull_maker.py -i <inputfile> -o <outputfile>'
+        print('pull_maker.py -i <inputfile> -o <outputfile>')
         sys.exit(2)
     for opt, arg in opts:
         if opt == '-h':
-            print 'pull_maker.py -i <inputfile> -o <outputfile>'
+            print('pull_maker.py -i <inputfile> -o <outputfile>')
             sys.exit()
         elif opt in ("-i", "--ifile"):
             inputfile = arg
         elif opt in ("-o", "--ofile"):
             outputfile = arg
-        print 'Input file is "', inputfile
-        print 'Output file is "', outputfile
+        print('Input file is "', inputfile)
+        print('Output file is "', outputfile)
 
     if not inputfile:
-        print "No input file defined, please define with '-i <InputFile>'"
+        print("No input file defined, please define with '-i <InputFile>'")
         sys.exit(2)
 
     uncRes = [[],[],[],[]]
         
-    log = open(inputfile,'r')
+    log = open(inputfile)
     switchOn = False
     muIDX = -1
     for aline in log.readlines():
@@ -92,15 +92,15 @@ def main(argv):
                 if uncRes[3][-1]<0.00001: uncRes[3][-1]=uncRes[2][-1]
  
     if len(uncRes[1])==0:
-        print 'Set inputfile=',inputfile,' failed - no errors found. Stopping here.'
+        print('Set inputfile=',inputfile,' failed - no errors found. Stopping here.')
         exit(1)
     
     from array import array
     y = array('d',uncRes[1])
     yep = array('d',uncRes[2])
     yem = array('d',uncRes[3])
-    x = array('d', [ a for a in xrange( len(uncRes[1]) ) ] )
-    xe = array('d', [ 0 for a in xrange( len(uncRes[1]) ) ] )
+    x = array('d', [ a for a in range( len(uncRes[1]) ) ] )
+    xe = array('d', [ 0 for a in range( len(uncRes[1]) ) ] )
     
     c = ROOT.TCanvas('Pulls_'+outputfile,'',1200,600)
     c.SetBottomMargin(0.42)
@@ -131,7 +131,7 @@ def main(argv):
     mul.SetLineStyle(4)
     mul.Draw('same')
     
-    for abin in xrange(len(uncRes[1])):
+    for abin in range(len(uncRes[1])):
         frame.GetXaxis().SetBinLabel( abin+1 , uncRes[0][abin] )
     frame.GetXaxis().LabelsOption('v')
     

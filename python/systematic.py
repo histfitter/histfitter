@@ -72,7 +72,7 @@ class SystematicBase:
             raise Exception("Given method %s is not known; use one of %s"
                              % (self.method, allowedSys))
 
-        log.debug("Defining new systematic '{0}' of type {1}".format(self.name, self.method))
+        log.debug(f"Defining new systematic '{self.name}' of type {self.method}")
 
     def Clone(self, name=""):
         """ 
@@ -187,16 +187,16 @@ class SystematicBase:
                             "overallNormHistoSysEnvelopeSym", "overallNormHistoSysOneSide", "overallNormHistoSysOneSideSym"]
         
         if not (self.method in _allowed_methods and (not sam.noRenormSys)):
-            log.debug("FillUpDownHist: systematic '{}' for sample '{}' not remapped - returning".format(self.name, sam.name))
+            log.debug(f"FillUpDownHist: systematic '{self.name}' for sample '{sam.name}' not remapped - returning")
             return
 
         histName = "h" + sam.name + self.name + lowhigh + normString + "Norm"
-        if histName in abstract.hists.keys():
-            log.debug("FillUpDownHist: systematic '{}': histogram '{}' already exists! Not rebuilding it.".format(self.name, histName))
+        if histName in list(abstract.hists.keys()):
+            log.debug(f"FillUpDownHist: systematic '{self.name}': histogram '{histName}' already exists! Not rebuilding it.")
             return
 
         if not sam.normRegions: 
-            log.error("    %s but no normalization regions specified for sample %s, noRenormSys=%s. This is not safe, please fix." % (self.method, sam.name, sam.noRenormSys))
+            log.error(f"    {self.method} but no normalization regions specified for sample {sam.name}, noRenormSys={sam.noRenormSys}. This is not safe, please fix.")
             normChannels = []
             tl = sam.parentChannel.parentTopLvl
             for ch in tl.channels:
@@ -215,7 +215,7 @@ class SystematicBase:
                 c = topLvl.getChannel(normReg[1], normReg[0])
             normString += c.regionString
        
-        log.debug("FillUpDownHist: constructed normString {}".format(normString))
+        log.debug(f"FillUpDownHist: constructed normString {normString}")
 
         # Attempt to read from the cache fileout without fallback
         # If it fails, set this silly boolean and still go into the block below
@@ -227,16 +227,16 @@ class SystematicBase:
             abstract.hists[histName] = None
             abstract.prepare.addHisto(histName, forceNoFallback=True)
             if abstract.hists[histName] == None and abstract.useCacheToTreeFallback: 
-                log.warning("Will rebuild {} from trees".format(histName))
+                log.warning(f"Will rebuild {histName} from trees")
                 reread = True
             elif abstract.hists[histName] != None:
-                log.debug("FillUpDownHist: systematic '{}': histogram '{}' successfully read! Not rebuilding it.".format(self.name, histName))
+                log.debug(f"FillUpDownHist: systematic '{self.name}': histogram '{histName}' successfully read! Not rebuilding it.")
                 return 
         else:
           reread = True
 
         if not abstract.readFromTree and not reread:
-            log.error("FillUpDownHist: systematic {}: histogram {}: not reading from trees and no fallback enabled. Will not build histogram".format(self.name, histName))
+            log.error(f"FillUpDownHist: systematic {self.name}: histogram {histName}: not reading from trees and no fallback enabled. Will not build histogram")
             return
         
         abstract.hists[histName] = TH1F(histName, histName, 1, 0.5, 1.5)
@@ -355,7 +355,7 @@ class SystematicBase:
                 #else:
                     #treeName = s.prefixTreeName + abstract.nomName
 
-            log.debug("FillUpDownHist(): calling prepare.read() for {}".format(s.name))
+            log.debug(f"FillUpDownHist(): calling prepare.read() for {s.name}")
             #abstract.prepare.read(treeName, filelist)
             abstract.prepare.read(s.input_files, suffix=s.getTreenameSuffix(), friendTreeName=s.friendTreeName)
 
@@ -371,41 +371,41 @@ class SystematicBase:
             _cut_str = abstract.cutsDict[normReg[0]]
             if s.additionalCuts != "":
                 if c.ignoreAdditionalCuts:
-                    log.debug("Ignoring additional cuts in channel {} for sample {}".format(c.channelName, s.name))
+                    log.debug(f"Ignoring additional cuts in channel {c.channelName} for sample {s.name}")
                 else:
-                    log.debug("Using additional cuts for sample {}: '{}'".format(s.name, s.additionalCuts))
+                    log.debug(f"Using additional cuts for sample {s.name}: '{s.additionalCuts}'")
                     if len(_cut_str.strip()) != 0:
                         # ROOT doesn't like "()" as a cut, so we only use the string if it's non-empty
-                        _cut_str = "(({}) && ({}))".format(_cut_str, s.additionalCuts)
+                        _cut_str = f"(({_cut_str}) && ({s.additionalCuts}))"
                     else:
                         log.warning("No region cuts applied; only using the additional ones")
                         _cut_str = copy(s.additionalCuts)
             _weight_str = "{} * {}".format(str(abstract.lumiUnits*abstract.outputLumi/abstract.inputLumi), " * ".join(_weights))
 
-            log.verbose("FillUpDownHist(): current chain {}".format(abstract.prepare.currentChainName))
-            log.verbose("FillUpDownHist(): normalization region {}".format(normReg[0]))
-            log.verbose("FillUpDownHist(): normalization region cuts {}".format(_cut_str))
-            log.verbose("FillUpDownHist(): weights: {}".format(_weight_str)) 
+            log.verbose(f"FillUpDownHist(): current chain {abstract.prepare.currentChainName}")
+            log.verbose(f"FillUpDownHist(): normalization region {normReg[0]}")
+            log.verbose(f"FillUpDownHist(): normalization region cuts {_cut_str}")
+            log.verbose(f"FillUpDownHist(): weights: {_weight_str}") 
                 
             currentChain = abstract.chains[abstract.prepare.currentChainName]
             try:
-                currentChain.Project("temp", _cut_str, "{} * ({})".format(_weight_str, _cut_str) )
+                currentChain.Project("temp", _cut_str, f"{_weight_str} * ({_cut_str})" )
             except:
                 # if e.g. rootpy is used and this goes wrong, it's a fatal exception otherwise
                 pass
 
-            log.verbose("FillUpDownHist(): loaded temporary histogram for {} in {} with integral {}".format(self.name, normReg[0],  tempHist.GetSumOfWeights()))
+            log.verbose(f"FillUpDownHist(): loaded temporary histogram for {self.name} in {normReg[0]} with integral {tempHist.GetSumOfWeights()}")
 
             abstract.hists[histName].SetBinContent(1, abstract.hists[histName].GetSum() + tempHist.GetSumOfWeights())
             del tempHist
 
-        log.verbose("FillUpDownHist(): loaded norm histogram {} for {} in {} with integral {}".format(histName, self.name, normString, abstract.hists[histName].GetSum()))
+        log.verbose(f"FillUpDownHist(): loaded norm histogram {histName} for {self.name} in {normString} with integral {abstract.hists[histName].GetSum()}")
 
         return
 
     def tryAddHistos(self, highorlow="", regionString="", normString="",
                      normCuts="", abstract=None, chan=None, sam=None):
-        histName = "h%s%s%s%s_obs_%s" % (sam.name, self.name, highorlow, regionString, replaceSymbols(chan.variableName) )
+        histName = f"h{sam.name}{self.name}{highorlow}{regionString}_obs_{replaceSymbols(chan.variableName)}"
 
         log.debug("       adding histo %s" % histName)
         try:
@@ -426,9 +426,9 @@ class TreeWeightSystematic(SystematicBase):
     def PrepareWAHforWeight(self, regionString="", normString="", normCuts="",
                             abstract=None, topLvl=None, chan=None, sam=None):
         
-        log.debug("PrepareWAHforWeight() for {} in {}".format(self, sam.name))
+        log.debug(f"PrepareWAHforWeight() for {self} in {sam.name}")
         
-        log.debug("PrepareWAHforWeight: removing systematic from {} to be sure {}".format(self.name, sam.name))
+        log.debug(f"PrepareWAHforWeight: removing systematic from {self.name} to be sure {sam.name}")
         sam.removeCurrentSystematic()
 
         highandlow = ["High_", "Low_"] # ,"Nom_"]
@@ -465,7 +465,7 @@ class TreeWeightSystematic(SystematicBase):
         if self.differentNominalTreeWeight:
             highandlow = ["High_", "Low_", "Nom_"]
 
-        log.debug("PrepareWAHforTree() for {}".format(self.name))
+        log.debug(f"PrepareWAHforTree() for {self.name}")
 
         weightstemp = abstract.prepare.weights
         for highorlow in highandlow:
@@ -475,7 +475,7 @@ class TreeWeightSystematic(SystematicBase):
                     abstract.prepare.weights += " * " + myw
 
             if abstract.readFromTree or abstract.useCacheToTreeFallback:
-                log.debug("PrepareWAHforTree(): will read syst {} from trees (or fallback enabled)".format(self.name))
+                log.debug(f"PrepareWAHforTree(): will read syst {self.name} from trees (or fallback enabled)")
                 
                 if highorlow == "High_":
                     log.verbose("PrepareWAHforTree(): in high mode")
@@ -487,10 +487,10 @@ class TreeWeightSystematic(SystematicBase):
                     log.verbose("PrepareWAHforTree(): in nominal mode")
                     sam.setCurrentSystematic(self)
                     
-                log.debug("PrepareWAHforTree(): calling prepare.read() for {} (sample {})".format(self.name, sam.name))
+                log.debug(f"PrepareWAHforTree(): calling prepare.read() for {self.name} (sample {sam.name})")
                 log.verbose("PrepareWAHforTree(): using the following inputs:")
                 for i in sam.input_files:
-                    log.verbose("{}{} from {}".format(i.treename, sam.getTreenameSuffix(), i.filename))
+                    log.verbose(f"{i.treename}{sam.getTreenameSuffix()} from {i.filename}")
 
                 abstract.prepare.read(sam.input_files, suffix=sam.getTreenameSuffix(), friendTreeName=sam.friendTreeName)
 
@@ -507,14 +507,14 @@ class TreeWeightSystematic(SystematicBase):
                                 normCuts="", abstract=None,
                                 topLvl=None, chan=None, sam=None):
 
-        log.verbose("PrepareWeightsAndHistos for {}".format(self.name))
+        log.verbose(f"PrepareWeightsAndHistos for {self.name}")
         if self.type == "weight":
-            log.verbose("Calling TreeWeightSystematic.PrepareWAHforWeight() for {}".format(self.name)) 
+            log.verbose(f"Calling TreeWeightSystematic.PrepareWAHforWeight() for {self.name}") 
             TreeWeightSystematic.PrepareWAHforWeight(self, regionString,
                                                      normString, normCuts,
                                                      abstract, topLvl, chan, sam)
         if self.type == "tree":
-            log.verbose("Calling TreeWeightSystematic.PrepareWAHforTree() for {}".format(self.name)) 
+            log.verbose(f"Calling TreeWeightSystematic.PrepareWAHforTree() for {self.name}") 
             TreeWeightSystematic.PrepareWAHforTree(self, regionString,
                                                    normString, normCuts,
                                                    abstract, topLvl, chan, sam)
@@ -531,10 +531,10 @@ class UserSystematic(SystematicBase):
                                 normCuts="", abstract=None,
                                 topLvl=None, chan=None, sam=None):
 
-        nomName = "h%sNom_%s_obs_%s" % (sam.name, regionString, replaceSymbols(chan.variableName) )
+        nomName = f"h{sam.name}Nom_{regionString}_obs_{replaceSymbols(chan.variableName)}"
         
         for lowhigh in ["High_","Low_"]:
-            lowhighName = "h%s%s%s%s_obs_%s" % (sam.name, self.name, lowhigh, regionString, replaceSymbols(chan.variableName))
+            lowhighName = f"h{sam.name}{self.name}{lowhigh}{regionString}_obs_{replaceSymbols(chan.variableName)}"
             if abstract.hists[lowhighName] is None:
                 if lowhigh == "High_":
                     abstract.hists[lowhighName] = histMgr.buildUserHistoSysFromHist(lowhighName, self.high, abstract.hists[nomName])
@@ -545,8 +545,8 @@ class UserSystematic(SystematicBase):
     def PrepareGlobalNormalization(self,normString,abstract,topLvl,chan,sam):
 
         for lowhigh in ["Nom_",self.name+"High_",self.name+"Low_"]:
-            histName = "h%s%s%sNorm" % (sam.name, lowhigh, normString)
-            if not histName in abstract.hists.keys():
+            histName = f"h{sam.name}{lowhigh}{normString}Norm"
+            if not histName in list(abstract.hists.keys()):
                 if sam.normRegions:
                     
                     if not abstract.readFromTree:
@@ -572,7 +572,7 @@ def Systematic(name="", nominal=None, high=None, low=None,
                type="", method="", constraint="Gaussian"):
     types = ["weight", "tree", "user"]
     if type not in types:
-        raise Exception("Systematic type {} unknown for {}".format(type, name))
+        raise Exception(f"Systematic type {type} unknown for {name}")
         
     if type == "weight" or type == "tree":
         return TreeWeightSystematic(name, nominal, high, low,

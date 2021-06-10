@@ -1,39 +1,62 @@
 stages:
-  - docker
-#  - test
+  - build
+  - test
 
-build_latest_image:
-  stage: docker
+lint-python:
+  stage: build
+  image:
+    name: python:3.7
+  except:
+    - tags
+  before_script:
+    - python -m pip install --no-cache-dir pre-commit
+  script:
+    - pre-commit install
+    - pre-commit run --all-files || git diff --exit-code
+
+build-latest-image:
+  stage: build
   except:
   - tags
-  tags:
-    - docker-image-build
-  script:
-    - ignore
-
-build_tagged_image:
-  stage: docker
   variables:
-    TO: $CI_REGISTRY_IMAGE:$CI_COMMIT_TAG
+    IMAGE_DESTINATION: "${CI_REGISTRY_IMAGE}:latest"
+  image:
+    name: gitlab-registry.cern.ch/ci-tools/docker-image-builder
+    entrypoint: [""]
+  script:
+    - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
+    - /kaniko/executor --context "${CI_PROJECT_DIR}"
+                       --dockerfile "${CI_PROJECT_DIR}/Dockerfile"
+                       --destination "${IMAGE_DESTINATION}"
+    - echo "Image pushed successfully to ${IMAGE_DESTINATION}"
+
+build-tagged-image:
+  stage: build
   only:
   - tags
-  tags:
-    - docker-image-build
+  variables:
+    IMAGE_DESTINATION: "${CI_REGISTRY_IMAGE}:$CI_COMMIT_TAG"
+  image:
+    name: gitlab-registry.cern.ch/ci-tools/docker-image-builder
+    entrypoint: [""]
   script:
-    - ignore
+    - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
+    - /kaniko/executor --context "${CI_PROJECT_DIR}"
+                       --dockerfile "${CI_PROJECT_DIR}/Dockerfile"
+                       --destination "${IMAGE_DESTINATION}"
+    - echo "Image pushed successfully to ${IMAGE_DESTINATION}"
 
-#test:
-#  stage: test
-#  image: $CI_REGISTRY_IMAGE:latest
-#  except:
-#    - tags
-#  before_script:
-#    #- sudo apt-get update && sudo apt-get -y install curl
-#    - cd /HistFitter
-#    - source /usr/local/bin/thisroot.sh && source setup.sh
-#    #- curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py ##Not working anymore in python2
-#    #- sudo python get-pip.py
-#    #- sudo pip install pytest
-#  script:
-#    #- pytest
-#    - HistFitter.py -w -f analysis/tutorial/MyUserAnalysis.py
+test:
+  stage: test
+  image:
+    name: $CI_REGISTRY_IMAGE:latest
+    entrypoint: [""]
+  except:
+    - tags
+  before_script:
+    - python -m pip install "pytest~=6.2"
+    - cd /usr/local/HistFitter
+    - . setup.sh
+    - printenv
+  script:
+    - python -m pytest test

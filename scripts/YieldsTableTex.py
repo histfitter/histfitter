@@ -72,7 +72,7 @@ def tablefragment(m, tabname, signalregionslist,sampleList,showBeforeFitError):
   print the region names
   """ 
   for region in m['names']:
-    regionName = region.replace("_cuts", "").replace("_meffInc", "").replace('_','\_')
+    regionName = region.replace("_cuts", "").replace("_meffInc", "").replace('_',r'\_')
     tableline += " & " + regionName + "           "   
     
   tableline += '''   \\\\
@@ -104,22 +104,22 @@ Fitted bkg events        '''
     """   
     if m['names'][index] in signalregionslist:
       if (n - m['TOTAL_FITTED_bkg_events_err'][index]) > 0. :
-        tableline += " & $" + str(("%.2f" %n)) + " \\pm " + str(("%.2f" %m['TOTAL_FITTED_bkg_events_err'][index])) +  "$         "
+        tableline += " & $" + str("%.2f" %n) + " \\pm " + str("%.2f" %m['TOTAL_FITTED_bkg_events_err'][index]) +  "$         "
       else:
         texLog.warning("negative symmetric error after fit extends below 0. for total bkg pdf:  will print asymmetric error w/ truncated negative error reaching to 0.")
-        tableline += " & $" + str(("%.2f" %n)) + "_{-" + str(("%.2f"%n)) + "}^{+" + str(("%.2f" %m['TOTAL_FITTED_bkg_events_err'][index])) +  "}$         "
+        tableline += " & $" + str("%.2f" %n) + "_{-" + str("%.2f"%n) + "}^{+" + str("%.2f" %m['TOTAL_FITTED_bkg_events_err'][index]) +  "}$         "
     else:
       if (n - m['TOTAL_FITTED_bkg_events_err'][index]) > 0. :
-        tableline += " & $" + str(("%.1f" %n)) + " \\pm " + str(("%.1f" %m['TOTAL_FITTED_bkg_events_err'][index])) +  "$         "
+        tableline += " & $" + str("%.1f" %n) + " \\pm " + str("%.1f" %m['TOTAL_FITTED_bkg_events_err'][index]) +  "$         "
       else:
         texLog.warning("negative symmetric error extends below 0. for total bkg pdf:  will print asymmetric error w/ truncated negative error reaching to 0.")
-        tableline += " & $" + str(("%.1f" %n)) + "_{-" + str(("%.1f"%n)) + "}^{+" + str(("%.1f" %m['TOTAL_FITTED_bkg_events_err'][index])) +  "}$         "
+        tableline += " & $" + str("%.1f" %n) + "_{-" + str("%.1f"%n) + "}^{+" + str("%.1f" %m['TOTAL_FITTED_bkg_events_err'][index]) +  "}$         "
   tableline +='''     \\\\
 \\midrule
 %%'''
 
 
-  map_listofkeys = m.keys()
+  map_listofkeys = list(m.keys())
 
   """
   print fitted number of events per sample
@@ -136,7 +136,7 @@ Fitted bkg events        '''
         tableline += '''
         Fitted '''
         sampleName = sample
-        sampleName = sampleName.replace("_","\_")
+        sampleName = sampleName.replace("_",r"\_")
         tableline += sampleName
         tableline += ''' events        '''
         for index, n in enumerate(m[name]):
@@ -145,16 +145,16 @@ Fitted bkg events        '''
           """   
           if m['names'][index] in signalregionslist:
             if ((n - m['Fitted_err_'+sample][index]) > 0.) or not abs(n) > 0.00001:
-              tableline += " & $" + str(("%.2f" %n)) + " \\pm " + str(("%.2f" %m['Fitted_err_'+sample][index])) +  "$         "
+              tableline += " & $" + str("%.2f" %n) + " \\pm " + str("%.2f" %m['Fitted_err_'+sample][index]) +  "$         "
             else:
-              texLog.warning("negative symmetric error after fit extends below 0. for sample {0} - will print asymmetric error w/ truncated negative error reaching to 0.".format(sample))
-              tableline += " & $" + str(("%.2f" %n)) + "_{-" + str(("%.2f"%n)) + "}^{+" + str(("%.2f" %m['Fitted_err_'+sample][index])) +  "}$         "
+              texLog.warning(f"negative symmetric error after fit extends below 0. for sample {sample} - will print asymmetric error w/ truncated negative error reaching to 0.")
+              tableline += " & $" + str("%.2f" %n) + "_{-" + str("%.2f"%n) + "}^{+" + str("%.2f" %m['Fitted_err_'+sample][index]) +  "}$         "
           else:
             if ((n - m['Fitted_err_'+sample][index]) > 0.) or not abs(n) > 0.00001:
-              tableline += " & $" + str(("%.1f" %n)) + " \\pm " + str(("%.1f" %m['Fitted_err_'+sample][index])) +  "$         "
+              tableline += " & $" + str("%.1f" %n) + " \\pm " + str("%.1f" %m['Fitted_err_'+sample][index]) +  "$         "
             else:
-              texLog.warning("negative symmetric error after fit extends below 0. for sample {0} - will print asymmetric error w/ truncated negative error reaching to 0.".format(sample))
-              tableline += " & $" + str(("%.1f" %n)) + "_{-" + str(("%.1f"%n)) + "}^{+" + str(("%.1f" %m['Fitted_err_'+sample][index])) +  "}$         "
+              texLog.warning(f"negative symmetric error after fit extends below 0. for sample {sample} - will print asymmetric error w/ truncated negative error reaching to 0.")
+              tableline += " & $" + str("%.1f" %n) + "_{-" + str("%.1f"%n) + "}^{+" + str("%.1f" %m['Fitted_err_'+sample][index]) +  "}$         "
         tableline +='''     \\\\
 %%'''
 
@@ -173,17 +173,17 @@ MC exp. SM events             '''
   for index, n in enumerate(m['TOTAL_MC_EXP_BKG_events']):
     if showBeforeFitError:
       if ((n - m['TOTAL_MC_EXP_BKG_err'][index]) > 0.) or not abs(n) > 0.00001:
-        tableline += " & $" + str(("%.2f" %n)) + " \\pm " + str(("%.2f" %m['TOTAL_MC_EXP_BKG_err'][index])) +  "$         "
+        tableline += " & $" + str("%.2f" %n) + " \\pm " + str("%.2f" %m['TOTAL_MC_EXP_BKG_err'][index]) +  "$         "
       else:
         texLog.warning("negative error before fit extends below 0. for total bkg pdf:   will print asymmetric error w/ truncated negative error reaching to 0.")
-        tableline += " & $" + str(("%.2f" %n)) + "_{-" + str(("%.2f"%n)) + "}^{+" + str(("%.2f" %m['TOTAL_MC_EXP_BKG_err'][index])) +  "}$         "
+        tableline += " & $" + str("%.2f" %n) + "_{-" + str("%.2f"%n) + "}^{+" + str("%.2f" %m['TOTAL_MC_EXP_BKG_err'][index]) +  "}$         "
     else:
-      tableline += " & $" + str(("%.2f" %n)) +  "$         "
+      tableline += " & $" + str("%.2f" %n) +  "$         "
   tableline +='''     \\\\
 \\midrule
 %%''' 
 
-  map_listofkeys = m.keys()
+  map_listofkeys = list(m.keys())
 
   """
   print expected number of events per sample
@@ -204,28 +204,28 @@ MC exp. SM events             '''
         data-driven exp. '''
 
         sampleName = sample
-        sampleName = sampleName.replace("_","\_")
+        sampleName = sampleName.replace("_",r"\_")
         tableline += sampleName
         tableline += ''' events        '''
         for index, n in enumerate(m[name]):
           if m['names'][index] in signalregionslist:
             if showBeforeFitError:
               if ((n - m['MC_exp_err_'+sample][index]) > 0.) or not abs(n) > 0.00001:
-                tableline += " & $" + str(("%.2f" %n)) + " \\pm " + str(("%.2f" %m['MC_exp_err_'+sample][index])) +  "$         "
+                tableline += " & $" + str("%.2f" %n) + " \\pm " + str("%.2f" %m['MC_exp_err_'+sample][index]) +  "$         "
               else:
-                texLog.warning("negative symmetric error after fit extends below 0. for sample {0} - will print asymmetric error w/ truncated negative error reaching to 0.".format(sample))
-                tableline += " & $" + str(("%.2f" %n)) + "_{-" + str(("%.2f"%n)) + "}^{+" + str(("%.2f" %m['MC_exp_err_'+sample][index])) +  "}$         "
+                texLog.warning(f"negative symmetric error after fit extends below 0. for sample {sample} - will print asymmetric error w/ truncated negative error reaching to 0.")
+                tableline += " & $" + str("%.2f" %n) + "_{-" + str("%.2f"%n) + "}^{+" + str("%.2f" %m['MC_exp_err_'+sample][index]) +  "}$         "
             else:
-              tableline += " & $" + str(("%.2f" %n)) +  "$         "
+              tableline += " & $" + str("%.2f" %n) +  "$         "
           else:
             if showBeforeFitError:
               if ((n - m['MC_exp_err_'+sample][index]) > 0.) or not abs(n) > 0.00001:
-                tableline += " & $" + str(("%.2f" %n)) + " \\pm " + str(("%.2f" %m['MC_exp_err_'+sample][index])) +  "$         "
+                tableline += " & $" + str("%.2f" %n) + " \\pm " + str("%.2f" %m['MC_exp_err_'+sample][index]) +  "$         "
               else:
-                texLog.warning("negative symmetric error after fit extends below 0. for sample {0} - will print asymmetric error w/ truncated negative error reaching to 0.".format(sample))
-                tableline += " & $" + str(("%.2f" %n)) + "_{-" + str(("%.2f"%n)) + "}^{+" + str(("%.2f" %m['MC_exp_err_'+sample][index])) +  "}$         "
+                texLog.warning(f"negative symmetric error after fit extends below 0. for sample {sample} - will print asymmetric error w/ truncated negative error reaching to 0.")
+                tableline += " & $" + str("%.2f" %n) + "_{-" + str("%.2f"%n) + "}^{+" + str("%.2f" %m['MC_exp_err_'+sample][index]) +  "}$         "
             else:
-              tableline += " & $" + str(("%.2f" %n)) +  "$         "##           else:
+              tableline += " & $" + str("%.2f" %n) +  "$         "##           else:
         tableline +='''     \\\\
 %%'''
 
@@ -259,11 +259,11 @@ def tableEndWithCaptionAndLabel(tableCaption, tableLabel):
   print table end with Caption and Label given by user
   """   
  
-  end = '''%%
-\\caption{%s}
-\\label{%s}
-\\end{table}
-%%''' % (tableCaption, tableLabel)
+  end = '''%
+\\caption{{{}}}
+\\label{{{}}}
+\\end{{table}}
+%'''.format(tableCaption, tableLabel)
 
   return end
 
@@ -272,18 +272,18 @@ def tableend(signalregion='3+ jets, loose',suffix='sr3jl'):
   print table end with Caption and Label used by default
   """   
 
-  end = '''%%
-\\caption{Signal region: %s. Fit results for the electron (top part) and muon (bottom part) channels, for an integrated luminosity of $1035$\,\ipb.
+  end = '''%
+\\caption{{Signal region: {}. Fit results for the electron (top part) and muon (bottom part) channels, for an integrated luminosity of $1035$\\,\\ipb.
 The results are obtained from the control regions using the discovery fit (see text for details). The fit results of the loose-not-tight regions are not shown.
 Nominal MC expectations (normalised to MC cross-sections) are given for comparison. 
 The Monte Carlo QCD estimates are provided for illustrational purposes only, and are not used in the fit.
 The errors shown are the statistical plus systematic uncertainties, except for the error on the background estimate in the signal region, which is the systematic uncertainty only.
 Uncertainties on the fitted yields are symmetric by construction, 
 where the negative error is truncated when reaching to zero event yield.
-}
-\\label{table.results.systematics.in.logL.fit.%s}
-\\end{table}
-%%''' % (signalregion,suffix)
+}}
+\\label{{table.results.systematics.in.logL.fit.{}}}
+\\end{{table}}
+%'''.format(signalregion,suffix)
 
   return end
 
@@ -295,19 +295,19 @@ def tableend2(signalregion='3+ jets, loose',suffix='sr3jl'):
   """   
  
 
-  end = '''%%
-\\caption{Signal region: %s. Fit results for an integrated luminosity of $1035$\,\ipb.
+  end = '''%
+\\caption{{Signal region: {}. Fit results for an integrated luminosity of $1035$\\,\\ipb.
 The results are obtained from the control regions using the discovery fit (see text for details). 
 Nominal MC expectations (normalised to MC cross-sections) are given for comparison. 
 The Monte Carlo QCD estimates are provided for illustrational purposes only, and are not used in the fit.
 The errors shown are the statistical plus systematic uncertainties, except for the error on the background estimate in the signal region, which is the systematic uncertainty only.
-%%All presented errors have been derived using MINOS.
+%All presented errors have been derived using MINOS.
 Uncertainties on the fitted yields are symmetric by construction, 
 where the negative error is truncated when reaching to zero event yield.
-}
-\\label{table.results.systematics.in.logL.fit.%s}
-\\end{table}
-%%''' % (signalregion,suffix)
+}}
+\\label{{table.results.systematics.in.logL.fit.{}}}
+\\end{{table}}
+%'''.format(signalregion,suffix)
 
   return end
 
@@ -321,7 +321,7 @@ def tableend3(suffix='sr3jl'):
  
 
   end = '''%%
-\caption{ Background fit results for the S3 (top part) and S4 (bottom part) signal regions, for an integrated luminosity of $20.5$~\\ifb.
+\\caption{ Background fit results for the S3 (top part) and S4 (bottom part) signal regions, for an integrated luminosity of $20.5$~\\ifb.
 %%The results are obtained from the control regions using the discovery fit (see text for details). The fit results of the loose-not-tight regions are not shown.
 Nominal MC expectations (normalised to MC cross-sections) are given for comparison. 
 %%The Monte Carlo QCD estimates are provided for illustrational purposes only, and are not used in the fit.
@@ -345,15 +345,15 @@ def tableend4(rList, suffix='sr3jl', mentionCh=''):
 
   regionsList = []
   for r in rList:
-      regionsList.append(r.replace('_','\_'))
+      regionsList.append(r.replace('_',r'\_'))
 
-  mentionCh = mentionCh.replace('_','\_')
+  mentionCh = mentionCh.replace('_',r'\_')
 
   tomention = ''
   if len(mentionCh)>0:
       tomention = 'related to the analysis containing region %s, ' % mentionCh
 
-  end = '''%%
+  end = r'''%%
 \caption{ Background fit results for the '''
 
   nRegions = len(regionsList)

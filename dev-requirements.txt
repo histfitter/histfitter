@@ -1,0 +1,5 @@
+# tests
+pytest~=6.2
+# develop
+pre-commit~=2.13
+pyupgrade~=2.19

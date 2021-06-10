@@ -47,7 +47,7 @@ for idx in range(fpf.getSize()):
         namemap['trigger, luminosity and pile-up'].append(parname)
 
     elif parname!="mu_SRall_disc":
-        print "WARNING: don't know what to do with nuisance parameter: %s. It will be ignored."%parname
+        print("WARNING: don't know what to do with nuisance parameter: %s. It will be ignored."%parname)
 
 
 ##### Note: it's also fine to simply hard-code namemap as e.g. below:

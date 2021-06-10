@@ -13,7 +13,7 @@ class backupCacheParser:
   def getMu(self, mu, log):
     # open file or modify the log file
     if os.path.isfile(log):
-      f = open(log, 'r')
+      f = open(log)
     else:
       # if self.log is already the log, mimic a file by splitting it with new lines
       f = self.log.split('\n')
@@ -42,10 +42,8 @@ class backupCacheParser:
         l = l.strip().split()
         central_diff = float(l[2])-float(l_ref[2])
         error_diff = float(l[4])-float(l_ref[4])
-        print l
-        print l_ref
-        print "difference in central value for %s: %s" % (mu, central_diff)
-        print "difference in error for %s: %s" % (mu, error_diff)
+        print(f"difference in central value for {mu}: {central_diff}")
+        print(f"difference in error for {mu}: {error_diff}")
         # return error if not close enough
         assert abs(central_diff/float(l[2])) < self.precision
         assert abs(error_diff/float(l[4])) < self.precision

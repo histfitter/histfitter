@@ -4,7 +4,7 @@
  * Package: HistFitter                                                            *
  *                                                                                *
  * Description:                                                                   *
- *      Minimal example configuration with two different uncertainties            * 
+ *      Minimal example configuration with two different uncertainties            *
  *                                                                                *
  * Authors:                                                                       *
  *      HistFitter group, CERN, Geneva                                            *
@@ -68,7 +68,7 @@ configMgr.keepSignalRegionType = True
 
 # Give the analysis a name
 configMgr.analysisName = "MyUserAnalysis"
-configMgr.outputFileName = "results/%s_Output.root"%configMgr.analysisName
+configMgr.outputFileName = f"results/{configMgr.analysisName}s_Output.root"
 
 # Define cuts
 configMgr.cutsDict["UserRegion"] = "1."
@@ -114,5 +114,5 @@ ana.addSignalChannels([chan])
 # These lines are needed for the user analysis to run
 # Make sure file is re-made when executing HistFactory
 if configMgr.executeHistFactory:
-    if os.path.isfile("data/%s.root" % configMgr.analysisName):
-        os.remove("data/%s.root" % configMgr.analysisName) 
+    if os.path.isfile(f"data/{configMgr.analysisName}.root"):
+        os.remove(f"data/{configMgr.analysisName}.root")

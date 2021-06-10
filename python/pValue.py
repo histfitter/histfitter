@@ -27,10 +27,10 @@ Modifications:
 import math
 
 def pValuePoissonError(nObs,   E, V):
-    print "obs",nObs
+    print("obs",nObs)
     if E<=0 or V<=0:
-        print "ERROR in pValuePoissonError(): expectation and variance must be positive. "
-        print  "Returning 0.5"
+        print("ERROR in pValuePoissonError(): expectation and variance must be positive. ")
+        print("Returning 0.5")
 
     B = E/V
     A = E*B
@@ -136,7 +136,7 @@ def pja_normal_quantile( p):
 def  pValueToSignificance( p, excess): # excess: bool, False if deficit
 
   if p<0 or p>1:
-    print "ERROR: p-value must belong to [0,1] but input value is ", p
+    print("ERROR: p-value must belong to [0,1] but input value is ", p)
     return 0
 
   if excess:

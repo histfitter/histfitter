@@ -83,7 +83,7 @@ def _checkLevel(level):
         raise TypeError("Level not an integer or a valid string: %r" % level)
     return rv
 
-class Logger(object):
+class Logger:
 
     def __init__(self, name):
         """

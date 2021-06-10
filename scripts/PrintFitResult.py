@@ -221,7 +221,7 @@ def latexfitresults( filename, resultName="RooExpandedFitResult_afterFit", outNa
   w = Util.GetWorkspaceFromFile(filename,workspacename)
 
   if w==None:
-    print "ERROR : Cannot open workspace : ", workspacename
+    print("ERROR : Cannot open workspace : ", workspacename)
     sys.exit(1) 
 
   """
@@ -229,7 +229,7 @@ def latexfitresults( filename, resultName="RooExpandedFitResult_afterFit", outNa
   """
   result = w.obj(resultName)
   if result==None:
-    print "ERROR : Cannot open fit result ", resultName
+    print("ERROR : Cannot open fit result ", resultName)
     sys.exit(1)
 
   regSys = {}
@@ -255,7 +255,7 @@ def latexfitresults( filename, resultName="RooExpandedFitResult_afterFit", outNa
     fpeh = fp.getErrorHi()
 
     name = parname
-    if namemap.has_key(name): name = namemap[name]
+    if name in namemap: name = namemap[name]
 
     regSys[name] = (ipv,ipe,ipel,ipeh,fpv,fpe,fpel,fpeh)
 
@@ -279,15 +279,15 @@ if __name__ == "__main__":
   Print out of usage, options and examples
   """
   def usage():
-    print "Usage:"
-    print "PrintFitResult.py [-c channel] [-w workspace_afterFit] [-o outputFileName]\n"
-    print "Minimal set of inputs [-c channels] [-w workspace_afterFit]"
-    print "*** Options are: "
-    print "-c <analysis name>: single name accepted only (OBLIGATORY) "
-    print "-w <workspaceFileName>: single name accepted only (OBLIGATORY) ;   if multiple channels/regions given in -c, assumes the workspace file contains all channels/regions"
+    print("Usage:")
+    print("PrintFitResult.py [-c channel] [-w workspace_afterFit] [-o outputFileName]\n")
+    print("Minimal set of inputs [-c channels] [-w workspace_afterFit]")
+    print("*** Options are: ")
+    print("-c <analysis name>: single name accepted only (OBLIGATORY) ")
+    print("-w <workspaceFileName>: single name accepted only (OBLIGATORY) ;   if multiple channels/regions given in -c, assumes the workspace file contains all channels/regions")
 
-    print "\nFor example:"
-    print "PrintFitResult.py -w MyName_combined_BasicMeasurement_model_afterFit.root  -c SR7j -o fitResultSR7j.tex"    
+    print("\nFor example:")
+    print("PrintFitResult.py -w MyName_combined_BasicMeasurement_model_afterFit.root  -c SR7j -o fitResultSR7j.tex")    
 
     sys.exit(0)        
 
@@ -334,5 +334,5 @@ if __name__ == "__main__":
   f = open(outputFileName, 'w')
   f.write( line_chanSysTight )
   f.close()
-  print "\nwrote results in file: %s"%(outputFileName)
+  print("\nwrote results in file: %s"%(outputFileName))
 

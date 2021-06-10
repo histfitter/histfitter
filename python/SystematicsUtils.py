@@ -33,8 +33,8 @@ def matchName(aChan, chanList):
 
 def appendIfMatchName(aChan, chanList):
     if aChan in chanList:
-        print "WARNING instance of channel %s already in chanList. " \
-              "Not the typical use case." % (aChan.name)
+        print("WARNING instance of channel %s already in chanList. " \
+              "Not the typical use case." % (aChan.name))
     if matchName(aChan, chanList):
         chanList.append(aChan)
         pass
@@ -138,7 +138,7 @@ def hadroSys(CRval, SRval, sample, observable):
 def hadroSysBins(CRval, SRNBins, SRBinLow, SRBinHigh, sample, observable):
     weights_up = []
     weights_down = []
-    for bin in xrange(SRNBins):
+    for bin in range(SRNBins):
         hadsystvalue = hadroSys(CRval,
                                 SRBinLow + (SRBinHigh - SRBinLow) * (bin + 0.5) / SRNBins,
                                 sample, observable)

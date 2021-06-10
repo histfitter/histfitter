@@ -116,7 +116,7 @@ class contourPlotter:
 		tmpText.SetTextColorAlpha(color,alpha)
 		tmpText.SetTextAngle(angle)
 		x,y,z,n = graph.GetX(), graph.GetY(), graph.GetZ(), graph.GetN()
-		for i in xrange(n):
+		for i in range(n):
 			tmpText.DrawLatex(x[i],y[i],format%z[i])
 
 		tmpText.SetTextSize(titlesize)
@@ -201,7 +201,7 @@ class contourPlotter:
 		tmpLine.DrawLineNDC(xyCoord[0],xyCoord[1]+ySeparation,xyCoord[0]+length,xyCoord[1]+ySeparation)
 
 	def writePlot(self, format="pdf"):
-		self.canvas.SaveAs("{0:s}.{1:s}".format(self.plotName, format))
+		self.canvas.SaveAs(f"{self.plotName:s}.{format:s}")
 		return
 
         # Pass a lambda function, e.g. y_new = lambda x,y : x - y

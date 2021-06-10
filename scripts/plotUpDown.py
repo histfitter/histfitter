@@ -15,19 +15,19 @@ def checkArgs(args):
         sys.exit()
 
     if not os.path.exists(args.filename):
-        print("Input file {0} doesn't exist!".format(args.filename))
+        print(f"Input file {args.filename} doesn't exist!")
         sys.exit()
 
     if not os.path.isfile(args.filename):
-        print("Input file {0} is not a file!".format(args.filename))
+        print(f"Input file {args.filename} is not a file!")
         sys.exit()
 
     if not os.path.exists(args.output_dir):
-        print("Output directory {0} doesn't exist!".format(args.output_dir))
+        print(f"Output directory {args.output_dir} doesn't exist!")
         sys.exit()
 
     if not os.path.isdir(args.output_dir):
-        print("Output directory {0} is not a directory!".format(args.output_dir))
+        print(f"Output directory {args.output_dir} is not a directory!")
         sys.exit()
 
     if args.sample == []:

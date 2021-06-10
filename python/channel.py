@@ -36,7 +36,7 @@ from configManager import replaceSymbols
 
 log = Logger('Channel')
 
-class Channel(object):
+class Channel:
     """
     Defines the content of a channel (=region)
     """
@@ -120,7 +120,7 @@ class Channel(object):
         self.ignoreAdditionalCuts = False # ignore any sample-specific cuts in this region
 
 
-        log.debug("Defining new channel '{0}'".format(self.name))
+        log.debug(f"Defining new channel '{self.name}'")
         return
 
     def initialize(self):
@@ -171,13 +171,13 @@ class Channel(object):
             # don't overwrite the last element but append it
             index = len(self.sampleList) 
 
-        log.verbose("addSample: adding sample {} to channel {}".format(sample.name, self.name))
+        log.verbose(f"addSample: adding sample {sample.name} to channel {self.name}")
 
         self.sampleList.insert(index, sample.Clone())
         self.sampleList[index].parentChannel = self
 
         # Add any input files we own to the channel
-        log.debug("Appending existing {} files for channel {} to sample {}".format(len(self.input_files), self.channelName, sample.name))
+        log.debug(f"Appending existing {len(self.input_files)} files for channel {self.channelName} to sample {sample.name}")
         for i in self.input_files:
             sample.addInput(i.filename, i.treename)
 
@@ -187,8 +187,8 @@ class Channel(object):
         if len(self.sampleList[index].weights) == 0:
             self.sampleList[index].weights = deepcopy(self.weights)
 
-        for (systName, syst) in self.systDict.items():
-            if not systName in self.sampleList[index].systDict.keys():
+        for (systName, syst) in list(self.systDict.items()):
+            if not systName in list(self.sampleList[index].systDict.keys()):
                 self.sampleList[index].addSystematic(syst)
         return
 
@@ -235,7 +235,7 @@ class Channel(object):
         try:
             self.sampleList.remove(aSam)
         except:
-            log.warning("unable to remove sample %s from channel %s" % (aSam.name, self.name))
+            log.warning(f"unable to remove sample {aSam.name} from channel {self.name}")
         
         return
 
@@ -321,7 +321,7 @@ class Channel(object):
                 if not weight in s.weights:
                     s.addWeight(weight)
 
-        for syst in self.systDict.values():
+        for syst in list(self.systDict.values()):
             if syst.type == "weight":
                 if not weight in syst.high:
                     syst.high.append(weight)
@@ -343,7 +343,7 @@ class Channel(object):
                 if weight in s.weights:
                     s.removeWeight(weight)
 
-        for syst in self.systDict.values():
+        for syst in list(self.systDict.values()):
             if syst.type == "weight":
                 if weight in syst.high:
                     syst.high.remove(weight)
@@ -379,7 +379,7 @@ class Channel(object):
             self.addSample(sigSample)
             self.parentTopLvl.setSignalSample(sigSample)
 
-            histoName = "h%sNom_%s_obs_%s" % (sigSample.name, sr, self.niceVarName)
+            histoName = f"h{sigSample.name}Nom_{sr}_obs_{self.niceVarName}"
             self.getSample("DiscoveryMode_%s" % sr).setHistoName(histoName)
 
             configMgr.hists[histoName] = TH1F(histoName, histoName,
@@ -411,10 +411,10 @@ class Channel(object):
             raise IndexError("Channel already has data " + str(self.dataList))
         histo = generateToys.generate(toyInputHistoList, varName,
                                       varLow, varHigh)
-        for iBin in xrange(histo.GetNbinsX() + 1):
+        for iBin in range(histo.GetNbinsX() + 1):
             for inputHisto in addInputHistoList:
                 histo.SetBinContent(iBin+1, TMath.Nint(histo.GetBinContent(iBin+1)) + TMath.Nint(inputHisto.GetBinContent(iBin+1)))
-        for iBin in xrange(histo.GetNbinsX() + 1):
+        for iBin in range(histo.GetNbinsX() + 1):
             histo.SetBinError(iBin+1, TMath.Sqrt(histo.GetBinContent(iBin+1)))
 
         self.dataList.append((configMgr.histCacheFile, histo.GetName(), ""))
@@ -427,14 +427,14 @@ class Channel(object):
 
         @param syst The systematic to add
         """
-        log.debug("Adding systematic '{0}' to channel '{1}'".format(syst.name, self.name))
-        if syst.name in self.systDict.keys():
+        log.debug(f"Adding systematic '{syst.name}' to channel '{self.name}'")
+        if syst.name in list(self.systDict.keys()):
             raise Exception("Attempt to overwrite systematic %s "
                             " in Channel %s" % (syst.name, self.name))
         else:
             self.systDict[syst.name] = syst.Clone()
             for sam in self.sampleList:
-                log.debug("Adding systematic '{0}' to sample '{1}'".format(syst.name, sam.name))
+                log.debug(f"Adding systematic '{syst.name}' to sample '{sam.name}'")
                 sam.addSystematic(syst)
             return
 
@@ -518,11 +518,11 @@ class Channel(object):
         self.writeString += "<Channel Name=\"%s\">\n\n" % self.channelName
         for data in self.dataList:
             if len(data[2]):
-                self.writeString += "  <Data HistoName=\"%s\" InputFile=\"%s\" HistoPath=\"%s\" />\n\n" % (data[1], data[0], data[2])
+                self.writeString += f"  <Data HistoName=\"{data[1]}\" InputFile=\"{data[0]}\" HistoPath=\"{data[2]}\" />\n\n"
             else:
-                self.writeString += "  <Data HistoName=\"%s\" InputFile=\"%s\" />\n\n" % (data[1], data[0])
+                self.writeString += f"  <Data HistoName=\"{data[1]}\" InputFile=\"{data[0]}\" />\n\n"
         if self.hasStatConfig:
-            self.writeString += "  <StatErrorConfig RelErrorThreshold=\"%g\" ConstraintType=\"%s\"/>\n\n" % (self.statErrorThreshold, self.statErrorType)
+            self.writeString += f"  <StatErrorConfig RelErrorThreshold=\"{self.statErrorThreshold:g}\" ConstraintType=\"{self.statErrorType}\"/>\n\n"
         for (iSample, sample) in enumerate(self.sampleList):
             if sample.write:
                 self.writeString += str(sample)
@@ -547,15 +547,15 @@ class Channel(object):
         """
 
         if self.nBins != remapChan.nBins:
-            log.warning("Cannot remap histoSys systematics from %s to channel %s as number of bins do not agree: %g versus %g" % (remapChan.name, self.name, float(self.nBins), float(remapChan.nBins)))
+            log.warning(f"Cannot remap histoSys systematics from {remapChan.name} to channel {self.name} as number of bins do not agree: {float(self.nBins):g} versus {float(remapChan.nBins):g}")
             return False
 
         if abs(self.binLow - remapChan.binLow) > 0.0001:
-            log.warning("Cannot remap histoSys systematics from %s to channel %s as number of bins do not agree: %g versus %g" % (remapChan.name, self.name, float(self.binLow), float(remapChan.binLow)))
+            log.warning(f"Cannot remap histoSys systematics from {remapChan.name} to channel {self.name} as number of bins do not agree: {float(self.binLow):g} versus {float(remapChan.binLow):g}")
             return False
 
         if abs(self.binHigh - remapChan.binHigh) > 0.0001:
-            log.warning("Cannot remap histoSys systematics from %s to channel %s as number of bins do not agree: %g versus %g" % (remapChan.name, self.name, float(self.binHigh), float(remapChan.binHigh)))
+            log.warning(f"Cannot remap histoSys systematics from {remapChan.name} to channel {self.name} as number of bins do not agree: {float(self.binHigh):g} versus {float(remapChan.binHigh):g}")
             return False
 
         return True
