@@ -269,7 +269,6 @@ class PrepareHistos:
         log.debug(f"Creating chain {chainID}")
         self.configMgr.chains[chainID] = TChain(treenames)
 
-        #self.configMgr.chains[chainID].CanDeleteRefs(True)
         SetOwnership(self.configMgr.chains[chainID], True)
 
         log.verbose(f"Created chain {chainID} @ {hex(id(self.configMgr.chains[chainID]))}")
