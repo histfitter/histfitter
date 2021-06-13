@@ -1,6 +1,7 @@
 # HistFitter
 
-[![stable-release](https://img.shields.io/badge/Stable-v0.66.0-green)](https://gitlab.cern.ch/HistFitter/HistFitter/-/releases/v0.66.0)
+[![stable-release-python2](https://img.shields.io/badge/StablePython2-v0.66.0-green)](https://gitlab.cern.ch/HistFitter/HistFitter/-/releases/v0.66.0)
+[![stable-release-python3](https://img.shields.io/badge/StablePython3-v1.0.0-green)](https://gitlab.cern.ch/HistFitter/HistFitter/-/tree/v1.0.0)
 [![Documentation](https://img.shields.io/badge/Documentation-blue)](https://twiki.cern.ch/twiki/bin/viewauth/AtlasProtected/SusyFitter)
 [![Tutorial](https://img.shields.io/badge/Tutorial-orange)](https://twiki.cern.ch/twiki/bin/viewauth/AtlasProtected/HistFitterTutorial)
 
@@ -9,12 +10,12 @@
 The HistFitter Group mailing-list, for **any** of your questions: <atlas-phys-susy-histfitter@cern.ch>
 
 ## Acquire
-
+HistFitter has 2 stable versions, one complient with Python2 (v0.66.0) and one with Python3 (v1.0.0).
 If you're going to be using HistFitter directly as a standalone application, clone the latest stable release
 
 ```
 git clone ssh://git@gitlab.cern.ch:7999/HistFitter/HistFitter.git
-git checkout v0.66.0 -b v0.66.0
+git checkout vX.XX.X -b vX.XX.X 
 ```
 
 If you're using HistFitter as a submodule in a project, specify the latest stable release while adding the submodule
@@ -22,30 +23,23 @@ If you're using HistFitter as a submodule in a project, specify the latest stabl
 ```
 # Relative path gives nicer clones in CI if parent project on CERN's GitLab
 git submodule add ../../HistFitter/HistFitter.git
-cd HistFitter && git checkout v0.66.0 -b v0.66.0 && cd ..
+cd HistFitter && git checkout vX.XX.X -b vX.XX.X && cd ..
 git add HistFitter && git commit -m "Add HistFitter submodule"
 ```
 
 
+### Recommended Root version
+
+Recommended Root version is 6.22.0
+
 ## Setup
 
-If you're on a machine with CVMFS you can setup using
+The environment can be set doing
 
 ```
 source setup.sh
 ```
 
-and if you're on LXPLUS and want to use AFS you can setup using
-
-```
-source setup_afs.sh
-```
-
-### Recommended Root version
-
-The setup files automatically point at the recommended ROOT version to use.
-These reside on AFS.
-Have a look at the setup script if you would like to modify the ROOT version.
 
 ## Build
 
