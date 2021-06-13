@@ -60,3 +60,4 @@ test:
     - printenv
   script:
     - python -m pytest test
+    - HistFitter.py -w -f analysis/tutorial/MyUserAnalysis.py
