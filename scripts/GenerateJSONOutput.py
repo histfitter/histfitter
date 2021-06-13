@@ -23,12 +23,12 @@ args = parser.parse_args()
 # Print out the settings
 for setting in dir(args):
 	if not setting[0]=="_":
-		print ">>> ... Setting: {: >20} {: >40}".format(setting, eval("args.%s"%setting) )
-print ""
+		print(">>> ... Setting: {: >20} {: >40}".format(setting, eval("args.%s"%setting) ))
+print("")
 
 import os
 import ROOT
-ROOT.gSystem.Load('{0}/lib/libSusyFitter.so'.format(os.getenv('HISTFITTER')))
+ROOT.gSystem.Load(f"{os.getenv('HISTFITTER')}/lib/libSusyFitter.so")
 
 ROOT.gROOT.SetBatch()
 
@@ -42,7 +42,7 @@ def main():
                 if args.addCoordinates !="":  addCoordinates(filename, args.addCoordinates)
 
 		if "Nominal" in filename:
-			print ">>> Attempting to find theory variation files"
+			print(">>> Attempting to find theory variation files")
 
 			try:
                                 newfilename = filename.replace("Nominal","Up")
@@ -50,7 +50,7 @@ def main():
 				processFile(newfilename)
                                 if args.addCoordinates !="":  addCoordinates(newfilename, args.addCoordinates)
 			except:
-				print ">>> WARNING: Can't find file: %s"%filename.replace("Nominal","Up")
+				print(">>> WARNING: Can't find file: %s"%filename.replace("Nominal","Up"))
 
 			try:
                                 newfilename = filename.replace("Nominal","Down")
@@ -58,7 +58,7 @@ def main():
 				processFile(newfilename)
                                 if args.addCoordinates !="":  addCoordinates(newfilename, args.addCoordinates)
 			except:
-				print ">>> WARNING: Can't find file: %s"%filename.replace("Nominal","Down")
+				print(">>> WARNING: Can't find file: %s"%filename.replace("Nominal","Down"))
 
 			try:
                                 newfilename = filename.replace("_fixSigXSecNominal_hypotest","_upperlimit")
@@ -66,40 +66,40 @@ def main():
 				processFile(newfilename)
                                 if args.addCoordinates !="":  addCoordinates(newfilename, args.addCoordinates)
 			except:
-				print ">>> WARNING: Can't find file: %s"%filename.replace("_fixSigXSecNominal_hypotest","_upperlimit")
+				print(">>> WARNING: Can't find file: %s"%filename.replace("_fixSigXSecNominal_hypotest","_upperlimit"))
 			try:
                                 newfilename = filename.replace("_Nominal","_upperlimit")
                                 if newfilename == filename: raise
 				processFile(newfilename)
                                 if args.addCoordinates !="":  addCoordinates(newfilename, args.addCoordinates)
 			except:
-				print ">>> WARNING: Can't find file: %s"%filename.replace("_fixSigXSecNominal_hypotest","_upperlimit")				
+				print(">>> WARNING: Can't find file: %s"%filename.replace("_fixSigXSecNominal_hypotest","_upperlimit"))
 
 	if not args.noAddTabs:
 		cleanUpJSON()
 
-	print ">>>"
-	print ">>> Done!"
-	print ">>>"
+	print(">>>")
+	print(">>> Done!")
+	print(">>>")
 
 	return
 
 def processFile(file):
 
-	print ""
+	print("")
 	if os.path.isfile(file):
 		ROOT.CollectAndWriteHypoTestResults( file, args.format, args.interpretation, args.cut )
 	else:
-		print ">>> ERROR: File does not exist: %s"%file
+		print(">>> ERROR: File does not exist: %s"%file)
 		sys.exit(1)
-	print ""
+	print("")
 	return
 
 def cleanUpJSON():
 	import json
 	import glob
 	for file in glob.glob("./*json"):
-		print ">>> Making file human readable: %s"%file
+		print(">>> Making file human readable: %s"%file)
 		data = json.load(open(file))
 		with open(file, 'w') as f:
 			f.write( json.dumps(data, indent=4) )
@@ -120,7 +120,7 @@ def addCoordinates(fileName, coordString):
         for i,hypo_test in enumerate(data): # an entry is one hypo test result
                 for key in coordDict: # each item of the result
                         # parse input arguments, thanks to Larry for regex suggestions
-                        total = eval( re.sub(r'\b([a-zA-Z]+[0-9]*)\b', 'hypo_test["\g<1>"]',key))
+                        total = eval( re.sub(r'\b([a-zA-Z]+[0-9]*)\b', r'hypo_test["\g<1>"]',key))
                                         
                         # assign new key to value
                         hypo_test[ coordDict[key] ] = total

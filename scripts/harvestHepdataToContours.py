@@ -14,9 +14,6 @@
 # By: Jonathan Long - April 2021
 
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
 
 import ROOT, csv, argparse, math
 
@@ -85,7 +82,7 @@ def closeContour(x,y, argument):
         i_save = -1
 
         #print(f"Appending point {x_close}, {y_close}")
-        print("Appending point {}, {}".format(x_close, y_close) )
+        print(f"Appending point {x_close}, {y_close}" )
         
         # Compute distance to closest existing point
         for i, (x_test, y_test) in enumerate(zip(x,y)):

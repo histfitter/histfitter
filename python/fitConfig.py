@@ -52,7 +52,7 @@ def mkdir_p(path):
             #pass
         #else: raise
 
-class fitConfig(object):
+class fitConfig:
     """
     Defines the content of a top-level HistFactory workspace
     """
@@ -135,8 +135,8 @@ class fitConfig(object):
         
         #Note: wsFileName is an educated guess of the workspace
         # file name externally decided by HistFactory.
-        self.wsFileName = "results/%s_combined_%s_model.root" % (self.prefix, self.measurements[0].name)
-        log.debug("fitConfig.initialize(): set output filename for {0} to {1}".format(self.name, self.wsFileName))
+        self.wsFileName = f"results/{self.prefix}_combined_{self.measurements[0].name}_model.root"
+        log.debug(f"fitConfig.initialize(): set output filename for {self.name} to {self.wsFileName}")
 
         for sam in self.sampleList:
             if sam.isData: # FIXME (works but ugly)
@@ -159,7 +159,7 @@ class fitConfig(object):
                             found = True
 
                 if not found:
-                    log.warning("signal sample %s is not contained in sampleList of fitConfig %s or its daughter channels" % (self.signalSample, self.name))
+                    log.warning(f"signal sample {self.signalSample} is not contained in sampleList of fitConfig {self.name} or its daughter channels")
 
         for chan in self.channels:
             chanName = chan.channelName
@@ -181,10 +181,10 @@ class fitConfig(object):
                 nFound += 1
 
             if nFound == 0:
-                log.warning("%s: Channel: no region type for region %s defined! " % (self.name, chanName))
+                log.warning(f"{self.name}: Channel: no region type for region {chanName} defined! ")
 
             if nFound > 1:
-                log.warning("%s: Channel: region type for %s is ambiguous: SR=%s CR=%s VR=%s. Double check your configuration! " % (self.name, chanName, isSR, isCR, isVR))
+                log.warning(f"{self.name}: Channel: region type for {chanName} is ambiguous: SR={isSR} CR={isCR} VR={isVR}. Double check your configuration! ")
 
             #for sample in self.sampleList:
             #    try:
@@ -257,7 +257,7 @@ class fitConfig(object):
         #verify that this name is not already used
         for meas in self.measurements:
             if meas.name == name:
-                raise RuntimeError("Measurement %s already exists in fitConfig %s. Please use a different name." % (name, self.name))
+                raise RuntimeError(f"Measurement {name} already exists in fitConfig {self.name}. Please use a different name.")
             pass
         
         #add measurement to the list
@@ -277,7 +277,7 @@ class fitConfig(object):
         #verify that this name is not already used
         for meas in self.measurements:
             if meas.name == obj.name:
-                raise RuntimeError("Measurement %s already exists in fitConfig %s. Please use a different name." % (obj.name, self.name))
+                raise RuntimeError(f"Measurement {obj.name} already exists in fitConfig {self.name}. Please use a different name.")
             pass
         
         #add measurement clone to the list
@@ -294,7 +294,7 @@ class fitConfig(object):
             if m.name == name:
                 return m
 
-        raise RuntimeError("Measurement %s does not exist in %s" % (name, self.name))
+        raise RuntimeError(f"Measurement {name} does not exist in {self.name}")
 
     def statStatErrorType(self, t):
         """
@@ -325,15 +325,15 @@ class fitConfig(object):
         chanObj = Channel(variableName, regions, self.prefix, nBins,
                              binLow, binHigh, self.statErrThreshold)
 
-        log.debug("Created channel object {0} for {1}".format(hex(id(chanObj)), chanObj.channelName))
+        log.debug(f"Created channel object {hex(id(chanObj))} for {chanObj.channelName}")
 
         # Verify that this name is not already used
         for chan in self.channels:
             if chan.name == chanObj.name:
                 log.info("Not going to add the region, because it exists in fitConfig --> channel list as follows:" )
                 for chan in self.channels:
-                    print "      chan.name = ", chan.name
-                raise RuntimeError("Channel %s already exists in fitConfig %s. Please use a different name." % (chanObj.name, self.name))
+                    print("      chan.name = ", chan.name)
+                raise RuntimeError(f"Channel {chanObj.name} already exists in fitConfig {self.name}. Please use a different name.")
 
         # set channel parent
         chanObj.parentTopLvl = self
@@ -345,7 +345,7 @@ class fitConfig(object):
         chanObj.setWeights(self.weights)
 
         # Propagate systematics into channel
-        for (systName, syst) in self.systDict.items():
+        for (systName, syst) in list(self.systDict.items()):
             chanObj.addSystematic(syst)
 
         # Put samples owned by this fitConfig into the channel
@@ -353,7 +353,7 @@ class fitConfig(object):
             chanObj.addSample(s.Clone())
 
         # Add any input files we own to the channel
-        log.debug("Appending existing files to channel {}".format(chanObj.channelName))
+        log.debug(f"Appending existing files to channel {chanObj.channelName}")
         for i in self.input_files:
             chanObj.addInput(i.filename, i.treename)
 
@@ -374,7 +374,7 @@ class fitConfig(object):
         # Verify that this name is not already used
         for chan in self.channels:
             if chan.name == obj.name:
-                raise RuntimeError("Channel %s already exists in fitConfig %s. Please use a different name." % (obj.name, self.name))
+                raise RuntimeError(f"Channel {obj.name} already exists in fitConfig {self.name}. Please use a different name.")
 
         # Create a copy
         newObj = deepcopy(obj)
@@ -389,8 +389,8 @@ class fitConfig(object):
             newObj.setWeights(self.weights)
 
         # Propagate systematics into channel
-        for (systName, syst) in self.systDict.items():
-            if not systName in newObj.systDict.keys():
+        for (systName, syst) in list(self.systDict.items()):
+            if not systName in list(newObj.systDict.keys()):
                 newObj.addSystematic(syst)
 
         # Put samples owned by this fitConfig into the channel
@@ -449,7 +449,7 @@ class fitConfig(object):
             if chan.variableName == variableName and chan.regions == regions:
                 return chan
 
-        raise RuntimeError("No channel with variable name %s and regions %s found" % (variableName, regions))
+        raise RuntimeError(f"No channel with variable name {variableName} and regions {regions} found")
 
     def addSamples(self, input):
         """
@@ -467,7 +467,7 @@ class fitConfig(object):
             # If the sample doesn't exist in fitConfig already then add it,
             # else something has gone wrong
             if sampleToAdd.name in [sam.name for sam in self.sampleList]:
-                raise RuntimeError("Sample %s already defined in fitConfig %s" % (sampleToAdd.name, self.name))
+                raise RuntimeError(f"Sample {sampleToAdd.name} already defined in fitConfig {self.name}")
 
             # Append copy of the sample
             self.sampleList.append(sampleToAdd.Clone())
@@ -479,8 +479,8 @@ class fitConfig(object):
                     self.sampleList[-1].setWeights(self.weights)
 
                 # Propagate our systematics into sample
-                for (systName, syst) in self.systDict.items():
-                    if not systName in self.sampleList[-1].systDict.keys():
+                for (systName, syst) in list(self.systDict.items()):
+                    if not systName in list(self.sampleList[-1].systDict.keys()):
                         self.sampleList[-1].addSystematic(syst)
 
             # Propagate to channels that are already owned as well, but don't have this sample yet
@@ -499,18 +499,18 @@ class fitConfig(object):
         log.warning("mergeSamples() is an experimental functionality that does not check things such as systematics remapping and normalisation regions!")
 
         if len(samples) < 2:
-            raise RuntimeError("Cannot merge less than 2 samples in fitConfig {}".format(self.name))
+            raise RuntimeError(f"Cannot merge less than 2 samples in fitConfig {self.name}")
 
         # Is any of the samples already flagged for merging?
         # don't use any() for this check - we want to prnt the names
         cannotMerge = False
         for s in samples:
             if s.toBeMerged:
-                log.error("Sample {} is already flagged for merging in fitConfig {}".format(sam.name, self.name))
+                log.error(f"Sample {sam.name} is already flagged for merging in fitConfig {self.name}")
                 cannotMerge = True
 
         if cannotMerge:
-            raise RuntimeError("One or more samples already flagged to be merged in fitConfig {}".format(self.name))
+            raise RuntimeError(f"One or more samples already flagged to be merged in fitConfig {self.name}")
         
         log.debug("mergeSamples: merging samples {} in fitConfig {}".format(", ".join(s.name for s in samples), self.name))
 
@@ -518,7 +518,7 @@ class fitConfig(object):
         if target != "":
             _target = copy(target)
 
-        log.debug("mergeSamples: set target name to {}".format(_target))
+        log.debug(f"mergeSamples: set target name to {_target}")
 
         for s in samples:
             s.toBeMerged = True
@@ -557,7 +557,7 @@ class fitConfig(object):
                 if s.name == name:
                     return s
  
-        raise Exception("Sample with name %s not found in fitConfig %s" % (name, self.name))
+        raise Exception(f"Sample with name {name} not found in fitConfig {self.name}")
 
     def setWeights(self, weights):
         """
@@ -590,7 +590,7 @@ class fitConfig(object):
         if not weight in self.weights:
             self.weights.append(weight)
         else:
-            raise RuntimeError("Weight %s already defined in fitConfig %s" % (weight, self.name))
+            raise RuntimeError(f"Weight {weight} already defined in fitConfig {self.name}")
 
         # Propagate to owned channels that do not already have this weight
         for c in self.channels:
@@ -605,7 +605,7 @@ class fitConfig(object):
 
         # Propagate to owned weight-type systematics that do not
         # already have this weight
-        for syst in self.systDict.values():
+        for syst in list(self.systDict.values()):
             if syst.type == "weight":
                 if not weight in syst.high:
                     syst.high.append(weight)
@@ -622,7 +622,7 @@ class fitConfig(object):
         if weight in self.weights:
             self.weights.remove(weight)
         else:
-            raise RuntimeError("Weight %s does not exist in fitConfig %s" % (weight, self.name))
+            raise RuntimeError(f"Weight {weight} does not exist in fitConfig {self.name}")
 
         # Propagate to owned channels
         for c in self.channels:
@@ -636,7 +636,7 @@ class fitConfig(object):
                     s.removeWeight(weight)
 
         # Propagate to owned weight-type systematics
-        for syst in self.systDict.values():
+        for syst in list(self.systDict.values()):
             if syst.type == "weight":
                 if weight in syst.high:
                     syst.high.remove(weight)
@@ -674,14 +674,14 @@ class fitConfig(object):
         for i in inList:
             if isinstance(i, Channel):
                 chanName = i.channelName
-                log.debug("\tFound channel name from object ({1}): {0}".format(chanName, hex(id(i))))
+                log.debug(f"\tFound channel name from object ({hex(id(i))}): {chanName}")
             else:
                 chanName = i
-                log.debug("\tUsing channel name as string: {0}".format(chanName))
+                log.debug(f"\tUsing channel name as string: {chanName}")
                 pass
             
             if chanName not in targetList:
-                log.debug("\t=> Appending channel {0}".format(chanName))
+                log.debug(f"\t=> Appending channel {chanName}")
                 targetList.append(chanName)
                 pass
             pass
@@ -787,8 +787,8 @@ class fitConfig(object):
 
         @param syst Systematic to add
         """
-        if syst.name in self.systDict.keys():
-            raise RuntimeError("Attempt to overwrite systematic %s in fitConfig %s" % (syst.name, self.name))
+        if syst.name in list(self.systDict.keys()):
+            raise RuntimeError(f"Attempt to overwrite systematic {syst.name} in fitConfig {self.name}")
         else:
             self.systDict[syst.name] = syst.Clone()
 
@@ -815,7 +815,7 @@ class fitConfig(object):
         try:
             return self.systDict[name]
         except KeyError:
-            raise KeyError("Could not find systematic %s in fitConfig %s" % (name, self.name))
+            raise KeyError(f"Could not find systematic {name} in fitConfig {self.name}")
 
     def clearSystematics(self):
         """
@@ -870,7 +870,7 @@ class fitConfig(object):
         self.writeString += "<Combination OutputFilePrefix=\"./results/" + self.prefix + "\"  >\n\n"
 
         for func in self.functions:
-            self.writeString += "  <Function Name=\"%s\" Expression=\"%s\" Dependents=\"%s\" />\n" % (func[0], func[1], func[2])
+            self.writeString += f"  <Function Name=\"{func[0]}\" Expression=\"{func[1]}\" Dependents=\"{func[2]}\" />\n"
         
         for chan in self.channels:
             self.writeString += "  <Input>" + chan.xmlFileName + "</Input>\n"

@@ -16,7 +16,7 @@
 """
 
 def tablefragment(m,signalRegions,skiplist,chanStr,showPercent,label="",caption=""):
-  """ 
+  """
   main function to transfer the set of numbers/names (=m provided by SysTable) into a LaTeX table
 
   @param m Set of numbers/names provided by SysTable
@@ -25,7 +25,7 @@ def tablefragment(m,signalRegions,skiplist,chanStr,showPercent,label="",caption=
   @param chanStr String of all channels used, to be used in label of table
   @param showPercent Boolean deciding whether to show percentage for each systematic
   """
-  
+
   tableline = ''
 
   tableline += '''
@@ -36,9 +36,9 @@ def tablefragment(m,signalRegions,skiplist,chanStr,showPercent,label="",caption=
 
   """
   print the region names
-  """ 
+  """
   for region in signalRegions:
-    tableline += "c"   
+    tableline += "c"
   tableline += '''}
 \\toprule
 \\textbf{Uncertainty of channel}                                   '''
@@ -46,9 +46,9 @@ def tablefragment(m,signalRegions,skiplist,chanStr,showPercent,label="",caption=
 
   """
   print the total fitted (after fit) number of events
-  """   
+  """
   for region in signalRegions:
-    tableline += " & " + region.replace('_','\_') + "           "   
+    tableline += " & " + region.replace('_',r'\_') + "           "
 
   tableline += ''' \\\\
 \\midrule
@@ -57,7 +57,7 @@ def tablefragment(m,signalRegions,skiplist,chanStr,showPercent,label="",caption=
   tableline += '''
 Total background expectation            '''
   for region in signalRegions:
-    tableline += " &  $" + str(("%.2f" %m[region]['nfitted'])) + "$       "
+    tableline += " &  $" + str("%.2f" %m[region]['nfitted']) + "$       "
   tableline += '''\\\\
 %%'''
 
@@ -69,61 +69,71 @@ Total background expectation            '''
 
   """
   print sqrt(N_obs) - for comparison with total systematic
-  """   
+  """
   tableline += '''
 Total statistical $(\\sqrt{N_{\\mathrm{exp}}})$             '''
   for region in signalRegions:
-    tableline += " & $\\pm " + str(("%.2f" %m[region]['sqrtnfitted'])) + "$       "
+    tableline += " & $\\pm " + str("%.2f" %m[region]['sqrtnfitted']) + "$       "
   tableline += '''\\\\
 %%'''
 
   """
   print total systematic uncertainty
-  """   
+  """
   tableline += '''
 Total background systematic              '''
 
   for region in signalRegions:
-    percentage = m[region]['totsyserr']/m[region]['nfitted'] * 100.0  if m[region]['nfitted']>0 else 0.  
-    tableline += " & $\\pm " + str(("%.2f" %m[region]['totsyserr'])) + "\ [" + str(("%.2f" %percentage)) + "\\%] $       "
+      percentage = (
+          m[region]["totsyserr"] / m[region]["nfitted"] * 100.0
+          if m[region]["nfitted"] > 0
+          else 0
+      )
+      tableline += (
+          " & $\\pm "
+          + str("%.2f" % m[region]["totsyserr"])
+          + r"\ ["
+          + str("%.2f" % percentage)
+          + "\\%] $       "
+      )
 
   tableline += '''      \\\\
 \\midrule
-%%''' 
+%%'''
 
 
   """
   print systematic uncertainty per floated parameter (or set of parameters, if requested)
-  """   
-  d = m[signalRegions[0]] 
-  m_listofkeys = sorted(d.iterkeys(), key=lambda k: d[k], reverse=True)
+  """
+  d = m[signalRegions[0]]
+  m_listofkeys = sorted(iter(d.keys()), key=lambda k: d[k], reverse=True)
 
   for name in m_listofkeys:
     if name not in skiplist:
       printname = name
       printname = printname.replace('syserr_','')
-      printname = printname.replace('_','\_')
+      printname = printname.replace('_',r'\_')
       for index,region in enumerate(signalRegions):
         if index == 0:
           tableline += "\n" + printname + "      "
-          
+
         if not showPercent:
-          tableline += "   & $\\pm " + str(("%.2f" %m[region][name])) + "$       "
+          tableline += "   & $\\pm " + str("%.2f" %m[region][name]) + "$       "
         else:
           percentage = m[region][name]/m[region]['nfitted'] * 100.0 if m[region]['nfitted']>0. else 0.
           if percentage <1:
-            tableline += "   & $\\pm " + str(("%.2f" %m[region][name])) + "\ [" + str(("%.2f" %percentage)) + "\\%] $       "
+            tableline += "   & $\\pm " + str("%.2f" %m[region][name]) + r"\ [" + str("%.2f" %percentage) + "\\%] $       "
           else:
-            tableline += "   & $\\pm " + str(("%.2f" %m[region][name])) + "\ [" + str(("%.1f" %percentage)) + "\\%] $       "
-                    
-          
+            tableline += "   & $\\pm " + str("%.2f" %m[region][name]) + r"\ [" + str("%.1f" %percentage) + "\\%] $       "
+
+
         if index == len(signalRegions)-1:
           tableline += '''\\\\
 %%'''
 
   """
   print table end with default Caption and Label
-  """   
+  """
 
   if caption =="":
     caption="""Breakdown of the dominant systematic uncertainties on background estimates in the various signal regions.
@@ -138,8 +148,8 @@ the total background uncertainty. The percentages show the size of the uncertain
 \\bottomrule
 \\end{tabular*}
 \\caption{"""+caption+"""}
-\\label{"""+label+"""}
+\\label{"""+label+r"""}
 \end{table}"""
-    
+
   return tableline
 

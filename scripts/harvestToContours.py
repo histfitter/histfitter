@@ -16,12 +16,15 @@
 #> localSetupSFT --cmtConfig=x86_64-slc6-gcc48-opt releases/LCG_79/pytools/1.9_python2.7,releases/LCG_79/pyanalysis/1.5_python2.7
 #> lsetup root
 
-
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
-import ROOT, json, argparse, math, sys, os, pickle, copy
+import ROOT
+import json
+import argparse
+import math
+import sys
+import os
+import pickle
+import copy
+from ctypes import c_double
 
 ROOT.gROOT.SetBatch()
 
@@ -198,7 +201,7 @@ def processInputFile(inputFile, outputFile, label = ""):
     resultsDict = harvestToDict( inputFile )
 
     if len(resultsDict)<3:
-        print (">>> WARNING: You have fewer than three valid model points in your input. I can't interpolate that in 2D! You've given me %d valid points!"%( len(resultsDict) ) )
+        print(">>> WARNING: You have fewer than three valid model points in your input. I can't interpolate that in 2D! You've given me %d valid points!"%( len(resultsDict) ) )
         return -1
 
     if label=="": #Only do this for the nominal signal XS
@@ -257,7 +260,7 @@ def processInputFile(inputFile, outputFile, label = ""):
             for iSubGraph,subGraph in enumerate(outputGraphs[whichContour]):
                 subGraph.Write("%s_Contour_%d%s"%(whichContour,iSubGraph,label))
         except:
-            print (">>> ... Well that one's no good. You might want to check on that... - %s"%whichContour)
+            print(">>> ... Well that one's no good. You might want to check on that... - %s"%whichContour)
             if len(outputGraphs[whichContour]):
                 print (">>> ... It appears this has no contours...")
 
@@ -303,13 +306,13 @@ def processInputFile(inputFile, outputFile, label = ""):
         canvas = ROOT.TCanvas("FinalCurves","FinalCurves")
         try:
             if not args.ignoreUncertainty and outputFile.Get("Band_1s_0"):
-                for iGraph in xrange(  len(outputGraphs[listOfContours_OneSigma[1] ])   ):
+                for iGraph in range(  len(outputGraphs[listOfContours_OneSigma[1] ])   ):
                         outputFile.Get("Band_1s_%d"%iGraph).Draw("ALF" if iGraph==0 else "LF")
             else:
                 outputFile.Get("Exp_0").Draw("AL")
-            for iGraph in xrange(len(outputGraphs[expectedContour]) ):
+            for iGraph in range(len(outputGraphs[expectedContour]) ):
                 outputFile.Get("Exp_%d"%iGraph).Draw("L")
-            for iGraph in xrange(len(outputGraphs[observedContour]) ):
+            for iGraph in range(len(outputGraphs[observedContour]) ):
                 outputFile.Get("Obs_%d"%iGraph).Draw("L")
             ROOT.gPad.RedrawAxis()
             canvas.Write()
@@ -329,7 +332,7 @@ def harvestToDict( harvestInputFileName = "" , tmpListOfContours = listOfContour
 
     modelDict = {}
 
-    harvestInput = open(harvestInputFileName,"r")
+    harvestInput = open(harvestInputFileName)
 
     constraintsDict = {}
     if args.fixedParamsFile:
@@ -338,7 +341,7 @@ def harvestToDict( harvestInputFileName = "" , tmpListOfContours = listOfContour
             constraintsDict = inputFixedParamsJSON
 
     if ".json" in harvestInputFileName:
-        print (">>> ... Interpreting json file %s"%harvestInputFileName)
+        print(">>> ... Interpreting json file %s"%harvestInputFileName)
 
         with open(harvestInputFileName) as inputJSONFile:
             inputJSON = json.load(inputJSONFile)
@@ -347,18 +350,18 @@ def harvestToDict( harvestInputFileName = "" , tmpListOfContours = listOfContour
 
                 ## Allowing filtering of entries via a constraints file
                 if args.fixedParamsFile:
-                    failConstraintCutList = [not sample[str(constrainedVar)]==constrainedVal for (constrainedVar, constrainedVal) in constraintsDict.iteritems()]
+                    failConstraintCutList = [not sample[str(constrainedVar)]==constrainedVal for (constrainedVar, constrainedVal) in constraintsDict.items()]
                     if any(failConstraintCutList):
                         continue
 
                 try:
                     sampleParams = (float(sample[args.xVariable]),float(sample[args.yVariable]) )
                 except:
-                    print (">>> ... Error: %s or %s doesn't exist as an entry in the input file"%(args.xVariable,args.yVariable))
+                    print(">>> ... Error: %s or %s doesn't exist as an entry in the input file"%(args.xVariable,args.yVariable))
                     print (">>> ... Use cmd line options -x and -y to point to variables that exist in the input")
                     print (">>> Available variables are listed below:")
                     print (">>> ")
-                    print (">>> "+"\n>>> ".join(sample.keys()))
+                    print(">>> "+"\n>>> ".join(list(sample.keys())))
                     sys.exit(1)
 
                 sampleParamsList = list(sampleParams)
@@ -377,7 +380,7 @@ def harvestToDict( harvestInputFileName = "" , tmpListOfContours = listOfContour
 
                 if not math.isinf(float(sample[expectedContour])) :
                     tmpList = [float(sample["%s"%x]) if (args.noSig or x in ["upperLimit","expectedUpperLimit"]) else ROOT.RooStats.PValueToSignificance( float(sample["%s"%x]) ) for x in tmpListOfContours]
-                    modelDict[sampleParams] = dict(zip(tmpListOfContours,  tmpList ) )
+                    modelDict[sampleParams] = dict(list(zip(tmpListOfContours,  tmpList )) )
                     if "fID" in sample:
                         modelDict[sampleParams]["fID"] = sample["fID"]
                     else:
@@ -386,10 +389,10 @@ def harvestToDict( harvestInputFileName = "" , tmpListOfContours = listOfContour
 
                 else:
                     if not sampleParams in modelDict:
-                        modelDict[sampleParams] = dict(zip(tmpListOfContours,  [args.sigmax for x in tmpListOfContours] ) )
+                        modelDict[sampleParams] = dict(list(zip(tmpListOfContours,  [args.sigmax for x in tmpListOfContours] )) )
                         modelDict[sampleParams]["fID"] = ""
                 if(args.debug):
-                    print (sampleParams, float(sample[observedContour]), float(sample[expectedContour]) if args.noSig else ROOT.RooStats.PValueToSignificance( float(sample[observedContour])     ))
+                    print((sampleParams, float(sample[observedContour]), float(sample[expectedContour]) if args.noSig else ROOT.RooStats.PValueToSignificance( float(sample[observedContour])     )))
 
 
     else:
@@ -408,7 +411,7 @@ def harvestToDict( harvestInputFileName = "" , tmpListOfContours = listOfContour
 
         for model in harvestInput.readlines():
             values = model.split()
-            values = dict(zip(fieldNames, values))
+            values = dict(list(zip(fieldNames, values)))
 
             sampleParams = (float(values[args.xVariable]),float(values[args.yVariable]))
 
@@ -421,13 +424,13 @@ def harvestToDict( harvestInputFileName = "" , tmpListOfContours = listOfContour
 
             ## Allowing filtering of entries via a constraints file
             if args.fixedParamsFile:
-                failConstraintCutList = [not values[str(constrainedVar)]==constrainedVal for (constrainedVar, constrainedVal) in constraintsDict.iteritems()]
+                failConstraintCutList = [not values[str(constrainedVar)]==constrainedVal for (constrainedVar, constrainedVal) in constraintsDict.items()]
                 if any(failConstraintCutList):
                     continue
 
             tmpList = [float(values["%s/F"%x]) if (args.noSig or x in ["upperLimit","expectedUpperLimit"]) else ROOT.RooStats.PValueToSignificance( float(values["%s/F"%x]) ) for x in tmpListOfContours]
 
-            modelDict[sampleParams] = dict(zip(tmpListOfContours,  tmpList ) )
+            modelDict[sampleParams] = dict(list(zip(tmpListOfContours,  tmpList )) )
 
 
     return modelDict
@@ -436,12 +439,12 @@ def harvestToDict( harvestInputFileName = "" , tmpListOfContours = listOfContour
 def addValuesToDict(inputDict, function, numberOfPoints = 100, value = 0):
     """This takes in a TF1 and dots zero points along that function, and adds to the dict"""
 
-    tmpListOfXValues = [entry[0] for entry in inputDict.keys()]
+    tmpListOfXValues = [entry[0] for entry in list(inputDict.keys())]
     lowerLimit = min(tmpListOfXValues)
     upperLimit = max(tmpListOfXValues)
 
-    forbiddenFunction = ROOT.TF1("forbiddenFunction${}".format(value),args.forbiddenFunction,lowerLimit,upperLimit)
-    forbiddenFunction.Write("forbiddenFunction${}".format(value))
+    forbiddenFunction = ROOT.TF1(f"forbiddenFunction${value}",args.forbiddenFunction,lowerLimit,upperLimit)
+    forbiddenFunction.Write(f"forbiddenFunction${value}")
 
 
     if value == "mirror":
@@ -467,11 +470,11 @@ def addValuesToDict(inputDict, function, numberOfPoints = 100, value = 0):
         # now to loop over entries in the inputDict. rotate them about this closest point on the forbidden line
         for signalPoint in inputDict:
             closestPointOnLine = list(closest_point(np.array([signalPoint]),np.array(forbiddenLineArray) ) )
-            inputDictCopy[tuple(closestPointOnLine)] = dict(zip(listOfContours,  [1 for x in listOfContours] ) )
+            inputDictCopy[tuple(closestPointOnLine)] = dict(list(zip(listOfContours,  [1 for x in listOfContours] )) )
             fakeMirroredSignalPoint = rotate(closestPointOnLine, signalPoint)
             tmpDict = copy.deepcopy(inputDictCopy[signalPoint])
             for key in tmpDict:
-                if isinstance(tmpDict[key], (int, long, float)):
+                if isinstance(tmpDict[key], (int, float)):
                     tmpDict[key] *= -1*np.sign(tmpDict[key])
             inputDictCopy[fakeMirroredSignalPoint] = tmpDict
 
@@ -479,15 +482,15 @@ def addValuesToDict(inputDict, function, numberOfPoints = 100, value = 0):
 
     else:
         for xValue in [lowerLimit + x*(upperLimit-lowerLimit)/float(numberOfPoints) for x in range(numberOfPoints)]:
-            inputDict[(xValue,forbiddenFunction.Eval(xValue))] = dict(zip(listOfContours,  [value for x in listOfContours] ) )
+            inputDict[(xValue,forbiddenFunction.Eval(xValue))] = dict(list(zip(listOfContours,  [value for x in listOfContours] )) )
 
     return inputDict
 
 def interpolateSurface(modelDict = {}, interpolationFunction = "linear", useROOT=False, outputSurface=False, outputSurfaceTGraph=False, tmpListOfContours=listOfContours):
     """The actual interpolation"""
 
-    modelPoints = modelDict.keys()
-    modelPointsValues = modelDict.values()
+    modelPoints = list(modelDict.keys())
+    modelPointsValues = list(modelDict.values())
     x0 =   list( zip( *modelPoints )[0] )
     y0 =   list( zip( *modelPoints )[1] )
 
@@ -508,14 +511,14 @@ def interpolateSurface(modelDict = {}, interpolationFunction = "linear", useROOT
         while any([math.isinf(tmp) or math.isnan(tmp) for tmp in zValues[whichContour]  ]):#  np.isinf( zValues[whichContour]  ).any():
             myindex = [math.isinf(tmp) or math.isnan(tmp) for tmp in zValues[whichContour] ].index(True)
             if (args.debug):
-                print (">>> ... Remove Inf or NaN at i=%d x=%d y=%d" % (myindex,x[whichContour][myindex],y[whichContour][myindex]))
+                print(">>> ... Remove Inf or NaN at i=%d x=%d y=%d" % (myindex,x[whichContour][myindex],y[whichContour][myindex]))
             x[whichContour].pop(myindex)
             y[whichContour].pop(myindex)
             zValues[whichContour].pop(myindex)
             pass;
 
         if any([math.isinf(tmp) or math.isnan(tmp) for tmp in zValues[whichContour]  ]):
-            print (">>> ... Still infs or nans in %s!! This is a problem... Exiting." % whichContour)
+            print(">>> ... Still infs or nans in %s!! This is a problem... Exiting." % whichContour)
             sys.exit(0)
 
     if useROOT:
@@ -538,7 +541,7 @@ def interpolateSurface(modelDict = {}, interpolationFunction = "linear", useROOT
         yi = {}
         zi = {}
         for whichContour in tmpListOfContours:
-            print (">>> ... Interpolating %s"%whichContour)
+            print(">>> ... Interpolating %s"%whichContour)
 
             # Convert everything to numpy arrays
             xArray = np.array(x[whichContour])
@@ -597,7 +600,7 @@ def interpolateSurface(modelDict = {}, interpolationFunction = "linear", useROOT
                 print (">>> ... Interpolation failing!!! Check to make sure there are no NANs or double defined points in your input JSON!")
                 print (">>> ... Printing points we're trying to interpolate (x,y,z) triplets:")
 
-                print (sorted( zip(xArray,yArray,zArray), key = lambda x: x[0]*x[1] ))
+                print(sorted( zip(xArray,yArray,zArray), key = lambda x: x[0]*x[1] ))
                 sys.exit(1)
 
             # Undo the scaling from above to get back to original units
@@ -663,8 +666,8 @@ def createTGraph2DFromMeshGrid(x,y,z):
 def createTGraphFromDict(modelDict,myName,listOfFIDs=None):
     """Given the results dictionary, can make a TGraph2D of values. Has support for fID as strings."""
 
-    modelPoints = modelDict.keys()
-    modelPointsValues = modelDict.values()
+    modelPoints = list(modelDict.keys())
+    modelPointsValues = list(modelDict.values())
 
     outputGraph = ROOT.TGraph2D(len(modelPoints))
     outputGraph.SetName(myName)
@@ -684,8 +687,8 @@ def createTGraphFromDict(modelDict,myName,listOfFIDs=None):
 def createListOfFIDs(modelDict, file=None):
     """Given a results dictionary, construct a list of possible signal regions (fIDs) and write it to the output file"""
 
-    modelPoints = modelDict.keys()
-    modelPointsValues = modelDict.values()
+    modelPoints = list(modelDict.keys())
+    modelPointsValues = list(modelDict.values())
     listOfFIDs = []
     for imodel,model in enumerate(modelPoints):
         if not modelDict[model]["fID"] in listOfFIDs:
@@ -716,7 +719,7 @@ def truncateSignificances(modelDict,sigmax=5):
 def createGraphsFromArrays(x,y,z,label):
 
     if args.debug:
-        print (">>> ... In createGraphsFromArrays for %s"%label)
+        print(">>> ... In createGraphsFromArrays for %s"%label)
 
     gr = createTGraph2DFromArrays(x,y,z)
 
@@ -753,7 +756,7 @@ def createGraphsFromArrays(x,y,z,label):
         biggestGraph.Draw("ALP")
 
     if args.debug:
-        print (">>> ... ... Number of graphs %d"%len(allGraphs))
+        print(">>> ... ... Number of graphs %d"%len(allGraphs))
 
     return allGraphs
 
@@ -766,7 +769,7 @@ def getContourPoints(xi,yi,zi,level ):
 
     contourList = []
 
-    for i in xrange( len(contour.get_paths() ) ):
+    for i in range( len(contour.get_paths() ) ):
         v = contour.get_paths()[i].vertices
 
         x = v[:,0]
@@ -776,12 +779,12 @@ def getContourPoints(xi,yi,zi,level ):
 
     return contourList
 
-def createBandFromContours(contour1,contour2=None):
 
+def createBandFromContours(contour1, contour2=None):
     if not contour2:
         outputGraph = contour1
     else:
-        outputSize = contour1.GetN()+contour2.GetN()+1
+        outputSize = contour1.GetN() + contour2.GetN() + 1
 
         pointOffset = 0
         if args.closedBands:
@@ -789,45 +792,68 @@ def createBandFromContours(contour1,contour2=None):
             pointOffset = 1
 
         outputGraph = ROOT.TGraph(outputSize)
-        tmpx, tmpy = ROOT.Double(), ROOT.Double()
-        tmpx1, tmpy1 = ROOT.Double(), ROOT.Double()
-        for iPoint in xrange(contour2.GetN()):
-            contour2.GetPoint(iPoint,tmpx,tmpy)
-            outputGraph.SetPoint(iPoint,tmpx,tmpy)
+        tmpx, tmpy = c_double(0.0), c_double(0.0)
+        tmpx1, tmpy1 = c_double(0.0), c_double(0.0)
+        for iPoint in range(contour2.GetN()):
+            contour2.GetPoint(iPoint, tmpx, tmpy)
+            outputGraph.SetPoint(iPoint, tmpx.value, tmpy.value)
 
         if args.closedBands:
-            contour2.GetPoint(0,tmpx,tmpy)
-            contour2.GetPoint(contour2.GetN()-1, tmpx1, tmpy1)
-            Point0vec = np.array([tmpx,tmpy])
-            Point1vec = np.array([tmpx1,tmpy1])
-            if(abs(np.dot(Point0vec,Point1vec)/(np.linalg.norm(Point0vec)*np.linalg.norm(Point1vec)))<0.01):
-                outputGraph.SetPoint(contour2.GetN(), 0.,0.)
+            contour2.GetPoint(0, tmpx, tmpy)
+            contour2.GetPoint(contour2.GetN() - 1, tmpx1, tmpy1)
+            Point0vec = np.array([tmpx.value, tmpy.value])
+            Point1vec = np.array([tmpx1.value, tmpy1.value])
+            if (
+                abs(
+                    np.dot(Point0vec, Point1vec)
+                    / (np.linalg.norm(Point0vec) * np.linalg.norm(Point1vec))
+                )
+                < 0.01
+            ):
+                outputGraph.SetPoint(contour2.GetN(), 0.0, 0.0)
                 outputSize += 1
                 pointOffset += 1
-            outputGraph.SetPoint(contour2.GetN()+pointOffset-1, tmpx,tmpy)
+            outputGraph.SetPoint(
+                contour2.GetN() + pointOffset - 1, tmpx.value, tmpy.value
+            )
 
-        for iPoint in xrange(contour1.GetN()):
-            contour1.GetPoint(contour1.GetN()-1-iPoint,tmpx,tmpy)
-            outputGraph.SetPoint(contour2.GetN()+pointOffset+iPoint,tmpx,tmpy)
+        for iPoint in range(contour1.GetN()):
+            contour1.GetPoint(contour1.GetN() - 1 - iPoint, tmpx, tmpy)
+            outputGraph.SetPoint(
+                contour2.GetN() + pointOffset + iPoint, tmpx.value, tmpy.value
+            )
 
         if args.closedBands:
-            contour1.GetPoint(contour1.GetN()-1,tmpx,tmpy)
+            contour1.GetPoint(contour1.GetN() - 1, tmpx, tmpy)
             contour1.GetPoint(0, tmpx1, tmpy1)
-            Point0vec = np.array([tmpx,tmpy])
-            Point1vec = np.array([tmpx1,tmpy1])
-            if(abs(np.dot(Point0vec,Point1vec)/(np.linalg.norm(Point0vec)*np.linalg.norm(Point1vec)))<0.01):
-                outputGraph.SetPoint(contour1.GetN()+contour2.GetN(), 0.,0.)
-                outputSize +=1
+            Point0vec = np.array([tmpx.value, tmpy.value])
+            Point1vec = np.array([tmpx1.value, tmpy1.value])
+            if (
+                abs(
+                    np.dot(Point0vec, Point1vec)
+                    / (np.linalg.norm(Point0vec) * np.linalg.norm(Point1vec))
+                )
+                < 0.01
+            ):
+                outputGraph.SetPoint(contour1.GetN() + contour2.GetN(), 0.0, 0.0)
+                outputSize += 1
                 pointOffset += 1
-            outputGraph.SetPoint(contour1.GetN()+contour2.GetN()+pointOffset-1, tmpx,tmpy)
+            outputGraph.SetPoint(
+                contour1.GetN() + contour2.GetN() + pointOffset - 1,
+                tmpx.value,
+                tmpy.value,
+            )
 
-        contour2.GetPoint(0,tmpx,tmpy)
-        outputGraph.SetPoint(contour1.GetN()+contour2.GetN()+pointOffset,tmpx,tmpy)
+        contour2.GetPoint(0, tmpx, tmpy)
+        outputGraph.SetPoint(
+            contour1.GetN() + contour2.GetN() + pointOffset, tmpx.value, tmpy.value
+        )
 
-    outputGraph.SetFillStyle(1001);
+    outputGraph.SetFillStyle(1001)
     outputGraph.SetLineWidth(1)
 
     return outputGraph
+
 
 if __name__ == "__main__":
     main()

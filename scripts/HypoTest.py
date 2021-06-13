@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import sys, commands
+import sys, subprocess
 import os, os.path
 import shutil
 import glob
@@ -14,7 +14,7 @@ sys.argv.insert(1, '-b')
 gROOT.Reset()
 gROOT.SetBatch(True)
 del sys.argv[1]
-ROOT.gSystem.Load('{0}/lib/libSusyFitter.so'.format(os.getenv('HISTFITTER')))
+ROOT.gSystem.Load(f"{os.getenv('HISTFITTER')}/lib/libSusyFitter.so")
 gROOT.Reset()
 
 def min_CLs(hypo):
@@ -36,8 +36,8 @@ def RedoScan(w,testStatType,hypo):
     #hypo=0
     
     n=hypo.ArraySize()
-    print "Available points: ",str(n)
-    print "Recalculate x"
+    print("Available points: ",str(n))
+    print("Recalculate x")
     if n>=2 and not isnan(hypo.GetResult(n-2).CLs()) and not isnan(hypo.GetLastResult().CLs()):
         diffCLs=fabs(hypo.GetResult(n-2).CLs()-hypo.GetLastResult().CLs())
         diffX=(maxX-hypo.GetXValue(n-2))
@@ -52,7 +52,7 @@ def RedoScan(w,testStatType,hypo):
     del hypo
     hypo=0
     
-    print "Redo scan with a larger x range: 0, ",str(newX)
+    print("Redo scan with a larger x range: 0, ",str(newX))
     hypo = RooStats.DoHypoTestInversion(w,1,2,testStatType,True,20,0.,newX)
     #if ( hypo!=0 ):
     #    hypo.ExclusionCleanup()
@@ -74,21 +74,21 @@ def doHypoTest(fixSigXSec, SigXSecSysnsigma,sigSamples):
     
     outfile = TFile.Open("results/"+sigSamples[0]+"_"+outPrefix+"_hypotest.root","UPDATE");
     if not outfile:
-        print "ERROR TFile <"+ outfileName+"> could not be opened"
+        print("ERROR TFile <"+ outfileName+"> could not be opened")
         #return
 
     #inFile = "results/MyOneLeptonKtScaleFitR17_Sig_"+sigSamples[0]+"_combined_NormalMeasurement_model.root"
     infile_list=glob.glob("results/*"+sigSamples[0]+"_combined_BasicMeasurement_model.root")
-    print infile_list
+    print(infile_list)
     if len(infile_list)!=1:
-        print "ERROR: More than one file given - please give only one file."
+        print("ERROR: More than one file given - please give only one file.")
         sys.exit(1)
     #inFileName = commands.getstatusoutput("ls results/*"+sigSamples[0]+"_combined_BasicMeasurement_model.root")[1]
     
     inFileName = infile_list[0]
     inFile = TFile.Open(inFileName)
     if not inFile:
-        print "ERROR TFile could not be opened"
+        print("ERROR TFile could not be opened")
         outfile.Close()
         #return
         
@@ -96,10 +96,10 @@ def doHypoTest(fixSigXSec, SigXSecSysnsigma,sigSamples):
     #Util.ReadWorkspace(inFile,"combined")
     #w=gDirectory.Get("w")	
     if not w:
-        print "workspace 'combined' does not exist in file"
+        print("workspace 'combined' does not exist in file")
         #return
 
-    print "Processing analysis "+sigSamples[0]
+    print("Processing analysis "+sigSamples[0])
     
     Util.SetInterpolationCode(w,4)
 
@@ -121,7 +121,7 @@ def doHypoTest(fixSigXSec, SigXSecSysnsigma,sigSamples):
         fitresult.SetName(hypName);
         fitresult.Print()
         fitresult.Write()
-        print ">>> Now storing RooFitResult <"+hypName+">"
+        print(">>> Now storing RooFitResult <"+hypName+">")
    
     hypo = RooStats.DoHypoTestInversion(w,configMgr.nTOYs,configMgr.calculatorType,3)
   
@@ -130,10 +130,10 @@ def doHypoTest(fixSigXSec, SigXSecSysnsigma,sigSamples):
         hypName2="hypo_"+sigSamples[0]
         hypo.SetName(hypName2)
         hypo.Write()
-        print ">>> Now storing HypoTestInverterResult <"+hypName2+">"
+        print(">>> Now storing HypoTestInverterResult <"+hypName2+">")
         del(hypo)
 
-    print ">>> Done. Stored HypoTestInverterResult and fit result in file <"+outfileName+">"
+    print(">>> Done. Stored HypoTestInverterResult and fit result in file <"+outfileName+">")
         
     outfile.Close()
 
@@ -156,33 +156,33 @@ if __name__ == "__main__":
     fixSigXSec = False
     sigSamples = []
     
-    print "\n * * * Welcome to HistFitter * * *\n"
+    print("\n * * * Welcome to HistFitter * * *\n")
 
     import os, sys
     import getopt
     from ROOT import RooStats,Util 
     def usage():
-        print "HistFitter.py [-i] [-t] [-w] [-f] [-l] [-l] [-p] [-n nTOYs] [-s seed] [-g gridPoint]\n"
-        print "(all OFF by default. Turn steps ON with options)"
-        print "-t re-create histograms from TTrees (default: %s)"%(configMgr.readFromTree)
-        print "-w re-create workspace from histograms (default: %s)"%(configMgr.executeHistFactory)
-        print "-f fit the workspace (default: %s)"%(configMgr.executeHistFactory)
-        print "-n <nTOYs> sets number of TOYs (<=0 means to use real data, default: %i)"%configMgr.nTOYs
-        print "-s <number> set the random seed for toy generation (default is CPU clock: %i)" % configMgr.toySeed
-        print "-c <number> set the calculator type (0 = toys, 2 = asymptotic calculator)" 
-        print "-a use Asimov dataset for fitting and plotting (default: %i)" % configMgr.useAsimovSet
-        print "-i stays in interactive session after executing the script (default %s)"%runInterpreter
-        print "-v verbose level (1: minimal, 2: print histogram names, 3: print XML files, default: %i)"%configMgr.verbose
-        print "-l make limit plot of workspace (default %s)" % printLimits
-        print "-p run hypothesis test on workspace (default %s)" % doHypoTests
-        print "-g <grid points to be processed> - give as comma separated list (default: %s)" % str(sigSamples)
-        print "-x fix cross signal section parameter and run nominal, +- 1 sigma"
-        print "\nAlso see the README file.\n"
-        print "Command examples:"
-        print "HistFitter.py -i python/MySusyFitterConfig.py           #only runs initialization in interactive mode (try e.g.: configMgr.<tab>)"
-        print "HistFitter.py -t -w -f python/MySusyFitterConfig.py     #runs all steps (TTree->Histos->Workspace->Fit) in batch mode"
-        print "HistFitter.py -f -i python/MySusyFitterConfig.py        #only fit and plot, using existing workspace, in interactive session"
-        print "\nNote: examples of input TTrees can be found in /afs/cern.ch/atlas/groups/susy/1lepton/samples/"
+        print("HistFitter.py [-i] [-t] [-w] [-f] [-l] [-l] [-p] [-n nTOYs] [-s seed] [-g gridPoint]\n")
+        print("(all OFF by default. Turn steps ON with options)")
+        print("-t re-create histograms from TTrees (default: %s)"%(configMgr.readFromTree))
+        print("-w re-create workspace from histograms (default: %s)"%(configMgr.executeHistFactory))
+        print("-f fit the workspace (default: %s)"%(configMgr.executeHistFactory))
+        print("-n <nTOYs> sets number of TOYs (<=0 means to use real data, default: %i)"%configMgr.nTOYs)
+        print("-s <number> set the random seed for toy generation (default is CPU clock: %i)" % configMgr.toySeed)
+        print("-c <number> set the calculator type (0 = toys, 2 = asymptotic calculator)") 
+        print("-a use Asimov dataset for fitting and plotting (default: %i)" % configMgr.useAsimovSet)
+        print("-i stays in interactive session after executing the script (default %s)"%runInterpreter)
+        print("-v verbose level (1: minimal, 2: print histogram names, 3: print XML files, default: %i)"%configMgr.verbose)
+        print("-l make limit plot of workspace (default %s)" % printLimits)
+        print("-p run hypothesis test on workspace (default %s)" % doHypoTests)
+        print("-g <grid points to be processed> - give as comma separated list (default: %s)" % str(sigSamples))
+        print("-x fix cross signal section parameter and run nominal, +- 1 sigma")
+        print("\nAlso see the README file.\n")
+        print("Command examples:")
+        print("HistFitter.py -i python/MySusyFitterConfig.py           #only runs initialization in interactive mode (try e.g.: configMgr.<tab>)")
+        print("HistFitter.py -t -w -f python/MySusyFitterConfig.py     #runs all steps (TTree->Histos->Workspace->Fit) in batch mode")
+        print("HistFitter.py -f -i python/MySusyFitterConfig.py        #only fit and plot, using existing workspace, in interactive session")
+        print("\nNote: examples of input TTrees can be found in /afs/cern.ch/atlas/groups/susy/1lepton/samples/")
         sys.exit(0)        
     
     try:
@@ -230,10 +230,10 @@ if __name__ == "__main__":
     
         
     
-    print "------------------------ Now running hypo test :"
-    print "calculatorType : ", configMgr.calculatorType
-    print "nToys : ", configMgr.nTOYs
-    print "fixSigXSec : ",fixSigXSec
+    print("------------------------ Now running hypo test :")
+    print("calculatorType : ", configMgr.calculatorType)
+    print("nToys : ", configMgr.nTOYs)
+    print("fixSigXSec : ",fixSigXSec)
     
     ## outdir
     #outdir = 'test/'
@@ -256,17 +256,17 @@ if __name__ == "__main__":
         outfileName="results/"+sigSamples[0]+"_upperlimit.root"
         outfile = TFile.Open("results/"+sigSamples[0]+"_upperlimit.root","UPDATE");
         if not outfile:
-           print "ERROR TFile <"+ outfileName+"> could not be opened"
+           print("ERROR TFile <"+ outfileName+"> could not be opened")
            #return
 
         #inFile = "results/MyOneLeptonKtScaleFitR17_Sig_"+sigSamples[0]+"_combined_NormalMeasurement_model.root"
 #        inFile = TFile.Open("results/MyOneLeptonKtScaleFitR17_Sig_"+sigSamples[0]+"_combined_NormalMeasurement_model.root")
 ##        inFile = TFile.Open("results/Combined_KFactorFit_5Channel_Final_dilepton_"+sigSamples[0]+"_combined_BasicMeasurement_model.root")
 #        inFile = TFile.Open("results/Combined_KFactorFit_5Channel_Sig_"+sigSamples[0]+"_combined_BasicMeasurement_model.root")
-        inFileName = commands.getstatusoutput("ls results/*"+sigSamples[0]+"_combined_BasicMeasurement_model.root")[1]
+        inFileName = subprocess.getstatusoutput("ls results/*"+sigSamples[0]+"_combined_BasicMeasurement_model.root")[1]
         inFile = TFile.Open(inFileName)
         if not inFile:
-           print "ERROR TFile could not be opened"
+           print("ERROR TFile could not be opened")
            outfile.Close()
           #return
 
@@ -275,7 +275,7 @@ if __name__ == "__main__":
         #Util.ReadWorkspace(inFile,"combined")
         #w=gDirectory.Get("w")
         if not w:
-           print "workspace 'combined' does not exist in file"
+           print("workspace 'combined' does not exist in file")
            #return
 
         Util.SetInterpolationCode(w,4)
@@ -291,7 +291,7 @@ if __name__ == "__main__":
 
         #Util.SetInterpolationCode(w,4)
   
-        print "Processing analysis "+sigSamples[0]
+        print("Processing analysis "+sigSamples[0])
 
         #if 'onestepCC' in sigSamples[0] and int(sigSamples[0].split("_")[3])>900:
         #    w.var("mu_SIG").setMax(50000.)
@@ -314,7 +314,7 @@ if __name__ == "__main__":
             i=0 
             while (i<5):
                 if min_CLs(hypo)>0.05: 
-                    print "Starting rescan iteration: "+str(i)           
+                    print("Starting rescan iteration: "+str(i))           
                     hypo = RedoScan(w,testStatType,hypo)
                     if ( hypo!=0 ):
                         hypo.ExclusionCleanup()
@@ -329,7 +329,7 @@ if __name__ == "__main__":
             hypo=0
             hypo = RooStats.DoHypoTestInversion(w,nToys,calcType,testStatType,True,nPoints,0,eul2)
             nPointsRemoved = hypo.ExclusionCleanup();
-            print "ExclusionCleanup() removed "+str(nPointsRemoved)+" scan point(s) for hypo test inversion: "+hypo.GetName()
+            print("ExclusionCleanup() removed "+str(nPointsRemoved)+" scan point(s) for hypo test inversion: "+hypo.GetName())
 
 
         ##store ul as nice plot ..
@@ -341,16 +341,16 @@ if __name__ == "__main__":
         if(hypo!=0):
             outfile.cd()
             if hypo.ArraySize()>0 and (min_CLs(hypo)>0.05 or max_CLs(hypo)<0.05):
-                print "ERROR Final CLs value not below threshold of 0.05 or initial CLs value not above threshold of 0.05 - upper limit scan most likely failed."
-                print "ERROR Will store result only for debugging purposes - do not use it in contour plots!"
+                print("ERROR Final CLs value not below threshold of 0.05 or initial CLs value not above threshold of 0.05 - upper limit scan most likely failed.")
+                print("ERROR Will store result only for debugging purposes - do not use it in contour plots!")
                 hypName="debug_"+sigSamples[0]
             elif hypo.ArraySize()==0:
-                print "ERROR All fits seem to have failed - cannot compute upper limit!"
+                print("ERROR All fits seem to have failed - cannot compute upper limit!")
                 hypName="debug_"+sigSamples[0]
             else:
                 hypName="hypo_"+sigSamples[0]
             hypo.SetName(hypName)
-            print ">>> Now storing HypoTestInverterResult <" +hypName+ ">"
+            print(">>> Now storing HypoTestInverterResult <" +hypName+ ">")
             hypo.Write()
                             
 
@@ -373,4 +373,4 @@ if __name__ == "__main__":
         cons.interact("Continuing interactive session... press Ctrl+d to exit")
         pass
 
-    print "Leaving HypoTest... Bye!"
+    print("Leaving HypoTest... Bye!")

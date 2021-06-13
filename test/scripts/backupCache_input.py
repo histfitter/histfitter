@@ -4,7 +4,7 @@
  * Package: HistFitter                                                            *
  *                                                                                *
  * Description:                                                                   *
- *      Python script to create an input ROOT files for the BackupCacheExample.py * 
+ *      Python script to create an input ROOT files for the BackupCacheExample.py *
  *      configuration. Based on arXiV: [1809.11105].                              *
  * Authors:                                                                       *
  *      HistFitter group, CERN, Geneva                                            *
@@ -15,8 +15,10 @@
  **********************************************************************************
 """
 
+import sys
 import ROOT
 from array import array
+from ctypes import c_double
 
 edges = {}
 content = {}
@@ -102,35 +104,34 @@ errors["fakes"] = errorsFakes
 regions = [["SSZCRee","Mjj"],["SSZCRmm","Mjj"],["SSZSRmm","HT"]]
 samples = ["Data","SherpaDY221","dibosonSherpa","top_physics","fakes"]
 
-if __name__ == '__main__':
-  import sys
 
-  outfile = ROOT.TFile(sys.argv[1],"RECREATE")
+if __name__ == "__main__":
+    outfile = ROOT.TFile(sys.argv[1], "RECREATE")
 
-  for s in samples:
-    values = content[s]
-    err = errors[s] if s in errors.keys() else None
-    for r in regions:
-      if not r[0] in values.keys():
-        continue
-      if s == "Data":
-        name = "h%s_%s_obs_%s" % (s,r[0],r[1])
-        nameNorm = "h%s_%sNorm" % (s,r[0])
-      else:
-        name = "h%sNom_%s_obs_%s" % (s,r[0],r[1])
-        nameNorm = "h%sNom_%sNorm" % (s,r[0])
-      h = ROOT.TH1F(name,name,len(edges[r[0]])-1,edges[r[0]])
-      hNorm = ROOT.TH1F(nameNorm,nameNorm,1,0.5,1.5)
-      v = values[r[0]]
-      e = err[r[0]] if err else None
-      for i in range(1,h.GetNbinsX()+1):
-        h.SetBinContent(i,v[i-1])
-        if e:
-          h.SetBinError(i,e[i-1])
-      NormErr = ROOT.Double(0)
-      hNorm.SetBinContent(1,h.IntegralAndError(0,h.GetNbinsX(),NormErr,""))
-      hNorm.SetBinError(1,NormErr)
-      h.Write()
-      hNorm.Write()
+    for s in samples:
+        values = content[s]
+        err = errors[s] if s in list(errors.keys()) else None
+        for r in regions:
+            if not r[0] in list(values.keys()):
+                continue
+            if s == "Data":
+                name = f"h{s}_{r[0]}_obs_{r[1]}"
+                nameNorm = f"h{s}_{r[0]}Norm"
+            else:
+                name = f"h{s}Nom_{r[0]}_obs_{r[1]}"
+                nameNorm = f"h{s}Nom_{r[0]}Norm"
+            h = ROOT.TH1F(name, name, len(edges[r[0]]) - 1, edges[r[0]])
+            hNorm = ROOT.TH1F(nameNorm, nameNorm, 1, 0.5, 1.5)
+            v = values[r[0]]
+            e = err[r[0]] if err else None
+            for i in range(1, h.GetNbinsX() + 1):
+                h.SetBinContent(i, v[i - 1])
+                if e:
+                    h.SetBinError(i, e[i - 1])
+            NormErr = c_double(0.0)
+            hNorm.SetBinContent(1, h.IntegralAndError(0, h.GetNbinsX(), NormErr, ""))
+            hNorm.SetBinError(1, NormErr.value)
+            h.Write()
+            hNorm.Write()
 
-  outfile.Close()
+    outfile.Close()

@@ -7,9 +7,6 @@
 # By: Larry Lee - Mar 2018
 # Updated in June 2020 by Jonathan Long
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
 
 import pickle
 import ROOT
@@ -83,7 +80,7 @@ def main():
     listOfInputFiles = [tmp.translate(None,", ") for tmp in args.inputFiles]
 
     print (">>> Grabbing input information from input files:")
-    print (">>> >>> " + " ".join(listOfInputFiles))
+    print(">>> >>> " + " ".join(listOfInputFiles))
     print (">>> ")
     print (">>> FYI, I'm also going to grab the *.expectedSurface.pkl files that should be in the same location")
 
@@ -106,7 +103,7 @@ def main():
             dict_Obs_u1s[inputFileName] = dict_TFiles[inputFileName].Get("Obs_0_Up").Clone(inputFileName+"_Obs_u1s")
             dict_Obs_d1s[inputFileName] = dict_TFiles[inputFileName].Get("Obs_0_Down").Clone(inputFileName+"_Obs_d1s")
 
-    print (">>> Creating output ROOT file: %s"%args.outputFile)
+    print(">>> Creating output ROOT file: %s"%args.outputFile)
 
     outputFile = ROOT.TFile(args.outputFile,"RECREATE")
 
@@ -140,11 +137,11 @@ def main():
                         isoExpectedContours[(region1,region2)] = cs.allsegs[0] # grab list of arrays of coords of intersection contour
                     else:
                         if not np.isclose(x_ref,x).all():
-                            print ("X for %s from: %f to %f" % (region1, x[0][0],y[-1][0]))
-                            print ("X for %s from: %f to %f" % (region2, x_ref[0][0],x_ref[-1][0]))
+                            print(f"X for {region1} from: {x[0][0]:f} to {y[-1][0]:f}")
+                            print(f"X for {region2} from: {x_ref[0][0]:f} to {x_ref[-1][0]:f}")
                         if not np.isclose(y_ref,y).all():
-                            print ("Y for %s from: %f to %f" % (region1, y[0][0],y[-1][0]))
-                            print ("Y for %s from: %f to %f" % (region2, y_ref[0][0],y_ref[-1][0]))
+                            print(f"Y for {region1} from: {y[0][0]:f} to {y[-1][0]:f}")
+                            print(f"Y for {region2} from: {y_ref[0][0]:f} to {y_ref[-1][0]:f}")
                   
                         print(">>> Error, inputs are not close.  %s is different"%(region1))
                         sys.exit(1)
@@ -175,19 +172,19 @@ def main():
 
         bestRegions[inputFileName] = list()
 
-    sumOfExpecteds = cascaded_union([polygons["Exp"] for regionName,polygons in uncutRegions.iteritems()]) # geometric union of all expected contours
+    sumOfExpecteds = cascaded_union([polygons["Exp"] for regionName,polygons in uncutRegions.items()]) # geometric union of all expected contours
     
     sumOfContours = copy.deepcopy(sumOfExpecteds)
     for key in ["Exp_u1s", "Exp_d1s", "Obs"] + (["Obs_u1s","Obs_d1s"] if not args.skipTheory else []):
         
-        sumOfContours = cascaded_union([polygons[key] for regionName,polygons in uncutRegions.iteritems()] + [sumOfContours]) # geometric union of all expected contours
+        sumOfContours = cascaded_union([polygons[key] for regionName,polygons in uncutRegions.items()] + [sumOfContours]) # geometric union of all expected contours
 
 
     sumOfExpectedsArea = sumOfExpecteds.area
 
     if args.debug:
-        print (">>> Number of regions being added to the best expected contour: %d"%len(uncutRegions) )
-        print (">>> Integral of the best expected contour: %d"%sumOfExpecteds.area)
+        print(">>> Number of regions being added to the best expected contour: %d"%len(uncutRegions) )
+        print(">>> Integral of the best expected contour: %d"%sumOfExpecteds.area)
 
         x,y = sumOfExpecteds.exterior.coords.xy
         convertArraysToTGraph(x,y).Write("debug_sumOfExpecteds")
@@ -195,7 +192,7 @@ def main():
         ax.plot(x,y,alpha=0.5)
         fig.savefig("debug_sumOfExpecteds.pdf")
 
-        for i,singleExpectedCurve in enumerate([v["Exp"] for k,v in uncutRegions.iteritems()]):
+        for i,singleExpectedCurve in enumerate([v["Exp"] for k,v in uncutRegions.items()]):
             x,y = singleExpectedCurve.exterior.coords.xy
             ax.cla()
             ax.plot(x,y,alpha=0.5)
@@ -246,7 +243,7 @@ def main():
                 allIsoExpectedContoursLineStrings.append( tmpLineString )
 
     # Add cut lines of the input expectected contours.  This helps with irregularities in the final expectected contour seen in a test with EWK comb contours
-    for regionName,polygons in uncutRegions.iteritems():
+    for regionName,polygons in uncutRegions.items():
         allIsoExpectedContoursLineStrings.append( LineString(polygons["Exp"].exterior.coords) )
 
 
@@ -260,7 +257,7 @@ def main():
         fig.savefig("debug_allEICs.pdf")
 
     
-    print (">>> Total number of isoExpectedContours: %d"%len(allIsoExpectedContoursLineStrings))
+    print(">>> Total number of isoExpectedContours: %d"%len(allIsoExpectedContoursLineStrings))
 
     listOfBestCurves = {}
 
@@ -298,7 +295,7 @@ def main():
 
 
     if args.debug:
-        print (">>> Number of regions in this plane: %d"%len(subRegions))
+        print(">>> Number of regions in this plane: %d"%len(subRegions))
 
     if args.debug: # JDL
         ax.cla()
@@ -316,9 +313,9 @@ def main():
     interiorPoints = []
     for subRegion in subRegions:
         x_cent,y_cent = subRegion.representative_point().xy
-        interiorPoints.append(([x_cent[0], y_cent[0]]))
+        interiorPoints.append([x_cent[0], y_cent[0]])
     
-    for regionName,region in uncutRegions.iteritems():
+    for regionName,region in uncutRegions.items():
         x,y = dict_Surfaces[regionName]["x"], dict_Surfaces[regionName]["y"]
         z = dict_Surfaces[regionName]["z"]
         ZI_reg_dict[regionName] = scipy.interpolate.griddata( (x.flatten(), y.flatten()), z.flatten(), interiorPoints, method="linear" )
@@ -336,7 +333,7 @@ def main():
         isInExpecteds = sumOfExpecteds.contains(interiorPoint)
 
         if isInExpecteds: # only consider SRs where point is in expected
-            for regionName,region in uncutRegions.iteritems():
+            for regionName,region in uncutRegions.items():
                 if region["Exp"].contains(interiorPoint):
                     ZI = ZI_reg_dict[regionName][iSubRegion]        
                     
@@ -344,7 +341,7 @@ def main():
                         bestZvalue = ZI
                         bestSR = regionName            
         else: # just go through and find the best point
-            for regionName,region in uncutRegions.iteritems():
+            for regionName,region in uncutRegions.items():
                 ZI = ZI_reg_dict[regionName][iSubRegion]        
             
                 if ZI > bestZvalue:
@@ -389,7 +386,7 @@ def main():
             if sR.area < args.minArea:
                 areaRemoved += sR.area
                 subRegions.remove(sR)
-        print (">>>Area removed over total %f / %f"%(areaRemoved,sumOfContours.area))
+        print(">>>Area removed over total %f / %f"%(areaRemoved,sumOfContours.area))
         print(">>> New number of subRegions %d"%(len(subRegions)))
 
     if args.debug: # JDL
@@ -405,7 +402,7 @@ def main():
     # Now go through subcurves and dice them up
     for iSubRegion,subRegion in enumerate(subRegions): # subRegions are the cut up space associated with the best SR in each region
         if args.debug:
-            print (">>> >>> Loop through sub regions: %d"%iSubRegion)
+            print(">>> >>> Loop through sub regions: %d"%iSubRegion)
 
         # this subRegion -- Figure out which SR it corresponds to
 
@@ -424,14 +421,14 @@ def main():
         # and cut them up with all the IECs (e.g. obs, exp+1sig, etc)
 
         if args.debug:
-            print (">>> >>> Identified the best SR in this region as %s"%bestSR)
+            print(">>> >>> Identified the best SR in this region as %s"%bestSR)
 
 
         if args.showPastLimit:
             bestRegions[bestSR].append(subRegion) 
 
         # Now loop through types of curves and cookie cut out shapes based on subRegions
-        for typeOfCurve, srCurve in uncutRegions[bestSR].iteritems(): #typeOfCurve is 'Exp', 'Obs' etc, srCurve is then that curves polygon, i.e. a single SR
+        for typeOfCurve, srCurve in uncutRegions[bestSR].items(): #typeOfCurve is 'Exp', 'Obs' etc, srCurve is then that curves polygon, i.e. a single SR
             
             if subRegion.intersects( srCurve):
                 cookieCut = subRegion.intersection(srCurve)
@@ -479,7 +476,7 @@ def main():
 
     expCurve = ()
     for typeOfCurve in listOfBestCurves:
-        print (">>> Adding together: %s"%typeOfCurve)
+        print(">>> Adding together: %s"%typeOfCurve)
 
         summedCurves[typeOfCurve]   = cascaded_union( listOfBestCurves[typeOfCurve] )
 
@@ -557,10 +554,10 @@ def tGraphToPolygon(myGraph, pinPoint=None):
     if pinPoint==None:
         x = np.append(x,[min(x)])
         y = np.append(y,[min(y)])
-    if not Polygon(zip(x,y)).is_valid:
+    if not Polygon(list(zip(x,y))).is_valid:
         x,y = x[:-1],y[:-1]
     
-    return Polygon(zip(x,y))
+    return Polygon(list(zip(x,y)))
 
 def convertTGraphToArrays(mygraph):
     size = mygraph.GetN()
@@ -594,12 +591,12 @@ def plotBestRegion(bestRegions, expCurve):
         colors.append(np.random.rand(3,))
 
     # Plot pieces
-    for reg in bestRegions.keys():
+    for reg in list(bestRegions.keys()):
         for curve in bestRegions[reg]:
 
             try:
                 x,y = curve.exterior.xy
-                c = colors[ (bestRegions.keys()).index(reg) ]
+                c = colors[ (list(bestRegions.keys())).index(reg) ]
                 ax.fill(x,y,alpha=0.3,linewidth=0.2,color=c)
             except:
                 print(">>> Skipped a subRegion.")

@@ -39,8 +39,8 @@ def chi2test(h1, h2):
 
     from scipy.stats import chi2
 
-    binsX = xrange(1, h1.GetNbinsX()+1)
-    binsY = xrange(1, h1.GetNbinsY()+1) if h1.InheritsFrom("TH2") else [0]
+    binsX = range(1, h1.GetNbinsX()+1)
+    binsY = range(1, h1.GetNbinsY()+1) if h1.InheritsFrom("TH2") else [0]
     
     test_chi2, dof = 0, 0
     for i in binsX:
@@ -75,7 +75,7 @@ def checkNormalizationEffect(hNom, hUp, hDown, norm_threshold=0.005):
    
     max_variation = max([abs(up_norm-1), abs(down_norm-1)])
     if max_variation < norm_threshold:
-        log.info("checkNormalizationEffect(): {}, {}, {}: max variation = {:.3f}, threshold = {:.3f}".format(hNom.GetName(), hUp.GetName(), hDown.GetName(), max_variation, norm_threshold))
+        log.info(f"checkNormalizationEffect(): {hNom.GetName()}, {hUp.GetName()}, {hDown.GetName()}: max variation = {max_variation:.3f}, threshold = {norm_threshold:.3f}")
         return False
 
     return True
@@ -103,28 +103,28 @@ def checkShapeEffect(hNom, hUp, hDown, chi2_threshold=0.05, use_overflows=True):
     
         pvalue = max([up_pvalue, down_pvalue])
         if not pvalue < chi2_threshold:
-            log.info("checkShapeEffect(): {}, {}, {}: up_pvalue = {:.3f}, down_pvalue = {:3f}, chi2 threshold = {:.3f}".format(hNom.GetName(), hUp.GetName(), hDown.GetName(), up_pvalue, down_pvalue, chi2_threshold))
+            log.info(f"checkShapeEffect(): {hNom.GetName()}, {hUp.GetName()}, {hDown.GetName()}: up_pvalue = {up_pvalue:.3f}, down_pvalue = {down_pvalue:3f}, chi2 threshold = {chi2_threshold:.3f}")
             return False
     
     #method 2: compare yield of all bins and check if below the configMgr.prunThreshold
     elif configMgr.prunMethod==2:
         if (not hNom.GetNbinsX() is hUp.GetNbinsX()) or (not hNom.GetNbinsX() is hDown.GetNbinsX()):
-            log.error("Checking shape impact of nominal histogram {} againt up histogram {} and down histogram {} and find a different number of bins. Stop comparison".format(hNom.GetName(), hUp.GetName(), hDown.GetName()))
+            log.error(f"Checking shape impact of nominal histogram {hNom.GetName()} againt up histogram {hUp.GetName()} and down histogram {hDown.GetName()} and find a different number of bins. Stop comparison")
             return True
         for bin1 in range(0,hNom.GetNbinsX()+2):
             if (bin1==0 or bin1==hNom.GetNbinsX()+1) and use_overflows==False:
                 continue
             if fabs(hNom.GetBinContent(bin1)-hUp.GetBinContent(bin1))>(configMgr.prunThreshold*hNom.GetBinContent(bin1)) or fabs(hNom.GetBinContent(bin1)-hDown.GetBinContent(bin1))>(configMgr.prunThreshold*hNom.GetBinContent(bin1)):
-                log.debug("checkShapeEffect(): (up - nominal): {0:f}, (nominal - down): {1:f}, for histograms {2:s},{3:s},{4:s}. Above prun threshold: {5:f}".format(hUp.GetBinContent(bin1)-hNom.GetBinContent(bin1),hNom.GetBinContent(bin1)-hDown.GetBinContent(bin1),hUp.GetName(),hDown.GetName(),hNom.GetName(),configMgr.prunThreshold*hNom.GetBinContent(bin1)))
+                log.debug(f"checkShapeEffect(): (up - nominal): {hUp.GetBinContent(bin1)-hNom.GetBinContent(bin1):f}, (nominal - down): {hNom.GetBinContent(bin1)-hDown.GetBinContent(bin1):f}, for histograms {hUp.GetName():s},{hDown.GetName():s},{hNom.GetName():s}. Above prun threshold: {configMgr.prunThreshold*hNom.GetBinContent(bin1):f}")
                 return True
-            log.debug("checkShapeEffect(): (up - nominal): {0:f}, (nominal - down): {1:f}, for histograms {2:s},{3:s},{4:s}. Below prun threshold: {5:f}".format(hUp.GetBinContent(bin1)-hNom.GetBinContent(bin1),hNom.GetBinContent(bin1)-hDown.GetBinContent(bin1),hUp.GetName(),hDown.GetName(),hNom.GetName(),configMgr.prunThreshold*hNom.GetBinContent(bin1)))
+            log.debug(f"checkShapeEffect(): (up - nominal): {hUp.GetBinContent(bin1)-hNom.GetBinContent(bin1):f}, (nominal - down): {hNom.GetBinContent(bin1)-hDown.GetBinContent(bin1):f}, for histograms {hUp.GetName():s},{hDown.GetName():s},{hNom.GetName():s}. Below prun threshold: {configMgr.prunThreshold*hNom.GetBinContent(bin1):f}")
         return False
 
     return True
 
 def symmetrizeSystematicEnvelope(nomName, lowName, highName):
     # Loop over all bins - and look for the biggest error
-    for iBin in xrange(1, configMgr.hists[lowName].GetNbinsX()+1):
+    for iBin in range(1, configMgr.hists[lowName].GetNbinsX()+1):
         lowVal = configMgr.hists[lowName].GetBinContent(iBin)
         highVal = configMgr.hists[highName].GetBinContent(iBin)
         nomVal = configMgr.hists[nomName].GetBinContent(iBin)
@@ -137,17 +137,17 @@ def symmetrizeSystematicEnvelope(nomName, lowName, highName):
         # If low' = (nominal-error) is < 0, truncate it to 0
         newLowVal = (nomVal - err)
         if newLowVal < 0.0:
-            log.warning("symmetrizeSystematicEnvelope(): low={0:f} is < 0.0 in {1:s} bin {2:d}. Setting negative bins to 0.0.".format(newLowVal, lowName, iBin))
+            log.warning(f"symmetrizeSystematicEnvelope(): low={newLowVal:f} is < 0.0 in {lowName:s} bin {iBin:d}. Setting negative bins to 0.0.")
         newHighVal = nomVal + err
         
-        log.debug("symmetrizeSystematicEnvelope(): bin {0:d} -> found nom={1}, low={2}, high={3} => symmetrized error to low={4} high={5}".format(iBin, nomVal, lowVal, highVal, newLowVal, newHighVal))
+        log.debug(f"symmetrizeSystematicEnvelope(): bin {iBin:d} -> found nom={nomVal}, low={lowVal}, high={highVal} => symmetrized error to low={newLowVal} high={newHighVal}")
 
         configMgr.hists[highName].SetBinContent(iBin, newHighVal) 
         configMgr.hists[lowName].SetBinContent(iBin, newLowVal) 
 
     return
 
-class Sample(object):
+class Sample:
     """
     Defines a Sample belonging to a Channel
     """
@@ -265,7 +265,7 @@ class Sample(object):
         configMgr.hists[self.histoName] = TH1F(self.histoName, self.histoName, len(self.binValues[(region, var)]), binLow, float(len(self.binValues[(region, var)]))*binWidth+binLow)
         for (iBin, val) in enumerate(self.binValues[(region, var)]):
             if val <=0:
-               log.warning('bin {} of the histogram {} empty or negative, setting as lowest value {}'.format(str(iBin), self.histoName, str(configMgr.minValue)))
+               log.warning(f'bin {str(iBin)} of the histogram {self.histoName} empty or negative, setting as lowest value {str(configMgr.minValue)}')
                configMgr.hists[self.histoName].SetBinContent(iBin+1, configMgr.minValue)
             else:
                configMgr.hists[self.histoName].SetBinContent(iBin+1, val)
@@ -287,7 +287,7 @@ class Sample(object):
             self.binStatErrors[(region, var)] = binStatErrors
 
         if not len(self.binStatErrors[(region, var)]) == len(self.binValues[(region, var)]):
-            raise Exception("Length of errors list in region %s and variable %s does not match the nominal histogram!" % (region, var))
+            raise Exception(f"Length of errors list in region {region} and variable {var} does not match the nominal histogram!")
 
         if not self.isData:
             self.histoName = "h"+self.name+"Nom_"+region+"_obs_"+var
@@ -356,7 +356,7 @@ class Sample(object):
             ## MB : propagated to actual weights in configManager, after all
             ##      systematics have been added
         else:
-            raise RuntimeError("Weight %s already defined for sample %s" % (weight, self.name))
+            raise RuntimeError(f"Weight {weight} already defined for sample {self.name}")
 
     def addWeight(self, weight):
         """
@@ -367,9 +367,9 @@ class Sample(object):
         if not weight in self.weights:
             self.weights.append(weight)
         else:
-            raise RuntimeError("Weight %s already defined in sample %s" % (weight, self.name))
+            raise RuntimeError(f"Weight {weight} already defined in sample {self.name}")
 
-        for syst in self.systDict.values():
+        for syst in list(self.systDict.values()):
             if syst.type == "weight":
                 if not weight in syst.high:
                     syst.high.append(weight)
@@ -385,7 +385,7 @@ class Sample(object):
         """
         if weight in self.weights:
             self.weights.remove(weight)
-        for syst in self.systDict.values():
+        for syst in list(self.systDict.values()):
             if syst.type == "weight":
                 if weight in syst.high:
                     syst.high.remove(weight)
@@ -441,7 +441,7 @@ class Sample(object):
         
         @param histoName Name of the histogram
         """
-        log.verbose("Setting histoName to {}".format(histoName))
+        log.verbose(f"Setting histoName to {histoName}")
         self.histoName = histoName
         return
 
@@ -529,7 +529,7 @@ class Sample(object):
         """
 
         if self.isData and variation != "":
-            raise ValueError("Sample {}: is data, cannot specify variation!".format(self.name))
+            raise ValueError(f"Sample {self.name}: is data, cannot specify variation!")
 
         # Special treatment for blinded samples
         if self.isBlinded(fitConfig):
@@ -587,13 +587,13 @@ class Sample(object):
             _name = name.name
             
             if name.type == "weight":
-                log.verbose("setCurrentSystematic: sample {}, name {} is a weight - not setting suffix".format(self.name, _name))
+                log.verbose(f"setCurrentSystematic: sample {self.name}, name {_name} is a weight - not setting suffix")
                 return
 
-        log.verbose("setCurrentSystematic: sample {}, name {}".format(self.name, _name))
+        log.verbose(f"setCurrentSystematic: sample {self.name}, name {_name}")
         
         if _name is not None and _name not in self.systDict:
-            raise ValueError("Sample {}: cannot set systematic to unknown {}".format(self.name, _name))
+            raise ValueError(f"Sample {self.name}: cannot set systematic to unknown {_name}")
 
         if mode.lower() == "high" or mode.lower() == "up":
             self.currentSystematic = self.systDict[_name].high
@@ -626,7 +626,7 @@ class Sample(object):
         Get name of the tree to take histograms from
         """
         if self.overrideTreename != "":
-            log.debug("Overriding treename for {} to {}".format(self.name, self.overrideTreename))
+            log.debug(f"Overriding treename for {self.name} to {self.overrideTreename}")
             return self.overrideTreename
 
         if self.prefixTreeName == "":
@@ -640,11 +640,11 @@ class Sample(object):
             _suffix = self.getTreenameSuffix()
 
         if _suffix != "":
-            log.debug("Using tree suffix {}".format(_suffix))
+            log.debug(f"Using tree suffix {_suffix}")
 
-        name = "{}{}".format(self.prefixTreeName, _suffix)
+        name = f"{self.prefixTreeName}{_suffix}"
 
-        log.debug("Using {} as tree name".format(name))
+        log.debug(f"Using {name} as tree name")
 
         return name
 
@@ -673,16 +673,16 @@ class Sample(object):
         @param symmetrizeEnvelope Boolean to indicate whether or not the envelope of up/down is taken as a symmetrical error
         """
 
-        log.debug("addHistoSys(): building histograms {0} / {1} / {2}".format(nomName, highName, lowName))
-        log.verbose("Using settings: includeOverallSys={0}, normalizeSys={1}, symmetrize={2}, oneSide={3}, symmetrizeEnvelope={4}".format(includeOverallSys, normalizeSys, symmetrize, oneSide, symmetrizeEnvelope)) 
+        log.debug(f"addHistoSys(): building histograms {nomName} / {highName} / {lowName}")
+        log.verbose(f"Using settings: includeOverallSys={includeOverallSys}, normalizeSys={normalizeSys}, symmetrize={symmetrize}, oneSide={oneSide}, symmetrizeEnvelope={symmetrizeEnvelope}") 
 
         if oneSide and symmetrizeEnvelope:
-            log.fatal("Cannot use oneSided histogram with symmetrizeEnvelope - use either, not both. Please check the systematic type of {0}".format(nomName))
+            log.fatal(f"Cannot use oneSided histogram with symmetrizeEnvelope - use either, not both. Please check the systematic type of {nomName}")
 
         ### use-case of different tree from nominal histogram in case of 
         if len(nomSysName) > 0:
             if configMgr.hists[nomSysName] != None:
-              if not lowName+"_test" in configMgr.hists.keys() and not highName+"_test" in configMgr.hists.keys():
+              if not lowName+"_test" in list(configMgr.hists.keys()) and not highName+"_test" in list(configMgr.hists.keys()):
                 configMgr.hists[lowName+"_test"] = configMgr.hists[lowName].Clone(lowName+"_test")
                 log.info(lowName + " / " + nomSysName)
                 success = configMgr.hists[lowName].Divide( configMgr.hists[nomSysName] )
@@ -735,7 +735,7 @@ class Sample(object):
             if symmetrize and symmetrizeEnvelope:
                 # build the envelope of up/down
                 log.verbose("Symmetrizing envelope of histogram: building error = max ( (up-nom), (nom-down) )")
-                log.verbose("(nom={0} / low={1} / high={2}".format(nomName, lowName, highName))
+                log.verbose(f"(nom={nomName} / low={lowName} / high={highName}")
                 symmetrizeSystematicEnvelope(nomName, lowName, highName)
             elif oneSide and symmetrize:
                 # symmetrize
@@ -743,7 +743,7 @@ class Sample(object):
                 configMgr.hists[lowName].Scale(2.0)
                 configMgr.hists[lowName].Add(configMgr.hists[highName],  -1.0)
 
-                for iBin in xrange(1, configMgr.hists[lowName].GetNbinsX()+1):
+                for iBin in range(1, configMgr.hists[lowName].GetNbinsX()+1):
                     binVal = configMgr.hists[lowName].GetBinContent(iBin)
                     if binVal<0.:
                         configMgr.hists[lowName].SetBinContent(iBin, 0.)
@@ -751,10 +751,10 @@ class Sample(object):
             # use different renormalization region
             if len(self.normSampleRemap) > 0: 
                 samNameRemap = self.normSampleRemap
-                log.info("remapping normalization of <%s> to sample:  %s" % (samName,samNameRemap))
+                log.info(f"remapping normalization of <{samName}> to sample:  {samNameRemap}")
             else:
                 samNameRemap = samName
-                log.debug("Using samNameRemap = {0}".format(samName))
+                log.debug(f"Using samNameRemap = {samName}")
 
             highRemapName = "h"+samNameRemap+systName+"High_"+normString+"Norm"
             lowRemapName = "h"+samNameRemap+systName+"Low_"+normString+"Norm"
@@ -764,9 +764,9 @@ class Sample(object):
             lowIntegral  = configMgr.hists[lowRemapName].Integral()
             nomIntegral  = configMgr.hists[nomRemapName].Integral()
 
-            log.verbose("Loading high remap integral from {0}: {1}".format(highRemapName, highIntegral))
-            log.verbose("Loading low remap integral from {0}: {1}".format(lowRemapName, lowIntegral))
-            log.verbose("Loading nominal remap integral from {0}: {1}".format(nomRemapName, nomIntegral))
+            log.verbose(f"Loading high remap integral from {highRemapName}: {highIntegral}")
+            log.verbose(f"Loading low remap integral from {lowRemapName}: {lowIntegral}")
+            log.verbose(f"Loading nominal remap integral from {nomRemapName}: {nomIntegral}")
             
             if len(nomSysName) > 0:  ## renormalization done based on consistent set of trees
                 if configMgr.hists[nomSysName] != None:
@@ -782,16 +782,16 @@ class Sample(object):
                         lowIntegral = nomIntegral
                     
                     # clearly a problem. Revert to unsymmetrize
-                    log.warning("    generating HistoSys for %s syst=%s low=0. Revert to non-symmetrize." % (nomName, systName))
+                    log.warning(f"    generating HistoSys for {nomName} syst={systName} low=0. Revert to non-symmetrize.")
                     symmetrize = False
 
             # Construct high/low from integrals
             try:
                 high = highIntegral / nomIntegral
                 low = lowIntegral / nomIntegral
-                log.verbose("Determined high and low ratios w.r.t. nominal: {} and {}".format(high, low))
+                log.verbose(f"Determined high and low ratios w.r.t. nominal: {high} and {low}")
             except ZeroDivisionError:
-                log.error("    generating HistoSys for %s syst=%s: nom=%g high=%g low=%g. Systematic is removed from fit." % (nomName, systName, nomIntegral, highIntegral, lowIntegral))
+                log.error(f"    generating HistoSys for {nomName} syst={systName}: nom={nomIntegral:g} high={highIntegral:g} low={lowIntegral:g}. Systematic is removed from fit.")
                 return
 
             log.debug("Constructing cloned normalized histograms")
@@ -801,11 +801,11 @@ class Sample(object):
 
             # Attempt to scale the high and low histograms down to normalized histograms
             try:
-                log.debug("Scaling normalized histograms by integrals of remapped histograms: high with {}, low with {}".format(1.0/high, 1.0/low))
+                log.debug(f"Scaling normalized histograms by integrals of remapped histograms: high with {1.0/high}, low with {1.0/low}")
                 configMgr.hists[highName+"Norm"].Scale(1./high)
                 configMgr.hists[lowName+"Norm"].Scale(1./low)
             except ZeroDivisionError:
-                log.error("    generating HistoSys for %s syst=%s: nom=%g high=%g low=%g. Systematic is removed from fit." % (nomName, systName, nomIntegral, highIntegral, lowIntegral))
+                log.error(f"    generating HistoSys for {nomName} syst={systName}: nom={nomIntegral:g} high={highIntegral:g} low={lowIntegral:g}. Systematic is removed from fit.")
                 return
             
             # Attempt to generate an overallNormHistoSys if required
@@ -815,13 +815,13 @@ class Sample(object):
                 lowIntegralN = configMgr.hists[lowName+"Norm"].Integral()
                 highIntegralN = configMgr.hists[highName+"Norm"].Integral()
             
-                log.verbose("Loading high norm integral from {0}: {1}".format(highName+"Norm", highIntegralN))
-                log.verbose("Loading low norm integral from {0}: {1}".format(lowName+"Norm", lowIntegralN))
-                log.verbose("Loading nominal norm integral from {0}: {1}".format(nomName, nomIntegralN))
+                log.verbose("Loading high norm integral from {}: {}".format(highName+"Norm", highIntegralN))
+                log.verbose("Loading low norm integral from {}: {}".format(lowName+"Norm", lowIntegralN))
+                log.verbose(f"Loading nominal norm integral from {nomName}: {nomIntegralN}")
 
                 if nomIntegralN == 0 or highIntegralN == 0 or lowIntegralN == 0:
                     # MB : cannot renormalize, so don't after all
-                    log.warning("    will not generate overallNormHistoSys for %s syst=%s nom=%g high=%g low=%g. Revert to NormHistoSys." % (nomName, systName, nomIntegralN, highIntegralN, lowIntegralN))
+                    log.warning(f"    will not generate overallNormHistoSys for {nomName} syst={systName} nom={nomIntegralN:g} high={highIntegralN:g} low={lowIntegralN:g}. Revert to NormHistoSys.")
                     includeOverallSys = False
                     pass
                 else:
@@ -830,15 +830,15 @@ class Sample(object):
                         highN = highIntegralN / nomIntegralN
                         lowN = lowIntegralN / nomIntegralN
                     except ZeroDivisionError:
-                        log.error("    generating overallNormHistoSys for %s syst=%s nom=%g high=%g low=%g. Systematic is removed from fit." % (nomName, systName, nomIntegralN, highIntegralN, lowIntegralN))
+                        log.error(f"    generating overallNormHistoSys for {nomName} syst={systName} nom={nomIntegralN:g} high={highIntegralN:g} low={lowIntegralN:g}. Systematic is removed from fit.")
                         return
                 
                     try:
-                        log.debug("Scaling normalized histograms: high with {}, low with {}".format(1.0/highN, 1.0/lowN))
+                        log.debug(f"Scaling normalized histograms: high with {1.0/highN}, low with {1.0/lowN}")
                         configMgr.hists[highName+"Norm"].Scale(1./highN)
                         configMgr.hists[lowName+"Norm"].Scale(1./lowN)
                     except ZeroDivisionError:
-                        log.error("    generating overallNormHistoSys for %s syst=%s nom=%g high=%g low=%g keeping in fit (offending histogram should be empty)." % (nomName, systName, nomIntegralN, highIntegralN, lowIntegralN))
+                        log.error(f"    generating overallNormHistoSys for {nomName} syst={systName} nom={nomIntegralN:g} high={highIntegralN:g} low={lowIntegralN:g} keeping in fit (offending histogram should be empty).")
                         return
 
 
@@ -868,7 +868,7 @@ class Sample(object):
                     if checkShapeEffect(configMgr.hists[nomName],configMgr.hists[highName+"Norm"],configMgr.hists[lowName+"Norm"]):
                         self.histoSystList.append((systName, highName+"Norm", nomName, configMgr.histCacheFile, "", "", "", ""))
                     else:
-                        log.info("Remove shape systematics {} for histogram {} as differences smaller {} or found small in chi2 test".format(systName,nomName,configMgr.prunThreshold))
+                        log.info(f"Remove shape systematics {systName} for histogram {nomName} as differences smaller {configMgr.prunThreshold} or found small in chi2 test")
                         self.systListHistoPruned.append(systName)
             else:
                 if not configMgr.prun:
@@ -878,7 +878,7 @@ class Sample(object):
                     if checkShapeEffect(configMgr.hists[nomName],configMgr.hists[highName+"Norm"],configMgr.hists[lowName+"Norm"]):
                         self.histoSystList.append((systName, highName+"Norm", lowName+"Norm", configMgr.histCacheFile, "", "", "", ""))
                     else:
-                        log.info("Remove shape systematics {} for histogram {} as differences smaller {} or found small in chi2 test".format(systName,nomName,configMgr.prunThreshold))
+                        log.info(f"Remove shape systematics {systName} for histogram {nomName} as differences smaller {configMgr.prunThreshold} or found small in chi2 test")
                         self.systListHistoPruned.append(systName)
                         
             # Do we need to include an overall systematic?
@@ -889,7 +889,7 @@ class Sample(object):
 
                 else:
                     if max( abs(highN-1.0), abs(1.0-lowN) ) < configMgr.prunThreshold:
-                        log.info("    generating OverallSys for {} syst={} nom={:g} high={:g} low={:g}. Systematic is smaller than pruning threshold ({:g}) and is removed from fit.".format(nomName, systName, nomIntegralN, highIntegralN, lowIntegralN, configMgr.prunThreshold))
+                        log.info(f"    generating OverallSys for {nomName} syst={systName} nom={nomIntegralN:g} high={highIntegralN:g} low={lowIntegralN:g}. Systematic is smaller than pruning threshold ({configMgr.prunThreshold:g}) and is removed from fit.")
                         self.systListOverallPruned.append(systName)
                     else: 
                         self.addOverallSys(systName, highN, lowN)
@@ -910,7 +910,7 @@ class Sample(object):
                 configMgr.hists[lowName].Scale(2.0)
                 configMgr.hists[lowName].Add(configMgr.hists[highName],  -1.0)
 
-                for iBin in xrange(1, configMgr.hists[lowName].GetNbinsX()+1):
+                for iBin in range(1, configMgr.hists[lowName].GetNbinsX()+1):
                     binVal = configMgr.hists[lowName].GetBinContent(iBin)
                     if binVal < 0.:
                         configMgr.hists[lowName].SetBinContent(iBin, 0.)
@@ -921,7 +921,7 @@ class Sample(object):
                 lowIntegral = configMgr.hists[lowName].Integral()
                 highIntegral = configMgr.hists[highName].Integral()
             except AttributeError:
-                log.error("    generating HistoSys for %s syst=%s: one of the histograms is None. Systematic is removed from fit." % (nomName, systName))
+                log.error(f"    generating HistoSys for {nomName} syst={systName}: one of the histograms is None. Systematic is removed from fit.")
                 return
 
             # Check whether a renormalization actually makes sense
@@ -932,10 +932,10 @@ class Sample(object):
                 else:
                     ## check shape effect
                     if checkShapeEffect(configMgr.hists[nomName], configMgr.hists[highName], configMgr.hists[lowName] ):
-                        log.error("    generating HistoSys for %s syst=%s nom=%g high=%g low=%g: cannot renormalize; only using shape" % (nomName, systName, nomIntegral, highIntegral, lowIntegral))
+                        log.error(f"    generating HistoSys for {nomName} syst={systName} nom={nomIntegral:g} high={highIntegral:g} low={lowIntegral:g}: cannot renormalize; only using shape")
                         self.histoSystList.append((systName, highName, lowName, configMgr.histCacheFile, "", "", "", ""))
                     else:
-                        log.error("    generating HistoSys for %s syst=%s nom=%g high=%g low=%g: cannot renormalize, no shape effect. Systematic is removed from fit." % (nomName, systName, nomIntegral, highIntegral, lowIntegral))
+                        log.error(f"    generating HistoSys for {nomName} syst={systName} nom={nomIntegral:g} high={highIntegral:g} low={lowIntegral:g}: cannot renormalize, no shape effect. Systematic is removed from fit.")
                         #self.systListHistoPruned.append(systName)
                         return
             else:
@@ -944,7 +944,7 @@ class Sample(object):
                     high = highIntegral / nomIntegral
                     low = lowIntegral / nomIntegral
                 except ZeroDivisionError:
-                    log.error("    generating HistoSys for %s syst=%s: nom=%g high=%g low=%g. Systematic is removed from fit." % (nomName, systName, nomIntegral, highIntegral, lowIntegral))
+                    log.error(f"    generating HistoSys for {nomName} syst={systName}: nom={nomIntegral:g} high={highIntegral:g} low={lowIntegral:g}. Systematic is removed from fit.")
                     return
                 
                 configMgr.hists[highName+"Norm"] = configMgr.hists[highName].Clone(highName+"Norm")
@@ -954,7 +954,7 @@ class Sample(object):
                     configMgr.hists[highName+"Norm"].Scale(1./high)
                     configMgr.hists[lowName+"Norm"].Scale(1./low)
                 except ZeroDivisionError:
-                    log.error("    generating HistoSys for %s syst=%s: nom=%g high=%g low=%g keeping in fit (offending histogram should be empty)." % (nomName, systName, nomIntegral, highIntegral, lowIntegral))
+                    log.error(f"    generating HistoSys for {nomName} syst={systName}: nom={nomIntegral:g} high={highIntegral:g} low={lowIntegral:g} keeping in fit (offending histogram should be empty).")
                     return
                 
                 if not configMgr.prun:
@@ -966,12 +966,12 @@ class Sample(object):
                     if checkShapeEffect(configMgr.hists[nomName], configMgr.hists[highName], configMgr.hists[lowName] ):
                         self.histoSystList.append((systName, highName+"Norm", lowName+"Norm", configMgr.histCacheFile, "", "", "", ""))
                     else:
-                        log.info("    generating HistoSys for %s syst=%s nom=%g high=%g low=%g has no impact on shape. Shape effect of systematic is removed from fit." % (nomName, systName, nomIntegral, highIntegral, lowIntegral))
+                        log.info(f"    generating HistoSys for {nomName} syst={systName} nom={nomIntegral:g} high={highIntegral:g} low={lowIntegral:g} has no impact on shape. Shape effect of systematic is removed from fit.")
                         self.systListHistoPruned.append(systName)
                         
                     ##check norm effect
                     if max( abs(high-1.0), abs(1.0-low) ) < configMgr.prunThreshold:
-                        log.info("    generating OverallSys for {} syst={} nom={:g} high={:g} low={:g}. Systematic is smaller than pruning threshold ({:g}) and is removed from fit.".format(nomName, systName, nomIntegral, highIntegral, lowIntegral, configMgr.prunThreshold))
+                        log.info(f"    generating OverallSys for {nomName} syst={systName} nom={nomIntegral:g} high={highIntegral:g} low={lowIntegral:g}. Systematic is smaller than pruning threshold ({configMgr.prunThreshold:g}) and is removed from fit.")
                         self.systListOverallPruned.append(systName)
                     else: 
                         self.addOverallSys(systName, high, low)
@@ -990,16 +990,16 @@ class Sample(object):
                     high = highIntegral / nomIntegral
                     low = lowIntegral / nomIntegral
                 except ZeroDivisionError:
-                    log.error("    generating HistoSys for %s syst=%s nom=%g high=%g low=%g. Systematic is removed from fit." % (nomName, systName, nomIntegral, highIntegral, lowIntegral))
+                    log.error(f"    generating HistoSys for {nomName} syst={systName} nom={nomIntegral:g} high={highIntegral:g} low={lowIntegral:g}. Systematic is removed from fit.")
                     return
 
                 if high < 1.0 and 1.0 > low > 0.0:
-                    log.warning("    addHistoSys for %s: high=%f is < 1.0. Taking symmetric value from low %f => %f" % (systName, high, low, 2.-low))
+                    log.warning(f"    addHistoSys for {systName}: high={high:f} is < 1.0. Taking symmetric value from low {low:f} => {2.-low:f}")
                     configMgr.hists[highName+"Norm"] = configMgr.hists[highName].Clone(highName+"Norm")
                     try:
                         configMgr.hists[highName+"Norm"].Scale((2.0-low)/high)
                     except ZeroDivisionError:
-                        log.error("    generating HistoSys for %s syst=%s nom=%g high=%g low=%g. Systematic is removed from fit." % (nomName, systName, nomIntegral, highIntegral, lowIntegral))
+                        log.error(f"    generating HistoSys for {nomName} syst={systName} nom={nomIntegral:g} high={highIntegral:g} low={lowIntegral:g}. Systematic is removed from fit.")
                         return
                     self.histoSystList.append((systName, highName+"Norm", lowName, configMgr.histCacheFile, "", "", "", ""))
                 elif low > 1.0 and high > 1.0:
@@ -1008,13 +1008,13 @@ class Sample(object):
                     try:
                         configMgr.hists[lowName+"Norm"].Scale((2.0-high)/low)
                     except ZeroDivisionError:
-                        log.error("    generating HistoSys for %s syst=%s nom=%g high=%g low=%g. Systematic is removed from fit." % (nomName, systName, nomIntegral, highIntegral, lowIntegral))
+                        log.error(f"    generating HistoSys for {nomName} syst={systName} nom={nomIntegral:g} high={highIntegral:g} low={lowIntegral:g}. Systematic is removed from fit.")
                         return
                     self.histoSystList.append((systName, highName, lowName+"Norm", configMgr.histCacheFile, "", "", "", ""))
                 elif low < 0.0:
-                    log.warning("    addHistoSys for %s: low=%f is < 0.0. Setting negative bins to 0.0." % (systName, low))
+                    log.warning(f"    addHistoSys for {systName}: low={low:f} is < 0.0. Setting negative bins to 0.0.")
                     configMgr.hists[lowName+"Norm"] = configMgr.hists[lowName].Clone(lowName+"Norm")
-                    for iBin in xrange(1, configMgr.hists[lowName+"Norm"].GetNbinsX()+1):
+                    for iBin in range(1, configMgr.hists[lowName+"Norm"].GetNbinsX()+1):
                         if configMgr.hists[lowName+"Norm"].GetBinContent(iBin) < 0.:
                             configMgr.hists[lowName+"Norm"].SetBinContent(iBin, 0.)
                     self.histoSystList.append((systName, highName, lowName+"Norm", configMgr.histCacheFile, "", "", "", ""))
@@ -1027,7 +1027,7 @@ class Sample(object):
                 configMgr.hists[lowName].Scale(2.0)
                 configMgr.hists[lowName].Add(configMgr.hists[highName], -1.0)
 
-                for iBin in xrange(1, configMgr.hists[lowName].GetNbinsX()+1):
+                for iBin in range(1, configMgr.hists[lowName].GetNbinsX()+1):
                     binVal = configMgr.hists[lowName].GetBinContent(iBin)
                     if binVal < 0.:
                         configMgr.hists[lowName].SetBinContent(iBin, 0.)
@@ -1049,12 +1049,12 @@ class Sample(object):
                 if configMgr.prun:
                     keepNorm = True
                     if not checkNormalizationEffect(configMgr.hists[nomName], configMgr.hists[highName], configMgr.hists[lowName], configMgr.prunThreshold):
-                        log.debug("    HistoSys for {} syst={} nom={:g} high={:g} low={:g} has small impact on normalisation.".format(nomName, systName, nomIntegral, highIntegral, lowIntegral))
+                        log.debug(f"    HistoSys for {nomName} syst={systName} nom={nomIntegral:g} high={highIntegral:g} low={lowIntegral:g} has small impact on normalisation.")
                         keepNorm = False
 
                     if not checkShapeEffect(configMgr.hists[nomName], configMgr.hists[highName], configMgr.hists[lowName]):
                         if not keepNorm:
-                            log.info("    HistoSys for {} syst={} nom={:g} high={:g} low={:g} has small impact on normalisation and no effect on shape. Removing from fit.".format(nomName, systName, nomIntegral, highIntegral, lowIntegral))
+                            log.info(f"    HistoSys for {nomName} syst={systName} nom={nomIntegral:g} high={highIntegral:g} low={lowIntegral:g} has small impact on normalisation and no effect on shape. Removing from fit.")
                             self.systListHistoPruned.append(systName)
                             return
                         
@@ -1069,7 +1069,7 @@ class Sample(object):
 
                 self.histoSystList.append((systName, highName, lowName, configMgr.histCacheFile, "", "", "", ""))
 
-        if not systName in configMgr.systDict.keys():
+        if not systName in list(configMgr.systDict.keys()):
             self.systList.append(systName)
         return
 
@@ -1094,7 +1094,7 @@ class Sample(object):
         nomHistName = nomName + "Norm"
         configMgr.hists[nomHistName]  = configMgr.hists[nomName].Clone(nomHistName)
 
-        for iBin in xrange(configMgr.hists[highHistName].GetNbinsX()+1):
+        for iBin in range(configMgr.hists[highHistName].GetNbinsX()+1):
             try:
                 configMgr.hists[highHistName].SetBinContent(iBin,  fabs((configMgr.hists[highHistName].GetBinContent(iBin) / configMgr.hists[nomName].GetBinContent(iBin)) - 1.0) )
                 configMgr.hists[highHistName].SetBinError(iBin, 0.)
@@ -1102,7 +1102,7 @@ class Sample(object):
                 configMgr.hists[highHistName].SetBinContent(iBin, 0.)
                 configMgr.hists[highHistName].SetBinError(iBin, 0.)
 
-        for iBin in xrange(configMgr.hists[lowHistName].GetNbinsX()+1):
+        for iBin in range(configMgr.hists[lowHistName].GetNbinsX()+1):
             try:
                 configMgr.hists[lowHistName].SetBinContent(iBin,  fabs((configMgr.hists[lowHistName].GetBinContent(iBin) / configMgr.hists[nomName].GetBinContent(iBin)) - 1.0) )
                 configMgr.hists[lowHistName].SetBinError(iBin, 0.)
@@ -1110,17 +1110,17 @@ class Sample(object):
                 configMgr.hists[lowHistName].SetBinContent(iBin, 0.)
                 configMgr.hists[lowHistName].SetBinError(iBin, 0.)
 
-        for iBin in xrange(configMgr.hists[nomHistName].GetNbinsX()+1):
+        for iBin in range(configMgr.hists[nomHistName].GetNbinsX()+1):
             try:
                 configMgr.hists[nomHistName].SetBinContent(iBin, max( configMgr.hists[highHistName].GetBinContent(iBin),
                                                                       configMgr.hists[lowHistName].GetBinContent(iBin)))
-                log.debug("!!!!!! shapeSys %s bin %g value %g" % (systName, iBin, configMgr.hists[nomHistName].GetBinContent(iBin)))
+                log.debug(f"!!!!!! shapeSys {systName} bin {iBin:g} value {configMgr.hists[nomHistName].GetBinContent(iBin):g}")
                 configMgr.hists[nomHistName].SetBinError(iBin, 0.)
             except ZeroDivisionError:
                 configMgr.hists[nomHistName].SetBinContent(iBin, 0.)
                 configMgr.hists[nomHistName].SetBinError(iBin, 0.)
 
-        if not systName in configMgr.systDict.keys():
+        if not systName in list(configMgr.systDict.keys()):
             self.systList.append(systName)
 
         return
@@ -1138,19 +1138,19 @@ class Sample(object):
         histName = nomName + "Norm"
         configMgr.hists[histName]  = configMgr.hists[nomName].Clone(histName)
 
-        for iBin in xrange(configMgr.hists[histName].GetNbinsX()+1):
+        for iBin in range(configMgr.hists[histName].GetNbinsX()+1):
             try:
                 ratio = configMgr.hists[nomName].GetBinError(iBin) / configMgr.hists[nomName].GetBinContent(iBin)
                 if (statErrorThreshold is not None) and (ratio<statErrorThreshold): 
-                    log.info( "shapeStat %s bin %g value %g, below threshold of: %g. Will ignore." % (systName, iBin, ratio, statErrorThreshold) )
+                    log.info( f"shapeStat {systName} bin {iBin:g} value {ratio:g}, below threshold of: {statErrorThreshold:g}. Will ignore." )
                     ratio = 0.0   ## don't show if below threshold
                 configMgr.hists[histName].SetBinContent( iBin, ratio )
                 configMgr.hists[histName].SetBinError( iBin, 0. )
-                log.debug("!!!!!! shapeStat %s bin %g value %g" % (systName, iBin, configMgr.hists[histName].GetBinContent(iBin)) )
+                log.debug(f"!!!!!! shapeStat {systName} bin {iBin:g} value {configMgr.hists[histName].GetBinContent(iBin):g}" )
             except ZeroDivisionError:
                 configMgr.hists[histName].SetBinContent( iBin, 0. )
                 configMgr.hists[histName].SetBinError( iBin, 0.)
-        if not systName in configMgr.systDict.keys():
+        if not systName in list(configMgr.systDict.keys()):
             self.systList.append(systName)
         return
 
@@ -1169,7 +1169,7 @@ class Sample(object):
             return
 
         if high == 0.0 and low == 0.0:
-            log.warning("    addOverallSys for %s: high=%g low=%g. Systematic is removed from fit." % (systName, high, low))
+            log.warning(f"    addOverallSys for {systName}: high={high:g} low={low:g}. Systematic is removed from fit.")
             return
 
         if high == low:
@@ -1179,19 +1179,19 @@ class Sample(object):
         if high == 1.0 and low > 0.0 and low != 1.0:
             highOld = high
             high = 2.0 - low
-            log.warning("    addOverallSys for %s: high=%g. Taking symmetric value from low %g => %g" % (systName, highOld, low, high))
+            log.warning(f"    addOverallSys for {systName}: high={highOld:g}. Taking symmetric value from low {low:g} => {high:g}")
 
         if low == 1.0 and high > 0.0 and high != 1.0:
             lowOld = low
             low = 2.0 - high
-            log.warning("    addOverallSys for %s: low=%g. Taking symmetric value from high %g => %g" % (systName, lowOld, low, high))
+            log.warning(f"    addOverallSys for {systName}: low={lowOld:g}. Taking symmetric value from high {low:g} => {high:g}")
 
         if low < 0.01:
-            log.warning("    addOverallSys for %s: low=%g is < 0.01. Setting to low=0.01. High=%g." % (systName, low, high))
+            log.warning(f"    addOverallSys for {systName}: low={low:g} is < 0.01. Setting to low=0.01. High={high:g}.")
             low = 0.01
 
         if high < 0.01:
-            log.warning("    addOverallSys for %s: high=%g is < 0.01. Setting to high=0.01. Low=%g." % (systName, high, low))
+            log.warning(f"    addOverallSys for {systName}: high={high:g} is < 0.01. Setting to high=0.01. Low={low:g}.")
             high = 0.01
       
         #print high, high == 1.0
@@ -1203,16 +1203,16 @@ class Sample(object):
             return
 
         if fabs(high) < 1E-5 and fabs(low) < 1E-5:
-            log.warning("    addOverallSys for %s: high=%g low=%g. Systematic is removed from fit." % (systName, high, low))
+            log.warning(f"    addOverallSys for {systName}: high={high:g} low={low:g}. Systematic is removed from fit.")
             return
           
         if configMgr.prun and fabs(high-1.0) < configMgr.prunThreshold and fabs(low-1.0) < configMgr.prunThreshold:
-            log.info("    addOverallSys for %s: high=%g low=%g. Pruning theshold=%g. Systematic is removed from fit." % (systName, high, low, configMgr.prunThreshold))
+            log.info(f"    addOverallSys for {systName}: high={high:g} low={low:g}. Pruning theshold={configMgr.prunThreshold:g}. Systematic is removed from fit.")
             self.systListOverallPruned.append(systName)
             return
 
         self.overallSystList.append((systName, high, low))
-        if not systName in configMgr.systDict.keys():
+        if not systName in list(configMgr.systDict.keys()):
             self.systList.append(systName)
         return
 
@@ -1322,12 +1322,12 @@ class Sample(object):
         @param syst An object of type Systematic
         """
         if self.isData:
-            log.debug("Sample {} is data - not adding systematic {}".format(self.name, syst.name))
+            log.debug(f"Sample {self.name} is data - not adding systematic {syst.name}")
             return
         
-        log.verbose("Adding systematic {} to sample {} ({})".format(syst.name, self.name, hex(id(self))))
-        if syst.name in self.systDict.keys():
-            raise Exception("Attempt to overwrite systematic %s in Sample %s (%s)" % (syst.name, self.name, hex(id(self))))
+        log.verbose(f"Adding systematic {syst.name} to sample {self.name} ({hex(id(self))})")
+        if syst.name in list(self.systDict.keys()):
+            raise Exception(f"Attempt to overwrite systematic {syst.name} in Sample {self.name} ({hex(id(self))})")
         else:
             self.systDict[syst.name] = syst.Clone()
             return
@@ -1348,7 +1348,7 @@ class Sample(object):
 
         @param rsyst Systematic object to replace the systematic with the same name
         """
-        for idx in xrange(len(self.overallSystList)):
+        for idx in range(len(self.overallSystList)):
             syst = self.overallSystList[idx]
             if rsyst[0]==syst[0]:
                 self.overallSystList[idx] = rsyst
@@ -1370,7 +1370,7 @@ class Sample(object):
 
         @param rsyst Systematic object to replace the systematic with the same name
         """
-        for idx in xrange(len(self.histoSystList)):
+        for idx in range(len(self.histoSystList)):
             syst = self.histoSystList[idx]
             if rsyst[0]==syst[0]:
                 self.histoSystList[idx] = rsyst
@@ -1382,7 +1382,7 @@ class Sample(object):
 
         @param systName Name of the overall systematic to remove
         """
-        for idx in xrange(len(self.overallSystList)):
+        for idx in range(len(self.overallSystList)):
             syst = self.overallSystList[idx]
             if systName==syst[0]:
                 del self.overallSystList[idx]
@@ -1394,7 +1394,7 @@ class Sample(object):
         Get all names of systematics associated to this sample
         """
 
-        return self.systDict.keys()
+        return list(self.systDict.keys())
 
     def getAllSystematics(self):
         """
@@ -1418,7 +1418,7 @@ class Sample(object):
         try:
             return self.systDict[name]
         except KeyError:
-            log.warning("could not find systematic %s in sample %s" % (name, self.name))
+            log.warning(f"could not find systematic {name} in sample {self.name}")
         
         return
 
@@ -1439,7 +1439,7 @@ class Sample(object):
         """
         Remove all systematics from the sample
         """
-        log.verbose("Clearing systematics for {} ({})".format(self.name, hex(id(self)))) 
+        log.verbose(f"Clearing systematics for {self.name} ({hex(id(self))})") 
         self.systDict.clear()
  
     def replaceSystematic(self, old, new):
@@ -1496,20 +1496,20 @@ class Sample(object):
             self.sampleString += "    <StatError Activate=\"%s\"/>\n" % self.statConfig
         
         for histoSyst in self.histoSystList:
-            self.sampleString += "    <HistoSys Name=\"%s\" HistoNameHigh=\"%s\" HistoNameLow=\"%s\" />\n" % (histoSyst[0], histoSyst[1], histoSyst[2])
+            self.sampleString += f"    <HistoSys Name=\"{histoSyst[0]}\" HistoNameHigh=\"{histoSyst[1]}\" HistoNameLow=\"{histoSyst[2]}\" />\n"
         
         for shapeSyst in self.shapeSystList:
-            self.sampleString += "    <ShapeSys Name=\"%s\" HistoName=\"%s\" ConstraintType=\"%s\"/>\n" % (shapeSyst[0], shapeSyst[1], shapeSyst[2])
+            self.sampleString += f"    <ShapeSys Name=\"{shapeSyst[0]}\" HistoName=\"{shapeSyst[1]}\" ConstraintType=\"{shapeSyst[2]}\"/>\n"
         
         for overallSyst in self.overallSystList:
-            self.sampleString += "    <OverallSys Name=\"%s\" High=\"%g\" Low=\"%g\" />\n" % (overallSyst[0], float(overallSyst[1]), float(overallSyst[2]))
+            self.sampleString += f"    <OverallSys Name=\"{overallSyst[0]}\" High=\"{float(overallSyst[1]):g}\" Low=\"{float(overallSyst[2]):g}\" />\n"
         
         for shapeFact in self.shapeFactorList:
             self.sampleString += "    <ShapeFactor Name=\"%s\" />\n" % shapeFact
         
         if len(self.normFactor)>0:
             for normFactor in self.normFactor:
-                self.sampleString += "    <NormFactor Name=\"%s\" Val=\"%g\" High=\"%g\" Low=\"%g\" Const=\"%s\" />\n" % (normFactor[0], normFactor[1], normFactor[2], normFactor[3], normFactor[4])
+                self.sampleString += f"    <NormFactor Name=\"{normFactor[0]}\" Val=\"{normFactor[1]:g}\" High=\"{normFactor[2]:g}\" Low=\"{normFactor[3]:g}\" Const=\"{normFactor[4]}\" />\n"
                 pass
         
         self.sampleString += "  </Sample>\n\n"

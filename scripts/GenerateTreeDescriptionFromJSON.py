@@ -14,20 +14,20 @@ scriptName = os.path.basename(__file__)
 
 def checkArgs(args):
     if not os.path.exists(args.filename):
-        print "%s: input file %s does not exist!" % (scriptName, args.filename)
+        print(f"{scriptName}: input file {args.filename} does not exist!")
         sys.exit()
 
     if not args.filename.endswith(".json") and (args.output_filename is None or args.output_filename == ""):
-        print "%s: input file %s does NOT end in .json. Cannot autogenerate output filename; specify a path yourself" % (scriptName, args.filename)
+        print(f"{scriptName}: input file {args.filename} does NOT end in .json. Cannot autogenerate output filename; specify a path yourself")
         sys.exit()
 
     if args.output_filename is None or args.output_filename == "":
         args.output_filename = args.filename.replace(".json", "")
 
-    print "%s: will write output to %s" % (scriptName, args.output_filename)
+    print(f"{scriptName}: will write output to {args.output_filename}")
 
 def generateHeaderFiles(keys):
-    print "%s: generating header files" % (scriptName)
+    print("%s: generating header files" % (scriptName))
 
 def sanitizeData(data):
     # 'NaN' is a string in JSON. Fix it. 
@@ -45,7 +45,7 @@ def readInputFile(filename):
         for line in f:
             data.append(json.loads(line))
 
-    print "%s: read input data" % (scriptName)
+    print("%s: read input data" % (scriptName))
     return sanitizeData(data)
 
 def getKeys(data):
@@ -59,7 +59,7 @@ def getKeys(data):
             # sanity check. if this goes wrong you messed up the file yourself.
             assert list(d.keys()) == keys
 
-    print "%s: read keys: %s" % (scriptName, ":".join(keys) )
+    print("{}: read keys: {}".format(scriptName, ":".join(keys) ))
     return keys
 
 def pythonHeaderTemplate():
@@ -133,10 +133,10 @@ def treeType(key):
     return "F"
 
 def writeHeaderFiles(keys, inputFilename, outputFilename):
-    types = {k: "{0}/F".format(k) for k in keys}
-    types = OrderedDict([(k, "{0}/{1}".format(k, treeType(k))) for k in keys])
+    types = {k: f"{k}/F" for k in keys}
+    types = OrderedDict([(k, f"{k}/{treeType(k)}") for k in keys])
 
-    description = ":".join(types.values())
+    description = ":".join(list(types.values()))
 
     t = string.Template(pythonHeaderTemplate())
     pythonHeader = t.substitute({"outfile": os.path.abspath(outputFilename), "description": description })
@@ -153,7 +153,7 @@ def writeHeaderFiles(keys, inputFilename, outputFilename):
     f.write(pythonHeader)
     f.close()
 
-    print "%s: wrote summary_harvest_tree_description.py" % scriptName
+    print("%s: wrote summary_harvest_tree_description.py" % scriptName)
 
     # write the C++ header
     headerFilename = "%s/summary_harvest_tree_description.h" % outputDir
@@ -161,7 +161,7 @@ def writeHeaderFiles(keys, inputFilename, outputFilename):
     f.write(cppHeader)
     f.close()
     
-    print "%s: wrote summary_harvest_tree_description.h" % scriptName
+    print("%s: wrote summary_harvest_tree_description.h" % scriptName)
 
     pass
 
@@ -174,11 +174,11 @@ def typeForVar(key):
 def writeOutputFile(data, filename):
     f = open(filename, "w+")
     for d in data[0]:
-        f.write(" ".join([typeForVar(k) % v for (k, v) in d.items()]))
+        f.write(" ".join([typeForVar(k) % v for (k, v) in list(d.items())]))
         f.write("\n")
     f.close()
     
-    print "%s: wrote %s" % (scriptName, filename)
+    print(f"{scriptName}: wrote {filename}")
     pass
 
 def writeListFile(inputFilename, outputFilename):

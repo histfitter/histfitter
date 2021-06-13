@@ -37,7 +37,7 @@ def tablefragment(m,tabname):
 \\noalign{\\smallskip}\\hline\\noalign{\\smallskip}
 %%'''
 
-  m_listofkeys = m.keys()
+  m_listofkeys = list(m.keys())
   m_listofkeys.sort()
   for name in m_listofkeys:
     tableline = addlinetosystable(tableline,m,name)
@@ -63,13 +63,13 @@ the background-only hypothesis, and the discovery $p$-value ($p(s = 0)$).
 
 def addlinetosystable(tableline, m, name):
     try:
-        m.has_key(name)
+        name in m
     except:
-        print " \n", name, "  not inside the upper limit table"
+        print(" \n", name, "  not inside the upper limit table")
         return tableline
 
     printname = name
-    printname = printname.replace('_','\_')
+    printname = printname.replace('_',r'\_')
 
     info = m[name] 
 

@@ -118,5 +118,5 @@ def getName(obj):
             pass
         return name
     else:
-        print "WARNING: cannot handle object of type %s. Return 'N/A'"%type(obj)
+        print("WARNING: cannot handle object of type %s. Return 'N/A'"%type(obj))
     return "N/A"

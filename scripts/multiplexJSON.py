@@ -28,26 +28,26 @@ args = parser.parse_args()
 try:
 	import pandas as pd
 except:
-	print ">>> You need scipy/matplotlib to run this. And you had to have run harvestToContours in scipy mode [default]"
-	print ">>> In an ATLAS environment, you can..."
-	print '>>> > lsetup "lcgenv -p LCG_93 x86_64-slc6-gcc62-opt pyanalysis" "lcgenv -p LCG_93 x86_64-slc6-gcc62-opt pytools" "lcgenv -p LCG_93 x86_64-slc6-gcc62-opt pygraphics" "lcgenv -p LCG_93 x86_64-slc6-gcc62-opt ROOT" '
-	print ">>> "
-	print ">>> Try that and then run this again!"
+	print(">>> You need scipy/matplotlib to run this. And you had to have run harvestToContours in scipy mode [default]")
+	print(">>> In an ATLAS environment, you can...")
+	print('>>> > lsetup "lcgenv -p LCG_93 x86_64-slc6-gcc62-opt pyanalysis" "lcgenv -p LCG_93 x86_64-slc6-gcc62-opt pytools" "lcgenv -p LCG_93 x86_64-slc6-gcc62-opt pygraphics" "lcgenv -p LCG_93 x86_64-slc6-gcc62-opt ROOT" ')
+	print(">>> ")
+	print(">>> Try that and then run this again!")
 	sys.exit(1)
 
 
 
 def main():
 
-	print ">>>"
-	print ">>> Welcome to multiplexJSON!"
+	print(">>>")
+	print(">>> Welcome to multiplexJSON!")
 
 	# Print out the settings
 	for setting in dir(args):
 		if not setting[0]=="_":
-			print ">>> ... Setting: {: >20}:  {}".format(setting, eval("args.%s"%setting) )
+			print(">>> ... Setting: {: >20}:  {}".format(setting, eval("args.%s"%setting) ))
 
-	print ">>> "
+	print(">>> ")
 
 	databaseList = []
 
@@ -58,52 +58,52 @@ def main():
 	for filename in args.inputFiles:
 		if filename == args.outputFile:
 			continue
-		print ">>> Adding input file: %s"%filename
+		print(">>> Adding input file: %s"%filename)
 		with open(filename) as data_file:
 			data = json.load(data_file)
-			df = pd.DataFrame(data, columns=data[0].keys())
+			df = pd.DataFrame(data, columns=list(data[0].keys()))
 			df['fID'] = filename
 			databaseList.append(df)
 
 			if args.debug:
-				print ">>> Loading %s"%filename
-				print ">>> ...has %d models "%len(df)
+				print(">>> Loading %s"%filename)
+				print(">>> ...has %d models "%len(df))
 
-		print ">>> Looking for related files"
+		print(">>> Looking for related files")
 
 		if "Nominal" in filename and not args.ignoreTheory:
 
 			try:
 				with open(filename.replace("Nominal","Up")) as data_file:
-					print ">>> >>> Adding input file for theory up variation"
+					print(">>> >>> Adding input file for theory up variation")
 					data = json.load(data_file)
-					df = pd.DataFrame(data, columns=data[0].keys())
+					df = pd.DataFrame(data, columns=list(data[0].keys()))
 					df['fID'] = filename
 					databaseListTheoryUp.append(df)
 			except:
-				print ">>> Can't find %s"%filename.replace("Nominal","Up")
+				print(">>> Can't find %s"%filename.replace("Nominal","Up"))
 
 			try:
 				with open(filename.replace("Nominal","Down")) as data_file:
-					print ">>> >>> Adding input file for theory down variation"
+					print(">>> >>> Adding input file for theory down variation")
 					data = json.load(data_file)
-					df = pd.DataFrame(data, columns=data[0].keys())
+					df = pd.DataFrame(data, columns=list(data[0].keys()))
 					df['fID'] = filename
 					databaseListTheoryDown.append(df)
 			except:
-				print ">>> Can't find %s"%filename.replace("Nominal","Down")
+				print(">>> Can't find %s"%filename.replace("Nominal","Down"))
 
 		if "Nominal" in filename and not args.ignoreUL:
 
 			try:
 				with open(filename.replace("fixSigXSecNominal_hypotest","upperlimit")) as data_file:
-					print ">>> >>> Adding input file for upper limits"
+					print(">>> >>> Adding input file for upper limits")
 					data = json.load(data_file)
-					df = pd.DataFrame(data, columns=data[0].keys())
+					df = pd.DataFrame(data, columns=list(data[0].keys()))
 					df['fID'] = filename
 					databaseListUpperLimit.append(df)
 			except:
-				print ">>> Can't find %s"%filename.replace("Nominal","Up")
+				print(">>> Can't find %s"%filename.replace("Nominal","Up"))
 
 
 	database = pd.concat(databaseList, ignore_index=True)
@@ -114,7 +114,7 @@ def main():
 		databaseUpperLimit = pd.concat(databaseListUpperLimit, ignore_index=True)
 
 	if args.debug:
-		print ">>> Full database has length: %d"%len(database)
+		print(">>> Full database has length: %d"%len(database))
 
 	# cleaning up the bad stuff!
 	database = database[(database.CLsexp != 0) & database.failedstatus==0]
@@ -122,14 +122,14 @@ def main():
 	try:
 		listOfModels = database[args.modelDef.split(",")].drop_duplicates()
 	except:
-		print ">>> Problem! The model definition variables don't seem to exist! Quitting."
+		print(">>> Problem! The model definition variables don't seem to exist! Quitting.")
 		sys.exit(1)
 
-	print ">>> Number of signal models considered: %s"%len(listOfModels)
+	print(">>> Number of signal models considered: %s"%len(listOfModels))
 
 	if args.debug:
-		print ">>> ... List of Signal Models:"
-		print listOfModels
+		print(">>> ... List of Signal Models:")
+		print(listOfModels)
 
 	outputDB = doTheMuxing(database,listOfModels)
 
@@ -144,22 +144,22 @@ def main():
 	if len(databaseListUpperLimit):
 		outputDBUpperLimit   = doTheMuxing(databaseUpperLimit,listOfModels, outputDB)
 
-	print ">>> Writing output json: %s"%args.outputFile
+	print(">>> Writing output json: %s"%args.outputFile)
 
 	writeDBOutToFile(outputDB,args.outputFile)
 
 	if len(databaseListTheoryUp):
-		print ">>> Writing output json for theory variations *_[Up/Down].json "
+		print(">>> Writing output json for theory variations *_[Up/Down].json ")
 		writeDBOutToFile(outputDB,args.outputFile.replace(".json","")+"_Nominal.json")
 		writeDBOutToFile(outputDBTheoryUp,  args.outputFile.replace(".json","")+"_Up.json")
 		writeDBOutToFile(outputDBTheoryDown,args.outputFile.replace(".json","")+"_Down.json")
 
 	if len(databaseListUpperLimit):
-		print ">>> Writing output json for upper limit "
+		print(">>> Writing output json for upper limit ")
 		writeDBOutToFile(outputDBUpperLimit,args.outputFile.replace(".json","")+"_UpperLimit.json")
 
-	print ">>> Done!"
-	print ">>>"
+	print(">>> Done!")
+	print(">>>")
 
 	return
 

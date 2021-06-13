@@ -44,7 +44,7 @@ def test_rebin():
   for i in range(1, h.GetNbinsX()+1):
     bins += [h.GetBinLowEdge(i)]
   bins += [h.GetBinLowEdge(h.GetNbinsX()) + h.GetBinWidth(h.GetNbinsX())]
-  assert bins == range(len(bins))
+  assert bins == list(range(len(bins)))
 
 def test_rebin_exception():
   # define some bin edges

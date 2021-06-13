@@ -140,7 +140,7 @@ def GetBoxes(all, results, renamedRegions, frame, doBlind, horizontal=False, doP
         name = info[0].replace(" ","")
         name = info[0].replace("_cuts","")
 
-        if name in renamedRegions.keys():
+        if name in list(renamedRegions.keys()):
             name = renamedRegions[name]
 
         if ( (name.find("SR") >= 0)  and doBlind) or (name.find("CR") >= 0 and not doPreFit):
@@ -189,7 +189,7 @@ def MakeHist(regionList, renamedRegions, results, hdata, hbkg, hbkgUp, hbkgDown,
         pull = 0
 
         name = regionList[counter].replace(" ","")
-        if name in renamedRegions.keys():
+        if name in list(renamedRegions.keys()):
             name = renamedRegions[name]
 
         for info in results: #extract the information
@@ -269,7 +269,7 @@ def MakeHist(regionList, renamedRegions, results, hdata, hbkg, hbkgUp, hbkgDown,
     return
 
 def MakeHistPullPlot(samples, regionList, outFileNamePrefix, hresults, renamedRegions, doBlind, outDir="", minimum=0.1, maximum=None, logy=True, doSignificance=False):
-    print "========================================", outFileNamePrefix
+    print("========================================", outFileNamePrefix)
     ROOT.gStyle.SetOptStat(0000);
     Npar=len(regionList)
 
@@ -431,8 +431,8 @@ def makePullPlot(pickleFilename, regionList, samples, renamedRegions, outputPref
     """
     try:
         picklefile = open(pickleFilename,'rb')
-    except IOError:
-        print "Cannot open pickle %s, continuing to next" % pickleFilename
+    except OSError:
+        print("Cannot open pickle %s, continuing to next" % pickleFilename)
         return
 
     mydict = pickle.load(picklefile)
@@ -471,19 +471,19 @@ def makePullPlot(pickleFilename, regionList, samples, renamedRegions, outputPref
 
         if plotSignificance == "arxiv":
             #calculates significance from https://arxiv.org/abs/1111.2062
-            print "plot significance in the bottom panel"
+            print("plot significance in the bottom panel")
             pValue = pValuePoissonError(int(nbObs), nbExp, nbExpEr*nbExpEr)
-            print "pval:", pValue
+            print("pval:", pValue)
             if pValue < 0.5:
                 pull = pValueToSignificance(pValue, nbObs>nbExp )
-                print pull
+                print(pull)
             else:
                 pull = 0.0001
-                print "pull at zero!"
+                print("pull at zero!")
         elif plotSignificance == "atlas":
             #significance calculated from https://cds.cern.ch/record/2643488
             # relabel variables to match CDS formula
-            print 'calculating significance from W. Buttinger and M.Lefebvre recommendation'
+            print('calculating significance from W. Buttinger and M.Lefebvre recommendation')
             factor1 = nbObs*log( (nbObs*(nbExp+nbExpEr**2))/(nbExp**2+nbObs*nbExpEr**2) )
             factor2 = (nbExp**2/nbExpEr**2)*log( 1 + (nbExpEr**2*(nbObs-nbExp))/(nbExp*(nbExp+nbExpEr**2)) )
 
@@ -491,15 +491,15 @@ def makePullPlot(pickleFilename, regionList, samples, renamedRegions, outputPref
                 pull  = -sqrt(2*(factor1 - factor2))
             else:
                 pull  = sqrt(2*(factor1 - factor2))
-            print pull
+            print(pull)
 
         else:
-            print "plot pull = (obs-exp)/err in the bottom panel"
+            print("plot pull = (obs-exp)/err in the bottom panel")
             if (nbObs-nbExp) > 0 and totErUp_pull != 0:
                 pull = (nbObs-nbExp)/totErUp_pull
             if (nbObs-nbExp) <= 0 and totErDo_pull != 0:
                 pull = (nbObs-nbExp)/totErDo_pull
-            print pull
+            print(pull)
             if -0.02 < pull < 0: pull = -0.02 ###ATT: ugly
             if 0 < pull < 0.02:  pull = 0.02 ###ATT: ugly
 
@@ -516,11 +516,11 @@ def makePullPlot(pickleFilename, regionList, samples, renamedRegions, outputPref
 
         if "CR" in region:
             pull = mydict["Fitted_events_ttbar"][index]/mydict["MC_exp_events_ttbar"][index]
-            print "ttbar SF: ", pull
+            print("ttbar SF: ", pull)
         else:
-            print "{0:s}: {1}".format(region, pull)
+            print(f"{region:s}: {pull}")
 
-        print "region: {0} nObs {1}".format(region, nbObs)
+        print(f"region: {region} nObs {nbObs}")
 
         results1.append((region,pull,nbObs,nbExp,nbExpEr,totEr,nbExpComponents))
 

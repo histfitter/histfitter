@@ -26,7 +26,7 @@ TH1.SetDefaultSumw2(True)
 
 from copy import deepcopy
 
-class Measurement(object):
+class Measurement:
     """
     Class to define measurements in a fit configuration
     """
@@ -109,7 +109,7 @@ class Measurement(object):
         m.SetBinLow(self.binLow)
         m.SetBinHigh(self.binHigh)
 
-        for (param, setting) in self.paramSettingDict.iteritems():
+        for (param, setting) in self.paramSettingDict.items():
             #setting is array [const, value]
             if not setting[0]: 
                 continue #means this param is not const
@@ -118,7 +118,7 @@ class Measurement(object):
             if setting[1]:
                 m.SetParamValue(param, setting[1])
 
-        for (syst, constraint) in self.constraintTermDict.iteritems():
+        for (syst, constraint) in self.constraintTermDict.items():
             #constraint is array [type, relUnc]; latter only allowed for Gamma and LogNormal
             if constraint[0] == "Gamma":
                 if constraint[1] is not None:
@@ -146,23 +146,23 @@ class Measurement(object):
         for (iPOI, poi) in enumerate(self. poiList):
             measurementString += "    <POI>%s</POI>\n" % poi
 
-        for (param, setting) in self.paramSettingDict. iteritems():
+        for (param, setting) in self.paramSettingDict. items():
             if setting[0]:
                 if not setting[1] is None:
-                    measurementString += "    <ParamSetting Const=\"True\" Val=\"%g\">%s</ParamSetting>\n" % (setting[1], param)
+                    measurementString += f"    <ParamSetting Const=\"True\" Val=\"{setting[1]:g}\">{param}</ParamSetting>\n"
                 else:
                     measurementString += "    <ParamSetting Const=\"True\">%s</ParamSetting>\n" % param
             else:
                 if not setting[1] is None:
-                    measurementString += "    <ParamSetting Const=\"False\" Val=\"%g\">%s</ParamSetting>\n" % (setting[1], param)
+                    measurementString += f"    <ParamSetting Const=\"False\" Val=\"{setting[1]:g}\">{param}</ParamSetting>\n"
                 else:
                     measurementString += "    <ParamSetting Const=\"False\">%s</ParamSetting>\n" % param
 
-        for (param, constraint) in self.constraintTermDict.iteritems():
+        for (param, constraint) in self.constraintTermDict.items():
             if not constraint[1] is None:
-                measurementString += "    <ConstraintTerm Type=\"%s\" RelativeUncertainty=\"%g\">%s</ConstraintTerm>\n" % (constraint[0], constraint[1], param)
+                measurementString += f"    <ConstraintTerm Type=\"{constraint[0]}\" RelativeUncertainty=\"{constraint[1]:g}\">{param}</ConstraintTerm>\n"
             else:
-                measurementString += "    <ConstraintTerm Type=\"%s\">%s</ConstraintTerm>\n" % (constraint[0], param)
+                measurementString += f"    <ConstraintTerm Type=\"{constraint[0]}\">{param}</ConstraintTerm>\n"
 
         measurementString += "  </Measurement>\n\n"
 

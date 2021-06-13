@@ -23,7 +23,7 @@ ROOT.PyConfig.IgnoreCommandLineOptions = True
 ROOT.SetMemoryPolicy( ROOT.kMemoryStrict )
 
 from ROOT import gROOT,gSystem,gDirectory,RooAbsData,RooRandom,RooWorkspace
-ROOT.gSystem.Load('{0}/lib/libSusyFitter.so'.format(os.getenv('HISTFITTER')))
+ROOT.gSystem.Load(f"{os.getenv('HISTFITTER')}/lib/libSusyFitter.so")
 from ROOT import ConfigMgr
 #gROOT.Reset()
 
@@ -66,8 +66,8 @@ def GenerateFitAndPlotCPP(fc, anaName, drawBeforeFit, drawAfterFit, drawCorrelat
     log.debug("GenerateFitAndPlotCPP: doFixParameters %s " % doFixParameters)
     log.debug("GenerateFitAndPlotCPP: fixedPars %s " % fixedPars)
     log.debug("GenerateFitAndPlotCPP: ReduceCorrMatrix %s " % ReduceCorrMatrix)
-    log.debug("GenerateFitAndPlotCPP: noFit {0}".format(noFit))
-    log.debug("GenerateFitAndPlotCPP: plotInterpolation {0}".format(plotInterpolation))
+    log.debug(f"GenerateFitAndPlotCPP: noFit {noFit}")
+    log.debug(f"GenerateFitAndPlotCPP: plotInterpolation {plotInterpolation}")
     
     Util.GenerateFitAndPlot(fc.name, anaName, drawBeforeFit, drawAfterFit, drawCorrelationMatrix,
                             drawSeparateComponents, drawLogLikelihood, minos, minosPars, doFixParameters, fixedPars, ReduceCorrMatrix, noFit, plotInterpolation)
@@ -108,7 +108,7 @@ if __name__ == "__main__":
     myFitType=FitType.Background
     doValidation = False
     
-    print("\n * * * Welcome to HistFitter * * * \n")
+    print("\n * * * Welcome to HistFitter * * *\n")
 
     """
     Definition of all options and defaults given as arguments
@@ -168,7 +168,7 @@ if __name__ == "__main__":
     process all the arguments/options
     """
     if not os.path.exists(HistFitterArgs.configFile[0]) and not os.path.isfile(HistFitterArgs.configFile[0]):
-        log.fatal("Specified input file '{0}' does not exist or is not a file".format(HistFitterArgs.configFile[0]))
+        log.fatal(f"Specified input file '{HistFitterArgs.configFile[0]}' does not exist or is not a file")
         sys.exit(-1)
 
     if HistFitterArgs.fit_type == "bkg":
@@ -304,7 +304,7 @@ if __name__ == "__main__":
             configMgr.SetBkgCorrVal(float(bkgArgs[1]))
             configMgr.SetBkgChlName("")
         elif len(bkgArgs) >= 3 and len(bkgArgs) % 3 == 0:
-            for iChan in xrange(len(bkgArgs) / 3):
+            for iChan in range(len(bkgArgs) / 3):
                 iCx = iChan * 3
                 configMgr.AddBkgChlName(bkgArgs[iCx])
                 configMgr.AddBkgParName(bkgArgs[iCx+1])
@@ -335,7 +335,7 @@ if __name__ == "__main__":
     """
     mandatory user-defined configuration file
     """
-    execfile(HistFitterArgs.configFile[0]) #[0] since any extra arguments (sys.argv[-1], etc.) are caught here
+    exec(compile(open(HistFitterArgs.configFile[0], "rb").read(), HistFitterArgs.configFile[0], 'exec')) #[0] since any extra arguments (sys.argv[-1], etc.) are caught here
 
     """
     standard execution from now on
@@ -372,7 +372,7 @@ if __name__ == "__main__":
                       log.info("no systematic has been specified.... all the systematics will be considered")
                       print(sam.systDict)
                       Systs = ""
-                      for i in sam.systDict.keys(): 
+                      for i in list(sam.systDict.keys()): 
                           Systs+=i
                           if 'Norm' in sam.systDict[i].method or 'norm' in sam.systDict[i].method: Systs+="Norm"
                           Systs+=","
@@ -404,13 +404,13 @@ if __name__ == "__main__":
         noFit = False
         if not runFit: noFit = True
 
-        for i in xrange(len(configMgr.fitConfigs)):
+        for i in range(len(configMgr.fitConfigs)):
             if not runAll and i != idx:
-                log.debug("Skipping fit config {0}".format(configMgr.fitConfigs[i].name))
+                log.debug(f"Skipping fit config {configMgr.fitConfigs[i].name}")
                 continue
 
             log.info("Running on fitConfig %s" % configMgr.fitConfigs[i].name)
-            log.info("Setting noFit = {0}".format(noFit))
+            log.info(f"Setting noFit = {noFit}")
             r = GenerateFitAndPlotCPP(configMgr.fitConfigs[i], configMgr.analysisName, drawBeforeFit, drawAfterFit, drawCorrelationMatrix, drawSeparateComponents, drawLogLikelihood, runMinos, minosPars, doFixParameters, fixedPars, ReduceCorrMatrix, noFit, drawInterpolation)
         
         log.debug(" GenerateFitAndPlotCPP(configMgr.fitConfigs[%d], configMgr.analysisName, drawBeforeFit, drawAfterFit, drawCorrelationMatrix, drawSeparateComponents, drawLogLikelihood, runMinos, minosPars, doFixParameters, fixedPars, ReduceCorrMatrix, noFit, drawInterpolation)" % idx)
@@ -423,7 +423,7 @@ if __name__ == "__main__":
     if printLimits:
         for fc in configMgr.fitConfigs:
             if len(fc.validationChannels) > 0:
-                raise(Exception, "Validation regions should be turned off for setting an upper limit!")
+                raise Exception
             pass
         configMgr.cppMgr.doUpperLimitAll()
         pass
@@ -434,7 +434,7 @@ if __name__ == "__main__":
     if doHypoTests or doDiscoveryHypoTests:
         for fc in configMgr.fitConfigs:
             if len(fc.validationChannels) > 0 and not (fc.signalSample is None or 'Bkg' in fc.signalSample):
-                raise(Exception,"Validation regions should be turned off for doing hypothesis test!")
+                raise Exception
             pass
         
         if doDiscoveryHypoTests:
