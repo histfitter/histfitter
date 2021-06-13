@@ -110,6 +110,8 @@ class PrepareHistos:
         # for histos
         self.cacheFileName = ''
         self.cache2FileName = ''
+        self.cacheFile = None
+        self.cache2File = None
 
         # fallback?
         self.useCacheToTreeFallback = useCacheToTreeFallback
