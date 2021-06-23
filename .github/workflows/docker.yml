@@ -122,9 +122,7 @@ jobs:
           file: Dockerfile
           tags: |
             histfitter/histfitter:latest
-            histfitter/histfitter:${{ steps.prep.outputs.histfitter_version }}
             ghcr.io/${{ steps.prep.outputs.repo_name_lowercase }}:latest
-            ghcr.io/${{ steps.prep.outputs.repo_name_lowercase }}:${{ steps.prep.outputs.histfitter_version }}
           labels: |
             org.opencontainers.image.source=${{ github.event.repository.html_url }}
             org.opencontainers.image.created=${{ steps.prep.outputs.created }}
