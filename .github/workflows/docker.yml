@@ -95,22 +95,18 @@ jobs:
       - name: Run pytest tests
         run: >-
           docker run --rm
-          -v $PWD:$PWD
-          -w $PWD
+          -w /usr/local/HistFitter
           histfitter/histfitter:sha-${GITHUB_SHA::8}
           'python -m pip install "pytest~=6.2" && \
-           cd /usr/local/HistFitter && \
            . setup.sh && \
            python -m pytest test'
 
       - name: Run tutorial check
         run: >-
           docker run --rm
-          -v $PWD:$PWD
-          -w $PWD
+          -w /usr/local/HistFitter
           histfitter/histfitter:sha-${GITHUB_SHA::8}
-          'cd /usr/local/HistFitter && \
-           . setup.sh && \
+          '. setup.sh && \
            HistFitter.py -w -f analysis/tutorial/MyUserAnalysis.py'
 
       - name: Build and publish to registry
