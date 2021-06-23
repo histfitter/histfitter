@@ -9,6 +9,7 @@ on:
   pull_request:
     branches:
     - master
+  # Run weekly at 0:01 UTC on Sunday
   schedule:
     - cron:  '1 0 * * 0'
   release:
