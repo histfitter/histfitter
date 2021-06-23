@@ -2,10 +2,10 @@ name: Docker Images
 
 on:
   push:
-    branches:
-    - master
-    tags:
-    - v*
+    # branches:
+    # - master
+    # tags:
+    # - v*
   pull_request:
     branches:
     - master
@@ -102,7 +102,7 @@ jobs:
 
       - name: Build and publish to registry
         # every PR will trigger a push event on master, so check the push event is actually coming from master
-        if: github.event_name == 'push' && github.ref == 'refs/heads/master' && github.repository == 'histfitter/histfitter'
+        # if: github.event_name == 'push' && github.ref == 'refs/heads/master' && github.repository == 'histfitter/histfitter'
         id: docker_build_latest
         uses: docker/build-push-action@v2
         with:
