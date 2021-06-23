@@ -97,7 +97,7 @@ jobs:
           -v $PWD:$PWD
           -w $PWD
           histfitter/histfitter:sha-${GITHUB_SHA::8}
-          'python -m pip install --requirement dev-requirements.txt && \
+          'python -m pip install "pytest~=6.2" && \
            cd /usr/local/HistFitter && \
            . setup.sh && \
            python -m pytest test'
