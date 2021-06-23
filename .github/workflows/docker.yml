@@ -76,7 +76,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           context: .
-          file: docker/centos/Dockerfile
+          file: Dockerfile
           tags: ${{ steps.prep.outputs.tags }}
           labels: |
             org.opencontainers.image.source=${{ github.event.repository.html_url }}
@@ -107,7 +107,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           context: .
-          file: docker/centos/Dockerfile
+          file: Dockerfile
           tags: |
             histfitter/histfitter:latest
             histfitter/histfitter:${{ steps.prep.outputs.histfitter_version }}
@@ -125,7 +125,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           context: .
-          file: docker/centos/Dockerfile
+          file: Dockerfile
           tags: ${{ steps.prep.outputs.tags }}
           labels: |
             org.opencontainers.image.source=${{ github.event.repository.html_url }}
