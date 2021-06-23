@@ -5,6 +5,8 @@
 [![Documentation](https://img.shields.io/badge/Documentation-blue)](https://twiki.cern.ch/twiki/bin/viewauth/AtlasProtected/SusyFitter)
 [![Tutorial](https://img.shields.io/badge/Tutorial-orange)](https://twiki.cern.ch/twiki/bin/viewauth/AtlasProtected/HistFitterTutorial)
 
+[![pre-commit.ci status](https://results.pre-commit.ci/badge/github/histfitter/histfitter/master.svg)](https://results.pre-commit.ci/latest/github/histfitter/histfitter/master)
+
 ## Contact
 
 The HistFitter Group mailing-list, for **any** of your questions: <atlas-phys-susy-histfitter@cern.ch>
@@ -15,7 +17,7 @@ If you're going to be using HistFitter directly as a standalone application, clo
 
 ```
 git clone ssh://git@gitlab.cern.ch:7999/HistFitter/HistFitter.git
-git checkout vX.XX.X -b vX.XX.X 
+git checkout vX.XX.X -b vX.XX.X
 ```
 
 If you're using HistFitter as a submodule in a project, specify the latest stable release while adding the submodule
