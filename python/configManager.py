@@ -1302,6 +1302,30 @@ class ConfigManager:
                 log.warning(f"    generating Low overallSys for {nomName} syst={syst.name} nom={nomIntegral:g} high={highIntegral:g} low={lowIntegral:g}")
                 overallSystLow = 1.0
             chan.getSample(sam.name).addOverallSys(syst.name, overallSystHigh, overallSystLow)
+        elif syst.method == "overallSysOneSide":
+            highIntegral = configMgr.hists[highName].Integral()
+            nomIntegral = configMgr.hists[nomName].Integral()
+            try:
+                overallSystHigh = highIntegral / nomIntegral
+            except ZeroDivisionError:
+                log.warning(f"    generating High overallSysOneSide for {nomName} syst={syst.name} nom={nomIntegral:g} high={highIntegral:g}")
+                overallSystHigh = 1.0
+            overallSystLow = 1.0
+            chan.getSample(sam.name).addOverallSys(syst.name, overallSystHigh, overallSystLow)
+        elif syst.method == "overallSysOneSideSym":
+            highIntegral = configMgr.hists[highName].Integral()
+            nomIntegral = configMgr.hists[nomName].Integral()
+            try:
+                overallSystHigh = highIntegral / nomIntegral
+            except ZeroDivisionError:
+                log.warning(f"    generating High overallSysOneSideSym for {nomName} syst={syst.name} nom={nomIntegral:g} high={highIntegral:g}")
+                overallSystHigh = 1.0
+            lowIntegral = 2.*nomIntegral - highIntegral # NOTE: this is an approximation!
+            overallSystLow = lowIntegral / nomIntegral
+            if overallSystLow < 0:
+                log.warning(f"    generating Low overallSysOneSideSym for {nomName} syst={syst.name} low<0, reverting to non-symmetrised systematic")
+                overallSystLow = 1.0
+            chan.getSample(sam.name).addOverallSys(syst.name, overallSystHigh, overallSystLow)
         elif syst.method == "userOverallSys":
             chan.getSample(sam.name).addOverallSys(syst.name, syst.high, syst.low)
         elif syst.method == "overallHistoSys":
