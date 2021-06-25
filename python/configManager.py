@@ -29,6 +29,8 @@ from math import sqrt
 
 from inputTree import InputTree
 
+from ctypes import c_double
+
 import os
 import sys
 
@@ -1288,9 +1290,13 @@ class ConfigManager:
                                                 includeOverallSys=False, normalizeSys=False, symmetrize=True, oneSide=False, symmetrizeEnvelope=True, 
                                                 samName=sam.name, normString=normString, nomSysName=nomSysName)
         elif syst.method == "overallSys":
-            highIntegral = configMgr.hists[highName].Integral()
-            lowIntegral = configMgr.hists[lowName].Integral()
+            highError = c_double(0.0)
+            lowError = c_double(0.0)
+            highIntegral = configMgr.hists[highName].IntegralAndError(0, -1, highError)
+            lowIntegral = configMgr.hists[lowName].IntegralAndError(0, -1, lowError)
             nomIntegral = configMgr.hists[nomName].Integral()
+            highError = highError.value
+            lowError = lowError.value
             try:
                 overallSystHigh = highIntegral / nomIntegral
             except ZeroDivisionError:
@@ -1301,6 +1307,36 @@ class ConfigManager:
             except ZeroDivisionError:
                 log.warning(f"    generating Low overallSys for {nomName} syst={syst.name} nom={nomIntegral:g} high={highIntegral:g} low={lowIntegral:g}")
                 overallSystLow = 1.0
+            if overallSystHigh > 1.0 and overallSystLow > 1.0:
+                if overallSystHigh > overallSystLow and (lowIntegral - lowError) / nomIntegral <= 1.0:
+                    if 2.0 - overallSystHigh > (lowIntegral - lowError) / nomIntegral:
+                        log.warning(f"    generating symmetrised overallSys for {nomName} syst={syst.name} nom={nomIntegral:g} high={highIntegral:g} low={(2*nomIntegral-highIntegral):g}")
+                        overallSystLow = 2.0 - overallSystHigh
+                    else:
+                        log.warning(f"    generating onesided overallSys for {nomName} syst={syst.name} nom={nomIntegral:g} high={highIntegral:g} low={nomIntegral:g}")
+                        overallSystLow = 1.0
+                elif overallSystHigh < overallSystLow and (highIntegral - highError) / nomIntegral <= 1.0:
+                    if 2.0 - overallSystLow > (highIntegral - highError) / nomIntegral:
+                        log.warning(f"    generating symmetrised overallSys for {nomName} syst={syst.name} nom={nomIntegral:g} high={(2*nomIntegral-lowIntegral):g} low={lowIntegral:g}")
+                        overallSystHigh = 2.0 - overallSystLow
+                    else:
+                        log.warning(f"    generating onesided overallSys for {nomName} syst={syst.name} nom={nomIntegral:g} high={nomIntegral:g} low={lowIntegral:g}")
+                        overallSystHigh = 1.0
+            elif overallSystHigh < 1.0 and overallSystLow < 1.0:
+                if overallSystHigh > overallSystLow and (highIntegral - highError) / nomIntegral >= 1.0:
+                    if 2.0 - overallSystLow < (highIntegral - highError) / nomIntegral:
+                        log.warning(f"    generating symmetrised overallSys for {nomName} syst={syst.name} nom={nomIntegral:g} high={(2*nomIntegral-lowIntegral):g} low={lowIntegral:g}")
+                        overallSystHigh = 2.0 - overallSystLow
+                    else:
+                        log.warning(f"    generating onesided overallSys for {nomName} syst={syst.name} nom={nomIntegral:g} high={nomIntegral:g} low={lowIntegral:g}")
+                        overallSystHigh = 1.0
+                elif overallSystHigh < overallSystLow and (lowIntegral - lowError) / nomIntegral >= 1.0:
+                    if 2.0 - overallSystHigh < (lowIntegral - lowError) / nomIntegral:
+                        log.warning(f"    generating symmetrised overallSys for {nomName} syst={syst.name} nom={nomIntegral:g} high={highIntegral:g} low={(2*nomIntegral-highIntegral):g}")
+                        overallSystLow = 2.0 - overallSystHigh
+                    else:
+                        log.warning(f"    generating onesided overallSys for {nomName} syst={syst.name} nom={nomIntegral:g} high={highIntegral:g} low={nomIntegral:g}")
+                        overallSystLow = 1.0
             chan.getSample(sam.name).addOverallSys(syst.name, overallSystHigh, overallSystLow)
         elif syst.method == "userOverallSys":
             chan.getSample(sam.name).addOverallSys(syst.name, syst.high, syst.low)
