@@ -3,7 +3,7 @@
 # check Root environment setup. Allow for external setup script.
 
 # Update here when tagged
-VERSION="v0.66.0"
+VERSION="v1.0.0"
 
 # check Root environment setup
 if [ -z "$(root-config --libs)" ] && [ -z "$(root-config --libs)"] && [ ! "${ROOTSYS}" ]; then

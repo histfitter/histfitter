@@ -1,0 +1,141 @@
+name: Docker Images
+
+on:
+  push:
+    branches:
+    - master
+    tags:
+    - v*
+  pull_request:
+    branches:
+    - master
+  # Run weekly at 0:01 UTC on Sunday
+  schedule:
+    - cron:  '1 0 * * 0'
+  release:
+    types: [published]
+  workflow_dispatch:
+
+jobs:
+  docker:
+    name: Build and publish images
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Prepare
+        id: prep
+        run: |
+          DOCKER_IMAGE=histfitter/histfitter
+          VERSION=latest
+          HISTFITTER_VERSION=v1.0.0
+          REPO_NAME=${{github.repository}}
+          REPO_NAME_LOWERCASE="${REPO_NAME,,}"
+          if [[ $GITHUB_REF == refs/tags/* ]]; then
+            VERSION=${GITHUB_REF#refs/tags/}
+          elif [[ $GITHUB_REF == refs/pull/* ]]; then
+            VERSION=pr-${{ github.event.number }}
+          fi
+          TAGS="${DOCKER_IMAGE}:${VERSION}"
+          TAGS="$TAGS,${DOCKER_IMAGE}:latest,${DOCKER_IMAGE}:${HISTFITTER_VERSION},${DOCKER_IMAGE}:sha-${GITHUB_SHA::8}"
+          # Releases also have GITHUB_REFs that are tags, so reuse VERSION
+          if [ "${{ github.event_name }}" = "release" ]; then
+            TAGS="$TAGS,${DOCKER_IMAGE}:latest-stable,ghcr.io/${REPO_NAME_LOWERCASE}:latest-stable,ghcr.io/${REPO_NAME_LOWERCASE}:${VERSION}"
+          fi
+          echo ::set-output name=version::${VERSION}
+          echo ::set-output name=tags::${TAGS}
+          echo ::set-output name=created::$(date -u +'%Y-%m-%dT%H:%M:%SZ')
+          echo ::set-output name=repo_name_lowercase::"${REPO_NAME_LOWERCASE}"
+          echo ::set-output name=histfitter_version::"${HISTFITTER_VERSION}"
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Login to DockerHub
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Login to GitHub Container Registry
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Test build
+        id: docker_build_test
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: Dockerfile
+          tags: ${{ steps.prep.outputs.tags }}
+          labels: |
+            org.opencontainers.image.source=${{ github.event.repository.html_url }}
+            org.opencontainers.image.created=${{ steps.prep.outputs.created }}
+            org.opencontainers.image.revision=${{ github.sha }}
+          load: true
+          push: false
+
+      - name: Image digest
+        run: echo ${{ steps.docker_build_test.outputs.digest }}
+
+      - name: List built images
+        run: docker images
+
+      - name: Run pytest tests
+        run: >-
+          docker run --rm
+          -w /usr/local/HistFitter
+          histfitter/histfitter:sha-${GITHUB_SHA::8}
+          'python -m pip install "pytest~=6.2" && \
+           . setup.sh && \
+           python -m pytest test'
+
+      - name: Run tutorial check
+        run: >-
+          docker run --rm
+          -w /usr/local/HistFitter
+          histfitter/histfitter:sha-${GITHUB_SHA::8}
+          '. setup.sh && \
+           HistFitter.py -w -f analysis/tutorial/MyUserAnalysis.py'
+
+      - name: Build and publish to registry
+        # every PR will trigger a push event on master, so check the push event is actually coming from master
+        if: github.event_name == 'push' && github.ref == 'refs/heads/master' && github.repository == 'histfitter/histfitter'
+        id: docker_build_latest
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: Dockerfile
+          tags: |
+            histfitter/histfitter:latest
+            ghcr.io/${{ steps.prep.outputs.repo_name_lowercase }}:latest
+          labels: |
+            org.opencontainers.image.source=${{ github.event.repository.html_url }}
+            org.opencontainers.image.created=${{ steps.prep.outputs.created }}
+            org.opencontainers.image.revision=${{ github.sha }}
+          push: true
+
+      - name: Build and publish to registry with release tag
+        if: github.event_name == 'release' && github.event.action == 'published' && github.repository == 'histfitter/histfitter'
+        id: docker_build_release
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: Dockerfile
+          tags: ${{ steps.prep.outputs.tags }}
+          labels: |
+            org.opencontainers.image.source=${{ github.event.repository.html_url }}
+            org.opencontainers.image.created=${{ steps.prep.outputs.created }}
+            org.opencontainers.image.revision=${{ github.sha }}
+          push: true
