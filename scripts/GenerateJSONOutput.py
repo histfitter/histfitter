@@ -28,7 +28,7 @@ print("")
 
 import os
 import ROOT
-gSystem.Load("libSusyFitter.so")
+ROOT.gSystem.Load(f"{os.getenv('HISTFITTER')}/lib/libSusyFitter.so")
 
 ROOT.gROOT.SetBatch()
 
