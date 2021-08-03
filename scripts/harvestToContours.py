@@ -620,11 +620,11 @@ def interpolateSurface(modelDict = {}, interpolationFunction = "linear", useROOT
 
             if whichContour==expectedContour and outputSurface:
                 print (">>> ... ... Writing out expected surface to pickle file")
-                with open(args.outputFile+'.expectedSurface.pkl', 'w') as outfile:
+                with open(args.outputFile+'.expectedSurface.pkl', 'wb') as outfile:
                     pickle.dump({"x": xymeshgrid[0], "y": xymeshgrid[1],"z": ZI} ,outfile, pickle.HIGHEST_PROTOCOL)
             elif whichContour==observedContour and outputSurface:
                 print (">>> ... ... Writing out observed surface to pickle file")
-                with open(args.outputFile+'.observedSurface.pkl', 'w') as outfile:
+                with open(args.outputFile+'.observedSurface.pkl', 'wb') as outfile:
                     pickle.dump({"x": xymeshgrid[0], "y": xymeshgrid[1],"z": ZI} ,outfile, pickle.HIGHEST_PROTOCOL)
 
             if outputSurfaceTGraph:
