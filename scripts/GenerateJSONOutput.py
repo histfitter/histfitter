@@ -7,7 +7,14 @@
 # By: Larry Lee - Dec 2017
 
 
-import argparse, sys, os
+import argparse
+import sys
+import os
+import ROOT
+
+ROOT.gSystem.Load(f"{os.getenv('HISTFITTER')}/lib/libSusyFitter.so")
+
+ROOT.gROOT.SetBatch()
 
 parser = argparse.ArgumentParser()
 parser.add_argument(
@@ -59,16 +66,6 @@ for arg in vars(args):
     else:
         print(f">>> ... Setting: {arg: >20} {user_input: >40}")
 print("")
-
-import sys
-sys.exit()
-
-import os
-import ROOT
-
-ROOT.gSystem.Load(f"{os.getenv('HISTFITTER')}/lib/libSusyFitter.so")
-
-ROOT.gROOT.SetBatch()
 
 
 def main():
