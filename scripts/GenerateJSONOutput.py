@@ -50,6 +50,7 @@ parser.add_argument(
 
 args = parser.parse_args()
 
+# Print out the settings
 for arg in vars(args):
     user_input = getattr(args, arg)
     if isinstance(user_input, list):
@@ -57,22 +58,6 @@ for arg in vars(args):
             print(f">>> ... Setting: {arg: >20} {input: >40}")
     else:
         print(f">>> ... Setting: {arg: >20} {user_input: >40}")
-
-# Print out the settings
-# for setting in dir(args):
-#     if not setting[0] == "_":
-#         # print(
-#         #     f">>> ... Setting: {setting: >20} {: >40}".format(
-#         #         setting, eval("args.%s" % setting)
-#         #     )
-#         # )
-#         print()
-#         print(setting)
-#         print(setting[0])
-#         print(args)
-#         print(
-#             f">>> ... Setting: {setting: >20} {eval(f'args.{setting}'): >40}"
-#         )
 print("")
 
 import sys
