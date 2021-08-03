@@ -60,13 +60,8 @@ args = parser.parse_args()
 # Print out the settings
 for arg in vars(args):
     user_input = getattr(args, arg)
-    if isinstance(user_input, list):
-        for input in user_input:
-            print(f">>> ... Setting: {arg: >20} {input: >40}")
-    else:
-        print(f">>> ... Setting: {arg: >20} {user_input: >40}")
+    print(f">>> ... Setting: {arg: >20} {str(user_input): >40}")
 print("")
-
 
 def main():
 
