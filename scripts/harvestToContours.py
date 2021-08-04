@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# harvestToContours.py #################
+# harvestToContours.py
 #
 # An attempt to unify contour production so we don't have a million attempts to reinvent a broken wheel...
 #
@@ -491,8 +491,7 @@ def interpolateSurface(modelDict = {}, interpolationFunction = "linear", useROOT
 
     modelPoints = list(modelDict.keys())
     modelPointsValues = list(modelDict.values())
-    x0 =   list( zip( *modelPoints )[0] )
-    y0 =   list( zip( *modelPoints )[1] )
+    x0, y0 = list(zip(*modelPoints))[:2]
 
     zValues = {} # entry x points
     x={} # entry x points
@@ -621,11 +620,11 @@ def interpolateSurface(modelDict = {}, interpolationFunction = "linear", useROOT
 
             if whichContour==expectedContour and outputSurface:
                 print (">>> ... ... Writing out expected surface to pickle file")
-                with open(args.outputFile+'.expectedSurface.pkl', 'w') as outfile:
+                with open(args.outputFile+'.expectedSurface.pkl', 'wb') as outfile:
                     pickle.dump({"x": xymeshgrid[0], "y": xymeshgrid[1],"z": ZI} ,outfile, pickle.HIGHEST_PROTOCOL)
             elif whichContour==observedContour and outputSurface:
                 print (">>> ... ... Writing out observed surface to pickle file")
-                with open(args.outputFile+'.observedSurface.pkl', 'w') as outfile:
+                with open(args.outputFile+'.observedSurface.pkl', 'wb') as outfile:
                     pickle.dump({"x": xymeshgrid[0], "y": xymeshgrid[1],"z": ZI} ,outfile, pickle.HIGHEST_PROTOCOL)
 
             if outputSurfaceTGraph:
