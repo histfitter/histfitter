@@ -7,7 +7,14 @@
 # By: Larry Lee - Dec 2017
 
 
-import argparse, sys, os
+import argparse
+import sys
+import os
+import ROOT
+
+ROOT.gSystem.Load(f"{os.getenv('HISTFITTER')}/lib/libSusyFitter.so")
+
+ROOT.gROOT.SetBatch()
 
 parser = argparse.ArgumentParser()
 parser.add_argument(
@@ -50,24 +57,11 @@ parser.add_argument(
 
 args = parser.parse_args()
 
-
 # Print out the settings
-for setting in dir(args):
-    if not setting[0] == "_":
-        print(
-            ">>> ... Setting: {: >20} {: >40}".format(
-                setting, eval("args.%s" % setting)
-            )
-        )
+for arg in vars(args):
+    user_input = getattr(args, arg)
+    print(f">>> ... Setting: {arg: >20} {str(user_input): >40}")
 print("")
-
-import os
-import ROOT
-
-ROOT.gSystem.Load(f"{os.getenv('HISTFITTER')}/lib/libSusyFitter.so")
-
-ROOT.gROOT.SetBatch()
-
 
 def main():
 
