@@ -21,8 +21,6 @@ RUN apt-get -qq -y update && \
     python3 -m pip --no-cache-dir install --upgrade pip setuptools wheel && \
     python3 -m pip --no-cache-dir install --requirement /usr/local/HistFitter/requirements.txt
 
-ENV HOME=/home/docker
-
 # Build HistFitter, make $HOME/.local/bin for .profile to find and add to PATH,
 # make $HOME/data user controlled, and automatically source HistFitter setup.sh
 WORKDIR /usr/local/HistFitter
