@@ -32,7 +32,7 @@ RUN root --version && \
     cd src && \
     make -j$(($(nproc) - 1)) && \
     mkdir -p "${HOME}/.local/bin" && \
-    mkdir "${HOME}/data" && \
+    mkdir -p "${HOME}/data" && \
     printf '\nif [ -f /usr/local/HistFitter/setup.sh ];then\n    . /usr/local/HistFitter/setup.sh\nfi\n' >> "${HOME}/.profile"
 
 WORKDIR "${HOME}/data"
