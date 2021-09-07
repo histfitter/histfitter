@@ -499,7 +499,7 @@ def main():
                                 x,y = poly.coords.xy
                                 ax.plot(x,y,linewidth=2,color='b',linestyle="-")
 
-                                fig.savefig("debug_nonpolygeocolcut_{}.pdf".format(debugCounter))
+                                fig.savefig(f"debug_nonpolygeocolcut_{debugCounter}.pdf")
                                 
                 else:
                     if args.debug:
@@ -512,7 +512,7 @@ def main():
 
                         x,y = cookieCut.coords.xy
                         ax.plot(x,y,linewidth=2,color='b',linestyle="-")
-                        fig.savefig("debug_nonpolycut_{}.pdf".format(debugCounter))
+                        fig.savefig(f"debug_nonpolycut_{debugCounter}.pdf")
 
                 debugCounter +=1
     if args.debug:
