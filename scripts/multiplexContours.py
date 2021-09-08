@@ -27,7 +27,7 @@ parser.add_argument("--ignoreInteriorLines", action="store_true", help="Ignore s
 parser.add_argument("--noSubRegionMerge", action="store_false", help="Do not merge split subregions.")
 parser.add_argument("--showPastLimit", action="store_true", help="Show the best expected region past the limit when using --plotUsedContours.")
 parser.add_argument("--minArea", type=float, default=-1, help="Remove subregions below this area.  Helps to remove very small subRegions by setting this to 1.")
-
+parser.add_argument("--doEntirePlane", action="store_true", help="Pick best contour for the entire plane, i.e., well out side of the obs/exp contours.  This will be slower, but you will need this to show upper limit values outside of the exclusion.")
 
 args = parser.parse_args()
 
@@ -67,6 +67,7 @@ def main():
     dict_rbf_Surf = {}
     dict_Exp = {}
     dict_Obs = {}
+    dict_UL = {}
 
     dict_Exp_u1s = {}
     dict_Exp_d1s = {}
@@ -77,18 +78,20 @@ def main():
 
     isoExpectedContours = {}
 
-    listOfInputFiles = [tmp.translate(None,", ") for tmp in args.inputFiles]
+    listOfInputFiles = [tmp.translate({None:", "}) for tmp in args.inputFiles]
 
     print (">>> Grabbing input information from input files:")
-    print(">>> >>> " + " ".join(listOfInputFiles))
+    print (">>> >>> " + " ".join(listOfInputFiles))
     print (">>> ")
     print (">>> FYI, I'm also going to grab the *.expectedSurface.pkl files that should be in the same location")
+    print (">>> P.S. using some smoothing during the harvest stage will speed up the contour slicing step and generally provide in a more satisfactory, and less wonky, result.")
+
 
 
     for inputFileName in listOfInputFiles:
         dict_TFiles[inputFileName] = ROOT.TFile(inputFileName)
         try:
-            dict_Surfaces[inputFileName] = pickle.load( open( inputFileName+".expectedSurface.pkl", "rb" ) )            
+            dict_Surfaces[inputFileName] = pickle.load( open( inputFileName+".expectedSurface.pkl", "rb" ) )
         except FileNotFoundError:
             print (">>> I need those *.expectedSurface.pkl files that are produced from harvestToContours! Exiting...")
             sys.exit(1)
@@ -103,7 +106,9 @@ def main():
             dict_Obs_u1s[inputFileName] = dict_TFiles[inputFileName].Get("Obs_0_Up").Clone(inputFileName+"_Obs_u1s")
             dict_Obs_d1s[inputFileName] = dict_TFiles[inputFileName].Get("Obs_0_Down").Clone(inputFileName+"_Obs_d1s")
 
-    print(">>> Creating output ROOT file: %s"%args.outputFile)
+        dict_UL[inputFileName] = dict_TFiles[inputFileName].Get("upperLimit_gr").Clone(inputFileName+"upperLimit_gr")
+
+    print (">>> Creating output ROOT file: %s"%args.outputFile)
 
     outputFile = ROOT.TFile(args.outputFile,"RECREATE")
 
@@ -177,7 +182,15 @@ def main():
     sumOfContours = copy.deepcopy(sumOfExpecteds)
     for key in ["Exp_u1s", "Exp_d1s", "Obs"] + (["Obs_u1s","Obs_d1s"] if not args.skipTheory else []):
         
-        sumOfContours = cascaded_union([polygons[key] for regionName,polygons in uncutRegions.items()] + [sumOfContours]) # geometric union of all expected contours
+        sumOfContours = cascaded_union([polygons[key] for regionName,polygons in uncutRegions.items()] + [sumOfContours]) # geometric union of all contours.  This defines the region where contours are chopped up
+
+    if args.doEntirePlane: 
+        # make rectangle bound
+        x_r = [x[0][0], x[0][-1], x[-1][-1], x[-1][0]]
+        y_r = [y[0][0], y[0][-1], y[-1][-1], y[-1][0]]
+
+        p_r = tGraphToPolygon(convertArraysToTGraph(x_r,y_r))
+        sumOfContours = cascaded_union([sumOfContours, p_r])
 
 
     sumOfExpectedsArea = sumOfExpecteds.area
@@ -207,8 +220,15 @@ def main():
         for intersectionContour in isoExpectedContours[two_region_tuple]:
             # JDL: couldn't this be a list of arrays?
 
-            ## Better handling of bad geometries like splitting overlapping lines.  Not sure it's always needed, but did fix a crash on a complicated test
-            if False:
+            ## Second clause is better handling of bad geometries like splitting overlapping lines.  Not sure it's always needed, but did fix a crash on a complicated test
+            try:
+                tmpLineString = LineString(intersectionContour)
+                if args.ignoreInteriorLines:
+                    if tmpLineString.within(sumOfExpecteds): # check if intersection contour is completely within sum of expecteds
+                        continue
+                allIsoExpectedContours.append( intersectionContour )
+                allIsoExpectedContoursLineStrings.append( tmpLineString )
+            except ValueError:            
                 try:
                     if Polygon(intersectionContour).is_valid:                
                         tmpLineString = LineString(intersectionContour)
@@ -233,14 +253,7 @@ def main():
                 except ValueError:
                     print(">>> Failed to handle an intersection contour")
                     continue
-                
-            else:
-                tmpLineString = LineString(intersectionContour)
-                if args.ignoreInteriorLines:
-                    if tmpLineString.within(sumOfExpecteds): # check if intersection contour is completely within sum of expecteds
-                        continue
-                allIsoExpectedContours.append( intersectionContour )
-                allIsoExpectedContoursLineStrings.append( tmpLineString )
+
 
     # Add cut lines of the input expectected contours.  This helps with irregularities in the final expectected contour seen in a test with EWK comb contours
     for regionName,polygons in uncutRegions.items():
@@ -288,9 +301,38 @@ def main():
                 # if closing the line requires a jump not greater than 1.5x the distance in the 2nd to last point, try it
                 if abs(dist_close-dist_neighbor)/dist_neighbor < 1.5:
                     cutLine = LineString(cutLine.coords[:]+cutLine.coords[0:1])
+                else:
+                    if args.debug:
+                        print("Debug: cutline distance too big to close")
 
             tmpGeoms = split(subRegion, cutLine)
-            tmpSubRegions.extend(tmpGeoms)
+            if len(tmpGeoms) == 1:
+                # Shapely is supposed to return the original poly if no split is made, but have seen edge cases where it does not.
+                tmpGeoms=[subRegion]
+
+            tmpGeomsClean = []
+            # Clean up some regions that might cause issues later
+            for tg in tmpGeoms:        
+                # Get rid of very small regions
+                if tg.area < 1e-10:
+                    continue
+
+                # Another corner case.  This removes stray lines coming off of polygons.
+                tmp = tg.buffer(-1e-1).buffer(5e-1).intersection(tg)
+                if type(tmp) == MultiPolygon:
+                    for t in tmp:
+                        if t.area>0:
+                            tmpGeomsClean.append(t)
+                elif type(tmp) == GeometryCollection:
+                    for t in tmp:
+                        if type(t) != LineString and type(t) != Point: 
+                            if t.area>0:
+                                tmpGeomsClean.append(t)
+                else:
+                    tmpGeomsClean.append( tmp )
+            
+            tmpSubRegions.extend(tmpGeomsClean)
+
         subRegions = tmpSubRegions
 
 
@@ -428,6 +470,7 @@ def main():
             bestRegions[bestSR].append(subRegion) 
 
         # Now loop through types of curves and cookie cut out shapes based on subRegions
+        debugCounter = 0
         for typeOfCurve, srCurve in uncutRegions[bestSR].items(): #typeOfCurve is 'Exp', 'Obs' etc, srCurve is then that curves polygon, i.e. a single SR
             
             if subRegion.intersects( srCurve):
@@ -446,12 +489,32 @@ def main():
                             if not args.showPastLimit and typeOfCurve == 'Exp': bestRegions[bestSR].append(poly) # keep best exp curves for each SR
                         else:
                             if args.debug:
-                                print(">>> geom obj type: %s"%(type(poly)))
-                            
+                                print(">>> Possibly skipping something: geom obj type: %s"%(type(poly)))
+                                ax.cla()
+                                x,y = subRegion.exterior.xy
+                                ax.plot(x,y,linewidth=2,color='k',linestyle=":")
+                                x,y = srCurve.exterior.xy
+                                ax.plot(x,y,linewidth=2,color='r',linestyle=":")
+
+                                x,y = poly.coords.xy
+                                ax.plot(x,y,linewidth=2,color='b',linestyle="-")
+
+                                fig.savefig(f"debug_nonpolygeocolcut_{debugCounter}.pdf")
+                                
                 else:
                     if args.debug:
-                        print(">>> cookieCut type: %s"%(type(cookieCut))) 
+                        print(">>> Possibly skipping something: cookieCut type: %s"%(type(cookieCut))) 
+                        ax.cla()
+                        x,y = subRegion.exterior.xy
+                        ax.plot(x,y,linewidth=2,color='k',linestyle=":")
+                        x,y = srCurve.exterior.xy
+                        ax.plot(x,y,linewidth=2,color='r',linestyle=":")
 
+                        x,y = cookieCut.coords.xy
+                        ax.plot(x,y,linewidth=2,color='b',linestyle="-")
+                        fig.savefig(f"debug_nonpolycut_{debugCounter}.pdf")
+
+                debugCounter +=1
     if args.debug:
         for typeOfCurve in listOfBestCurves:
             print("nCurves to Sum for %s = %d"%(typeOfCurve,len(listOfBestCurves[typeOfCurve])))
@@ -535,6 +598,10 @@ def main():
 
             convertArraysToTGraph(x,y).Write("ExpectedBand")
 
+
+    # Upper Limits (little grey numbers)
+    makeBestValueGraph(bestRegions, dict_UL).Write("upperLimit_gr")
+
     if args.debug:
         print (">>> Saving debugging plot: debug.pdf")
         fig.savefig("debug.pdf")
@@ -575,6 +642,24 @@ def convertArraysToTGraph(x,y):
         mygraph.SetPoint(iPoint,x,y)
     return mygraph
 
+def convertTGraph2DToArrays(mygraph):
+    size = mygraph.GetN()
+    x1buffer = mygraph.GetX()
+    y1buffer = mygraph.GetY()
+    z1buffer = mygraph.GetZ()
+
+    x1 = np.array([ x1buffer[i]  for i in range(size) ])
+    y1 = np.array([ y1buffer[i]  for i in range(size) ])
+    z1 = np.array([ z1buffer[i]  for i in range(size) ])
+
+    return (x1,y1,z1)
+
+def convertArraysToTGraph2D(x,y,z):
+    mygraph = ROOT.TGraph2D(len(x))
+    for iPoint,(x,y,z) in enumerate(zip(x,y,z)):
+        mygraph.SetPoint(iPoint,x,y,z)
+    return mygraph
+
 
 def doPolygonsTouch(poly1, poly2):
 
@@ -584,6 +669,8 @@ def doPolygonsTouch(poly1, poly2):
 
 def plotBestRegion(bestRegions, expCurve):
 
+    fout = ROOT.TFile("usedExpectedContours.root","recreate")
+    
     fig, ax = plt.subplots()
 
     colors = ['b','g','r','c','m','y','k']
@@ -598,13 +685,21 @@ def plotBestRegion(bestRegions, expCurve):
                 x,y = curve.exterior.xy
                 c = colors[ (list(bestRegions.keys())).index(reg) ]
                 ax.fill(x,y,alpha=0.3,linewidth=0.2,color=c)
+
+                tg = convertArraysToTGraph(x,y)
+                name = reg.replace(".root","")+"_"+str(i)
+                tg.SetNameTitle(name, name)
+                tg.Write()
             except:
                 print(">>> Skipped a subRegion.")
                 pass
 
     # Plot combined expected
     ax.plot(expCurve[0],expCurve[1],linewidth=1,color='k')
-                
+    tg = convertArraysToTGraph(expCurve[0],expCurve[1])
+    tg.SetNameTitle("comb_expected","comb_expected")
+    tg.Write()
+
     # Make legend
     patches=[]
     for i,reg in enumerate(bestRegions.keys()):
@@ -619,6 +714,55 @@ def plotBestRegion(bestRegions, expCurve):
 
     print (">>> Saving used expected contours: usedExpectedContours.pdf")
     fig.savefig("usedExpectedContours.pdf")
+    fout.Close()
+
+def makeBestValueGraph(bestRegions, inputGraphDict):
+    
+    outpoints = []
+
+    # Gather points
+    valuesDict = {fname:[] for fname in inputGraphDict.keys()}
+    points = []
+    for fname in inputGraphDict.keys():
+        (x,y,z) = convertTGraph2DToArrays(inputGraphDict[fname])
+        points+=zip(x,y) 
+        valuesDict[fname]+= zip(x,y,z)
+
+    # unique set of points to loop over
+    #print(points)
+    points = list(set(points))
+
+    # Loop over points, get best region, retrieve UL, and save.
+    for p in points:
+        x = p[0]
+        y = p[1]
+        z = -1
+        test_point = Point( x, y )
+
+        # Loop over best regions
+        for reg in bestRegions:
+            for curve in bestRegions[reg]:
+
+                # Buffer solves issues when point is on the boundary
+                if curve.buffer(1e-10).contains(test_point):
+                    
+                    for v in valuesDict[reg]:
+                        x_test = v[0]
+                        y_test = v[1]
+                        z_test = v[2]
+    
+                        if x == x_test and y == y_test:
+                            z = z_test
+                            outpoints.append( (x,y,z) )
+                            break
+                    break
+
+    x_out = [o[0] for o in outpoints]
+    y_out = [o[1] for o in outpoints]
+    z_out = [o[2] for o in outpoints]
+
+
+    return convertArraysToTGraph2D(x_out, y_out, z_out)
 
 
 if __name__ == "__main__":
