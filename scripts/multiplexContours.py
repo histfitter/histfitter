@@ -761,9 +761,6 @@ def makeBestValueGraph(bestRegions, inputGraphDict):
     y_out = [o[1] for o in outpoints]
     z_out = [o[2] for o in outpoints]
 
-    #print(x_out)
-    #print(y_out)
-    #print(z_out)
 
     return convertArraysToTGraph2D(x_out, y_out, z_out)
 
