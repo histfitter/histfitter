@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# harvestToContours.py #################
+# harvestToContours.py
 #
 # An attempt to unify contour production so we don't have a million attempts to reinvent a broken wheel...
 #
@@ -35,7 +35,7 @@ parser.add_argument("--outputFile","-o", type = str, help="output ROOT file", de
 parser.add_argument("--interpolation",   type = str, help="interpolation function for scipy (RBF): linear, cubic, gaussian, multiquadric or (griddata): nearest, linear, cubic", default = "multiquadric")
 parser.add_argument("--interpolationScheme",   type = str, help="type of interpolation for scipy: rbf, griddata", default = "rbf")
 parser.add_argument("--interpolationEpsilon", type=float, help="scipy (RBF) epsilon parameter", default = 0)
-parser.add_argument("--level",           type = float, help="contour level output. Default to 95%% CL", default = 1.64485362695)
+parser.add_argument("--level",           type = float, help="contour level output. Default to one-sided 95% CL.", default = 1.64485362695)
 parser.add_argument("--useROOT","-r",    help = "use the root interpolation engine instead of mpl", action="store_true", default=False)
 parser.add_argument("--debug","-d",      help = "print extra debugging info", action="store_true", default=False)
 parser.add_argument("--sigmax",          type = float, help="maximum significance in sigmas", default = 5.0)
@@ -491,8 +491,7 @@ def interpolateSurface(modelDict = {}, interpolationFunction = "linear", useROOT
 
     modelPoints = list(modelDict.keys())
     modelPointsValues = list(modelDict.values())
-    x0 =   list( zip( *modelPoints )[0] )
-    y0 =   list( zip( *modelPoints )[1] )
+    x0, y0 = list(zip(*modelPoints))[:2]
 
     zValues = {} # entry x points
     x={} # entry x points
@@ -621,11 +620,11 @@ def interpolateSurface(modelDict = {}, interpolationFunction = "linear", useROOT
 
             if whichContour==expectedContour and outputSurface:
                 print (">>> ... ... Writing out expected surface to pickle file")
-                with open(args.outputFile+'.expectedSurface.pkl', 'w') as outfile:
+                with open(args.outputFile+'.expectedSurface.pkl', 'wb') as outfile:
                     pickle.dump({"x": xymeshgrid[0], "y": xymeshgrid[1],"z": ZI} ,outfile, pickle.HIGHEST_PROTOCOL)
             elif whichContour==observedContour and outputSurface:
                 print (">>> ... ... Writing out observed surface to pickle file")
-                with open(args.outputFile+'.observedSurface.pkl', 'w') as outfile:
+                with open(args.outputFile+'.observedSurface.pkl', 'wb') as outfile:
                     pickle.dump({"x": xymeshgrid[0], "y": xymeshgrid[1],"z": ZI} ,outfile, pickle.HIGHEST_PROTOCOL)
 
             if outputSurfaceTGraph:

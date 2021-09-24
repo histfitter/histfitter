@@ -18,11 +18,8 @@ RUN apt-get -qq -y update && \
     cp /root/.bashrc /home/docker/ && \
     chown -R --from=root docker /home/docker && \
     chown -R --from=root docker /usr/local/HistFitter && \
-    python3 -m pip --no-cache-dir install --upgrade pip setuptools wheel && \
-    python3 -m pip --no-cache-dir install --requirement /usr/local/HistFitter/requirements.txt
-
-USER docker
-ENV HOME=/home/docker
+    python -m pip --no-cache-dir install --upgrade pip setuptools wheel && \
+    python -m pip --no-cache-dir install --requirement /usr/local/HistFitter/requirements.txt
 
 # Build HistFitter, make $HOME/.local/bin for .profile to find and add to PATH,
 # make $HOME/data user controlled, and automatically source HistFitter setup.sh
@@ -35,7 +32,7 @@ RUN root --version && \
     cd src && \
     make -j$(($(nproc) - 1)) && \
     mkdir -p "${HOME}/.local/bin" && \
-    mkdir "${HOME}/data" && \
+    mkdir -p "${HOME}/data" && \
     printf '\nif [ -f /usr/local/HistFitter/setup.sh ];then\n    . /usr/local/HistFitter/setup.sh\nfi\n' >> "${HOME}/.profile"
 
 WORKDIR "${HOME}/data"
