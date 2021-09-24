@@ -116,25 +116,25 @@ ana.addSamples([dataSample,backgroundSample])
 bkgSampleA = Sample("dummy_BkgA",kBlue)
 bkgSampleA.buildHisto([1],"A","cuts",0.5)
 #mu_A become the estimated Bkg events in SR
-bkgSampleA.addNormFactor("mu_A",1.0, 100,0,False)
+bkgSampleA.addNormFactor("mu_A",1.0,0,100,False)
 
 bkgSampleB = Sample("dummy_BkgB",kBlue)
 bkgSampleB.buildHisto([1],"B","cuts",0.5)
-bkgSampleB.addNormFactor("mu_A",1.0, 100,0,False)
-bkgSampleB.addNormFactor("eff_B",EffB,2.*EffB,0,False)
+bkgSampleB.addNormFactor("mu_A",1.0,0,100,False)
+bkgSampleB.addNormFactor("eff_B",EffB,0,2.*EffB,False)
 
 bkgSampleC = Sample("dummy_BkgC",kBlue)
 bkgSampleC.buildHisto([1],"C","cuts",0.5)
-bkgSampleC.addNormFactor("mu_A",1.0, 100,0,False)
-bkgSampleC.addNormFactor("eff_C",EffC,2.*EffC,0,False) 
+bkgSampleC.addNormFactor("mu_A",1.0,0,100,False)
+bkgSampleC.addNormFactor("eff_C",EffC,0,2.*EffC,False) 
 
 
 #in region D eff_B* eff_C become the eff_D, because we assume we can use ABCD method
 bkgSampleD = Sample("dummy_BkgD",kBlue)
 bkgSampleD.buildHisto([1],"D","cuts",0.5)
-bkgSampleD.addNormFactor("mu_A",1.0, 100,0,False)
-bkgSampleD.addNormFactor("eff_B",EffB,2.*EffB,0,False)
-bkgSampleD.addNormFactor("eff_C",EffC,2.*EffC,0,False)
+bkgSampleD.addNormFactor("mu_A",1.0,0,100,False)
+bkgSampleD.addNormFactor("eff_B",EffB,0,2.*EffB,False)
+bkgSampleD.addNormFactor("eff_C",EffC,0,2.*EffC,False)
 
 
 # Add the channel
