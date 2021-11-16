@@ -17,7 +17,7 @@
  **********************************************************************************
 """
 
-from ROOT import gROOT, TFile, TH1F, gDirectory, SetOwnership
+from ROOT import gROOT, TFile, TH1D, gDirectory, SetOwnership
 from ROOT import TChain, TObject, TTree, TIter
 from math import sqrt
 from logger import Logger
@@ -418,7 +418,7 @@ class PrepareHistos:
 
         if self.var == "cuts":
             if self.configMgr.hists[name] is None:
-                self.configMgr.hists[name] = TH1F(name, name, len(self.channel.regions), self.channel.binLow, float(len(self.channel.regions))+self.channel.binLow)
+                self.configMgr.hists[name] = TH1D(name, name, len(self.channel.regions), self.channel.binLow, float(len(self.channel.regions))+self.channel.binLow)
                 for (iReg,reg) in enumerate(self.channel.regions):
                     log.debug(f"__addHistoFromTree: loading {name} in region {reg}")
 
@@ -426,7 +426,7 @@ class PrepareHistos:
                     # NOTE: Changed configManager.py for it to behave the same as the binned version
 
                     tempName = f"{name}temp{str(iReg)}"
-                    tempHist = TH1F(tempName, tempName, 1, 0.5, 1.5)
+                    tempHist = TH1D(tempName, tempName, 1, 0.5, 1.5)
 
                     log.debug(f"__addHistoFromTree: current chain name {self.currentChainName}")
                     log.debug(f"__addHistoFromTree: projecting into {tempName}")
@@ -456,18 +456,18 @@ class PrepareHistos:
             if self.configMgr.hists[name] is None:
                 log.verbose(f"Constructing binned histogram for {name}")
                 #if self.var.find(":") == -1:
-                    #self.configMgr.hists[name] = TH1F(name, name, self.channel.nBins, self.channel.binLow, self.channel.binHigh)
+                    #self.configMgr.hists[name] = TH1D(name, name, self.channel.nBins, self.channel.binLow, self.channel.binHigh)
                 #else:
-                    #self.configMgr.hists[name] = TH2F(name, name, self.channel.nBins, self.channel.binLow, self.channel.binHigh, self.channelnBinsY, self.channel.binLowY, self.channel.binHighY)
+                    #self.configMgr.hists[name] = TH2D(name, name, self.channel.nBins, self.channel.binLow, self.channel.binHigh, self.channelnBinsY, self.channel.binLowY, self.channel.binHighY)
 
                 for (iReg,reg) in enumerate(self.channel.regions):
                     tempName = f"{name}temp{str(iReg)}"
                     #self.cuts = self.configMgr.cutsDict[reg]
 
                     if self.var.find(":") == -1:
-                        tempHist = TH1F(tempName, tempName, self.channel.nBins, self.channel.binLow, self.channel.binHigh)
+                        tempHist = TH1D(tempName, tempName, self.channel.nBins, self.channel.binLow, self.channel.binHigh)
                     else:
-                        tempHist = TH2F(tempName, tempName, self.channel.nBins, self.channel.binLow, self.channel.binHigh,
+                        tempHist = TH2D(tempName, tempName, self.channel.nBins, self.channel.binLow, self.channel.binHigh,
                                                             self.channelnBinsY, self.channel.binLowY, self.channel.binHighY)
 
                     log.debug(f"__addHistoFromTree: projecting binned {self.var} into {tempName}")
@@ -606,7 +606,7 @@ class PrepareHistos:
                     needs_bins = [i for i, x in enumerate(pairwise(found_binning)) for y in pairwise(desired_binning) if isClose(x[0],y[0]) and isClose(x[1],y[1])]
                     log.debug("Indices of needed bins from original histogram: %s" % needs_bins)
 
-                    temp = TH1F("h_temp", "h_temp", self.channel.nBins, self.channel.binLow, self.channel.binHigh)
+                    temp = TH1D("h_temp", "h_temp", self.channel.nBins, self.channel.binLow, self.channel.binHigh)
 
                     log.verbose(f"Loading bin content from {name}")
                     for i, x in enumerate(needs_bins):
@@ -694,19 +694,19 @@ class PrepareHistos:
 
         systName = "%sSyst" % self.name
         statName = "%sStat" % self.name
-        qcdHistoSyst = TH1F(systName, systName, self.channel.nBins, self.channel.binLow, self.channel.binHigh)
-        qcdHistoStat = TH1F(statName, statName, self.channel.nBins, self.channel.binLow, self.channel.binHigh)
+        qcdHistoSyst = TH1D(systName, systName, self.channel.nBins, self.channel.binLow, self.channel.binHigh)
+        qcdHistoStat = TH1D(statName, statName, self.channel.nBins, self.channel.binLow, self.channel.binHigh)
 
         if self.var == "cuts":
             for (iReg,reg) in enumerate(self.channel.regions):
                 if self.configMgr.hists[prefixNom+"_"+str(iReg+1)] is None:
                     tempNameSyst = f"{self.name}Syst{str(iReg+1)}"
-                    qcdHistoSystTemp = TH1F(tempNameSyst, tempNameSyst, self.channel.nBins, self.channel.binLow, self.channel.binHigh)
+                    qcdHistoSystTemp = TH1D(tempNameSyst, tempNameSyst, self.channel.nBins, self.channel.binLow, self.channel.binHigh)
                     self.configMgr.chains[self.currentChainName].Project(tempNameSyst, self.configMgr.cutsDict[reg], self.weights+"Syst")
                     qcdHistoSyst.SetBinContent(iReg+1,qcdHistoSystTemp.GetBinContent(1))
 
                     tempNameStat = f"{self.name}Stat{str(iReg+1)}"
-                    qcdHistoStatTemp = TH1F(tempNameStat, tempNameStat, self.channel.nBins, self.channel.binLow, self.channel.binHigh)
+                    qcdHistoStatTemp = TH1D(tempNameStat, tempNameStat, self.channel.nBins, self.channel.binLow, self.channel.binHigh)
                     self.configMgr.chains[self.currentChainName].Project(tempNameStat, self.configMgr.cutsDict[reg], self.weights+"Stat")
                     qcdHistoStat.SetBinContent(iReg+1, qcdHistoStatTemp.GetBinContent(1))
         else:
@@ -726,9 +726,9 @@ class PrepareHistos:
             #
             if self.configMgr.hists[prefixNom+"_"+str(iBin)] is None:
                 if self.channel.variableName == "cuts":
-                    self.configMgr.hists[prefixNom+"_"+str(iBin)] = TH1F(prefixNom+"_"+str(iBin),prefixNom+"_"+str(iBin),len(self.channel.regions),self.channel.binLow,float(len(self.channel.regions))+self.channel.binLow)
+                    self.configMgr.hists[prefixNom+"_"+str(iBin)] = TH1D(prefixNom+"_"+str(iBin),prefixNom+"_"+str(iBin),len(self.channel.regions),self.channel.binLow,float(len(self.channel.regions))+self.channel.binLow)
                 else:
-                    self.configMgr.hists[prefixNom+"_"+str(iBin)] = TH1F(prefixNom+"_"+str(iBin),prefixNom+"_"+str(iBin),self.channel.nBins,self.channel.binLow,self.channel.binHigh)
+                    self.configMgr.hists[prefixNom+"_"+str(iBin)] = TH1D(prefixNom+"_"+str(iBin),prefixNom+"_"+str(iBin),self.channel.nBins,self.channel.binLow,self.channel.binHigh)
 
                 binVal = self.configMgr.hists[prefixNom].GetBinContent(iBin)
                 #binError = sqrt(qcdHistoSyst.GetBinContent(iBin)**2+qcdHistoStat.GetBinContent(iBin)**2)
@@ -758,9 +758,9 @@ class PrepareHistos:
             #
             if self.configMgr.hists[prefixHigh+"_"+str(iBin)] is None:
                 if self.channel.variableName == "cuts":
-                    self.configMgr.hists[prefixHigh+"_"+str(iBin)] = TH1F(prefixHigh+"_"+str(iBin),prefixHigh+"_"+str(iBin),len(self.channel.regions),self.channel.binLow,float(len(self.channel.regions))+self.channel.binLow)
+                    self.configMgr.hists[prefixHigh+"_"+str(iBin)] = TH1D(prefixHigh+"_"+str(iBin),prefixHigh+"_"+str(iBin),len(self.channel.regions),self.channel.binLow,float(len(self.channel.regions))+self.channel.binLow)
                 else:
-                    self.configMgr.hists[prefixHigh+"_"+str(iBin)] = TH1F(prefixHigh+"_"+str(iBin),prefixHigh+"_"+str(iBin),self.channel.nBins,self.channel.binLow,self.channel.binHigh)
+                    self.configMgr.hists[prefixHigh+"_"+str(iBin)] = TH1D(prefixHigh+"_"+str(iBin),prefixHigh+"_"+str(iBin),self.channel.nBins,self.channel.binLow,self.channel.binHigh)
                 if binVal+binError > 0.: # self.configMgr.hists[prefixNom].GetBinContent(iBin) > 0.:
                     self.configMgr.hists[prefixHigh+"_"+str(iBin)].SetBinContent(iBin,binVal+binError) #self.configMgr.hists[prefixNom].GetBinContent(iBin)+binError)
                     self.configMgr.hists[prefixHigh].SetBinContent(iBin,binVal+binError) #self.configMgr.hists[prefixNom].GetBinContent(iBin)+binError)
@@ -772,9 +772,9 @@ class PrepareHistos:
             #
             if self.configMgr.hists[prefixLow+"_"+str(iBin)] is None:
                 if self.channel.variableName == "cuts":
-                    self.configMgr.hists[prefixLow+"_"+str(iBin)] = TH1F(prefixLow+"_"+str(iBin),prefixLow+"_"+str(iBin),len(self.channel.regions),self.channel.binLow,float(len(self.channel.regions))+self.channel.binLow)
+                    self.configMgr.hists[prefixLow+"_"+str(iBin)] = TH1D(prefixLow+"_"+str(iBin),prefixLow+"_"+str(iBin),len(self.channel.regions),self.channel.binLow,float(len(self.channel.regions))+self.channel.binLow)
                 else:
-                    self.configMgr.hists[prefixLow+"_"+str(iBin)] = TH1F(prefixLow+"_"+str(iBin),prefixLow+"_"+str(iBin),self.channel.nBins,self.channel.binLow,self.channel.binHigh)
+                    self.configMgr.hists[prefixLow+"_"+str(iBin)] = TH1D(prefixLow+"_"+str(iBin),prefixLow+"_"+str(iBin),self.channel.nBins,self.channel.binLow,self.channel.binHigh)
                 if (binVal-binError)>0. : # ( self.configMgr.hists[prefixNom].GetBinContent(iBin) - binError ) > 0.:
                     self.configMgr.hists[prefixLow+"_"+str(iBin)].SetBinContent(iBin,binVal-binError) # self.configMgr.hists[prefixNom].GetBinContent(iBin)-binError)
                     self.configMgr.hists[prefixLow].SetBinContent(iBin,binVal-binError) # self.configMgr.hists[prefixNom].GetBinContent(iBin)-binError)
@@ -904,7 +904,7 @@ class PrepareHistos:
         h = self.configMgr.hists[name]
         nx = h.GetNbinsX()
         currentBinEdges = []
-        htemp = TH1F(h.GetName()+"TempNameForRemapping",h.GetName()+"TempNameForRemapping",h.GetNbinsX(),0,h.GetNbinsX())
+        htemp = TH1D(h.GetName()+"TempNameForRemapping",h.GetName()+"TempNameForRemapping",h.GetNbinsX(),0,h.GetNbinsX())
         for i in range(1,nx+1):
             currentBinEdges += [h.GetBinLowEdge(i)]
             htemp.SetBinContent(i,h.GetBinContent(i))
