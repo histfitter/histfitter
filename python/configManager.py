@@ -143,7 +143,7 @@ class ConfigManager:
         self.plotRatio="ratio" #Pass to cppMgr to configure drawing options: "ratio", "pull", "none"
         self.removeEmptyBins = False # Boolean to chose to remove empty bins from data histogram on plot
         self.executeHistFactory = True # Boolean to chose to execute HistFactory
-        self.writeXML = False # Boolean to chose whether to write HistFactory XML files by hand
+        self.writeXML = True # Boolean to chose whether to write HistFactory XML files by hand
         self.printHistoNames = False # Print out the names of generated histograms
         self.doHypoTest = False
         self.doDiscoveryHypoTest = False
