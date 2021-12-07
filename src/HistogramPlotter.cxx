@@ -356,7 +356,7 @@ void HistogramPlot::buildFrame() {
                 h->GetPoint(i, x, y);
 
                 if (!isfinite(y)) {
-                    Logger << kDEBUG << "  Zeroing strange bin: " << x << " " << y << GEndl;
+                    Logger << kINFO << "  Zeroing strange bin: " << x << " " << y << " of graph " << hname << GEndl;
                     h->SetPoint(i, x, 0.);
                 }
             }
