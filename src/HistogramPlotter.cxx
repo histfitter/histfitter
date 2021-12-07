@@ -341,6 +341,26 @@ void HistogramPlot::buildFrame() {
     if(m_style.getRemoveEmptyBins()) {
         Logger << kDEBUG << "Removing empty bins" << GEndl;
         Util::RemoveEmptyDataBins(m_frame);
+
+    // Fixup frame
+    Logger << kDEBUG << "Fixing up strange graphs" << GEndl;
+    for (Int_t i = 0; i < m_frame->numItems(); ++i) {
+        RooHist *h = (RooHist*) m_frame->getObject(i);
+        TString hname = h->GetName();
+
+        if (hname.BeginsWith(TString("model"))) {
+            Logger << kDEBUG << " Fixing up graph " << hname << GEndl;
+
+            for (Int_t i = 0; i < h->GetN(); ++i) {
+                Double_t x, y;
+                h->GetPoint(i, x, y);
+
+                if (!isfinite(y)) {
+                    Logger << kDEBUG << "  Zeroing strange bin: " << x << " " << y << GEndl;
+                    h->SetPoint(i, x, 0.);
+                }
+            }
+        }
     }
 
 }
