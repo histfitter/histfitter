@@ -1599,12 +1599,6 @@ TH2D* Util::PlotCorrelationMatrix(RooFitResult* rFit, TString anaName,  bool Red
     c_corr->SaveAs("results/"+anaName+"/"+canName+".pdf");
     c_corr->SaveAs("results/"+anaName+"/"+canName+".eps");
 
-    gStyle->SetMarkerSize(orig_MarkerSize);
-    gStyle->SetMarkerColor(orig_MarkerColor);
-    gStyle->SetPaintTextFormat(orig_PaintTextFormat) ;
-    gStyle->SetLabelSize(orig_LabelSize);
-    gStyle->SetOptStat(00000000);
-
     return h_corr;
 
 }
