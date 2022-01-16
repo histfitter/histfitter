@@ -314,6 +314,7 @@ void HistogramPlot::buildFrame() {
                 RooFit::FillStyle(m_style.getErrorFillStyle()),
                 RooFit::LineColor(m_style.getErrorLineColor()),
                 RooFit::LineStyle(m_style.getErrorLineStyle()), 
+                RooFit::DrawOption("F"),
                 RooFit::VisualizeError(*m_fitResult),
                 RooFit::Name("total_error_band"));
 
@@ -816,6 +817,7 @@ void HistogramPlot::plotSingleComponent(unsigned int i, double normalisation) {
         m_regionPdf->plotOn(frame, RooFit::Components(m_componentNames[i].Data()), 
                 RooFit::VisualizeError(*m_fitResult),
                 RooFit::FillColor(kCyan),
+                RooFit::DrawOption("F"),
                 RooFit::Precision(1e-5),
                 RooFit::Normalization(m_componentFractions[i]*normalisation, RooAbsReal::NumEvent));
     }
@@ -938,6 +940,7 @@ void HistogramPlot::saveHistograms() {
                 RooFit::FillStyle(m_style.getErrorFillStyle()),
                 RooFit::LineColor(m_style.getErrorLineColor()),
                 RooFit::LineStyle(m_style.getErrorLineStyle()), 
+                RooFit::DrawOption("F"),
                 RooFit::VisualizeError(*m_fitResult),
                 RooFit::Name("total_error_band"));
         auto total_err = static_cast<RooCurve*>(frame_dummy->findObject("total_error_band"));
