@@ -25,6 +25,8 @@ from logger import Logger
 from systematic import SystematicBase
 from inputTree import InputTree
 
+from ctypes import c_double
+
 log = Logger('Sample')
 
 TH1.SetDefaultSumw2(True)
@@ -811,9 +813,13 @@ class Sample:
             # Attempt to generate an overallNormHistoSys if required
             if includeOverallSys and not (oneSide and not symmetrize):
                 log.debug("Attempting to build overallNormHistoSys")
+                highErrorN = c_double(0.0)
+                lowErrorN = c_double(0.0)
                 nomIntegralN = configMgr.hists[nomName].Integral()
-                lowIntegralN = configMgr.hists[lowName+"Norm"].Integral()
-                highIntegralN = configMgr.hists[highName+"Norm"].Integral()
+                lowIntegralN = configMgr.hists[lowName+"Norm"].IntegralAndError(0, -1, lowErrorN)
+                highIntegralN = configMgr.hists[highName+"Norm"].IntegralAndError(0, -1, highErrorN)
+                highErrorN = highErrorN.value
+                lowErrorN = lowErrorN.value
             
                 log.verbose("Loading high norm integral from {}: {}".format(highName+"Norm", highIntegralN))
                 log.verbose("Loading low norm integral from {}: {}".format(lowName+"Norm", lowIntegralN))
@@ -885,6 +891,36 @@ class Sample:
             if includeOverallSys and not (oneSide and not symmetrize):
                 #just include the systematics in case we don't prun systematics. Else check size.
                 if not configMgr.prun:
+                    if highN > 1.0 and lowN > 1.0:
+                        if highN > lowN and (lowIntegralN - lowErrorN) / nomIntegralN <= 1.0:
+                            if 2.0 - highN > (lowIntegralN - lowErrorN) / nomIntegralN:
+                                log.warning(f"    generating symmetrised overallSys for {nomName} syst={systName} nom={nomIntegralN:g} high={highIntegralN:g} low={(2*nomIntegralN-highIntegralN):g}")
+                                lowN = 2.0 - highN
+                            else:
+                                log.warning(f"    generating onesided overallSys for {nomName} syst={systName} nom={nomIntegralN:g} high={highIntegralN:g} low={nomIntegralN:g}")
+                                lowN = 1.0
+                        elif highN < lowN and (highIntegralN - highErrorN) / nomIntegralN <= 1.0:
+                            if 2.0 - lowN > (highIntegralN - highErrorN) / nomIntegralN:
+                                log.warning(f"    generating symmetrised overallSys for {nomName} syst={systName} nom={nomIntegralN:g} high={(2*nomIntegralN-lowIntegralN):g} low={lowIntegralN:g}")
+                                highN = 2.0 - lowN
+                            else:
+                                log.warning(f"    generating onesided overallSys for {nomName} syst={systName} nom={nomIntegralN:g} high={nomIntegralN:g} low={lowIntegralN:g}")
+                                highN = 1.0
+                    elif highN < 1.0 and lowN < 1.0:
+                        if highN > lowN and (highIntegralN - highErrorN) / nomIntegralN >= 1.0:
+                            if 2.0 - lowN < (highIntegralN - highErrorN) / nomIntegralN:
+                                log.warning(f"    generating symmetrised overallSys for {nomName} syst={systName} nom={nomIntegralN:g} high={(2*nomIntegralN-lowIntegralN):g} low={lowIntegralN:g}")
+                                highN = 2.0 - lowN
+                            else:
+                                log.warning(f"    generating onesided overallSys for {nomName} syst={systName} nom={nomIntegralN:g} high={nomIntegralN:g} low={lowIntegralN:g}")
+                                highN = 1.0
+                        elif highN < lowN and (lowIntegralN - lowErrorN) / nomIntegralN >= 1.0:
+                            if 2.0 - highN < (lowIntegralN - lowErrorN) / nomIntegralN:
+                                log.warning(f"    generating symmetrised overallSys for {nomName} syst={systName} nom={nomIntegralN:g} high={highIntegralN:g} low={(2*nomIntegralN-highIntegralN):g}")
+                                lowN = 2.0 - highN
+                            else:
+                                log.warning(f"    generating onesided overallSys for {nomName} syst={systName} nom={nomIntegralN:g} high={highIntegralN:g} low={nomIntegralN:g}")
+                                lowN = 1.0
                     self.addOverallSys(systName, highN, lowN)
 
                 else:
@@ -1176,15 +1212,15 @@ class Sample:
             low = 2.0 - high
             log.error("    addOverallSys '%s' has invalid inputs: high == low == %.3f.\n    This would result in error=(high-low)/(high+low)=0, silently cancelled by HistFactory.\n    Please fix your user configuration.\n    For now, will recover by symmetrizing error: high=%.3f low=%.3f."%(systName,high,high,low))
 
-        if high == 1.0 and low > 0.0 and low != 1.0:
-            highOld = high
-            high = 2.0 - low
-            log.warning(f"    addOverallSys for {systName}: high={highOld:g}. Taking symmetric value from low {low:g} => {high:g}")
+        #if high == 1.0 and low > 0.0 and low != 1.0:
+        #    highOld = high
+        #    high = 2.0 - low
+        #    log.warning(f"    addOverallSys for {systName}: high={highOld:g}. Taking symmetric value from low {low:g} => {high:g}")
 
-        if low == 1.0 and high > 0.0 and high != 1.0:
-            lowOld = low
-            low = 2.0 - high
-            log.warning(f"    addOverallSys for {systName}: low={lowOld:g}. Taking symmetric value from high {low:g} => {high:g}")
+        #if low == 1.0 and high > 0.0 and high != 1.0:
+        #    lowOld = low
+        #    low = 2.0 - high
+        #    log.warning(f"    addOverallSys for {systName}: low={lowOld:g}. Taking symmetric value from high {low:g} => {high:g}")
 
         if low < 0.01:
             log.warning(f"    addOverallSys for {systName}: low={low:g} is < 0.01. Setting to low=0.01. High={high:g}.")
