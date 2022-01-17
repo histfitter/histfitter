@@ -1560,29 +1560,29 @@ TH2D* Util::PlotCorrelationMatrix(RooFitResult* rFit, TString anaName,  bool Red
             h_corr_reduced->Fill(index_x,index_y,h_corr->GetBinContent(ix,iy));
             index_y++;
             TString labelY = h_corr->GetYaxis()->GetBinLabel(iy);
-                  if(labelY.Contains("Lumi") || labelY.Contains("mcstat") || labelY.Contains("gamma_stat")){
-                  labelY.ReplaceAll("gamma_shape_mcstat","#gamma");
-                  labelY.ReplaceAll("gamma_stat","#gamma");
-                  labelY.ReplaceAll("_cuts_bin_0","");}
-                  if(labelY.Contains("mu")){
-                  labelY.ReplaceAll("mu","#mu");}
-                  if(labelY.Contains("alpha")){
-                  labelY.ReplaceAll("alpha","#alpha");}
+            if(labelY.Contains("Lumi") || labelY.Contains("mcstat") || labelY.Contains("gamma_stat")){
+                labelY.ReplaceAll("gamma_shape_mcstat","#gamma");
+                labelY.ReplaceAll("gamma_stat","#gamma");
+                labelY.ReplaceAll("_cuts_bin_0","");}
+            if(labelY.Contains("mu")){
+                labelY.ReplaceAll("mu","#mu");}
+            if(labelY.Contains("alpha")){
+                labelY.ReplaceAll("alpha","#alpha");}
             if (index_x==0) h_corr_reduced->GetYaxis()->SetBinLabel(index_y,labelY);
             fillHistX=true;
           }
         }
         if (fillHistX) {
           index_x++;
-           TString labelX = h_corr->GetXaxis()->GetBinLabel(ix);
-                  if(labelX.Contains("Lumi") || labelX.Contains("mcstat") || labelX.Contains("gamma_stat")){
-                  labelX.ReplaceAll("gamma_shape_mcstat","#gamma");
-                  labelX.ReplaceAll("gamma_stat","#gamma");
-                  labelX.ReplaceAll("_cuts_bin_0","");}
-                  if(labelX.Contains("mu")){
-                  labelX.ReplaceAll("mu","#mu");}
-                  if(labelX.Contains("alpha")){
-                  labelX.ReplaceAll("alpha","#alpha");}
+          TString labelX = h_corr->GetXaxis()->GetBinLabel(ix);
+          if(labelX.Contains("Lumi") || labelX.Contains("mcstat") || labelX.Contains("gamma_stat")){
+              labelX.ReplaceAll("gamma_shape_mcstat","#gamma");
+              labelX.ReplaceAll("gamma_stat","#gamma");
+              labelX.ReplaceAll("_cuts_bin_0","");}
+          if(labelX.Contains("mu")){
+              labelX.ReplaceAll("mu","#mu");}
+          if(labelX.Contains("alpha")){
+              labelX.ReplaceAll("alpha","#alpha");}
           h_corr_reduced->GetXaxis()->SetBinLabel(index_x,labelX);
         }
       }
