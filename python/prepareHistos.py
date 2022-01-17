@@ -17,7 +17,7 @@
  **********************************************************************************
 """
 
-from ROOT import gROOT, TFile, TH1D, gDirectory, SetOwnership
+from ROOT import gROOT, gSystem, TFile, TH1D, gDirectory, SetOwnership
 from ROOT import TChain, TObject, TTree, TIter
 from math import sqrt
 from logger import Logger
@@ -150,9 +150,13 @@ class PrepareHistos:
             self.cache2File = None
 
         # Check if cache file is accessible and not a zombie
-        self.cacheFile = TFile.Open(filepath, "READ")
+        cacheFileIsOk = False
+        if not gSystem.AccessPathName(filepath):            
+            self.cacheFile = TFile.Open(filepath, "READ")
+            if not self.cacheFile.IsZombie():
+                cacheFileIsOk = True
 
-        if (self.cacheFile) and (not self.cacheFile.IsZombie()):
+        if cacheFileIsOk:
             if file2path=='' and not self.useCacheToTreeFallback:
                 '''
                 default, no archive file and no fallback activated
