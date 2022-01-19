@@ -1519,12 +1519,38 @@ TH2D* Util::PlotCorrelationMatrix(RooFitResult* rFit, TString anaName,  bool Red
     else     gStyle->SetMarkerSize(0.25);
 
     TH2D* h_corr = (TH2D*) rFit->correlationHist(Form("h_corr_%s",rFit->GetName())); 
+    int nbins = h_corr->GetNbinsX();
+
+    for (int xbin=1; xbin<nbins+1; xbin++) {
+        TString labelX = h_corr->GetXaxis()->GetBinLabel(xbin);
+        if(labelX.Contains("Lumi") || labelX.Contains("mcstat") || labelX.Contains("gamma_stat")){
+            labelX.ReplaceAll("gamma_shape_mcstat","#gamma");
+            labelX.ReplaceAll("gamma_stat","#gamma");
+            labelX.ReplaceAll("_cuts_bin_0","");}
+        if(labelX.Contains("mu")){
+            labelX.ReplaceAll("mu","#mu");}
+        if(labelX.Contains("alpha")){
+            labelX.ReplaceAll("alpha","#alpha");}
+        h_corr->GetXaxis()->SetBinLabel(xbin,labelX);
+    }
+
+    for (int ybin=1; ybin<nbins+1; ybin++) {
+        TString labelY = h_corr->GetYaxis()->GetBinLabel(ybin);
+         if(labelY.Contains("Lumi") || labelY.Contains("mcstat") || labelY.Contains("gamma_stat")){
+            labelY.ReplaceAll("gamma_shape_mcstat","#gamma");
+            labelY.ReplaceAll("gamma_stat","#gamma");
+            labelY.ReplaceAll("_cuts_bin_0","");}
+         if(labelY.Contains("mu")){
+            labelY.ReplaceAll("mu","#mu");}
+         if(labelY.Contains("alpha")){
+            labelY.ReplaceAll("alpha","#alpha");}
+        h_corr->GetYaxis()->SetBinLabel(ybin,labelY);
+    }
 
     if (ReduceMatrix) {
       // Cleanup corrMattrix from rows and columns with content less then corrThres
       vector <int> rm_idx; rm_idx.clear();
       double corrThresh[3] = {0.01,0.1,0.2}; 
-      int nbins = h_corr->GetNbinsX();
       int index_x=0, index_y=0, Thresh1Counter;//, Thresh0Counter, Thresh2Counter;
       bool fillHistY, fillHistX;
 
@@ -1559,31 +1585,13 @@ TH2D* Util::PlotCorrelationMatrix(RooFitResult* rFit, TString anaName,  bool Red
           if (fillHistY) {
             h_corr_reduced->Fill(index_x,index_y,h_corr->GetBinContent(ix,iy));
             index_y++;
-            TString labelY = h_corr->GetYaxis()->GetBinLabel(iy);
-            if(labelY.Contains("Lumi") || labelY.Contains("mcstat") || labelY.Contains("gamma_stat")){
-                labelY.ReplaceAll("gamma_shape_mcstat","#gamma");
-                labelY.ReplaceAll("gamma_stat","#gamma");
-                labelY.ReplaceAll("_cuts_bin_0","");}
-            if(labelY.Contains("mu")){
-                labelY.ReplaceAll("mu","#mu");}
-            if(labelY.Contains("alpha")){
-                labelY.ReplaceAll("alpha","#alpha");}
-            if (index_x==0) h_corr_reduced->GetYaxis()->SetBinLabel(index_y,labelY);
+            if (index_x==0) h_corr_reduced->GetYaxis()->SetBinLabel(index_y,h_corr->GetYaxis()->GetBinLabel(iy));
             fillHistX=true;
           }
         }
         if (fillHistX) {
           index_x++;
-          TString labelX = h_corr->GetXaxis()->GetBinLabel(ix);
-          if(labelX.Contains("Lumi") || labelX.Contains("mcstat") || labelX.Contains("gamma_stat")){
-              labelX.ReplaceAll("gamma_shape_mcstat","#gamma");
-              labelX.ReplaceAll("gamma_stat","#gamma");
-              labelX.ReplaceAll("_cuts_bin_0","");}
-          if(labelX.Contains("mu")){
-              labelX.ReplaceAll("mu","#mu");}
-          if(labelX.Contains("alpha")){
-              labelX.ReplaceAll("alpha","#alpha");}
-          h_corr_reduced->GetXaxis()->SetBinLabel(index_x,labelX);
+          h_corr_reduced->GetXaxis()->SetBinLabel(index_x,h_corr->GetXaxis()->GetBinLabel(ix));
         }
       }
 
