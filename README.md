@@ -16,7 +16,7 @@ HistFitter has 2 stable versions, one complient with Python2 (v0.66.0) and one w
 If you're going to be using HistFitter directly as a standalone application, clone the latest stable release
 
 ```
-git clone ssh://git@gitlab.cern.ch:7999/HistFitter/HistFitter.git
+git clone https://github.com/histfitter/histfitter
 git checkout vX.XX.X -b vX.XX.X
 ```
 
@@ -70,7 +70,7 @@ cd ..
 
 ## Contributing
 
-To contribute to development please first [fork HistFitter](https://gitlab.cern.ch/HistFitter/HistFitter/-/forks/new) and do all of your development on a feature branch that is **not** `master`.
-If you are planning on making feature changes please first [open up an Issue](https://gitlab.cern.ch/HistFitter/HistFitter/-/issues) and outline your plans so that development can be discusses with the maintainer team, streamlining the process as your MR is written.
+To contribute to development please first fork HistFitter and do all of your development on a feature branch that is **not** `master`.
+If you are planning on making feature changes please first [open up an Issue](https://github.com/histfitter/histfitter/issues) and outline your plans so that development can be discusses with the maintainer team, streamlining the process as your MR is written.
 
 When you make a MR, include a summary in the body of the MR of your changes that can be easily found and incorporated into Changelog for the next release.

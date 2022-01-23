@@ -18,7 +18,7 @@
  **********************************************************************************
 """
 
-from ROOT import THStack, TLegend, TCanvas, TFile, std, TH1F, TH2F, gStyle
+from ROOT import THStack, TLegend, TCanvas, TFile, std, TH1D, TH2D, gStyle
 from ROOT import ConfigMgr, FitConfig, ChannelStyle #this module comes from gSystem.Load("libSusyFitter.so")
 from ROOT import gROOT, TObject, TProof
 from prepareHistos import PrepareHistos
@@ -803,9 +803,9 @@ class ConfigManager:
                 
                 if len(syst_list)==0: continue
                 
-                histPrunedOverallHisto = TH2F("histPrunedOverallHisto_"+str(i), "Pruned systematics affecting the normalization and shape for channel "+channel.name,len(channel.sampleList)-1,0,len(channel.sampleList)-1,len(syst_list),0,len(syst_list))
-                histPrunedOverall = TH2F("histPrunedOverall_"+str(i), "Pruned systematics affecting the normalization for channel "+channel.name,len(channel.sampleList)-1,0,len(channel.sampleList)-1,len(syst_list),0,len(syst_list))
-                histPrunedHisto = TH2F("histPrunedHisto_"+str(i), "Pruned systematics affecting the shape for channel "+channel.name,len(channel.sampleList)-1,0,len(channel.sampleList)-1,len(syst_list),0,len(syst_list))
+                histPrunedOverallHisto = TH2D("histPrunedOverallHisto_"+str(i), "Pruned systematics affecting the normalization and shape for channel "+channel.name,len(channel.sampleList)-1,0,len(channel.sampleList)-1,len(syst_list),0,len(syst_list))
+                histPrunedOverall = TH2D("histPrunedOverall_"+str(i), "Pruned systematics affecting the normalization for channel "+channel.name,len(channel.sampleList)-1,0,len(channel.sampleList)-1,len(syst_list),0,len(syst_list))
+                histPrunedHisto = TH2D("histPrunedHisto_"+str(i), "Pruned systematics affecting the shape for channel "+channel.name,len(channel.sampleList)-1,0,len(channel.sampleList)-1,len(syst_list),0,len(syst_list))
                 
                 
                 xbin = 1
@@ -1586,7 +1586,7 @@ class ConfigManager:
                 #    self.hists[tmpName]=None    ## MB : do not delete, else cannot rerun later with -w
                     return
             else:
-                self.hists[tmpName] = TH1F(tmpName, tmpName, chan.nBins, chan.binLow, chan.binHigh)
+                self.hists[tmpName] = TH1D(tmpName, tmpName, chan.nBins, chan.binLow, chan.binHigh)
                 for iBin in range(self.hists[tmpName].GetNbinsX()+1):
                     self.hists[tmpName].SetBinContent(iBin+1, 1.)
             chan.getSample(sam.name).setHistoName(tmpName)
@@ -1657,7 +1657,7 @@ class ConfigManager:
                     if self.forceNorm==False and self.prepare.useCache:
                         self.hists[tmpName] = self.prepare.addHisto(tmpName, forceNoFallback=True)
                     if self.hists[tmpName] == None:
-                        self.hists[tmpName] = TH1F(tmpName, tmpName, 1, 0.5, 1.5)
+                        self.hists[tmpName] = TH1D(tmpName, tmpName, 1, 0.5, 1.5)
                         log.debug(f"addSampleSpecificHists(): building temporary histogram {tmpName}")
                         for normReg in sam.normRegions:
                             log.verbose(f"addSampleSpecificHists(): using normalisation in {normReg}")
@@ -1692,7 +1692,7 @@ class ConfigManager:
                                             _cuts = copy(s.additionalCuts)
 
                                 # TODO: why don't we store this histogram in its proper name for a region? then it can be recycled
-                                tempHist = TH1F("temp", "temp", 1, 0.5, 1.5)
+                                tempHist = TH1D("temp", "temp", 1, 0.5, 1.5)
                                 try:
                                   self.chains[self.prepare.currentChainName].Project("temp",_cuts, \
                                                                                    str(self.lumiUnits*self.outputLumi/self.inputLumi)+" * "+"*".join(s.weights)+" * ("+_cuts+")")
@@ -1824,7 +1824,7 @@ class ConfigManager:
             return
 
         log.verbose(f"buildBlindedHistos: constructing {histname}")
-        self.hists[histname] = TH1F(histname, histname, channel.nBins, channel.binLow, channel.binHigh)
+        self.hists[histname] = TH1D(histname, histname, channel.nBins, channel.binLow, channel.binHigh)
 
         log.info(f"Blinding sample {sample.name} in {channel.channelName} with the following samples:")
         for s in channel.sampleList:

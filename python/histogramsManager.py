@@ -17,7 +17,7 @@
  **********************************************************************************
 """
 
-from ROOT import TH1F
+from ROOT import TH1D
 from logger import Logger
 
 log = Logger('HistogramsManager')
@@ -41,7 +41,7 @@ class HistogramsManager:
         @param xmin Left edge of lower bin
         @param binValues Bin content in a list
         """
-        h = TH1F(hName, hName, len(binValues), xmin, xmin+float(len(binValues)))
+        h = TH1D(hName, hName, len(binValues), xmin, xmin+float(len(binValues)))
         for iBin, val in enumerate(binValues):
             h.SetBinContent(iBin+1, val)
             pass
@@ -98,8 +98,8 @@ class HistogramsManager:
         #binErrs is the relative errors
         xmin = hNom.GetXaxis().GetXmin()
         xmax = hNom.GetXaxis().GetXmax()
-        #h = TH1F(hName, hName, len(binErrs), xmin, xmin+float(len(binErrs)))
-        h = TH1F(hName, hName, len(binErrs), xmin, xmax)
+        #h = TH1D(hName, hName, len(binErrs), xmin, xmin+float(len(binErrs)))
+        h = TH1D(hName, hName, len(binErrs), xmin, xmax)
         for iBin in range(hNom.GetNbinsX()):
             val=hNom.GetBinContent(iBin+1)*binErrs[iBin]
             h.SetBinContent(iBin+1, val)

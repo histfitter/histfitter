@@ -17,7 +17,7 @@
  **********************************************************************************
 """
 
-from ROOT import THStack,TLegend,TCanvas,TFile,TH1F
+from ROOT import THStack,TLegend,TCanvas,TFile,TH1D
 from ROOT import ConfigMgr,FitConfig  #from gSystem.Load("libSusyFitter.so")
 from histogramsManager import histMgr
 from copy import deepcopy
@@ -239,7 +239,7 @@ class SystematicBase:
             log.error(f"FillUpDownHist: systematic {self.name}: histogram {histName}: not reading from trees and no fallback enabled. Will not build histogram")
             return
         
-        abstract.hists[histName] = TH1F(histName, histName, 1, 0.5, 1.5)
+        abstract.hists[histName] = TH1D(histName, histName, 1, 0.5, 1.5)
 
         for normReg in sam.normRegions:
             # Find the sample object associated to each of the normalisation regions
@@ -359,7 +359,7 @@ class SystematicBase:
             #abstract.prepare.read(treeName, filelist)
             abstract.prepare.read(s.input_files, suffix=s.getTreenameSuffix(), friendTreeName=s.friendTreeName)
 
-            tempHist = TH1F("temp", "temp", 1, 0.5, 1.5)
+            tempHist = TH1D("temp", "temp", 1, 0.5, 1.5)
 
             _weights = s.weights
             if systNorm.type == "weight":
@@ -553,7 +553,7 @@ class UserSystematic(SystematicBase):
                         abstract.hists[histName] = None
                         abstract.prepare.addHisto(histName)
                     else:
-                        abstract.hists[histName] = TH1F(histName, histName, 1, 0.5, 1.5)
+                        abstract.hists[histName] = TH1D(histName, histName, 1, 0.5, 1.5)
                         totNorm=0.0
                         for normReg in sam.normRegions:
                             nameTmp = "h" + sam.name + lowhigh + normReg[0] + "_obs_" + replaceSymbols(chan.variableName)

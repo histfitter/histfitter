@@ -18,7 +18,7 @@
 """
 
 import ROOT
-from ROOT import TFile, TMath, RooRandom, TH1, TH1F
+from ROOT import TFile, TMath, RooRandom, TH1, TH1D
 from ROOT import kBlack, kWhite, kGray, kRed, kPink, kMagenta, kViolet, kBlue, kAzure, kCyan, kTeal, kGreen, kSpring, kYellow, kOrange, kDashed, kSolid, kDotted
 from math import fabs
 from logger import Logger
@@ -262,7 +262,7 @@ class Sample:
         else:
             self.histoName = "h"+self.name+"_"+region+"_obs_"+var
 
-        configMgr.hists[self.histoName] = TH1F(self.histoName, self.histoName, len(self.binValues[(region, var)]), binLow, float(len(self.binValues[(region, var)]))*binWidth+binLow)
+        configMgr.hists[self.histoName] = TH1D(self.histoName, self.histoName, len(self.binValues[(region, var)]), binLow, float(len(self.binValues[(region, var)]))*binWidth+binLow)
         for (iBin, val) in enumerate(self.binValues[(region, var)]):
             if val <=0:
                log.warning(f'bin {str(iBin)} of the histogram {self.histoName} empty or negative, setting as lowest value {str(configMgr.minValue)}')

@@ -90,7 +90,7 @@ def MakeBox(color=4, offset=0, pull=-1, horizontal=False, doPreFit=False, error=
 def GetFrame(outFileNamePrefix,Npar,ytitle="(n_{obs} - n_{pred}) / #sigma_{tot}",horizontal=False):
     offset = 0.;
     if horizontal:
-        frame =TH2F("frame"+outFileNamePrefix, "",
+        frame =TH2D("frame"+outFileNamePrefix, "",
                     Npar,0.,Npar,80,-4.,4.);
         frame.GetYaxis().SetTitleSize( 0.09 );
         frame.GetYaxis().SetTitleOffset(0.5)
@@ -101,7 +101,7 @@ def GetFrame(outFileNamePrefix,Npar,ytitle="(n_{obs} - n_{pred}) / #sigma_{tot}"
         frame.GetYaxis().SetNdivisions(4)
         frame.SetYTitle(ytitle);
     else:
-        frame =TH2F( "frame"+outFileNamePrefix, outFileNamePrefix,
+        frame =TH2D( "frame"+outFileNamePrefix, outFileNamePrefix,
                                 1, -3.5, 3.5,
                                 Npar, -offset, Npar+offset );
 
@@ -273,29 +273,29 @@ def MakeHistPullPlot(samples, regionList, outFileNamePrefix, hresults, renamedRe
     ROOT.gStyle.SetOptStat(0000);
     Npar=len(regionList)
 
-    hdata = TH1F(outFileNamePrefix, outFileNamePrefix, Npar, 0, Npar);
+    hdata = TH1D(outFileNamePrefix, outFileNamePrefix, Npar, 0, Npar);
     hdata.GetYaxis().SetTitle("Events")
     hdata.GetYaxis().SetTitleSize( 0.065 )
     hdata.GetYaxis().SetTitleOffset( 0.5 )
     hdata.GetXaxis().SetLabelSize( 0.06 )
     hdata.GetYaxis().SetLabelSize( 0.05 )
     hdata.SetMarkerStyle(20)
-    hbkg = TH1F("hbkg", "hbkg", Npar, 0, Npar);
+    hbkg = TH1D("hbkg", "hbkg", Npar, 0, Npar);
     hbkg.SetLineColor(1)
     hbkg.SetLineWidth(2)
 
-    hbkgUp = TH1F("hbkgUp", "hbkgUp", Npar, 0, Npar);
+    hbkgUp = TH1D("hbkgUp", "hbkgUp", Npar, 0, Npar);
     hbkgUp.SetLineStyle(0)
     hbkgUp.SetLineWidth(0)
 
-    hbkgDown = TH1F("hbkgDown", "hbkgDown", Npar, 0, Npar);
+    hbkgDown = TH1D("hbkgDown", "hbkgDown", Npar, 0, Npar);
     hbkgDown.SetLineStyle(0)
     hbkgDown.SetLineWidth(0)
 
     hbkgComponents = []
     samples.replace(" ","") #remove spaces, and split by comma => don't split by ", "
     for sam in samples.split(","):
-        h = TH1F("hbkg"+sam, "hbkg"+sam, Npar, 0, Npar)
+        h = TH1D("hbkg"+sam, "hbkg"+sam, Npar, 0, Npar)
         h.SetFillColor(getSampleColor(sam))
         hbkgComponents.append(h)
 

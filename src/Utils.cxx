@@ -2912,6 +2912,7 @@ RooCurve* Util::MakePdfErrorRatioHist(RooAbsData* regionData, RooAbsPdf* regionP
                                  Precision(1e-5), 
                                  FillColor(kBlue-5), 
                                  FillStyle(3004), 
+                                 DrawOption("F"),
                                  VisualizeError(*rFit, Nsigma));
     }
 
