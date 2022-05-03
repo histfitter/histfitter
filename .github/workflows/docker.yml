@@ -31,7 +31,7 @@ jobs:
         run: |
           DOCKER_IMAGE=histfitter/histfitter
           VERSION=latest
-          HISTFITTER_VERSION=v1.0.0
+          HISTFITTER_VERSION=v1.0.1
           REPO_NAME=${{github.repository}}
           REPO_NAME_LOWERCASE="${REPO_NAME,,}"
           if [[ $GITHUB_REF == refs/tags/* ]]; then
