@@ -69,16 +69,10 @@ def main():
     print(">>>")
     print(">>> Welcome to multiplexJSON!")
 
-    # Print out the settings
-    for setting in dir(args):
-        if not setting[0] == "_":
-            print(
-                ">>> ... Setting: {: >20}:  {}".format(
-                    setting, eval("args.%s" % setting)
-                )
-            )
-
-    print(">>> ")
+    for arg in vars(args):
+        user_input = getattr(args, arg)
+        print(f">>> ... Setting: {arg: >20} {str(user_input): >40}")
+    print("")
 
     databaseList = []
 
