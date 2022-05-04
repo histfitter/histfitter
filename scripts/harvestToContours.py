@@ -121,10 +121,10 @@ def main():
     print( ">>> Welcome to harvestToContours!" )
 
     # Print out the settings
-    for setting in dir(args):
-        if not setting[0]=="_":
-            print( ">>> ... Setting: {: >20} {: >40}".format(setting, eval("args.%s"%setting) ) )
-
+    for arg in vars(args):
+        user_input = getattr(args, arg)
+        print(f">>> ... Setting: {arg: >20} {str(user_input): >40}")
+    print("")
 
     if args.xMin == None:
         print ("")
