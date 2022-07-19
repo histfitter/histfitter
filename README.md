@@ -50,6 +50,11 @@ cd src
 make
 cd ..
 ```
+or with cmake:
+```
+cmake src -B lib -DCMAKE_BUILD_TYPE=Release
+cmake --build lib
+```
 
 ## Directory structure
 
