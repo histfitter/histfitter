@@ -52,8 +52,8 @@ cd ..
 ```
 or with cmake:
 ```
-cmake src -B lib -DCMAKE_BUILD_TYPE=Release
-cmake --build lib
+cmake -S src -B lib -DCMAKE_BUILD_TYPE=Release
+cmake --build lib --clean-first --parallel 8
 ```
 
 ## Directory structure
