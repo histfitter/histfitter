@@ -1,7 +1,7 @@
 # HistFitter
 
 [![stable-release-python2](https://img.shields.io/badge/StablePython2-v0.66.0-green)](https://gitlab.cern.ch/HistFitter/HistFitter/-/releases/v0.66.0)
-[![stable-release-python3](https://img.shields.io/badge/StablePython3-v1.0.0-green)](https://gitlab.cern.ch/HistFitter/HistFitter/-/tree/v1.0.0)
+[![stable-release-python3](https://img.shields.io/badge/StablePython3-v1.0.1-green)](https://gitlab.cern.ch/HistFitter/HistFitter/-/tree/v1.0.1)
 [![Documentation](https://img.shields.io/badge/Documentation-blue)](https://twiki.cern.ch/twiki/bin/viewauth/AtlasProtected/SusyFitter)
 [![Tutorial](https://img.shields.io/badge/Tutorial-orange)](https://twiki.cern.ch/twiki/bin/viewauth/AtlasProtected/HistFitterTutorial)
 
@@ -12,7 +12,7 @@
 The HistFitter Group mailing-list, for **any** of your questions: <atlas-phys-susy-histfitter@cern.ch>
 
 ## Acquire
-HistFitter has 2 stable versions, one complient with Python2 (v0.66.0) and one with Python3 (v1.0.0).
+HistFitter has 2 stable versions, one complient with Python2 (v0.66.0) and one with Python3 (v1.x.y).
 If you're going to be using HistFitter directly as a standalone application, clone the latest stable release
 
 ```
@@ -49,6 +49,11 @@ source setup.sh
 cd src
 make
 cd ..
+```
+or with cmake:
+```
+cmake -S src -B lib -DCMAKE_BUILD_TYPE=Release
+cmake --build lib --clean-first --parallel 8
 ```
 
 ## Directory structure
