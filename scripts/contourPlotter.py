@@ -270,9 +270,8 @@ class contourPlotter:
         x = array("d")
         y = array("d")
         for i in range(n):
-            x_temp = ROOT.Double()
-            y_temp = ROOT.Double()
-            tg.GetPoint(i, x_temp, y_temp)
+            x_temp = tg.GetPointX(i)
+            y_temp = tg.GetPointY(i)
 
             x.append(x_new(x_temp, y_temp))
             y.append(y_new(x_temp, y_temp))
@@ -288,7 +287,6 @@ class contourPlotter:
         y = array("d")
         z = array("d")
 
-        # tg.GetPoint(i, x_temp, y_temp, z_temp) # this doesn't exit in old root versions
 
         x_temp = tg.GetX()
         y_temp = tg.GetY()

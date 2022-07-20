@@ -247,7 +247,7 @@ def MakeHist(regionList, renamedRegions, results, hdata, hbkg, hbkgUp, hbkgDown,
         graph_bkg3.SetPointError(counter, 0.5, 0.5, 0, 0)
         graph_data.SetPoint(counter, hbkg.GetBinCenter(counter+1), nObs)
         if not nObs > 0: nObs = 0
-        graph_data.SetPointError(counter, 0., 0, sqrt(nObs), sqrt(nObs))
+        graph_data.SetPointError(counter, 0., 0, PoissonError(nObs)[1], PoissonError(nObs)[0])
 
         graph_pull.SetPoint(counter, hbkg.GetBinCenter(counter+1), pull)
         graph_pull.SetPointError(counter, 0., 0, 0, 0)
