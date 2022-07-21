@@ -15,7 +15,8 @@ OBJDIR=obj
 DEPDIR=$(OBJDIR)/dep
 VPATH= $(OBJDIR)
 INCLUDES += -I../include -I$(shell $(ROOTCONFIG) --incdir)
-ROOTSYS  ?= ERROR_RootSysIsNotDefined
+ROOTSYS ?= "$(ROOT_INCLUDE_PATH)/.."
+ROOTSYS ?= ERROR_RootSysIsNotDefined
 
 DICTHEAD  = $(PACKAGE)_Dict.h
 DICTFILE  = $(PACKAGE)_Dict.C
