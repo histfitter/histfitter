@@ -19,8 +19,8 @@
  * (http://roofit.sourceforge.net/license.txt)                               *
  *****************************************************************************/
 
-#ifndef ROOPLOT_H
-#define ROOPLOT_H
+#ifndef ROO_PLOT
+#define ROO_PLOT
 
 #include <float.h>
 #include "RooList.h"
