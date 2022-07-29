@@ -19,8 +19,8 @@
  * (http://roofit.sourceforge.net/license.txt)                               *
  *****************************************************************************/
 
-#ifndef ROOHIST_H
-#define ROOHIST_H
+#ifndef ROO_HIST
+#define ROO_HIST
 
 #include "TGraphAsymmErrors.h"
 #include "RooPlotable.h"
