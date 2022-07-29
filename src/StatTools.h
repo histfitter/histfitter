@@ -1,6 +1,6 @@
 // vim: ts=4:sw=4
-#ifndef StatTools_hh
-#define StatTools_hh
+#ifndef STATTOOLS_H
+#define STATTOOLS_H
 
 #include "TString.h"
 #include <iostream>
@@ -30,25 +30,25 @@ namespace RooStats {
     class ModelConfig;
 }
 
-namespace RooStats 
+namespace RooStats
 {
-    TTree* toyMC_gen_fit( RooWorkspace* w, const int& nexp, const double& muVal=-1.0, const bool& doDataFitFirst=true, 
+    TTree* toyMC_gen_fit( RooWorkspace* w, const int& nexp, const double& muVal=-1.0, const bool& doDataFitFirst=true,
             const bool& storetoys=false, const TString& toyoutfile="toyResults.root" );
     TTree* ConvertMCStudyResults( RooMCStudy* mcstudy );
 
     RooStats::HypoTestInverterResult* DoHypoTestInversion( RooWorkspace* w,
                 int ntoys=1000,
                 int calculatorType = 0,
-                int testStatType = 3, 
-                bool useCLs = true ,  
-                int npoints = 1,   
-                double poimin = 1.0,  
-                double poimax = 1.0, 
+                int testStatType = 3,
+                bool useCLs = true ,
+                int npoints = 1,
+                double poimin = 1.0,
+                double poimax = 1.0,
                 bool doAnalyze = false,
                 bool useNumberCounting = false,
                 const char * modelSBName = "ModelConfig",
                 const char * modelBName = "",
-                const char * dataName = "obsData",                 
+                const char * dataName = "obsData",
                 const char * nuisPriorName = 0,
                 bool generateAsimovDataForObserved = false,
                 int nCPUs = 1
@@ -58,10 +58,10 @@ namespace RooStats
                 bool doUL = true, // true = exclusion, false = discovery
                 int ntoys=1000,
                 int calculatorType = 0,
-                int testStatType = 3, 
+                int testStatType = 3,
                 const char * modelSBName = "ModelConfig",
                 const char * modelBName = "",
-                const char * dataName = "obsData",                 
+                const char * dataName = "obsData",
                 bool useNumberCounting = false,
                 const char * nuisPriorName = 0) ;
 
@@ -101,31 +101,31 @@ namespace RooStats
                 bool useNumberCounting = false,
                 const char * nuisPriorName = 0) ;
 
-    void AnalyzeHypoTestInverterResult(const char* infile, 
+    void AnalyzeHypoTestInverterResult(const char* infile,
             const char* resultName,
             int calculatorType,
-            int testStatType , 
-            bool useCLs ,  
+            int testStatType ,
+            bool useCLs ,
             int npoints,
             const char* outfilePrefix = "",
             const char* plotType = ".pdf"
             ) ;
 
-    void AnalyzeHypoTestInverterResult(RooStats::HypoTestInverterResult* result, 
+    void AnalyzeHypoTestInverterResult(RooStats::HypoTestInverterResult* result,
             int calculatorType,
-            int testStatType , 
-            bool useCLs ,  
+            int testStatType ,
+            bool useCLs ,
             int npoints,
             const char* outfilePrefix = "",
             const char* plotType = ".pdf"
             ) ;
 
-    RooStats::HypoTestInverterResult* MakeUpperLimitPlot(const char* fileprefix, 
+    RooStats::HypoTestInverterResult* MakeUpperLimitPlot(const char* fileprefix,
                 RooWorkspace* w,
                 int calculatorType = 0,
-                int testStatType = 3, 
+                int testStatType = 3,
                 int ntoys=1000,
-                bool useCLs = true ,  
+                bool useCLs = true ,
                 int npoints = 20 ) ;
 
     LimitResult get_Pvalue( const RooStats::HypoTestInverterResult* fResults, bool doUL=true );

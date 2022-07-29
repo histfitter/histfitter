@@ -1,6 +1,6 @@
 // vim: ts=4:sw=4
 /**********************************************************************************
- * Project: HistFitter - A ROOT-based package for statistical data analysis       *  
+ * Project: HistFitter - A ROOT-based package for statistical data analysis       *
  * Package: HistFitter                                                            *
  * Class  : TMsgLogger                                                            *
  *                                                                                *
@@ -27,8 +27,8 @@
  * (http://tmva.sourceforge.net/LICENSE)                                          *
  **********************************************************************************/
 
-#ifndef ROOT_TMsgLogger
-#define ROOT_TMsgLogger
+#ifndef TMSGLOGGER_H
+#define TMSGLOGGER_H
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -49,8 +49,8 @@
 #include "TString.h"
 #include "RooGlobalFunc.h"
 
-enum TMsgLevel { 
-    kVERBOSE = 1, 
+enum TMsgLevel {
+    kVERBOSE = 1,
     kDEBUG   = 2,
     kINFO    = 3,
     kWARNING = 4,
@@ -124,7 +124,7 @@ class TMsgLogger : public std::ostringstream, public TObject {
         }
 
         static void SetMinLevel( TMsgLevel minLevel, bool lock=false ) {
-            if(m_levelLock) 
+            if(m_levelLock)
                 return;
 
             m_minLevel = minLevel;
@@ -139,8 +139,8 @@ class TMsgLogger : public std::ostringstream, public TObject {
         std::map<TMsgLevel, std::string> GetLevelMap() const { return m_levelMap; }
 
         // for python
-        void writeLogMessage( TMsgLevel level, std::string message) { 
-            *(TMsgLogger*) this << level << message << TMsgLogger::endmsg; 
+        void writeLogMessage( TMsgLevel level, std::string message) {
+            *(TMsgLogger*) this << level << message << TMsgLogger::endmsg;
         }
 
     private:

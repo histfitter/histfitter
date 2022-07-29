@@ -17,13 +17,13 @@
  * Copyright (c):                                                                 *
  *      CERN, Switzerland                                                         *
  *                                                                                *
- * http://root.cern.ch/root/html534/tutorials/roostats/StandardHypoTestInvDemo.C.html 
+ * http://root.cern.ch/root/html534/tutorials/roostats/StandardHypoTestInvDemo.C.html
  *                                                                                *
  * (http://root.cern.ch/drupal/content/license)                                   *
  **********************************************************************************/
 
-#ifndef HypoTestTool_hh
-#define HypoTestTool_hh
+#ifndef HYPOTESTTOOL_H
+#define HYPOTESTTOOL_H
 
 #include <string>
 
@@ -40,7 +40,7 @@ class RooWorkspace;
 
 // internal class to run the inverter and more
 
-namespace RooStats { 
+namespace RooStats {
 
     class HypoTestTool{
 
@@ -48,27 +48,27 @@ namespace RooStats {
             HypoTestTool();
             ~HypoTestTool() { this->ResetHypoTestInverter(); this->ResetHypoTestCalculator(); };
 
-            HypoTestInverterResult* RunHypoTestInverter(RooWorkspace * w, 
-                        const char * modelSBName, const char * modelBName, 
+            HypoTestInverterResult* RunHypoTestInverter(RooWorkspace * w,
+                        const char * modelSBName, const char * modelBName,
                         const char * dataName,
-                        int type,  int testStatType, 
-                        bool useCLs, int npoints, double poimin, double poimax, int ntoys, 
-                        bool useNumberCounting = false, 
+                        int type,  int testStatType,
+                        bool useCLs, int npoints, double poimin, double poimax, int ntoys,
+                        bool useNumberCounting = false,
                         const char * nuisPriorName = 0);
 
-            HypoTestResult* RunHypoTest(RooWorkspace * w, bool doUL=true, 
-                        const char * modelSBName="ModelConfig", const char * modelBName="", 
+            HypoTestResult* RunHypoTest(RooWorkspace * w, bool doUL=true,
+                        const char * modelSBName="ModelConfig", const char * modelBName="",
                         const char * dataName="obsData",
-                        int type=0,  int testStatType=3, 
-                        int ntoys=1000, 
-                        bool useNumberCounting = false, 
+                        int type=0,  int testStatType=3,
+                        int ntoys=1000,
+                        bool useNumberCounting = false,
                         const char * nuisPriorName = 0);
 
             void AnalyzeResult( HypoTestInverterResult * r,
                         int calculatorType,
-                        int testStatType, 
-                        bool useCLs,  
-                        int npoints, 
+                        int testStatType,
+                        bool useCLs,
+                        int npoints,
                         const char* outfilePrefix = "",
                         const char* outfiletype = ".eps" ); ///,const char * fileNameBase = 0 );
 
@@ -81,21 +81,21 @@ namespace RooStats {
             inline HypoTestInverter* GetInverter() { return m_calc; }
 
         private:
-            bool SetupHypoTestInverter(RooWorkspace * w, 
-                    const char * modelSBName="ModelConfig", const char * modelBName="", 
+            bool SetupHypoTestInverter(RooWorkspace * w,
+                    const char * modelSBName="ModelConfig", const char * modelBName="",
                     const char * dataName="obsData",
-                    int type=0,  int testStatType=3, 
-                    bool useCLs=true, 
-                    int npoints=6, double poimin=0, double poimax=5, int ntoys=1000, 
-                    bool useNumberCounting = false, 
+                    int type=0,  int testStatType=3,
+                    bool useCLs=true,
+                    int npoints=6, double poimin=0, double poimax=5, int ntoys=1000,
+                    bool useNumberCounting = false,
                     const char * nuisPriorName = 0);
 
-            bool SetupHypoTestCalculator(RooWorkspace * w, bool doUL=true, 
-                    const char * modelSBName="ModelConfig", const char *modelBName="", 
+            bool SetupHypoTestCalculator(RooWorkspace * w, bool doUL=true,
+                    const char * modelSBName="ModelConfig", const char *modelBName="",
                     const char * dataName="obsData",
-                    int type=0,  int testStatType=3, 
-                    int ntoys=1000, 
-                    bool useNumberCounting = false, 
+                    int type=0,  int testStatType=3,
+                    int ntoys=1000,
+                    bool useNumberCounting = false,
                     const char * nuisPriorName = 0);
 
             inline void ResetHypoTestCalculator() { if (m_hc!=0) { delete m_hc; m_hc=0; } };
@@ -115,13 +115,13 @@ namespace RooStats {
             int     mNWorkers;
             int     mNToyToRebuild;
             int     mPrintLevel;
-            int     mInitialFit; 
-            int     mRandomSeed; 
+            int     mInitialFit;
+            int     mRandomSeed;
             double  mNToysRatio;
             double  mMaxPoi;
             std::string mMassValue;
-            std::string mMinimizerType;  
-            TString     mResultFileName; 
+            std::string mMinimizerType;
+            TString     mResultFileName;
 
             bool mNoSystematics;
             double mConfLevel;

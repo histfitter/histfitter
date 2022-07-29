@@ -16,8 +16,8 @@
  * LICENSE.                                                                       *
  **********************************************************************************/
 
-#ifndef __TEasyFormula__
-#define __TEasyFormula__
+#ifndef TEASYFORMULA_H
+#define TEASYFORMULA_H
 
 #include <vector>
 #include <map>
@@ -30,7 +30,7 @@ class TEasyFormula : public ROOT::v5::TFormula {
 
     public:
 
-        TEasyFormula();      
+        TEasyFormula();
         TEasyFormula(const char* expression);
         TEasyFormula(const char* name, const char* expression);
         virtual ~TEasyFormula();
@@ -48,7 +48,7 @@ class TEasyFormula : public ROOT::v5::TFormula {
         Bool_t Contains(const TString& parname) const;
         Bool_t Contains(const std::vector<TString>& parList) const;
 
-        inline double GetDoubleValue()  { return this->EvalPar(0,0); } 
+        inline double GetDoubleValue()  { return this->EvalPar(0,0); }
         inline float  GetFloatValue()   { return static_cast<float>( this->EvalPar(0,0) ); }
         inline bool   GetBoolValue()    { return static_cast<bool>( this->EvalPar(0,0) ); }
         inline int    GetIntValue()     { return static_cast<int>( this->EvalPar(0,0) ); }
