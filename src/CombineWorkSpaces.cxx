@@ -60,9 +60,9 @@ void clearVec( std::vector<RooWorkspace*>& wsVec ) {
     //std::vector<RooWorkspace*>::iterator wItr=wsVec.begin(), wEnd=wsVec.end();
     //for (; wItr!=wEnd; ++wItr) {
     for(auto *wItr: wsVec) {
-        if ( wItr !=0) { 
-            delete (wItr); 
-        } 
+        if ( wItr !=0) {
+            delete (wItr);
+        }
     }
     wsVec.clear();
 }
@@ -81,7 +81,7 @@ std::vector<RooWorkspace*> CollectWorkspaces( const std::map< TString,TString >&
     for(auto const &wfItr : fwnameMap) {
         //for (int i=0; wfItr!=wfEnd; ++wfItr, ++i) {
         ++i;
-        RooWorkspace* w = GetWorkspaceFromFile( wfItr.first.Data(), wfItr.second );
+        RooWorkspace* w = Util::GetWorkspaceFromFile( wfItr.first.Data(), wfItr.second );
         if ( w==0 ) {
             CombineWorkSpacesLogger << kFATAL << "Cannot open workspace <" << wfItr.second << "> in file <" << wfItr.second << ">" << GEndl;
         }
@@ -97,7 +97,7 @@ return wsVec;
 
 
 //________________________________________________________________________________________________
-/* this function categorizes all workspaces found in infile, whose names match the format 
+/* this function categorizes all workspaces found in infile, whose names match the format
  * string, eg. "muSUSY10_3j_20pb_SU_%f_%f_0_3", where %f and %f are mapped onto the parameters "m0:m12"
  */
 std::map< TString,TString > GetMatchingWorkspaces( const TString& infile, const TString& theformat, const TString& interpretation, const TString& cutStr, const Int_t& fID, TTree* ORTree ) {
@@ -119,7 +119,7 @@ std::map< TString,TString > GetMatchingWorkspaces( const TString& infile, const 
     TString format = theformat;
     CombineWorkSpacesLogger << kDEBUG << " 1  format = " << format << GEndl;
     Bool_t searchFileName(kFALSE);
-    if (format.BeginsWith("filename+")) { 
+    if (format.BeginsWith("filename+")) {
         format = format.ReplaceAll("filename+","");
         searchFileName = kTRUE;
     }
@@ -181,7 +181,7 @@ std::map< TString,TString > GetMatchingWorkspaces( const TString& infile, const 
         wsnameSearch = wsname;
         CombineWorkSpacesLogger << kDEBUG <<" 5.1   j = " << j << " wsnameSearch = " << wsnameSearch << GEndl;
 
-        if (searchFileName && !fullWSName.IsNull()) { // E.g. WS is called combined 
+        if (searchFileName && !fullWSName.IsNull()) { // E.g. WS is called combined
             CombineWorkSpacesLogger << kDEBUG << " 5.2   searchFileName && !fullWSName.IsNull() = " << (searchFileName && !fullWSName.IsNull()) << GEndl;
             CombineWorkSpacesLogger << kDEBUG << " 5.3   TString(key->GetName())) = " << TString(key->GetName()) << GEndl;
             if (fullWSName != TString(key->GetName()))  continue;
@@ -192,41 +192,41 @@ std::map< TString,TString > GetMatchingWorkspaces( const TString& infile, const 
         //// -> we check for NULL when really reading anyway!
         //// confirm this is a workspace
         //TObject* obj = file->Get( wsname.Data() );
-        //if (obj==0) continue; 
+        //if (obj==0) continue;
         ////	if ( obj->ClassName()!=TString("RooWorkspace") ) continue;
 
         CombineWorkSpacesLogger << kDEBUG << " 5.4  searchFileName = " << searchFileName << GEndl;
         if (searchFileName) {
-            wsnameSearch = infile + "_" + wsnameSearch;	
+            wsnameSearch = infile + "_" + wsnameSearch;
         }
         CombineWorkSpacesLogger << kDEBUG << " 5.5  wsnameSearch = " << wsnameSearch << GEndl;
 
         // accept upto 10 args in ws name
-        int narg2 = sscanf( wsnameSearch.Data(), format.Data(), &wsarg[0],&wsarg[1],&wsarg[2],&wsarg[3],&wsarg[4],&wsarg[5],&wsarg[6],&wsarg[7],&wsarg[8],&wsarg[9] ); 
+        int narg2 = sscanf( wsnameSearch.Data(), format.Data(), &wsarg[0],&wsarg[1],&wsarg[2],&wsarg[3],&wsarg[4],&wsarg[5],&wsarg[6],&wsarg[7],&wsarg[8],&wsarg[9] );
         if ( !(narg1==narg2 && narg1==narg3 && narg2>0) ) { continue; }
 
         wsarg.resize(narg2);
         wsid.Clear();  // form unique ws id
-        for (int i=0; i<narg2; ++i) { 
+        for (int i=0; i<narg2; ++i) {
             objString = (TObjString*)iArr->At(i);
             // wsid  += Form("%s_%.2f_", objString->GetString().Data(), wsarg[i]);
             wsid  += Form("%s=%.2f_", objString->GetString().Data(), wsarg[i]);
             formula.SetValue(objString->GetString(),wsarg[i]);
-        }        
+        }
         //wsid += Form( "%d_",keymap[key->GetName()] );
         if (!formula.GetBoolValue()) continue;
 
         if ((ORTree!=0) && fID>=0) { // logical orring
             float searchVal(-1);
             bool found = Util::findValueFromTree(ORTree,"fID",searchVal,wsidvec,wsarg);
-            if (!found) 
+            if (!found)
                 continue;
-            if ( fID!=static_cast<int>(searchVal) ) 
-                continue; 
+            if ( fID!=static_cast<int>(searchVal) )
+                continue;
         }
 
         // NOTE: wsid always connects to highest key-index found in file!
-        wsidMap[wsid] = wsname;    
+        wsidMap[wsid] = wsname;
         CombineWorkSpacesLogger << kDEBUG  << " 5.6  wsidMap[ " << wsid << "] = " << wsname << GEndl;
     }
 
@@ -237,41 +237,6 @@ std::map< TString,TString > GetMatchingWorkspaces( const TString& infile, const 
 
     return wsidMap;
 }
-
-
-//________________________________________________________________________________________________
-RooWorkspace* GetWorkspaceFromFile( const TString& infile, const TString& wsname ) {
-    TFile* file = TFile::Open(infile.Data(), "READ");
-    if (file->IsZombie()) {
-        CombineWorkSpacesLogger << kERROR << "Cannot open file: " << infile << GEndl;
-        return NULL;
-    }
-    file->cd();
-
-    TObject* obj = file->Get( wsname.Data() ) ;
-    if (obj==0) {
-        CombineWorkSpacesLogger << kERROR << "Cannot open workspace <" << wsname << "> in file <" << infile << ">" << GEndl;
-        file->Close();
-        return NULL;
-    }
-
-    if (obj->ClassName()!=TString("RooWorkspace")) {
-        CombineWorkSpacesLogger << kERROR << "Cannot open workspace <" << wsname << "> in file <" << infile << ">" << GEndl;
-        file->Close();
-        return NULL;
-    }
-
-    RooWorkspace* w = (RooWorkspace*)( obj );
-    if ( w==0 ) {
-        CombineWorkSpacesLogger << kERROR << "Cannot open workspace <" << wsname << "> in file <" << infile << ">" << GEndl;
-        file->Close();
-        return NULL;
-    }
-
-    //file->Close();
-    return w;
-}
-
 
 //________________________________________________________________________________________________
 RooStats::HypoTestInverterResult* GetHypoTestResultFromFile( TFile* file, const TString& wsname ) {

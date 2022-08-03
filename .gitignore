@@ -13,6 +13,7 @@ include/*.h
 results/*
 config/*
 data/*
+*.json
 
 # Development environments
 .vscode/

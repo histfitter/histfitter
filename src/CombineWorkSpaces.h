@@ -15,8 +15,8 @@
  * LICENSE.                                                                       *
  **********************************************************************************/
 
-#ifndef CombineWorkSpaces_hh
-#define CombineWorkSpaces_hh
+#ifndef COMBINEWORKSPACES_H
+#define COMBINEWORKSPACES_H
 
 #include "TString.h"
 #include <string>
@@ -24,7 +24,7 @@
 #include <map>
 
 // -------------------------------
-// Combines workspaces 
+// Combines workspaces
 // -------------------------------
 
 class RooWorkspace;
@@ -43,8 +43,6 @@ std::map<TString,TString> GetMatchingWorkspaces( const TString& infile, const TS
 std::vector<RooWorkspace*> CollectWorkspaces( const std::map< TString,TString >& fwnameMap, const TString& wid );
 
 void clearVec( std::vector<RooWorkspace*>& wsVec );
-
-RooWorkspace* GetWorkspaceFromFile( const TString& infile, const TString& wsname );
 
 RooStats::HypoTestInverterResult* GetHypoTestResultFromFile( TFile* file, const TString& wsname );
 

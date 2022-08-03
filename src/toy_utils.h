@@ -15,8 +15,8 @@
  * LICENSE.                                                                       *
  **********************************************************************************/
 
-#ifndef toy_utilsDEF
-#define toy_utilsDEF 
+#ifndef TOYUTILS_H
+#define TOYUTILS_H
 
 #include "TString.h"
 #include "LimitResult.h"
@@ -35,8 +35,8 @@ LimitResult get_Pvalue( RooWorkspace* w, const int& mode=0, const int& n_toys=10
 std::list<LimitResult> CollectLimitResults( const TString& infile, const TString& format, const TString& interpretation, const TString& cutStr="1", const int& mode=0, const int& n_toys=10000, const int& do_ul=1 );
 void WriteResultSetJSON(const std::list<LimitResult>& summary, const TString& listname, const TString& outDir="./");
 void WriteResultSet(const std::list<LimitResult>& summary, const TString& listname, const TString& outDir="./");
-void CollectAndWriteResultSet( const TString& infile, const TString& format, const TString& interpretation, const TString& cutStr="1", 
-        const int& mode=0, const int& par1=100000 /*nexp*/, const int& par2=0 /*nobssigma*/, const int& par3=0, 
+void CollectAndWriteResultSet( const TString& infile, const TString& format, const TString& interpretation, const TString& cutStr="1",
+        const int& mode=0, const int& par1=100000 /*nexp*/, const int& par2=0 /*nobssigma*/, const int& par3=0,
         const TString& outDir="./", const TString& fileprefix="" );
 
 // same, but collect and convert hypotest results

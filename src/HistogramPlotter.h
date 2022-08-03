@@ -1,6 +1,6 @@
 // vim: ts=4 sw=4
-#ifndef HAVE_HISTOGRAMPLOTTER_H
-#define HAVE_HISTOGRAMPLOTTER_H 
+#ifndef HISTOGRAMPLOTTER_H
+#define HISTOGRAMPLOTTER_H
 
 #include <iostream>
 #include <map>
@@ -84,7 +84,7 @@ class HistogramPlotter {
 
         // internals
         RooSimultaneous *m_pdf;
-        RooCategory *m_regionCategory; 
+        RooCategory *m_regionCategory;
         std::vector<TString> m_regions; // regions actually used for plotting
 
         std::vector< std::vector<TH1*> > m_histograms; // histograms
@@ -97,7 +97,7 @@ class HistogramPlot {
 
         void saveHistograms();
         void plotSeparateComponents();
-        
+
         void setAnalysisName(const TString& anaName);
         void setOutputPrefix(const TString& outputPrefix);
         void setFitResult(RooFitResult *r);
@@ -105,14 +105,14 @@ class HistogramPlot {
 
     private:
         HistogramPlot();
-       
+
         // for the 'normal' plot
         void buildFrame();
         void addRatioPanelCosmetics(RooPlot*, RooPlot*);
         void addRatioPanel();
         void addComponents();
 
-        // plot a single component 
+        // plot a single component
         void plotSingleComponent(unsigned int i, double normalisation=0.0);
 
         TLegend* buildLegend();
@@ -127,7 +127,7 @@ class HistogramPlot {
         RooAbsPdf* m_regionPdf;
         RooDataSet* m_regionData;
         ChannelStyle m_style;
-       
+
         RooFitResult* m_fitResult;
 
         TString m_regionCategoryLabel;

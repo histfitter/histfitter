@@ -16,8 +16,8 @@
  * See corresponding .h file for author and license information                   *
  **********************************************************************************/
 
-#ifndef __Significance__
-#define __Significance__ 
+#ifndef SIGNIFICANCE_H
+#define SIGNIFICANCE_H
 
 #include "TString.h"
 #include <vector>
@@ -43,7 +43,7 @@ namespace StatTools
     Double_t FindXS95( Double_t nObs, Double_t nBkgExp, Double_t nBkgErr, Double_t signalEff, Double_t lumi, Double_t pValue=0.05 );
 
     Double_t FindSNSigma( Double_t nEvtExp, Double_t sumErr, Double_t nsigma3=3.0, Double_t signald=0, Double_t signalu=100, Double_t tol=0.001 ) ;
-    Double_t FindXSNSigma( Double_t nBkgExp, Double_t nBkgErr, Double_t signalEff, Double_t lumi, Double_t nsigma3=3.0, 
+    Double_t FindXSNSigma( Double_t nBkgExp, Double_t nBkgErr, Double_t signalEff, Double_t lumi, Double_t nsigma3=3.0,
             Double_t signalu=100 ) ;
 }
 
