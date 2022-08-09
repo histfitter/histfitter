@@ -12,7 +12,7 @@ find_package(ROOT 6 REQUIRED ${root_components})
 list(TRANSFORM root_components PREPEND ROOT::)
 
 set(local_libs ChannelStyle;CombinationUtils;CombineWorkSpaces;ConfigMgr;
-        DrawUtils;FitConfig;HistogramPlotter;HypoTestTool;json;LimitResult;
+        DrawUtils;FitConfig;HistogramPlotter;HypoTestTool;LimitResult;
         RooExpandedFitResult;RooHist;RooPlot;Significance;StatTools;
         TEasyFormula;TMsgLogger;toy_utils;Utils;ValidationUtils;XtraValues)
 list(TRANSFORM local_libs APPEND .h OUTPUT_VARIABLE headers)

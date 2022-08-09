@@ -20,7 +20,7 @@
 #include "StatTools.h"
 #include "TMsgLogger.h"
 #include "RooStats/HypoTestInverterResult.h"
-#include "json.h"
+#include <nlohmann/json.hpp>
 
 #include "TTree.h"
 #include "TFile.h"
@@ -51,6 +51,7 @@
 using namespace std;
 using namespace RooFit;
 using namespace RooStats;
+using json = nlohmann::json;
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 /// Code to collect hypotest results and write to text files
@@ -98,7 +99,7 @@ void CollectAndWriteHypoTestResults( const TString& infile, const TString& forma
     TString rootoutfilestub = outdir + listname;
 
     // collect p-values, store rootfile if needed
-    std::list<LimitResult> summary = CollectHypoTestResults( infile, format, interpretation, cutStr, rejectFailedPrefit ); 
+    std::list<LimitResult> summary = CollectHypoTestResults( infile, format, interpretation, cutStr, rejectFailedPrefit );
 
     // store harvest in text file
     //return WriteResultSet( summary, listname, outdir );
@@ -107,16 +108,16 @@ void CollectAndWriteHypoTestResults( const TString& infile, const TString& forma
 
 
 //________________________________________________________________________________________________
-std::list<LimitResult> CollectHypoTestResults( const TString& infile, const TString& format, const TString& interpretation, 
-        const TString& cutStr, const bool& rejectFailedPrefit ) 
+std::list<LimitResult> CollectHypoTestResults( const TString& infile, const TString& format, const TString& interpretation,
+        const TString& cutStr, const bool& rejectFailedPrefit )
 {
     std::list<LimitResult> limres;
-    if ( infile.IsNull() || format.IsNull() || interpretation.IsNull() ) 
+    if ( infile.IsNull() || format.IsNull() || interpretation.IsNull() )
         return limres;
 
     // collect all hypotest results in input file
     std::map<TString,TString> wsnameMap = GetMatchingWorkspaces( infile, format, interpretation, cutStr );
-    if ( wsnameMap.empty() ) 
+    if ( wsnameMap.empty() )
         return limres;
 
     // loop over hypotestresults and save results
@@ -129,7 +130,7 @@ std::list<LimitResult> CollectHypoTestResults( const TString& infile, const TStr
     int counter_badcovquality = 0;
     int counter_probably_bad_fit = 0;
 
-    RooStats::HypoTestInverterResult *ht = NULL; 
+    RooStats::HypoTestInverterResult *ht = NULL;
     RooFitResult *fitresult = NULL;
 
     //for (; itr!=end; ++itr) {
@@ -143,7 +144,7 @@ std::list<LimitResult> CollectHypoTestResults( const TString& infile, const TStr
                 << " has failed HypoTestInverterResult - cannot use result. Skip." << GEndl;
             delete ht; ht=NULL;
             continue;
-        } 
+        }
 
         //Check fit result
         TString fitresultname = TString(ht->GetName());
@@ -162,7 +163,7 @@ std::list<LimitResult> CollectHypoTestResults( const TString& infile, const TStr
         if (fitresult && fitresult->status()!=0) {
             ToyUtilsLogger << kWARNING << "Fit failed for point " << fitresultname.Data() << ". Result has been flagged as failed fit." << GEndl;
             ++counter_failed_status;
-            failed_status = true;   
+            failed_status = true;
         }
 
         int fitstatus = -1;
@@ -173,13 +174,13 @@ std::list<LimitResult> CollectHypoTestResults( const TString& infile, const TStr
         bool failed_cov = false;
         bool dodgy_cov = false;
         if (fitresult && fitresult->covQual() < 1.1) {
-            ToyUtilsLogger << kWARNING << "Fit result " << fitresultname.Data() 
+            ToyUtilsLogger << kWARNING << "Fit result " << fitresultname.Data()
                 << " has bad covariance matrix quality! Result has been flagged as failed fit." << GEndl;
             ++counter_badcovquality;
             //failed_fit = true;
             failed_cov = true;
         } else if (fitresult && fitresult->covQual() < 2.1) {
-            ToyUtilsLogger << kWARNING << "Fit result " << fitresultname.Data() 
+            ToyUtilsLogger << kWARNING << "Fit result " << fitresultname.Data()
                 << " has mediocre covariance matrix quality. Result has been flagged as failed cov matrix." << GEndl;
             ++counter_not_great_fits;
             //failed_cov = true;
@@ -202,7 +203,7 @@ std::list<LimitResult> CollectHypoTestResults( const TString& infile, const TStr
         // MB Keeping points for now, this also rejects bad fits.
         if (fabs(result.GetP0()-0.5) < 0.0001 && result.GetSigma0() < 0.0001){
             //counter_probably_bad_fit++;
-            ToyUtilsLogger << kINFO << "One of the base fits _may_ have failed for point (or may not): " 
+            ToyUtilsLogger << kINFO << "One of the base fits _may_ have failed for point (or may not): "
                 << fitresultname.Data() << " : " << result.GetP0() << " " << result.GetSigma0() << " Flagged as p0=0.5." << GEndl;
             //failed_fit = true;
             failed_p0half = true;
@@ -222,16 +223,16 @@ std::list<LimitResult> CollectHypoTestResults( const TString& infile, const TStr
         result.AddMetaData ( ParseWorkspaceID(itr.first) );
         result.AddMetaData ( failMap );
 
-        // store info from interpretation string (eg m0 and m12 value) 
-        limres.push_back(result); 
+        // store info from interpretation string (eg m0 and m12 value)
+        limres.push_back(result);
 
         if(ht){ delete ht; ht=NULL; }
         if(fitresult) { delete fitresult; fitresult=NULL; }
     }
     infile_f->Close();
-    ToyUtilsLogger << kINFO << counter_failed_status << " failed fit status and " << counter_badcovquality 
+    ToyUtilsLogger << kINFO << counter_failed_status << " failed fit status and " << counter_badcovquality
         << " fit(s) with bad covariance matrix quality were counted" << GEndl;
-    ToyUtilsLogger << kINFO << counter_probably_bad_fit << " fit(s) with a bad p-value and " << counter_not_great_fits 
+    ToyUtilsLogger << kINFO << counter_probably_bad_fit << " fit(s) with a bad p-value and " << counter_not_great_fits
         << " fit(s) with mediocre covariance matrix quality were counted" << GEndl;
     ToyUtilsLogger << kINFO << "All but the ones with mediocre covariance matrix quality were rejected from the final results list." << GEndl;
     ToyUtilsLogger << kINFO << counter_failed_fits << " failed fit(s)" << GEndl;
@@ -241,14 +242,14 @@ std::list<LimitResult> CollectHypoTestResults( const TString& infile, const TStr
 
 
 //________________________________________________________________________________________________
-void WriteResultSetJSON( const std::list<LimitResult>& summary, const TString& listname, const TString& outDir ){
-    if (summary.empty()) { 
+void WriteResultSetJSON( const std::vector<LimitResult>& summary, const TString& listname, const TString& outDir ){
+    if (summary.empty()) {
         return;
     }
 
     ToyUtilsLogger << kINFO << "Storing results of " << summary.size() << " scan points as JSON" << GEndl;
 
-    TString outdir = gSystem->pwd(); 
+    TString outdir = gSystem->pwd();
     if ( !gSystem->cd( outDir.Data() ) ) {
         ToyUtilsLogger << kERROR << "output dir <" << outDir << "> does not exist. Return." << GEndl;
         return;
@@ -263,10 +264,11 @@ void WriteResultSetJSON( const std::list<LimitResult>& summary, const TString& l
     std::ostringstream outfile;
     outfile << outdir.Data() << listname.Data() << "_harvest_list.json";
 
-    JSON limresJSON = JSON::Array();
-    for(auto const &l: summary) { 
-        limresJSON.asVector().push_back( l.GetJSONData()); 
-    }
+    json limresJSON(summary);
+    /*JSON limresJSON = JSON::Array();
+    for(auto const &l: summary) {
+        limresJSON.asVector().push_back( l.GetJSONData());
+    }*/
 
     // write out files
     ofstream fout;
@@ -275,7 +277,7 @@ void WriteResultSetJSON( const std::list<LimitResult>& summary, const TString& l
         ToyUtilsLogger << kERROR << "Error opening file <" << outfile.str() <<">" << GEndl;
         return;
     }
-    limresJSON.print(fout);
+    fout << limresJSON;
     fout.close();
 
     ToyUtilsLogger << kINFO << "JSON list file stored as <" << outfile.str() << ">" << GEndl;
@@ -289,7 +291,7 @@ void WriteResultSet( const std::list<LimitResult>& summary, const TString& listn
 
     ToyUtilsLogger << kINFO << "Storing results of " << summary.size() << " scan points." << GEndl;
 
-    TString outdir = gSystem->pwd(); 
+    TString outdir = gSystem->pwd();
     if ( !gSystem->cd( outDir.Data() ) ) {
         ToyUtilsLogger << kERROR << "output dir <" << outDir << "> does not exist. Return." << GEndl;
         return;
@@ -343,7 +345,7 @@ void WriteResultSet( const std::list<LimitResult>& summary, const TString& listn
     writetree   += "  file->Close();\n";
     writetree   += "}\n";
 
-    mymain  = "\nvoid summary_harvest_tree_description() {\n"; 
+    mymain  = "\nvoid summary_harvest_tree_description() {\n";
     mymain += "  TTree* tree = harvesttree();\n";
     mymain += "  gDirectory->Add(tree);\n";
     mymain += "}\n";
@@ -447,7 +449,7 @@ void CollectAndWriteResultSet( const TString& infile, const TString& format, con
     TString rootoutfilestub = outdir + listname;
 
     // collect p-values, store rootfile if needed
-    std::list<LimitResult> summary = CollectLimitResults( infile, format, interpretation, cutStr, mode, n_toys, do_ul ); 
+    std::list<LimitResult> summary = CollectLimitResults( infile, format, interpretation, cutStr, mode, n_toys, do_ul );
 
     // store harvest in text file
     //return WriteResultSet( summary, listname, outdir );
@@ -458,12 +460,12 @@ void CollectAndWriteResultSet( const TString& infile, const TString& format, con
 //________________________________________________________________________________________________
 std::list<LimitResult> CollectLimitResults( const TString& infile, const TString& format, const TString& interpretation, const TString& cutStr, const int& mode, const int& n_toys, const int& do_ul) {
     std::list<LimitResult> limres;
-    if ( infile.IsNull() || format.IsNull() || interpretation.IsNull() ) 
+    if ( infile.IsNull() || format.IsNull() || interpretation.IsNull() )
         return limres;
 
     // classify all workspaces in input files
     std::map<TString,TString> wsnameMap = GetMatchingWorkspaces( infile, format, interpretation, cutStr );
-    if ( wsnameMap.empty() ) 
+    if ( wsnameMap.empty() )
         return limres;
 
     // loop over workspaces and print results
