@@ -23,10 +23,7 @@
 #include "json.hpp"
 #include "TString.h"
 
-namespace hf
-{
 using json = nlohmann::json;
-}
 
 class LimitResult {
     private:
@@ -147,13 +144,13 @@ class LimitResult {
         void Summary();
         std::vector<std::string> GetKeys() const;
         std::map<std::string, float> GetData() const;
-        hf::json GetJSONData() const;
+        json GetJSONData() const;
         std::string GetSummaryString() const;
         std::string GetDescriptionString() const;
         void AddMetaData(const std::map<std::string,float>& metadata);
         void AddMetaData(const std::string&, float);
 };
 
-void to_json(hf::json& j, const LimitResult& L);
+void to_json(json& j, const LimitResult& L);
 
 #endif

@@ -16,11 +16,11 @@
  **********************************************************************************/
 
 #ifndef toy_utilsDEF
-#define toy_utilsDEF
+#define toy_utilsDEF 
 
 #include "TString.h"
 #include "LimitResult.h"
-#include <vector>
+#include <list>
 #include <map>
 
 class RooArgSet;
@@ -32,16 +32,16 @@ class RooRealVar;
 LimitResult get_Pvalue( RooWorkspace* w, const int& mode=0, const int& n_toys=10000, const int& do_ul=1, const TString& wid="" );
 
 // run and collect harvest, based on workspace results
-std::vector<LimitResult> CollectLimitResults( const TString& infile, const TString& format, const TString& interpretation, const TString& cutStr="1", const int& mode=0, const int& n_toys=10000, const int& do_ul=1 );
-void WriteResultSetJSON(const std::vector<LimitResult>& summary, const TString& listname, const TString& outDir="./");
-void WriteResultSet(const std::vector<LimitResult>& summary, const TString& listname, const TString& outDir="./");
-void CollectAndWriteResultSet( const TString& infile, const TString& format, const TString& interpretation, const TString& cutStr="1",
-        const int& mode=0, const int& par1=100000 /*nexp*/, const int& par2=0 /*nobssigma*/, const int& par3=0,
+std::list<LimitResult> CollectLimitResults( const TString& infile, const TString& format, const TString& interpretation, const TString& cutStr="1", const int& mode=0, const int& n_toys=10000, const int& do_ul=1 );
+void WriteResultSetJSON(const std::list<LimitResult>& summary, const TString& listname, const TString& outDir="./");
+void WriteResultSet(const std::list<LimitResult>& summary, const TString& listname, const TString& outDir="./");
+void CollectAndWriteResultSet( const TString& infile, const TString& format, const TString& interpretation, const TString& cutStr="1", 
+        const int& mode=0, const int& par1=100000 /*nexp*/, const int& par2=0 /*nobssigma*/, const int& par3=0, 
         const TString& outDir="./", const TString& fileprefix="" );
 
 // same, but collect and convert hypotest results
 void CollectAndWriteHypoTestResults( const TString& infile, const TString& format, const TString& interpretation, const TString& cutStr="1", const bool rejectFailedPrefit=true, const TString& outDir="./", const TString& fileprefix="" );
-std::vector<LimitResult> CollectHypoTestResults( const TString& infile, const TString& format, const TString& interpretation, const TString& cutStr="1", const bool& rejectFailedPrefit=true );
+std::list<LimitResult> CollectHypoTestResults( const TString& infile, const TString& format, const TString& interpretation, const TString& cutStr="1", const bool& rejectFailedPrefit=true );
 
 
 #endif
