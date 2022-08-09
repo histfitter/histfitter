@@ -9,7 +9,6 @@ set(root_components Core;Net;Hist;Graf;Graf3d;Gpad;Tree;Rint;
         HistFactory;XMLParser;Foam;Html;Minuit)
 
 find_package(ROOT 6 REQUIRED ${root_components})
-find_package(nlohmann_json REQUIRED)
 list(TRANSFORM root_components PREPEND ROOT::)
 
 set(local_libs ChannelStyle;CombinationUtils;CombineWorkSpaces;ConfigMgr;

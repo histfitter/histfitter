@@ -27,10 +27,10 @@ WORKDIR /usr/local/HistFitter
 RUN root --version && \
     gcc --version && \
     python --version --version && \
-    cmake --version && \
+    make --version && \
     . setup.sh && \
-    cmake -S src -B lib && \
-    cmake --build lib -j$(($(nproc) - 1)) && \
+    cd src && \
+    make -j$(($(nproc) - 1)) && \
     mkdir -p "${HOME}/.local/bin" && \
     mkdir -p "${HOME}/data" && \
     printf '\nif [ -f /usr/local/HistFitter/setup.sh ];then\n    . /usr/local/HistFitter/setup.sh\nfi\n' >> "${HOME}/.profile"
