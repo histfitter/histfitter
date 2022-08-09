@@ -20,7 +20,7 @@
 #include "StatTools.h"
 #include "TMsgLogger.h"
 #include "RooStats/HypoTestInverterResult.h"
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 
 #include "TTree.h"
 #include "TFile.h"
