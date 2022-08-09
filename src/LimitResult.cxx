@@ -19,7 +19,10 @@
 #include "LimitResult.h"
 #include "Significance.h"
 
+namespace hf
+{
 using json = nlohmann::json;
+}
 
 template <typename T> std::string to_string_scientific(const T& t) {
    std::ostringstream os;
@@ -223,7 +226,7 @@ void LimitResult::AddMetaData(const std::string& s, float val){
     m_metadata[s] = val;
 }
 
-void to_json(json& j, const LimitResult& L)
+void to_json(hf::json& j, const LimitResult& L)
 {
-    j = json(L.GetData());
+    j = hf::json(L.GetData());
 }

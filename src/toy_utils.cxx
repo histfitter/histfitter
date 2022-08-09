@@ -51,7 +51,10 @@
 using namespace std;
 using namespace RooFit;
 using namespace RooStats;
+namespace hf
+{
 using json = nlohmann::json;
+}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 /// Code to collect hypotest results and write to text files
@@ -99,7 +102,7 @@ void CollectAndWriteHypoTestResults( const TString& infile, const TString& forma
     TString rootoutfilestub = outdir + listname;
 
     // collect p-values, store rootfile if needed
-    std::list<LimitResult> summary = CollectHypoTestResults( infile, format, interpretation, cutStr, rejectFailedPrefit );
+    std::vector<LimitResult> summary = CollectHypoTestResults( infile, format, interpretation, cutStr, rejectFailedPrefit );
 
     // store harvest in text file
     //return WriteResultSet( summary, listname, outdir );
@@ -108,10 +111,10 @@ void CollectAndWriteHypoTestResults( const TString& infile, const TString& forma
 
 
 //________________________________________________________________________________________________
-std::list<LimitResult> CollectHypoTestResults( const TString& infile, const TString& format, const TString& interpretation,
+std::vector<LimitResult> CollectHypoTestResults( const TString& infile, const TString& format, const TString& interpretation,
         const TString& cutStr, const bool& rejectFailedPrefit )
 {
-    std::list<LimitResult> limres;
+    std::vector<LimitResult> limres;
     if ( infile.IsNull() || format.IsNull() || interpretation.IsNull() )
         return limres;
 
@@ -121,7 +124,7 @@ std::list<LimitResult> CollectHypoTestResults( const TString& infile, const TStr
         return limres;
 
     // loop over hypotestresults and save results
-    std::list<LimitResult> limitres;
+    std::vector<LimitResult> limitres;
     //std::map<TString,TString>::const_iterator itr = wsnameMap.begin(), end = wsnameMap.end();
 
     int counter_failed_fits = 0;
@@ -264,7 +267,7 @@ void WriteResultSetJSON( const std::vector<LimitResult>& summary, const TString&
     std::ostringstream outfile;
     outfile << outdir.Data() << listname.Data() << "_harvest_list.json";
 
-    json limresJSON(summary);
+    hf::json limresJSON(summary);
     /*JSON limresJSON = JSON::Array();
     for(auto const &l: summary) {
         limresJSON.asVector().push_back( l.GetJSONData());
@@ -284,7 +287,7 @@ void WriteResultSetJSON( const std::vector<LimitResult>& summary, const TString&
 }
 
 //________________________________________________________________________________________________
-void WriteResultSet( const std::list<LimitResult>& summary, const TString& listname, const TString& outDir ){
+void WriteResultSet( const std::vector<LimitResult>& summary, const TString& listname, const TString& outDir ){
     if (summary.empty()) {
         return;
     }
@@ -302,7 +305,7 @@ void WriteResultSet( const std::list<LimitResult>& summary, const TString& listn
     }
     outdir = ( outdir.EndsWith("/") ? outdir : outdir+"/" );
 
-    std::list<LimitResult>::const_iterator itr=summary.begin(), end=summary.end();
+    std::vector<LimitResult>::const_iterator itr=summary.begin(), end=summary.end();
 
     TString outfile = outdir + listname + "_harvest_list" ;
     TString outdesc = outdir + "summary_harvest_tree_description.h" ;
@@ -449,7 +452,7 @@ void CollectAndWriteResultSet( const TString& infile, const TString& format, con
     TString rootoutfilestub = outdir + listname;
 
     // collect p-values, store rootfile if needed
-    std::list<LimitResult> summary = CollectLimitResults( infile, format, interpretation, cutStr, mode, n_toys, do_ul );
+    std::vector<LimitResult> summary = CollectLimitResults( infile, format, interpretation, cutStr, mode, n_toys, do_ul );
 
     // store harvest in text file
     //return WriteResultSet( summary, listname, outdir );
@@ -458,8 +461,8 @@ void CollectAndWriteResultSet( const TString& infile, const TString& format, con
 
 
 //________________________________________________________________________________________________
-std::list<LimitResult> CollectLimitResults( const TString& infile, const TString& format, const TString& interpretation, const TString& cutStr, const int& mode, const int& n_toys, const int& do_ul) {
-    std::list<LimitResult> limres;
+std::vector<LimitResult> CollectLimitResults( const TString& infile, const TString& format, const TString& interpretation, const TString& cutStr, const int& mode, const int& n_toys, const int& do_ul) {
+    std::vector<LimitResult> limres;
     if ( infile.IsNull() || format.IsNull() || interpretation.IsNull() )
         return limres;
 
@@ -469,7 +472,7 @@ std::list<LimitResult> CollectLimitResults( const TString& infile, const TString
         return limres;
 
     // loop over workspaces and print results
-    std::list<LimitResult> limitres;
+    std::vector<LimitResult> limitres;
     //std::map<TString,TString>::const_iterator itr=wsnameMap.begin(), end=wsnameMap.end();
 
     //for (; itr!=end; ++itr) {
