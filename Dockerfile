@@ -29,8 +29,8 @@ RUN root --version && \
     python --version --version && \
     make --version && \
     . setup.sh && \
-    cd src && \
-    make -j$(($(nproc) - 1)) && \
+    cmake -S src -B lib -DCMAKE_BUILD_TYPE=Release && \
+    cmake --build lib -j$(($(nproc) - 1)) && \
     mkdir -p "${HOME}/.local/bin" && \
     mkdir -p "${HOME}/data" && \
     printf '\nif [ -f /usr/local/HistFitter/setup.sh ];then\n    . /usr/local/HistFitter/setup.sh\nfi\n' >> "${HOME}/.profile"

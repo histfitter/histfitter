@@ -20,7 +20,7 @@
 
 #include <iostream>
 #include <map>
-#include "json.hpp"
+#include <nlohmann/json.hpp>
 #include "TString.h"
 
 using json = nlohmann::json;

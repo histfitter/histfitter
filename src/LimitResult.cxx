@@ -14,7 +14,7 @@
 #include <iostream>
 #include <sstream>
 #include <iomanip>
-#include "json.hpp"
+#include <nlohmann/json.hpp>
 
 #include "LimitResult.h"
 #include "Significance.h"
