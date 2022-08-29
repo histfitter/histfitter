@@ -92,10 +92,9 @@ Total background systematic              '''
       tableline += (
           " & $\\pm "
           + str("%.2f" % m[region]["totsyserr"])
-          + r"\ ["
-          + str("%.2f" % percentage)
-          + "\\%] $       "
       )
+      if showPercent: tableline += fr"\ [{percentage:0.2f}\%] "
+      tableline += "$       "
 
   tableline += '''      \\\\
 \\midrule
