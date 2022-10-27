@@ -54,7 +54,6 @@
 #include "RooMinimizer.h"
 #include "RooConstVar.h"
 #include "RooNumIntConfig.h"
-#include "RooMinuit.h"
 #include "RooFormulaVar.h"
 
 #include "RooStats/ModelConfig.h"
@@ -115,18 +114,18 @@ double Util::looseToTightVal(const TString& reg, TMap* map){
   double LtoTeffReal_W=((TObjString*)map->GetValue("LtoTeffReal_WZ_"+reg+"lmt"))->GetString().Atof();
   double fBTagTop=((TObjString*)map->GetValue("btag_sep_tt"))->GetString().Atof();
   double fBTagWZ=((TObjString*)map->GetValue("btag_sep_WZ"))->GetString().Atof();
-  
+
   double nTop=nTopTight * (LtoTeffReal_tt-1.0);
   double nWZ=nWTight * (LtoTeffReal_W-1.0);
-  if(reg=="TR"){ 
-    nTop=nTop*fBTagTop; 
-    nWZ=nWZ*fBTagWZ; 
+  if(reg=="TR"){
+    nTop=nTop*fBTagTop;
+    nWZ=nWZ*fBTagWZ;
   }
-  else if(reg=="WR"){ 
-    nTop=nTop*(1.0-fBTagTop); 
-    nWZ=nWZ*(1.0-fBTagWZ); 
+  else if(reg=="WR"){
+    nTop=nTop*(1.0-fBTagTop);
+    nWZ=nWZ*(1.0-fBTagWZ);
   }
-  
+
   double val=(nLMT-nTop-nWZ)/LtoTeffFake;
   return val;
 }
@@ -160,7 +159,7 @@ double Util::getNonQcdVal(const TString& proc, const TString& reg, TMap* map,con
 
 
 //_____________________________________________________________________________
-void Util::GenerateFitAndPlot(TString fcName, TString anaName, Bool_t drawBeforeFit, Bool_t drawAfterFit, Bool_t plotCorrelationMatrix, 
+void Util::GenerateFitAndPlot(TString fcName, TString anaName, Bool_t drawBeforeFit, Bool_t drawAfterFit, Bool_t plotCorrelationMatrix,
         Bool_t plotSeparateComponents, Bool_t plotNLL, Bool_t minos, TString minosPars,
         Bool_t doFixParameters, TString fixedPars, bool ReduceCorrMatrix, bool noFit, bool plotInterpolation ){
 
@@ -210,7 +209,7 @@ void Util::GenerateFitAndPlot(TString fcName, TString anaName, Bool_t drawBefore
         return;
     }
 
-    Util::SetInterpolationCode(w,4); 
+    Util::SetInterpolationCode(w,4);
     if (not noFit ) {
         // only modify the workspace when actually fitting
         SaveInitialSnapshot(w);
@@ -232,7 +231,7 @@ void Util::GenerateFitAndPlot(TString fcName, TString anaName, Bool_t drawBefore
 
     //hack to be fixed at HistFactory level (check again with ROOT 5.34)
     // Bool_t lumiConst = kTRUE;
-    //if (fc->m_signalChannels.size() > 0) 
+    //if (fc->m_signalChannels.size() > 0)
     Bool_t lumiConst = kFALSE;
 
     //  fit toy MC if specified. When left None, data is fit by default
@@ -267,7 +266,7 @@ void Util::GenerateFitAndPlot(TString fcName, TString anaName, Bool_t drawBefore
         ImportInWorkspace(w, expResultBefore, "RooExpandedFitResult_beforeFit");
     } else {
         // retrieve from the workspace
-        expResultBefore = static_cast<RooExpandedFitResult*>( w->genobj("RooExpandedFitResult_beforeFit") ); 
+        expResultBefore = static_cast<RooExpandedFitResult*>( w->genobj("RooExpandedFitResult_beforeFit") );
         LoadSnapshotInWorkspace(w, "snapshot_paramsVals_RooExpandedFitResult_beforeFit");
     }
 
@@ -283,9 +282,9 @@ void Util::GenerateFitAndPlot(TString fcName, TString anaName, Bool_t drawBefore
         h.setOutputPrefix("beforeFit");
         h.setFitResult(expResultBefore);
         h.setInputData(toyMC);
-        
+
         h.Initialize();
-        h.PlotRegions(); 
+        h.PlotRegions();
         //h.saveHistograms();
     }
 
@@ -297,7 +296,7 @@ void Util::GenerateFitAndPlot(TString fcName, TString anaName, Bool_t drawBefore
         result = FitPdf(w, fitChannels, lumiConst, toyMC, "", minos, minosPars, doFixParameters, fixedPars);
 
         if (result == NULL) {
-            Logger << kERROR << "PlotNLL(): running FitPdf() failed!" << GEndl;    
+            Logger << kERROR << "PlotNLL(): running FitPdf() failed!" << GEndl;
             return;
         }
 
@@ -307,7 +306,7 @@ void Util::GenerateFitAndPlot(TString fcName, TString anaName, Bool_t drawBefore
         ImportInWorkspace(w, expResultAfter, "RooExpandedFitResult_afterFit");
     } else {
         // load back the fit result
-        expResultAfter = static_cast<RooExpandedFitResult*>( w->genobj("RooExpandedFitResult_afterFit") ); 
+        expResultAfter = static_cast<RooExpandedFitResult*>( w->genobj("RooExpandedFitResult_afterFit") );
         LoadSnapshotInWorkspace(w, "snapshot_paramsVals_RooExpandedFitResult_afterFit");
     }
 
@@ -321,19 +320,19 @@ void Util::GenerateFitAndPlot(TString fcName, TString anaName, Bool_t drawBefore
         h.setOutputPrefix("afterFit");
         h.setFitResult(expResultAfter);
         h.setInputData(toyMC);
-        
+
         // plot each component of each region separately with propagated
         // error after fit  (interesting for debugging)
-        if(plotSeparateComponents) { 
-            h.setPlotSeparateComponents(true); 
+        if(plotSeparateComponents) {
+            h.setPlotSeparateComponents(true);
         }
-        
+
         h.Initialize();
-        h.PlotRegions(); 
+        h.PlotRegions();
     }
 
     //plot correlation matrix for result
-    if(plotCorrelationMatrix) { 
+    if(plotCorrelationMatrix) {
         //PlotCorrelationMatrix(result, anaName, ReduceCorrMatrix);
         PlotCorrelationMatrix(expResultAfter, anaName, ReduceCorrMatrix);
     }
@@ -343,16 +342,16 @@ void Util::GenerateFitAndPlot(TString fcName, TString anaName, Bool_t drawBefore
     if(plotNLL) {
         PlotNLL(w, expResultAfter, plotPLL, anaName, "", toyMC, minosPars, fitChannels, lumiConst);
     }
-    
+
     if(not noFit) {
         // only write out output workspace if we've run a fit
-        if (toyMC) { 
+        if (toyMC) {
             WriteWorkspace(w, inputFilename, toyMC->GetName());
         } else {
             WriteWorkspace(w, inputFilename);
         }
     }
-    if (result){  
+    if (result){
         result->Print("v");
         PlotFitParameters(result,anaName);
     }
@@ -368,7 +367,7 @@ void Util::GenerateFitAndPlot(TString fcName, TString anaName, Bool_t drawBefore
 ///////////////
 
 //_____________________________________________________________________________
-void Util::GeneratePlots(TString filename, TString anaName, Bool_t drawBeforeFit, Bool_t drawAfterFit, Bool_t plotCorrelationMatrix, 
+void Util::GeneratePlots(TString filename, TString anaName, Bool_t drawBeforeFit, Bool_t drawAfterFit, Bool_t plotCorrelationMatrix,
         Bool_t plotSeparateComponents, Bool_t plotNLL, Bool_t minos, TString minosPars,
         Bool_t doFixParameters, TString fixedPars, bool ReduceCorrMatrix){
 
@@ -415,7 +414,7 @@ void Util::GeneratePlots(TString filename, TString anaName, Bool_t drawBeforeFit
         return;
     }
 
-    Util::SetInterpolationCode(w,4); 
+    Util::SetInterpolationCode(w,4);
     if (not noFit ) {
         // only modify the workspace when actually fitting
         SaveInitialSnapshot(w);
@@ -437,7 +436,7 @@ void Util::GeneratePlots(TString filename, TString anaName, Bool_t drawBeforeFit
 
     //hack to be fixed at HistFactory level (check again with ROOT 5.34)
     // Bool_t lumiConst = kTRUE;
-    //if (fc->m_signalChannels.size() > 0) 
+    //if (fc->m_signalChannels.size() > 0)
     Bool_t lumiConst = kFALSE;
 
     //  fit toy MC if specified. When left None, data is fit by default
@@ -472,11 +471,11 @@ void Util::GeneratePlots(TString filename, TString anaName, Bool_t drawBeforeFit
         ImportInWorkspace(w, expResultBefore, "RooExpandedFitResult_beforeFit");
     } else {
         // retrieve from the workspace
-        expResultBefore = static_cast<RooExpandedFitResult*>( w->genobj("RooExpandedFitResult_beforeFit") ); 
+        expResultBefore = static_cast<RooExpandedFitResult*>( w->genobj("RooExpandedFitResult_beforeFit") );
         LoadSnapshotInWorkspace(w, "snapshot_paramsVals_RooExpandedFitResult_beforeFit");
     }
 
-    // plot before fit  
+    // plot before fit
     if (drawBeforeFit)
         PlotPdfWithComponents(w, "beforeFit", anaName, plotChannels, "beforeFit", expResultBefore, toyMC);
 
@@ -487,7 +486,7 @@ void Util::GeneratePlots(TString filename, TString anaName, Bool_t drawBeforeFit
         //result = FitPdf(w, fitChannels, lumiConst, toyMC, "", minos, minosPars, doFixParameters, fixedPars);
 
         //if (result == NULL) {
-            //Logger << kERROR << "PlotNLL(): running FitPdf() failed!" << GEndl;    
+            //Logger << kERROR << "PlotNLL(): running FitPdf() failed!" << GEndl;
             //return;
         //}
 
@@ -497,7 +496,7 @@ void Util::GeneratePlots(TString filename, TString anaName, Bool_t drawBeforeFit
         //ImportInWorkspace(w, expResultAfter, "RooExpandedFitResult_afterFit");
     //} else {
         // load back the fit result
-        expResultAfter = static_cast<RooExpandedFitResult*>( w->genobj("RooExpandedFitResult_afterFit") ); 
+        expResultAfter = static_cast<RooExpandedFitResult*>( w->genobj("RooExpandedFitResult_afterFit") );
         LoadSnapshotInWorkspace(w, "snapshot_paramsVals_RooExpandedFitResult_afterFit");
     //}
 
@@ -508,13 +507,13 @@ void Util::GeneratePlots(TString filename, TString anaName, Bool_t drawBeforeFit
 
     // plot each component of each region separately with propagated
     // error after fit  (interesting for debugging)
-    if(plotSeparateComponents) { 
+    if(plotSeparateComponents) {
         //PlotSeparateComponents(w, fc->m_name, anaName, plotChannels, "afterFit", result, toyMC);
         PlotSeparateComponents(w, "afterFit_separateComponents", anaName, plotChannels, "afterFit", expResultAfter, toyMC);
     }
 
     //plot correlation matrix for result
-    if(plotCorrelationMatrix) { 
+    if(plotCorrelationMatrix) {
         //PlotCorrelationMatrix(result, anaName, ReduceCorrMatrix);
         PlotCorrelationMatrix(expResultAfter, anaName, ReduceCorrMatrix);
     }
@@ -525,16 +524,16 @@ void Util::GeneratePlots(TString filename, TString anaName, Bool_t drawBeforeFit
         //PlotNLL(w, expResultAfter, plotPLL, anaName, "", toyMC, minosPars, fitChannels, lumiConst);
         PlotNLL(w, expResultAfter, plotPLL, anaName, "", toyMC, minosPars, "ALL", lumiConst);
     }
-    
+
     if(not noFit) {
         // only write out output workspace if we've run a fit
-        if (toyMC) { 
+        if (toyMC) {
             WriteWorkspace(w, inputFilename, toyMC->GetName());
         } else {
             WriteWorkspace(w, inputFilename);
         }
     }
-    if (result)  
+    if (result)
         result->Print("v");
 }
 
@@ -559,7 +558,7 @@ void Util::SaveInitialSnapshot(RooWorkspace* w){
         Logger << kWARNING << "Util::SaveInitialSnapshot():   not saving the initial snapshot as cannot find pdf (simPdf or combPdf) in workspace" << GEndl;
         return;
     }
-      
+
     RooAbsData* data = (RooAbsData*) w->data("obsData");
     RooArgSet* params = (RooArgSet*) pdf->getParameters(*data) ;
     if(!w->loadSnapshot("snapshot_paramsVals_initial")) {
@@ -579,14 +578,14 @@ void Util::LoadSnapshotInWorkspace(RooWorkspace* w,TString snapshot){
 
     Bool_t loaded =  w->loadSnapshot(snapshot);
 
-    if (loaded){ 
-        Logger << kINFO << "workspace loaded" << GEndl; 
-        return; 
-    } else { 
+    if (loaded){
+        Logger << kINFO << "workspace loaded" << GEndl;
+        return;
+    } else {
         Logger << kWARNING << "Util.LoadSnapshotInWorkspace() did not find snapshot named "  << snapshot << ", check your workspace file" << GEndl;
     }
 
-    return;  
+    return;
 
 }
 
@@ -594,9 +593,9 @@ void Util::LoadSnapshotInWorkspace(RooWorkspace* w,TString snapshot){
 //_____________________________________________________________________________
 void Util::WriteWorkspace(RooWorkspace* w, TString outFileName, TString suffix){
 
-    if(w==NULL){ 
-        Logger << kERROR << "Workspace not found, not writing workspace to file" << GEndl; 
-        return; 
+    if(w==NULL){
+        Logger << kERROR << "Workspace not found, not writing workspace to file" << GEndl;
+        return;
     }
 
     outFileName.ReplaceAll(".root","_afterFit.root");
@@ -618,7 +617,7 @@ void Util::WriteWorkspace(RooWorkspace* w, TString outFileName, TString suffix){
 
 
 /*
- * The FitPdf() function is (partially) taken from the function 
+ * The FitPdf() function is (partially) taken from the function
  * RooStats::ProfileLikelihoodTestStat::GetMinNLL()
  * See: http://root.cern.ch/root/html534/src/RooStats__ProfileLikelihoodTestStat.cxx.html
  * ((http://root.cern.ch/drupal/content/license))
@@ -636,9 +635,9 @@ RooFitResult* Util::FitPdf( RooWorkspace* w, TString fitRegions, Bool_t lumiCons
 
     RooMsgService::instance().getStream(1).removeTopic(NumIntegration);
 
-    if(!w){ 
+    if(!w){
         Logger << kERROR << "Workspace not found, no fitting performed" << GEndl;
-        return NULL; 
+        return NULL;
     }
 
     if(!deactivateBinnedLikelihood) {
@@ -654,24 +653,24 @@ RooFitResult* Util::FitPdf( RooWorkspace* w, TString fitRegions, Bool_t lumiCons
 
     RooSimultaneous* pdf = static_cast<RooSimultaneous*>(w->pdf("simPdf"));
 
-    RooAbsData* data = ( inputData!=0 ? inputData : static_cast<RooAbsData*>(w->data("obsData")) ); 
+    RooAbsData* data = ( inputData!=0 ? inputData : static_cast<RooAbsData*>(w->data("obsData")) );
     if(!data) {
         Logger << kFATAL << "Can't find RooAbsData 'data' in workspace. Are you attempting to run a blinded fit but did you not add a (dummy) data sample?" << GEndl;
-        return NULL; 
+        return NULL;
     }
-    
-    RooCategory* regionCat = (RooCategory*) w->cat("channelCat");  
+
+    RooCategory* regionCat = (RooCategory*) w->cat("channelCat");
     if(!regionCat) {
         Logger << kERROR << "Can't find RooCategory 'channelCat' in workspace" << GEndl;
-        return NULL; 
+        return NULL;
     }
-   
+
     RooAbsCategory* absRegionCat = static_cast<RooAbsCategory*>(regionCat);
     if(!absRegionCat) {
         Logger << kERROR << "Can't cast RooAbsCategory 'channelCat' from workspace" << GEndl;
-        return NULL; 
+        return NULL;
     }
-  
+
     Logger << kINFO << "Will dump channelCat as RooAbsCategory now:" << GEndl;
     absRegionCat->Print("v");
 
@@ -687,15 +686,15 @@ RooFitResult* Util::FitPdf( RooWorkspace* w, TString fitRegions, Bool_t lumiCons
 
     if (lumiConst) {
         RooRealVar* lumi = (RooRealVar*) w->var("Lumi");
-        if (lumi!=NULL) lumi->setConstant(lumiConst); 
+        if (lumi!=NULL) lumi->setConstant(lumiConst);
     }
-    
+
     //fixing parameters to certain values
     if (doFixParameters && fixedPars != "") {
      std::vector<TString> fixedParsVector = Tokens(fixedPars,",");
      for (unsigned int j=0; j<fixedParsVector.size(); j++) {
          std::vector<TString> fixedParsPair = Tokens(fixedParsVector[j],":");
-         if (fixedParsPair.size() != 2) { 
+         if (fixedParsPair.size() != 2) {
              Logger << kERROR << " Util::FitPdf() fixing parameters to constant: wrong arguments given: " <<  fixedParsVector[j] << GEndl;
              Logger << kERROR << " Util::FitPdf() Ignore this and continue." << GEndl;
              continue;
@@ -707,7 +706,7 @@ RooFitResult* Util::FitPdf( RooWorkspace* w, TString fitRegions, Bool_t lumiCons
              var->setVal(fixedParsPair[1].Atof());
              var->setConstant(kTRUE);
          }
-     }        
+     }
     }
 
     // Construct an empty simultaneous pdf using category regionCat as index
@@ -722,8 +721,8 @@ RooFitResult* Util::FitPdf( RooWorkspace* w, TString fitRegions, Bool_t lumiCons
 
     for(unsigned int iVec=0; iVec<numFitRegions; iVec++){
         TString regionCatLabel = fitRegionsVec[iVec];
-        if( regionCat->setLabel(regionCatLabel,kTRUE)){  
-            Logger << kWARNING << " Label '" << regionCatLabel << "' is not a state of channelCat (see Table) " << GEndl; 
+        if( regionCat->setLabel(regionCatLabel,kTRUE)){
+            Logger << kWARNING << " Label '" << regionCatLabel << "' is not a state of channelCat (see Table) " << GEndl;
         } else{
             // dataset for each channel/region/category
             TString dataCatLabel = Form("channelCat==channelCat::%s",regionCatLabel.Data());
@@ -736,12 +735,12 @@ RooFitResult* Util::FitPdf( RooWorkspace* w, TString fitRegions, Bool_t lumiCons
     }
 
 
-    if(dataVec.empty()){ 
-        Logger << kERROR << "   NONE OF THE REGIONS ARE SPECIFIED IN DATASET, NO FIT WILL BE PERFORMED" << GEndl; 
+    if(dataVec.empty()){
+        Logger << kERROR << "   NONE OF THE REGIONS ARE SPECIFIED IN DATASET, NO FIT WILL BE PERFORMED" << GEndl;
         return 0;
     }
-    else if(pdfVec.empty()){ 
-        Logger << kERROR << "   NONE OF THE REGIONS ARE SPECIFIED IN SIMULTANEOUS PDF, NO FIT WILL BE PERFORMED" << GEndl; 
+    else if(pdfVec.empty()){
+        Logger << kERROR << "   NONE OF THE REGIONS ARE SPECIFIED IN SIMULTANEOUS PDF, NO FIT WILL BE PERFORMED" << GEndl;
         return 0;
     }
     else{
@@ -788,7 +787,7 @@ RooFitResult* Util::FitPdf( RooWorkspace* w, TString fitRegions, Bool_t lumiCons
     RooStats::ModelConfig* mc = Util::GetModelConfig( w );
     const RooArgSet* globObs = mc->GetGlobalObservables();
 
-    RooAbsReal* nll = (RooNLLVar*) pdf_FR->createNLL(*data_FR, RooFit::GlobalObservables(*globObs), RooFit::Offset(true) ); 
+    RooAbsReal* nll = (RooNLLVar*) pdf_FR->createNLL(*data_FR, RooFit::GlobalObservables(*globObs), RooFit::Offset(true) );
 
     int minimPrintLevel = 1; //verbose;
 
@@ -801,34 +800,34 @@ RooFitResult* Util::FitPdf( RooWorkspace* w, TString fitRegions, Bool_t lumiCons
     double tol =  ROOT::Math::MinimizerOptions::DefaultTolerance();
     tol = std::max(tol, 1.0); // 1.0 is the minimum value used in RooMinimizer
     minim.setEps( tol );
-    
+
     //LM: RooMinimizer.setPrintLevel has +1 offset - so subtruct  here -1
     minim.setPrintLevel(minimPrintLevel-1);
     int status = -1;
     minim.optimizeConst(2);
-    TString minimizer = "Minuit2"; //ROOT::Math::MinimizerOptions::DefaultMinimizerType(); 
-    TString algorithm = ROOT::Math::MinimizerOptions::DefaultMinimizerAlgo(); 
+    TString minimizer = "Minuit2"; //ROOT::Math::MinimizerOptions::DefaultMinimizerType();
+    TString algorithm = ROOT::Math::MinimizerOptions::DefaultMinimizerAlgo();
 
-    Logger << kINFO << "Util::FitPdf()  ........ using " << minimizer << " / " << algorithm << GEndl; 
+    Logger << kINFO << "Util::FitPdf()  ........ using " << minimizer << " / " << algorithm << GEndl;
     Logger << kINFO << " with strategy  " << strategy << " and tolerance " << tol << GEndl;
 
 
     for (int tries = 1, maxtries = 4; tries <= maxtries; ++tries) {
-        status = minim.minimize(minimizer, algorithm);  
-        if (status%1000 == 0) {  // ignore erros from Improve 
+        status = minim.minimize(minimizer, algorithm);
+        if (status%1000 == 0) {  // ignore erros from Improve
             break;
-        } else { 
+        } else {
             if (tries == 1) {
                 Logger << kINFO << "    ----> Doing a re-scan first" << GEndl;
                 minim.minimize(minimizer,"Scan");
             }
             if (tries == 2) {
-                if (ROOT::Math::MinimizerOptions::DefaultStrategy() == 0 ) { 
+                if (ROOT::Math::MinimizerOptions::DefaultStrategy() == 0 ) {
                     Logger << kINFO << "    ----> trying with strategy = 1" << GEndl;
                     minim.setStrategy(1);
                 }
-                else 
-                    tries++; // skip this trial if stratehy is already 1 
+                else
+                    tries++; // skip this trial if stratehy is already 1
             }
             if (tries == 3) {
                 Logger << kINFO << "    ----> trying with improve" << GEndl;
@@ -852,10 +851,10 @@ RooFitResult* Util::FitPdf( RooWorkspace* w, TString fitRegions, Bool_t lumiCons
             minim.hesse();
         }
 
-        // save fit result 
+        // save fit result
         r = minim.save();
     }
-    else { 
+    else {
         Logger << kERROR << "FIT FAILED !- return a NaN NLL " << GEndl;
     }
 
@@ -884,7 +883,7 @@ RooFitResult* Util::FitPdf( RooWorkspace* w, TString fitRegions, Bool_t lumiCons
 
 
 //_____________________________________________________________________________
-void 
+void
 Util::SetInterpolationCode(RooWorkspace* w, Int_t code)
 {
     if(w==NULL){
@@ -895,9 +894,9 @@ Util::SetInterpolationCode(RooWorkspace* w, Int_t code)
     RooArgSet funcs = w->allFunctions();
     TIterator* iter = funcs.createIterator() ;
 
-    RooAbsArg* parg(0);  
+    RooAbsArg* parg(0);
     while((parg=(RooAbsArg*)iter->Next())) {
-        if ( parg->ClassName()!=TString("PiecewiseInterpolation") ) { continue; }    
+        if ( parg->ClassName()!=TString("PiecewiseInterpolation") ) { continue; }
         PiecewiseInterpolation* p = (PiecewiseInterpolation*)w->function( parg->GetName() ); // something I can modifiy :)
         p->setAllInterpCodes(code);
     }
@@ -907,22 +906,22 @@ Util::SetInterpolationCode(RooWorkspace* w, Int_t code)
 
 
 //_____________________________________________________________________________
-RooAbsData* 
+RooAbsData*
 Util::GetAsimovSet( RooWorkspace* inputws  )
 {
     RooWorkspace* w(0);
     if (inputws!=NULL) { w = inputws; }
     else { w = (RooWorkspace*) gDirectory->Get("w"); }
 
-    if(w==NULL){ 
-        Logger << kERROR << "Workspace not found, no Asimov set found. Return." << GEndl; 
-        return 0; 
+    if(w==NULL){
+        Logger << kERROR << "Workspace not found, no Asimov set found. Return." << GEndl;
+        return 0;
     }
 
     RooAbsData* data = w->data("asimovData");
-    if (data==NULL) { 
-        Logger << kERROR << "No Asimov set found. Return." << GEndl; 
-        return 0; 
+    if (data==NULL) {
+        Logger << kERROR << "No Asimov set found. Return." << GEndl;
+        return 0;
     }
 
     return data;
@@ -930,39 +929,39 @@ Util::GetAsimovSet( RooWorkspace* inputws  )
 
 
 //_____________________________________________________________________________
-    RooAbsData* 
+    RooAbsData*
 Util::GetToyMC( RooWorkspace* inputws  )
 {
     RooWorkspace* w(0);
     if (inputws!=NULL) { w = inputws; }
     else { w = (RooWorkspace*) gDirectory->Get("w"); }
-    if(w==NULL){ 
-        Logger << kERROR << "Workspace not found, no toy dataset generated." << GEndl; 
-        return 0; 
+    if(w==NULL){
+        Logger << kERROR << "Workspace not found, no toy dataset generated." << GEndl;
+        return 0;
     }
 
     RooStats::ModelConfig* mc = Util::GetModelConfig( w );
-    if (mc==NULL) { 
-        Logger << kERROR << "No model config found. Return." << GEndl; 
-        return 0; 
+    if (mc==NULL) {
+        Logger << kERROR << "No model config found. Return." << GEndl;
+        return 0;
     }
 
     RooAbsPdf* pdf = mc->GetPdf();
-    if (pdf==NULL) { 
-        Logger << kERROR << "No pdf found. Return." << GEndl; 
-        return 0; 
+    if (pdf==NULL) {
+        Logger << kERROR << "No pdf found. Return." << GEndl;
+        return 0;
     }
 
     RooAbsData* data = w->data("obsData");
-    if (data==NULL) { 
-        Logger << kERROR << "No dataset found. Return." << GEndl; 
-        return 0; 
+    if (data==NULL) {
+        Logger << kERROR << "No dataset found. Return." << GEndl;
+        return 0;
     }
 
     const RooArgSet* obsSet = mc->GetObservables();
-    if (obsSet==NULL) { 
-        Logger << kERROR << "No observables found. Return." << GEndl; 
-        return 0; 
+    if (obsSet==NULL) {
+        Logger << kERROR << "No observables found. Return." << GEndl;
+        return 0;
     }
 
     Logger << kINFO << "Util::GetToyMC() : now generating toy MC set with # events : " << data->sumEntries() << GEndl;
@@ -979,14 +978,14 @@ vector<TString> Util::GetRegionsVec(TString regions, RooCategory* regionCat){
     std::vector<TString> regionsAllVec = TokensALL(regionCat);
     std::vector<TString> regionsRequestedVec = Tokens(regions,",");
 
-    if(regions=="ALL"){ regionsVec = regionsAllVec; 
+    if(regions=="ALL"){ regionsVec = regionsAllVec;
     } else {
         for(unsigned int iReg=0; iReg<regionsAllVec.size(); iReg++){
             for(unsigned int jReg=0; jReg<regionsRequestedVec.size(); jReg++){
                 if( regionsAllVec[iReg].EqualTo(regionsRequestedVec[jReg]) ) {
                     regionsVec.push_back(regionsAllVec[iReg]);
                 }
-            }    
+            }
         }
     }
 
@@ -1008,7 +1007,7 @@ void Util::DecomposeWS(const char* infile, const char* wsname, const char* outfi
     }
 
     // open file and check if input file exists
-    TFile * file = TFile::Open(fileName); 
+    TFile * file = TFile::Open(fileName);
 
     // if input file was specified but not found, quit
     if(!file && !TString(infile).IsNull()){
@@ -1046,12 +1045,12 @@ void Util::DecomposeWS(const char* infile, const char* wsname, const char* outfi
 
     TString allObs;
 
-    // iterate over all the regions 
+    // iterate over all the regions
     for(unsigned int iVec=0; iVec<numPlots; iVec++){
 
         TString regionCatLabel = regionsVec[iVec];
-        if( regionCat->setLabel(regionCatLabel,kTRUE)){  
-            Logger << kINFO << " Label '" << regionCatLabel << "' is not a state of channelCat (see Table) " << GEndl; 
+        if( regionCat->setLabel(regionCatLabel,kTRUE)){
+            Logger << kINFO << " Label '" << regionCatLabel << "' is not a state of channelCat (see Table) " << GEndl;
         }else{
             RooAbsPdf* regionPdf = (RooAbsPdf*) pdf->getPdf(regionCatLabel.Data());
 
@@ -1059,7 +1058,7 @@ void Util::DecomposeWS(const char* infile, const char* wsname, const char* outfi
             RooDataSet* regionData = (RooDataSet*) data->reduce(dataCatLabel.Data());
             if(regionPdf==NULL || regionData==NULL){
                 Logger << kWARNING << " Either the Pdf or the Dataset do not have an appropriate state for the region = " << regionCatLabel << ", check the Workspace file" << GEndl;
-                Logger << kWARNING << " regionPdf = " << regionPdf << "   regionData = " << regionData << GEndl;  
+                Logger << kWARNING << " regionPdf = " << regionPdf << "   regionData = " << regionData << GEndl;
                 continue;
             }
 
@@ -1091,58 +1090,58 @@ void Util::PlotPdfWithComponents(RooWorkspace* w, TString fcName, TString anaNam
     h.setPlotSeparateComponents(true); //TODO: hack
 
     h.Initialize();
-    h.PlotRegions(); 
+    h.PlotRegions();
 }
 
 //_____________________________________________________________________________________________________________________________________
 void Util::PlotSeparateComponents(RooWorkspace* w,TString fcName, TString anaName, TString plotRegions,TString outputPrefix, RooFitResult* rFit, RooAbsData* inputData)
 {
-    if(rFit==NULL){ 
-        Logger << kWARNING << " Running PlotSeparateComponents() without a RooFitResult is pointless, I'm done" << GEndl ; 
-        return; 
+    if(rFit==NULL){
+        Logger << kWARNING << " Running PlotSeparateComponents() without a RooFitResult is pointless, I'm done" << GEndl ;
+        return;
     }
 
     Bool_t plotComponents=true;
     ConfigMgr* mgr = ConfigMgr::getInstance();
     FitConfig* fc = mgr->getFitConfig(fcName);
 
-    Logger << kINFO << " ------ Starting PlotSeparateComponents with parameters:   analysisName = " << fcName << GEndl; 
+    Logger << kINFO << " ------ Starting PlotSeparateComponents with parameters:   analysisName = " << fcName << GEndl;
     Logger << kINFO << "    fitRegions = " <<  plotRegions <<  "  plotComponents = " << plotComponents << "  outputPrefix = " << outputPrefix  << GEndl;
 
-    if(w==NULL){ 
-        Logger << kWARNING << " Workspace not found, no plotting performed" << GEndl; 
-        return; 
+    if(w==NULL){
+        Logger << kWARNING << " Workspace not found, no plotting performed" << GEndl;
+        return;
     }
     RooSimultaneous* pdf = (RooSimultaneous*) w->pdf("simPdf");
 
-    RooAbsData* data = ( inputData!=0 ? inputData : (RooAbsData*)w->data("obsData") ); 
+    RooAbsData* data = ( inputData!=0 ? inputData : (RooAbsData*)w->data("obsData") );
     RooCategory* regionCat = (RooCategory*) w->cat("channelCat");
     data->table(*((RooAbsCategory*)regionCat))->Print("v");
 
     if(plotRegions =="") plotRegions = "ALL";
     std::vector<TString> regionsVec = GetRegionsVec(plotRegions, regionCat);
 
-    unsigned  int numRegions = regionsVec.size();
-    TCanvas* canVec[numRegions];
+    const unsigned int numRegions = regionsVec.size();
+    std::vector<TCanvas*> canVec(numRegions);
 
-    for(unsigned int iVec=0; iVec<numRegions; iVec++){   
+    for (unsigned int iVec = 0; iVec < numRegions; iVec++){
 
         TString regionCatLabel = regionsVec[iVec];
-        if( regionCat->setLabel(regionCatLabel,kTRUE)){  
+        if( regionCat->setLabel(regionCatLabel,kTRUE)){
             Logger << kWARNING << " Label '" << regionCatLabel << "' is not a state of channelCat (see Table) " << GEndl;
         } else{
             RooAbsPdf* regionPdf = (RooAbsPdf*) pdf->getPdf(regionCatLabel.Data());
             TString dataCatLabel = Form("channelCat==channelCat::%s",regionCatLabel.Data());
             RooAbsData* regionData = (RooAbsData*) data->reduce(dataCatLabel.Data());
             ChannelStyle style = fc->getChannelStyle(regionCatLabel);
-            if(regionPdf==NULL || regionData==NULL){ 
+            if(regionPdf==NULL || regionData==NULL){
                 Logger << kERROR << " Either the Pdf or the Dataset do not have an appropriate state for the region = " << regionCatLabel << ", check the Workspace file" << GEndl;
-                Logger << kERROR << " regionPdf = " << regionPdf << "   regionData = " << regionData << GEndl;  
-                continue; 
+                Logger << kERROR << " regionPdf = " << regionPdf << "   regionData = " << regionData << GEndl;
+                continue;
             }
             RooRealVar* regionVar =(RooRealVar*) ((RooArgSet*) regionPdf->getObservables(*regionData))->find(Form("obs_x_%s",regionCatLabel.Data()));
             // get all components/samples in this region
-            TString RRSPdfName = Form("%s_model",regionCatLabel.Data()); 
+            TString RRSPdfName = Form("%s_model",regionCatLabel.Data());
             RooRealSumPdf* RRSPdf = (RooRealSumPdf*) regionPdf->getComponents()->find(RRSPdfName);
             TString binWidthName =  Form("binWidth_obs_x_%s_0",regionCatLabel.Data());
             RooRealVar* regionBinWidth = ((RooRealVar*) RRSPdf->getVariables()->find(Form("binWidth_obs_x_%s_0",regionCatLabel.Data()))) ;
@@ -1161,20 +1160,20 @@ void Util::PlotSeparateComponents(RooWorkspace* w,TString fcName, TString anaNam
                 canVecDivX = ((Int_t) (sqrt(numComps)));
                 canVecDivY = ((Int_t) (sqrt(numComps)+0.5));
 
-                if(canVecDivX<1) 
+                if(canVecDivX<1)
                     canVecDivX = 1;
-                if(canVecDivY<1) 
+                if(canVecDivY<1)
                     canVecDivY = 1;
-            }  
+            }
 
             TString canName=Form("can_%s_%s_separateComponents",regionCatLabel.Data(),outputPrefix.Data());
-            canVec[iVec] = new TCanvas(canName,canName,600,600); // .c_str()) 
+            canVec[iVec] = new TCanvas(canName,canName,600,600); // .c_str())
             canVec[iVec]->Divide(canVecDivX , canVecDivY);
 
             //iterate over all samples and plot
             for( unsigned int iComp=0; iComp<regionCompFracVec.size(); iComp++){
                 TString component =  regionCompNameVec[iComp];
-                RooPlot* frame =  regionVar->frame(); 
+                RooPlot* frame =  regionVar->frame();
                 frame->SetName(Form("frame_%s_%s_%s",regionCatLabel.Data(),regionCompNameVec[iComp].Data(),outputPrefix.Data()));
                 Int_t  compPlotColor = ( (fc!=0) ? style.getSampleColor(regionCompNameVec[iComp]) : static_cast<int>(iComp) );
                 TString  compShortName  = ( (fc!=0) ? style.getSampleName(regionCompNameVec[iComp])  : "" );
@@ -1182,9 +1181,9 @@ void Util::PlotSeparateComponents(RooWorkspace* w,TString fcName, TString anaNam
                 // normalize pdf to number of expected events, not to number of events in dataset
                 double normCount = regionPdf->expectedEvents(*regionVar);
 
-                if (rFit != NULL) 
+                if (rFit != NULL)
                     regionPdf->plotOn(frame,Components(regionCompNameVec[iComp].Data()),VisualizeError(*rFit),FillColor(kCyan),Precision(1e-5),Normalization(1,RooAbsReal::RelativeExpected));
-    
+
                 regionPdf->plotOn(frame,Components(regionCompNameVec[iComp].Data()),LineColor(compPlotColor),Normalization(regionCompFracVec[iComp]*normCount,RooAbsReal::NumEvent),Precision(1e-5));
 
                 canVec[iVec]->cd(iComp+1);
@@ -1216,19 +1215,19 @@ void Util::PlotSeparateComponents(RooWorkspace* w,TString fcName, TString anaNam
 //_____________________________________________________________________________________________________________________________________
 void Util::PlotNLL(RooWorkspace* w, RooFitResult* rFit, Bool_t plotPLL, TString anaName, TString outputPrefix, RooAbsData* inputData, TString plotPars, TString fitRegions, Bool_t lumiConst)
 {
-    if(rFit==NULL){ 
-        Logger << kWARNING << " Running PlotNLL() without a RooFitResult is pointless, I'm done" << GEndl ; 
-        return; 
+    if(rFit==NULL){
+        Logger << kWARNING << " Running PlotNLL() without a RooFitResult is pointless, I'm done" << GEndl ;
+        return;
     }
 
     Logger << kINFO << " ------ Starting PlotNLL with parameters: " << GEndl;
     Logger << kINFO << "  outputPrefix = " << outputPrefix  << GEndl;
 
-    if(!w){ 
-        Logger << kINFO << " Workspace not found, no plotting performed" << GEndl; 
-        return; 
+    if(!w){
+        Logger << kINFO << " Workspace not found, no plotting performed" << GEndl;
+        return;
     }
-    
+
     if(!deactivateBinnedLikelihood) {
         RooFIter iter = w->components().fwdIterator();
         RooAbsArg* arg;
@@ -1243,13 +1242,13 @@ void Util::PlotNLL(RooWorkspace* w, RooFitResult* rFit, Bool_t plotPLL, TString 
 
     RooSimultaneous* pdf = (RooSimultaneous*) w->pdf("simPdf");
 
-    RooAbsData* data = ( inputData!=0 ? inputData : (RooAbsData*)w->data("obsData") ); 
+    RooAbsData* data = ( inputData!=0 ? inputData : (RooAbsData*)w->data("obsData") );
     RooCategory* regionCat = (RooCategory*) w->cat("channelCat");
     data->table(*((RooAbsCategory*)regionCat))->Print("v");
 
     if (lumiConst) {
         RooRealVar* lumi = (RooRealVar*) w->var("Lumi");
-        if (lumi!=NULL) lumi->setConstant(lumiConst); 
+        if (lumi!=NULL) lumi->setConstant(lumiConst);
     }
 
     // Construct an empty simultaneous pdf using category regionCat as index
@@ -1264,8 +1263,8 @@ void Util::PlotNLL(RooWorkspace* w, RooFitResult* rFit, Bool_t plotPLL, TString 
 
     for(unsigned int iVec=0; iVec<numFitRegions; iVec++){
         TString regionCatLabel = fitRegionsVec[iVec];
-        if( regionCat->setLabel(regionCatLabel,kTRUE)){  
-            Logger << kWARNING << " Label '" << regionCatLabel << "' is not a state of channelCat (see Table) " << GEndl; 
+        if( regionCat->setLabel(regionCatLabel,kTRUE)){
+            Logger << kWARNING << " Label '" << regionCatLabel << "' is not a state of channelCat (see Table) " << GEndl;
         } else{
             // dataset for each channel/region/category
             TString dataCatLabel = Form("channelCat==channelCat::%s",regionCatLabel.Data());
@@ -1277,12 +1276,12 @@ void Util::PlotNLL(RooWorkspace* w, RooFitResult* rFit, Bool_t plotPLL, TString 
         }
     }
 
-    if(dataVec.empty()){ 
-        Logger << kERROR << "   NONE OF THE REGIONS ARE SPECIFIED IN DATASET, NO FIT WILL BE PERFORMED" << GEndl; 
+    if(dataVec.empty()){
+        Logger << kERROR << "   NONE OF THE REGIONS ARE SPECIFIED IN DATASET, NO FIT WILL BE PERFORMED" << GEndl;
         return;
     }
-    else if(pdfVec.empty()){ 
-        Logger << kERROR << "   NONE OF THE REGIONS ARE SPECIFIED IN SIMULTANEOUS PDF, NO FIT WILL BE PERFORMED" << GEndl; 
+    else if(pdfVec.empty()){
+        Logger << kERROR << "   NONE OF THE REGIONS ARE SPECIFIED IN SIMULTANEOUS PDF, NO FIT WILL BE PERFORMED" << GEndl;
         return;
     }
     else{
@@ -1318,7 +1317,7 @@ void Util::PlotNLL(RooWorkspace* w, RooFitResult* rFit, Bool_t plotPLL, TString 
     RooStats::ModelConfig* mc = Util::GetModelConfig( w );
     const RooArgSet* globObs = mc->GetGlobalObservables();
 
-    // Create Log Likelihood    
+    // Create Log Likelihood
     RooAbsReal* nll = simPdfFitRegions->createNLL(*dataFitRegions,NumCPU(2), RooFit::GlobalObservables(*globObs), RooFit::Offset(true)) ;
 
     unsigned int numParsP = plotParams->getSize();
@@ -1331,10 +1330,10 @@ void Util::PlotNLL(RooWorkspace* w, RooFitResult* rFit, Bool_t plotPLL, TString 
     }
     Logger << kINFO << "Util::PlotNLL rFit contains no floating parameters: " << numParsP << GEndl;
 
-    TCanvas* canVec[numPars];
+    std::vector<TCanvas*> canVec(numPars);
 
     // loop over all floating pars
-    for(unsigned int iPar=0, jPar=0; iPar<numPars ; iPar++){
+    for(unsigned int iPar=0, jPar=0; iPar < numPars ; iPar++){
         RooAbsArg* arg = fpf.at(iPar);
 
         if ( (plotParams->getSize()>0) && plotParams->find(arg->GetName())==0 ) { continue; }
@@ -1373,23 +1372,23 @@ void Util::PlotNLL(RooWorkspace* w, RooFitResult* rFit, Bool_t plotPLL, TString 
 
         Double_t curveMax = curve->getYAxisMax();
         // safety for weird RooPlots where curve goes to infinity in first/last bin(s)
-        if (curveMax > 0. && !std::isinf(curveMax) && !std::isnan(curveMax) )  { ; } // frame->SetMaximum(curveMax * 2.); 
+        if (curveMax > 0. && !std::isinf(curveMax) && !std::isnan(curveMax) )  { ; } // frame->SetMaximum(curveMax * 2.);
         else if(curveMax > 0. && (std::isinf(curveMax) || std::isnan(curveMax))){
 
             for(Int_t iBin=1;  iBin < curve->GetN()-1; iBin++){
                 Double_t xBin = 0.;
-                Double_t yBin = -1.;     
+                Double_t yBin = -1.;
                 curve->GetPoint(iBin,xBin,yBin) ;
                 if(std::isinf(yBin)  || std::isnan(yBin)){
                     curve->RemovePoint(iBin);
                     Logger << kWARNING << " Removing bin = " << iBin  << " as it was either inf or nan from NLL plot for parameter = " << parName<< GEndl;
                     iBin--;
                 }
-            } 
+            }
 
             Int_t iBin = 1;
             Double_t xFirstBin = 0.;
-            Double_t yFirstBin = -1.; 
+            Double_t yFirstBin = -1.;
             while ( (yFirstBin<0 || std::isinf(yFirstBin)  || std::isnan(yFirstBin) )&& iBin < curve->GetN()-1){
                 iBin++;
                 curve->GetPoint(iBin,xFirstBin,yFirstBin) ;
@@ -1403,13 +1402,13 @@ void Util::PlotNLL(RooWorkspace* w, RooFitResult* rFit, Bool_t plotPLL, TString 
             Double_t yLastBin = -1.;
             while ( (yLastBin < 0 || std::isinf(yLastBin) || std::isnan(yLastBin) ) && iBin >0){
                 iBin--;
-                curve->GetPoint(iBin,xLastBin,yLastBin) ; 
+                curve->GetPoint(iBin,xLastBin,yLastBin) ;
                 if(std::isinf(yLastBin)  || std::isnan(yLastBin)){
                     curve->RemovePoint(iBin);
                     Logger << kWARNING << " Removing bin = " << iBin  << " as it was either inf or nan from NLL plot for parameter = " << parName<< GEndl;
                 }
             }
-            curveMax = yLastBin>yFirstBin ? yLastBin : yFirstBin;      
+            curveMax = yLastBin>yFirstBin ? yLastBin : yFirstBin;
         }
 
         // plot cosmetics
@@ -1429,7 +1428,7 @@ void Util::PlotNLL(RooWorkspace* w, RooFitResult* rFit, Bool_t plotPLL, TString 
 
         RooAbsReal* pll(0);
         TGraph *pllCurve = 0;
-        if(plotPLL) { 
+        if(plotPLL) {
             pll = nll->createProfile(*par) ;
             pll->plotOn(frame, LineColor(kRed), LineStyle(kDashed), NumCPU(4));
             //const char* curvename = 0;
@@ -1441,9 +1440,9 @@ void Util::PlotNLL(RooWorkspace* w, RooFitResult* rFit, Bool_t plotPLL, TString 
 
 
         TString canName=Form("can_NLL_%s_%s_%s", outputPrefix.Data(), rFit->GetName(), parName.Data());
-        canVec[iPar] = new TCanvas(canName, canName, 600, 600); 
+        canVec[iPar] = new TCanvas(canName, canName, 600, 600);
         canVec[iPar]->cd();
-        frame->Draw();  
+        frame->Draw();
 
         TLegend* leg = new TLegend(0.55, 0.65, 0.85, 0.9, "");
         leg->SetFillStyle(0);
@@ -1451,7 +1450,7 @@ void Util::PlotNLL(RooWorkspace* w, RooFitResult* rFit, Bool_t plotPLL, TString 
         leg->SetBorderSize(0);
         TLegendEntry* entry=leg->AddEntry("", "NLL", "l") ;
         entry->SetLineColor(kBlue);
-        if(plotPLL) {   
+        if(plotPLL) {
             entry=leg->AddEntry("", "PLL", "l") ;
             entry->SetLineColor(kRed);
             entry->SetLineStyle(kDashed);
@@ -1490,9 +1489,9 @@ void Util::PlotNLL(RooWorkspace* w, RooFitResult* rFit, Bool_t plotPLL, TString 
 TH2D* Util::PlotCorrelationMatrix(RooFitResult* rFit, TString anaName,  bool ReduceMatrix){
 
 
-    if(rFit==NULL){ 
-        Logger << kWARNING << "Running PlotCorrelationMatrix() without a RooFitResult is pointless, I'm done" << GEndl ; 
-        throw 1 ; 
+    if(rFit==NULL){
+        Logger << kWARNING << "Running PlotCorrelationMatrix() without a RooFitResult is pointless, I'm done" << GEndl ;
+        throw 1 ;
     }
 
     Logger << kINFO << " ------ Starting PlotCorrelationMatrix() " << GEndl;
@@ -1500,7 +1499,7 @@ TH2D* Util::PlotCorrelationMatrix(RooFitResult* rFit, TString anaName,  bool Red
     Int_t numPars = rFit->floatParsFinal().getSize();
 
     TString canName = Form("c_corrMatrix_%s",rFit->GetName());
-    TCanvas* c_corr = new TCanvas(canName.Data(),canName.Data(),600,400); // .c_str()) 
+    TCanvas* c_corr = new TCanvas(canName.Data(),canName.Data(),600,400); // .c_str())
 
     Double_t orig_MarkerSize =  gStyle->GetMarkerSize();
     Int_t orig_MarkerColor =  gStyle->GetMarkerColor();
@@ -1518,7 +1517,7 @@ TH2D* Util::PlotCorrelationMatrix(RooFitResult* rFit, TString anaName,  bool Red
     else if(numPars<40)    gStyle->SetMarkerSize(0.5);
     else     gStyle->SetMarkerSize(0.25);
 
-    TH2D* h_corr = (TH2D*) rFit->correlationHist(Form("h_corr_%s",rFit->GetName())); 
+    TH2D* h_corr = (TH2D*) rFit->correlationHist(Form("h_corr_%s",rFit->GetName()));
     int nbins = h_corr->GetNbinsX();
 
     for (int xbin=1; xbin<nbins+1; xbin++) {
@@ -1550,7 +1549,7 @@ TH2D* Util::PlotCorrelationMatrix(RooFitResult* rFit, TString anaName,  bool Red
     if (ReduceMatrix) {
       // Cleanup corrMattrix from rows and columns with content less then corrThres
       vector <int> rm_idx; rm_idx.clear();
-      double corrThresh[3] = {0.01,0.1,0.2}; 
+      double corrThresh[3] = {0.01,0.1,0.2};
       int index_x=0, index_y=0, Thresh1Counter;//, Thresh0Counter, Thresh2Counter;
       bool fillHistY, fillHistX;
 
@@ -1640,14 +1639,14 @@ TH2D* Util::GetCorrelations(RooFitResult* rFit, double threshold, TString anaNam
         for(unsigned int iBinX = 1; iBinX <= nBinsX && iBinX <= (nBinsX-iBinY); iBinX++){
             if(fabs(h_corr->GetBinContent(iBinX,iBinY)) > threshold){
                 Logger << kWARNING << " High correlation coefficient between:   par1 = " << h_corr->GetXaxis()->GetBinLabel(iBinX) << "  and par2 = "
-                    << h_corr->GetYaxis()->GetBinLabel(iBinY) << " " 
+                    << h_corr->GetYaxis()->GetBinLabel(iBinY) << " "
                     << " val = " << h_corr->GetBinContent(iBinX,iBinY) << GEndl;
             }
         }
     }
 
     return h_corr;
-} 
+}
 
 
 
@@ -1768,7 +1767,7 @@ RooStats::ModelConfig* Util::GetModelConfig( const RooWorkspace* w, const TStrin
 
 
 //________________________________________________________________________________________________
-    RooRealVar* 
+    RooRealVar*
 Util::GetPOI( const RooWorkspace* w  )
 {
     if(w==0){
@@ -1818,12 +1817,12 @@ Util::doFreeFit( RooWorkspace* w, RooDataSet* inputdata, const bool& verbose, co
         return NULL;
     }
 
-    /// get pdf and dataset 
+    /// get pdf and dataset
     RooDataSet* data(0);
-    if (inputdata!=0) { 
+    if (inputdata!=0) {
         data = inputdata;
     }
-    else              
+    else
         data = dynamic_cast<RooDataSet*>(w->data("obsData")); // default: fit to data
     if (verbose) data->Print();
 
@@ -1837,9 +1836,9 @@ Util::doFreeFit( RooWorkspace* w, RooDataSet* inputdata, const bool& verbose, co
     if (resetAfterFit) {
         // save snapshot before any fit has been done
         RooArgSet* params = (RooArgSet*) pdf->getParameters(*data) ;
-        if(!w->loadSnapshot("snapshot_paramsVals_initial")) { 
+        if(!w->loadSnapshot("snapshot_paramsVals_initial")) {
             w->saveSnapshot("snapshot_paramsVals_initial",*params);
-        } else { 
+        } else {
             Logger << kWARNING << "Snapshot 'snapshot_paramsVals_initial' already exists in  workspace, will not overwrite it" << GEndl;
         }
     }
@@ -1851,7 +1850,7 @@ Util::doFreeFit( RooWorkspace* w, RooDataSet* inputdata, const bool& verbose, co
 
     const RooArgSet* globObs = mc->GetGlobalObservables();
 
-    RooAbsReal* nll = (RooNLLVar*) pdf->createNLL(*data, RooFit::GlobalObservables(*globObs), RooFit::Offset(true)); 
+    RooAbsReal* nll = (RooNLLVar*) pdf->createNLL(*data, RooFit::GlobalObservables(*globObs), RooFit::Offset(true));
 
     // find parameters requested for Minos
     RooArgSet* minosParams = new RooArgSet();
@@ -1872,33 +1871,33 @@ Util::doFreeFit( RooWorkspace* w, RooDataSet* inputdata, const bool& verbose, co
     RooMinimizer minim(*nll);
     int strategy = ROOT::Math::MinimizerOptions::DefaultStrategy();
     minim.setStrategy( strategy);
-    
+
     // use tolerance - but never smaller than 1 (default in RooMinimizer)
     double tol =  ROOT::Math::MinimizerOptions::DefaultTolerance();
     tol = std::max(tol,1.0); // 1.0 is the minimum value used in RooMinimizer
     minim.setEps( tol );
-    
+
     //LM: RooMinimizer.setPrintLevel has +1 offset - so subtruct  here -1
     minim.setPrintLevel(minimPrintLevel-1);
     minim.optimizeConst(2);
-    
-    TString minimizer = "Minuit2"; //ROOT::Math::MinimizerOptions::DefaultMinimizerType(); 
-    TString algorithm = ROOT::Math::MinimizerOptions::DefaultMinimizerAlgo(); 
-    
+
+    TString minimizer = "Minuit2"; //ROOT::Math::MinimizerOptions::DefaultMinimizerType();
+    TString algorithm = ROOT::Math::MinimizerOptions::DefaultMinimizerAlgo();
+
     int status = -1;
 
     // require covQual = 3 from any fit while retrying?
     bool requireGoodCovQual = true;
 
-    Logger << kINFO << "Util::doFreeFit()  ........ using " << minimizer << " / " << algorithm 
+    Logger << kINFO << "Util::doFreeFit()  ........ using " << minimizer << " / " << algorithm
         << " with strategy  " << strategy << " and tolerance " << tol << GEndl;
 
     for (int tries = 1, maxtries = 5; tries <= maxtries; ++tries) {
         //   status = minim.minimize(fMinimizer, ROOT::Math::MinimizerOptions::DefaultMinimizerAlgo().c_str());
-        status = minim.minimize(minimizer, algorithm); 
+        status = minim.minimize(minimizer, algorithm);
 
-        if (status%1000 == 0) {  // ignore erros from Improve 
-            
+        if (status%1000 == 0) {  // ignore erros from Improve
+
             // if desired, is the covariance matrix OK?
             std::unique_ptr<RooFitResult> res(minim.save());
             if(!requireGoodCovQual || res->covQual() == 3){
@@ -1906,8 +1905,8 @@ Util::doFreeFit( RooWorkspace* w, RooDataSet* inputdata, const bool& verbose, co
             } else {
                 Logger << kINFO << " status OK but covariance matrix not at full accuracy, retrying" << GEndl;
             }
-        } 
-            
+        }
+
         if (tries == 1) {
             Logger << kINFO << "    ----> Doing a re-scan first" << GEndl;
             minim.minimize(minimizer,"Scan");
@@ -1916,16 +1915,16 @@ Util::doFreeFit( RooWorkspace* w, RooDataSet* inputdata, const bool& verbose, co
                 Logger << kINFO << "    ----> trying with strategy = 1" << GEndl;
                 strategy = 1;
                 minim.setStrategy(strategy);
-            } else { 
-                tries++; // skip this trial if stratehy is already 1 
+            } else {
+                tries++; // skip this trial if stratehy is already 1
             }
         } else if (tries == 3) {
             if (strategy == 1) {
                 Logger << kINFO << "    ----> trying with strategy = 2" << GEndl;
                 strategy = 2;
                 minim.setStrategy(strategy);
-            } else { 
-                tries++; // skip this trial if stratehy is already 2 
+            } else {
+                tries++; // skip this trial if stratehy is already 2
             }
         } else if (tries == 4) {
             Logger << kINFO << "    ----> trying with improve" << GEndl;
@@ -1933,15 +1932,15 @@ Util::doFreeFit( RooWorkspace* w, RooDataSet* inputdata, const bool& verbose, co
             algorithm = "migradimproved";
         }
     }
-    
+
     std::unique_ptr<RooFitResult> res(minim.save());
     if( requireGoodCovQual && res->covQual() != 3 && !hesse ) {
         Logger << kINFO << "status OK but covariance matrix not at full accuracy, will retry with HESSE to improve" << GEndl;
         hesse = true;
     }
 
-    RooFitResult * result = 0; 
-    
+    RooFitResult * result = 0;
+
     if (status%100 == 0 ) { // ignore errors in Hesse or in Improve
         // only calculate minos errors if fit with Migrad converged
         Logger << kINFO <<  "status: " << status << ", hesse = " << hesse <<" minos = " << minos << " minosPars = " << minosPars << GEndl;
@@ -1960,7 +1959,7 @@ Util::doFreeFit( RooWorkspace* w, RooDataSet* inputdata, const bool& verbose, co
         // ignore errors in Hesse or in Improve if minos option not activated
         result  = minim.save();
     }
-    else { 
+    else {
         Logger << kERROR << "FIT FAILED !- return a NaN NLL " << GEndl;
     }
 
@@ -1975,7 +1974,7 @@ Util::doFreeFit( RooWorkspace* w, RooDataSet* inputdata, const bool& verbose, co
 
 
 //________________________________________________________________________________________________
-    RooMCStudy* 
+    RooMCStudy*
 Util::GetMCStudy( const RooWorkspace* w )
 {
     if (w==0) {
@@ -2008,10 +2007,10 @@ Util::GetMCStudy( const RooWorkspace* w )
 
 //________________________________________________________________________________________________
 // ATLAS specific - FIXME ; remove for public release
-void Util::ATLASLabel(Double_t x,Double_t y,const char* text,Color_t color) 
+void Util::ATLASLabel(Double_t x,Double_t y,const char* text,Color_t color)
 {
 
-    TLatex l; 
+    TLatex l;
     l.SetNDC();
     l.SetTextFont(72);
     l.SetTextColor(color);
@@ -2020,7 +2019,7 @@ void Util::ATLASLabel(Double_t x,Double_t y,const char* text,Color_t color)
 
     l.DrawLatex(x,y,"ATLAS");
     if (text) {
-        TLatex p; 
+        TLatex p;
         p.SetNDC();
         p.SetTextFont(42);
         p.SetTextColor(color);
@@ -2031,10 +2030,10 @@ void Util::ATLASLabel(Double_t x,Double_t y,const char* text,Color_t color)
 
 
 //________________________________________________________________________________________________
-void Util::AddText(Double_t x,Double_t y,char* text,Color_t color) 
+void Util::AddText(Double_t x,Double_t y,char* text,Color_t color)
 {
 
-    TLatex l; 
+    TLatex l;
     l.SetNDC();
     l.SetTextFont(72);
     l.SetTextColor(color);
@@ -2042,7 +2041,7 @@ void Util::AddText(Double_t x,Double_t y,char* text,Color_t color)
     double delx = 0.115*696*gPad->GetWh()/(472*gPad->GetWw());
 
     if (text) {
-        TLatex p; 
+        TLatex p;
         p.SetNDC();
         p.SetTextFont(42);
         p.SetTextColor(color);
@@ -2070,14 +2069,14 @@ void Util::AddTextLabel(Double_t x, Double_t y, const char* text, Color_t color)
 }
 
 //_____________________________________________________________________________
-RooAbsReal* Util::GetComponent(RooWorkspace* w, TString component, TString region, bool exactRegionName, TString rangeName){ 
+RooAbsReal* Util::GetComponent(RooWorkspace* w, TString component, TString region, bool exactRegionName, TString rangeName){
 
     std::vector<TString> componentVec = Tokens(component,",");
     if(componentVec.size() <1) { Logger << kWARNING << " componentVec.size() < 1, for components = " << component << GEndl; }
 
-    if(w==NULL){ 
-        Logger << kERROR << " Workspace not found, no GetComponent performed" << GEndl; 
-        return NULL; 
+    if(w==NULL){
+        Logger << kERROR << " Workspace not found, no GetComponent performed" << GEndl;
+        return NULL;
     }
 
     RooCategory* regionCat = (RooCategory*) w->cat("channelCat");
@@ -2092,14 +2091,14 @@ RooAbsReal* Util::GetComponent(RooWorkspace* w, TString component, TString regio
     RooSimultaneous* pdf = (RooSimultaneous*) w->pdf("simPdf");
     RooAbsPdf* regionPdf = (RooAbsPdf*) pdf->getPdf(regionFullName.Data());
 
-    RooAbsData* data = (RooAbsData*)w->data("obsData"); 
+    RooAbsData* data = (RooAbsData*)w->data("obsData");
     TString dataCatLabel = Form("channelCat==channelCat::%s",regionFullName.Data());
     RooAbsData* regionData = (RooAbsData*) data->reduce(dataCatLabel.Data());
 
-    if(regionPdf==NULL || regionData==NULL){ 
+    if(regionPdf==NULL || regionData==NULL){
         Logger << kERROR << " Either the Pdf or the Dataset do not have an appropriate state for the region = " << region << ", check the Workspace file" << GEndl;
-        Logger << kERROR << " regionPdf = " << regionPdf << "   regionData = " << regionData << GEndl;  
-        return NULL; 
+        Logger << kERROR << " regionPdf = " << regionPdf << "   regionData = " << regionData << GEndl;
+        return NULL;
     }
     RooRealVar* regionVar =(RooRealVar*) ((RooArgSet*) regionPdf->getObservables(*regionData))->find(Form("obs_x_%s",regionFullName.Data()));
 
@@ -2124,11 +2123,11 @@ RooAbsReal* Util::GetComponent(RooWorkspace* w, TString component, TString regio
                 compFuncList.add(*(RooProduct*)w->obj(regionCompNameVec[iReg]));
                 compCoefList.add(*regionBinWidth);
             }
-        }  
+        }
     }
 
     if (compFuncList.getSize()==0 || compCoefList.getSize()==0 || compCoefList.getSize()!=compFuncList.getSize()){
-        Logger << kERROR << " Something wrong with compFuncList or compCoefList in Util::GetComponent(w," << component << "," << region 
+        Logger << kERROR << " Something wrong with compFuncList or compCoefList in Util::GetComponent(w," << component << "," << region
             << ") " << GEndl << "         compFuncList.getSize() = " << compFuncList.getSize() << " compCoefList.getSize() = " << compCoefList.getSize() << GEndl;
         return NULL;
     }
@@ -2182,13 +2181,13 @@ RooAbsReal* Util::GetComponent(RooWorkspace* w, TString component, TString regio
 Double_t Util::GetComponentFracInRegion(RooWorkspace* w, TString component, TString region){
 
     std::vector<TString> componentVec = Tokens(component,",");
-    if(componentVec.size() <1) { 
-        Logger << kWARNING << " componentVec.size() < 1, for components = " << component << GEndl; 
+    if(componentVec.size() <1) {
+        Logger << kWARNING << " componentVec.size() < 1, for components = " << component << GEndl;
     }
 
-    if(w==NULL){ 
-        Logger << kERROR << " Workspace not found, no GetComponent performed" << GEndl; 
-        return 0; 
+    if(w==NULL){
+        Logger << kERROR << " Workspace not found, no GetComponent performed" << GEndl;
+        return 0;
     }
 
     RooCategory* regionCat = (RooCategory*) w->cat("channelCat");
@@ -2197,14 +2196,14 @@ Double_t Util::GetComponentFracInRegion(RooWorkspace* w, TString component, TStr
     RooSimultaneous* pdf = (RooSimultaneous*) w->pdf("simPdf");
     RooAbsPdf* regionPdf = (RooAbsPdf*) pdf->getPdf(regionFullName.Data());
 
-    RooAbsData* data = (RooAbsData*)w->data("obsData"); 
+    RooAbsData* data = (RooAbsData*)w->data("obsData");
     TString dataCatLabel = Form("channelCat==channelCat::%s",regionFullName.Data());
     RooAbsData* regionData = (RooAbsData*) data->reduce(dataCatLabel.Data());
 
-    if(regionPdf==NULL || regionData==NULL){ 
+    if(regionPdf==NULL || regionData==NULL){
         Logger << kERROR << " Either the Pdf or the Dataset do not have an appropriate state for the region = " << region << ", check the Workspace file" << GEndl;
-        Logger << kERROR << " regionPdf = " << regionPdf << "   regionData = " << regionData << GEndl;  
-        return 0; 
+        Logger << kERROR << " regionPdf = " << regionPdf << "   regionData = " << regionData << GEndl;
+        return 0;
     }
 
     RooRealVar* regionVar =(RooRealVar*) ((RooArgSet*) regionPdf->getObservables(*regionData))->find(Form("obs_x_%s",regionFullName.Data()));
@@ -2229,7 +2228,7 @@ Double_t Util::GetComponentFracInRegion(RooWorkspace* w, TString component, TStr
                 compFuncList.add(*(RooProduct*)w->obj(regionCompNameVec[iReg]));
                 compCoefList.add(*regionBinWidth);
             }
-        } 
+        }
     }
 
     if (compFuncList.getSize()==0 || compCoefList.getSize()==0 || compCoefList.getSize()!=compFuncList.getSize()){
@@ -2243,7 +2242,7 @@ Double_t Util::GetComponentFracInRegion(RooWorkspace* w, TString component, TStr
     }
 
     // get the full RRSPdf of this region
-    TString RRSPdfName = Form("%s_model",regionFullName.Data()); 
+    TString RRSPdfName = Form("%s_model",regionFullName.Data());
 
     double componentFrac = 0.;
     for(unsigned int iReg=0; iReg<regionCompNameVec.size(); iReg++){
@@ -2263,9 +2262,9 @@ Double_t Util::GetComponentFracInRegion(RooWorkspace* w, TString component, TStr
 //_____________________________________________________________________________
 RooAbsPdf* Util::GetRegionPdf(RooWorkspace* w, TString region){  //, unsigned int bin){
 
-    if(w==NULL){ 
-        Logger << kERROR << " Workspace not found, no GetRegionPdf performed" << GEndl; 
-        return NULL; 
+    if(w==NULL){
+        Logger << kERROR << " Workspace not found, no GetRegionPdf performed" << GEndl;
+        return NULL;
     }
 
     RooCategory* regionCat = (RooCategory*) w->cat("channelCat");
@@ -2274,10 +2273,10 @@ RooAbsPdf* Util::GetRegionPdf(RooWorkspace* w, TString region){  //, unsigned in
     RooSimultaneous* pdf = (RooSimultaneous*) w->pdf("simPdf");
     RooAbsPdf* regionPdf = (RooAbsPdf*) pdf->getPdf(regionFullName.Data());
 
-    if(regionPdf==NULL){ 
+    if(regionPdf==NULL){
         Logger << kERROR << " The Simultaneous Pdf  does not have an appropriate state for the region = " << region << ", check the Workspace file" << GEndl;
-        Logger << kERROR << " regionPdf = " << regionPdf << GEndl;  
-        return NULL; 
+        Logger << kERROR << " regionPdf = " << regionPdf << GEndl;
+        return NULL;
     }
 
     return regionPdf;
@@ -2286,11 +2285,11 @@ RooAbsPdf* Util::GetRegionPdf(RooWorkspace* w, TString region){  //, unsigned in
 
 
 //_____________________________________________________________________________
-RooRealVar* Util::GetRegionVar(RooWorkspace* w, TString region){ 
+RooRealVar* Util::GetRegionVar(RooWorkspace* w, TString region){
 
-    if(w==NULL){ 
-        Logger << kERROR << " Workspace not found, no GetComponent performed" << GEndl; 
-        return NULL; 
+    if(w==NULL){
+        Logger << kERROR << " Workspace not found, no GetComponent performed" << GEndl;
+        return NULL;
     }
 
     RooCategory* regionCat = (RooCategory*) w->cat("channelCat");
@@ -2299,14 +2298,14 @@ RooRealVar* Util::GetRegionVar(RooWorkspace* w, TString region){
     RooSimultaneous* pdf = (RooSimultaneous*) w->pdf("simPdf");
     RooAbsPdf* regionPdf = (RooAbsPdf*) pdf->getPdf(regionFullName.Data());
 
-    RooAbsData* data = (RooAbsData*)w->data("obsData"); 
+    RooAbsData* data = (RooAbsData*)w->data("obsData");
     TString dataCatLabel = Form("channelCat==channelCat::%s",regionFullName.Data());
     RooAbsData* regionData = (RooAbsData*) data->reduce(dataCatLabel.Data());
 
-    if(regionPdf==NULL || regionData==NULL){ 
+    if(regionPdf==NULL || regionData==NULL){
         Logger << kERROR << " Either the Pdf or the Dataset do not have an appropriate state for the region = " << region << ", check the Workspace file" << GEndl;
-        Logger << kERROR << " regionPdf = " << regionPdf << "   regionData = " << regionData << GEndl;  
-        return NULL; 
+        Logger << kERROR << " regionPdf = " << regionPdf << "   regionData = " << regionData << GEndl;
+        return NULL;
     }
     RooRealVar* regionVar =(RooRealVar*) ((RooArgSet*) regionPdf->getObservables(*regionData))->find(Form("obs_x_%s",regionFullName.Data()));
 
@@ -2326,14 +2325,14 @@ TString Util::GetFullRegionName(RooCategory* regionCat,  TString regionShortName
         if( regionsAllVec[iReg].Contains(regionShortName) && foundReg==0) {
             regionFullName = regionsAllVec[iReg];
             foundReg++;
-        } 
+        }
         else if( regionsAllVec[iReg].Contains(regionShortName) && foundReg>0){
-            foundReg++;     
+            foundReg++;
         }
     }
 
     if(foundReg>1)
-        Logger << kWARNING << "Util.GetFullRegionName() found more then one region in workspace with shortname = " << regionShortName 
+        Logger << kWARNING << "Util.GetFullRegionName() found more then one region in workspace with shortname = " << regionShortName
             << " \n Please use full region names (like WREl_meffInc) insted of shortnames (like WR) " << GEndl;
 
     return regionFullName;
@@ -2342,13 +2341,13 @@ TString Util::GetFullRegionName(RooCategory* regionCat,  TString regionShortName
 //__________________________________________________________________________________________
 vector<TString> Util::GetAllComponentNamesInRegion(TString region, RooAbsPdf* regionPdf){
 
-    TString RRSPdfName = Form("%s_model",region.Data()); 
+    TString RRSPdfName = Form("%s_model",region.Data());
     RooRealSumPdf* RRSPdf = (RooRealSumPdf*) regionPdf->getComponents()->find(RRSPdfName);
 
     if(RRSPdf==NULL){
         Logger << kERROR << " Util::GetAllComponentNamesInRegion() cannot find a RooRealSumPdf named " <<  RRSPdfName << GEndl ;
         vector<TString> vec;
-        return vec; 
+        return vec;
     }
 
     RooArgList RRSComponentsList =  RRSPdf->funcList();
@@ -2358,7 +2357,7 @@ vector<TString> Util::GetAllComponentNamesInRegion(TString region, RooAbsPdf* re
     vector<TString> compNameVec;
     compNameVec.clear();
 
-    while( (component = (RooProduct*) iter.Next())) { 
+    while( (component = (RooProduct*) iter.Next())) {
         TString  componentName = component->GetName();
         compNameVec.push_back(componentName);
     }
@@ -2372,7 +2371,7 @@ vector<TString> Util::GetAllComponentNamesInRegion(TString region, RooAbsPdf* re
 //__________________________________________________________________________________________
 vector<double> Util::GetAllComponentFracInRegion(RooWorkspace* w, TString region, RooAbsPdf* regionPdf, RooRealVar* obsRegion,RooRealVar* regionBinWidth){
 
-    TString RRSPdfName = Form("%s_model",region.Data()); 
+    TString RRSPdfName = Form("%s_model",region.Data());
     RooRealSumPdf* RRSPdf = (RooRealSumPdf*) regionPdf->getComponents()->find(RRSPdfName);
 
     RooArgList RRSComponentsList =  RRSPdf->funcList();
@@ -2382,7 +2381,7 @@ vector<double> Util::GetAllComponentFracInRegion(RooWorkspace* w, TString region
     vector<double> compFracVec;
     compFracVec.clear();
 
-    while( (component = (RooProduct*) iter.Next())) { 
+    while( (component = (RooProduct*) iter.Next())) {
         TString  componentName = component->GetName();
         double componentFrac = GetComponentFrac(w,componentName,RRSPdfName,obsRegion,regionBinWidth) ;
         compFracVec.push_back(componentFrac);
@@ -2397,11 +2396,11 @@ vector<double> Util::GetAllComponentFracInRegion(RooWorkspace* w, TString region
  * by Wouter Verkerke
  * See: http://root.cern.ch/root/html534/src/RooAbsReal.h.html
  * (http://roofit.sourceforge.net/license.txt)
- */ 
+ */
 
 
 //_____________________________________________________________________________
-double Util::GetPropagatedError(RooAbsReal* var, const RooFitResult& fr, const bool& doAsym) 
+double Util::GetPropagatedError(RooAbsReal* var, const RooFitResult& fr, const bool& doAsym)
 {
     Logger << kDEBUG << " GPP for variable = " << var->GetName() << GEndl;
 
@@ -2424,7 +2423,7 @@ double Util::GetPropagatedError(RooAbsReal* var, const RooFitResult& fr, const b
         }
     }
 
-    vector<Double_t> plusVar, minusVar ;   
+    vector<Double_t> plusVar, minusVar ;
 
     TMatrixDSym V( fr.covarianceMatrix() ) ;
 
@@ -2458,7 +2457,7 @@ double Util::GetPropagatedError(RooAbsReal* var, const RooFitResult& fr, const b
 
     }
 
-    TMatrixDSym C(paramList.getSize()) ;     
+    TMatrixDSym C(paramList.getSize()) ;
     vector<double> errVec(paramList.getSize()) ;
     for (int i=0 ; i<paramList.getSize() ; i++) {
         int newII = fpf_idx[i];
@@ -2485,7 +2484,7 @@ double Util::GetPropagatedError(RooAbsReal* var, const RooFitResult& fr, const b
     // Calculate error in linear approximation from variations and correlation coefficient
     Double_t sum = F*(C*F) ;
 
-    Logger << kDEBUG << " GPP : sum = " << sqrt(sum) << GEndl; 
+    Logger << kDEBUG << " GPP : sum = " << sqrt(sum) << GEndl;
 
     return sqrt(sum) ;
 }
@@ -2546,7 +2545,7 @@ Util::resetAllNominalValues( RooWorkspace* wspace )
 
 
 //_____________________________________________________________________________
-RooArgList 
+RooArgList
 Util::getFloatParList( const RooAbsPdf& pdf, const RooArgSet& obsSet )
 {
     RooArgList floatParList;
@@ -2569,8 +2568,8 @@ Util::getFloatParList( const RooAbsPdf& pdf, const RooArgSet& obsSet )
 
 
 //_____________________________________________________________________________
-void 
-Util::resetError( RooWorkspace* wspace, const RooArgList& parList, const RooArgList& vetoList ) 
+void
+Util::resetError( RooWorkspace* wspace, const RooArgList& parList, const RooArgList& vetoList )
 
 {
     /// For the given workspace,
@@ -2609,10 +2608,10 @@ Util::resetError( RooWorkspace* wspace, const RooArgList& parList, const RooArgL
             throw -1;
         }
         // If it is a standard (gaussian) uncertainty
-        else if( string(UncertaintyName).find("alpha")!=string::npos ){ 
+        else if( string(UncertaintyName).find("alpha")!=string::npos ){
             // Assume the values are +1, -1
             val_hi  =  1.0;
-            val_low = -1.0;      
+            val_low = -1.0;
             sigma = 1.0;
             resetRange = true;
         }
@@ -2635,7 +2634,7 @@ Util::resetError( RooWorkspace* wspace, const RooArgList& parList, const RooArgL
             double val_nom = nominalLumi->getVal();
 
             val_hi  = val_nom + sigma;
-            val_low = val_nom - sigma; 
+            val_low = val_nom - sigma;
             resetRange = true;
         }
         // If it is a stat uncertainty (gamma)
@@ -2667,7 +2666,7 @@ Util::resetError( RooWorkspace* wspace, const RooArgList& parList, const RooArgL
                 val_hi = 1 + sigma;
                 val_low = 1 - sigma;
                 resetRange = true;
-            } 
+            }
             else {
                 Logger << kERROR << "Strange constraint type for Stat Uncertainties: " << ConstraintType << GEndl;
                 throw -1;
@@ -2770,8 +2769,8 @@ Util::resetValue( RooWorkspace* wspace, const RooArgList& parList, const RooArgL
 
 
 //_____________________________________________________________________________
-    void 
-Util::resetNominalValue( RooWorkspace* wspace, const RooArgSet& globSet ) 
+    void
+Util::resetNominalValue( RooWorkspace* wspace, const RooArgSet& globSet )
 {
     /// For the given workspace,
     /// find the input systematic with
@@ -2841,7 +2840,7 @@ void Util::ImportInWorkspace( RooWorkspace* wspace, TObject* obj, TString name) 
 
     // save snapshot
     RooSimultaneous* pdf = (RooSimultaneous*) wspace->pdf("simPdf");
-    RooAbsData* data = (RooAbsData*)wspace->data("obsData"); 
+    RooAbsData* data = (RooAbsData*)wspace->data("obsData");
     RooArgSet* params = (RooArgSet*) pdf->getParameters(*data) ;
 
     wspace->saveSnapshot(Form("snapshot_paramsVals_%s",name.Data()),*params);
@@ -2878,25 +2877,25 @@ void Util::RemoveEmptyDataBins( RooPlot* frame){
 
 RooHist* Util::MakeRatioOrPullHist(RooAbsData *regionData, RooAbsPdf *regionPdf, RooRealVar *regionVar, bool makePull /*false*/) {
 	// data/pdf ratio histograms are plotted by RooPlot.ratioHist() through a dummy frame
-	RooPlot* frame_dummy = regionVar->frame(); 
+	RooPlot* frame_dummy = regionVar->frame();
 	regionData->plotOn(frame_dummy, RooFit::DataError(RooAbsData::Poisson));
-	
+
 	// normalize pdf to number of expected events, not to number of events in dataset
-	regionPdf->plotOn(frame_dummy, RooFit::Normalization(1, RooAbsReal::RelativeExpected), 
+	regionPdf->plotOn(frame_dummy, RooFit::Normalization(1, RooAbsReal::RelativeExpected),
 								     RooFit::Precision(1e-5));
 
-	if(makePull) {	
+	if(makePull) {
         //return static_cast<RooHist*>(frame_dummy->pullHist());
         return static_cast<RooHist*>(frame_dummy->pullHist());
 	}
-		
+
     return static_cast<RooHist*>(frame_dummy->ratioHist());
 }
 
 //________________________________________________________________________________________________________________________________________
 RooCurve* Util::MakePdfErrorRatioHist(RooAbsData* regionData, RooAbsPdf* regionPdf, RooRealVar* regionVar, RooFitResult* rFit, Double_t Nsigma){
 
-    RooPlot* frame = regionVar->frame(); 
+    RooPlot* frame = regionVar->frame();
     regionData->plotOn(frame, RooFit::DataError(RooAbsData::Poisson));
 
     // normalize pdf to number of expected events, not to number of events in dataset
@@ -2908,10 +2907,10 @@ RooCurve* Util::MakePdfErrorRatioHist(RooAbsData* regionData, RooAbsPdf* regionP
     }
 
     if(rFit != NULL) {
-        regionPdf->plotOn(frame, Normalization(1, RooAbsReal::RelativeExpected), 
-                                 Precision(1e-5), 
-                                 FillColor(kBlue-5), 
-                                 FillStyle(3004), 
+        regionPdf->plotOn(frame, Normalization(1, RooAbsReal::RelativeExpected),
+                                 Precision(1e-5),
+                                 FillColor(kBlue-5),
+                                 FillStyle(3004),
                                  DrawOption("F"),
                                  VisualizeError(*rFit, Nsigma));
     }
@@ -2961,10 +2960,10 @@ RooCurve* Util::MakePdfErrorRatioHist(RooAbsData* regionData, RooAbsPdf* regionP
         }
 
         // only divide by yNom if it is non-zero
-        if(  fabs(yNom) > 0.00001 ){ 
-            ratioBand->addPoint(x, (y / yNom));  
-        } else { 
-            ratioBand->addPoint(x, 0.);             
+        if(  fabs(yNom) > 0.00001 ){
+            ratioBand->addPoint(x, (y / yNom));
+        } else {
+            ratioBand->addPoint(x, 0.);
         }
     }
 
@@ -3011,20 +3010,20 @@ void Util::SetPdfParError(RooWorkspace* w, double Nsigma){
 //_____________________________________________________________________________
 RooAbsReal* Util::CreateNLL( RooWorkspace* w, TString fitRegions, Bool_t lumiConst)
 {
-    if(w==NULL){ 
+    if(w==NULL){
         Logger << kERROR << "Workspace not found, no fitting performed" << GEndl;
-        return NULL; 
+        return NULL;
     }
     RooSimultaneous* pdf = (RooSimultaneous*) w->pdf("simPdf");
 
-    RooAbsData* data = (RooAbsData*)w->data("obsData") ; 
-    RooCategory* regionCat = (RooCategory*) w->cat("channelCat");  
+    RooAbsData* data = (RooAbsData*)w->data("obsData") ;
+    RooCategory* regionCat = (RooCategory*) w->cat("channelCat");
 
     data->table(*((RooAbsCategory*)regionCat))->Print("v");
 
     if (lumiConst) {
         RooRealVar* lumi = (RooRealVar*) w->var("Lumi");
-        if (lumi!=NULL) lumi->setConstant(lumiConst); 
+        if (lumi!=NULL) lumi->setConstant(lumiConst);
     }
 
     // Construct an empty simultaneous pdf using category regionCat as index
@@ -3039,8 +3038,8 @@ RooAbsReal* Util::CreateNLL( RooWorkspace* w, TString fitRegions, Bool_t lumiCon
 
     for(unsigned int iVec=0; iVec<numFitRegions; iVec++){
         TString regionCatLabel = fitRegionsVec[iVec];
-        if( regionCat->setLabel(regionCatLabel,kTRUE)){  
-            Logger << kWARNING << " Label '" << regionCatLabel << "' is not a state of channelCat (see Table) " << GEndl; 
+        if( regionCat->setLabel(regionCatLabel,kTRUE)){
+            Logger << kWARNING << " Label '" << regionCatLabel << "' is not a state of channelCat (see Table) " << GEndl;
         } else{
             // dataset for each channel/region/category
             TString dataCatLabel = Form("channelCat==channelCat::%s",regionCatLabel.Data());
@@ -3052,12 +3051,12 @@ RooAbsReal* Util::CreateNLL( RooWorkspace* w, TString fitRegions, Bool_t lumiCon
         }
     }
 
-    if(dataVec.empty()){ 
-        Logger << kERROR << "   NONE OF THE REGIONS ARE SPECIFIED IN DATASET, NO FIT WILL BE PERFORMED" << GEndl; 
+    if(dataVec.empty()){
+        Logger << kERROR << "   NONE OF THE REGIONS ARE SPECIFIED IN DATASET, NO FIT WILL BE PERFORMED" << GEndl;
         return 0;
     }
-    else if(pdfVec.empty()){ 
-        Logger << kERROR << "   NONE OF THE REGIONS ARE SPECIFIED IN SIMULTANEOUS PDF, NO FIT WILL BE PERFORMED" << GEndl; 
+    else if(pdfVec.empty()){
+        Logger << kERROR << "   NONE OF THE REGIONS ARE SPECIFIED IN SIMULTANEOUS PDF, NO FIT WILL BE PERFORMED" << GEndl;
         return 0;
     }
     else{
@@ -3079,7 +3078,7 @@ RooAbsReal* Util::CreateNLL( RooWorkspace* w, TString fitRegions, Bool_t lumiCon
     RooStats::ModelConfig* mc = Util::GetModelConfig( w );
     const RooArgSet* globObs = mc->GetGlobalObservables();
 
-    RooAbsReal* nll = (RooNLLVar*) pdf_FR->createNLL(*data_FR, RooFit::GlobalObservables(*globObs) ); 
+    RooAbsReal* nll = (RooNLLVar*) pdf_FR->createNLL(*data_FR, RooFit::GlobalObservables(*globObs) );
 
     return nll;
 }
@@ -3095,7 +3094,7 @@ Util::scanStrForFloats(const TString& toscan, const TString& format)
 
     int narg2 = sscanf( toscan.Data(), format.Data(), &wsarg[0],&wsarg[1],&wsarg[2],&wsarg[3],&wsarg[4],&wsarg[5],&wsarg[6],&wsarg[7],&wsarg[8],&wsarg[9] );
 
-    if ( !(narg1==narg2 && narg2>0) ) { 
+    if ( !(narg1==narg2 && narg2>0) ) {
         Logger << kERROR << "Util::scanStringForFloats incorrect lengths" << GEndl;
         return wsid;
     }
@@ -3104,7 +3103,7 @@ Util::scanStrForFloats(const TString& toscan, const TString& format)
     wsid.Clear();  // form unique ws id
     for (int i=0; i<narg2; ++i) {
         if (i!=0) wsid += "_" ;
-        wsid += Form("%.0f", wsarg[i] ); 
+        wsid += Form("%.0f", wsarg[i] );
     }
 
     return wsid;
@@ -3159,7 +3158,7 @@ TGraph* Util::getErrorBand(TH1F* hNom, TH1F* hHigh, TH1F* hLow){
       else{
         if(hNom->GetBinContent(i) == hHigh->GetBinContent(i)){
           if(hNom->GetBinContent(i)>hLow->GetBinContent(i)){
-            high.push_back(0.);  
+            high.push_back(0.);
             low.push_back(hNom->GetBinContent(i)-hLow->GetBinContent(i));
           }
           else{
@@ -3186,9 +3185,9 @@ TGraph* Util::getErrorBand(TH1F* hNom, TH1F* hHigh, TH1F* hLow){
      g->SetPoint(2*i,X[i]-ErrXl[i],nom[i]+high[i]);
      g->SetPoint(2*i+1,X[i]+ErrXh[i],nom[i]+high[i]);
    }
-   
+
    int Ntmp = g->GetN();
-   
+
    for(unsigned int i=0;i<X.size();i++){
     g->SetPoint(Ntmp+2*i,X[X.size()-1-i]+ErrXh[X.size()-1-i],nom[X.size()-1-i]-low[X.size()-1-i]);
     g->SetPoint(Ntmp+2*i+1,X[X.size()-1-i]-ErrXl[X.size()-1-i],nom[X.size()-1-i]-low[X.size()-1-i]);
@@ -3197,14 +3196,14 @@ TGraph* Util::getErrorBand(TH1F* hNom, TH1F* hHigh, TH1F* hLow){
    g->SetFillColor(kYellow);
 
    return g;
- 
+
 }
 
 void Util::plotDistribution(TFile* f, TString hNomName, TString Syst, TString NameSample, TString Region, TString Var){
 
 
    TH1F* hNom = (TH1F*)f->Get(hNomName);
-   
+
    TString syst_name = Syst;
    TString norm = "";
    if (syst_name.EndsWith("Norm")) {
@@ -3229,7 +3228,7 @@ void Util::plotDistribution(TFile* f, TString hNomName, TString Syst, TString Na
    for(int i=1;i<=hNomClone->GetNbinsX();i++){
        if(hNom->GetBinContent(i)>0) hNomClone->SetBinError(i,hNom->GetBinError(i)/hNom->GetBinContent(i));
        hNomClone->SetBinContent(i,1);
-       
+
    }
 
    TH1F* hHighClone = (TH1F*)hHigh->Clone();
@@ -3242,12 +3241,12 @@ void Util::plotDistribution(TFile* f, TString hNomName, TString Syst, TString Na
    for(int i=1;i<=hLowClone->GetNbinsX();i++){
        hLowClone->SetBinError(i,0.);
    }
-   
+
    for(int i=1;i<=hNom->GetNbinsX();i++){
       if(hNom->GetBinContent(i)<=0){
         if(hLow->GetBinContent(i)<=0 && hHigh->GetBinContent(i)<=0){
              hLowClone->SetBinContent(i,1.);
-             hHighClone->SetBinContent(i,1); 
+             hHighClone->SetBinContent(i,1);
         }
         else if(hLow->GetBinContent(i)<=0 && hHigh->GetBinContent(i)>0) hHighClone->SetBinContent(i,10);
         else if(hLow->GetBinContent(i)>0 && hHigh->GetBinContent(i)<=0) hLowClone->SetBinContent(i,10);
@@ -3261,12 +3260,12 @@ void Util::plotDistribution(TFile* f, TString hNomName, TString Syst, TString Na
             hHighClone->SetBinContent(i,1.);
          }
         }
-        
+
       }
    }
 
-   
-  
+
+
 
    TCanvas* c = new TCanvas(NameSample+"_"+Syst+"Syst_"+Region+"_Dist",NameSample+" "+Syst+" Syst ("+Region+") Dist",600,400);
 
@@ -3313,22 +3312,22 @@ void Util::plotDistribution(TFile* f, TString hNomName, TString Syst, TString Na
    pad2->SetBottomMargin(0.2);
    pad2->Draw();
    pad2->cd();
-  
+
    TGraph* gClone = getErrorBand(hNomClone,hHighClone,hLowClone);
-   gClone->GetXaxis()->SetLabelSize(0.08);  
+   gClone->GetXaxis()->SetLabelSize(0.08);
    gClone->GetXaxis()->SetTitleSize(0.08);
    gClone->GetXaxis()->SetTitle(Var);
    gClone->GetYaxis()->SetTitle("#Delta X/X[%]");
    gClone->GetYaxis()->SetTitleOffset(0.5);
    gClone->GetYaxis()->SetTitleSize(0.08);
    gClone->GetYaxis()->SetRangeUser(0,2.);
-   gClone->GetYaxis()->SetLabelSize(0.06);  
+   gClone->GetYaxis()->SetLabelSize(0.06);
    double minY=11., maxY=0;
    for(int i=0;i<gClone->GetN();i++){
       double x,y;
       gClone->GetPoint(i,x,y);
       if(y<minY) minY=y;
-      if(y>maxY) maxY=y;     
+      if(y>maxY) maxY=y;
    }
    if(maxY>2.) maxY=2.;
    gClone->GetYaxis()->SetRangeUser(minY-0.01,maxY+0.01);
@@ -3373,8 +3372,8 @@ void Util::plotSystematics(TFile* f,TString hNomName, vector<TString> Syst, TStr
         syst_name.ReplaceAll("Norm","");
         norm = "Norm";
       }
-      
-       
+
+
       hSystNom->SetBinContent(i,Nom);
       TString hHighName = hNomName;
       hHighName.ReplaceAll("Nom",syst_name+"High");
@@ -3384,7 +3383,7 @@ void Util::plotSystematics(TFile* f,TString hNomName, vector<TString> Syst, TStr
       hLowName.ReplaceAll("Nom",syst_name+"Low");
       TH1F* hL = (TH1F*)f->Get(hLowName+norm);
 
-      if(!hH || !hL){ 
+      if(!hH || !hL){
         Logger << kWARNING << syst_name <<" systematic (with or without normalization) has not been found" << GEndl;
         hSystHigh->SetBinContent(i,Nom);
         hSystLow->SetBinContent(i,Nom);
@@ -3470,7 +3469,7 @@ void Util::plotUpDown(TString FileName, TString NameSample, TString SystName, TS
 
 
   if(NBins>0){
-   for(unsigned int i=0;i<Syst.size();i++) plotDistribution(f,hNomName,Syst[i],NameSample,Region,Var);    
+   for(unsigned int i=0;i<Syst.size();i++) plotDistribution(f,hNomName,Syst[i],NameSample,Region,Var);
   }
 
   plotSystematics(f,hNomName,Syst,NameSample,Region,Var);
@@ -3480,7 +3479,7 @@ void Util::plotUpDown(TString FileName, TString NameSample, TString SystName, TS
 
  //f->Close();
  //delete f;
-   
+
 }
 
 //-------------------------------------------------------------------------------------------------------
@@ -3548,8 +3547,8 @@ void Util::PlotFitParameters(RooFitResult* r, TString anaName){
  parLowErrors.insert(parLowErrors.end(), alpha_parLowErrors.begin(), alpha_parLowErrors.end());
  parLowErrors.insert(parLowErrors.end(), mcstat_parLowErrors.begin(), mcstat_parLowErrors.end());
  parLowErrors.insert(parLowErrors.end(), mu_parLowErrors.begin(), mu_parLowErrors.end());
- 
- 
+
+
 
  TCanvas* c_np = new TCanvas("fit_parameters","fit_parameters",1200,800);
  c_np->cd();
@@ -3558,7 +3557,7 @@ void Util::PlotFitParameters(RooFitResult* r, TString anaName){
  p_np->Draw();
  p_np->cd();
 
- TGraphAsymmErrors* g = new TGraphAsymmErrors(N.size(),&(parVals[0]),&(N[0]),&(parLowErrors[0]),&(parHighErrors[0]),&(errN[0]),&(errN[0])); 
+ TGraphAsymmErrors* g = new TGraphAsymmErrors(N.size(),&(parVals[0]),&(N[0]),&(parLowErrors[0]),&(parHighErrors[0]),&(errN[0]),&(errN[0]));
  g->GetHistogram()->GetYaxis()->Set(count/2,1,count+1);
  for(unsigned int i=1;i<=N.size();i++) g->GetHistogram()->GetYaxis()->SetBinLabel(i,parNames[i-1]);
  g->GetHistogram()->GetYaxis()->SetRangeUser(1,count+1);
@@ -3586,7 +3585,7 @@ void Util::PlotFitParameters(RooFitResult* r, TString anaName){
  _parLowErrors.insert(_parLowErrors.end(), mcstat_parLowErrors.begin(), mcstat_parLowErrors.end());
  _parLowErrors.insert(_parLowErrors.end(), mu_parLowErrors.begin(), mu_parLowErrors.end());
 
- TGraph* _g = new TGraph(_N.size(),&(_parVals[0]),&(_N[0])); 
+ TGraph* _g = new TGraph(_N.size(),&(_parVals[0]),&(_N[0]));
  _g->SetName("_fit_results");
  _g->SetTitle("");
  _g->SetMarkerStyle(8);
@@ -3600,12 +3599,12 @@ void Util::PlotFitParameters(RooFitResult* r, TString anaName){
  yMCstatBand->SetPoint(1,-1,count+2);
  yMCstatBand->SetPoint(2,1,count+2);
  yMCstatBand->SetPoint(3,1,0);
- yMCstatBand->SetFillColor(kYellow); 
- yMCstatBand->SetFillStyle(3352); 
+ yMCstatBand->SetFillColor(kYellow);
+ yMCstatBand->SetFillStyle(3352);
 
  TLine* lMCstat = new TLine(0,1,0,count+1);
  lMCstat->SetLineStyle(8);
- c_np->Update(); 
+ c_np->Update();
 
  TGaxis *axis1 = new TGaxis(p_np->GetUxmin(),p_np->GetUymax(),p_np->GetUxmax(),p_np->GetUymax(),p_np->GetUxmin()+1,p_np->GetUxmax()+1,510,"-L");
  axis1->SetLineColor(kBlue);
@@ -3619,7 +3618,7 @@ void Util::PlotFitParameters(RooFitResult* r, TString anaName){
  g->Draw("Psame");
  _g->Draw("Psame");
 
- c_np->SaveAs("results/"+anaName+"/"+c_np->GetName()+".root"); 
+ c_np->SaveAs("results/"+anaName+"/"+c_np->GetName()+".root");
 
 }
 
@@ -3632,7 +3631,7 @@ TH1* Util::ComponentToHistogram(RooRealSumPdf* component, RooRealVar* variable, 
     auto stepsize = variable->getBinning().averageBinWidth();
     auto hist = component->createHistogram(Form("hist_%s", component->GetName()), *variable);
 
-    // Now loop over the bins and fill them 
+    // Now loop over the bins and fill them
     for(int i=0; i < hist->GetNbinsX()+2; ++i) {
         auto low = hist->GetBinLowEdge(i);
         auto width = hist->GetBinWidth(i);
@@ -3653,7 +3652,7 @@ TH1* Util::ComponentToHistogram(RooRealSumPdf* component, RooRealVar* variable, 
     }
 
     auto sum = component->createIntegral(RooArgSet(*variable))->getVal();
-    
+
     double scale = 0.0;
     if(sum != 0 && hist->Integral() != 0) {
         scale = sum / hist->Integral();
@@ -3664,10 +3663,10 @@ TH1* Util::ComponentToHistogram(RooRealSumPdf* component, RooRealVar* variable, 
     return hist;
 }
 
-void Util::ScaleGraph(TGraphAsymmErrors *g, TH1* h) { 
+void Util::ScaleGraph(TGraphAsymmErrors *g, TH1* h) {
     if (g->GetN() != h->GetNbinsX() ) {
-        Logger << kERROR << "Cannot multiply graph with " << g->GetN() << " points with histogram with " << h->GetNbinsX() << " points" << GEndl ; 
-        throw 1 ; 
+        Logger << kERROR << "Cannot multiply graph with " << g->GetN() << " points with histogram with " << h->GetNbinsX() << " points" << GEndl ;
+        throw 1 ;
     }
 
     for(int i=0; i < g->GetN(); ++i) {
@@ -3675,7 +3674,7 @@ void Util::ScaleGraph(TGraphAsymmErrors *g, TH1* h) {
         int j = i+1;
 
         double x, y;
-        g->GetPoint(i, x, y); 
+        g->GetPoint(i, x, y);
 
         g->SetPoint(i, x, y * h->GetBinContent(j));
         g->SetPointEYhigh(i, g->GetErrorYhigh(i) * h->GetBinContent(j));
@@ -3702,7 +3701,7 @@ void Util::plotInterpolationScheme(RooWorkspace *w) {
 
     RooAbsArg* parg(0);
     while((parg=(RooAbsArg*)iter->Next())) {
-        if ( parg->ClassName()!=TString("PiecewiseInterpolation") ) { continue; }    
+        if ( parg->ClassName()!=TString("PiecewiseInterpolation") ) { continue; }
         PiecewiseInterpolation* p = (PiecewiseInterpolation*)w->function( parg->GetName() );
         p->printAllInterpCodes();
         const RooArgList paramList =  p->paramList();

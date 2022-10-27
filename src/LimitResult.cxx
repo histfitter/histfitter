@@ -7,22 +7,25 @@
  * Description:                                                                   *
  *      Implementation (see header for description)                               *
  *                                                                                *
- * See corresponding .h file for author and license information                   *         
+ * See corresponding .h file for author and license information                   *
  *                                                                                *
  **********************************************************************************/
 
 #include <iostream>
 #include <sstream>
 #include <iomanip>
+#include <nlohmann/json.hpp>
 
 #include "LimitResult.h"
 #include "Significance.h"
 
-template <typename T> std::string to_string_scientific(const T& t) { 
-   std::ostringstream os; 
-   os << std::scientific << std::setprecision(6) << t; 
-   return os.str(); 
-} 
+using json = nlohmann::json;
+
+template <typename T> std::string to_string_scientific(const T& t) {
+   std::ostringstream os;
+   os << std::scientific << std::setprecision(6) << t;
+   return os.str();
+}
 
 //_____________________________________________________________________________
 LimitResult::~LimitResult()
@@ -61,7 +64,7 @@ LimitResult::LimitResult(const std::string &name, const std::string &title) :
     m_resultfilename(""),
     m_comments("") {
     // dummy code: allow unused variable
-    std::string tmp=title; 
+    std::string tmp=title;
     tmp=name;
 };
 
@@ -82,10 +85,10 @@ void LimitResult::Summary() {
     std::cout << " | Sigma0:   "<<       GetSigma0() << std::endl;
     std::cout << " | Sigma1:   "<<       GetSigma1() << std::endl;
 
-    std::cout << " | NExp:     "<<         GetNExp() << std::endl;          
-    std::cout << " | Mode:     "<<         GetMode() << std::endl;          
-    std::cout << " | Seed:     "<<         GetSeed() << std::endl;  
-    std::cout << " | fID:      "<<         GetfID() << std::endl;  
+    std::cout << " | NExp:     "<<         GetNExp() << std::endl;
+    std::cout << " | Mode:     "<<         GetMode() << std::endl;
+    std::cout << " | Seed:     "<<         GetSeed() << std::endl;
+    std::cout << " | fID:      "<<         GetfID() << std::endl;
 
     std::cout << " | Upper Limit:  " << GetUpperLimit() << " +/- " << GetUpperLimitEstimatedError() << std::endl;
     std::cout << " | Expected Upper Limit:           " << GetExpectedUpperLimit()  << std::endl;
@@ -139,37 +142,37 @@ std::vector<std::string> LimitResult::GetKeys() const {
 
 std::map<std::string, float> LimitResult::GetData() const {
     std::map<std::string, float> summary;
-    summary["p0"] = GetP0(); 
+    summary["p0"] = GetP0();
     summary["p1"] = GetP1();
     summary["CLs"] = GetCLs();
 
     summary["mode"] = GetMode();
     summary["nexp"] = GetNExp();
     summary["seed"] = GetSeed();
-    
+
     summary["CLsexp"] = GetCLsexp();
     summary["fID"] = GetfID();
     summary["sigma0"] = GetSigma0();
     summary["sigma1"] = GetSigma1();
-    
-    summary["clsu1s"] = GetCLsu1S(); 
-    summary["clsd1s"] = GetCLsd1S(); 
-    summary["clsu2s"] = GetCLsu2S(); 
-    summary["clsd2s"] = GetCLsd2S(); 
-    
+
+    summary["clsu1s"] = GetCLsu1S();
+    summary["clsd1s"] = GetCLsd1S();
+    summary["clsu2s"] = GetCLsu2S();
+    summary["clsd2s"] = GetCLsd2S();
+
     summary["p0exp"] = GetP0exp();
     summary["p0u1s"] = GetP0u1S();
     summary["p0d1s"] = GetP0d1S();
     summary["p0u2s"] = GetP0u2S();
     summary["p0d2s"] = GetP0d2S();
-    
+
     summary["upperLimit"] = GetUpperLimit();
     summary["upperLimitEstimatedError"] = GetUpperLimitEstimatedError();
     summary["expectedUpperLimit"] = GetExpectedUpperLimit();
-    summary["expectedUpperLimitPlus1Sig"] = GetExpectedUpperLimitPlus1Sig(); 
-    summary["expectedUpperLimitPlus2Sig"] = GetExpectedUpperLimitPlus2Sig(); 
-    summary["expectedUpperLimitMinus1Sig"] = GetExpectedUpperLimitMinus1Sig(); 
-    summary["expectedUpperLimitMinus2Sig"] = GetExpectedUpperLimitMinus2Sig(); 
+    summary["expectedUpperLimitPlus1Sig"] = GetExpectedUpperLimitPlus1Sig();
+    summary["expectedUpperLimitPlus2Sig"] = GetExpectedUpperLimitPlus2Sig();
+    summary["expectedUpperLimitMinus1Sig"] = GetExpectedUpperLimitMinus1Sig();
+    summary["expectedUpperLimitMinus2Sig"] = GetExpectedUpperLimitMinus2Sig();
     summary["xsec"] = -999007.;
     summary["excludedXsec"] = -999007.;
 
@@ -183,21 +186,12 @@ std::map<std::string, float> LimitResult::GetData() const {
 
 }
 
-JSON LimitResult::GetJSONData() const {
-    JSON summary = JSON::Object();
-   
-    for(const auto &itr : GetData()){
-        summary[itr.first] = itr.second;
-    }
-    return summary;
-}
-
 //_____________________________________________________________________________
 std::string LimitResult::GetDescriptionString() const {
     std::ostringstream description;
     description << "p0:p1:CLs:"; //3
     description << "mode:nexp:";  //2
-    description << "seed:";       //1 
+    description << "seed:";       //1
     description << "CLsexp:";     //1
     description << "fID:sigma0:sigma1:";   //3
     description << "clsu1s:clsd1s:clsu2s:clsd2s:"; //4
@@ -229,3 +223,7 @@ void LimitResult::AddMetaData(const std::string& s, float val){
     m_metadata[s] = val;
 }
 
+void to_json(json& j, const LimitResult& L)
+{
+    j = json(L.GetData());
+}

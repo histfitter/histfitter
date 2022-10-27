@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.21)
+cmake_minimum_required(VERSION 3.13)
 
 project(HistFitter VERSION 1.0.2)
 set(CMAKE_CXX_STANDARD 17)
@@ -12,7 +12,7 @@ find_package(ROOT 6 REQUIRED ${root_components})
 list(TRANSFORM root_components PREPEND ROOT::)
 
 set(local_libs ChannelStyle;CombinationUtils;CombineWorkSpaces;ConfigMgr;
-        DrawUtils;FitConfig;HistogramPlotter;HypoTestTool;json;LimitResult;
+        DrawUtils;FitConfig;HistogramPlotter;HypoTestTool;LimitResult;
         RooExpandedFitResult;RooHist;RooPlot;Significance;StatTools;
         TEasyFormula;TMsgLogger;toy_utils;Utils;ValidationUtils;XtraValues)
 list(TRANSFORM local_libs APPEND .h OUTPUT_VARIABLE headers)
@@ -34,7 +34,7 @@ if(CMAKE_BUILD_TYPE STREQUAL Release)
         message(STATUS "LTO/IPO not supported: <${error}>")
     endif()
 endif()
-target_link_libraries(SusyFitter PRIVATE ${root_components} Threads::Threads  m dl)
+target_link_libraries(SusyFitter PRIVATE ${root_components} Threads::Threads nlohmann_json::nlohmann_json m dl)
 if(OpenMP::OpenMP_CXX)
     target_link_libraries(SusyFitter PRIVATE OpenMP::OpenMP_CXX)
 endif()

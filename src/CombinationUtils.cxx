@@ -75,7 +75,7 @@ float Util::getValueFromTree( TTree* tree, const std::string& searchpar, const s
     float searchval(-1);
     bool matchfound = Util::findValueFromTree( tree,searchpar,searchval,pnVec,vVec );
 
-    if (!matchfound) 
+    if (!matchfound)
         CombinationUtilsLogger << kERROR << "no value found for search parameter : " << searchpar << GEndl;
 
     return searchval;
@@ -114,19 +114,21 @@ bool Util::findValueFromTree( TTree* tree, const std::string& searchpar, float& 
     if (pnVec.size()==0) return false;
     if (searchpar.empty()) return false;
 
-    const int nidpar = static_cast<int>( pnVec.size() ); 
+    const int nidpar = static_cast<int>( pnVec.size() );
 
-    float val[nidpar], sval(defaultVal);
-    TBranch* branch[nidpar], *sbranch(0);
+    std::vector<float> val(nidpar);
+    float sval(defaultVal);
+    std::vector<TBranch*> branch(nidpar);
+    TBranch* sbranch(0);
 
     // set branches
-    for (Int_t i=0; i<nidpar; ++i) { 
+    for (Int_t i=0; i<nidpar; ++i) {
         tree->SetBranchAddress( pnVec[i].c_str(), &val[i], &branch[i] );
-        if (branch[i]==0) { 
+        if (branch[i]==0) {
             CombinationUtilsLogger << kERROR << "no branch found with name : " << pnVec[i] << ". Return false." << GEndl;
             return false;
         }
-    }  
+    }
 
     // search par
     tree->SetBranchAddress( searchpar.c_str(), &sval, &sbranch );

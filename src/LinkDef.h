@@ -70,10 +70,6 @@
 #pragma link C++ function StatTools::FindSNSigma ;
 #pragma link C++ function StatTools::FindXSNSigma;
 
-//json.cxx
-#pragma link C++ class JSON;
-#pragma link C++ class JSONException;
-
 //DrawUtils.cxx
 #pragma link C++ namespace DrawUtil;
 #pragma link C++ function DrawUtil::triwsmooth;
