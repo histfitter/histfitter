@@ -49,9 +49,10 @@ ROOTCINT     := rootcint
 ROOTCLING     := rootcling
 
 ifeq ($(PLATFORM),macosx)
-MACOSX_MINOR := $(shell sw_vers | sed -n 's/ProductVersion://p' | cut -d . -f 2)
+MACOSX_MAJOR := $(shell sw_vers | sed -n 's/ProductVersion://p' | xargs | cut -d . -f 1)
+MACOSX_MINOR := $(shell sw_vers | sed -n 's/ProductVersion://p' | xargs | cut -d . -f 2)
 ifeq ($(MACOSX_DEPLOYMENT_TARGET),)
-MACOSXTARGET := 10.$(MACOSX_MINOR)
+MACOSXTARGET := $(MACOSX_MAJOR).$(MACOSX_MINOR)
 else
 MACOSXTARGET := $(MACOSX_DEPLOYMENT_TARGET)
 endif
@@ -321,6 +322,15 @@ LDFLAGS       = $(OPT)
 SOFLAGS       = -shared
 endif
 
+ifeq ($(ARCH),linuxarm64)
+# ARM Linux with egcs
+CXX           = g++
+CXXFLAGS      = $(OPT) -Wall -fPIC
+LD            = g++
+LDFLAGS       = $(OPT)
+SOFLAGS       = -shared
+endif
+
 ifeq ($(ARCH),freebsd4)
 # FreeBSD with glibc
 CXX           = g++
@@ -375,6 +385,19 @@ ifneq ($(subst $(MACOSX_MINOR),,12),12)
 UNDEFOPT      = suppress
 LD            = g++
 endif
+SOFLAGS       = -dynamiclib -single_module -undefined $(UNDEFOPT) -install_name $(CURDIR)/
+endif
+
+ifeq ($(ARCH),macosxarm64)
+# MacOS on M-series ARM SoCs
+CXX           = g++
+CXXFLAGS      = $(OPT2) -pipe -Wall -W -Woverloaded-virtual
+LD            = g++
+LDFLAGS       = $(OPT2) -mmacosx-version-min=$(MACOSXTARGET)
+# The SOFLAGS will be used to create the .dylib,
+# the .so will be created separately
+DllSuf        = dylib
+UNDEFOPT      = dynamic_lookup
 SOFLAGS       = -dynamiclib -single_module -undefined $(UNDEFOPT) -install_name $(CURDIR)/
 endif
 
