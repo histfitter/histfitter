@@ -202,7 +202,7 @@ def refit_parameter(opts, index):
                       par_final.getVal(), par_final.getErrorHi(), par_final.getErrorLo(),
                       *poi_shifts
                     )
-    pickle.dump(Param, open(fileNamePar, "w") )
+    pickle.dump(Param, open(fileNamePar, "wb") )
 
 def nice_param_name(par_name):
     if par_name.startswith("gamma"):
