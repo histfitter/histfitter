@@ -53,6 +53,7 @@
 #include "RooMinimizer.h"
 #include "RooConstVar.h"
 #include "RooNumIntConfig.h"
+#include "RooMinimizer.h"
 #include "RooFormulaVar.h"
 
 #include "RooStats/ModelConfig.h"
@@ -1997,7 +1998,7 @@ Util::GetMCStudy( const RooWorkspace* w )
     }
 
     // caller owns mcstudy
-    return ( new RooMCStudy( *pdf, *obsset, RooFit::FitOptions("r") ) ) ;
+    return ( new RooMCStudy( *pdf, *obsset, RooFit::Save(true) ) ) ;
 }
 
 
