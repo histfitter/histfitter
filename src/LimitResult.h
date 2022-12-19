@@ -15,8 +15,8 @@
  * LICENSE.                                                                       *
  **********************************************************************************/
 
-#ifndef LimitResult_hh
-#define LimitResult_hh
+#ifndef LIMITRESULT_H
+#define LIMITRESULT_H
 
 #include <iostream>
 #include <map>
@@ -64,19 +64,19 @@ class LimitResult {
 
         double GetP0() const 				{ return m_p0; }; // p value at signal = 0
         double GetP0exp() const 			{ return m_p0exp; }; //
-        double GetP0u1S() const 			{ return m_p0u1S; }; // 1 sigma upper and lower 
-        double GetP0d1S() const 			{ return m_p0d1S; }; // from toys               
-        double GetP0u2S() const                         { return m_p0u2S; }; // 1 sigma upper and lower 
-        double GetP0d2S() const                         { return m_p0d2S; }; // from toys               
+        double GetP0u1S() const 			{ return m_p0u1S; }; // 1 sigma upper and lower
+        double GetP0d1S() const 			{ return m_p0d1S; }; // from toys
+        double GetP0u2S() const                         { return m_p0u2S; }; // 1 sigma upper and lower
+        double GetP0d2S() const                         { return m_p0d2S; }; // from toys
 
         double GetP1() const 				{ return m_p1; }; // p value at signal = 1
 
-        double GetCLs() const 			{ return m_CLs; }; // 
+        double GetCLs() const 			{ return m_CLs; }; //
         double GetCLsexp() const 			{ return m_CLsexp; }; //
-        double GetCLsu1S() const 			{ return m_CLsu1S; }; // 1 sigma upper and lower 
-        double GetCLsd1S() const 			{ return m_CLsd1S; }; // from toys               
-        double GetCLsu2S() const                       { return m_CLsu2S; }; // 1 sigma upper and lower 
-        double GetCLsd2S() const                       { return m_CLsd2S; }; // from toys               
+        double GetCLsu1S() const 			{ return m_CLsu1S; }; // 1 sigma upper and lower
+        double GetCLsd1S() const 			{ return m_CLsd1S; }; // from toys
+        double GetCLsu2S() const                       { return m_CLsu2S; }; // 1 sigma upper and lower
+        double GetCLsd2S() const                       { return m_CLsd2S; }; // from toys
 
         double GetSigma0() const                      { return m_sigma0; }
         double GetSigma1() const                      { return m_sigma1; }
@@ -96,21 +96,21 @@ class LimitResult {
         double GetExpectedUpperLimitMinus2Sig() const              { return m_expectedUpperLimitMinus2Sig; }
 
 
-        void SetP0(double val)		{ m_p0 = val; }; // 
-        void SetP0exp(double val)	{ m_p0exp = val; }; // 
-        void SetP0u1S(double val)	{ m_p0u1S= val; }; // 1 sigma upper and lower 
-        void SetP0d1S(double val)	{ m_p0d1S= val; }; // from toys                  
-        void SetP0u2S(double val)        { m_p0u2S= val; }; // 1 sigma upper and lower 
-        void SetP0d2S(double val)        { m_p0d2S= val; }; // from toys        
+        void SetP0(double val)		{ m_p0 = val; }; //
+        void SetP0exp(double val)	{ m_p0exp = val; }; //
+        void SetP0u1S(double val)	{ m_p0u1S= val; }; // 1 sigma upper and lower
+        void SetP0d1S(double val)	{ m_p0d1S= val; }; // from toys
+        void SetP0u2S(double val)        { m_p0u2S= val; }; // 1 sigma upper and lower
+        void SetP0d2S(double val)        { m_p0d2S= val; }; // from toys
 
-        void SetP1(double val)		{ m_p1 = val; }; // 
+        void SetP1(double val)		{ m_p1 = val; }; //
 
-        void SetCLs(double val)		{ m_CLs = val; }; // 
-        void SetCLsexp(double val)		{ m_CLsexp = val; }; // 
-        void SetCLsu1S(double val)		{ m_CLsu1S= val; }; // 1 sigma upper and lower 
-        void SetCLsd1S(double val)		{ m_CLsd1S= val; }; // from toys                  
-        void SetCLsu2S(double val)             { m_CLsu2S= val; }; // 1 sigma upper and lower 
-        void SetCLsd2S(double val)             { m_CLsd2S= val; }; // from toys        
+        void SetCLs(double val)		{ m_CLs = val; }; //
+        void SetCLsexp(double val)		{ m_CLsexp = val; }; //
+        void SetCLsu1S(double val)		{ m_CLsu1S= val; }; // 1 sigma upper and lower
+        void SetCLsd1S(double val)		{ m_CLsd1S= val; }; // from toys
+        void SetCLsu2S(double val)             { m_CLsu2S= val; }; // 1 sigma upper and lower
+        void SetCLsd2S(double val)             { m_CLsd2S= val; }; // from toys
 
         void SetSigma0(const double& sigma)           { m_sigma0=sigma; };
         void SetSigma1(const double& sigma)           { m_sigma1=sigma; };
@@ -133,19 +133,19 @@ class LimitResult {
         // filename of saved file
         std::string GetResultFilename() const 		{ return m_resultfilename; }
         // comment string
-        std::string GetComments() const 			{ return m_comments; }   
+        std::string GetComments() const 			{ return m_comments; }
         // filename of saved file
         void SetResultFilename(const std::string & val)   { m_resultfilename = val; }
         // comment string
-        void SetComments(const std::string & val) 	{ m_comments = val; }   
+        void SetComments(const std::string & val) 	{ m_comments = val; }
 
         void Summary();
         std::vector<std::string> GetKeys() const;
         std::map<std::string, float> GetData() const;
-        JSON GetJSONData() const; 
-        std::string GetSummaryString() const; 
+        JSON GetJSONData() const;
+        std::string GetSummaryString() const;
         std::string GetDescriptionString() const;
-        void AddMetaData(const std::map<std::string,float>& metadata); 
+        void AddMetaData(const std::map<std::string,float>& metadata);
         void AddMetaData(const std::string&, float);
 };
 

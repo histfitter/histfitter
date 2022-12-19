@@ -14,8 +14,8 @@
  * LICENSE.                                                                       *
  **********************************************************************************/
 
-#ifndef ValidationUtilsDEF
-#define ValidationUtilsDEF
+#ifndef VALIDATIONUTILS_H
+#define VALIDATIONUTILS_H
 
 //Combination/trunk/Tools/CombinationGlob.h
 #include "TCanvas.h"
@@ -51,7 +51,7 @@ namespace ValidationUtils
 
   // set frame styles
   void SetFrameStyle2D( TH1* frame, Float_t scale = 1.0 );
-  
+
   void PullPlot3(XtraValues* inValsEl, XtraValues* inValsMu, const TString& outFileNamePrefix);
   void PullPlot4(XtraValues* inVals, const TString& outFileNamePrefix);
   void PullPlot5(XtraValues* inValsEl, XtraValues* inValsMu,  XtraValues* inValsEM, const TString& outFileNamePrefix);

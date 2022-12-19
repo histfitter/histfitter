@@ -17,26 +17,26 @@
  * LICENSE.                                                                       *
  **********************************************************************************/
 
-#ifndef Utils_hh
-#define Utils_hh
+#ifndef UTILS_H
+#define UTILS_H
 
 #include <map>
 #include <vector>
 #include <string>
+#include <iostream>
+
 #include "TString.h"
 #include "TH1.h"
 #include "TH2.h"
 #include "TFile.h"
 #include "TGraphAsymmErrors.h"
 
-#include <iostream>
 
 #include "RooFitResult.h"
 #include "RooArgSet.h"
 #include "RooArgList.h"
 #include "RooExpandedFitResult.h"
 #include "ChannelStyle.h"
-
 class TMap;
 class TTree;
 
@@ -49,7 +49,6 @@ class RooAbsData;
 class RooSimultaneous;
 class RooCategory;
 class RooPlot;
-//class RooFitResult;
 class RooMCStudy;
 class FitConfig;
 class RooProdPdf;
@@ -74,7 +73,7 @@ namespace Util
   RooWorkspace* GetWorkspaceFromFile( const TString& infile, const TString& wsname );
   /**
      Wrute RooWorkspace to file
-  */ 
+  */
   void WriteWorkspace(RooWorkspace* w, TString outFileName="./results/BkgForumTest_combined_ComHistoSysOverConst_model.root", TString suffix = "");
   /**
      Load snapshot
@@ -90,10 +89,10 @@ namespace Util
   void ImportInWorkspace( RooWorkspace* wspace, TObject* obj=NULL, TString name="");
 
   /**
-    Decompose RooWorkspace into a separate object for each region, mainly decomposing simultaneous PDF/data 
+    Decompose RooWorkspace into a separate object for each region, mainly decomposing simultaneous PDF/data
   */
   void DecomposeWS(const char* infile, const char* wsname, const char* outfile);
-  
+
   /**
      Reset errors of all (nuisance/normalization) parameters in RooWorkspace to 'natural' values
   */
@@ -146,17 +145,17 @@ namespace Util
      @param fixedPars String of parameter1:value1,parameter2:value2 giving information on which parameter to fix to which value if dofixParameter == kTRUE, default=''
      @param noFit Don't re-run fit, but load parameter from after-fit workspace
      @param plotInterpolation plot the interpolation scheme
-  */  
-  void GenerateFitAndPlot(TString fcName, TString anaName, Bool_t drawBeforeFit, Bool_t drawAfterFit, Bool_t plotCorrelationMatrix, 
+  */
+  void GenerateFitAndPlot(TString fcName, TString anaName, Bool_t drawBeforeFit, Bool_t drawAfterFit, Bool_t plotCorrelationMatrix,
 			  Bool_t plotSeparateComponents, Bool_t plotNLL,  Bool_t minos = kFALSE, TString minosPars="", Bool_t doFixParameters = kFALSE, TString fixedPars="", bool ReduceCorrMatrix = true, bool noFit = false, bool plotInterpolation = false);
- 
+
   // Same as above, but now only for afterFit workspace
-  void GeneratePlots(TString filename, TString anaName, Bool_t drawBeforeFit, Bool_t drawAfterFit, Bool_t plotCorrelationMatrix, 
+  void GeneratePlots(TString filename, TString anaName, Bool_t drawBeforeFit, Bool_t drawAfterFit, Bool_t plotCorrelationMatrix,
           Bool_t plotSeparateComponents, Bool_t plotNLL, Bool_t minos, TString minosPars,
           Bool_t doFixParameters, TString fixedPars, bool ReduceCorrMatrix);
 
   /**
-     Function to plot each region with data, pdf and pdf-components(=samples)  
+     Function to plot each region with data, pdf and pdf-components(=samples)
      @param w RooWorkspace pointer
      @param fcName Fitconfig name as TString, pre-defined in RooWorkspace
      @param anaName Analysis name defined in config file, mainly used for output file/dir naming
@@ -164,17 +163,17 @@ namespace Util
      @param outputPrefix Output prefix, mainly used for TCanvas naming
      @param rFit RooFitResult pointer to plot the propagated uncertainty on the fitted model
      @param inputData RooAbsData pointer pointing to a toy/asimov-dataset, default='' meaning that it takes obsData from RooWorkspace
-  */   
-  void PlotPdfWithComponents(RooWorkspace* w, TString fcName = "Example3b", TString anaName="Analysis", TString plotRegions = "ALL", 
+  */
+  void PlotPdfWithComponents(RooWorkspace* w, TString fcName = "Example3b", TString anaName="Analysis", TString plotRegions = "ALL",
 			     TString outputPrefix = "", RooFitResult* rFit = NULL, RooAbsData* inputData=0);
   /**
-     Function to plot each region with data, pdf and pdf-components(=samples) 
-     @sa PlotPdfWithComponents() 
+     Function to plot each region with data, pdf and pdf-components(=samples)
+     @sa PlotPdfWithComponents()
 
-  */ 
-  void PlotPdfWithComponents(RooWorkspace* w, FitConfig* fc,  TString anaName="Analysis", TString plotRegions= "ALL", TString outputPrefix = "", 
+  */
+  void PlotPdfWithComponents(RooWorkspace* w, FitConfig* fc,  TString anaName="Analysis", TString plotRegions= "ALL", TString outputPrefix = "",
 			     RooFitResult* rFit= NULL, RooAbsData* inputData=0 );
- 
+
   /**
      Function to add components(=samples) in plot, called for each region in turn
      @param w RooWorkspace pointer
@@ -185,9 +184,9 @@ namespace Util
      @param regionCatLabel TString that defines this region in simultaneous pdf
      @param style Instance of ChannelStyle class defined for the FitConfig fc, that carries info on plot colors etc
   */
-  void AddComponentsToPlot(RooWorkspace* w,FitConfig* fc, RooPlot* frame, RooAbsPdf* regionPdf, 
+  void AddComponentsToPlot(RooWorkspace* w,FitConfig* fc, RooPlot* frame, RooAbsPdf* regionPdf,
 			   RooRealVar* obsRegion, TString regionCatLabel, ChannelStyle style);
-  
+
   /**
      Function to plot each component(=sample) separately in each region
      @param w RooWorkspace pointer
@@ -197,10 +196,10 @@ namespace Util
      @param outputPrefix Output prefix, mainly used for TCanvas naming
      @param rFit RooFitResult pointer to plot the propagated uncertainty on the fitted model
      @param inputData RooAbsData pointer pointing to a toy/asimov-dataset, default='' meaning that it takes obsData from RooWorkspace
-  */   
-  void PlotSeparateComponents(RooWorkspace* w, TString fcName = "Example3b", TString anaName="Analysis", TString plotRegions = "ALL", 
+  */
+  void PlotSeparateComponents(RooWorkspace* w, TString fcName = "Example3b", TString anaName="Analysis", TString plotRegions = "ALL",
 			      TString outputPrefix = "", RooFitResult* rFit = NULL, RooAbsData* inputData=0 );
-  
+
   /**
      Function to plot correlation matrix
      @param rFit RooFitResult pointer to get the correlation matrix for
@@ -215,7 +214,7 @@ namespace Util
      @param anaName Analysis name defined in config file, mainly used for output file/dir naming
   */
   TH2D* GetCorrelations(RooFitResult* rFit = NULL, double threshold = 0.9, TString anaName="Analysis");
- 
+
   /**
      Function to plot log-likelihood (NLL) and profile log-likelihood (PLL)
      @param w RooWorkspace pointer
@@ -228,9 +227,9 @@ namespace Util
      @param fitRegions Comma-separated input TString of regions used for the fit, hence also used to build the NLL/PLL (as also done in FitPdf())
      @param lumiConst Boolean deciding whether "Lumi" parameter (with a special treatment in HistFactory) is to be set constant or not (as also done in FitPdf())
   */
-  void PlotNLL(RooWorkspace* w, RooFitResult* rFit = NULL,  Bool_t plotPLL = false, TString anaName="Analysis", 
+  void PlotNLL(RooWorkspace* w, RooFitResult* rFit = NULL,  Bool_t plotPLL = false, TString anaName="Analysis",
 	       TString outputPrefix = "", RooAbsData* inputData=0, TString plotPars="", TString fitRegions="ALL", Bool_t lumiConst=false);
- 
+
   /**
      Function to construct a data/model ratio or pull
      @param regionPdf RooAbsPdf pointer to the total-pdf for this specific region
@@ -248,7 +247,7 @@ namespace Util
      @param rFit RooFitResult pointer used to construct +/-1 sigma curves
      @param Nsigma Number of sigmas to be plotted, default= 1.
   */
-  RooCurve* MakePdfErrorRatioHist(RooAbsData* regionData, RooAbsPdf* regionPdf, 
+  RooCurve* MakePdfErrorRatioHist(RooAbsData* regionData, RooAbsPdf* regionPdf,
 				  RooRealVar* regionVar, RooFitResult* rFit, Double_t Nsigma = 1.);
 
 
@@ -265,12 +264,12 @@ namespace Util
 
   */
   void ATLASLabel(Double_t x,Double_t y, const char* text=NULL,Color_t color=kBlack) ;
-  
+
   /**
      Add text to plot
   */
   void AddText(Double_t x,Double_t y,char* text=NULL,Color_t color=kBlack) ;
- 
+
   /**
      Add text to plot when streamed from steering macro
   */
@@ -281,10 +280,10 @@ namespace Util
      Remove empty bins for data (otherwise a Poisson error on 0 observed events is shown)
      @param frame RooPlot pointer for the frame that needs removing the empty bins
   */
- 
+
 
   void RemoveEmptyDataBins(RooPlot* frame);
-  
+
 
   // Fitting related functions
   /**
@@ -297,10 +296,10 @@ namespace Util
      @param minos Boolean deciding whether asymmetric errors are calculated, eg whether MINOS is run, default=kFALSE
      @param minosPars When minos is called, defining what parameters need asymmetric error calculation, default=''
      @param doFixParameters Boolean deciding if some parameters are fixed to a value given or not, default=kFalse
-     @param fixedPars String of parameter1:value1,parameter2:value2 giving information on which parameter to fix to which value if dofixParameter == kTrue, default=''    
+     @param fixedPars String of parameter1:value1,parameter2:value2 giving information on which parameter to fix to which value if dofixParameter == kTrue, default=''
      @return RooFitResult pointer continaing the fit result
   */
-  RooFitResult* FitPdf(RooWorkspace* w,  TString fitRegions="ALL", Bool_t lumiConst=false, RooAbsData* inputData=0, 
+  RooFitResult* FitPdf(RooWorkspace* w,  TString fitRegions="ALL", Bool_t lumiConst=false, RooAbsData* inputData=0,
 		       TString suffix ="", Bool_t minos = kFALSE, TString minosPars="", Bool_t doFixParameters = kFALSE, TString fixedPars="");
 
   /**
@@ -310,12 +309,12 @@ namespace Util
      @param doAsym Boolean deciding whether asymmetric (MINOS) errors on parameters get used in an averaged approximation
      @return Returns the propagated error
   */
-  double GetPropagatedError(RooAbsReal* var, const RooFitResult& fr, const bool& doAsym=false); 
-  
+  double GetPropagatedError(RooAbsReal* var, const RooFitResult& fr, const bool& doAsym=false);
+
   /**
-     Sets interpolation code  
+     Sets interpolation code
      @param w RooWorkspace pointer
-     @param code Typicaly set to code = 4, meaning parabolic interpolation (default now in RooStats). This avoids kinks in the likelihood curve. 
+     @param code Typicaly set to code = 4, meaning parabolic interpolation (default now in RooStats). This avoids kinks in the likelihood curve.
    */
   void SetInterpolationCode(RooWorkspace* w, Int_t code);
   /**
@@ -342,9 +341,9 @@ namespace Util
      @param hesse Boolean deciding whether to run HESSE or not; default=false
      @param minos Boolean deciding whether asymmetric errors are calculated, eg whether MINOS is run, default=kFALSE
      @param minosPars When minos is called, defining what parameters need asymmetric error calculation, default=''
-     @return RooFitResult pointer to fit result 
+     @return RooFitResult pointer to fit result
   */
-  RooFitResult* doFreeFit( RooWorkspace* w, RooDataSet* inputdata=0, const bool& verbose=false, 
+  RooFitResult* doFreeFit( RooWorkspace* w, RooDataSet* inputdata=0, const bool& verbose=false,
 			   const bool& resetAfterFit=false, bool hesse=false, Bool_t minos = kFALSE, TString minosPars="" );
   /**
      Get asimovData dataset from workspace
@@ -354,13 +353,13 @@ namespace Util
      Generate and return a toyMC set based on the PDF/obsData contained in ModelConfig in workspace. Number of generated events is equal to number of events in obsData.
   */
   RooAbsData* GetToyMC( RooWorkspace* inputws=0 ) ;
-  
- 
-  
+
+
+
   // Simultaneous PDF related functions, to (de)compose PDF and PDF components
   /**
      Get component (sample or mutiple samples as comma-separated string) in region.
-     Returns the integral of recomposed RooRealSumPdf (top-level region PDF in HistFactory); only in a specific range, if rangeName is given. 
+     Returns the integral of recomposed RooRealSumPdf (top-level region PDF in HistFactory); only in a specific range, if rangeName is given.
   */
   RooAbsReal* GetComponent(RooWorkspace* w, TString component, TString region, const bool exactRegionName=false, TString rangeName="");
   /**
@@ -380,7 +379,7 @@ namespace Util
      Get component (sample or multiple samples) fraction in region
   */
   Double_t GetComponentFracInRegion(RooWorkspace* w, TString component, TString region);
-  
+
   /**
      Get a vector of region names
   */
@@ -390,10 +389,10 @@ namespace Util
   */
   std::vector<TString> GetAllComponentNamesInRegion(TString region, RooAbsPdf* regionPdf);
   /**
-    Get all component (sample) fractions in region  
+    Get all component (sample) fractions in region
   */
   std::vector<double> GetAllComponentFracInRegion(RooWorkspace* w, TString region, RooAbsPdf* regionPdf, RooRealVar* obsRegion, RooRealVar* binWidth);
-  
+
   /**
      Get region name as used in RooCategory of the simultaneous PDF
   */
@@ -404,13 +403,13 @@ namespace Util
   double looseToTightVal(const TString& reg, TMap* map);
   double looseToTightErr(const TString& reg, TMap* map);
   double getNonQcdVal(const TString& proc, const TString& reg, TMap* map, const TString& opt);
-  
+
   std::vector<TString> Tokens(TString aline,TString aDelim);
   std::vector<TString> TokensALL(RooCategory* cat);
 
   TString scanStrForFloats(const TString& toscan, const TString& format);
 
- 
+
   // Functions for toy generation with ToyMCSampler
   /**
      Get parameter of interest (POI) out of ModelConfig in workspace
@@ -436,9 +435,9 @@ namespace Util
   @param Syst       -> Systematic Name
   @param NameSample -> Sample Name
   @param Region     -> Region:{ex. SR,CR,VR}
-  @param Var        -> Varible  
+  @param Var        -> Varible
   */
-  
+
   void plotDistribution(TFile* f, TString hNomName, TString Syst, TString NameSample, TString Region, TString Var);
 
   /**
@@ -448,7 +447,7 @@ namespace Util
   @param Syst       -> Systematics
   @param NameSample -> Sample Name
   @param Region     -> Region:{ex. SR,CR,VR}
-  @param Var        -> Varible  
+  @param Var        -> Varible
   */
 
  void plotSystematics(TFile* f,TString hNomName, std::vector<TString> Syst, TString NameSample, TString Region, TString Var);
@@ -459,7 +458,7 @@ namespace Util
   @param NameSample -> Sample Name
   @param SystName   -> List of the Systematics ex. JER,JES (a comma should be used to between each systematic)
   @param Region     -> Region:{ex. SR,CR,VR}
-  @param Var        -> Varible  
+  @param Var        -> Varible
   */
 
  void plotUpDown(TString FileName, TString NameSample, TString SystName, TString Region, TString Var);
