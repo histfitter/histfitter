@@ -430,7 +430,7 @@ def parse_opts():
 
     parser.add_argument("--max-np", type=int, default=20, help="Max number of NPs to show")
     parser.add_argument("--stat", action="store_true", help="Show stat. only uncertainty")
-    parser.add_argument("-i", "--input", help="Use stored fit results from last run, do not do the re-fitting again. Useful if you only want to change the layout")
+    parser.add_argument("-i", "--input", help="Path to .data file.  Use stored fit results from last run, do not do the re-fitting again. Useful if you only want to change the layout")
 
     parser.add_argument("--post-fit", action="store_true", help="Only show post-fit impact on the POI")
 
@@ -462,11 +462,11 @@ def main():
         if not os.path.exists(opts.output):
             os.makedirs(opts.output)
 
-        pfile = open(os.path.join(opts.output, opts.name + ".data"), "w")
+        pfile = open(os.path.join(opts.output, opts.name + ".data"), "wb")
         pickle.dump((ranking, stat_only), pfile)
         pfile.close()
     else:
-        pfile = open(os.path.join(opts.output, opts.name + ".data"))
+        pfile = open(os.path.join(opts.input), "rb")
         ranking, stat_only = pickle.load(pfile)
         pfile.close()
 
