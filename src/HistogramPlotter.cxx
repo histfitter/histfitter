@@ -606,8 +606,9 @@ void HistogramPlot::loadComponentInformation() {
     RooProduct* component = nullptr;
 
     // Find the binWidth variable
-    TString binWidthName(Form("binWidth_obs_x_%s_0", m_regionCategoryLabel.Data()));
-    RooRealVar* regionBinWidth = static_cast<RooRealVar*>(RRSPdf->getVariables()->find(binWidthName)) ;
+    RooProduct *rp = static_cast<RooProduct*>(&RRSPdf->funcList()[0]); // just take the first PDF
+    TString binWidthName(Form("%s_model_binWidth", m_regionCategoryLabel.Data()));
+    RooRealVar* regionBinWidth = static_cast<RooRealVar*>(rp->components().find(binWidthName));
 
     if(!regionBinWidth){
         Logger << kWARNING << " binWidth variable not found for region '" << m_regionCategoryLabel << "' => PLOTTING COMPONENTS WILL BE WRONG " << GEndl ;
