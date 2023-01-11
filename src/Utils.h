@@ -470,7 +470,7 @@ namespace Util
 
  void PlotFitParameters(RooFitResult* r, TString anaName);
 
-
+ double getPropagatedError628(RooAbsReal& absReal, const RooFitResult &fr, const RooArgSet &nset);
  TH1* ComponentToHistogram(RooRealSumPdf* component, RooRealVar* variable, RooFitResult *fitResult);
  void ScaleGraph(TGraphAsymmErrors *g, TH1* h);
 
