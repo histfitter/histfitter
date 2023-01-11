@@ -631,7 +631,7 @@ void HistogramPlot::loadComponentInformation() {
 
         // Find the fraction and the stacked fraction for these backgrounds
         // RooFit can't stack via PlotOn() when normalising, so keep track of this ourselves
-        double componentFraction = Util::GetComponentFrac(m_workspace, componentName, RSSPdfName, m_regionVariable, regionBinWidth) ;
+        double componentFraction = Util::GetComponentFrac(m_workspace, componentName, RSSPdfName, m_regionVariable) ;
         double stackComponentFraction = componentFraction;
         if(!m_componentStackedFractions.empty()){
             stackComponentFraction  = m_componentStackedFractions.back() + componentFraction;

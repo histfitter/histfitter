@@ -1691,17 +1691,17 @@ vector<TString> Util::TokensALL(RooCategory* cat)
 
 
 //__________________________________________________________________________________________________________________________________________________________
-Double_t Util::GetComponentFrac(RooWorkspace* w, const char* Component, const char* RRSPdfName, RooRealVar* observable, RooRealVar* binWidth){
+Double_t Util::GetComponentFrac(RooWorkspace* w, const char* Component, const char* RRSPdfName, RooRealVar* observable){
 
     // Components are now the shape (func) * scaleFactor (coef)
     TString coefName = TString(Component).ReplaceAll("_shapes", "_scaleFactors");
 
     RooAbsReal*  i_RRSPdf = ((RooAbsPdf*)w->pdf(RRSPdfName))->createIntegral(RooArgSet(*observable));
-    RooProduct* func_prod = dynamic_cast<RooProduct*>(w->obj(Component));
-    RooProduct* coef_prod = dynamic_cast<RooProduct*>(w->obj(coefName));
+    RooProduct* func_prod = dynamic_cast<RooProduct*>(w->obj(Component)->Clone());
+    RooAbsReal* i_coeficient = dynamic_cast<RooAbsReal*>(w->obj(coefName));
+    func_prod->addTerm(i_coeficient);   
 
     RooAbsReal*  i_component  =   func_prod->createIntegral(RooArgSet(*observable));
-    RooAbsReal*  i_coeficient =   coef_prod->createIntegral(RooArgSet(*observable));
 
     // Get total integral and integral of component
     Double_t Int_RRSPdf = i_RRSPdf->getVal();
@@ -1711,10 +1711,11 @@ Double_t Util::GetComponentFrac(RooWorkspace* w, const char* Component, const ch
     Logger << kDEBUG << "GetComponnentFrac: component = "<<Component << ", RRSPdf val = " << Int_RRSPdf << ", func val = " << Int_func << ", coef val = " << Int_coef << GEndl;
 
     Double_t componentFrac = 0.;
-    if(Int_RRSPdf != 0.) componentFrac =  Int_func * Int_coef * binWidth->getVal() / Int_RRSPdf;
+    if(Int_RRSPdf != 0.) componentFrac =  Int_func / Int_RRSPdf; 
 
     delete  i_RRSPdf;
     delete  i_component;
+    delete func_prod;
 
     return componentFrac;
 }
@@ -2260,7 +2261,7 @@ Double_t Util::GetComponentFracInRegion(RooWorkspace* w, TString component, TStr
         for(unsigned int iComp=0; iComp< componentVec.size(); iComp++){
             TString target = "_"+componentVec[iComp]+"_";
             if(  regionCompNameVec[iReg].Contains(target.Data())) {
-                componentFrac += GetComponentFrac(w,regionCompNameVec[iReg],RRSPdfName,regionVar,regionBinWidth) ;
+                componentFrac += GetComponentFrac(w,regionCompNameVec[iReg],RRSPdfName,regionVar) ;
             }
         }
     }
@@ -2394,7 +2395,7 @@ vector<double> Util::GetAllComponentFracInRegion(RooWorkspace* w, TString region
 
     while( (component = (RooProduct*) iter.Next())) {
         TString  componentName = component->GetName();
-        double componentFrac = GetComponentFrac(w,componentName,RRSPdfName,obsRegion,regionBinWidth) ;
+        double componentFrac = GetComponentFrac(w,componentName,RRSPdfName,obsRegion) ;
         compFracVec.push_back(componentFrac);
     }
 

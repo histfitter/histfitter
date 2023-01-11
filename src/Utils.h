@@ -374,7 +374,7 @@ namespace Util
   /**
      Get component (sample or multiple sample) fraction, called by  GetComponentFracInRegion()
   */
-  Double_t GetComponentFrac(RooWorkspace* w, const char* Component, const char* RRSPdf, RooRealVar* observable, RooRealVar* binWidth);
+  Double_t GetComponentFrac(RooWorkspace* w, const char* Component, const char* RRSPdf, RooRealVar* observable);
   /**
      Get component (sample or multiple samples) fraction in region
   */
