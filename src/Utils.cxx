@@ -2107,18 +2107,6 @@ RooAbsReal* Util::GetComponent(RooWorkspace* w, TString component, TString regio
     }
     RooRealVar* regionVar =(RooRealVar*) ((RooArgSet*) regionPdf->getObservables(*regionData))->find(Form("obs_x_%s",regionFullName.Data()));
 
-    // get the binWidth variable, to be multiplied with component RooProduct, for a complete component RooFormulaVar, as used in RooRealSumPdf
-    TString RRSPdfName = Form("%s_model",regionFullName.Data());
-    RooRealSumPdf* RRSPdf = (RooRealSumPdf*) regionPdf->getComponents()->find(RRSPdfName);
-    RooProduct *rp = static_cast<RooProduct*>(&RRSPdf->funcList()[0]); // just take the first PDF
-    TString binWidthName(Form("%s_model_binWidth", regionFullName.Data()));
-    RooRealVar* regionBinWidth = static_cast<RooRealVar*>(rp->components().find(binWidthName));
-
-    if(regionBinWidth==NULL){
-        Logger << kWARNING << " bindWidth variable not found for region(" << regionFullName << "),   RETURNING COMPONENTS WILL BE WRONG " << GEndl ;
-        return NULL;
-    }
-
     // find the correct RooProduct
     vector<TString> regionCompNameVec = GetAllComponentNamesInRegion(regionFullName, regionPdf);
     RooArgList compFuncList;
@@ -2128,8 +2116,11 @@ RooAbsReal* Util::GetComponent(RooWorkspace* w, TString component, TString regio
             Logger << kDEBUG << " GetComponent: regionCompNameVec[" << iReg << "] = " << regionCompNameVec[iReg] << " componentVec[" << iComp << "] = " << componentVec[iComp] << GEndl;
             TString target = componentVec[iComp]+"_";
             if(  regionCompNameVec[iReg].Contains(target.Data())) {
-                compFuncList.add(*(RooProduct*)w->obj(regionCompNameVec[iReg]));
-                compCoefList.add(*regionBinWidth); // JDL TODO, should this be binwidth or coef, clean up as well
+                TString func_name = regionCompNameVec[iReg];
+                TString coef_name = func_name;
+                coef_name.ReplaceAll("_shapes", "_scaleFactors");
+                compFuncList.add(*(RooProduct*)w->obj(func_name));
+                compCoefList.add(*(RooProduct*)w->obj(coef_name));
             }
         }
     }
