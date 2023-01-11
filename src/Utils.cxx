@@ -12,7 +12,7 @@
  *      Lorenzo Moneta, CERN, Geneva  <Lorenzo.Moneta@cern.h>                     *
  *           See: FitPdf()                                                        *
  *      Wouter Verkerke, Nikhef, Amsterdam <verkerke@nikhef.nl>                   *
- *           See: GetPropagatedError()                                            *
+ *           See: getPropagatedError628()                                            *
  *                                                                                *
  * See corresponding .h file for author and license information                   *
  **********************************************************************************/
@@ -2389,7 +2389,7 @@ vector<double> Util::GetAllComponentFracInRegion(RooWorkspace* w, TString region
 
 
 /*
- * Adopted from: RooAbsReal::GetPropagatedError()
+ * Adopted from: RooAbsReal::getPropagatedError628()
  * by Wouter Verkerke
  * See: http://root.cern.ch/root/html534/src/RooAbsReal.h.html
  * (http://roofit.sourceforge.net/license.txt)
@@ -2397,7 +2397,7 @@ vector<double> Util::GetAllComponentFracInRegion(RooWorkspace* w, TString region
 
 
 //_____________________________________________________________________________
-double Util::GetPropagatedError(RooAbsReal* var, const RooFitResult& fr, const bool& doAsym)
+double Util::getPropagatedError628(RooAbsReal* var, const RooFitResult& fr, const bool& doAsym)
 {
     Logger << kDEBUG << " GPP for variable = " << var->GetName() << GEndl;
 
@@ -3621,7 +3621,7 @@ void Util::PlotFitParameters(RooFitResult* r, TString anaName){
 
 //-------------------------------------------------------------------------------------------------------
 
-// The fixed version of getPropagatedError from ROOT 6.28 that also works for
+// The fixed version of getPropagatedError628 from ROOT 6.28 that also works for
 // the RooRealSumPdf directly. Can be removed once ROOT 6.28 is used.
 double Util::getPropagatedError628(RooAbsReal& absReal, const RooFitResult &fr, const RooArgSet &nset={})
 {
@@ -3649,8 +3649,8 @@ double Util::getPropagatedError628(RooAbsReal& absReal, const RooFitResult &fr, 
      // negligibly far away from each other, relative to the uncertainty.
      if(std::abs(rrvInAbsReal->getVal() - rrvFitRes->getVal()) > 0.01 * rrvFitRes->getError()) {
         std::stringstream errMsg;
-        errMsg << "RooAbsReal::getPropagatedError(): the parameters of the RooAbsReal don't have"
-               << " the same values as in the fit result! The logic of getPropagatedError is broken in this case.";
+        errMsg << "RooAbsReal::getPropagatedError628(): the parameters of the RooAbsReal don't have"
+               << " the same values as in the fit result! The logic of getPropagatedError628 is broken in this case.";
 
         throw std::runtime_error(errMsg.str());
      }
@@ -3687,7 +3687,7 @@ double Util::getPropagatedError628(RooAbsReal& absReal, const RooFitResult &fr, 
   }
 
   // Re-evaluate this RooAbsReal with the central parameters just to be
-  // extra-safe that a call to `getPropagatedError()` doesn't change any state.
+  // extra-safe that a call to `getPropagatedError628()` doesn't change any state.
   // It should not be necessarry because thanks to the dirty flag propagation
   // the RooAbsReal is re-evaluated anyway the next time getVal() is called.
   // Still there are imaginable corner cases where it would not be triggered,
@@ -3743,8 +3743,8 @@ TH1* Util::ComponentToHistogram(RooRealSumPdf* component, RooRealVar* variable, 
         auto sum = component->getVal();
         std::cout<<"Utils "<<__LINE__<<std::endl;
 
-        // In ROOT 6.28, we can direcly use RooAbsReal::getPropagatedError()
-        //auto err = integral->getPropagatedError(*fitResult) / stepsize;
+        // In ROOT 6.28, we can direcly use RooAbsReal::getPropagatedError628()
+        //auto err = integral->getPropagatedError628(*fitResult) / stepsize;
         auto err = getPropagatedError628(*component, *fitResult);
         std::cout<<"Utils "<<__LINE__<<std::endl;
 
