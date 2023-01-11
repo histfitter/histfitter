@@ -377,6 +377,7 @@ namespace Util
   Double_t GetComponentFrac(RooWorkspace* w, const char* Component, const char* RRSPdf, RooRealVar* observable);
   /**
      Get component (sample or multiple samples) fraction in region
+     Why does this function exist, it's never called
   */
   Double_t GetComponentFracInRegion(RooWorkspace* w, TString component, TString region);
 
@@ -391,7 +392,7 @@ namespace Util
   /**
     Get all component (sample) fractions in region
   */
-  std::vector<double> GetAllComponentFracInRegion(RooWorkspace* w, TString region, RooAbsPdf* regionPdf, RooRealVar* obsRegion, RooRealVar* binWidth);
+  std::vector<double> GetAllComponentFracInRegion(RooWorkspace* w, TString region, RooAbsPdf* regionPdf, RooRealVar* obsRegion);
 
   /**
      Get region name as used in RooCategory of the simultaneous PDF

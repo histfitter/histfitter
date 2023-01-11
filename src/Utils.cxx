@@ -1141,15 +1141,8 @@ void Util::PlotSeparateComponents(RooWorkspace* w,TString fcName, TString anaNam
             }
             RooRealVar* regionVar =(RooRealVar*) ((RooArgSet*) regionPdf->getObservables(*regionData))->find(Form("obs_x_%s",regionCatLabel.Data()));
             // get all components/samples in this region
-            TString RRSPdfName = Form("%s_model",regionCatLabel.Data());
-            RooRealSumPdf* RRSPdf = (RooRealSumPdf*) regionPdf->getComponents()->find(RRSPdfName);
-            TString binWidthName =  Form("binWidth_obs_x_%s_0",regionCatLabel.Data());
-            RooRealVar* regionBinWidth = ((RooRealVar*) RRSPdf->getVariables()->find(Form("binWidth_obs_x_%s_0",regionCatLabel.Data()))) ;
-            if(regionBinWidth==NULL){
-                Logger << kWARNING << " bindWidth variable not found for region(" << regionCatLabel << "),   PLOTTING COMPONENTS WILL BE WRONG " << GEndl ;
-            }
 
-            vector<double> regionCompFracVec = GetAllComponentFracInRegion(w, regionCatLabel, regionPdf, regionVar,regionBinWidth);
+            vector<double> regionCompFracVec = GetAllComponentFracInRegion(w, regionCatLabel, regionPdf, regionVar);
             vector<TString> regionCompNameVec = GetAllComponentNamesInRegion(regionCatLabel, regionPdf);
             Int_t numComps = regionCompNameVec.size();
 
@@ -2115,8 +2108,11 @@ RooAbsReal* Util::GetComponent(RooWorkspace* w, TString component, TString regio
     RooRealVar* regionVar =(RooRealVar*) ((RooArgSet*) regionPdf->getObservables(*regionData))->find(Form("obs_x_%s",regionFullName.Data()));
 
     // get the binWidth variable, to be multiplied with component RooProduct, for a complete component RooFormulaVar, as used in RooRealSumPdf
-    TString binWidthName =  Form("binWidth_obs_x_%s_0",regionFullName.Data());
-    RooRealVar* regionBinWidth = ((RooRealVar*) regionPdf->getVariables()->find(Form("binWidth_obs_x_%s_0",regionFullName.Data()))) ;
+    TString RRSPdfName = Form("%s_model",regionFullName.Data());
+    RooRealSumPdf* RRSPdf = (RooRealSumPdf*) regionPdf->getComponents()->find(RRSPdfName);
+    RooProduct *rp = static_cast<RooProduct*>(&RRSPdf->funcList()[0]); // just take the first PDF
+    TString binWidthName(Form("%s_model_binWidth", regionFullName.Data()));
+    RooRealVar* regionBinWidth = static_cast<RooRealVar*>(rp->components().find(binWidthName));
 
     if(regionBinWidth==NULL){
         Logger << kWARNING << " bindWidth variable not found for region(" << regionFullName << "),   RETURNING COMPONENTS WILL BE WRONG " << GEndl ;
@@ -2130,10 +2126,10 @@ RooAbsReal* Util::GetComponent(RooWorkspace* w, TString component, TString regio
     for(unsigned int iReg=0; iReg<regionCompNameVec.size(); iReg++){
         for(unsigned int iComp=0; iComp< componentVec.size(); iComp++){
             Logger << kDEBUG << " GetComponent: regionCompNameVec[" << iReg << "] = " << regionCompNameVec[iReg] << " componentVec[" << iComp << "] = " << componentVec[iComp] << GEndl;
-            TString target = "_"+componentVec[iComp]+"_";
+            TString target = componentVec[iComp]+"_";
             if(  regionCompNameVec[iReg].Contains(target.Data())) {
                 compFuncList.add(*(RooProduct*)w->obj(regionCompNameVec[iReg]));
-                compCoefList.add(*regionBinWidth);
+                compCoefList.add(*regionBinWidth); // JDL TODO, should this be binwidth or coef, clean up as well
             }
         }
     }
@@ -2220,46 +2216,35 @@ Double_t Util::GetComponentFracInRegion(RooWorkspace* w, TString component, TStr
 
     RooRealVar* regionVar =(RooRealVar*) ((RooArgSet*) regionPdf->getObservables(*regionData))->find(Form("obs_x_%s",regionFullName.Data()));
 
-    // get the binWidth variable, to be multiplied with component RooProduct, for a complete component RooFormulaVar, as used in RooRealSumPdf
-    TString binWidthName =  Form("binWidth_obs_x_%s_0",regionFullName.Data());
-    RooRealVar* regionBinWidth = ((RooRealVar*) regionPdf->getVariables()->find(Form("binWidth_obs_x_%s_0",regionFullName.Data()))) ;
-
-    if(regionBinWidth==NULL){
-        Logger << kWARNING << " bindWidth variable not found for region(" << regionFullName << "),   RETURNING COMPONENTS WILL BE WRONG " << GEndl ;
-        return 0;
-    }
-
-    // find the correct RooProduct
+    // Check if component isn't found
     vector<TString> regionCompNameVec = GetAllComponentNamesInRegion(regionFullName, regionPdf);
-    RooArgList compFuncList;
-    RooArgList compCoefList;
+    bool found_comp = false;
     for(unsigned int iReg=0; iReg<regionCompNameVec.size(); iReg++){
         for(unsigned int iComp=0; iComp< componentVec.size(); iComp++){
-            TString target = "_"+componentVec[iComp]+"_";
-            if(  regionCompNameVec[iReg].Contains(target.Data())) {
-                compFuncList.add(*(RooProduct*)w->obj(regionCompNameVec[iReg]));
-                compCoefList.add(*regionBinWidth);
-            }
+            TString target = componentVec[iComp]+"_";
+            if (regionCompNameVec[iReg].Contains(target.Data())) found_comp = true;
         }
     }
 
-    if (compFuncList.getSize()==0 || compCoefList.getSize()==0 || compCoefList.getSize()!=compFuncList.getSize()){
-        Logger << kERROR << " Something wrong with compFuncList or compCoefList in Util::GetComponent() "<< GEndl;
-        return 0.;
+    if(!found_comp){
+        Logger << kERROR << "Something went wrong, no components found for "<<component.Data()<<GEndl;
+        return NULL;
     }
+
+    // get the full RRSPdf of this region
+    TString RRSPdfName = Form("%s_model",regionFullName.Data());
 
     TString compName = "comps";
     for(unsigned int iVec=0; iVec<componentVec.size(); iVec++){
         compName += "_" + componentVec[iVec];
     }
 
-    // get the full RRSPdf of this region
-    TString RRSPdfName = Form("%s_model",regionFullName.Data());
+
 
     double componentFrac = 0.;
     for(unsigned int iReg=0; iReg<regionCompNameVec.size(); iReg++){
         for(unsigned int iComp=0; iComp< componentVec.size(); iComp++){
-            TString target = "_"+componentVec[iComp]+"_";
+            TString target = componentVec[iComp]+"_";
             if(  regionCompNameVec[iReg].Contains(target.Data())) {
                 componentFrac += GetComponentFrac(w,regionCompNameVec[iReg],RRSPdfName,regionVar) ;
             }
@@ -2381,7 +2366,7 @@ vector<TString> Util::GetAllComponentNamesInRegion(TString region, RooAbsPdf* re
 
 
 //__________________________________________________________________________________________
-vector<double> Util::GetAllComponentFracInRegion(RooWorkspace* w, TString region, RooAbsPdf* regionPdf, RooRealVar* obsRegion,RooRealVar* regionBinWidth){
+vector<double> Util::GetAllComponentFracInRegion(RooWorkspace* w, TString region, RooAbsPdf* regionPdf, RooRealVar* obsRegion){
 
     TString RRSPdfName = Form("%s_model",region.Data());
     RooRealSumPdf* RRSPdf = (RooRealSumPdf*) regionPdf->getComponents()->find(RRSPdfName);
@@ -3737,37 +3722,51 @@ TH1* Util::ComponentToHistogram(RooRealSumPdf* component, RooRealVar* variable, 
     // Build a TH1-based histogram from a pdf, an observable and a fit result
 
     // Get the stepsize and build a histogram according to the binning of the variable
-    auto stepsize = variable->getBinning().averageBinWidth();
+    //auto stepsize = variable->getBinning().averageBinWidth();
+    std::cout<<"Utils "<<__LINE__<<std::endl;
+
+    // this line is throwing an error when trying to save individual parts
     auto hist = component->createHistogram(Form("hist_%s", component->GetName()), *variable);
+    std::cout<<"Utils "<<__LINE__<<std::endl;
+
+    // Remember original variable value to reset later
+    const double origVal = variable->getVal();
+    std::cout<<"Utils "<<__LINE__<<std::endl;
 
     // Now loop over the bins and fill them
-    for(int i=0; i < hist->GetNbinsX()+2; ++i) {
-        auto low = hist->GetBinLowEdge(i);
-        auto width = hist->GetBinWidth(i);
+    // Skip the under- and overflow bins because they don't exist in RooFit.
+    for(int i=1; i < hist->GetNbinsX()+1; ++i) {
+        variable->setBin(i-1);
 
-        // Constraint the observable to this bin
-        variable->setRange(Form("bin%d", i), low, low+width);
-
-        // Start by integrating in this bin
-        auto integral = component->createIntegral(RooArgSet(*variable), RooFit::Range(Form("bin%d", i)) );
-
+        std::cout<<"Utils "<<__LINE__<<std::endl;
         // Now get the value and the error
-        auto sum = integral->getVal() / stepsize;
-        auto err = integral->getPropagatedError(*fitResult) / stepsize;
+        auto sum = component->getVal();
+        std::cout<<"Utils "<<__LINE__<<std::endl;
+
+        // In ROOT 6.28, we can direcly use RooAbsReal::getPropagatedError()
+        //auto err = integral->getPropagatedError(*fitResult) / stepsize;
+        auto err = getPropagatedError628(*component, *fitResult);
+        std::cout<<"Utils "<<__LINE__<<std::endl;
 
         // and put them in the histogram
         hist->SetBinContent(i, sum);
         hist->SetBinError(i, err);
     }
+        std::cout<<"Utils "<<__LINE__<<std::endl;
 
-    auto sum = component->createIntegral(RooArgSet(*variable))->getVal();
+    // Reset original variable value
+    variable->setVal(origVal);
 
-    double scale = 0.0;
-    if(sum != 0 && hist->Integral() != 0) {
-        scale = sum / hist->Integral();
-    }
+    std::cout<<"Utils "<<__LINE__<<std::endl;
 
-    hist->Scale(scale);
+    //auto sum = component->getVal();
+    //
+    //double scale = 0.0;
+    //if(sum != 0 && hist->Integral() != 0) {
+    //    scale = sum / hist->Integral();
+    //}
+    //
+    //hist->Scale(scale);
 
     return hist;
 }

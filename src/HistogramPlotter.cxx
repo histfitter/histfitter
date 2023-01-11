@@ -648,7 +648,7 @@ void HistogramPlot::loadComponentInformation() {
         RooArgList compFuncList;
         RooArgList compCoefList;
         compFuncList.add(*(RooProduct*) m_workspace->obj(componentName));
-        compCoefList.add(*regionBinWidth);
+        compCoefList.add(*regionBinWidth); // JDL todo, should this be coef not bin width?
         RooRealSumPdf* componentPdf = new RooRealSumPdf(componentPdf_name, componentPdf_name, compFuncList, compCoefList);
 
         m_componentPdfs[componentName] = componentPdf;
