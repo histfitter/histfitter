@@ -1,4 +1,4 @@
-FROM atlasamglab/stats-base:root6.20.06-python3.8 as base
+FROM atlasamglab/stats-base:root6.26.08-python3.10 as base
 
 SHELL [ "/bin/bash", "-c" ]
 
