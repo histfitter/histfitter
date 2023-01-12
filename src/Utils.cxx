@@ -3714,41 +3714,32 @@ TH1* Util::ComponentToHistogram(RooRealSumPdf* component, RooRealVar* variable, 
 
     // Get the stepsize and build a histogram according to the binning of the variable
     //auto stepsize = variable->getBinning().averageBinWidth();
-    std::cout<<"Utils "<<__LINE__<<std::endl;
 
     // this line is throwing an error when trying to save individual parts
     auto hist = component->createHistogram(Form("hist_%s", component->GetName()), *variable);
-    std::cout<<"Utils "<<__LINE__<<std::endl;
 
     // Remember original variable value to reset later
     const double origVal = variable->getVal();
-    std::cout<<"Utils "<<__LINE__<<std::endl;
 
     // Now loop over the bins and fill them
     // Skip the under- and overflow bins because they don't exist in RooFit.
     for(int i=1; i < hist->GetNbinsX()+1; ++i) {
         variable->setBin(i-1);
 
-        std::cout<<"Utils "<<__LINE__<<std::endl;
         // Now get the value and the error
         auto sum = component->getVal();
-        std::cout<<"Utils "<<__LINE__<<std::endl;
 
         // In ROOT 6.28, we can direcly use RooAbsReal::getPropagatedError628()
         //auto err = integral->getPropagatedError628(*fitResult) / stepsize;
         auto err = getPropagatedError628(*component, *fitResult);
-        std::cout<<"Utils "<<__LINE__<<std::endl;
 
         // and put them in the histogram
         hist->SetBinContent(i, sum);
         hist->SetBinError(i, err);
     }
-        std::cout<<"Utils "<<__LINE__<<std::endl;
 
     // Reset original variable value
     variable->setVal(origVal);
-
-    std::cout<<"Utils "<<__LINE__<<std::endl;
 
     //auto sum = component->getVal();
     //
