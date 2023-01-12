@@ -3713,7 +3713,7 @@ TH1* Util::ComponentToHistogram(RooRealSumPdf* component, RooRealVar* variable, 
     // Build a TH1-based histogram from a pdf, an observable and a fit result
 
     // Get the stepsize and build a histogram according to the binning of the variable
-    //auto stepsize = variable->getBinning().averageBinWidth();
+    auto stepsize = variable->getBinning().averageBinWidth();
 
     // this line is throwing an error when trying to save individual parts
     auto hist = component->createHistogram(Form("hist_%s", component->GetName()), *variable);
@@ -3741,14 +3741,7 @@ TH1* Util::ComponentToHistogram(RooRealSumPdf* component, RooRealVar* variable, 
     // Reset original variable value
     variable->setVal(origVal);
 
-    //auto sum = component->getVal();
-    //
-    //double scale = 0.0;
-    //if(sum != 0 && hist->Integral() != 0) {
-    //    scale = sum / hist->Integral();
-    //}
-    //
-    //hist->Scale(scale);
+    hist->Scale(stepsize);
 
     return hist;
 }

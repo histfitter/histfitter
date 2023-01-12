@@ -605,15 +605,6 @@ void HistogramPlot::loadComponentInformation() {
     RooLinkedListIter iter = RRSComponentsList.iterator() ;
     RooProduct* component = nullptr;
 
-    // Find the binWidth variable
-    RooProduct *rp = static_cast<RooProduct*>(&RRSPdf->funcList()[0]); // just take the first PDF
-    TString binWidthName(Form("%s_model_binWidth", m_regionCategoryLabel.Data()));
-    RooRealVar* regionBinWidth = static_cast<RooRealVar*>(rp->components().find(binWidthName));
-
-    if(!regionBinWidth){
-        Logger << kWARNING << " binWidth variable not found for region '" << m_regionCategoryLabel << "' => PLOTTING COMPONENTS WILL BE WRONG " << GEndl ;
-    }
-
     // Now load the names and calculate the fractions to be able to build the plot
     while( (component = dynamic_cast<RooProduct*>(iter.Next()))) {
         TString componentName(component->GetName());
@@ -648,7 +639,8 @@ void HistogramPlot::loadComponentInformation() {
         RooArgList compFuncList;
         RooArgList compCoefList;
         compFuncList.add(*(RooProduct*) m_workspace->obj(componentName));
-        compCoefList.add(*regionBinWidth); // JDL todo, should this be coef not bin width?
+        TString coefName = TString(componentName).ReplaceAll("_shapes", "_scaleFactors");
+        compCoefList.add(*(RooRealVar*) m_workspace->obj(coefName));
         RooRealSumPdf* componentPdf = new RooRealSumPdf(componentPdf_name, componentPdf_name, compFuncList, compCoefList);
 
         m_componentPdfs[componentName] = componentPdf;
