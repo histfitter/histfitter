@@ -560,7 +560,7 @@ class UserSystematic(SystematicBase):
                             try:
                                 totNorm += abstract.hists[nameTmp].GetSumOfWeights()
                             except:
-                                log.warning("could get histogram %s for normalization" % nameTmp)
+                                log.warning("couldn't get histogram %s for normalization" % nameTmp)
                         
                         abstract.hists[histName].SetBinContent(1,totNorm)
         return
