@@ -341,7 +341,8 @@ void HistogramPlot::buildFrame() {
     if(m_style.getRemoveEmptyBins()) {
         Logger << kDEBUG << "Removing empty bins" << GEndl;
         Util::RemoveEmptyDataBins(m_frame);
-
+    }
+        
     // Fixup frame
     Logger << kDEBUG << "Fixing up strange graphs" << GEndl;
     for (Int_t i = 0; i < m_frame->numItems(); ++i) {
