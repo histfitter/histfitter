@@ -90,7 +90,7 @@ class HistogramsManager:
             if len(binErrs) == 1:
                 binErrs=self.floatToArray(binErrs[0], hNom)
             elif hNom.GetNbinsX() != len(binErrs):
-                raise ValueError("hNom and binErrs must have same length in buildUserHistoSysFromHist()")
+                raise ValueError(f"hNom {hNom.GetNbinsX()} and binErrs {len(binErrs)} must have same length in buildUserHistoSysFromHist()")
         else:
             log.error("Incorrect input format for user-defined systematic")
             raise TypeError(f"Input of errors of type {str(type(binErrs).__name__)} is not supported for a 'user' systematic - float or list of floats expected. Double check whether you meant to use 'tree' instead.")

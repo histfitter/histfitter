@@ -309,7 +309,7 @@ namespace Util
      @param doAsym Boolean deciding whether asymmetric (MINOS) errors on parameters get used in an averaged approximation
      @return Returns the propagated error
   */
-  double GetPropagatedError(RooAbsReal* var, const RooFitResult& fr, const bool& doAsym=false);
+  double getPropagatedError628(RooAbsReal* var, const RooFitResult& fr, const bool& doAsym=false);
 
   /**
      Sets interpolation code
@@ -374,9 +374,10 @@ namespace Util
   /**
      Get component (sample or multiple sample) fraction, called by  GetComponentFracInRegion()
   */
-  Double_t GetComponentFrac(RooWorkspace* w, const char* Component, const char* RRSPdf, RooRealVar* observable, RooRealVar* binWidth);
+  Double_t GetComponentFrac(RooWorkspace* w, const char* Component, const char* RRSPdf, RooRealVar* observable);
   /**
      Get component (sample or multiple samples) fraction in region
+     Why does this function exist, it's never called
   */
   Double_t GetComponentFracInRegion(RooWorkspace* w, TString component, TString region);
 
@@ -391,7 +392,7 @@ namespace Util
   /**
     Get all component (sample) fractions in region
   */
-  std::vector<double> GetAllComponentFracInRegion(RooWorkspace* w, TString region, RooAbsPdf* regionPdf, RooRealVar* obsRegion, RooRealVar* binWidth);
+  std::vector<double> GetAllComponentFracInRegion(RooWorkspace* w, TString region, RooAbsPdf* regionPdf, RooRealVar* obsRegion);
 
   /**
      Get region name as used in RooCategory of the simultaneous PDF
@@ -470,7 +471,7 @@ namespace Util
 
  void PlotFitParameters(RooFitResult* r, TString anaName);
 
-
+ double getPropagatedError628(RooAbsReal& absReal, const RooFitResult &fr, const RooArgSet &nset);
  TH1* ComponentToHistogram(RooRealSumPdf* component, RooRealVar* variable, RooFitResult *fitResult);
  void ScaleGraph(TGraphAsymmErrors *g, TH1* h);
 

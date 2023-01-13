@@ -183,7 +183,7 @@ def latexfitresults( filename, namemap, region='3jL', sample='', resultName="Roo
   regSys['sqrtnfitted'] = TMath.Sqrt(nFittedInRegion)
   regSys['nfitted'] = nFittedInRegion
 
-  pdfFittedErrInRegion = Util.GetPropagatedError(pdfInRegion, result, doAsym)
+  pdfFittedErrInRegion = Util.getPropagatedError628(pdfInRegion, result, doAsym)
   regSys['totsyserr'] = pdfFittedErrInRegion
 
 
@@ -209,7 +209,7 @@ def latexfitresults( filename, namemap, region='3jL', sample='', resultName="Roo
         par = w.var(parname)
         par.setConstant(False)
         pass
-      sysError  = Util.GetPropagatedError(pdfInRegion, result, doAsym)
+      sysError  = Util.getPropagatedError628(pdfInRegion, result, doAsym)
       regSys['syserr_'+key] =  sysError
       for idx in range(fpf.getSize()):
         parname = fpf[idx].GetName()
@@ -221,7 +221,7 @@ def latexfitresults( filename, namemap, region='3jL', sample='', resultName="Roo
       parname = fpf[idx].GetName()
       par = w.var(parname)
       par.setConstant(False)
-      sysError  = Util.GetPropagatedError(pdfInRegion, result, doAsym)
+      sysError  = Util.getPropagatedError628(pdfInRegion, result, doAsym)
       regSys['syserr_'+parname] =  sysError
       par.setConstant()
 
@@ -386,7 +386,7 @@ def latexfitresults_method2(filename,resultname='RooExpandedFitResult_afterFit',
   regSys['sqrtnfitted'] = TMath.Sqrt(nFittedInRegion)
   regSys['nfitted'] = nFittedInRegion
 
-  pdfFittedErrInRegion = Util.GetPropagatedError(pdfInRegion, result, doAsym)
+  pdfFittedErrInRegion = Util.getPropagatedError628(pdfInRegion, result, doAsym)
   regSys['totsyserr'] = pdfFittedErrInRegion
 
   """
@@ -425,7 +425,7 @@ def latexfitresults_method2(filename,resultname='RooExpandedFitResult_afterFit',
     calculate newly fitted number of events and full error
     """
     nFittedInRegion_1parfixed = pdfInRegion.getVal()
-    pdfFittedErrInRegion_1parfixed = Util.GetPropagatedError(pdfInRegion, expResultAfter_1parfixed, doAsym) #  result_1parfixed)
+    pdfFittedErrInRegion_1parfixed = Util.getPropagatedError628(pdfInRegion, expResultAfter_1parfixed, doAsym) #  result_1parfixed)
 
     """
     check whether original total error is smaller then newly-fitted total error

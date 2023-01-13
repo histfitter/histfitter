@@ -605,14 +605,6 @@ void HistogramPlot::loadComponentInformation() {
     RooLinkedListIter iter = RRSComponentsList.iterator() ;
     RooProduct* component = nullptr;
 
-    // Find the binWidth variable
-    TString binWidthName(Form("binWidth_obs_x_%s_0", m_regionCategoryLabel.Data()));
-    RooRealVar* regionBinWidth = static_cast<RooRealVar*>(RRSPdf->getVariables()->find(binWidthName)) ;
-
-    if(!regionBinWidth){
-        Logger << kWARNING << " binWidth variable not found for region '" << m_regionCategoryLabel << "' => PLOTTING COMPONENTS WILL BE WRONG " << GEndl ;
-    }
-
     // Now load the names and calculate the fractions to be able to build the plot
     while( (component = dynamic_cast<RooProduct*>(iter.Next()))) {
         TString componentName(component->GetName());
@@ -630,7 +622,7 @@ void HistogramPlot::loadComponentInformation() {
 
         // Find the fraction and the stacked fraction for these backgrounds
         // RooFit can't stack via PlotOn() when normalising, so keep track of this ourselves
-        double componentFraction = Util::GetComponentFrac(m_workspace, componentName, RSSPdfName, m_regionVariable, regionBinWidth) ;
+        double componentFraction = Util::GetComponentFrac(m_workspace, componentName, RSSPdfName, m_regionVariable) ;
         double stackComponentFraction = componentFraction;
         if(!m_componentStackedFractions.empty()){
             stackComponentFraction  = m_componentStackedFractions.back() + componentFraction;
@@ -647,7 +639,8 @@ void HistogramPlot::loadComponentInformation() {
         RooArgList compFuncList;
         RooArgList compCoefList;
         compFuncList.add(*(RooProduct*) m_workspace->obj(componentName));
-        compCoefList.add(*regionBinWidth);
+        TString coefName = TString(componentName).ReplaceAll("_shapes", "_scaleFactors");
+        compCoefList.add(*(RooRealVar*) m_workspace->obj(coefName));
         RooRealSumPdf* componentPdf = new RooRealSumPdf(componentPdf_name, componentPdf_name, compFuncList, compCoefList);
 
         m_componentPdfs[componentName] = componentPdf;
