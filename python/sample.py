@@ -351,6 +351,11 @@ class Sample:
 
         @param weight The weight to append to the list of weights
         """
+
+        # Don't add empty weights
+        if weight == "":
+            return
+
         if not weight in self.tempWeights:
             self.tempWeights.append(weight)
             ## MB : propagated to actual weights in configManager, after all
