@@ -342,6 +342,27 @@ void HistogramPlot::buildFrame() {
         Logger << kDEBUG << "Removing empty bins" << GEndl;
         Util::RemoveEmptyDataBins(m_frame);
     }
+        
+    // Set NaN/infinite numbers to 0
+    Logger << kDEBUG << "Setting NaN/infinite entries to 0 in graphs" << GEndl;
+    for (Int_t i = 0; i < m_frame->numItems(); ++i) {
+        RooHist *h = (RooHist*) m_frame->getObject(i);
+        TString hname = h->GetName();
+
+        if (hname.BeginsWith(TString("model"))) {
+            Logger << kDEBUG << " Fixing up graph " << hname << GEndl;
+            
+            for (Int_t i = 0; i < h->GetN(); ++i) {
+                Double_t x, y;
+                h->GetPoint(i, x, y);
+
+                if (!isfinite(y)) {
+                    Logger << kWARNING << "  Zeroing non-finite bin: " << x << " " << y << " of graph " << hname << GEndl;
+                    h->SetPoint(i, x, 0.);
+                }
+            }
+        }
+    }
 
 }
 
