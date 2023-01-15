@@ -53,7 +53,8 @@ parser.add_argument("--logX", help="use log10 of x variable", action="store_true
 parser.add_argument("--logY", help="use log10 of y variable", action="store_true", default=False)
 
 parser.add_argument("--fixedParamsFile","-f",   type=str, help="give a json file with key=variable and value=value. e.g. use for pinning down third parameter in harvest list", default="")
-parser.add_argument("--forbiddenFunction","-l", type=str, help="""a ROOT TF1 definition for a forbidden line e.g. kinematically forbidden regions. (defaults to diagonal, i.e. -l 'x'). Set to 'None' to turn off.""", default="x")
+parser.add_argument("--forbiddenFunction","-l", type=str, help="""a ROOT TF1 definition for a forbidden line e.g. kinematically forbidden regions. (defaults to diagonal, i.e. -l 'x'). Set to 'None' to turn off.  Can enter multiple comma separated arguments""", default="x")
+parser.add_argument("--forbiddenPoints","-p", type=str, help="""Insert these points as forbidden values, syntac is a space separated list \"0,0 600,0 0,600\" """, default="")
 parser.add_argument("--ignoreUncertainty","-u", help="""Don't care about uncertainty bands!""", action="store_true", default=False)
 
 parser.add_argument("--areaThreshold","-a",     type = float, help="Throw away contours with areas less than threshold", default=0)
@@ -226,7 +227,16 @@ def processInputFile(inputFile, outputFile, label = ""):
     # Step 1.5 - If there's a function for a kinematically forbidden region, add zeros to dictionary
 
     if "none" not in args.forbiddenFunction.lower():
-        resultsDict = addValuesToDict(resultsDict, args.forbiddenFunction, numberOfPoints=100 ,value = "mirror" )
+        if "," in args.forbiddenFunction:
+            for fF in args.forbiddenFunction.split(','):
+                resultsDict = addValuesToDict(resultsDict, fF, numberOfPoints=100 ,value = "mirror" )
+        else:
+            resultsDict = addValuesToDict(resultsDict, args.forbiddenFunction, numberOfPoints=100 ,value = "mirror" )
+
+    ############################################################
+    # Step 1.6 - If there are forbidden points, add them
+    if args.forbiddenPoints !="":
+        resultsDict = addPointsToDict(resultsDict, args.forbiddenPoints, value = 0)
 
     ############################################################
     # Step 2 - Interpolate the fit results
@@ -443,7 +453,7 @@ def addValuesToDict(inputDict, function, numberOfPoints = 100, value = 0):
     lowerLimit = min(tmpListOfXValues)
     upperLimit = max(tmpListOfXValues)
 
-    forbiddenFunction = ROOT.TF1(f"forbiddenFunction${value}",args.forbiddenFunction,lowerLimit,upperLimit)
+    forbiddenFunction = ROOT.TF1(f"forbiddenFunction${value}",function,lowerLimit,upperLimit)
     forbiddenFunction.Write(f"forbiddenFunction${value}")
 
 
@@ -485,6 +495,22 @@ def addValuesToDict(inputDict, function, numberOfPoints = 100, value = 0):
             inputDict[(xValue,forbiddenFunction.Eval(xValue))] = dict(list(zip(listOfContours,  [value for x in listOfContours] )) )
 
     return inputDict
+
+def addPointsToDict(inputDict, input_points, value = 0):
+    """This takes in a list of points adds them to the dict"""
+
+    points = []
+    text_points = input_points.split()
+
+    for tp in text_points:
+        points.append( (float( tp.split(",")[0] ),
+                       float( tp.split(",")[1] ) ) )
+
+    for p in points:
+        inputDict[p] = dict(zip(listOfContours, [value for x in listOfContours]))
+
+    return inputDict
+
 
 def interpolateSurface(modelDict = {}, interpolationFunction = "linear", useROOT=False, outputSurface=False, outputSurfaceTGraph=False, tmpListOfContours=listOfContours):
     """The actual interpolation"""
