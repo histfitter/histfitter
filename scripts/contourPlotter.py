@@ -11,7 +11,7 @@ import ROOT
 ROOT.gROOT.SetBatch()
 
 from array import array
-
+import csv
 
 class contourPlotter:
     def __init__(self, plotName="test", xSize=800, ySize=600):
@@ -20,9 +20,10 @@ class contourPlotter:
         self.ySize = ySize
         self.canvas = ROOT.TCanvas(self.plotName, self.plotName, xSize, ySize)
 
-        self.canvas.SetLeftMargin(0.2)
+        self.canvas.SetLeftMargin(0.15)
         self.canvas.SetRightMargin(0.07)
         self.canvas.SetTopMargin(0.07)
+        self.canvas.SetBottomMargin(0.15)
 
         self.xAxisLabel = "x label"
         self.yAxisLabel = "y label"
@@ -36,16 +37,22 @@ class contourPlotter:
 
         return
 
-    def setXAxisLabel(self, label=""):
+    def setXAxisLabel(self, label="",titlesize=0.05,labelsize=0.045):
         self.xAxisLabel = label
         if self.bottomObject:
             self.bottomObject.GetXaxis().SetTitle(self.xAxisLabel)
+            self.bottomObject.GetXaxis().SetTitleSize(titlesize)
+            self.bottomObject.GetXaxis().SetLabelSize(labelsize)
+
         return
 
-    def setYAxisLabel(self, label=""):
+    def setYAxisLabel(self, label="",titlesize=0.05,labelsize=0.045):
         self.yAxisLabel = label
         if self.bottomObject:
             self.bottomObject.GetYaxis().SetTitle(self.yAxisLabel)
+            self.bottomObject.GetYaxis().SetTitleSize(titlesize)
+            self.bottomObject.GetYaxis().SetLabelSize(labelsize)
+
         return
 
     def setYAxisLog(self, b=1):
@@ -57,7 +64,8 @@ class contourPlotter:
         self.canvas.cd()
         self.bottomObject = self.canvas.DrawFrame(*axisRange)
         self.bottomObject.SetTitle(f";{self.xAxisLabel};{self.yAxisLabel}")
-        self.bottomObject.GetYaxis().SetTitleOffset(1.8)
+        self.bottomObject.GetYaxis().SetTitleOffset(1.3)
+        self.bottomObject.GetXaxis().SetTitleOffset(1.3)
         self.canvas.Update()
         return
 
@@ -173,7 +181,7 @@ class contourPlotter:
         curve.SetFillColorAlpha(color, alpha)
         curve.SetLineStyle(1)
         curve.SetLineWidth(1)
-        curve.SetLineColorAlpha(ROOT.kGray, 0.5)
+        curve.SetLineColorAlpha(color,alpha)
         curve.Draw("F")
         curve.Draw("L")
         self.canvas.Update()
@@ -188,7 +196,7 @@ class contourPlotter:
     ):
         self.canvas.cd()
         tmpLine = ROOT.TLine()
-        tmpLine.SetLineColorAlpha(color, 0.9)
+        tmpLine.SetLineColorAlpha(color, 1.0)
         tmpLine.SetLineStyle(style)
         tmpLine.DrawLine(*coordinates)
         xmin, ymin, xmax, ymax = coordinates
@@ -202,7 +210,7 @@ class contourPlotter:
         else:
             tmpLineLabel.DrawLatex(
                 coordinates[0] + 0.1 * (coordinates[2] - coordinates[0]),
-                coordinates[1] + 0.12 * (coordinates[3] - coordinates[1]),
+                coordinates[1] + 0.18 * (coordinates[3] - coordinates[1]),
                 label,
             )
 
@@ -213,13 +221,13 @@ class contourPlotter:
         self.canvas.cd()
         latexObject = ROOT.TLatex()
         latexObject.SetTextSize(0.028)
-        latexObject.DrawLatexNDC(0.2, 0.95, self.processLabel)
+        latexObject.DrawLatexNDC(0.15, 0.95, self.processLabel)
 
         latexObject.SetTextSize(0.037)
-        latexObject.DrawLatexNDC(0.24, 0.8, self.lumiLabel)
+        latexObject.DrawLatexNDC(0.18, 0.8, self.lumiLabel)
 
         latexObject.SetTextSize(0.05)
-        latexObject.DrawLatexNDC(0.24, 0.85, self.figLabel)
+        latexObject.DrawLatexNDC(0.18, 0.85, self.figLabel)
 
         ROOT.gPad.RedrawAxis()
         self.canvas.Update()
@@ -250,6 +258,7 @@ class contourPlotter:
     ):
         self.canvas.cd()
         tmpLine = ROOT.TLine()
+        tmpLine.SetLineWidth(2)
         tmpLine.SetLineColorAlpha(color, alpha)
         tmpLine.SetLineStyle(style)
         tmpLine.DrawLineNDC(xyCoord[0], xyCoord[1], xyCoord[0] + length, xyCoord[1])
@@ -299,4 +308,59 @@ class contourPlotter:
 
         tg_new = ROOT.TGraph2D(n, x, y, z)
 
+        return tg_new
+
+
+    """
+    Reads in csv file with factors to apply, with the following format
+    x,y,factor # header
+    600,,0.1E+02 # first point
+    800,,0.12E+01 # second point etc.
+    """
+    def applyFactorToTGraph2D(self, tg, csvFile):
+        n = tg.GetN()
+
+        x_tg = tg.GetX()
+        y_tg = tg.GetY()
+        z_tg = tg.GetZ()
+
+        x_out = array( 'd' )
+        y_out = array( 'd' )
+        z_out = array( 'd' )
+
+        # open csv file with factors to multiply in
+        with open(csvFile) as cf:
+            # Loop over TGraph points
+            for i in range(n):
+                x_temp = x_tg[i]
+                y_temp = y_tg[i]
+                z_temp = z_tg[i]
+
+                appended = False
+
+                # Look for factor to apply
+                cf.seek(0)
+                c_reader = csv.DictReader(cf)
+                for row in c_reader:
+            
+                    x_fac = row['x']
+                    y_fac = row['y']
+                    f = float(row['factor'])
+
+                    if x_fac == '' or float(x_fac) == x_temp:
+                        if y_fac == '' or float(y_fac) == y_temp:
+                        
+                            x_out.append(x_temp)
+                            y_out.append(y_temp)
+                            z_out.append(z_temp * f)
+                            appended = True
+
+                if not appended:
+                    x_out.append(x_temp)
+                    y_out.append(y_temp)
+                    z_out.append(z_temp)
+
+
+        tg_new = ROOT.TGraph2D(n, x_out, y_out, z_out)
+            
         return tg_new
