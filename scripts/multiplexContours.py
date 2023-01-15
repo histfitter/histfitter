@@ -68,6 +68,7 @@ def main():
     dict_Exp = {}
     dict_Obs = {}
     dict_UL = {}
+    dict_CLs = {}
 
     dict_Exp_u1s = {}
     dict_Exp_d1s = {}
@@ -107,6 +108,8 @@ def main():
             dict_Obs_d1s[inputFileName] = dict_TFiles[inputFileName].Get("Obs_0_Down").Clone(inputFileName+"_Obs_d1s")
 
         dict_UL[inputFileName] = dict_TFiles[inputFileName].Get("upperLimit_gr").Clone(inputFileName+"upperLimit_gr")
+        dict_CLs[inputFileName] = dict_TFiles[inputFileName].Get("CLs_gr").Clone(inputFileName+"CLs_gr")
+
 
     print (">>> Creating output ROOT file: %s"%args.outputFile)
 
@@ -601,6 +604,7 @@ def main():
 
     # Upper Limits (little grey numbers)
     makeBestValueGraph(bestRegions, dict_UL).Write("upperLimit_gr")
+    makeBestValueGraph(bestRegions, dict_CLs).Write("CLs_gr")
 
     if args.debug:
         print (">>> Saving debugging plot: debug.pdf")
