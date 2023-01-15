@@ -513,9 +513,12 @@ def main():
                         x,y = srCurve.exterior.xy
                         ax.plot(x,y,linewidth=2,color='r',linestyle=":")
 
-                        x,y = cookieCut.coords.xy
-                        ax.plot(x,y,linewidth=2,color='b',linestyle="-")
-                        fig.savefig(f"debug_nonpolycut_{debugCounter}.pdf")
+                        try: 
+                            x,y = cookieCut.coords.xy
+                            ax.plot(x,y,linewidth=2,color='b',linestyle="-")
+                            fig.savefig("debug_nonpolycut_{}.pdf".format(debugCounter))
+                        except NotImplementedError as e:
+                            print("Weird geo without coords: ", e) 
 
                 debugCounter +=1
     if args.debug:
@@ -543,6 +546,10 @@ def main():
     expCurve = ()
     for typeOfCurve in listOfBestCurves:
         print(">>> Adding together: %s"%typeOfCurve)
+
+        if args.debug:
+            for curv in listOfBestCurves[typeOfCurve]:
+                print( type(curv))
 
         summedCurves[typeOfCurve]   = cascaded_union( listOfBestCurves[typeOfCurve] )
 
@@ -587,7 +594,13 @@ def main():
         
         summedCurves["Exp_u1s"] = summedCurves["Exp_u1s"].buffer(1e-1) # this fixed some bad behavior where the band was the whole area
         band = summedCurves["Exp_d1s"].difference(summedCurves["Exp_u1s"])
-        
+
+        # Write out up and down separately
+        x,y = summedCurves["Exp_u1s"].exterior.coords.xy
+        convertArraysToTGraph(x,y).Write("Exp_u1s")
+
+        x,y = summedCurves["Exp_d1s"].exterior.coords.xy
+        convertArraysToTGraph(x,y).Write("Exp_d1s")
         
         if type(band)==MultiPolygon:
             band = sorted(band, key=lambda x: x.area, reverse=True)
