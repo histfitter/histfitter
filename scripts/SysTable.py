@@ -505,6 +505,7 @@ if __name__ == "__main__":
     print("-o <outputFileName>: sets the output table file name, name defined by regions if none provided")
     print("-b: shows the error on samples Before the fit (by default After fit is shown)")
     print("-%: also show the individual errors as percentage of the total systematic error (off by default)")
+    print("-z: shade systematic based on size")
     print("-y: take symmetrized average of minos errors")
     print("-k: select nth systematic.  0 gets total.  This allows running one batch job per syst.")
     print("-C: full table caption")
@@ -518,7 +519,7 @@ if __name__ == "__main__":
 
   wsFileName=''
   try:
-    opts, args = getopt.getopt(sys.argv[1:], "o:c:w:m:f:s:C:L:k:%by")
+    opts, args = getopt.getopt(sys.argv[1:], "o:c:w:m:f:s:C:L:k:%by:z")
   except Exception as e:
     print(e)
     usage()
@@ -532,6 +533,7 @@ if __name__ == "__main__":
   method="1"
   showAfterFitError=True
   showPercent=False
+  useColorShade=False
   doAsym=True
   sampleStr=''
   chosenSample = False
@@ -571,6 +573,8 @@ if __name__ == "__main__":
       showAfterFitError=False
     elif opt == '-%':
       showPercent=True
+    elif opt == '-z':
+      useColorShade=True
     elif opt == '-y':
       doAsym=True
     elif opt == "-k":
@@ -639,7 +643,7 @@ if __name__ == "__main__":
   """
   write out LaTeX table by calling function from SysTableTex.py function tablefragment
   """
-  line_chanSysTight = tablefragment(chanSys,chanList,skiplist,chanStr,showPercent,tableLabel,tableCaption)
+  line_chanSysTight = tablefragment(chanSys,chanList,skiplist,chanStr,showPercent,tableLabel,tableCaption,useColorShade)
 
   f = open(outputFileName, 'w')
   f.write( line_chanSysTight )
