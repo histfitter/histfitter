@@ -49,6 +49,7 @@ ConfigMgr::ConfigMgr() : m_logger("ConfigMgrCPP") {
     m_useScanRange = false;
     m_scanRangeMin = -1;
     m_scanRangeMax = -1;
+    m_autoscan = false;
     m_fixSigXSec = false;
     m_runOnlyNominalXSec = false;
     m_doUL = true;
@@ -526,53 +527,74 @@ void ConfigMgr::doUpperLimit(FitConfig* fc) {
         }
     }
 
-    /// here we go ...
-    RooStats::HypoTestInverterResult* hypo = nullptr;
-    if (!m_useScanRange) {
-        /// first asymptotic limit, to get a quick but reliable estimate for the upper limit
-        /// dynamic evaluation of ranges
-        m_logger << kINFO << "doUpperLimit(): no range specified - running quick asymptotic scan in attempt at finding one" << GEndl;
-        hypo = RooStats::DoHypoTestInversion(w, 1, 2, m_testStatType, m_useCLs, 20, 0, -1,
-                doAnalyze,
-                useNumberCounting, 
-                modelSBName.Data(), modelBName.Data(),
-                dataName, 
-                nuisPriorName,
-                generateAsimovDataForObserved
-                ); 
-    }
 
     double minRange = 0.0;
     double maxRange = 0.0;
-    if ( hypo != 0 ) { 
-        maxRange = 1.10 * hypo->GetExpectedUpperLimit(2);
-    }
-        
-    // did the user overrule our scan range finding? 
-    if (m_useScanRange) { 
-        minRange = m_scanRangeMin;
-        maxRange = m_scanRangeMax;
-    }
+    RooStats::HypoTestInverterResult* hypo = nullptr;
+    if (m_autoscan)
+    {
+        std::vector<double> hints;
+        minRange = m_useScanRange ? m_scanRangeMin : 0.;
+        maxRange = m_useScanRange ? m_scanRangeMax : 40.;
 
-    // first evaluation with proper settings
-    if ( hypo!=0 ) { 
-        delete hypo; hypo=0;
+        hypo = RooStats::DoHypoTestInversionAutoScan(w, m_nToys, m_calcType, m_testStatType, m_useCLs, m_nPoints, minRange, maxRange,
+            doAnalyze,
+            useNumberCounting, 
+            modelSBName.Data(), modelBName.Data(),
+            dataName, 
+            nuisPriorName,
+            generateAsimovDataForObserved,
+            m_nCPUs,
+            hints
+            ); 
+    } else {        
+        /// here we go ...
+        if (!m_useScanRange) {
+            /// first asymptotic limit, to get a quick but reliable estimate for the upper limit
+            /// dynamic evaluation of ranges
+            m_logger << kINFO << "doUpperLimit(): no range specified - running quick asymptotic scan in attempt at finding one" << GEndl;
+            hypo = RooStats::DoHypoTestInversion(w, 1, 2, m_testStatType, m_useCLs, 20, 0, -1,
+                    doAnalyze,
+                    useNumberCounting, 
+                    modelSBName.Data(), modelBName.Data(),
+                    dataName, 
+                    nuisPriorName,
+                    generateAsimovDataForObserved
+                    ); 
+        }
+
+
+        if ( hypo != 0 ) { 
+            maxRange = 1.10 * hypo->GetExpectedUpperLimit(2);
+        }
+            
+        // did the user overrule our scan range finding? 
+        if (m_useScanRange) { 
+            minRange = m_scanRangeMin;
+            maxRange = m_scanRangeMax;
+        }
+
+        // first evaluation with proper settings
+        if ( hypo!=0 ) { 
+            delete hypo; hypo=0;
+        }
+        
+        m_logger << kINFO << "doUpperLimit(): running DoHypoTestInversion in [" << minRange << ", " << maxRange << "] with " << m_nPoints << " points " << GEndl;
+        if(m_disableULRangeExtension) {
+            m_logger << kWARNING << "doUpperLimit(): scan range extender disabled; this scan will never be extended. Please remember to check the output plot for convergence" << GEndl;
+            sleep(2); // user should see this message
+        }
+        hypo = RooStats::DoHypoTestInversion(w, m_nToys, m_calcType, m_testStatType, m_useCLs, m_nPoints, minRange, maxRange,
+                    doAnalyze,
+                    useNumberCounting, 
+                    modelSBName.Data(), modelBName.Data(),
+                    dataName, 
+                    nuisPriorName,
+                    generateAsimovDataForObserved,
+                    m_nCPUs
+                );
+
     }
-    
-    m_logger << kINFO << "doUpperLimit(): running DoHypoTestInversion in [" << minRange << ", " << maxRange << "] with " << m_nPoints << " points " << GEndl;
-    if(m_disableULRangeExtension) {
-        m_logger << kWARNING << "doUpperLimit(): scan range extender disabled; this scan will never be extended. Please remember to check the output plot for convergence" << GEndl;
-        sleep(2); // user should see this message
-    }
-    hypo = RooStats::DoHypoTestInversion(w, m_nToys, m_calcType, m_testStatType, m_useCLs, m_nPoints, minRange, maxRange,
-                doAnalyze,
-                useNumberCounting, 
-                modelSBName.Data(), modelBName.Data(),
-                dataName, 
-                nuisPriorName,
-                generateAsimovDataForObserved,
-                m_nCPUs
-            );
 
     const double startingMaxRange __attribute((unused)) = maxRange; // Note: used in commented-out debug statements below
     double previousMaxRange = maxRange; // needed in case we fall into the trap where all the points in the extension happen to fail

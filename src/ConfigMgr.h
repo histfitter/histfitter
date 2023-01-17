@@ -100,6 +100,9 @@ class ConfigMgr {
         
         void setScanRange(const bool useScanRange, const float min=-1, const float max=-1) { m_useScanRange=useScanRange; m_scanRangeMin=min; m_scanRangeMax=max; }
 
+        void setAutoScan(const bool& autoscan=true){m_autoscan = autoscan; }
+        bool getAutoScan(){return m_autoscan;}
+
         void setfixSigXSec(const bool& fix=true) { m_fixSigXSec = fix; }
         bool getfixSigXSec() { return m_fixSigXSec; }
 
@@ -175,6 +178,7 @@ class ConfigMgr {
         bool m_useScanRange;
         float m_scanRangeMin;
         float m_scanRangeMax; 
+        bool m_autoscan;
         bool m_fixSigXSec;
         bool m_runOnlyNominalXSec;
         bool m_doUL;

@@ -121,6 +121,7 @@ class ConfigManager:
         self.FitType = enum('FitType','Discovery , Exclusion , Background') # to distinguish between background, exclusion and discovery fit
         self.myFitType = None #propagted from HistFitter.py
         self.scanRange = None # possibility to define a scan range with a tuple (min, max) (when the first fit fails)
+        self.autoScan = False # use automatic determination of scan range for UL
         self.normList = [] # List of normalization factors
         self.outputFileName = None # Output file name used to store fit results
         self.stackList = [] # List of stacks for plotting
@@ -542,6 +543,14 @@ class ConfigManager:
             self.cppMgr.setScanRange(True, self.scanRange[0], self.scanRange[1])
         else:
             self.cppMgr.setScanRange(False)
+
+        if self.autoScan and self.scanRange:
+            log.warning("Do not set a scan range if you want to use auto scan for the UL.")
+            self.cppMgr.setAutoScan(False)
+        elif self.autoScan:
+            self.cppMgr.setAutoScan(True)
+        else:
+            self.cppMgr.setAutoScan(False)
 
         # Fill FitConfigs from TopLevelXMLs
         for fc in self.fitConfigs:
