@@ -37,6 +37,9 @@
 #include "RooArgList.h"
 #include "RooExpandedFitResult.h"
 #include "ChannelStyle.h"
+#include "RooStats/HypoTestInverterResult.h"
+
+
 class TMap;
 class TTree;
 
@@ -474,6 +477,13 @@ namespace Util
  double getPropagatedError628(RooAbsReal& absReal, const RooFitResult &fr, const RooArgSet &nset);
  TH1* ComponentToHistogram(RooRealSumPdf* component, RooRealVar* variable, RooFitResult *fitResult);
  void ScaleGraph(TGraphAsymmErrors *g, TH1* h);
+
+ /* Return quantiles from HypoTestInverterResult, i.e. the expected CLs and variations
+ @ index -> which result to use
+ @ q -> quantiles are returned in this
+ */
+ void getExpectedCLsFromHypoTest(RooStats::HypoTestInverterResult* HTIR, int index, double *q);
+
 
 }
 
