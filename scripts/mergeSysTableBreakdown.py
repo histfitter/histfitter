@@ -25,7 +25,7 @@ for chan in ["SRLow", "SRMed", "SRHigh"]:
     # chanStr is an underscore separated list of the regions used for the label
     chanStr = chan + "_"+chan.replace("SR","CR")
     showPercent = True
-    outputFileName = "systable_{}_bkg_comb_postfitm2.tex".format(chan.lower(), chan.lower())
+    outputFileName = f"systable_{chan.lower()}_bkg_comb_postfitm2.tex"
     
     regSys = {}
     chanSys = {}
@@ -47,4 +47,4 @@ for chan in ["SRLow", "SRMed", "SRHigh"]:
     f.write( line_chanSysTight )
     f.close()
     
-    print("Wrote to {}".format(outputFileName))
+    print(f"Wrote to {outputFileName}")

@@ -516,7 +516,7 @@ def main():
                         try: 
                             x,y = cookieCut.coords.xy
                             ax.plot(x,y,linewidth=2,color='b',linestyle="-")
-                            fig.savefig("debug_nonpolycut_{}.pdf".format(debugCounter))
+                            fig.savefig(f"debug_nonpolycut_{debugCounter}.pdf")
                         except NotImplementedError as e:
                             print("Weird geo without coords: ", e) 
 

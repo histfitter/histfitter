@@ -469,7 +469,7 @@ def latexfitresults_method2(filename,resultname='RooExpandedFitResult_afterFit',
       if selectSys == 0: print("grepkey[\"{}\"] = {}".format('totsyserr', regSys['totsyserr']) )
       if selectSys == 0: print("grepkey[\"{}\"] = {}".format('nfitted', regSys['nfitted']) )
       if selectSys == 0: print("grepkey[\"{}\"] = {}".format('sqrtnfitted', regSys['sqrtnfitted']) )
-      print("grepkey[\"syserr_{}\"] = {}".format(parname, systError) )
+      print(f"grepkey[\"syserr_{parname}\"] = {systError}" )
       sys.exit()
     else:
       regSys['syserr_'+parname] =  systError
