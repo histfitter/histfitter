@@ -519,6 +519,7 @@ RooStats::HypoTestInverterResult* RooStats::DoHypoTestInversionAutoScan(RooWorks
         // List of POIs to evaluate
         double sigma2_up = UL_exp_asymm + 2*fabs(UL_exp_asymm-UL_exp_up_asymm);
         double sigma2_dw = UL_exp_asymm - 2*fabs(UL_exp_asymm-UL_exp_dw_asymm);
+        // Ignore the 2 sigma band.  If we want to guarantee that also goes below the CLs threshold, then add the points commented out below
         std::vector<double> test_pois = {UL_obs_asymm, UL_exp_up_asymm, UL_exp_dw_asymm}; //, sigma2_up, sigma2_dw};
         
 
@@ -1148,7 +1149,6 @@ double RooStats::nextTestPOI(std::vector<double> &test_pois, HypoTestInverterRes
     double CLs_threshold = 0.05; // CLs value used to evaluate UL
     double nextPoint = -1.; // default
     double overshoot_fraction = 1.1; // Next poi value via linear extrapolatoin is multiplied by this to coverge faster
-    double poi_error_threshold = 1.1; // If we have a tested point with a poi value within this fraction of a crossing, we're done
 
     // Run all of the input suggested points first
     if (test_pois.size() > 0) 
