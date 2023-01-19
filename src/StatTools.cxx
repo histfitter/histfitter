@@ -509,16 +509,15 @@ RooStats::HypoTestInverterResult* RooStats::DoHypoTestInversionAutoScan(RooWorks
         method = 0;
         map_poi_hti.clear();
 
-        //std::cout<<__LINE__<<" Starting toys"<<std::endl;
         // Seed values from asymptotic UL
         double UL_obs_asymm = r_asym->UpperLimit();
-        double UL_exp_asymm = r_asym->GetExpectedUpperLimit(0);
+        //double UL_exp_asymm = r_asym->GetExpectedUpperLimit(0);
         double UL_exp_up_asymm = r_asym->GetExpectedUpperLimit(1);
         double UL_exp_dw_asymm = r_asym->GetExpectedUpperLimit(-1);
 
         // List of POIs to evaluate
-        double sigma2_up = UL_exp_asymm + 2*fabs(UL_exp_asymm-UL_exp_up_asymm);
-        double sigma2_dw = UL_exp_asymm - 2*fabs(UL_exp_asymm-UL_exp_dw_asymm);
+        //double sigma2_up = UL_exp_asymm + 2*fabs(UL_exp_asymm-UL_exp_up_asymm);
+        //double sigma2_dw = UL_exp_asymm - 2*fabs(UL_exp_asymm-UL_exp_dw_asymm);
         // Ignore the 2 sigma band.  If we want to guarantee that also goes below the CLs threshold, then add the points commented out below
         std::vector<double> test_pois = {UL_obs_asymm, UL_exp_up_asymm, UL_exp_dw_asymm}; //, sigma2_up, sigma2_dw};
         
@@ -1172,22 +1171,23 @@ double RooStats::nextTestPOI(std::vector<double> &test_pois, HypoTestInverterRes
             // Get expected CLs
             double q[7];
             Util::getExpectedCLsFromHypoTest(HTIR, lastResult, q);            
-            double CLsExp = q[2];
-            double CLsExpUp = q[1];
+            //double CLsExp = q[2]; // technically not needed since we require down to cross
+            //double CLsExpUp = q[1]; // technically not needed since we require down to cross
             double CLsExpDw = q[3];
 
             Util::getExpectedCLsFromHypoTest(HTIR, lastResult-1, q);
-            double CLsExp_Last = q[2];
-            double CLsExpUp_Last = q[1];
+            //double CLsExp_Last = q[2];
+            //double CLsExpUp_Last = q[1];
             double CLsExpDw_Last = q[3];            
 
-            bool resultIsAsymptotic = ( !HTIR->GetNullTestStatDist(0) && !HTIR->GetAltTestStatDist  (0) );
+            // debug
+            //bool resultIsAsymptotic = ( !HTIR->GetNullTestStatDist(0) && !HTIR->GetAltTestStatDist  (0) );
             //std::cout<<"Toys="<<!resultIsAsymptotic << " CLsObs = " << CLsObs << " CLsExp = "<<CLsExp<< " CLsExpUp = "<<CLsExpUp<< " CLsExpDw = "<<CLsExpDw<< " CLsExp_Last = "<<CLsExp_Last << " CLsExpUp_Last = "<<CLsExpUp_Last << " CLsExpDw_Last = "<<CLsExpDw_Last<<   std::endl;
 
             
             if (CLsObs > CLs_threshold)            
             {
-                // liniar extrapolation from last point.  here is where something fancier could be done
+                // linear extrapolation from last point.  here is where something fancier could be done
                 double m = (lastCLsObs - CLsObs) / (last_poi_val - poi_val);
                 double b = CLsObs - m*poi_val;
                 nextPoint = (CLs_threshold - b) / m;
@@ -1197,7 +1197,7 @@ double RooStats::nextTestPOI(std::vector<double> &test_pois, HypoTestInverterRes
             }
             else if (CLsExpDw > CLs_threshold)
             {
-                // liniar extrapolation from last point.  here is where something fancier could be done
+                // linear extrapolation from last point.  here is where something fancier could be done
                 double m = (CLsExpDw_Last - CLsExpDw) / (last_poi_val - poi_val);
                 double b = CLsExpDw - m*poi_val;
                 nextPoint = (CLs_threshold - b) / m;
@@ -1237,9 +1237,9 @@ double RooStats::nextTestPOI(std::vector<double> &test_pois, HypoTestInverterRes
                 // Get expected CLs
                 double q[7];
                 Util::getExpectedCLsFromHypoTest(HTIR, i, q);            
-                double CLsExp = q[2];
+                //double CLsExp = q[2];
                 double CLsExpUp = q[1];
-                double CLsExpDw = q[3];
+                //double CLsExpDw = q[3];
 
                 if (HTIR->GetYValue(i) > CLs_threshold) nAboveCLsThreshold++;
                 if (CLsExpUp > CLs_threshold) nAboveCLsExpUpThreshold++;                
