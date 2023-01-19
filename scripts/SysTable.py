@@ -206,9 +206,13 @@ def latexfitresults( filename, namemap, region='3jL', sample='', resultName="Roo
     for key in list(namemap.keys()):
       print(namemap[key])
       for parname in namemap[key]:
-        par = w.var(parname)
-        par.setConstant(False)
+        try:
+          par = w.var(parname)
+          par.setConstant(False)
+        except ReferenceError:
+           print( f'Systematic {parname} not found in workspace, passing gracefully.' )
         pass
+
       sysError  = Util.getPropagatedError628(pdfInRegion, result, doAsym)
       regSys['syserr_'+key] =  sysError
       for idx in range(fpf.getSize()):
@@ -230,7 +234,7 @@ def latexfitresults( filename, namemap, region='3jL', sample='', resultName="Roo
 
 
 
-def latexfitresults_method2(filename,resultname='RooExpandedFitResult_afterFit', region='3jL', sample='', fitregions = 'WR,TR,S3,S4,SR3jT,SR4jT', dataname='obsData', doAsym=False):
+def latexfitresults_method2(filename,resultname='RooExpandedFitResult_afterFit', region='3jL', sample='', fitregions = 'WR,TR,S3,S4,SR3jT,SR4jT', dataname='obsData', doAsym=False, selectSys=-1):
   """
   Method-2: set the parameter you're interested in constant,
   redo the fit with all other parameters floating,
@@ -392,13 +396,20 @@ def latexfitresults_method2(filename,resultname='RooExpandedFitResult_afterFit',
   """
   set lumi parameter constant for the refit -- FIXME
   """
-  lumiConst = True
+  lumiConst = True # why is this set to true?
 
 
   """
   redo the fit for every parameter being fixed
   """
+  if selectSys >= fpf.getSize():
+    print(f"Error, selectSys value {selectSys} is >= than parameter list size {fpf.getSize()}")
+    sys.exit()
+
+
   for idx in range(fpf.getSize()):
+    if selectSys != -1 and idx != selectSys: continue # skip until we get the one we want
+
     parname = fpf[idx].GetName()
     print("\n Method-2: redoing fit with fixed parameter ", parname)
 
@@ -451,6 +462,17 @@ def latexfitresults_method2(filename,resultname='RooExpandedFitResult_afterFit',
       systError = 0.0
       print("        WARNING :   for parameter ",parname," fixed the fit does not converge, as status=",result_1parfixed.status(), "(converged=0),  and covariance matrix quality=", result_1parfixed.covQual(), " (full accurate==3)")
       print("        WARNING: setting systError = 0 for parameter ",parname)
+      
+    
+    if selectSys > -1:
+      # Print out the selected syst, also totals if it's the 0th
+      if selectSys == 0: print("grepkey[\"{}\"] = {}".format('totsyserr', regSys['totsyserr']) )
+      if selectSys == 0: print("grepkey[\"{}\"] = {}".format('nfitted', regSys['nfitted']) )
+      if selectSys == 0: print("grepkey[\"{}\"] = {}".format('sqrtnfitted', regSys['sqrtnfitted']) )
+      print(f"grepkey[\"syserr_{parname}\"] = {systError}" )
+      sys.exit()
+    else:
+      regSys['syserr_'+parname] =  systError
 
     regSys['syserr_'+parname] =  systError
 
@@ -483,7 +505,9 @@ if __name__ == "__main__":
     print("-o <outputFileName>: sets the output table file name, name defined by regions if none provided")
     print("-b: shows the error on samples Before the fit (by default After fit is shown)")
     print("-%: also show the individual errors as percentage of the total systematic error (off by default)")
+    print("-z: shade systematic based on size")
     print("-y: take symmetrized average of minos errors")
+    print("-k: select nth systematic.  0 gets total.  This allows running one batch job per syst.")
     print("-C: full table caption")
     print("-L: full table label")
 
@@ -495,8 +519,9 @@ if __name__ == "__main__":
 
   wsFileName=''
   try:
-    opts, args = getopt.getopt(sys.argv[1:], "o:c:w:m:f:s:C:L:%by")
-  except:
+    opts, args = getopt.getopt(sys.argv[1:], "o:c:w:m:f:s:C:L:k:%by:z")
+  except Exception as e:
+    print(e)
     usage()
   if len(opts)<2:
     usage()
@@ -508,6 +533,7 @@ if __name__ == "__main__":
   method="1"
   showAfterFitError=True
   showPercent=False
+  useColorShade=False
   doAsym=True
   sampleStr=''
   chosenSample = False
@@ -547,8 +573,12 @@ if __name__ == "__main__":
       showAfterFitError=False
     elif opt == '-%':
       showPercent=True
+    elif opt == '-z':
+      useColorShade=True
     elif opt == '-y':
       doAsym=True
+    elif opt == "-k":
+      selectSys = int(arg)
 
   if outputFileName=="default":
     outputFileName=sampleStr+chanStr+'_SysTable.tex'
@@ -593,7 +623,7 @@ if __name__ == "__main__":
 
     if not chosenSample:
       if method == "2":
-        regSys = latexfitresults_method2(wsFileName,resultName,chan,'',fitRegionsStr,'obsData',doAsym)
+        regSys = latexfitresults_method2(wsFileName,resultName,chan,'',fitRegionsStr,'obsData',doAsym, selectSys)
       else:
         regSys = latexfitresults(wsFileName,namemap,chan,'',resultName,'obsData',doAsym)
       chanSys[chan] = regSys
@@ -602,7 +632,7 @@ if __name__ == "__main__":
       for sample in sampleList:
         sampleName=getName(sample)
         if method == "2":
-          regSys = latexfitresults_method2(wsFileName,resultName,chan,sample,fitRegionsStr,'obsData',doAsym)
+          regSys = latexfitresults_method2(wsFileName,resultName,chan,sample,fitRegionsStr,'obsData',doAsym, selectSys)
         else:
           regSys = latexfitresults(wsFileName,namemap,chan,sample,resultName,'obsData',doAsym)
         chanSys[chan+"_"+sampleName] = regSys
@@ -613,7 +643,7 @@ if __name__ == "__main__":
   """
   write out LaTeX table by calling function from SysTableTex.py function tablefragment
   """
-  line_chanSysTight = tablefragment(chanSys,chanList,skiplist,chanStr,showPercent,tableLabel,tableCaption)
+  line_chanSysTight = tablefragment(chanSys,chanList,skiplist,chanStr,showPercent,tableLabel,tableCaption,useColorShade)
 
   f = open(outputFileName, 'w')
   f.write( line_chanSysTight )

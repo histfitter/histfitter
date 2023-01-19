@@ -140,7 +140,7 @@ std::list<LimitResult> CollectHypoTestResults( const TString& infile, const TStr
         if(!ht) { continue; }
         if(ht->ArraySize()==0) {
             ToyUtilsLogger << kWARNING << "Fit result " << ht->GetName()
-                << " has failed HypoTestInverterResult - cannot use result. Skip." << GEndl;
+                << " has failed HypoTestInverterResult, array size 0 - cannot use result. Skip." << GEndl;
             delete ht; ht=NULL;
             continue;
         }
@@ -160,7 +160,7 @@ std::list<LimitResult> CollectHypoTestResults( const TString& infile, const TStr
 
         bool failed_status = false;
         if (fitresult && fitresult->status()!=0) {
-            ToyUtilsLogger << kWARNING << "Fit failed for point " << fitresultname.Data() << ". Result has been flagged as failed fit." << GEndl;
+            ToyUtilsLogger << kWARNING << "Fit failed for point " << fitresultname.Data() << ". Result has been flagged as failed fit due to status " << fitresult->status()<< GEndl;
             ++counter_failed_status;
             failed_status = true;
         }

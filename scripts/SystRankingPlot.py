@@ -37,6 +37,7 @@ def refit_fixed(fit_name, par_name, value, w, fit_regions, data_set):
     par.setVal(value)
     par.setConstant(True)
 
+    # why is lumiconst true here             \/?
     fit_result = Util.FitPdf(w, fit_regions, True, data_set, fit_name, True, "all")
 
     par.setConstant(False)
@@ -129,7 +130,8 @@ def get_syst_ranking(opts):
         par_name = float_pars_final[i].GetName()
         par = w.var(par_name)
         par.setConstant(True)
-
+        
+    # why is lumiconst true here             \/?
     fit_result = Util.FitPdf(w, fit_regions, True, data_set, fit_name, True, "all")
     exp_result = RooExpandedFitResult(fit_result, float_pars_final)
     float_pars = exp_result.floatParsFinal()

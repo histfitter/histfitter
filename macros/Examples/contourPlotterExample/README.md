@@ -3,7 +3,7 @@ L. Lee (Feb 2018)
 
 ### Creation of JSON
 
-Run the tutorial (for `MySimpleChannelConfig.py`). Once you run the fits (`-p` option), you'll be handed a trio of root files. (For convenience, the JSON files are included in this directory if you want to skip to the next section.)
+Run the tutorial (for `MySimpleChannelConfig.py`). Once you run the fits (`-p` option), you'll be handed a trio of root files. (For convenience, the JSON files are included in this directory if you want to skip to the next section.).  If you are producing these files yourself for your own analysis with many points, hadd together the hypotest files for Nominal, Up, and Down separately.  
 
 ```
 MySimpleChannelAnalysis_fixSigXSecNominal_hypotest.root
@@ -17,7 +17,7 @@ where the last two are theory cross section variation files. We need to get thes
 GenerateJSONOutput.py -i inputHypoTestResults/MySimpleChannelAnalysis_fixSigXSecNominal_hypotest.root -f "hypo_SU_%f_%f_0_10" -p "m0:m12"
 ```
 
-(See `GenerateJSONOutput.py -h` for help!) This will automatically pick up the theory variation files.
+(See `GenerateJSONOutput.py -h` for help!) This will automatically pick up the theory variation files (the Up and Down).
 
 This produces some output JSON:
 
@@ -29,9 +29,11 @@ MySimpleChannelAnalysis_fixSigXSecDown_hypotest__1_harvest_list.json
 
 For convenience, you can find these in this example directory under `inputJSON/`. These JSON contain all of the fit results.
 
-### Multiplexing JSON (e.g. Single file with "best" SR from best expected CLs value)
+### Multiplexing JSON / Contours (e.g. Single file with "best" SR from best expected CLs value)
 
 If you have multiple JSON (for multiple SRs) you can combine them using the `multiplexJSON.py` functionality given in the HF `scripts` directory (and in your path if your environment is setup via `source setup.sh`).
+
+A better method of merging multiple contours is to do it based on the intersections of the contours themselves, i.e. the actual expected CLs values of the contour surface.  This handles sharp features better.  See `multiplexContours.py` for usage, but you need to produce the contours as explained below first!
 
 ### Contour Production
 

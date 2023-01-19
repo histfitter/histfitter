@@ -68,6 +68,7 @@ def main():
     dict_Exp = {}
     dict_Obs = {}
     dict_UL = {}
+    dict_CLs = {}
 
     dict_Exp_u1s = {}
     dict_Exp_d1s = {}
@@ -107,6 +108,8 @@ def main():
             dict_Obs_d1s[inputFileName] = dict_TFiles[inputFileName].Get("Obs_0_Down").Clone(inputFileName+"_Obs_d1s")
 
         dict_UL[inputFileName] = dict_TFiles[inputFileName].Get("upperLimit_gr").Clone(inputFileName+"upperLimit_gr")
+        dict_CLs[inputFileName] = dict_TFiles[inputFileName].Get("CLs_gr").Clone(inputFileName+"CLs_gr")
+
 
     print (">>> Creating output ROOT file: %s"%args.outputFile)
 
@@ -510,9 +513,12 @@ def main():
                         x,y = srCurve.exterior.xy
                         ax.plot(x,y,linewidth=2,color='r',linestyle=":")
 
-                        x,y = cookieCut.coords.xy
-                        ax.plot(x,y,linewidth=2,color='b',linestyle="-")
-                        fig.savefig(f"debug_nonpolycut_{debugCounter}.pdf")
+                        try: 
+                            x,y = cookieCut.coords.xy
+                            ax.plot(x,y,linewidth=2,color='b',linestyle="-")
+                            fig.savefig(f"debug_nonpolycut_{debugCounter}.pdf")
+                        except NotImplementedError as e:
+                            print("Weird geo without coords: ", e) 
 
                 debugCounter +=1
     if args.debug:
@@ -540,6 +546,10 @@ def main():
     expCurve = ()
     for typeOfCurve in listOfBestCurves:
         print(">>> Adding together: %s"%typeOfCurve)
+
+        if args.debug:
+            for curv in listOfBestCurves[typeOfCurve]:
+                print( type(curv))
 
         summedCurves[typeOfCurve]   = cascaded_union( listOfBestCurves[typeOfCurve] )
 
@@ -584,7 +594,13 @@ def main():
         
         summedCurves["Exp_u1s"] = summedCurves["Exp_u1s"].buffer(1e-1) # this fixed some bad behavior where the band was the whole area
         band = summedCurves["Exp_d1s"].difference(summedCurves["Exp_u1s"])
-        
+
+        # Write out up and down separately
+        x,y = summedCurves["Exp_u1s"].exterior.coords.xy
+        convertArraysToTGraph(x,y).Write("Exp_u1s")
+
+        x,y = summedCurves["Exp_d1s"].exterior.coords.xy
+        convertArraysToTGraph(x,y).Write("Exp_d1s")
         
         if type(band)==MultiPolygon:
             band = sorted(band, key=lambda x: x.area, reverse=True)
@@ -601,6 +617,7 @@ def main():
 
     # Upper Limits (little grey numbers)
     makeBestValueGraph(bestRegions, dict_UL).Write("upperLimit_gr")
+    makeBestValueGraph(bestRegions, dict_CLs).Write("CLs_gr")
 
     if args.debug:
         print (">>> Saving debugging plot: debug.pdf")

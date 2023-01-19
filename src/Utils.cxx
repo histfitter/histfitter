@@ -3850,3 +3850,48 @@ void Util::plotInterpolationScheme(RooWorkspace *w) {
     currentDir->cd();
 
 }
+
+
+//________________________________________________________________________________________________
+void Util::getExpectedCLsFromHypoTest(HypoTestInverterResult* HTIR, int index, double *q)
+{
+    // Get expected CLs
+    // See https://root.cern.ch/doc/master/HypoTestInverterPlot_8cxx_sourcehtml#l00150
+    bool resultIsAsymptotic = ( !HTIR->GetNullTestStatDist(0) &&!HTIR->GetAltTestStatDist(0) );
+    double p[7];
+    double nsig1 = 1;
+    double nsig2 = 2;
+    p[0] = ROOT::Math::normal_cdf(-nsig2);
+    p[1] = ROOT::Math::normal_cdf(-nsig1);
+    p[2] = 0.5;
+    p[3] = ROOT::Math::normal_cdf(nsig1);
+    p[4] = ROOT::Math::normal_cdf(nsig2);
+
+    SamplingDistribution * s = HTIR->GetExpectedPValueDist(index);
+    const std::vector<double> & values = s->GetSamplingDistribution();
+    
+    if (resultIsAsymptotic) {
+        double maxSigma = 5;//HTIR->fgAsymptoticMaxSigma;
+        double dsig = 2* maxSigma/ (values.size() -1) ;
+        int  i0 = (int) TMath::Floor ( ( -nsig2 +  maxSigma )/dsig + 0.5);
+        int  i1 = (int) TMath::Floor ( (-nsig1 +  maxSigma )/dsig + 0.5);
+        int  i2 = (int) TMath::Floor ( ( maxSigma)/dsig + 0.5);
+        int  i3 = (int) TMath::Floor ( ( nsig1 + maxSigma)/dsig + 0.5);
+        int  i4 = (int) TMath::Floor ( ( nsig2 + maxSigma)/dsig + 0.5);
+        q[0] = values[i0];
+        q[1] = values[i1];
+        q[2] = values[i2];
+        q[3] = values[i3];
+        q[4] = values[i4];
+    }
+    else
+    {
+        double * x = const_cast<double *>(&values[0]); // need to changeTMath::Quantiles
+        TMath::Quantiles(values.size(), 5, x,q,p,false);
+    }
+    //float CLsExp = q[2];
+    //float CLsExpUp = q[1];
+    //float CLsExpDw = q[3];
+    delete s;
+
+}

@@ -388,6 +388,211 @@ nToyRatio            ratio of S+B/B toys (default is 2)
 }
 
 //________________________________________________________________________________________________
+RooStats::HypoTestInverterResult* RooStats::DoHypoTestInversionAutoScan(RooWorkspace* w,
+        int ntoys,
+        int calculatorType ,
+        int testStatType , 
+        bool useCLs ,  
+        int npoints ,   
+        double poimin ,  
+        double poimax , 
+        bool doAnalyze,
+        bool useNumberCounting ,
+        const char* modelSBName ,
+        const char* modelBName,
+        const char* dataName , 
+        const char* nuisPriorName,
+        bool generateAsimovDataForObserved,
+        int nCPUs,
+        std::vector<double> hints)
+{
+
+    double initial_guess_mult = 1; // multi POI error by this much for first guess
+
+    if (w == NULL) {
+        StatToolsLogger << kERROR << "input workspace is NULL - Exit." << GEndl;
+        return 0;
+    }
+
+    
+    HypoTestTool calc;
+    calc.SetParameter("EnableDetailedOutput", true);
+    
+    
+    if (nCPUs > 1){
+        StatToolsLogger << kINFO << "setting use of PROOF to true, nCPUs=" << nCPUs << GEndl; 
+        calc.SetParameter("UseProof", true);
+        calc.SetParameter("NWorkers", nCPUs);
+    }
+
+    calc.SetParameter("GenerateAsimovDataForObserved", generateAsimovDataForObserved);
+
+    // return value
+    HypoTestInverterResult* r = 0; 
+    
+    // Initial estimate of poi value to test
+    RooFitResult* result = Util::doFreeFit(w,0,false) ;
+    delete result;
+
+    ModelConfig* sbModel = (ModelConfig*) w->obj(modelSBName);
+    RooRealVar *poi = (RooRealVar*)sbModel->GetParametersOfInterest()->first();
+    double poihat = poi->getVal();
+    double poiup = poihat + initial_guess_mult*fabs(poi->getError()); 
+    //std::cout<<"POI val after fit "<<poihat << " errorLo = " << poi->getErrorLo()<< " errorHi = " << poi->getErrorHi()<< " error = " << poi->getError()<<std::endl;
+
+
+    HypoTestInverterResult* r_asym = NULL;
+    HypoTestInverterResult* r_temp = NULL;
+
+    // Asymptotic UL first
+    int method = 0; // Auto scan method
+    std::vector<double> test_pois = {poiup};    
+    if (hints.size() > 0) 
+    {
+        test_pois = hints;// if we were given hints, just use those
+        method = 1;
+    }
+
+    std::map<double, HypoTestInverterResult*> map_poi_hti;
+
+    // Loop through points
+    double test_point = 0;
+    while (test_point >= 0)
+    {
+        HypoTestInverterResult* r_test = calc.RunHypoTestInverter( 
+            w, modelSBName, modelBName,
+            dataName, 2, testStatType, useCLs,
+            1, test_point, test_point+10.,  
+            ntoys, useNumberCounting, nuisPriorName ); 
+
+        map_poi_hti.emplace(test_point, r_test);
+
+        
+        if (r_temp) 
+        {
+            r_temp->Add(*r_test);
+            //delete r_test;
+        }
+        else
+        {
+            r_temp = static_cast<HypoTestInverterResult*>(r_test->Clone());
+        }
+        
+        // Get next test point, based on extrapolating 
+        test_point = nextTestPOI(test_pois, r_temp, method);
+        // Switch to refining test points once the line above has converged
+        if (test_point < 0 and method == 0 ) 
+        {
+            method = 1;
+            test_point = nextTestPOI(test_pois, r_temp, method);
+        }
+        //std::cout<<"Asym TEST POINT "<<test_point<<std::endl;
+    }
+    delete r_temp;
+    r_temp = NULL;
+
+    // Put test points in order of POI, otherwise ROOT removes them
+    r_asym = map_poi_hti.begin()->second; // need something to start adding to
+    std::map<double, HypoTestInverterResult*>::iterator it;
+    for (it = std::next(map_poi_hti.begin()); it != map_poi_hti.end(); it++)
+    {
+        r_asym->Add( *(it->second) );
+        delete it->second;
+    }
+
+    // We're only running asymptotics, so set that as the return value.
+    if (calculatorType == 2) r = r_asym;
+    
+    // Toy based UL
+    if (calculatorType == 0) 
+    {
+        method = 0;
+        map_poi_hti.clear();
+
+        // Seed values from asymptotic UL
+        double UL_obs_asymm = r_asym->UpperLimit();
+        //double UL_exp_asymm = r_asym->GetExpectedUpperLimit(0);
+        double UL_exp_up_asymm = r_asym->GetExpectedUpperLimit(1);
+        double UL_exp_dw_asymm = r_asym->GetExpectedUpperLimit(-1);
+
+        // List of POIs to evaluate
+        //double sigma2_up = UL_exp_asymm + 2*fabs(UL_exp_asymm-UL_exp_up_asymm);
+        //double sigma2_dw = UL_exp_asymm - 2*fabs(UL_exp_asymm-UL_exp_dw_asymm);
+        // Ignore the 2 sigma band.  If we want to guarantee that also goes below the CLs threshold, then add the points commented out below
+        std::vector<double> test_pois = {UL_obs_asymm, UL_exp_up_asymm, UL_exp_dw_asymm}; //, sigma2_up, sigma2_dw};
+        
+
+        HypoTestInverterResult* r_toy = NULL;
+
+        // Loop through test points
+        double test_point = 0;
+        while (test_point >= 0)
+        {
+            HypoTestInverterResult* r_test = calc.RunHypoTestInverter( 
+                w, modelSBName, modelBName,
+                dataName, 0, testStatType, useCLs,
+                1, test_point, test_point+10.,  
+                ntoys, useNumberCounting, nuisPriorName ); 
+
+            map_poi_hti.emplace(test_point, r_test);
+
+            if (r_temp) 
+            {
+                r_temp->Add(*r_test);
+                //delete r_test;
+            }
+            else
+            {
+                r_temp = static_cast<HypoTestInverterResult*>(r_test->Clone());
+            }
+
+            // Get next test point, based on extrapolating 
+            test_point = nextTestPOI(test_pois, r_temp, method);
+            // Switch to refining test points once the line above has converged
+            if (test_point < 0 and method == 0 ) 
+            {
+                method = 1;
+                test_point = nextTestPOI(test_pois, r_temp, method);
+            }            
+        }
+        delete r_temp;
+        r_temp = NULL;
+
+        // Put test points in order of POI, otherwise ROOT removes them
+        r_toy = map_poi_hti.begin()->second; // need something to start adding to
+        std::map<double, HypoTestInverterResult*>::iterator it;
+        for (it = std::next(map_poi_hti.begin()); it != map_poi_hti.end(); it++)
+        {
+            r_toy->Add( *(it->second) );
+            delete it->second;
+        }
+
+
+        r = r_toy;
+
+    }
+
+    // Exit if not asymptotics or toys
+    if (calculatorType == 1)
+    {
+        StatToolsLogger << kERROR <<"Error in HypoTestInverter, calculator type 1 not supported for AutoScan."  << GEndl;
+        return 0;
+    }
+
+    if (!r) { 
+        StatToolsLogger << kERROR << "Error running the HypoTestInverter - Exit " << GEndl;
+        return 0;          
+    }
+
+    if (doAnalyze) 
+        calc.AnalyzeResult( r, calculatorType, testStatType, useCLs, npoints, w->GetName() );
+
+    return r;
+}
+
+
+
+//________________________________________________________________________________________________
 RooStats::HypoTestResult* RooStats::DoHypoTest(RooWorkspace* w, 
         bool doUL,
         int ntoys,
@@ -933,4 +1138,159 @@ RooStats::HypoTestResult* RooStats::get_htr(  RooWorkspace* w,
             modelSBName,modelBName,dataName,
             useNumberCounting,nuisPriorName);
     return result;
+}
+
+
+
+//________________________________________________________________________________________________
+double RooStats::nextTestPOI(std::vector<double> &test_pois, HypoTestInverterResult *HTIR, int method)
+{
+    double CLs_threshold = 0.05; // CLs value used to evaluate UL
+    double nextPoint = -1.; // default
+    double overshoot_fraction = 1.1; // Next poi value via linear extrapolatoin is multiplied by this to coverge faster
+
+    // Run all of the input suggested points first
+    if (test_pois.size() > 0) 
+    {
+        nextPoint = test_pois.back();
+        test_pois.pop_back();
+        return nextPoint;
+    }
+    else
+    {
+        // Predict crossing point and evaluate, this only goes forwards
+        if (method == 0) 
+        {
+            // Get previous results to make prediction
+            int lastResult = HTIR->ArraySize()-1;            
+            double CLsObs = HTIR->GetYValue(lastResult);
+            double poi_val = HTIR->GetXValue(lastResult);
+            double lastCLsObs = HTIR->GetYValue(lastResult - 1);
+            double last_poi_val = HTIR->GetXValue(lastResult - 1);
+
+            // Get expected CLs
+            double q[7];
+            Util::getExpectedCLsFromHypoTest(HTIR, lastResult, q);            
+            //double CLsExp = q[2]; // technically not needed since we require down to cross
+            //double CLsExpUp = q[1]; // technically not needed since we require down to cross
+            double CLsExpDw = q[3];
+
+            Util::getExpectedCLsFromHypoTest(HTIR, lastResult-1, q);
+            //double CLsExp_Last = q[2];
+            //double CLsExpUp_Last = q[1];
+            double CLsExpDw_Last = q[3];            
+
+            // debug
+            //bool resultIsAsymptotic = ( !HTIR->GetNullTestStatDist(0) && !HTIR->GetAltTestStatDist  (0) );
+            //std::cout<<"Toys="<<!resultIsAsymptotic << " CLsObs = " << CLsObs << " CLsExp = "<<CLsExp<< " CLsExpUp = "<<CLsExpUp<< " CLsExpDw = "<<CLsExpDw<< " CLsExp_Last = "<<CLsExp_Last << " CLsExpUp_Last = "<<CLsExpUp_Last << " CLsExpDw_Last = "<<CLsExpDw_Last<<   std::endl;
+
+            
+            if (CLsObs > CLs_threshold)            
+            {
+                // linear extrapolation from last point.  here is where something fancier could be done
+                double m = (lastCLsObs - CLsObs) / (last_poi_val - poi_val);
+                double b = CLsObs - m*poi_val;
+                nextPoint = (CLs_threshold - b) / m;
+
+                test_pois.push_back(nextPoint*overshoot_fraction);
+                return nextTestPOI(test_pois, HTIR, 0);
+            }
+            else if (CLsExpDw > CLs_threshold)
+            {
+                // linear extrapolation from last point.  here is where something fancier could be done
+                double m = (CLsExpDw_Last - CLsExpDw) / (last_poi_val - poi_val);
+                double b = CLsExpDw - m*poi_val;
+                nextPoint = (CLs_threshold - b) / m;
+
+                test_pois.push_back(nextPoint*overshoot_fraction);
+                return nextTestPOI(test_pois, HTIR, 0);
+            }
+            else 
+            {   
+                return -1;
+            }
+
+        } // end method 0
+
+        // Check if points we've evaluated are close to crossings, if not predict new points and test those
+        if (method == 1)
+        {
+
+            // Should have already run a few points
+            if (HTIR->ArraySize() < 2)
+            {
+                StatToolsLogger << kERROR << "Not enough points evaluated already to compute UL" << GEndl;
+                return -1;
+            }
+            
+
+            // Tested POI values
+            std::vector<double> tested_POIs;
+            int nAboveCLsThreshold = 0;
+            int nAboveCLsExpUpThreshold = 0;
+
+            for (int i = 0; i < HTIR->ArraySize(); i++) 
+            {
+                //std::cout<<"tested POIs = " << HTIR->GetXValue(i)<<std::endl;
+                tested_POIs.push_back(HTIR->GetXValue(i) );
+
+                // Get expected CLs
+                double q[7];
+                Util::getExpectedCLsFromHypoTest(HTIR, i, q);            
+                //double CLsExp = q[2];
+                double CLsExpUp = q[1];
+                //double CLsExpDw = q[3];
+
+                if (HTIR->GetYValue(i) > CLs_threshold) nAboveCLsThreshold++;
+                if (CLsExpUp > CLs_threshold) nAboveCLsExpUpThreshold++;                
+            }
+
+            // If the first POI test (0) is the only one above the CLs threshold, it's probably not a good limit, try halfway
+            if (nAboveCLsThreshold == 1)
+            {
+                std::sort(tested_POIs.begin(), tested_POIs.end());
+                std::vector<double> valuesToTest = {tested_POIs[1] / 2}; // this is the closest point to 0
+                return nextTestPOI(valuesToTest, HTIR, 1);
+            } else if (nAboveCLsExpUpThreshold == 1 )
+            {
+                std::sort(tested_POIs.begin(), tested_POIs.end());
+                std::vector<double> valuesToTest = {tested_POIs[1] / 2}; // this is the closest point to 0
+                return nextTestPOI(valuesToTest, HTIR, 1);
+            }
+
+            // Current UL estimate
+            double UL_obs = HTIR->UpperLimit();
+            double UL_exp = HTIR->GetExpectedUpperLimit(0);
+            double UL_exp_1sig_up = HTIR->GetExpectedUpperLimit(1);
+            double UL_exp_1sig_dw =  HTIR->GetExpectedUpperLimit(-1);
+
+            // Check how close we were and run another test if not close enough
+            std::vector<double> valuesToTest = {UL_obs, UL_exp, UL_exp_1sig_up, UL_exp_1sig_dw};
+            for (auto &test : tested_POIs)
+            { // cls_threshold should be the poi error thresd.. JDL todo
+                if (fabs( test - UL_obs ) / UL_obs < CLs_threshold) valuesToTest.erase(std::remove(valuesToTest.begin(), valuesToTest.end(), UL_obs), valuesToTest.end());
+
+                if (fabs( test - UL_exp ) / UL_exp < CLs_threshold) valuesToTest.erase(std::remove(valuesToTest.begin(), valuesToTest.end(), UL_exp), valuesToTest.end());
+
+                if (fabs( test - UL_exp_1sig_up ) / UL_exp_1sig_up < CLs_threshold) valuesToTest.erase(std::remove(valuesToTest.begin(), valuesToTest.end(), UL_exp_1sig_up), valuesToTest.end());
+
+                //std::cout<< "down diff " << ((fabs( test - UL_exp_1sig_dw ) / UL_exp_1sig_dw) < CLs_threshold) <<std::endl;
+
+                if (fabs( test - UL_exp_1sig_dw ) / UL_exp_1sig_dw < CLs_threshold) 
+                {
+                    valuesToTest.erase(std::remove(valuesToTest.begin(), valuesToTest.end(), UL_exp_1sig_dw), valuesToTest.end());
+                }
+
+            }
+
+            // debug 
+            //std::cout<<"method 1 values " << " UL_obs "<<UL_obs << " UL_exp " << UL_exp << " UL_exp_1sig_up " << UL_exp_1sig_up << " UL_exp_1sig_dw " << UL_exp_1sig_dw<<std::endl;
+            //for (auto &i: valuesToTest) std::cout<<" values to test " <<i <<std::endl;
+
+            if (valuesToTest.size() > 0) return nextTestPOI(valuesToTest, HTIR, 1);           
+        }
+
+    }
+    
+    return -1;
 }

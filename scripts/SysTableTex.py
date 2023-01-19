@@ -15,7 +15,22 @@
  * LICENSE.                                                                       *
 """
 
-def tablefragment(m,signalRegions,skiplist,chanStr,showPercent,label="",caption=""):
+def colorShade(percent, useColorShade):
+
+  if not useColorShade:
+    return 'black'
+
+  if percent < 1.:
+    return 'lightgray'
+  elif percent <10.:
+    return 'gray'
+  elif percent<50.:
+    return 'darkgray'
+  else:
+    return 'black'
+
+
+def tablefragment(m,signalRegions,skiplist,chanStr,showPercent,label="",caption="",useColorShade=False):
   """
   main function to transfer the set of numbers/names (=m provided by SysTable) into a LaTeX table
 
@@ -31,8 +46,9 @@ def tablefragment(m,signalRegions,skiplist,chanStr,showPercent,label="",caption=
   tableline += '''
 \\begin{table}
 \\centering
-\\small
-\\begin{tabular*}{\\textwidth}{@{\\extracolsep{\\fill}}l'''
+\\begin{adjustbox}{width=\\textwidth}
+\\scriptsize
+\\begin{tabular}{l'''
 
   """
   print the region names
@@ -116,14 +132,17 @@ Total background systematic              '''
         if index == 0:
           tableline += "\n" + printname + "      "
 
+        percentage = m[region][name]/m[region]['nfitted'] * 100.0 if m[region]['nfitted']>0. else 0.
+
         if not showPercent:
-          tableline += "   & $\\pm " + str("%.2f" %m[region][name]) + "$       "
+          #tableline += "   & $\\pm " + str("%.2f" %m[region][name]) + "$       "
+          tableline += f"   & \\textcolor{{{colorShade(percentage,useColorShade)}}}{{$\\pm " + str("%.2f" %m[region][name]) + "$}       "
         else:
-          percentage = m[region][name]/m[region]['nfitted'] * 100.0 if m[region]['nfitted']>0. else 0.
           if percentage <1:
-            tableline += "   & $\\pm " + str("%.2f" %m[region][name]) + r"\ [" + str("%.2f" %percentage) + "\\%] $       "
+            #tableline += "   & $\\pm " + str("%.2f" %m[region][name]) + r"\ [" + str("%.2f" %percentage) + "\\%] $       "
+            tableline += f"   & \\textcolor{{{colorShade(percentage,useColorShade)}}}{{$\\pm " + str("%.2f" %m[region][name]) + r"\ [" + str("%.2f" %percentage) + "\\%] $}       "
           else:
-            tableline += "   & $\\pm " + str("%.2f" %m[region][name]) + r"\ [" + str("%.1f" %percentage) + "\\%] $       "
+            tableline += f"   & \\textcolor{{{colorShade(percentage,useColorShade)}}}{{$\\pm " + str("%.2f" %m[region][name]) + r"\ [" + str("%.1f" %percentage) + "\\%] $}       "
 
 
         if index == len(signalRegions)-1:
@@ -145,7 +164,8 @@ the total background uncertainty. The percentages show the size of the uncertain
   tableline += """
 
 \\bottomrule
-\\end{tabular*}
+\\end{tabular}
+\\end{adjustbox}
 \\caption{"""+caption+"""}
 \\label{"""+label+r"""}
 \end{table}"""

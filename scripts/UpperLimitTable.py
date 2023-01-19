@@ -24,16 +24,18 @@ gSystem.Load(f"{os.getenv('HISTFITTER')}/lib/libSusyFitter.so")
 gROOT.SetBatch(True)
 gROOT.Reset()
 
-from ROOT import TFile, RooWorkspace, TObject, TString, RooAbsReal, RooRealVar, RooFitResult, RooDataSet, RooAddition, RooArgSet,RooAbsData,RooRandom 
+from ROOT import TFile, RooWorkspace, TObject, TString, RooAbsReal, RooRealVar, RooFitResult, RooDataSet, RooAddition, RooArgSet,RooAbsData,RooRandom
 from ROOT import Util, TMath, RooStats, StatTools
 from ROOT import RooFit
+from ROOT.std import vector
+from ROOT import double
 
 from UpperLimitTableTex import *
 
 import pickle
 import sys
 
-def latexfitresults(filename, poiname='mu_SIG', lumiFB=1.0, nTOYS=3000, nPoints=20, muRange=40, asimov=False, wname='combined', outputPrefix=""):
+def latexfitresults(filename, poiname='mu_SIG', lumiFB=1.0, nTOYS=3000, nPoints=20, muRange=40, asimov=False, wname='combined', outputPrefix="", autoScan=False):
   """
   Calculate before/after-fit yields in all channels given
   
@@ -97,8 +99,16 @@ def latexfitresults(filename, poiname='mu_SIG', lumiFB=1.0, nTOYS=3000, nPoints=
   nCPUs = 8
   murangelow = 0.0
   murangehigh = muRange #set here -1. if you want to have automatic determined scan range, if using values != -1, please check the log file if the scan range was large enough
-  hti_result = RooStats.DoHypoTestInversion(w, ntoys, calctype, 3, True, nPoints, murangelow, murangehigh, False, False, "ModelConfig", "", "obsData", "")
-  #hti_result = RooStats.DoHypoTestInversion(w, ntoys, calctype, 3, True, nPoints, murangelow, murangehigh, False, False, "ModelConfig", "", "obsData", "", nCPUs)
+
+  myhints = [] # list of points to try in autoscan, instead of extrapolating forward
+  hints = vector(double)()
+  for i in myhints: hints.push_back(i)
+
+  if autoScan:
+    hti_result = RooStats.DoHypoTestInversionAutoScan(w, ntoys, calctype, 3, True, nPoints, murangelow, murangehigh, False, False, "ModelConfig", "", "obsData", "", False, nCPUs, hints)
+  else: 
+    #hti_result = RooStats.DoHypoTestInversion(w, ntoys, calctype, 3, True, nPoints, murangelow, murangehigh, False, False, "ModelConfig", "", "obsData", "")
+    hti_result = RooStats.DoHypoTestInversion(w, ntoys, calctype, 3, True, nPoints, murangelow, murangehigh, False, False, "ModelConfig", "", "obsData", "", False, nCPUs)
 
   nRemoved = hti_result.ExclusionCleanup()
   if nRemoved > 0:
@@ -242,6 +252,7 @@ if __name__ == "__main__":
     print("-p <poiNames>: single POI name string (mu_<SRname>) or comma separated list accepted, only needed if your workspace contains a different POI then mu_<SRname>")
     print("-o <outputFileName>: sets the output table file name")
     print("-i stays in interactive session after executing the script (default off)")
+    print("-A use auto scan to find upper limit (default off)")
     
     print("\nFor example:")
     print("UpperLimitTable.py -c SR4jTEl -w /afs/cern.ch/user/k/koutsman/HistFitterUser/MET_jets_leptons/results/MyDiscoveryAnalysis_Lumi_SR4jTEl_SPlusB_combined_NormalMeasurement_model.root -l 4.713")
@@ -254,7 +265,7 @@ if __name__ == "__main__":
 
   wsFileName='/results/MyOneLeptonKtScaleFit_HardLepR17_BkgOnlyKt_combined_NormalMeasurement_model_afterFit.root'
   try:
-    opts, args = getopt.getopt(sys.argv[1:], "c:w:l:o:n:N:R:p:ai")
+    opts, args = getopt.getopt(sys.argv[1:], "c:w:l:o:n:N:R:p:ai:A")
   except:
     usage()
   if len(opts)<3:
@@ -271,6 +282,7 @@ if __name__ == "__main__":
   poiName = "default"
   nPoints = 20
   muRange = -1
+  autoScan = False
 
   """
   set options as given by the user call
@@ -298,6 +310,9 @@ if __name__ == "__main__":
       poiList = arg.split(",")
     elif opt == '-i':
       runInterpreter = True
+    elif opt == '-A':
+      autoScan = True
+
 
   if lumiFB == -1:
     print(" Luminosity must be given with -l option\n")
@@ -359,7 +374,7 @@ if __name__ == "__main__":
     calculate upper limit
     """
     outputPrefix = outputFileName.replace(".tex.tmp", "_") # HACK. Who cares. #GJ -19/2/2014
-    ulMapChan = latexfitresults(wsFileNameChan, poiNameChan, lumiFB, nTOYS, nPoints, muRange, useAsimovSet, 'combined', outputPrefix)
+    ulMapChan = latexfitresults(wsFileNameChan, poiNameChan, lumiFB, nTOYS, nPoints, muRange, useAsimovSet, 'combined', outputPrefix, autoScan)
     upLim[chan] = ulMapChan
     """
     print file for every channel separately

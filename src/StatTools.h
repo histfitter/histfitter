@@ -54,6 +54,25 @@ namespace RooStats
                 int nCPUs = 1
                 ) ;
 
+    RooStats::HypoTestInverterResult* DoHypoTestInversionAutoScan( RooWorkspace* w,
+                int ntoys=1000,
+                int calculatorType = 0,
+                int testStatType = 3, 
+                bool useCLs = true ,  
+                int npoints = 1,   
+                double poimin = 1.0,  
+                double poimax = 1.0, 
+                bool doAnalyze = false,
+                bool useNumberCounting = false,
+                const char * modelSBName = "ModelConfig",
+                const char * modelBName = "",
+                const char * dataName = "obsData",                 
+                const char * nuisPriorName = 0,
+                bool generateAsimovDataForObserved = false,
+                int nCPUs = 1,
+                std::vector<double> hints = {});
+
+
     RooStats::HypoTestResult* DoHypoTest(RooWorkspace* w,
                 bool doUL = true, // true = exclusion, false = discovery
                 int ntoys=1000,
@@ -130,6 +149,9 @@ namespace RooStats
 
     LimitResult get_Pvalue( const RooStats::HypoTestInverterResult* fResults, bool doUL=true );
     LimitResult get_Pvalue( const RooStats::HypoTestResult* fResult, bool doUL=true );
+    
+    double nextTestPOI(std::vector<double> &test_pois, HypoTestInverterResult *HTIR, int method=0);
+
 }
 
 # endif
