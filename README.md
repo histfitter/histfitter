@@ -36,7 +36,7 @@ Recommended Root version is 6.26.08.  This version of HistFitter is not compatib
 
 ## Setup
 
-The environment can be set doing
+The environment can be set by activating the setup script in the root folder
 
 ```
 source setup.sh
@@ -44,7 +44,7 @@ source setup.sh
 
 
 ## Build
-
+From the root folder do
 ```
 cd src
 make
@@ -52,7 +52,7 @@ cd ..
 ```
 or with cmake:
 ```
-cmake -S src -B lib -DCMAKE_BUILD_TYPE=Release
+cmake -S . -B lib -DCMAKE_BUILD_TYPE=Release
 cmake --build lib --clean-first --parallel 8
 ```
 
@@ -62,9 +62,7 @@ cmake --build lib --clean-first --parallel 8
 - `config`: Contains HistFactory schema
 - `data`: Contains data text files, provided externally, used to create workspaces for analysis
 - `doc`: Documentation
-- `docs`: Legacy tutorial (candidate for removal)
 - `examples`: Example scripts that use the libraries in `python/`
-- `include`: (not needed in version control and should be removed)
 - `lib`: Location shared library
 - `macros`: Macros for making plots, testing the fit, ongoing work, etc
 - `python`: Python base classes
