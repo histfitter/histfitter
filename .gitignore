@@ -1,6 +1,9 @@
 obj
-lib/*
+lib/
+bin/
+build/
 src/SusyFitter_Dict.C
+*.o
 
 .*.swp
 data/*.root
@@ -10,9 +13,9 @@ data/*.root
 include/*.h
 
 # output
-results/*
-config/*
-data/*
+results/
+config/
+data/
 *.json
 
 # Development environments
