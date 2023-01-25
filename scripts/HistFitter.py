@@ -23,7 +23,7 @@ ROOT.PyConfig.IgnoreCommandLineOptions = True
 ROOT.SetMemoryPolicy( ROOT.kMemoryStrict )
 
 from ROOT import gROOT,gSystem,gDirectory,RooAbsData,RooRandom,RooWorkspace
-ROOT.gSystem.Load(f"{os.getenv('HISTFITTER')}/lib/libSusyFitter.so")
+ROOT.gSystem.Load(f"libSusyFitter.so")
 from ROOT import ConfigMgr
 #gROOT.Reset()
 

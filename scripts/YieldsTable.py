@@ -22,7 +22,7 @@ import pickle
 import ROOT
 ROOT.gROOT.SetBatch(True)
 ROOT.PyConfig.IgnoreCommandLineOptions = True
-ROOT.gSystem.Load(f"{os.getenv('HISTFITTER')}/lib/libSusyFitter.so")
+ROOT.gSystem.Load(f"libSusyFitter.so")
 
 from ROOT import gROOT,gSystem,gDirectory, PyConfig
 gROOT.Reset()
