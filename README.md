@@ -52,7 +52,8 @@ cd build
 cmake -DCMAKE_INSTALL_PREFIX=/path/to/install/ /path/to/histfitter/
 make install
 ```
-Then you have to add the library path manually to access it:
+Then you have to update the library path in the setup script manually to access it:
+
 ```
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/path/to/install/lib/
 ```
