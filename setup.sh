@@ -1,5 +1,4 @@
 #!/bin/bash
-# setup ROOT
 # check Root environment setup. Allow for external setup script.
 
 # Update here when tagged
@@ -33,7 +32,7 @@ function validate_ROOT_release {
 
   if [[ "${ROOT_version_major}" -lt "${ROOT_version_minimum_major}" ]]; then
     compatible_ROOT_version=false
-  elif [[ "${ROOT_version_minor}" -lt "${ROOT_version_minimum_minor}" ]]; then
+  elif [ "${ROOT_version_major}" -eq "${ROOT_version_minimum_major}" ] && [ "${ROOT_version_minor}" -lt "${ROOT_version_minimum_minor}" ]; then
     compatible_ROOT_version=false
   fi
   if [[ "${compatible_ROOT_version}" = false ]]; then
@@ -45,17 +44,16 @@ function validate_ROOT_release {
 
 validate_ROOT_release
 
-
+#Check LD_LIBRARY_PATH
 if [ ! "${LD_LIBRARY_PATH}" ]; then
   echo "Warning: so far you haven't setup your ROOT enviroment properly (no LD_LIBRARY_PATH)"
   return
 fi
 
-
 # setup HistFitter package
 if [ -z "${ZSH_NAME}" ] && [ "$(dirname "${BASH_ARGV[0]}")" == "." ]; then
   if [ ! -f setup.sh ]; then
-    echo ERROR: must "cd where/HistFitter/is" before calling "source setup.sh" for this version of bash!
+    echo "ERROR: must cd where/HistFitter/is before calling source setup.sh for this version of bash!"
     HF=; export HF
     return 1
   fi
@@ -64,24 +62,23 @@ else
   # get param to "."
   scriptname=${BASH_SOURCE:-$0}
   DIR=$( cd "$( dirname "${scriptname}" )" && pwd )
-  #thishistfitter=$(dirname ${BASH_ARGV[0]})
   HF=${DIR}; export HF
 fi
 HISTFITTER=$HF; export HISTFITTER
 
+#Export version number
 HISTFITTER_VERSION=$VERSION
 export HISTFITTER_VERSION
 
 echo "Setting \$HISTFITTER to ${HISTFITTER}"
 
-# put root & python stuff into PATH, LD_LIBRARY_PATH
+# update paths
 export ROOT_INCLUDE_PATH="${ROOT_INCLUDE_PATH}:$HISTFITTER/src"
 export PATH="${PATH}:$HISTFITTER/bin:$HISTFITTER/scripts"
 export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:$HISTFITTER/lib"
 # PYTHONPATH contains all directories that are used for 'import bla' commands
 # Must prepend so as to catch python/cmdLineUtils.py before ROOT installation's
 export PYTHONPATH="$HISTFITTER/python:$HISTFITTER/scripts:${PYTHONPATH}"
-export ROOT_INCLUDE_PATH=$HISTFITTER/include:${ROOT_INCLUDE_PATH}
 
 # Hack for ssh from mac
 export LC_ALL=C
