@@ -340,7 +340,7 @@ def latexfitresults(filename,regionList,sampleList,dataname='obsData',showSum=Fa
   
   log.info("starting BEFORE-FIT calculations")
   """
-  FROM HERE ON OUT WE CALCULATE THE EXPECTED NUMBER OF EVENTS __BEFORRE__ THE FIT
+  FROM HERE ON OUT WE CALCULATE THE EXPECTED NUMBER OF EVENTS __BEFORE__ THE FIT
   """
 
   """
