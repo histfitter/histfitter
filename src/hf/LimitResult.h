@@ -15,13 +15,20 @@
  * LICENSE.                                                                       *
  **********************************************************************************/
 
-#ifndef LIMITRESULT_H
-#define LIMITRESULT_H
+#ifndef HF_LIMITRESULT_H
+#define HF_LIMITRESULT_H
 
+// STL include(s)
 #include <iostream>
 #include <map>
+
+// HistFitter include(s)
 #include "json.h"
+
+// ROOT include(s)
 #include "TString.h"
+
+namespace hf{
 
 class LimitResult {
     private:
@@ -149,4 +156,6 @@ class LimitResult {
         void AddMetaData(const std::string&, float);
 };
 
-#endif
+}  // namespace hf
+
+#endif  // HF_LIMITRESULT_H

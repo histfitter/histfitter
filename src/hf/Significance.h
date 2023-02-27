@@ -16,14 +16,19 @@
  * See corresponding .h file for author and license information                   *
  **********************************************************************************/
 
-#ifndef SIGNIFICANCE_H
-#define SIGNIFICANCE_H
+#ifndef HF_SIGNIFICANCE_H
+#define HF_SIGNIFICANCE_H
 
-#include "TString.h"
+// STL include(s)
 #include <vector>
+
+// ROOT include(s)
+#include "TString.h"
 
 class RooWorkspace;
 class RooDataSet;
+
+namespace hf{
 
 namespace StatTools
 {
@@ -47,5 +52,7 @@ namespace StatTools
             Double_t signalu=100 ) ;
 }
 
-#endif
+}  // namespace hf
+
+#endif  // HF_SIGNIFICANCE_H
 

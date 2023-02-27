@@ -1,23 +1,27 @@
 // vim: ts=4 sw=4
-#ifndef HISTOGRAMPLOTTER_H
-#define HISTOGRAMPLOTTER_H
+#ifndef HF_HISTOGRAMPLOTTER_H
+#define HF_HISTOGRAMPLOTTER_H
 
+// STL include(s)
 #include <iostream>
 #include <map>
 #include <vector>
 #include <string>
+#include <stdexcept>
+
+// ROOT include(s)
 #include "TString.h"
 #include "TGraphAsymmErrors.h"
 #include "TArrow.h"
-
-#include <stdexcept>
-
 #include "RooFitResult.h"
 #include "RooArgSet.h"
 #include "RooArgList.h"
-#include "RooExpandedFitResult.h"
-#include "ChannelStyle.h"
 #include "RooBinning.h"
+
+// HistFitter include(s)
+#include "src/root/RooExpandedFitResult.h"
+#include "ChannelStyle.h"
+#include "FitConfig.h"
 
 class TH1D;
 class TMap;
@@ -33,7 +37,6 @@ class RooSimultaneous;
 class RooCategory;
 class RooPlot;
 class RooMCStudy;
-class FitConfig;
 class RooProdPdf;
 class RooHist;
 class RooCurve;
@@ -44,12 +47,16 @@ namespace RooStats {
     class ModelConfig;
 }
 
+namespace hf{
+
+class FitConfig;
+
 // A class to write a lot of PDFs
 class HistogramPlotter {
     public:
 
         HistogramPlotter(RooWorkspace *w, const TString& fitConfigName = "Example3b");
-        HistogramPlotter(RooWorkspace* w, FitConfig* fc);
+        HistogramPlotter(RooWorkspace* w, hf::FitConfig* fc);
         ~HistogramPlotter();
 
         void setAnalysisName(const TString& anaName);
@@ -69,7 +76,7 @@ class HistogramPlotter {
     private:
         RooWorkspace* m_workspace;
 
-        FitConfig* m_fitConfig;
+        hf::FitConfig* m_fitConfig;
         TString m_anaName;
 
         bool m_plotSeparateComponents;
@@ -92,7 +99,7 @@ class HistogramPlotter {
 
 class HistogramPlot {
     public:
-        HistogramPlot(RooWorkspace *w, const TString& r, RooAbsPdf *regionPdf, RooDataSet *regionData, const ChannelStyle &style);
+        HistogramPlot(RooWorkspace *w, const TString& r, RooAbsPdf *regionPdf, RooDataSet *regionData, const hf::ChannelStyle &style);
         void plot();
 
         void saveHistograms();
@@ -126,7 +133,7 @@ class HistogramPlot {
         RooWorkspace* m_workspace;
         RooAbsPdf* m_regionPdf;
         RooDataSet* m_regionData;
-        ChannelStyle m_style;
+        hf::ChannelStyle m_style;
 
         RooFitResult* m_fitResult;
 
@@ -158,4 +165,6 @@ class HistogramPlot {
 
 };
 
-#endif
+}  // namespace hf
+
+#endif  // HF_HISTOGRAMPLOTTER_H

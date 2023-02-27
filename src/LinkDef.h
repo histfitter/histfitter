@@ -6,21 +6,22 @@
 
 #pragma link C++ nestedclass;
 
-#pragma link C++ class ConfigMgr+;
-#pragma link C++ class FitConfig+;
-#pragma link C++ class RooExpandedFitResult+;
-#pragma link C++ class XtraValues+;
-#pragma link C++ class TMsgLogger+;
+#pragma link C++ namespace hf;
+#pragma link C++ class hf::ConfigMgr+;
+#pragma link C++ class hf::FitConfig+;
+#pragma link C++ class hf::RooExpandedFitResult+;
+#pragma link C++ class hf::XtraValues+;
+#pragma link C++ class hf::TMsgLogger+;
 
-#pragma link C++ namespace Util+;
-#pragma link C++ function Util::GetToyMC+;
+#pragma link C++ namespace hf::Util+;
+#pragma link C++ function hf::Util::GetToyMC+;
 
-#pragma link C++ namespace ValidationUtils+;
-#pragma link C++ function ValidationUtils::PullPlot3+;
+#pragma link C++ namespace hf::ValidationUtils+;
+#pragma link C++ function hf::ValidationUtils::PullPlot3+;
 
-#pragma link C++ class ChannelStyle+;
-#pragma link C++ class std::vector<ChannelStyle>+;
-#pragma link C++ class vector<ChannelStyle>::iterator+;
+#pragma link C++ class hf::ChannelStyle+;
+#pragma link C++ class std::vector<hf::ChannelStyle>+;
+#pragma link C++ class vector<hf::ChannelStyle>::iterator+;
 
 //////////////////////////////////////
 /// Functions from combination package
@@ -45,18 +46,18 @@
 #pragma link C++ defined_in "CombineWorkSpaces.h";
 
 //TEasyFormula.cxx
-#pragma link C++ class TEasyFormula ;
+#pragma link C++ class hf::TEasyFormula ;
 
 //TMsgLogger.cxx
-#pragma link C++ class TMsgLogger;
+#pragma link C++ class hf::TMsgLogger;
 
 //toy_utils.cxx
-#pragma link C++ function get_Pvalue;
-#pragma link C++ function CollectLimitResults;
-#pragma link C++ function WriteResultSet;
-#pragma link C++ function CollectAndWriteResultSet;
-#pragma link C++ function CollectAndWriteHypoTestResults;
-#pragma link C++ function CollectHypoTestResults;
+#pragma link C++ function hf::get_Pvalue;
+#pragma link C++ function hf::CollectLimitResults;
+#pragma link C++ function hf::WriteResultSet;
+#pragma link C++ function hf::CollectAndWriteResultSet;
+#pragma link C++ function hf::CollectAndWriteHypoTestResults;
+#pragma link C++ function hf::CollectHypoTestResults;
 
 #pragma link C++ namespace StatTools;
 #pragma link C++ function StatTools::GetProbFromSigma;
@@ -75,10 +76,10 @@
 #pragma link C++ class JSONException;
 
 //DrawUtils.cxx
-#pragma link C++ namespace DrawUtil;
-#pragma link C++ function DrawUtil::triwsmooth;
-#pragma link C++ function DrawUtil::makesignificancehistos;
-#pragma link C++ function DrawUtil::linearsmooth;
+#pragma link C++ namespace hf::DrawUtil;
+#pragma link C++ function hf::DrawUtil::triwsmooth;
+#pragma link C++ function hf::DrawUtil::makesignificancehistos;
+#pragma link C++ function hf::DrawUtil::linearsmooth;
 
 //StatTools.cxx
 #pragma link C++ namespace RooStats;
@@ -93,7 +94,7 @@
 //HypoTestTool.cxx
 #pragma link C++ class RooStats::HypoTestTool;
 
-#pragma link C++ class LimitResult;
+#pragma link C++ class hf::LimitResult;
 
 #endif
 

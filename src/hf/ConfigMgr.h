@@ -18,21 +18,25 @@
  * LICENSE.                                                                       *
  **********************************************************************************/
 
-#ifndef CONFIGMGR_H
-#define CONFIGMGR_H
+#ifndef HF_CONFIGMGR_H
+#define HF_CONFIGMGR_H
 
+// STL include(s):
 #include <iostream>
 #include <vector>
 #include <string>
+
+// ROOT include(s)
 #include "TString.h"
-
-#include "FitConfig.h"
-
-//Root/RooFit/RooStats includes
 #include "RooStats/HypoTestInverterResult.h"
+
+// HistFitter include(s)
+#include "FitConfig.h"
 
 class RooWorkspace;
 
+namespace hf{
+    
 class ConfigMgr {
     private:
         ConfigMgr();
@@ -61,13 +65,13 @@ class ConfigMgr {
         void runToysAll();
 
         void fit(int i);
-        void fit(FitConfig* fc);
+        void fit(hf::FitConfig* fc);
         void doHypoTest(int i, TString outdir="results/", double nsigma=0., Bool_t doUL=true);
-        void doHypoTest(FitConfig* fc, TString outdir="results/", double nsigma=0., Bool_t doUL=true);
+        void doHypoTest(hf::FitConfig* fc, TString outdir="results/", double nsigma=0., Bool_t doUL=true);
         void doUpperLimit(int i);
-        void doUpperLimit(FitConfig* fc);
+        void doUpperLimit(hf::FitConfig* fc);
         void runToys(int i);
-        void runToys(FitConfig* fc);
+        void runToys(hf::FitConfig* fc);
         
         //functions to allow the rescan for -l
         double min_CLs(RooStats::HypoTestInverterResult* hypo);
@@ -77,8 +81,8 @@ class ConfigMgr {
         void finalize();
         Bool_t checkConsistency();
 
-        FitConfig* addFitConfig(const TString& name);
-        FitConfig* getFitConfig(const TString& name);
+        hf::FitConfig* addFitConfig(const TString& name);
+        hf::FitConfig* getFitConfig(const TString& name);
 
         TString makeCorrectedBkgModelConfig(RooWorkspace* w, const char* modelSBName="ModelConfig");
 
@@ -162,7 +166,7 @@ class ConfigMgr {
 
         TString m_status;
         TString m_outputFileName;
-        std::vector<FitConfig*> m_fitConfigs;
+        std::vector<hf::FitConfig*> m_fitConfigs;
         int  m_seed;
         bool m_useAsimovSet;
         bool m_generateAsimovDataForObserved;
@@ -198,4 +202,6 @@ class ConfigMgr {
         static ConfigMgr *_singleton;
 };
 
-#endif
+}  // namespace hf
+
+#endif  // HF_CONFIGMGR_H

@@ -11,10 +11,12 @@
  *                                                                                *
  **********************************************************************************/
 
+// STL include(s)
 #include <iostream>
 #include <sstream>
 #include <iomanip>
 
+// HistFitter include(s)
 #include "LimitResult.h"
 #include "Significance.h"
 
@@ -25,13 +27,13 @@ template <typename T> std::string to_string_scientific(const T& t) {
 } 
 
 //_____________________________________________________________________________
-LimitResult::~LimitResult()
+hf::LimitResult::~LimitResult()
 {
 }
 
 
 //_____________________________________________________________________________
-LimitResult::LimitResult(const std::string &name, const std::string &title) :
+hf::LimitResult::LimitResult(const std::string &name, const std::string &title) :
     m_p0(-1),
     m_p1(-1),
     m_CLs(-1),
@@ -67,17 +69,17 @@ LimitResult::LimitResult(const std::string &name, const std::string &title) :
 
 
 //_____________________________________________________________________________
-void LimitResult::Summary() {
+void hf::LimitResult::Summary() {
     std::cout << " Printing data for object: " << this << std::endl ;
-    std::cout << " | p0:               "<<    GetP0() << "      sigma: " << StatTools::GetSigma(   GetP0())<<std::endl ;
-    std::cout << " | p1:               "<<    GetP1() << "      sigma: " << StatTools::GetSigma(   GetP1())<<std::endl ;
+    std::cout << " | p0:               "<<    GetP0() << "      sigma: " << hf::StatTools::GetSigma(   GetP0())<<std::endl ;
+    std::cout << " | p1:               "<<    GetP1() << "      sigma: " << hf::StatTools::GetSigma(   GetP1())<<std::endl ;
 
-    std::cout << " | CLs:               "<<    GetCLs() << "      sigma: " << StatTools::GetSigma(   GetCLs())<<std::endl ;
-    std::cout << " | CLsexp:            "<<    GetCLsexp() << "      sigma: " << StatTools::GetSigma(   GetCLsexp())<<std::endl ;
-    std::cout << " | CLsu1S (+1s)       "<< GetCLsu1S() << "      sigma: " << StatTools::GetSigma(GetCLsu1S())<<std::endl ;
-    std::cout << " | CLsd1S (-1s)       "<< GetCLsd1S() << "      sigma: " << StatTools::GetSigma(GetCLsd1S())<<std::endl ;
-    std::cout << " | CLsu2S (+2s)       "<< GetCLsu2S() << "      sigma: " << StatTools::GetSigma(GetCLsu2S())<<std::endl ;
-    std::cout << " | CLsd2S (-2s)       "<< GetCLsd2S() << "      sigma: " << StatTools::GetSigma(GetCLsd2S())<<std::endl ;
+    std::cout << " | CLs:               "<<    GetCLs() << "      sigma: " << hf::StatTools::GetSigma(   GetCLs())<<std::endl ;
+    std::cout << " | CLsexp:            "<<    GetCLsexp() << "      sigma: " << hf::StatTools::GetSigma(   GetCLsexp())<<std::endl ;
+    std::cout << " | CLsu1S (+1s)       "<< GetCLsu1S() << "      sigma: " << hf::StatTools::GetSigma(GetCLsu1S())<<std::endl ;
+    std::cout << " | CLsd1S (-1s)       "<< GetCLsd1S() << "      sigma: " << hf::StatTools::GetSigma(GetCLsd1S())<<std::endl ;
+    std::cout << " | CLsu2S (+2s)       "<< GetCLsu2S() << "      sigma: " << hf::StatTools::GetSigma(GetCLsu2S())<<std::endl ;
+    std::cout << " | CLsd2S (-2s)       "<< GetCLsd2S() << "      sigma: " << hf::StatTools::GetSigma(GetCLsd2S())<<std::endl ;
 
     std::cout << " | Sigma0:   "<<       GetSigma0() << std::endl;
     std::cout << " | Sigma1:   "<<       GetSigma1() << std::endl;
@@ -107,7 +109,7 @@ void LimitResult::Summary() {
 
 
 //_____________________________________________________________________________
-std::string  LimitResult::GetSummaryString() const {
+std::string  hf::LimitResult::GetSummaryString() const {
     std::string summary;
     summary += Form(" %e %e %e",GetP0(),GetP1(),GetCLs());
     summary += Form(" %d %d",GetMode(),GetNExp());
@@ -128,7 +130,7 @@ std::string  LimitResult::GetSummaryString() const {
     return summary;
 }
 
-std::vector<std::string> LimitResult::GetKeys() const {
+std::vector<std::string> hf::LimitResult::GetKeys() const {
     std::vector<std::string> retval;
     for(const auto &itr : GetData() ){
         retval.push_back(itr.first);
@@ -137,7 +139,7 @@ std::vector<std::string> LimitResult::GetKeys() const {
     return retval;
 }
 
-std::map<std::string, float> LimitResult::GetData() const {
+std::map<std::string, float> hf::LimitResult::GetData() const {
     std::map<std::string, float> summary;
     summary["p0"] = GetP0(); 
     summary["p1"] = GetP1();
@@ -183,7 +185,7 @@ std::map<std::string, float> LimitResult::GetData() const {
 
 }
 
-JSON LimitResult::GetJSONData() const {
+JSON hf::LimitResult::GetJSONData() const {
     JSON summary = JSON::Object();
    
     for(const auto &itr : GetData()){
@@ -193,7 +195,7 @@ JSON LimitResult::GetJSONData() const {
 }
 
 //_____________________________________________________________________________
-std::string LimitResult::GetDescriptionString() const {
+std::string hf::LimitResult::GetDescriptionString() const {
     std::ostringstream description;
     description << "p0:p1:CLs:"; //3
     description << "mode:nexp:";  //2
@@ -217,7 +219,7 @@ std::string LimitResult::GetDescriptionString() const {
 
 
 //_____________________________________________________________________________
-void LimitResult::AddMetaData(const std::map<std::string,float>& metadata) {
+void hf::LimitResult::AddMetaData(const std::map<std::string,float>& metadata) {
     //std::map<std::string,float>::const_iterator itr=metadata.begin(), end=metadata.end();
     //for (; itr!=end; ++itr) { m_metadata[itr->first]=itr->second; }
     for(const auto &kv : metadata){
@@ -225,7 +227,7 @@ void LimitResult::AddMetaData(const std::map<std::string,float>& metadata) {
     }
 }
 
-void LimitResult::AddMetaData(const std::string& s, float val){
+void hf::LimitResult::AddMetaData(const std::string& s, float val){
     m_metadata[s] = val;
 }
 

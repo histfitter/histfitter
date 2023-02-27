@@ -13,22 +13,25 @@
  * See corresponding .h file for author and license information                   *
  **********************************************************************************/
 
-#include "DrawUtils.h"
-#include "TMsgLogger.h"
-
+// STL include(s)
 #include <iostream>
+
+// ROOT include(s)
 #include "TH2D.h"
 #include "TTree.h"
 #include "TBranch.h"
 #include "TGraph2D.h"
 #include "TString.h"
 
+// HistFitter include(s)
+#include "DrawUtils.h"
+#include "TMsgLogger.h"
+
 using namespace std;
 
-
-namespace DrawUtil
+namespace hf::DrawUtil
 {
-    static TMsgLogger DrawUtilLogger("DrawUtil");
+    static hf::TMsgLogger DrawUtilLogger("DrawUtil");
 
 //________________________________________________________________________________________________
     TH2D* triwsmooth( TTree* tree, const char* varstr, const char* name, const char* title, const char* cutstr, TH2D* inputHist) {
@@ -171,4 +174,4 @@ namespace DrawUtil
         return hist2; // caller owns histogram
     }
 
-}
+}  // namespace hf::DrawUtil

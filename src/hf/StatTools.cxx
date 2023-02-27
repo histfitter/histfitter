@@ -1,11 +1,10 @@
 // vim: ts=4:sw=4
-#include "StatTools.h"
-#include "Utils.h"
-#include "CombineWorkSpaces.h"
-#include "TMsgLogger.h"
 
-#include "HypoTestTool.h"
+// STL include(s)
+#include <iostream>
+#include <fstream>
 
+// ROOT include(s)
 #include "RooArgSet.h"
 #include "TIterator.h"
 #include "RooAbsReal.h"
@@ -17,7 +16,6 @@
 #include "RooSimultaneous.h"
 #include "RooProdPdf.h"
 #include "RooDataSet.h"
-#include "RooPlot.h"
 #include "RooProduct.h"
 #include "RooMCStudy.h"
 #include "Roo1DTable.h"
@@ -30,7 +28,7 @@
 #include "RooStats/ProfileLikelihoodCalculator.h"
 #include "RooStats/LikelihoodInterval.h"
 #include "RooStats/ToyMCSampler.h"
-#include "RooStats/SamplingDistPlot.h"
+//#include "RooStats/SamplingDistPlot.h"
 #include "RooStats/HypoTestInverterResult.h"
 #include "RooStats/HypoTestResult.h"
 
@@ -49,14 +47,29 @@
 #include "TLegend.h"
 #include "TLegendEntry.h"
 
-#include <iostream>
-#include <fstream>
+
+// HistFitter include(s)
+#include "StatTools.h"
+#include "Utils.h"
+#include "CombineWorkSpaces.h"
+#include "TMsgLogger.h"
+#include "HypoTestTool.h"
+//#include "src/root/RooPlot.h"
 
 using namespace std;
 using namespace RooFit;
 using namespace RooStats;
 
-static TMsgLogger StatToolsLogger("StatTools");
+using hf::kVERBOSE;
+using hf::kDEBUG;
+using hf::kINFO;
+using hf::kWARNING;
+using hf::kERROR;
+using hf::kFATAL;
+using hf::kALWAYS;
+
+
+static hf::TMsgLogger StatToolsLogger("StatTools");
 
 //________________________________________________________________________________________________
 // the caller owns the returned dataset.
@@ -67,7 +80,7 @@ TTree* RooStats::toyMC_gen_fit( RooWorkspace* w, const int& nexp, const double& 
         return NULL;
     }
 
-    RooStats::ModelConfig* mc = Util::GetModelConfig(w);
+    RooStats::ModelConfig* mc = hf::Util::GetModelConfig(w);
     if(mc==0){
         StatToolsLogger << kERROR << "ModelConfig is null!" << GEndl;
         return NULL;
@@ -76,7 +89,7 @@ TTree* RooStats::toyMC_gen_fit( RooWorkspace* w, const int& nexp, const double& 
 
     // reset (bkg) parameters to values found in data
     if (doDataFitFirst) {
-        RooFitResult* result = Util::doFreeFit(w,0,false) ;
+        RooFitResult* result = hf::Util::doFreeFit(w,0,false) ;
         delete result;
     }
 
@@ -85,7 +98,7 @@ TTree* RooStats::toyMC_gen_fit( RooWorkspace* w, const int& nexp, const double& 
     RooMsgService::instance().setGlobalKillBelow(StatToolsLogger.GetRooFitMsgLevel()); 
 
     // to avoid effects from boundary and simplify asymptotic comparison, set min=-max
-    RooRealVar* poi = Util::GetPOI(w);
+    RooRealVar* poi = hf::Util::GetPOI(w);
     Bool_t allowNegativeMu=kTRUE;
     if (allowNegativeMu && (muVal>=0)) poi->setMin(-1*poi->getMax());
 
@@ -93,7 +106,7 @@ TTree* RooStats::toyMC_gen_fit( RooWorkspace* w, const int& nexp, const double& 
     if (poi!=0 && muVal>=0) { poi->setVal(muVal); }
 
     // setup roomcstudy. This is only used for storage of PE fit results.
-    RooMCStudy* mcstudy = Util::GetMCStudy(w); 
+    RooMCStudy* mcstudy = hf::Util::GetMCStudy(w); 
 
     ///////////////////////////////////////////////////////////////////////////////////
     // Now setup the toy mc sampler. This provides the datasets to be fitted.
@@ -431,7 +444,7 @@ RooStats::HypoTestInverterResult* RooStats::DoHypoTestInversionAutoScan(RooWorks
     HypoTestInverterResult* r = 0; 
     
     // Initial estimate of poi value to test
-    RooFitResult* result = Util::doFreeFit(w,0,false) ;
+    RooFitResult* result = hf::Util::doFreeFit(w,0,false) ;
     delete result;
 
     ModelConfig* sbModel = (ModelConfig*) w->obj(modelSBName);
@@ -727,7 +740,7 @@ void RooStats::AnalyzeHypoTestInverterResult(const char* infile ,
         return; 
     }
 
-    return RooStats::AnalyzeHypoTestInverterResult( r, calculatorType, testStatType, useCLs, npoints, outfilePrefix, plotType );
+    return AnalyzeHypoTestInverterResult( r, calculatorType, testStatType, useCLs, npoints, outfilePrefix, plotType );
 }
 
 
@@ -784,7 +797,7 @@ RooStats::HypoTestInverterResult* RooStats::MakeUpperLimitPlot(const char* filep
         int npoints ) {
     /// first asumptotic limit, to get a quick but reliable estimate for the upper limit
     /// dynamic evaluation of ranges
-    RooStats::HypoTestInverterResult* hypo = RooStats::DoHypoTestInversion(w, 1, 2, testStatType, useCLs, 20, 0, -1);  
+    RooStats::HypoTestInverterResult* hypo = DoHypoTestInversion(w, 1, 2, testStatType, useCLs, 20, 0, -1);  
     int nPointsRemoved = hypo->ExclusionCleanup();
     if(nPointsRemoved > 0) {
         StatToolsLogger << kWARNING << "MakeUpperLimitPlot(): ExclusionCleanup() removed " << nPointsRemoved << " scan point(s) for hypo test inversion (quick scan): " << hypo->GetName() << GEndl;
@@ -795,7 +808,7 @@ RooStats::HypoTestInverterResult* RooStats::MakeUpperLimitPlot(const char* filep
         double eul2 = 1.10 * hypo->GetExpectedUpperLimit(2);
         delete hypo; hypo=0;
         //cout << "INFO grepme : nToys=" << ntoys << " calcType=" << calculatorType << " testStatType=" << testStatType << " useCLs=" << useCLs << " nPoints=" << npoints << " eul2=" << eul2 << std::endl;
-        hypo = RooStats::DoHypoTestInversion(w, ntoys, calculatorType, testStatType, useCLs, npoints, 0, eul2); 
+        hypo = DoHypoTestInversion(w, ntoys, calculatorType, testStatType, useCLs, npoints, 0, eul2); 
     }
 
     /// store ul as nice plot ..
@@ -806,14 +819,14 @@ RooStats::HypoTestInverterResult* RooStats::MakeUpperLimitPlot(const char* filep
             StatToolsLogger << kWARNING << "MakeUpperLimitPlot(): ExclusionCleanup() removed " << nPointsRemoved << " scan point(s) for hypo test inversion: " << hypo->GetName() << GEndl;
         }
 
-        RooStats::AnalyzeHypoTestInverterResult( hypo, calculatorType, testStatType, useCLs, npoints, fileprefix, ".eps") ;
+        AnalyzeHypoTestInverterResult( hypo, calculatorType, testStatType, useCLs, npoints, fileprefix, ".eps") ;
     }
 
     return hypo;
 }
 
 //________________________________________________________________________________________________
-LimitResult RooStats::get_Pvalue(const RooStats::HypoTestInverterResult* fResults, bool doUL ) {
+hf::LimitResult RooStats::get_Pvalue(const RooStats::HypoTestInverterResult* fResults, bool doUL ) {
     // MB : code taken from HypoTestInverterPlot::MakeExpectedPlot()
 
     const int nEntries = fResults->ArraySize();
@@ -844,7 +857,7 @@ LimitResult RooStats::get_Pvalue(const RooStats::HypoTestInverterResult* fResult
     std::vector<double> qv;
     qv.resize(11,-1.0);
 
-    LimitResult upperLimitResult;
+    hf::LimitResult upperLimitResult;
 
     if (nEntries>1 and doUL){ // clearly an upper limit result
 
@@ -885,7 +898,7 @@ LimitResult RooStats::get_Pvalue(const RooStats::HypoTestInverterResult* fResult
     p[4] = ROOT::Math::normal_cdf(nsig2);
 
     bool resultIsAsymptotic = ( !fResults->GetNullTestStatDist(0) && !fResults->GetAltTestStatDist(0) ); 
-    LimitResult dummyResult;
+    hf::LimitResult dummyResult;
     dummyResult.SetP0( -1 );
     dummyResult.SetP1( -1 );
     dummyResult.SetCLs( -1 );
@@ -989,7 +1002,7 @@ LimitResult RooStats::get_Pvalue(const RooStats::HypoTestInverterResult* fResult
     qv[10] = fResults->CLsplusbError(0) ; //
 
     /// And pass on to limitresult object
-    LimitResult result;
+    hf::LimitResult result;
     result.SetP0(     p0 );
     result.SetP1(     qv[9] );
     result.SetCLs(    qv[5] );
@@ -1011,7 +1024,7 @@ LimitResult RooStats::get_Pvalue(const RooStats::HypoTestInverterResult* fResult
 }
 
 //________________________________________________________________________________________________
-LimitResult RooStats::get_Pvalue(     RooWorkspace* w,
+hf::LimitResult RooStats::get_Pvalue(     RooWorkspace* w,
         bool doUL, // = true, // true = exclusion, false = discovery
         int ntoys, //=1000,
         int calculatorType, // = 0,
@@ -1023,12 +1036,12 @@ LimitResult RooStats::get_Pvalue(     RooWorkspace* w,
         bool useNumberCounting, // = false,
         const char * nuisPriorName) // = 0  
 {
-    LimitResult lres;
+    hf::LimitResult lres;
 
     double muVal = ( doUL ? 1.0 : 0.0 );
 
     if (doUL) { // exclusion
-        RooStats::HypoTestInverterResult* result = RooStats::DoHypoTestInversion(w, 
+        RooStats::HypoTestInverterResult* result = DoHypoTestInversion(w, 
                 ntoys, calculatorType, testStatType, 
                 useCLs, 
                 1, muVal, muVal, // test of single point only
@@ -1050,7 +1063,7 @@ LimitResult RooStats::get_Pvalue(     RooWorkspace* w,
             } 
         }
 
-        RooStats::HypoTestResult* result = RooStats::DoHypoTest(w,doUL,ntoys,calculatorType,testStatType,modelSBName,modelBName,dataName,
+        RooStats::HypoTestResult* result = DoHypoTest(w,doUL,ntoys,calculatorType,testStatType,modelSBName,modelBName,dataName,
                 useNumberCounting,nuisPriorName);
         if (result == 0) { 
             return lres; 
@@ -1063,7 +1076,7 @@ LimitResult RooStats::get_Pvalue(     RooWorkspace* w,
 }
 
 //________________________________________________________________________________________________
-LimitResult RooStats::get_Pvalue( const RooStats::HypoTestResult* fResult, bool doUL )
+hf::LimitResult RooStats::get_Pvalue( const RooStats::HypoTestResult* fResult, bool doUL )
 {
     RooStats::HypoTestInverterResult* hti = new RooStats::HypoTestInverterResult();
     if (doUL) { // exclusion test
@@ -1170,12 +1183,12 @@ double RooStats::nextTestPOI(std::vector<double> &test_pois, HypoTestInverterRes
 
             // Get expected CLs
             double q[7];
-            Util::getExpectedCLsFromHypoTest(HTIR, lastResult, q);            
+            hf::Util::getExpectedCLsFromHypoTest(HTIR, lastResult, q);            
             //double CLsExp = q[2]; // technically not needed since we require down to cross
             //double CLsExpUp = q[1]; // technically not needed since we require down to cross
             double CLsExpDw = q[3];
 
-            Util::getExpectedCLsFromHypoTest(HTIR, lastResult-1, q);
+            hf::Util::getExpectedCLsFromHypoTest(HTIR, lastResult-1, q);
             //double CLsExp_Last = q[2];
             //double CLsExpUp_Last = q[1];
             double CLsExpDw_Last = q[3];            
@@ -1236,7 +1249,7 @@ double RooStats::nextTestPOI(std::vector<double> &test_pois, HypoTestInverterRes
 
                 // Get expected CLs
                 double q[7];
-                Util::getExpectedCLsFromHypoTest(HTIR, i, q);            
+                hf::Util::getExpectedCLsFromHypoTest(HTIR, i, q);            
                 //double CLsExp = q[2];
                 double CLsExpUp = q[1];
                 //double CLsExpDw = q[3];

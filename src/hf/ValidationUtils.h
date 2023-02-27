@@ -14,8 +14,8 @@
  * LICENSE.                                                                       *
  **********************************************************************************/
 
-#ifndef VALIDATIONUTILS_H
-#define VALIDATIONUTILS_H
+#ifndef HF_VALIDATIONUTILS_H
+#define HF_VALIDATIONUTILS_H
 
 //Combination/trunk/Tools/CombinationGlob.h
 #include "TCanvas.h"
@@ -38,6 +38,8 @@ using std::endl;
 
 #include "XtraValues.h"
 
+namespace hf{
+  
 namespace ValidationUtils
 {
   void Horizontal( TH1 *h, Int_t nbin, Bool_t kLINE, Int_t color, float yWidthScaleUp=0.12, float yWidthScaleDown=0.12  );
@@ -58,4 +60,6 @@ namespace ValidationUtils
 
 }
 
-#endif
+}  // namespace hf
+
+#endif  // HF_VALIDATIONUTILS_H

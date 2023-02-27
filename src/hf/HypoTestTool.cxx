@@ -21,41 +21,50 @@
  * (http://root.cern.ch/drupal/content/license)                                   *
  **********************************************************************************/
 
+// HistFitter include(s)
 #include "HypoTestTool.h"
 #include "TMsgLogger.h"
 
+// ROOT include(s)
 #include "TSystem.h"
 #include "TFile.h"
-#include "RooWorkspace.h"
-#include "RooAbsPdf.h"
-#include "RooRealVar.h"
-#include "RooDataSet.h"
-#include "RooStats/ModelConfig.h"
-#include "RooRandom.h"
 #include "TGraphErrors.h"
 #include "TGraphAsymmErrors.h"
 #include "TCanvas.h"
 #include "TLine.h"
 #include "TROOT.h"
 
+#include "RooWorkspace.h"
+#include "RooAbsPdf.h"
+#include "RooRealVar.h"
+#include "RooDataSet.h"
+#include "RooRandom.h"
+
+#include "RooStats/ModelConfig.h"
 #include "RooStats/AsymptoticCalculator.h"
 #include "RooStats/HybridCalculator.h"
 #include "RooStats/FrequentistCalculator.h"
 #include "RooStats/ToyMCSampler.h"
 #include "RooStats/HypoTestPlot.h"
-
 #include "RooStats/NumEventsTestStat.h"
 #include "RooStats/ProfileLikelihoodTestStat.h"
 #include "RooStats/SimpleLikelihoodRatioTestStat.h"
 #include "RooStats/RatioOfProfiledLikelihoodsTestStat.h"
 #include "RooStats/MaxLikelihoodEstimateTestStat.h"
-
 #include "RooStats/HypoTestInverterResult.h"
 #include "RooStats/HypoTestResult.h"
 #include "RooStats/HypoTestInverterPlot.h"
 
 using namespace RooFit;
 using namespace RooStats;
+using hf::kVERBOSE;
+using hf::kDEBUG;
+using hf::kINFO;
+using hf::kWARNING;
+using hf::kERROR;
+using hf::kFATAL;
+using hf::kALWAYS;
+
 
 /* Options:
  *  bool plotHypoTestResult = true;          // plot test statistic result at each point
@@ -191,7 +200,7 @@ RooStats::HypoTestTool::SetParameter(const char * name, const char * value){
 
 //_______________________________________________________________________________________
 void
-RooStats::HypoTestTool::AnalyzeResult( HypoTestInverterResult * r,
+RooStats::HypoTestTool::AnalyzeResult( RooStats::HypoTestInverterResult * r,
         int calculatorType,
         int testStatType, 
         bool useCLs,  
@@ -297,7 +306,7 @@ RooStats::HypoTestTool::AnalyzeResult( HypoTestInverterResult * r,
 /* internal routine to run the inverter
  * The inverter assumes to exclude the signal model
  */
-HypoTestInverterResult *
+RooStats::HypoTestInverterResult *
 RooStats::HypoTestTool::RunHypoTestInverter(RooWorkspace * w,
         const char * modelSBName, const char * modelBName, 
         const char * dataName, int type,  int testStatType, 
@@ -316,7 +325,7 @@ RooStats::HypoTestTool::RunHypoTestInverter(RooWorkspace * w,
     /// by now m_calc has been setup okay ...
     TStopwatch tw; 
     tw.Start();
-    HypoTestInverterResult * r = m_calc->GetInterval();
+    RooStats::HypoTestInverterResult * r = m_calc->GetInterval();
 
     m_logger << kINFO << "Time to perform limit scan \n";
     tw.Print();
@@ -351,7 +360,7 @@ RooStats::HypoTestTool::RunHypoTestInverter(RooWorkspace * w,
 
 //_______________________________________________________________________________________
 /// internal routine to run the hypothesis test
-HypoTestResult*
+RooStats::HypoTestResult*
 RooStats::HypoTestTool::RunHypoTest(RooWorkspace * w, bool doUL,
         const char * modelSBName, const char * modelBName, 
         const char * dataName, int type, int testStatType, 
@@ -371,7 +380,7 @@ RooStats::HypoTestTool::RunHypoTest(RooWorkspace * w, bool doUL,
 
     TStopwatch tw; 
     tw.Start();
-    HypoTestResult * r = m_hc->GetHypoTest();
+    RooStats::HypoTestResult * r = m_hc->GetHypoTest();
     tw.Print();
 
     m_logger << kINFO << ">>> Done running HypoTestCalculator on the workspace " << w->GetName() << GEndl;
@@ -900,6 +909,3 @@ RooStats::HypoTestTool::SetupHypoTestInverter(RooWorkspace * w,
 
     return true;
 }
-
-
-

@@ -16,29 +16,26 @@
  * LICENSE.                                                                       *
  **********************************************************************************/
 
-//SusyFitter includes
-#include "TMsgLogger.h"
-#include "ConfigMgr.h"
-#include "Utils.h"
-#include "StatTools.h"
-
-//Root/RooFit/RooStats includes
+// ROOT include(s)
 #include "TSystem.h"
 #include "TFile.h"
 #include "TTree.h"
 #include "RooMCStudy.h"
 #include "RooFitResult.h"
-//#include "RooStats/HypoTestInverterResult.h"
 #include "RooRandom.h"
 #include "RooRealIntegral.h"
 #include "RooRealSumPdf.h"
 
+// HistFitter include(s)
+#include "TMsgLogger.h"
+#include "ConfigMgr.h"
+#include "Utils.h"
+#include "StatTools.h"
 
 using namespace std;
 
-
 //_______________________________________________________________________________________
-ConfigMgr::ConfigMgr() : m_logger("ConfigMgrCPP") { 
+hf::ConfigMgr::ConfigMgr() : m_logger("ConfigMgrCPP") { 
     m_nToys = 1000;
     m_calcType = 0;
     m_testStatType = 3;
@@ -62,7 +59,7 @@ ConfigMgr::ConfigMgr() : m_logger("ConfigMgrCPP") {
     m_plotRatio = "ratio"; //options: "ratio", "pull", "none"
     m_nCPUs = 1;
 
-    Util::deactivateBinnedLikelihood = false;
+    hf::Util::deactivateBinnedLikelihood = false;
 
     m_logger << kDEBUG << "Setting RooStats::UseNLLOffset(true)" << GEndl;
     RooStats::UseNLLOffset(true);
@@ -70,15 +67,15 @@ ConfigMgr::ConfigMgr() : m_logger("ConfigMgrCPP") {
 
 
 //_______________________________________________________________________________________
-FitConfig* ConfigMgr::addFitConfig(const TString& name){
-    FitConfig* fc = new FitConfig(name);
+hf::FitConfig* hf::ConfigMgr::addFitConfig(const TString& name){
+    hf::FitConfig* fc = new FitConfig(name);
     m_fitConfigs.push_back(fc);
     return m_fitConfigs.at(m_fitConfigs.size()-1);
 }
 
 
 //_______________________________________________________________________________________
-FitConfig* ConfigMgr::getFitConfig(const TString& name){
+hf::FitConfig* hf::ConfigMgr::getFitConfig(const TString& name){
     for(unsigned int i=0; i<m_fitConfigs.size(); i++) {
         if(m_fitConfigs.at(i)->m_name==name){
             return m_fitConfigs.at(i);
@@ -90,7 +87,7 @@ FitConfig* ConfigMgr::getFitConfig(const TString& name){
 
 
 //_______________________________________________________________________________________
-Bool_t ConfigMgr::checkConsistency() {
+Bool_t hf::ConfigMgr::checkConsistency() {
     if(m_fitConfigs.size()==0) {
         m_status = "empty";
         return false;
@@ -102,7 +99,7 @@ Bool_t ConfigMgr::checkConsistency() {
 
 
 //_______________________________________________________________________________________
-void ConfigMgr::initialize() {  
+void hf::ConfigMgr::initialize() {  
     if(m_saveTree || m_doHypoTest){
         if(m_outputFileName.Length()>0) {
             TFile fileOut(m_outputFileName,"RECREATE");
@@ -116,7 +113,7 @@ void ConfigMgr::initialize() {
 
 
 //_______________________________________________________________________________________
-void ConfigMgr::fitAll() {
+void hf::ConfigMgr::fitAll() {
     for(unsigned int i=0; i<m_fitConfigs.size(); i++) {
         fit ( m_fitConfigs.at(i) );
     }
@@ -126,13 +123,13 @@ void ConfigMgr::fitAll() {
 
 
 //_______________________________________________________________________________________
-void ConfigMgr::fit(int i) {
+void hf::ConfigMgr::fit(int i) {
     return fit(m_fitConfigs.at(i));
 }
 
 
 //_______________________________________________________________________________________
-void ConfigMgr::fit(FitConfig* fc) {
+void hf::ConfigMgr::fit(hf::FitConfig* fc) {
     TString outfileName = m_outputFileName;
     outfileName.ReplaceAll(".root","_fitresult.root");
     TFile* outfile = TFile::Open(outfileName,"UPDATE");
@@ -153,7 +150,7 @@ void ConfigMgr::fit(FitConfig* fc) {
         return; 
     }
 
-    RooFitResult* fitresult = Util::doFreeFit( w );
+    RooFitResult* fitresult = hf::Util::doFreeFit( w );
 
     if(fitresult) {	
         outfile->cd();
@@ -173,7 +170,7 @@ void ConfigMgr::fit(FitConfig* fc) {
 
 
 //_______________________________________________________________________________________
-void ConfigMgr::doHypoTestAll(TString outdir, Bool_t doUL) {
+void hf::ConfigMgr::doHypoTestAll(TString outdir, Bool_t doUL) {
     for(unsigned int i=0; i<m_fitConfigs.size(); i++) {
         doHypoTest( m_fitConfigs.at(i), outdir, 0., doUL );
         if( m_fixSigXSec && !m_runOnlyNominalXSec && doUL ){
@@ -188,13 +185,13 @@ void ConfigMgr::doHypoTestAll(TString outdir, Bool_t doUL) {
 
 
 //_______________________________________________________________________________________
-void ConfigMgr::doHypoTest(int i , TString outdir, double SigXSecSysnsigma, Bool_t doUL) {
+void hf::ConfigMgr::doHypoTest(int i , TString outdir, double SigXSecSysnsigma, Bool_t doUL) {
     return doHypoTest( m_fitConfigs.at(i), outdir, SigXSecSysnsigma, doUL );
 }
 
 
 //_______________________________________________________________________________________
-void ConfigMgr::doHypoTest(FitConfig* fc, TString outdir, double SigXSecSysnsigma, Bool_t doUL) {
+void hf::ConfigMgr::doHypoTest(hf::FitConfig* fc, TString outdir, double SigXSecSysnsigma, Bool_t doUL) {
     TString outfileName = m_outputFileName;
     TString suffix = "_hypotest.root";
 
@@ -224,7 +221,7 @@ void ConfigMgr::doHypoTest(FitConfig* fc, TString outdir, double SigXSecSysnsigm
     }
 
     // piece-wise linear to 6th order poly interp + linear extrapolation (also used in Higgs group)
-    Util::SetInterpolationCode(w,4); 
+    hf::Util::SetInterpolationCode(w,4); 
 
     m_logger << kINFO << "Processing analysis " << fc->m_signalSampleName << GEndl;
 
@@ -241,9 +238,9 @@ void ConfigMgr::doHypoTest(FitConfig* fc, TString outdir, double SigXSecSysnsigm
     }
 
     // set Errors&values of all parameters to 'natural' values before plotting/fitting
-    Util::resetAllErrors(w);
-    Util::resetAllValues(w);
-    Util::resetAllNominalValues(w);
+    hf::Util::resetAllErrors(w);
+    hf::Util::resetAllValues(w);
+    hf::Util::resetAllNominalValues(w);
 
     bool useCLs = true;  
     int npoints = 1;   
@@ -262,7 +259,7 @@ void ConfigMgr::doHypoTest(FitConfig* fc, TString outdir, double SigXSecSysnsigm
     }
 
     /// 1. Do first fit and save fit result in order to control fit quality
-    RooFitResult* fitresult = Util::doFreeFit( w, 0, false, true ); // reset fit paremeters after the fit ...
+    RooFitResult* fitresult = hf::Util::doFreeFit( w, 0, false, true ); // reset fit paremeters after the fit ...
 
     if(fitresult) {	
         outfile->cd();
@@ -344,7 +341,7 @@ void ConfigMgr::doHypoTest(FitConfig* fc, TString outdir, double SigXSecSysnsigm
 
 
 //_______________________________________________________________________________________
-TString ConfigMgr::makeCorrectedBkgModelConfig( RooWorkspace* w, const char* modelSBName ) {
+TString hf::ConfigMgr::makeCorrectedBkgModelConfig( RooWorkspace* w, const char* modelSBName ) {
     TString bModelStr;
 
     if ( m_bkgCorrValVec.size()!=m_bkgParNameVec.size() || 
@@ -354,7 +351,7 @@ TString ConfigMgr::makeCorrectedBkgModelConfig( RooWorkspace* w, const char* mod
         return bModelStr; 
     }
 
-    RooStats::ModelConfig* sbModel = Util::GetModelConfig( w, modelSBName );
+    RooStats::ModelConfig* sbModel = hf::Util::GetModelConfig( w, modelSBName );
     if (sbModel == NULL) { 
         m_logger << kERROR << "No signal model config found. Return." << GEndl;
         return bModelStr; 
@@ -387,8 +384,8 @@ TString ConfigMgr::makeCorrectedBkgModelConfig( RooWorkspace* w, const char* mod
 
         prevbknorm.push_back( totbk->getVal() );
 
-        RooAbsPdf* bkpdf  = Util::GetRegionPdf( w, m_chnNameVec[i] ); 
-        RooRealVar* bkvar = Util::GetRegionVar( w, m_chnNameVec[i] );
+        RooAbsPdf* bkpdf  = hf::Util::GetRegionPdf( w, m_chnNameVec[i] ); 
+        RooRealVar* bkvar = hf::Util::GetRegionVar( w, m_chnNameVec[i] );
         RooRealIntegral* bkint = (RooRealIntegral *)bkpdf->createIntegral( RooArgSet(*bkvar) );
 
         double oldtotbk = bkint->getVal(); 
@@ -418,7 +415,7 @@ TString ConfigMgr::makeCorrectedBkgModelConfig( RooWorkspace* w, const char* mod
     }
 
     bModelStr = TString(modelSBName)+TString("_with_poi_0");
-    RooStats::ModelConfig* bModel = Util::GetModelConfig( w, bModelStr.Data() );
+    RooStats::ModelConfig* bModel = hf::Util::GetModelConfig( w, bModelStr.Data() );
     if (bModel) { 
         m_logger << kERROR << "Bkg model config already defined. Return." << GEndl; 
         return bModelStr; 
@@ -447,7 +444,7 @@ TString ConfigMgr::makeCorrectedBkgModelConfig( RooWorkspace* w, const char* mod
 
 
 //_______________________________________________________________________________________
-void ConfigMgr::doUpperLimitAll() {
+void hf::ConfigMgr::doUpperLimitAll() {
     for(unsigned int i=0; i<m_fitConfigs.size(); i++) {
         doUpperLimit( m_fitConfigs.at(i) );
     }
@@ -456,13 +453,13 @@ void ConfigMgr::doUpperLimitAll() {
 
 
 //_______________________________________________________________________________________
-void ConfigMgr::doUpperLimit(int i) {
+void hf::ConfigMgr::doUpperLimit(int i) {
     return doUpperLimit(m_fitConfigs.at(i));
 }
 
 
 //_______________________________________________________________________________________
-void ConfigMgr::doUpperLimit(FitConfig* fc) {
+void hf::ConfigMgr::doUpperLimit(hf::FitConfig* fc) {
     TString outfileName = m_outputFileName;
     outfileName.ReplaceAll(".root","_upperlimit.root");
     TFile* outfile = TFile::Open(outfileName,"UPDATE");
@@ -494,12 +491,12 @@ void ConfigMgr::doUpperLimit(FitConfig* fc) {
     // -- GJ 2 jun 2016
 
     // 6th order poly interp + linear extrapolation (also used in Higgs group)
-    Util::SetInterpolationCode(w, 4);
+    hf::Util::SetInterpolationCode(w, 4);
 
     // reset all nominal values
-    Util::resetAllValues(w) ;
-    Util::resetAllErrors(w) ;
-    Util::resetAllNominalValues(w) ;
+    hf::Util::resetAllValues(w) ;
+    hf::Util::resetAllErrors(w) ;
+    hf::Util::resetAllNominalValues(w) ;
 
     // fix x-section uncertainty
     if(m_fixSigXSec && fc->m_signalSampleName != "" && w->var("alpha_SigXSec") != NULL){
@@ -729,9 +726,9 @@ void ConfigMgr::doUpperLimit(FitConfig* fc) {
     /// store ul as nice plot ..
     if ( hypo!=0 ) {
         TString outputPrefix = TString(gSystem->DirName(outfileName))+"/"+fc->m_signalSampleName.Data();
-        RooStats::AnalyzeHypoTestInverterResult( hypo, m_calcType, m_testStatType, m_useCLs, m_nPoints, outputPrefix, ".eps") ;
-        RooStats::AnalyzeHypoTestInverterResult( hypo, m_calcType, m_testStatType, m_useCLs, m_nPoints, outputPrefix, ".pdf") ;
-        RooStats::AnalyzeHypoTestInverterResult( hypo, m_calcType, m_testStatType, m_useCLs, m_nPoints, outputPrefix, ".png") ;
+        AnalyzeHypoTestInverterResult( hypo, m_calcType, m_testStatType, m_useCLs, m_nPoints, outputPrefix, ".eps") ;
+        AnalyzeHypoTestInverterResult( hypo, m_calcType, m_testStatType, m_useCLs, m_nPoints, outputPrefix, ".pdf") ;
+        AnalyzeHypoTestInverterResult( hypo, m_calcType, m_testStatType, m_useCLs, m_nPoints, outputPrefix, ".png") ;
     }
 
     // save complete hypotestinverterresult to file
@@ -775,7 +772,7 @@ void ConfigMgr::doUpperLimit(FitConfig* fc) {
 
 
 //_______________________________________________________________________________________
-void ConfigMgr::runToysAll() {
+void hf::ConfigMgr::runToysAll() {
     for(unsigned int i=1; i<m_fitConfigs.size(); i++) {
         runToys ( m_fitConfigs.at(i) );
     }
@@ -784,13 +781,13 @@ void ConfigMgr::runToysAll() {
 
 
 //_______________________________________________________________________________________
-void ConfigMgr::runToys(int i) {
+void hf::ConfigMgr::runToys(int i) {
     return runToys(m_fitConfigs.at(i));
 }
 
 
 //_______________________________________________________________________________________
-void ConfigMgr::runToys(FitConfig* fc) {
+void hf::ConfigMgr::runToys(hf::FitConfig* fc) {
     TFile* inFile = TFile::Open(fc->m_inputWorkspaceFileName);
     if(!inFile){ 
         m_logger << kERROR << "TFile could not be opened" << GEndl; 
@@ -819,7 +816,7 @@ void ConfigMgr::runToys(FitConfig* fc) {
 }
 
 //_______________________________________________________________________________________
-double ConfigMgr::min_CLs(RooStats::HypoTestInverterResult* hypo) {
+double hf::ConfigMgr::min_CLs(RooStats::HypoTestInverterResult* hypo) {
     double CLs=1.;
     for (int i=0; i<hypo->ArraySize(); i++) {
         if (hypo->GetResult(i)->CLs()<CLs) { CLs = hypo->GetResult(i)->CLs();}
@@ -828,7 +825,7 @@ double ConfigMgr::min_CLs(RooStats::HypoTestInverterResult* hypo) {
 }
 
 //_______________________________________________________________________________________
-double ConfigMgr::max_CLs(RooStats::HypoTestInverterResult* hypo) {
+double hf::ConfigMgr::max_CLs(RooStats::HypoTestInverterResult* hypo) {
     double CLs=1.;
     for (int i=0; i<hypo->ArraySize(); i++) {
         if (hypo->GetResult(i)->CLs()>CLs) { CLs = hypo->GetResult(i)->CLs();}
@@ -837,7 +834,7 @@ double ConfigMgr::max_CLs(RooStats::HypoTestInverterResult* hypo) {
 }
 
 //_______________________________________________________________________________________
-RooStats::HypoTestInverterResult* ConfigMgr::RedoScan(RooWorkspace* w, RooStats::HypoTestInverterResult* hypo) {
+RooStats::HypoTestInverterResult* hf::ConfigMgr::RedoScan(RooWorkspace* w, RooStats::HypoTestInverterResult* hypo) {
     double maxX=hypo->GetLastXValue();
     double newX = maxX;
     
@@ -867,11 +864,11 @@ RooStats::HypoTestInverterResult* ConfigMgr::RedoScan(RooWorkspace* w, RooStats:
 }
     
 //_______________________________________________________________________________________
-void ConfigMgr::finalize(){
+void hf::ConfigMgr::finalize(){
     return;
 }
 
 
 //_______________________________________________________________________________________
 /// Initialization of singleton
-ConfigMgr *ConfigMgr::_singleton = NULL;
+hf::ConfigMgr *hf::ConfigMgr::_singleton = NULL;

@@ -16,16 +16,21 @@
  * LICENSE.                                                                       *
  **********************************************************************************/
 
-#ifndef TEASYFORMULA_H
-#define TEASYFORMULA_H
+#ifndef HF_TEASYFORMULA_H
+#define HF_TEASYFORMULA_H
 
+// STL include(s)
 #include <vector>
 #include <map>
 
+// ROOT include(s)
 #include "v5/TFormula.h"
 #include "TString.h"
+
+// HistFitter include(s)
 #include "TMsgLogger.h"
 
+namespace hf{
 class TEasyFormula : public ROOT::v5::TFormula {
 
     public:
@@ -77,5 +82,7 @@ class TEasyFormula : public ROOT::v5::TFormula {
         ClassDef(TEasyFormula,0)
 };
 
-#endif
+}  // namespace hf
+
+#endif  // HF_TEASYFORMULA_H
 

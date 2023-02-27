@@ -17,27 +17,30 @@
  * LICENSE.                                                                       *
  **********************************************************************************/
 
-#ifndef UTILS_H
-#define UTILS_H
+#ifndef HF_UTILS_H
+#define HF_UTILS_H
 
+// STL include(s)
 #include <map>
 #include <vector>
 #include <string>
 #include <iostream>
 
+// ROOT include(s)
 #include "TString.h"
 #include "TH1.h"
 #include "TH2.h"
 #include "TFile.h"
 #include "TGraphAsymmErrors.h"
-
-
 #include "RooFitResult.h"
 #include "RooArgSet.h"
 #include "RooArgList.h"
-#include "RooExpandedFitResult.h"
-#include "ChannelStyle.h"
 #include "RooStats/HypoTestInverterResult.h"
+
+// HistFitter include(s)
+#include "src/root/RooExpandedFitResult.h"
+#include "ChannelStyle.h"
+
 
 
 class TMap;
@@ -64,8 +67,10 @@ namespace RooStats {
   class ModelConfig;
 }
 
-namespace Util
-{
+namespace hf{
+   
+namespace Util{
+
 
   extern bool deactivateBinnedLikelihood;
 
@@ -188,7 +193,7 @@ namespace Util
      @param style Instance of ChannelStyle class defined for the FitConfig fc, that carries info on plot colors etc
   */
   void AddComponentsToPlot(RooWorkspace* w,FitConfig* fc, RooPlot* frame, RooAbsPdf* regionPdf,
-			   RooRealVar* obsRegion, TString regionCatLabel, ChannelStyle style);
+			   RooRealVar* obsRegion, TString regionCatLabel, hf::ChannelStyle style);
 
   /**
      Function to plot each component(=sample) separately in each region
@@ -484,7 +489,7 @@ namespace Util
  */
  void getExpectedCLsFromHypoTest(RooStats::HypoTestInverterResult* HTIR, int index, double *q);
 
+}  // namespace Util
+}  // namespace hf
 
-}
-
-# endif
+#endif  //HF_UTILS_H

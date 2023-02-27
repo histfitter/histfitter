@@ -13,22 +13,24 @@
  * See corresponding .h file for author and license information                   *
  **********************************************************************************/
 
-#include "CombinationUtils.h"
-
+// ROOT include(s)
 #include "TMath.h"
 #include "RooArgList.h"
 #include "RooRealVar.h"
 #include "RooFitResult.h"
 #include "RooWorkspace.h"
 #include "TTree.h"
-#include "TMsgLogger.h"
 #include "TFile.h"
+
+// HistFitter include(s)
+#include "CombinationUtils.h"
+#include "TMsgLogger.h"
 
 using namespace std;
 
 
 //________________________________________________________________________________________________
-void resetFloatPars( const RooWorkspace* w, const RooFitResult* result ) {
+void hf::resetFloatPars( const RooWorkspace* w, const RooFitResult* result ) {
     const RooArgList& floatParsInit = result->floatParsInit() ;
 
     for (int i=0; i<floatParsInit.getSize(); ++i) {
@@ -40,13 +42,13 @@ void resetFloatPars( const RooWorkspace* w, const RooFitResult* result ) {
 
 
 //_____________________________________________________________________________
-namespace Util {
-    static TMsgLogger CombinationUtilsLogger("CombinationUtils");
+namespace hf::Util {
+    static hf::TMsgLogger CombinationUtilsLogger("CombinationUtils");
 }
 
 
 //_____________________________________________________________________________
-float Util::getValueFromTree( TTree* tree, const std::string& searchpar,
+float hf::Util::getValueFromTree( TTree* tree, const std::string& searchpar,
         const std::string& pn0, const float& v0, const std::string& pn1, const float& v1,
         const std::string& pn2, const float& v2, const std::string& pn3, const float& v3,
         const std::string& pn4, const float& v4, const std::string& pn5, const float& v5,
@@ -66,14 +68,14 @@ float Util::getValueFromTree( TTree* tree, const std::string& searchpar,
     if ( !pn8.empty() ) { pnVec.push_back(pn8); vVec.push_back(v8); }
     if ( !pn9.empty() ) { pnVec.push_back(pn9); vVec.push_back(v9); }
 
-    return Util::getValueFromTree( tree, searchpar, pnVec, vVec );
+    return hf::Util::getValueFromTree( tree, searchpar, pnVec, vVec );
 }
 
 
 //_____________________________________________________________________________
-float Util::getValueFromTree( TTree* tree, const std::string& searchpar, const std::vector<std::string>& pnVec, const std::vector<float>& vVec ) {
+float hf::Util::getValueFromTree( TTree* tree, const std::string& searchpar, const std::vector<std::string>& pnVec, const std::vector<float>& vVec ) {
     float searchval(-1);
-    bool matchfound = Util::findValueFromTree( tree,searchpar,searchval,pnVec,vVec );
+    bool matchfound = hf::Util::findValueFromTree( tree,searchpar,searchval,pnVec,vVec );
 
     if (!matchfound) 
         CombinationUtilsLogger << kERROR << "no value found for search parameter : " << searchpar << GEndl;
@@ -83,7 +85,7 @@ float Util::getValueFromTree( TTree* tree, const std::string& searchpar, const s
 
 
 //_____________________________________________________________________________
-bool Util::findValueFromTree( TTree* tree, const std::string& searchpar, float& searchval,
+bool hf::Util::findValueFromTree( TTree* tree, const std::string& searchpar, float& searchval,
         const std::string& pn0, const float& v0, const std::string& pn1, const float& v1,
         const std::string& pn2, const float& v2, const std::string& pn3, const float& v3,
         const std::string& pn4, const float& v4, const std::string& pn5, const float& v5,
@@ -103,12 +105,12 @@ bool Util::findValueFromTree( TTree* tree, const std::string& searchpar, float& 
     if ( !pn8.empty() ) { pnVec.push_back(pn8); vVec.push_back(v8); }
     if ( !pn9.empty() ) { pnVec.push_back(pn9); vVec.push_back(v9); }
 
-    return Util::findValueFromTree( tree, searchpar, searchval, pnVec, vVec );
+    return hf::Util::findValueFromTree( tree, searchpar, searchval, pnVec, vVec );
 }
 
 
 //_____________________________________________________________________________
-bool Util::findValueFromTree( TTree* tree, const std::string& searchpar, float& searchval, const std::vector<std::string>& pnVec, const std::vector<float>& vVec, const float& defaultVal ) {
+bool hf::Util::findValueFromTree( TTree* tree, const std::string& searchpar, float& searchval, const std::vector<std::string>& pnVec, const std::vector<float>& vVec, const float& defaultVal ) {
     if (tree==0) return false;
     if (pnVec.size()!=vVec.size()) return false;
     if (pnVec.size()==0) return false;
@@ -148,6 +150,3 @@ bool Util::findValueFromTree( TTree* tree, const std::string& searchpar, float& 
 
     return match;
 }
-
-
-

@@ -18,7 +18,7 @@
 
 
 //________________________________________________________________________________________________
-void ValidationUtils::Horizontal( TH1 *h, Int_t nbin, Bool_t kLINE, Int_t color, float yWidthScaleUp, float yWidthScaleDown)
+void hf::ValidationUtils::Horizontal( TH1 *h, Int_t nbin, Bool_t kLINE, Int_t color, float yWidthScaleUp, float yWidthScaleDown)
 {
    // Draw histogram h horizontaly with bars
    TAxis *axis   = h->GetXaxis();
@@ -43,7 +43,7 @@ void ValidationUtils::Horizontal( TH1 *h, Int_t nbin, Bool_t kLINE, Int_t color,
 
 
 //________________________________________________________________________________________________
-void ValidationUtils::HorizontalElMu( TH1 *h, Int_t nbin, Bool_t /*kLINE*/, Int_t color, Int_t /*color2*/, float yWidthScale )
+void hf::ValidationUtils::HorizontalElMu( TH1 *h, Int_t nbin, Bool_t /*kLINE*/, Int_t color, Int_t /*color2*/, float yWidthScale )
 {
    // Draw histogram h horizontaly with bars
    TAxis *axis   = h->GetXaxis();
@@ -68,7 +68,7 @@ void ValidationUtils::HorizontalElMu( TH1 *h, Int_t nbin, Bool_t /*kLINE*/, Int_
 
 
 //________________________________________________________________________________________________
-void ValidationUtils::SetCombinationStyle() 
+void hf::ValidationUtils::SetCombinationStyle() 
 {
   TStyle *CombinationStyle = gROOT->GetStyle("Combination");
   if(CombinationStyle!=0) {
@@ -130,7 +130,7 @@ void ValidationUtils::SetCombinationStyle()
 
 //________________________________________________________________________________________________
 /// set style and remove existing canvas'
-void ValidationUtils::Initialize( Bool_t useCombinationStyle )
+void hf::ValidationUtils::Initialize( Bool_t useCombinationStyle )
 {
   // destroy canvas'
   TList * loc = (TList*)gROOT->GetListOfCanvases();
@@ -151,7 +151,7 @@ void ValidationUtils::Initialize( Bool_t useCombinationStyle )
 
 //________________________________________________________________________________________________
 /// set frame styles
-void ValidationUtils::SetFrameStyle2D( TH1* frame, Float_t scale )
+void hf::ValidationUtils::SetFrameStyle2D( TH1* frame, Float_t scale )
 {
   frame->SetLabelOffset( 0.012, "X" );// label offset on x axis
   frame->SetLabelOffset( 0.012, "Y" );// label offset on x axis
@@ -173,10 +173,10 @@ void ValidationUtils::SetFrameStyle2D( TH1* frame, Float_t scale )
 
 
 //________________________________________________________________________________________________
-void ValidationUtils::PullPlot3(XtraValues* inValsEl, XtraValues* inValsMu, const TString& outFileNamePrefix)
+void hf::ValidationUtils::PullPlot3(XtraValues* inValsEl, XtraValues* inValsMu, const TString& outFileNamePrefix)
 {
   // set style and remove existing canvas'
-   ValidationUtils::Initialize();
+   hf::ValidationUtils::Initialize();
 
    const Int_t Npar = inValsEl->size();
    
@@ -212,7 +212,7 @@ void ValidationUtils::PullPlot3(XtraValues* inValsEl, XtraValues* inValsMu, cons
    TH2F *frame = new TH2F( "frame"+outFileNamePrefix, "Pull plot", 
                            1, -3.0, 3.0, Npar+1, -offset, Float_t(Npar)+offset );
 
-   ValidationUtils::SetFrameStyle2D( frame, 1.0 ); // the size (scale) is 1.0
+   hf::ValidationUtils::SetFrameStyle2D( frame, 1.0 ); // the size (scale) is 1.0
    frame->SetLabelFont(42,"X");
    frame->SetTitleFont(42,"X");
    frame->SetLabelFont(42,"Y");
@@ -358,10 +358,10 @@ void ValidationUtils::PullPlot3(XtraValues* inValsEl, XtraValues* inValsMu, cons
 
 
 //________________________________________________________________________________________________
-void ValidationUtils::PullPlot5(XtraValues* inValsEl, XtraValues* inValsMu, XtraValues* inValsEM, const TString& outFileNamePrefix)
+void hf::ValidationUtils::PullPlot5(XtraValues* inValsEl, XtraValues* inValsMu, XtraValues* inValsEM, const TString& outFileNamePrefix)
 {
   // set style and remove existing canvas'
-   ValidationUtils::Initialize();
+   hf::ValidationUtils::Initialize();
 
    const Int_t Npar = inValsEM->size();
    // if (Npar==0) Npar = inValsEM->size();
@@ -397,7 +397,7 @@ void ValidationUtils::PullPlot5(XtraValues* inValsEl, XtraValues* inValsMu, Xtra
    TH2F *frame = new TH2F( "frame"+outFileNamePrefix, "Pull plot", 
                            1, -3.0, 3.0, Npar+1, -offset, Float_t(Npar)+offset );
 
-   ValidationUtils::SetFrameStyle2D( frame, 1.0 ); // the size (scale) is 1.0
+   hf::ValidationUtils::SetFrameStyle2D( frame, 1.0 ); // the size (scale) is 1.0
    frame->SetLabelFont(42,"X");
    frame->SetTitleFont(42,"X");
    frame->SetLabelFont(42,"Y");
@@ -541,10 +541,10 @@ void ValidationUtils::PullPlot5(XtraValues* inValsEl, XtraValues* inValsMu, Xtra
 
 
 //________________________________________________________________________________________________
-void ValidationUtils::PullPlot4(XtraValues* inVals,const TString& outFileNamePrefix)
+void hf::ValidationUtils::PullPlot4(XtraValues* inVals,const TString& outFileNamePrefix)
 {
   // set style and remove existing canvas'
-   ValidationUtils::Initialize();
+   hf::ValidationUtils::Initialize();
  
    const Int_t Npar = inVals->size();
    
@@ -563,7 +563,7 @@ void ValidationUtils::PullPlot4(XtraValues* inVals,const TString& outFileNamePre
    TH2F *frame = new TH2F( "frame"+outFileNamePrefix, "Results of the global SM fit", 
                            1, -3.0, 3.0, Npar+1, -offset, Float_t(Npar)+offset );
 
-   ValidationUtils::SetFrameStyle2D( frame, 1.0 ); // the size (scale) is 1.0
+   hf::ValidationUtils::SetFrameStyle2D( frame, 1.0 ); // the size (scale) is 1.0
    frame->SetLabelFont(42,"X");
    frame->SetTitleFont(42,"X");
    frame->SetLabelFont(42,"Y");
@@ -661,7 +661,7 @@ void ValidationUtils::PullPlot4(XtraValues* inVals,const TString& outFileNamePre
    for (Int_t i=0; i<Npar; i++) {
       Float_t delta = inVals->m_nObs.at(i) - inVals->m_nPred.at(i);
       Float_t err=inVals->m_Delta_eTot.at(i);
-      Float_t pull = StatTools::GetNSigma( inVals->m_nObs.at(i), inVals->m_nPred.at(i), inVals->m_nPred_eFit.at(i) );
+      Float_t pull = hf::StatTools::GetNSigma( inVals->m_nObs.at(i), inVals->m_nPred.at(i), inVals->m_nPred_eFit.at(i) );
       std::cout<<"i="<<i<<"  delta="<<delta;
       std::cout<<"  err="<<err;
 
