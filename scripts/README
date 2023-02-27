@@ -1,0 +1,34 @@
+1. See:
+HistFitter.py -usage 
+for all HistFitter options.
+
+==========================================================================================
+
+Described below is a simple channel example, based on input histograms.
+This can be used in combination with the example in :
+macros/Examples/contourplot/README
+
+2.
+## To make root files containing the workspaces for grid point you want to assess.
+
+## For example
+HistFitter.py -w python/MySimpleChannelConfig.py
+
+This config file:
+python/MySimpleChannelConfig.py
+
+... described a simple counting experiment in one bin, with:
+- a JES uncertainty on the total bkg estimate and the signal estimate.
+- a cross-section uncertainty on the signal estimate
+- a luminosity uncertainty on the signal estimate
+
+The signal estimates are given for 173 grid points in an msugra plane (tanb=3, A0=0).
+
+The histograms for the background / signal / and error estimates are given in:
+data/MySimpleChannelAnalysis.root
+
+3.
+## To extend this to a bin fitting simultaneously several bins, simply 
+extend the number of bins in the input histograms, and change the python config to 
+this number of bins.
+
