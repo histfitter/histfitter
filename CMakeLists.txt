@@ -32,13 +32,14 @@ list(TRANSFORM root_components PREPEND ROOT::)
 # Loop over source code and add to list of source and headers
 set(SusyFitter_headers "")
 set(SusyFitter_sources "")
-file(GLOB filePaths src/hf/*)
+file(GLOB filePaths src/*/*)
 
 foreach (_filePath ${filePaths})
+    get_filename_component(_fileDir ${_filePath} DIRECTORY)
 	get_filename_component(_fileName ${_filePath} NAME_WE)
     	if(NOT ${_fileName} MATCHES "LinkDef" AND NOT ${_fileName} MATCHES "Makefile")
-            list(APPEND SusyFitter_sources "src/hf/${_fileName}.cxx")
-            list(APPEND SusyFitter_headers "src/hf/${_fileName}.h")
+            list(APPEND SusyFitter_sources "${_fileDir}/${_fileName}.cxx")
+            list(APPEND SusyFitter_headers "${_fileDir}/${_fileName}.h")
 	endif()
 endforeach()
 

@@ -3,15 +3,19 @@
 #pragma link off all globals;
 #pragma link off all classes;
 #pragma link off all functions;
+#pragma link off all namespaces;
 
 #pragma link C++ nestedclass;
+#pragma link C++ nestedtypedef;
 
 #pragma link C++ namespace hf;
+#pragma link C++ class hf::TMsgLogger+;
 #pragma link C++ class hf::ConfigMgr+;
 #pragma link C++ class hf::FitConfig+;
 #pragma link C++ class hf::RooExpandedFitResult+;
 #pragma link C++ class hf::XtraValues+;
-#pragma link C++ class hf::TMsgLogger+;
+
+//#pragma link C++ TMsgLogger hf::TMsgLogger;
 
 #pragma link C++ namespace hf::Util+;
 #pragma link C++ function hf::Util::GetToyMC+;
@@ -30,7 +34,7 @@
 // by including the entire (now dropped) Combination namespace
 
 //CombinationUtils.cxx
-#pragma link C++ function resetFloatPars;
+#pragma link C++ function hf::resetFloatPars;
 
 //CombineWorkSpaces.cxx
 
@@ -59,17 +63,18 @@
 #pragma link C++ function hf::CollectAndWriteHypoTestResults;
 #pragma link C++ function hf::CollectHypoTestResults;
 
-#pragma link C++ namespace StatTools;
-#pragma link C++ function StatTools::GetProbFromSigma;
-#pragma link C++ function StatTools::GetSigma;
-#pragma link C++ function StatTools::DmLogL_PA ;
-#pragma link C++ function StatTools::GetSimpleP1 ;
+//StatTools namespace is in Significance.h
+#pragma link C++ namespace hf::StatTools;
+#pragma link C++ function hf::StatTools::GetProbFromSigma;
+#pragma link C++ function hf::StatTools::GetSigma;
+#pragma link C++ function hf::StatTools::DmLogL_PA ;
+#pragma link C++ function hf::StatTools::GetSimpleP1 ;
 
-#pragma link C++ function StatTools::FindS95 ;
-#pragma link C++ function StatTools::GetDLL ;
-#pragma link C++ function StatTools::FindXS95 ;
-#pragma link C++ function StatTools::FindSNSigma ;
-#pragma link C++ function StatTools::FindXSNSigma;
+#pragma link C++ function hf::StatTools::FindS95 ;
+#pragma link C++ function hf::StatTools::GetDLL ;
+#pragma link C++ function hf::StatTools::FindXS95 ;
+#pragma link C++ function hf::StatTools::FindSNSigma ;
+#pragma link C++ function hf::StatTools::FindXSNSigma;
 
 //json.cxx
 #pragma link C++ class JSON;
@@ -93,7 +98,6 @@
 
 //HypoTestTool.cxx
 #pragma link C++ class RooStats::HypoTestTool;
-
 #pragma link C++ class hf::LimitResult;
 
 #endif

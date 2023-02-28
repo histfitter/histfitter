@@ -62,7 +62,7 @@ HISTFITTER_VERSION=$VERSION
 export HISTFITTER_VERSION
 
 # update paths
-export ROOT_INCLUDE_PATH="$ROOT_INCLUDE_PATH:$SOURCE_DIR/src" #What does this do?
+export ROOT_INCLUDE_PATH="$ROOT_INCLUDE_PATH:$SOURCE_DIR/src/hf:$SOURCE_DIR/src/root" #What does this do?
 export PATH="$PATH:$SOURCE_DIR/bin:$SOURCE_DIR/scripts"
 export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$LIB_DIR"
 # PYTHONPATH contains all directories that are used for 'import bla' commands
