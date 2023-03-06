@@ -54,7 +54,7 @@ add_library(SusyFitter SHARED ${SusyFitter_sources})
 target_include_directories(SusyFitter PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 
 # generate the dictionary source code
-ROOT_GENERATE_DICTIONARY(SusyFitter_dict ${SusyFitter_headers} MODULE SusyFitter LINKDEF src/LinkDef.h)
+ROOT_GENERATE_DICTIONARY(SusyFitter_dict ${SusyFitter_headers} MODULE SusyFitter LINKDEF src/root/LinkDef.h)
 
 #Require threads
 set(THREADS_PREFER_PTHREAD_FLAG ON)
