@@ -45,7 +45,7 @@
 #include "./CombineWorkSpaces.h"
 #include "./Significance.h"
 #include "./Utils.h"
-#include "./StatTools.h"
+#include "../root/StatTools.h"
 #include "./TMsgLogger.h"
 #include "./json.h"
 
