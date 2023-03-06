@@ -22,6 +22,7 @@
 #include "RooCategory.h"
 #include "RooRealSumPdf.h"
 #include "RooMinimizer.h"
+#include "RooPlot.h"
 
 #include "RooStats/ModelConfig.h"
 #include "RooStats/ProfileLikelihoodTestStat.h"
@@ -49,12 +50,12 @@
 
 
 // HistFitter include(s)
-#include "StatTools.h"
-#include "Utils.h"
-#include "CombineWorkSpaces.h"
-#include "TMsgLogger.h"
-#include "HypoTestTool.h"
-//#include "src/root/RooPlot.h"
+#include "./StatTools.h"
+#include "./Utils.h"
+#include "./CombineWorkSpaces.h"
+#include "./TMsgLogger.h"
+#include "./HypoTestTool.h"
+//#include "../root/RooPlot.h"
 
 using namespace std;
 using namespace RooFit;

@@ -39,6 +39,8 @@
 #include "RooConstVar.h"
 #include "RooNumIntConfig.h"
 #include "RooBinningCategory.h"
+#include "RooPlot.h" //Needed by RooAbsPdf and RooAbsData
+#include "RooHist.h"
 
 #include "TMap.h"
 #include "TString.h"
@@ -52,13 +54,13 @@
 #include "TLine.h"
 
 // HistFitter include(s)
-#include "HistogramPlotter.h"
-#include "Utils.h"
-#include "ConfigMgr.h"
-#include "TMsgLogger.h"
-#include "ChannelStyle.h"
-#include "src/root/RooPlot.h"
-#include "src/root/RooHist.h"
+#include "./HistogramPlotter.h"
+#include "./Utils.h"
+#include "./ConfigMgr.h"
+#include "./TMsgLogger.h"
+#include "./ChannelStyle.h"
+//#include "../root/RooPlot.h"
+//#include "../root/RooHist.h"
 
 static hf::TMsgLogger Logger("HistogramPlotter");
 

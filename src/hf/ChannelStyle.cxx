@@ -16,7 +16,7 @@
 #include <iostream>
 
 // HistFitter include(s)
-#include "ChannelStyle.h"
+#include "./ChannelStyle.h"
 
 ClassImp(hf::ChannelStyle);
 

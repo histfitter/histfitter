@@ -45,10 +45,10 @@
 #include "Roo1DTable.h"
 
 // HistFitter include(s)
-#include "CombineWorkSpaces.h"
-#include "CombinationUtils.h"
-#include "Utils.h"
-#include "TMsgLogger.h"
+#include "./CombineWorkSpaces.h"
+#include "./CombinationUtils.h"
+#include "./Utils.h"
+#include "./TMsgLogger.h"
 
 using namespace std;
 using namespace RooFit;

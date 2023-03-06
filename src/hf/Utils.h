@@ -38,11 +38,10 @@
 #include "RooStats/HypoTestInverterResult.h"
 
 // HistFitter include(s)
-#include "src/root/RooExpandedFitResult.h"
-#include "ChannelStyle.h"
+#include "../root/RooExpandedFitResult.h"
+#include "./ChannelStyle.h"
 
-
-
+//Forward declarations
 class TMap;
 class TTree;
 
@@ -54,18 +53,23 @@ class RooAbsPdf;
 class RooAbsData;
 class RooSimultaneous;
 class RooCategory;
-class RooPlot;
 class RooMCStudy;
 class FitConfig;
 class RooProdPdf;
-class RooHist;
 class RooCurve;
 class RooRealSumPdf;
+class RooHist;
+class RooPlot;
 
 namespace RooStats {
   class HypoTestResult;
   class ModelConfig;
 }
+/*
+namespace hf {
+//class RooPlot;
+class RooHist;
+}*/
 
 namespace hf{
    
@@ -245,6 +249,7 @@ namespace Util{
      @param regionVar RooRealVar pointer to the observable for this region
      @param makePull Boolean flag to set whether a ratio or pull is returned
   */
+
   RooHist* MakeRatioOrPullHist(RooAbsData *regionData, RooAbsPdf *regionPdf, RooRealVar *regionVar, bool makePull=false);
 
   /**

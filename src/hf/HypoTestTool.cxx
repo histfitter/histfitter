@@ -21,10 +21,6 @@
  * (http://root.cern.ch/drupal/content/license)                                   *
  **********************************************************************************/
 
-// HistFitter include(s)
-#include "HypoTestTool.h"
-#include "TMsgLogger.h"
-
 // ROOT include(s)
 #include "TSystem.h"
 #include "TFile.h"
@@ -54,6 +50,10 @@
 #include "RooStats/HypoTestInverterResult.h"
 #include "RooStats/HypoTestResult.h"
 #include "RooStats/HypoTestInverterPlot.h"
+
+// HistFitter include(s)
+#include "./HypoTestTool.h"
+#include "./TMsgLogger.h"
 
 using namespace RooFit;
 using namespace RooStats;

@@ -29,6 +29,7 @@
 #include "TObjString.h"
 #include "RooRandom.h"
 #include "RooStats/ModelConfig.h"
+#include "RooStats/HypoTestInverterResult.h"
 #include "RooMsgService.h"
 #include "RooRandom.h"
 #include "RooFitResult.h"
@@ -40,14 +41,13 @@
 #include "RooAddition.h"
 
 // HistFitter include(s)
-#include "toy_utils.h"
-#include "CombineWorkSpaces.h"
-#include "Significance.h"
-#include "Utils.h"
-#include "StatTools.h"
-#include "TMsgLogger.h"
-#include "RooStats/HypoTestInverterResult.h"
-#include "json.h"
+#include "./toy_utils.h"
+#include "./CombineWorkSpaces.h"
+#include "./Significance.h"
+#include "./Utils.h"
+#include "./StatTools.h"
+#include "./TMsgLogger.h"
+#include "./json.h"
 
 using namespace std;
 using namespace RooFit;

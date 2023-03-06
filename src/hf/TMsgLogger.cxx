@@ -38,7 +38,7 @@
 #include "TString.h"
 
 // HistFitter include(s)
-#include "TMsgLogger.h"
+#include "./TMsgLogger.h"
 
 ClassImp(hf::TMsgLogger);
 

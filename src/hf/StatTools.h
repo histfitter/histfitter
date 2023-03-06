@@ -10,7 +10,7 @@
 #include "TString.h"
 
 // HistFitter include(s)
-#include "LimitResult.h"
+#include "./LimitResult.h"
 
 class TMap;
 class TTree;
@@ -24,7 +24,7 @@ class RooAbsPdf;
 class RooAbsData;
 class RooSimultaneous;
 class RooCategory;
-//class RooPlot;
+class RooPlot;
 class RooFitResult;
 class RooMCStudy;
 class RooDataSet;

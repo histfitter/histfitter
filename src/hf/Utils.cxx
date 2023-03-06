@@ -73,6 +73,8 @@
 #include "RooNumIntConfig.h"
 #include "RooMinimizer.h"
 #include "RooFormulaVar.h"
+#include "RooPlot.h" //Needed by RooAbsPdf
+#include "RooHist.h"
 
 #include "RooStats/ModelConfig.h"
 #include "RooStats/ProfileLikelihoodTestStat.h"
@@ -86,13 +88,13 @@
 #include "RooStats/HistFactory/PiecewiseInterpolation.h"
 
 // HistFitter include(s)
-#include "Utils.h"
-#include "ConfigMgr.h"
-#include "TMsgLogger.h"
-#include "ChannelStyle.h"
-#include "HistogramPlotter.h"
-#include "src/root/RooPlot.h"
-#include "src/root/RooHist.h"
+#include "./Utils.h"
+#include "./ConfigMgr.h"
+#include "./TMsgLogger.h"
+#include "./ChannelStyle.h"
+#include "./HistogramPlotter.h"
+//#include "../root/RooPlot.h"
+//#include "../root/RooHist.h"
 
 using namespace std;
 using namespace RooFit;
@@ -2866,6 +2868,7 @@ RooHist* hf::Util::MakeRatioOrPullHist(RooAbsData *regionData, RooAbsPdf *region
 	// data/pdf ratio histograms are plotted by RooPlot.ratioHist() through a dummy frame
 	RooPlot* frame_dummy = regionVar->frame();
 	regionData->plotOn(frame_dummy, RooFit::DataError(RooAbsData::Poisson));
+      //Adding function which does not exist in original RooHist.h
 
 	// normalize pdf to number of expected events, not to number of events in dataset
 	regionPdf->plotOn(frame_dummy, RooFit::Normalization(1, RooAbsReal::RelativeExpected),
@@ -2876,7 +2879,8 @@ RooHist* hf::Util::MakeRatioOrPullHist(RooAbsData *regionData, RooAbsPdf *region
         return static_cast<RooHist*>(frame_dummy->pullHist());
 	}
 
-    return static_cast<RooHist*>(frame_dummy->ratioHist());
+    //return static_cast<RooHist*>(frame_dummy->ratioHist());
+    return static_cast<RooHist*>(frame_dummy->residHist(0, 0, false, true));
 }
 
 //________________________________________________________________________________________________________________________________________

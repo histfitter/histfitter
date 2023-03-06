@@ -28,7 +28,7 @@ along with Bit Powder Libraries.  If not, see <http://www.gnu.org/licenses/>.
 #include <cmath>
 
 // HistFitter include(s)
-#include "json.h"
+#include "./json.h"
 
 
 template <class T>

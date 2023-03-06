@@ -23,8 +23,8 @@
 #include "TFile.h"
 
 // HistFitter include(s)
-#include "CombinationUtils.h"
-#include "TMsgLogger.h"
+#include "./CombinationUtils.h"
+#include "./TMsgLogger.h"
 
 using namespace std;
 

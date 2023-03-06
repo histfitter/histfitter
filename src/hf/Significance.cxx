@@ -24,9 +24,9 @@
 #include "RooAbsReal.h"
 
 // HistFitter include(s)
-#include "Significance.h"
-#include "toy_utils.h"
-#include "CombineWorkSpaces.h"
+#include "./Significance.h"
+#include "./toy_utils.h"
+#include "./CombineWorkSpaces.h"
 
 //________________________________________________________________________________________________
 Double_t hf::StatTools::GetNSigma( Double_t nObs, Double_t nb, Double_t sig ) {

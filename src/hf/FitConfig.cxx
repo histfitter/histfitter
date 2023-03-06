@@ -20,7 +20,7 @@
 #include <iostream>
 
 // HistFitter include(s)
-#include "FitConfig.h"
+#include "./FitConfig.h"
 
 using namespace std;
 

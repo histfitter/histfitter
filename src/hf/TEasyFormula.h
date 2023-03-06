@@ -28,7 +28,7 @@
 #include "TString.h"
 
 // HistFitter include(s)
-#include "TMsgLogger.h"
+#include "./TMsgLogger.h"
 
 namespace hf{
 class TEasyFormula : public ROOT::v5::TFormula {

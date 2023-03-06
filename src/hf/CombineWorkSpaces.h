@@ -23,7 +23,7 @@
 #include <vector>
 #include <map>
 
-// HistFitter include(s)
+// ROOT include(s)
 #include "TString.h"
 
 // -------------------------------

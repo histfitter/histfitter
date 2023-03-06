@@ -27,7 +27,7 @@
 #include "TLegend.h"
 
 // HistFitter include(s)
-#include "TMsgLogger.h"
+#include "./TMsgLogger.h"
 
 namespace hf{
 

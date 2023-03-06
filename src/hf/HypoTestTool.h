@@ -33,7 +33,7 @@
 #include "RooStats/HypoTestCalculatorGeneric.h"
 
 // HistFitter include(s)
-#include "TMsgLogger.h"
+#include "./TMsgLogger.h"
 
 
 namespace RooStats {

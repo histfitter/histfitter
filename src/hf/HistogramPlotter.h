@@ -19,9 +19,9 @@
 #include "RooBinning.h"
 
 // HistFitter include(s)
-#include "src/root/RooExpandedFitResult.h"
-#include "ChannelStyle.h"
-#include "FitConfig.h"
+#include "../root/RooExpandedFitResult.h"
+#include "./ChannelStyle.h"
+#include "./FitConfig.h"
 
 class TH1D;
 class TMap;
@@ -35,10 +35,12 @@ class RooAbsPdf;
 class RooAbsData;
 class RooSimultaneous;
 class RooCategory;
-class RooPlot;
+
 class RooMCStudy;
 class RooProdPdf;
 class RooHist;
+class RooPlot;
+
 class RooCurve;
 class RooRealSumPdf;
 
@@ -46,6 +48,7 @@ namespace RooStats {
     class HypoTestResult;
     class ModelConfig;
 }
+
 
 namespace hf{
 

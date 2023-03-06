@@ -24,8 +24,8 @@
 #include "TString.h"
 
 // HistFitter include(s)
-#include "DrawUtils.h"
-#include "TMsgLogger.h"
+#include "src/hf/DrawUtils.h"
+#include "src/hf/TMsgLogger.h"
 
 using namespace std;
 

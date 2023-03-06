@@ -17,8 +17,8 @@
 #include <iomanip>
 
 // HistFitter include(s)
-#include "LimitResult.h"
-#include "Significance.h"
+#include "./LimitResult.h"
+#include "./Significance.h"
 
 template <typename T> std::string to_string_scientific(const T& t) { 
    std::ostringstream os; 

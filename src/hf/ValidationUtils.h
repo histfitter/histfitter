@@ -32,11 +32,14 @@
 #include "TGraph.h"
 #include "TMath.h"
 
+// STL include(s)
 #include <iostream>
+
+// HistFitter include(s)
+#include "./XtraValues.h"
+
 using std::cout;
 using std::endl;
-
-#include "XtraValues.h"
 
 namespace hf{
   
