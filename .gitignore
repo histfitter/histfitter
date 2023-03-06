@@ -2,6 +2,7 @@ obj
 lib/
 bin/
 build/
+install/
 src/SusyFitter_Dict.C
 *.o
 
@@ -11,6 +12,9 @@ data/*.root
 
 # copied from the src dir!
 include/*.h
+
+# setup script
+setup.sh
 
 # output
 results/
