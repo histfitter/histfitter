@@ -67,7 +67,7 @@ export PATH="$PATH:$SOURCE_DIR/bin:$SOURCE_DIR/scripts"
 export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$LIB_DIR"
 # PYTHONPATH contains all directories that are used for 'import bla' commands
 # Must prepend so as to catch python/cmdLineUtils.py before ROOT installation's
-export PYTHONPATH="$PYTHON_DIR:$PYTHONPATH"
+export PYTHONPATH="$PYTHON_DIR/hf:$PYTHONPATH"
 export PYTHONPATH="$SOURCE_DIR/scripts:$PYTHONPATH"
 
 # Hack for ssh from mac
