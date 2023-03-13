@@ -235,6 +235,15 @@ namespace Util
 
   /**
      Function to construct a data/model ratio or pull
+     @param frame RooPlot pointer to the frame for this region
+     @param histname const char pointer to the histogram name
+     @param pdfname const char pointer to the pdf name
+     @param useAverage Boolean flag to set whether averages are used
+  */
+  RooHist* MakeRatioHist(RooPlot *frame, const char* histname=nullptr, const char* pdfname=nullptr, bool useAverage=false);
+
+  /**
+     Function to construct a data/model ratio or pull
      @param regionPdf RooAbsPdf pointer to the total-pdf for this specific region
      @param regionData RooAbsData pointer to the data for this region
      @param regionVar RooRealVar pointer to the observable for this region

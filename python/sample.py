@@ -1221,7 +1221,7 @@ class Sample:
             self.systList.append(systName)
         return
 
-    def addNormFactor(self, name, val, low, high, const=False):
+    def addNormFactor(self, name, val, low, high):
         """
         Add a normalization factor
 
@@ -1229,14 +1229,13 @@ class Sample:
         @param val Nominal value
         @param high Value at +1sigma
         @param low Value at -1sigma
-        @param const Boolean that indicates whether the factor is constant or not
         """
-        self.normFactor.append( (name, val, high, low, const) )
+        self.normFactor.append( (name, val, high, low) )
         if not name in configMgr.normList:
             configMgr.normList.append(name)
         return
 
-    def setNormFactor(self, name, val, low, high, const=False):
+    def setNormFactor(self, name, val, low, high):
         """
         Set normalization factor
         
@@ -1244,10 +1243,9 @@ class Sample:
         @param val Nominal value
         @param high Value at +1sigma
         @param low Value at -1sigma
-        @param const Boolean that indicates whether the factor is constant or not
         """
         self.normFactor = []
-        self.normFactor.append( (name, val, high, low, const) )
+        self.normFactor.append( (name, val, high, low) )
         if not name in configMgr.normList:
             configMgr.normList.append(name)
         return
@@ -1487,7 +1485,7 @@ class Sample:
         # high = 2, low = 3
         if len(self.normFactor) > 0:
             for normFactor in self.normFactor:
-                s.AddNormFactor(normFactor[0], normFactor[1], normFactor[3], normFactor[2], normFactor[4])
+                s.AddNormFactor(normFactor[0], normFactor[1], normFactor[3], normFactor[2])
 
         return s
 
@@ -1514,7 +1512,7 @@ class Sample:
         
         if len(self.normFactor)>0:
             for normFactor in self.normFactor:
-                self.sampleString += f"    <NormFactor Name=\"{normFactor[0]}\" Val=\"{normFactor[1]:g}\" High=\"{normFactor[2]:g}\" Low=\"{normFactor[3]:g}\" Const=\"{normFactor[4]}\" />\n"
+                self.sampleString += f"    <NormFactor Name=\"{normFactor[0]}\" Val=\"{normFactor[1]:g}\" High=\"{normFactor[2]:g}\" Low=\"{normFactor[3]:g}\" />\n"
                 pass
         
         self.sampleString += "  </Sample>\n\n"

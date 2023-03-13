@@ -55,6 +55,7 @@
 #include "RooNumIntConfig.h"
 #include "RooMinimizer.h"
 #include "RooFormulaVar.h"
+#include "RooNLLVar.h"
 
 #include "RooStats/ModelConfig.h"
 #include "RooStats/ProfileLikelihoodTestStat.h"
@@ -2219,7 +2220,7 @@ Double_t Util::GetComponentFracInRegion(RooWorkspace* w, TString component, TStr
 
     if(!found_comp){
         Logger << kERROR << "Something went wrong, no components found for "<<component.Data()<<GEndl;
-        return NULL;
+        return 0;
     }
 
     // get the full RRSPdf of this region
@@ -2863,6 +2864,123 @@ void Util::RemoveEmptyDataBins( RooPlot* frame){
 
 }
 
+//________________________________________________________________________________________________________________________________________
+RooHist* Util::MakeRatioHist(RooPlot *frame, const char* histname, const char* pdfname, bool useAverage) {
+    // Find all curve objects with the name "pdfname" or the name of the last
+    // plotted curve (there might be multiple in the case of multi-range fits).
+    std::vector<RooCurve*> curves;
+
+    std::vector<TObject*> objects;
+    for(size_t i = frame->numItems() - 1; i >= 0; i--) objects.push_back(frame->getObject(i));
+    
+    for(TObject* obj : objects) {
+        if(obj->IsA() == RooCurve::Class()) {
+            // If no pdfname was passed, we take by default the last curve and all
+            // other curves that have the same name
+            if((!pdfname || pdfname[0] == '\0') || std::string(pdfname) == obj->GetName()) {
+                pdfname = obj->GetName();
+                curves.push_back(static_cast<RooCurve*>(obj));
+            }
+        }
+    }
+    
+    if (curves.empty()) {
+        Logger << kERROR << "RooPlotRatioHistGenerator::ratioHist(" << frame->GetName() << ") cannot find pdf curve" << GEndl ;
+        return nullptr;
+    }
+    
+    // Find histogram object
+    auto hist = static_cast<RooHist*>(frame->findObject(histname, RooHist::Class()));
+    if (!hist) {
+        Logger << kERROR << "RooPlotRatioHistGenerator::ratioHist(" << frame->GetName() << ") cannot find histogram" << GEndl ;
+        return nullptr;
+    }
+    
+
+    // ---------------------------------------------------------------------------
+    // Implementation of:
+    // auto residHist = hist->createEmptyResidHist(*curves.front(), normalize);
+
+    // Copy all non-content properties from hist1
+    auto ratioHist = std::make_unique<RooHist>(hist->getNominalBinWidth());
+    ratioHist->SetName(Form("pull_%s_%s", hist->GetName(), curves.front()->GetName()));
+    ratioHist->SetTitle(Form("Pull of %s and %s", hist->GetTitle(), curves.front()->GetTitle()));
+    // ---------------------------------------------------------------------------
+    
+
+    // We consider all curves with the same name as long as the ranges don't
+    // overlap, to create also the full residual plot in multi-range fits.
+    std::vector<std::pair<double, double>> coveredRanges;
+    for(RooCurve* curve : curves) {
+        const double xmin = curve->GetPointX(0);
+        const double xmax = curve->GetPointX(curve->GetN() - 1);
+    
+        for(auto const& prevRange : coveredRanges) {
+            const double pxmin = prevRange.first;
+            const double pxmax = prevRange.second;
+            // If either xmin or xmax is within any previous range, the ranges
+            // overloap and it makes to sense to also consider this curve for the
+            // residuals (i.e., they can't come from a multi-range fit).
+            if((pxmax > xmin && pxmin <= xmin) || (pxmax > xmax && pxmin <= xmax)) {
+                continue;
+            }
+        }
+    
+        coveredRanges.emplace_back(xmin, xmax);
+    
+        
+        // ---------------------------------------------------------------------------
+        // Implementation of:
+        // hist->fillResidHist(*residHist, *curve, normalize, useAverage);
+
+        // Determine range of curve
+        Double_t xstart, xstop, y;
+        curve->GetPoint(0, xstart, y);
+        curve->GetPoint(curve->GetN() - 1, xstop, y) ;
+        
+        // Add histograms, calculate Poisson confidence interval on sum value
+        for(Int_t i = 0 ; i < hist->GetN() ; i++) {
+            Double_t x, point;
+            hist->GetPoint(i, x, point) ;
+        
+            // Only calculate pull for bins inside curve range
+            if (x < xstart || x > xstop) continue ;
+        
+            Double_t yy ;
+            Double_t dyl = hist->GetErrorYlow(i) ;
+            Double_t dyh = hist->GetErrorYhigh(i) ;
+
+            if (useAverage) {
+                Double_t exl = hist->GetErrorXlow(i);
+                Double_t exh = hist->GetErrorXhigh(i) ;
+                if (exl <= 0) exl = hist->GetErrorX(i);
+                if (exh <= 0) exh = hist->GetErrorX(i);
+                if (exl <= 0) exl = 0.5 * hist->getNominalBinWidth();
+                if (exh <= 0) exh = 0.5 * hist->getNominalBinWidth();
+
+                yy = point / curve->average(x - exl, x + exh) ;
+                dyl /= curve->average(x - exl, x + exh);
+                dyh /= curve->average(x - exl, x + exh);
+            } else {
+                yy = point / curve->interpolate(x);
+                dyl /= curve->interpolate(x);
+                dyh /= curve->interpolate(x);
+            }
+
+            // Don't add a ratio plot point if there's no data in the bin
+            if (std::abs(point) < 0.000001) continue;
+        
+            ratioHist->addBinWithError(x, yy, dyl, dyh);
+        }
+        // ---------------------------------------------------------------------------
+    }
+    ratioHist->GetHistogram()->GetXaxis()->SetRangeUser(frame->GetXaxis()->GetXmin(), frame->GetXaxis()->GetXmax());
+    ratioHist->GetHistogram()->GetXaxis()->SetTitle(frame->GetXaxis()->GetTitle());
+    ratioHist->GetHistogram()->GetYaxis()->SetTitle("Data / curve");
+    return ratioHist.release();
+}
+
+//________________________________________________________________________________________________________________________________________
 RooHist* Util::MakeRatioOrPullHist(RooAbsData *regionData, RooAbsPdf *regionPdf, RooRealVar *regionVar, bool makePull /*false*/) {
 	// data/pdf ratio histograms are plotted by RooPlot.ratioHist() through a dummy frame
 	RooPlot* frame_dummy = regionVar->frame();
@@ -2877,7 +2995,8 @@ RooHist* Util::MakeRatioOrPullHist(RooAbsData *regionData, RooAbsPdf *regionPdf,
         return static_cast<RooHist*>(frame_dummy->pullHist());
 	}
 
-    return static_cast<RooHist*>(frame_dummy->ratioHist());
+    // Ratio hist
+    return static_cast<RooHist*>(MakeRatioHist(frame_dummy, nullptr, nullptr, false));
 }
 
 //________________________________________________________________________________________________________________________________________
