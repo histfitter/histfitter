@@ -321,7 +321,7 @@ namespace Util
      @param doAsym Boolean deciding whether asymmetric (MINOS) errors on parameters get used in an averaged approximation
      @return Returns the propagated error
   */
-  double getPropagatedError628(RooAbsReal* var, const RooFitResult& fr, const bool& doAsym=false);
+  double getPropagatedError(RooAbsReal* var, const RooFitResult& fr, const bool& doAsym=false);
 
   /**
      Sets interpolation code
@@ -483,7 +483,6 @@ namespace Util
 
  void PlotFitParameters(RooFitResult* r, TString anaName);
 
- double getPropagatedError628(RooAbsReal& absReal, const RooFitResult &fr, const RooArgSet &nset);
  TH1* ComponentToHistogram(RooRealSumPdf* component, RooRealVar* variable, RooFitResult *fitResult);
  void ScaleGraph(TGraphAsymmErrors *g, TH1* h);
 
