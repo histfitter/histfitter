@@ -2871,7 +2871,7 @@ RooHist* Util::MakeRatioHist(RooPlot *frame, const char* histname, const char* p
     std::vector<RooCurve*> curves;
 
     std::vector<TObject*> objects;
-    for(size_t i = frame->numItems() - 1; i >= 0; i--) objects.push_back(frame->getObject(i));
+    for(size_t i = frame->numItems() - 1; i > 0; i--) objects.push_back(frame->getObject(i));
     
     for(TObject* obj : objects) {
         if(obj->IsA() == RooCurve::Class()) {
