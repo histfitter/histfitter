@@ -32,7 +32,7 @@ git add HistFitter && git commit -m "Add HistFitter submodule"
 
 ### Recommended Root version
 
-Recommended Root version is 6.28. This version of HistFitter is not compatible with ROOT versions < 6.28.
+Recommended Root version is 6.28.0. This version of HistFitter is not compatible with ROOT versions < 6.28.0.
 
 ## Setup
 
