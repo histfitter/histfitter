@@ -1,7 +1,7 @@
 # HistFitter
 
 [![stable-release-python2](https://img.shields.io/badge/StablePython2-v0.66.0-green)](https://gitlab.cern.ch/HistFitter/HistFitter/-/releases/v0.66.0)
-[![stable-release-python3](https://img.shields.io/badge/StablePython3-v1.0.1-green)](https://gitlab.cern.ch/HistFitter/HistFitter/-/tree/v1.0.1)
+[![stable-release-python3](https://img.shields.io/badge/StablePython3-v1.2.0-green)](https://gitlab.cern.ch/HistFitter/HistFitter/-/tree/v1.2.0)
 [![Documentation](https://img.shields.io/badge/Documentation-blue)](https://twiki.cern.ch/twiki/bin/viewauth/AtlasProtected/SusyFitter)
 [![Tutorial](https://img.shields.io/badge/Tutorial-orange)](https://twiki.cern.ch/twiki/bin/viewauth/AtlasProtected/HistFitterTutorial)
 
@@ -32,7 +32,7 @@ git add HistFitter && git commit -m "Add HistFitter submodule"
 
 ### Recommended Root version
 
-Recommended Root version is 6.28.0. This version of HistFitter is not compatible with ROOT versions < 6.28.0.
+Recommended Root version is 6.28/00. This version of HistFitter is not compatible with ROOT versions < 6.28.
 
 ## Setup
 
