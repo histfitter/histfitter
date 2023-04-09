@@ -1057,7 +1057,9 @@ class ConfigManager:
                                 c = fitConfig.getChannel(normReg[1], normReg[0])
                             normString += c.regionString
 
-                    syst.PrepareGlobalNormalization(normString, self, fitConfig, chan, sam)
+                    # Do not fall back if the sample has no input files defined!
+                    forceNoFallback = len(sam.input_files) == 0
+                    syst.PrepareGlobalNormalization(normString, self, chan, sam, forceNoFallBack)
                     sam.addHistoSys(syst.name, nomName, highName, lowName, False, True, False, False, sam.name, normString)
 
         # post-processing 2: swapping of overall systematics for specified channel by systematics from other channel
@@ -1296,7 +1298,7 @@ class ConfigManager:
             chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName, 
                                                 includeOverallSys=False, normalizeSys=False, symmetrize=True, oneSide=False, symmetrizeEnvelope=True, 
                                                 samName=sam.name, normString=normString, nomSysName=nomSysName)
-        elif syst.method == "overallSys":
+        elif syst.method == "overallSys" or syst.method == 'userOverallSys':
             highIntegral = configMgr.hists[highName].Integral()
             lowIntegral = configMgr.hists[lowName].Integral()
             nomIntegral = configMgr.hists[nomName].Integral()
@@ -1311,8 +1313,6 @@ class ConfigManager:
                 log.warning(f"    generating Low overallSys for {nomName} syst={syst.name} nom={nomIntegral:g} high={highIntegral:g} low={lowIntegral:g}")
                 overallSystLow = 1.0
             chan.getSample(sam.name).addOverallSys(syst.name, overallSystHigh, overallSystLow)
-        elif syst.method == "userOverallSys":
-            chan.getSample(sam.name).addOverallSys(syst.name, syst.high, syst.low)
         elif syst.method == "overallHistoSys":
             chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName, 
                                                 includeOverallSys=True, normalizeSys=False, nomSysName=nomSysName)
@@ -1353,10 +1353,12 @@ class ConfigManager:
                                                 includeOverallSys=False, normalizeSys=True, symmetrize=True, oneSide=False, symmetrizeEnvelope=True, 
                                                 samName=sam.name, normString=normString, nomSysName=nomSysName)
         elif syst.method == "userHistoSys" or syst.method == "userNormHistoSys":
-            if configMgr.hists[highName] is None:
-                configMgr.hists[highName] = histMgr.buildUserHistoSysFromHist(highName,  syst.high,  configMgr.hists[nomName])
-            if configMgr.hists[lowName] is None:
-                configMgr.hists[lowName] = histMgr.buildUserHistoSysFromHist(lowName,  syst.low,  configMgr.hists[nomName])
+            # These following lines should never need to be called, since all sys are processed before the ConfigManager.addHistoSysforNoQCD() call
+            # in ConfigManager.execute():
+            #if configMgr.hists[highName] is None:
+            #    configMgr.hists[highName] = histMgr.buildUserHistoSysFromHist(highName,  syst.high,  configMgr.hists[nomName])
+            #if configMgr.hists[lowName] is None:
+            #    configMgr.hists[lowName] = histMgr.buildUserHistoSysFromHist(lowName,  syst.low,  configMgr.hists[nomName])
             if syst.method == "userHistoSys":
                 chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName, False, False, nomSysName=nomSysName)
             pass
