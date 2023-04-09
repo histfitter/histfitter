@@ -13,7 +13,7 @@ list(TRANSFORM root_components PREPEND ROOT::)
 
 set(local_libs ChannelStyle;CombinationUtils;CombineWorkSpaces;ConfigMgr;
         DrawUtils;FitConfig;HistogramPlotter;HypoTestTool;json;LimitResult;
-        RooExpandedFitResult;RooHist;RooPlot;Significance;StatTools;
+        RooExpandedFitResult;Significance;StatTools;
         TEasyFormula;TMsgLogger;toy_utils;Utils;ValidationUtils;XtraValues)
 list(TRANSFORM local_libs APPEND .h OUTPUT_VARIABLE headers)
 list(TRANSFORM local_libs APPEND .cxx OUTPUT_VARIABLE local_lib_sources)
