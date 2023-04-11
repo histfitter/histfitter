@@ -10,7 +10,12 @@ def script_runner():
         proc = subprocess.Popen(
             cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True
         )
-        proc.wait()
-        return proc
+        try:
+            out,err = proc.communicate(timeout=120)
+            return (proc,out,err)
+        except TimeoutExpired:
+            print("script_runner timedout")
+            proc.kill()
+            return proc
 
     yield run
