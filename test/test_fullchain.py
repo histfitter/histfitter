@@ -2,7 +2,7 @@ import ROOT
 import os
 import math
 
-# dump test info
+# snippet to dump test info from cache
 """
 import ROOT
 f = ROOT.TFile("data/hf_test/histCache.root")
@@ -15,7 +15,7 @@ for k in f.GetListOfKeys():
 
 def test_treeToHist(script_runner):
 
-    # Make input ttree if needed
+    # Make input TTree if needed
     if not os.path.isfile("test_tree.root"): 
         command = "root -l -b -q ${HISTFITTER}/test/scripts/genTree.C+"
         (ret,outRaw,errRaw) = script_runner(command)
@@ -60,7 +60,7 @@ def test_treeToHist(script_runner):
 
 def test_bkgFit(script_runner):
 
-    # Make input ttree if needed
+    # Make input TTree if needed
     if not os.path.isfile("test_tree.root"): 
         command = "root -l -b -q ${HISTFITTER}/test/scripts/genTree.C+"
         (ret,outRaw,errRaw) = script_runner(command)
@@ -76,6 +76,7 @@ def test_bkgFit(script_runner):
     (ret,outRaw,errRaw) = script_runner(command)
     assert ret.returncode == 0
 
+    # list of files that should have been created
     out_files = [
         "SR_m_beforeFit.pdf",
         "SR_m_beforeFit.eps",
@@ -96,14 +97,14 @@ def test_bkgFit(script_runner):
     ]
 
     for f in out_files:
-        assert os.path.isfile(f"results/hf_test/{f}") # post fit files
+        assert os.path.isfile(f"results/hf_test/{f}") # post fit files exist
 
     out = outRaw.decode('utf-8')
     assert "mu_bkg    1.0000e+00    1.1" in out # postfit bkg norm value
 
 def test_sigExclusionAll(script_runner):
 
-    # Make input ttree if needed
+    # Make input TTree if needed
     if not os.path.isfile("test_tree.root"): 
         command = "root -l -b -q ${HISTFITTER}/test/scripts/genTree.C+"
         (ret,outRaw,errRaw) = script_runner(command)
@@ -114,8 +115,6 @@ def test_sigExclusionAll(script_runner):
     assert ret.returncode == 0
 
     # YieldTable
-    print("YieldTable")
-
     command = "YieldsTable.py -c SR,CR -w results/hf_test/Sig_excl_combined_BasicMeasurement_model_afterFit.root -s bkg1,bkg2,signal -b -o yieldTable.tex"
     (ret,outRaw,errRaw) = script_runner(command)
     assert ret.returncode == 0
@@ -128,8 +127,6 @@ def test_sigExclusionAll(script_runner):
 
 
     # SysTable
-    print("SysTable")
-
     command = "SysTable.py -c SR -w results/hf_test/Sig_excl_combined_BasicMeasurement_model_afterFit.root -s bkg1,bkg2,signal -o sysTable.tex -%"
     (ret,outRaw,errRaw) = script_runner(command)
     assert ret.returncode == 0
@@ -142,8 +139,6 @@ def test_sigExclusionAll(script_runner):
         
 
     # Exclusion Asymptotics
-    print("Asymptotics")
-
     command = "HistFitter.py -F excl -l ${HISTFITTER}/test/scripts/config_for_pytest.py"
     (ret,outRaw,errRaw) = script_runner(command)
     assert ret.returncode == 0
@@ -154,8 +149,6 @@ def test_sigExclusionAll(script_runner):
 
 
     # Exclusion Toys
-    print("Toys")
-
     command = 'HistFitter.py -F excl -l -u"--useToys" ${HISTFITTER}/test/scripts/config_for_pytest.py'
     (ret,outRaw,errRaw) = script_runner(command)
     assert ret.returncode == 0

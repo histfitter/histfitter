@@ -2,10 +2,13 @@
 #include "TTree.h"
 #include "TRandom3.h"
 
-
+/*
+Generate TTree for testing
+*/
 
 void genTree(){
 
+    // open file
     std::string outfileName = "test_tree.root";
 
     TFile *f = TFile::Open(outfileName.c_str(),"RECREATE");

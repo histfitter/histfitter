@@ -1,22 +1,5 @@
 ## Config for CI testing
 
-################################################################
-## In principle all you have to setup is defined in this file ##
-################################################################
-
-
-### Usage examples
-
-## Run from scratch background-only
-# HistFitter.py -t -w -f -D "before,after" analysis/strong_2l2j.py  -u"--doSRHigh"
-
-## Run an exclusion fit after having run bkg only
-# HistFitter.py -w -f -F excl -D "before,after" analysis/strong_2l2j.py -g GG_N2_SLN1_2200_300 -u"--doSRHigh"
-
-# signal names used with -g must match filename before _merged_processed.root
-# e.g. GG_N2_SLN1_2200_300 or GG_N2_ZN1_1900_300, GG_N2_ZN1_1600_1300
-
-
 from configManager import configMgr
 from ROOT import kBlack,kWhite,kGray,kRed,kPink,kMagenta,kViolet,kBlue,kAzure,kCyan,kTeal,kGreen,kSpring,kYellow,kOrange
 from ROOT import TColor
@@ -35,8 +18,6 @@ gROOT.SetBatch(True)
 
 includeOverflowBin = True
 useStat    = True
-useExpSys  = True
-useThrSys  = True
 useToys = False
 
 
@@ -65,7 +46,6 @@ configMgr.nTOYs = 500
 configMgr.calculatorType = 0 if useToys else 2 # 2=asymptotic calculator, 0=frequentist calculator
 configMgr.testStatType = 3   # 3=one-sided profile likelihood test statistic (LHC default)
 configMgr.nPoints = 20       # number of values scanned of signal-strength for upper-limit determination of signal strength.
-#configMgr.scanRange = (0., 50.)
 
 if useToys:
     configMgr.nPoints = 10
@@ -85,7 +65,6 @@ try: os.mkdir('results/'+configMgr.analysisName )
 except: pass
 
 ##############
-# Cache for discovery fits, use -r srcmet_Nov2_80_100 for example
 configMgr.useCacheToTreeFallback = True
 configMgr.useHistBackupCacheFile = True # enable the use of an alternate data file
 configMgr.histBackupCacheFile =  "data/" + analysisNameBase + "/histCache.root" # the data file of your previous fit (= the backup cache file)
@@ -114,7 +93,7 @@ if not configMgr.readFromTree:
 
 
 
-######## Event Weights
+######## Event Weights and Cuts
 configMgr.weights = ["weight"]
 configMgr.cutsDict = {"SR":"m>100.",
                       "CR":"m<100."}
