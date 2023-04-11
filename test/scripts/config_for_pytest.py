@@ -105,7 +105,7 @@ if discovery_key != "":
 if not configMgr.readFromTree:
     inputHistFile = ROOT.TFile(configMgr.histBackupCacheFile)
     if inputHistFile.IsOpen():
-        print("Loading histograms from {}".format(inputHistFile) )
+        print(f"Loading histograms from {inputHistFile}" )
         for h in inputHistFile.GetListOfKeys():
             name = h.GetName()
             configMgr.hists[ h.GetName() ] = inputHistFile.Get( name )
