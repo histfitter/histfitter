@@ -1353,15 +1353,13 @@ class ConfigManager:
                                                 includeOverallSys=False, normalizeSys=True, symmetrize=True, oneSide=False, symmetrizeEnvelope=True, 
                                                 samName=sam.name, normString=normString, nomSysName=nomSysName)
         elif syst.method == "userHistoSys" or syst.method == "userNormHistoSys":
-            # These following lines should never need to be called, since all sys are processed before the ConfigManager.addHistoSysforNoQCD() call
-            # in ConfigManager.execute():
-            #if configMgr.hists[highName] is None:
-            #    configMgr.hists[highName] = histMgr.buildUserHistoSysFromHist(highName,  syst.high,  configMgr.hists[nomName])
-            #if configMgr.hists[lowName] is None:
-            #    configMgr.hists[lowName] = histMgr.buildUserHistoSysFromHist(lowName,  syst.low,  configMgr.hists[nomName])
+            if configMgr.hists[highName] is None:
+                log.warning(f'    addHistoSysforNoQCDEmpty: {highName} histogram is not found in configMgr.hists')
+            if configMgr.hists[lowName] is None:
+                log.warning(f'    addHistoSysforNoQCDEmpty: {lowName} histogram is not found in configMgr.hists')
+
             if syst.method == "userHistoSys":
                 chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName, False, False, nomSysName=nomSysName)
-            pass
         elif syst.method == "shapeSys":
             if syst.merged:
                 mergedName = "".join(syst.sampleList)
