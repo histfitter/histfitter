@@ -22,7 +22,6 @@ useToys = False
 
 
 input_file = "test_tree.root"
-discovery_key = ''
 
 nominal_tree_name = "_NoSys"
 
@@ -46,10 +45,10 @@ configMgr.nTOYs = 500
 configMgr.calculatorType = 0 if useToys else 2 # 2=asymptotic calculator, 0=frequentist calculator
 configMgr.testStatType = 3   # 3=one-sided profile likelihood test statistic (LHC default)
 configMgr.nPoints = 20       # number of values scanned of signal-strength for upper-limit determination of signal strength.
+configMgr.scanRange = (0., 2.)
 
 if useToys:
     configMgr.nPoints = 10
-    configMgr.scanRange = (0., 2.)
 
 
 ROOT.Math.MinimizerOptions.SetDefaultStrategy(0)
@@ -72,13 +71,11 @@ configMgr.histBackupCacheFile =  "data/" + analysisNameBase + "/histCache.root" 
 configMgr.outputFileName = "results/" + configMgr.analysisName  + "/Output.root"
 configMgr.histCacheFile = "data/" + analysisNameBase + "/histCache.root"
 
-if discovery_key != "":
-    configMgr.histBackupCacheFile =  "data/" + analysisNameBase + "/histCache_disc_"+discovery_key+".root"
-    if myFitType==FitType.Discovery:
-        configMgr.outputFileName = "results/" + configMgr.analysisName   + "/Output_disc_" + discovery_key + ".root"
-    else:
-        configMgr.outputFileName = "results/" + configMgr.analysisName  + "/Output_bkg_" + discovery_key + ".root"
-    configMgr.histCacheFile = "data/" + analysisNameBase + "/histCache_disc_"+discovery_key+".root"
+
+if myFitType==FitType.Discovery:
+    configMgr.histBackupCacheFile =  "data/" + analysisNameBase + "/histCache_disc.root" # the data file of your previous fit (= the backup cache file)
+    configMgr.outputFileName = "results/" + configMgr.analysisName  + "/Output_disc.root"
+    configMgr.histCacheFile = "data/" + analysisNameBase + "/histCache_disc.root"
 
 
 if not configMgr.readFromTree:
@@ -96,6 +93,7 @@ if not configMgr.readFromTree:
 ######## Event Weights and Cuts
 configMgr.weights = ["weight"]
 configMgr.cutsDict = {"SR":"m>100.",
+                      "SR_disc":"m>150.",
                       "CR":"m<100."}
 
 ####### Setup Data and Background Samples ############
@@ -132,8 +130,6 @@ sigSample.addSystematic( Systematic('flat_sys', '', 1.10, 0.90, 'user', 'overall
 
 ########## Fit Config Base ##########
 bkgName = "BkgOnly"
-if discovery_key != "":
-    bkgName += "_" + discovery_key
 cfg_fit = configMgr.addFitConfig(bkgName)
 if useStat:
     cfg_fit.statErrThreshold=0.03 
@@ -147,7 +143,7 @@ cfg_fit.addSamples([bkg1Sample, bkg2Sample, dataSample])
 # Signal region
 SRs = list()
 if myFitType==FitType.Discovery:
-    SR = cfg_fit.addChannel('m',["SR_disc"],1,150,200)
+    SR = cfg_fit.addChannel('cuts',["SR_disc"],1,0.5,1.5)
 else:
     SR = cfg_fit.addChannel('m',["SR"],2,100,200)
 SRs.append(SR)

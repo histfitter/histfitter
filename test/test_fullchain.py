@@ -168,3 +168,26 @@ def test_sigExclusionAll(script_runner):
     assert math.isclose(exp_ul, 0.8, abs_tol = 0.1)
 
 
+
+def test_discoveryAll(script_runner):
+    # Make input TTree if needed
+    if not os.path.isfile("test_tree.root"): 
+        command = "root -l -b -q ${HISTFITTER}/test/scripts/genTree.C+"
+        (ret,outRaw,errRaw) = script_runner(command)
+        assert ret.returncode == 0 # ROOT file with TTrees generated
+
+    # Make discovery workspace and fit
+    #command = 'HistFitter.py -t -w -F disc -f -D"before,after,corrMatrix" ${HISTFITTER}/test/scripts/config_for_pytest.py' 
+    # plotting crashes, something to fix!
+    command = 'HistFitter.py -t -w -F disc -f ${HISTFITTER}/test/scripts/config_for_pytest.py'
+    (ret,outRaw,errRaw) = script_runner(command)
+    assert ret.returncode == 0
+
+    # Upper limit table
+    command = 'UpperLimitTable.py -c SR_disc -w results/hf_test/Discovery_combined_BasicMeasurement_model.root -l 10 -p mu_Discovery -o ulTable.tex -a -R 10'
+    (ret,outRaw,errRaw) = script_runner(command)
+    assert ret.returncode == 0
+
+    with open('ulTable.tex') as f:
+        contents = f.read()
+        assert 'SR\\_disc    & $0.75$ &  $7.5$ & $ { 5.6 }^{ +2.9 }_{ -1.8 }$ & $0.75$ & $ 0.21$~$(0.82)$' in contents # UL table
