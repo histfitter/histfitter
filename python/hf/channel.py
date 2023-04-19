@@ -156,7 +156,7 @@ class Channel:
         """
 
         self.prefix = prefix
-        self.xmlFileName = "config/" + self.prefix + "_" + self.channelName + ".xml"
+        self.xmlFileName = f"{os.getenv('HISTFITTER')}/config/" + self.prefix + "_" + self.channelName + ".xml"
         
         return
 

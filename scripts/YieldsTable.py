@@ -20,15 +20,20 @@ import os
 import sys
 import pickle
 import ROOT
-ROOT.gROOT.SetBatch(True)
-ROOT.PyConfig.IgnoreCommandLineOptions = True
-ROOT.gSystem.Load(f"libSusyFitter.so")
 
 from ROOT import gROOT,gSystem,gDirectory, PyConfig
+
+gROOT.SetBatch(True)
+PyConfig.IgnoreCommandLineOptions = True
+gSystem.Load(f"libSusyFitter.so")
+from ROOT import hf
+Util = hf.Util
+RooExpandedFitResult = hf.RooExpandedFitResult
 gROOT.Reset()
 
+
 from ROOT import TFile, RooWorkspace, TObject, TString, RooAbsReal, RooRealVar, RooFitResult, RooDataSet, RooAddition, RooArgSet, RooFormulaVar, RooAbsData, RooRandom, RooArgList, RooBinningCategory
-from ROOT import TMath, TMap, RooExpandedFitResult, Util
+from ROOT import TMath, TMap
 
 from cmdLineUtils import getPdfInRegions,getName,getPdfInRegionsWithRangeName
 

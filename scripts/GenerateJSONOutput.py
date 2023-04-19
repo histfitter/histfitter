@@ -11,6 +11,9 @@ import argparse
 import sys
 import os
 import ROOT
+import json
+import glob
+import re
 
 ROOT.gSystem.Load(f"libSusyFitter.so")
 
@@ -152,8 +155,6 @@ def processFile(file):
 
 
 def cleanUpJSON():
-    import json
-    import glob
 
     for file in glob.glob("./*json"):
         print(">>> Making file human readable: %s" % file)
@@ -164,8 +165,6 @@ def cleanUpJSON():
 
 
 def addCoordinates(fileName, coordString):
-    import json
-    import re
 
     coordDict = json.loads(coordString)
 

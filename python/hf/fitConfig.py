@@ -131,11 +131,11 @@ class fitConfig:
         """
         Initialise internal variables
         """
-        self.xmlFileName = "config/"+self.prefix+".xml"
+        self.xmlFileName = f"{os.getenv('HISTFITTER')}/config/"+self.prefix+".xml"
         
         #Note: wsFileName is an educated guess of the workspace
         # file name externally decided by HistFactory.
-        self.wsFileName = f"results/{self.prefix}_combined_{self.measurements[0].name}_model.root"
+        self.wsFileName = f"{os.getenv('HISTFITTER')}/results/{self.prefix}_combined_{self.measurements[0].name}_model.root"
         log.debug(f"fitConfig.initialize(): set output filename for {self.name} to {self.wsFileName}")
 
         for sam in self.sampleList:
@@ -866,8 +866,8 @@ class fitConfig:
         """
         Convert instance to XML string
         """
-        self.writeString = "<!DOCTYPE Combination  SYSTEM '"+os.getenv('HISTFITTER')+"/config/HistFactorySchema.dtd'>\n\n"
-        self.writeString += "<Combination OutputFilePrefix=\"./results/" + self.prefix + "\"  >\n\n"
+        self.writeString = f"<!DOCTYPE Combination  SYSTEM \"{os.getenv('HISTFITTER')}/config/HistFactorySchema.dtd\">\n\n"
+        self.writeString += f"<Combination OutputFilePrefix=\"{os.getenv('HISTFITTER')}/results/" + self.prefix + "\"  >\n\n"
 
         for func in self.functions:
             self.writeString += f"  <Function Name=\"{func[0]}\" Expression=\"{func[1]}\" Dependents=\"{func[2]}\" />\n"

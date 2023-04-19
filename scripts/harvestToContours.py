@@ -24,8 +24,27 @@ import sys
 import os
 import pickle
 import copy
+from array import array
 from ctypes import c_double
 
+
+## If I need to use scipy, please let me have scipy. I'll even help you out!
+try:
+    import matplotlib as mpl
+    mpl.use('Agg')
+    import matplotlib.pyplot as plt
+    import numpy as np
+    import scipy.interpolate
+except:
+    print( ">>>" )
+    print( ">>> You need scipy/matplotlib to run this. And you had to have run harvestToContours in scipy mode [default]" )
+    print( ">>> In an ATLAS environment, you can..." )
+    print( '>>> >  lsetup "views LCG_94 x86_64-centos7-gcc62-opt" # or replace with a newer LCG release or more appropriate arch' )
+    print( ">>> " )
+    print( ">>> Try that and then run this again!" )
+    sys.exit(1)
+
+from scipy.spatial.distance import cdist
 ROOT.gROOT.SetBatch()
 
 
@@ -69,22 +88,6 @@ parser.add_argument("--closedBands","-b",      help = "if contours are closed sh
 
 args = parser.parse_args()
 
-
-## If I need to use scipy, please let me have scipy. I'll even help you out!
-try:
-    import matplotlib as mpl
-    mpl.use('Agg')
-    import matplotlib.pyplot as plt
-    import numpy as np
-    import scipy.interpolate
-except:
-    print( ">>>" )
-    print( ">>> You need scipy/matplotlib to run this. And you had to have run harvestToContours in scipy mode [default]" )
-    print( ">>> In an ATLAS environment, you can..." )
-    print( '>>> >  lsetup "views LCG_94 x86_64-centos7-gcc62-opt" # or replace with a newer LCG release or more appropriate arch' )
-    print( ">>> " )
-    print( ">>> Try that and then run this again!" )
-    sys.exit(1)
 
 
 if args.useUpperLimit:
@@ -458,7 +461,6 @@ def addValuesToDict(inputDict, function, numberOfPoints = 100, value = 0):
 
 
     if value == "mirror":
-        from scipy.spatial.distance import cdist
         def closest_point(pt, others):
             distances = cdist(pt, others)
             return others[distances.argmin()]
@@ -672,7 +674,6 @@ def interpolateSurface(modelDict = {}, interpolationFunction = "linear", useROOT
 
 def createTGraph2DFromArrays(x,y,z):
     """Helper function to quickly create a TGraph2D from three python iterables"""
-    from array import array
     return ROOT.TGraph2D(len(x),
         array('f',x),
         array('f',y),

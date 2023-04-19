@@ -25,7 +25,8 @@ Place-holder for functions to interpret complex command line arguments
 common to HistFitter.py, YieldsTable.py, SysTable.py and other scripts.
 """
 
-from ROOT import Util,RooAddition,RooArgList 
+from ROOT import RooAddition, RooArgList, hf
+Util = hf.Util
 
 def cmdStringToListOfLists(inputString):
     """
