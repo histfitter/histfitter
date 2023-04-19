@@ -59,6 +59,12 @@ make install
 ```
 Then you have to update the library path in the setup script manually to access it:
 
+An LCG release with the correct ROOT and Python versions can be loaded with
+
+```
+source setup_lcg.sh
+```
+
 
 ## Build
 

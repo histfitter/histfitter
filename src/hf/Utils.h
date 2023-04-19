@@ -331,7 +331,7 @@ namespace Util{
      @param doAsym Boolean deciding whether asymmetric (MINOS) errors on parameters get used in an averaged approximation
      @return Returns the propagated error
   */
-  double getPropagatedError628(RooAbsReal* var, const RooFitResult& fr, const bool& doAsym=false);
+  double getPropagatedError(RooAbsReal* var, const RooFitResult& fr, const bool& doAsym=false);
 
   /**
      Sets interpolation code
