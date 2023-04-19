@@ -5,6 +5,12 @@ src/SusyFitter_Dict.C
 .*.swp
 data/*.root
 *.pyc
+*.pcm
+*.d
+*.so
+
+*~
+*#
 
 # copied from the src dir!
 include/*.h

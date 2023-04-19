@@ -26,6 +26,7 @@
 #include "TSystem.h"
 #include "TFile.h"
 #include "TTree.h"
+#include "TMath.h"
 #include "RooMCStudy.h"
 #include "RooFitResult.h"
 //#include "RooStats/HypoTestInverterResult.h"
