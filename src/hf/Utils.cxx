@@ -73,16 +73,11 @@
 #include "RooNumIntConfig.h"
 #include "RooMinimizer.h"
 #include "RooFormulaVar.h"
-<<<<<<< HEAD
-<<<<<<< HEAD:src/hf/Utils.cxx
+
 #include "RooPlot.h" //Needed by RooAbsPdf
 #include "RooHist.h"
-=======
->>>>>>> f9ad3d48f5d6ad54cb43fe30e033d7980acb856d:src/Utils.cxx
-=======
 #include "RooPlot.h" //Needed by RooAbsPdf
 #include "RooHist.h"
->>>>>>> 2bfa7a8675a8aec3560807c99cce08b5fd7bd158
 #include "RooNLLVar.h"
 
 #include "RooStats/ModelConfig.h"
@@ -2398,11 +2393,7 @@ vector<double> hf::Util::GetAllComponentFracInRegion(RooWorkspace* w, TString re
 
 
 //_____________________________________________________________________________
-<<<<<<< HEAD
 double hf::Util::getPropagatedError(RooAbsReal* var, const RooFitResult& fr, const bool& doAsym)
-=======
-double hf::Util::getPropagatedError(RooAbsReal* var, const RooFitResult& fr, const bool& doAsym)
->>>>>>> 2bfa7a8675a8aec3560807c99cce08b5fd7bd158
 {
     Logger << kDEBUG << " GPP for variable = " << var->GetName() << GEndl;
 
@@ -2876,8 +2867,6 @@ void hf::Util::RemoveEmptyDataBins( RooPlot* frame){
 
 }
 
-<<<<<<< HEAD
-//________________________________________________________________________________________________________________________________________
 RooHist* hf::Util::MakeRatioHist(RooPlot *frame, const char* histname, const char* pdfname, bool useAverage) {
     // Find all curve objects with the name "pdfname" or the name of the last
     // plotted curve (there might be multiple in the case of multi-range fits).
@@ -2993,9 +2982,7 @@ RooHist* hf::Util::MakeRatioHist(RooPlot *frame, const char* histname, const cha
     return ratioHist.release();
 }
 
-//________________________________________________________________________________________________________________________________________
-=======
->>>>>>> 2bfa7a8675a8aec3560807c99cce08b5fd7bd158
+
 RooHist* hf::Util::MakeRatioOrPullHist(RooAbsData *regionData, RooAbsPdf *regionPdf, RooRealVar *regionVar, bool makePull /*false*/) {
 	// data/pdf ratio histograms are plotted by RooPlot.ratioHist() through a dummy frame
 	RooPlot* frame_dummy = regionVar->frame();
@@ -3011,13 +2998,8 @@ RooHist* hf::Util::MakeRatioOrPullHist(RooAbsData *regionData, RooAbsPdf *region
         return static_cast<RooHist*>(frame_dummy->pullHist());
 	}
 
-<<<<<<< HEAD
     // Ratio hist
     return static_cast<RooHist*>(MakeRatioHist(frame_dummy, nullptr, nullptr, false));
-=======
-    //return static_cast<RooHist*>(frame_dummy->ratioHist());
-    return static_cast<RooHist*>(frame_dummy->residHist(0, 0, false, true));
->>>>>>> 2bfa7a8675a8aec3560807c99cce08b5fd7bd158
 }
 
 //________________________________________________________________________________________________________________________________________
@@ -3750,110 +3732,7 @@ void hf::Util::PlotFitParameters(RooFitResult* r, TString anaName){
 
 }
 
-<<<<<<< HEAD
 
-//-------------------------------------------------------------------------------------------------------
-=======
-//-------------------------------------------------------------------------------------------------------
-
-// The fixed version of getPropagatedError from ROOT 6.28 that also works for
-// the RooRealSumPdf directly. Can be removed once ROOT 6.28 is used.
-double hf::Util::getPropagatedError(RooAbsReal& absReal, const RooFitResult &fr, const RooArgSet &nset={})
-{
-  // Calling getParameters() might be costly, but necessary to get the right
-  // parameters in the RooAbsReal. The RooFitResult only stores snapshots.
-  RooArgSet allParamsInAbsReal;
-  absReal.getParameters(&nset, allParamsInAbsReal);
-
-  RooArgList paramList;
-  for(auto * rrvFitRes : static_range_cast<RooRealVar*>(fr.floatParsFinal())) {
-
-     auto rrvInAbsReal = static_cast<RooRealVar const*>(allParamsInAbsReal.find(*rrvFitRes));
-
-     // If this RooAbsReal is a RooRealVar in the fit result, we don't need to
-     // propagate anything and can just return the error in the fit result
-     if(rrvFitRes->namePtr() == absReal.namePtr()) return rrvFitRes->getError();
-
-     // Strip out parameters with zero error
-     if (rrvFitRes->getError() <= rrvFitRes->getVal() * std::numeric_limits<double>::epsilon()) continue;
-
-     // Ignore parameters in the fit result that this RooAbsReal doesn't depend on
-     if(!rrvInAbsReal) continue;
-
-     // Checking for float equality is a bad. We check if the values are
-     // negligibly far away from each other, relative to the uncertainty.
-     if(std::abs(rrvInAbsReal->getVal() - rrvFitRes->getVal()) > 0.01 * rrvFitRes->getError()) {
-        std::stringstream errMsg;
-        errMsg << "RooAbsReal::getPropagatedError(): the parameters of the RooAbsReal don't have"
-               << " the same values as in the fit result! The logic of getPropagatedError is broken in this case.";
-
-        throw std::runtime_error(errMsg.str());
-     }
-
-     paramList.add(*rrvInAbsReal);
-  }
-
-  std::vector<double> plusVar;
-  std::vector<double> minusVar;
-  plusVar.reserve(paramList.size());
-  minusVar.reserve(paramList.size());
-
-  // Create std::vector of plus,minus variations for each parameter
-  TMatrixDSym V(paramList.size() == fr.floatParsFinal().size() ?
-      fr.covarianceMatrix() :
-      fr.reducedCovarianceMatrix(paramList)) ;
-
-  for (Int_t ivar=0 ; ivar<paramList.getSize() ; ivar++) {
-
-    auto& rrv = static_cast<RooRealVar&>(paramList[ivar]);
-
-    double cenVal = rrv.getVal() ;
-    double errVal = sqrt(V(ivar,ivar)) ;
-
-    // Make Plus variation
-    rrv.setVal(cenVal+errVal) ;
-    plusVar.push_back(absReal.getVal(nset)) ;
-
-    // Make Minus variation
-    rrv.setVal(cenVal-errVal) ;
-    minusVar.push_back(absReal.getVal(nset)) ;
-
-    rrv.setVal(cenVal) ;
-  }
-
-  // Re-evaluate this RooAbsReal with the central parameters just to be
-  // extra-safe that a call to `getPropagatedError()` doesn't change any state.
-  // It should not be necessarry because thanks to the dirty flag propagation
-  // the RooAbsReal is re-evaluated anyway the next time getVal() is called.
-  // Still there are imaginable corner cases where it would not be triggered,
-  // for example if the user changes the RooFit operation more after the error
-  // propagation.
-  absReal.getVal(nset);
-
-  TMatrixDSym C(paramList.getSize()) ;
-  std::vector<double> errVec(paramList.getSize()) ;
-  for (int i=0 ; i<paramList.getSize() ; i++) {
-    errVec[i] = std::sqrt(V(i,i)) ;
-    for (int j=i ; j<paramList.getSize() ; j++) {
-      C(i,j) = V(i,j) / std::sqrt(V(i,i)*V(j,j));
-      C(j,i) = C(i,j) ;
-    }
-  }
-
-  // Make std::vector of variations
-  TVectorD F(plusVar.size()) ;
-  for (unsigned int j=0 ; j<plusVar.size() ; j++) {
-    F[j] = (plusVar[j]-minusVar[j])/2 ;
-  }
-
-  // Calculate error in linear approximation from variations and correlation coefficient
-  double sum = F*(C*F) ;
-
-  return sqrt(sum) ;
-}
-
-
->>>>>>> 2bfa7a8675a8aec3560807c99cce08b5fd7bd158
 TH1* hf::Util::ComponentToHistogram(RooRealSumPdf* component, RooRealVar* variable, RooFitResult *fitResult) {
     // Build a TH1-based histogram from a pdf, an observable and a fit result
 
