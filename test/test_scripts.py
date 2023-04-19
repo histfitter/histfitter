@@ -16,10 +16,9 @@ def test_help(script_runner):
 
 def test_backupCacheExampleAnalysis(script_runner):
     # create input ROOT file with a python script
-    command1 = "python ${HISTFITTER}/test/scripts/backupCache_input.py data/backupCache_example.root"
-    (ret,outRaw,errRaw) = script_runner(command1)
-    err = errRaw.decode('utf-8')
-    assert err == ""
+    command1 = f"python test/scripts/backupCache_input.py {os.getenv('HISTFITTER')}/data/backupCache_example.root"
+    ret = script_runner(command1)
+    assert ret.stderr.read().decode("utf-8") == ""
     # run HistFitter
     command2 = "HistFitter.py -R -w -f -F bkg -D before,after ${HISTFITTER}/test/scripts/backupCache_config.py"
     (ret,outRaw,errRaw) = script_runner(command2)
