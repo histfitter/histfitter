@@ -483,7 +483,7 @@ void hf::HistogramPlot::addRatioPanel() {
         poi->setVal(poi_val_old);
     }
 
-    //// data/pdf ratio histograms are plotted by RooPlot.ratioHist() through a dummy frame
+    //// data/pdf ratio histograms are plotted by RooPlot through a dummy frame
     RooPlot* frame_dummy = m_regionVariable->frame();
 
     // Construct a histogram with the ratio of the pdf curve w.r.t the pdf curve +/- 1 sigma

@@ -15,22 +15,30 @@
  * modification, are permitted according to the terms listed in the file          *
  * LICENSE.                                                                       *
 """
-
+#python imports
 import os
-
-import ROOT
-ROOT.PyConfig.IgnoreCommandLineOptions = True
-ROOT.SetMemoryPolicy( ROOT.kMemoryStrict )
-
-from ROOT import gROOT,gSystem,gDirectory,RooAbsData,RooRandom,RooWorkspace
-ROOT.gSystem.Load(f"libSusyFitter.so")
-from ROOT importConfigMgr
-#gROOT.Reset()
-
+import cProfile
+from code import InteractiveConsole
 import argparse
 import sys
 
+#ROOT imports
+import ROOT
+ROOT.PyConfig.IgnoreCommandLineOptions = True
+ROOT.SetMemoryPolicy( ROOT.kMemoryStrict )
+from ROOT import gROOT, gSystem, gDirectory, RooAbsData, RooRandom, RooWorkspace
+
+#HistFitter c++ imports
+ROOT.gSystem.Load(f"libSusyFitter.so")
+from ROOT import hf
+ConfigMgr = hf.ConfigMgr
+Util = hf.Util
+
+#Histfitter imports
 from logger import Logger
+from configManager import configMgr
+
+#Create logger
 log = Logger('HistFitter')
 
 def GenerateFitAndPlotCPP(fc, anaName, drawBeforeFit, drawAfterFit, drawCorrelationMatrix, drawSeparateComponents, drawLogLikelihood, minos, minosPars, doFixParameters, fixedPars, ReduceCorrMatrix, noFit, plotInterpolation):
@@ -53,8 +61,6 @@ def GenerateFitAndPlotCPP(fc, anaName, drawBeforeFit, drawAfterFit, drawCorrelat
     @param plotInterpolation plot the interpolation scheme
     """
     
-    from ROOT import Util
-    
     log.debug('GenerateFitAndPlotCPP: anaName %s ' % anaName)
     log.debug("GenerateFitAndPlotCPP: drawBeforeFit %s " % drawBeforeFit) 
     log.debug("GenerateFitAndPlotCPP: drawAfterFit %s " % drawAfterFit) 
@@ -76,8 +82,6 @@ if __name__ == "__main__":
     """
     Main function call starts here ....
     """
-    
-    from configManager import configMgr
     
     """
     set some default options
@@ -349,7 +353,6 @@ if __name__ == "__main__":
     """
     if configMgr.readFromTree or configMgr.executeHistFactory:
         if doCodeProfiling:
-            import cProfile
             cProfile.run('configMgr.executeAll()')
         else:
             configMgr.executeAll()
@@ -358,7 +361,6 @@ if __name__ == "__main__":
     shows systematics
     """
     if drawSystematics:
-       from ROOT import Util
        if not os.path.isdir("./plots"): 
           log.info("no directory './plots' found - attempting to create one")
           os.mkdir("./plots")
@@ -450,8 +452,6 @@ if __name__ == "__main__":
         pass
 
     if runInterpreter:
-        from code import InteractiveConsole
-        from ROOT import Util
         cons = InteractiveConsole(locals())
         cons.interact("Continuing interactive session... press Ctrl+d to exit")
         pass

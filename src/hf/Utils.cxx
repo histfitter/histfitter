@@ -12,7 +12,7 @@
  *      Lorenzo Moneta, CERN, Geneva  <Lorenzo.Moneta@cern.h>                     *
  *           See: FitPdf()                                                        *
  *      Wouter Verkerke, Nikhef, Amsterdam <verkerke@nikhef.nl>                   *
- *           See: getPropagatedError628()                                            *
+ *           See: getPropagatedError()                                            *
  *                                                                                *
  * See corresponding .h file for author and license information                   *
  **********************************************************************************/
@@ -75,6 +75,7 @@
 #include "RooFormulaVar.h"
 #include "RooPlot.h" //Needed by RooAbsPdf
 #include "RooHist.h"
+#include "RooNLLVar.h"
 
 #include "RooStats/ModelConfig.h"
 #include "RooStats/ProfileLikelihoodTestStat.h"
@@ -2115,7 +2116,7 @@ RooAbsReal* hf::Util::GetComponent(RooWorkspace* w, TString component, TString r
     for(unsigned int iReg=0; iReg<regionCompNameVec.size(); iReg++){
         for(unsigned int iComp=0; iComp< componentVec.size(); iComp++){
             Logger << kDEBUG << " GetComponent: regionCompNameVec[" << iReg << "] = " << regionCompNameVec[iReg] << " componentVec[" << iComp << "] = " << componentVec[iComp] << GEndl;
-            TString target = componentVec[iComp]+"_";
+            TString target = componentVec[iComp]+"_"+regionFullName;
             if(  regionCompNameVec[iReg].Contains(target.Data())) {
                 TString func_name = regionCompNameVec[iReg];
                 TString coef_name = func_name;
@@ -2213,14 +2214,14 @@ Double_t hf::Util::GetComponentFracInRegion(RooWorkspace* w, TString component, 
     bool found_comp = false;
     for(unsigned int iReg=0; iReg<regionCompNameVec.size(); iReg++){
         for(unsigned int iComp=0; iComp< componentVec.size(); iComp++){
-            TString target = componentVec[iComp]+"_";
+            TString target = componentVec[iComp]+"_"+regionFullName;
             if (regionCompNameVec[iReg].Contains(target.Data())) found_comp = true;
         }
     }
 
     if(!found_comp){
         Logger << kERROR << "Something went wrong, no components found for "<<component.Data()<<GEndl;
-        return NULL;
+        return 0;
     }
 
     // get the full RRSPdf of this region
@@ -2236,7 +2237,7 @@ Double_t hf::Util::GetComponentFracInRegion(RooWorkspace* w, TString component, 
     double componentFrac = 0.;
     for(unsigned int iReg=0; iReg<regionCompNameVec.size(); iReg++){
         for(unsigned int iComp=0; iComp< componentVec.size(); iComp++){
-            TString target = componentVec[iComp]+"_";
+            TString target = componentVec[iComp]+"_"+regionFullName;
             if(  regionCompNameVec[iReg].Contains(target.Data())) {
                 componentFrac += GetComponentFrac(w,regionCompNameVec[iReg],RRSPdfName,regionVar) ;
             }
@@ -2381,7 +2382,7 @@ vector<double> hf::Util::GetAllComponentFracInRegion(RooWorkspace* w, TString re
 
 
 /*
- * Adopted from: RooAbsReal::getPropagatedError628()
+ * Adopted from: RooAbsReal::getPropagatedError()
  * by Wouter Verkerke
  * See: http://root.cern.ch/root/html534/src/RooAbsReal.h.html
  * (http://roofit.sourceforge.net/license.txt)
@@ -2460,7 +2461,6 @@ double hf::Util::getPropagatedError628(RooAbsReal* var, const RooFitResult& fr, 
 
     // Make vector of variations
     TVectorD F(plusVar.size()) ;
-
     for (unsigned int j=0 ; j<plusVar.size() ; j++) {
         F[j] = (plusVar[j]-minusVar[j])/2 ;
     }
@@ -3731,10 +3731,7 @@ TH1* hf::Util::ComponentToHistogram(RooRealSumPdf* component, RooRealVar* variab
 
         // Now get the value and the error
         auto sum = component->getVal();
-
-        // In ROOT 6.28, we can direcly use RooAbsReal::getPropagatedError628()
-        //auto err = integral->getPropagatedError628(*fitResult) / stepsize;
-        auto err = getPropagatedError628(*component, *fitResult);
+        auto err = component->getPropagatedError(*fitResult);
 
         // and put them in the histogram
         hist->SetBinContent(i, sum);

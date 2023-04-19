@@ -16,6 +16,7 @@
 
 
 import ROOT, csv, argparse, math
+from array import array
 
 ROOT.gROOT.SetBatch()
 
@@ -54,8 +55,6 @@ def main():
            
         # Convert arrays to ROOT TGraph
         outfile = ROOT.TFile(args.outputFile, "recreate")
-   
-        from array import array
         graph =  ROOT.TGraph(len(x), array('f',x), array('f',y))
    
         graph.Write("hepdata_graph")    

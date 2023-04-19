@@ -20,6 +20,7 @@
 #include "TSystem.h"
 #include "TFile.h"
 #include "TTree.h"
+#include "TMath.h"
 #include "RooMCStudy.h"
 #include "RooFitResult.h"
 #include "RooRandom.h"
@@ -30,7 +31,7 @@
 #include "./TMsgLogger.h"
 #include "./ConfigMgr.h"
 #include "./Utils.h"
-#include "./root/StatTools.h"
+#include "../root/StatTools.h"
 
 using namespace std;
 

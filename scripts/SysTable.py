@@ -17,18 +17,21 @@
 """
 import os
 # this module comes from gSystem.Load("libSusyFitter.so")
-from ROOT import ConfigMgr, FitConfig
-from ROOT import gROOT, gSystem, gDirectory
-from ROOT import PyConfig
 gROOT.SetBatch(True)
 PyConfig.IgnoreCommandLineOptions = True
 gSystem.Load(f"libSusyFitter.so")
+from ROOT import hf
+ConfigMgr = hf.ConfigMgr
+FitConfig = hf.FitConfig
+Util = hf.Util
+RooExpandedFitResult = hf.RooExpandedFitResult
 gROOT.Reset()
 
+from ROOT import gROOT, gSystem, gDirectory
+from ROOT import PyConfig
 from ROOT import TFile, RooWorkspace, TObject, TString, RooAbsReal, RooRealVar, RooFitResult, RooDataSet, RooAddition, RooArgSet,RooAbsData,RooRandom,RooArgList
-from ROOT import Util, TMath
+from ROOT import TMath
 from ROOT import RooFit
-from ROOT import RooExpandedFitResult
 
 from cmdLineUtils import getPdfInRegions,getName
 
@@ -183,7 +186,7 @@ def latexfitresults( filename, namemap, region='3jL', sample='', resultName="Roo
   regSys['sqrtnfitted'] = TMath.Sqrt(nFittedInRegion)
   regSys['nfitted'] = nFittedInRegion
 
-  pdfFittedErrInRegion = Util.getPropagatedError628(pdfInRegion, result, doAsym)
+  pdfFittedErrInRegion = Util.getPropagatedError(pdfInRegion, result, doAsym)
   regSys['totsyserr'] = pdfFittedErrInRegion
 
 
@@ -213,7 +216,7 @@ def latexfitresults( filename, namemap, region='3jL', sample='', resultName="Roo
            print( f'Systematic {parname} not found in workspace, passing gracefully.' )
         pass
 
-      sysError  = Util.getPropagatedError628(pdfInRegion, result, doAsym)
+      sysError  = Util.getPropagatedError(pdfInRegion, result, doAsym)
       regSys['syserr_'+key] =  sysError
       for idx in range(fpf.getSize()):
         parname = fpf[idx].GetName()
@@ -225,7 +228,7 @@ def latexfitresults( filename, namemap, region='3jL', sample='', resultName="Roo
       parname = fpf[idx].GetName()
       par = w.var(parname)
       par.setConstant(False)
-      sysError  = Util.getPropagatedError628(pdfInRegion, result, doAsym)
+      sysError  = Util.getPropagatedError(pdfInRegion, result, doAsym)
       regSys['syserr_'+parname] =  sysError
       par.setConstant()
 
@@ -390,7 +393,7 @@ def latexfitresults_method2(filename,resultname='RooExpandedFitResult_afterFit',
   regSys['sqrtnfitted'] = TMath.Sqrt(nFittedInRegion)
   regSys['nfitted'] = nFittedInRegion
 
-  pdfFittedErrInRegion = Util.getPropagatedError628(pdfInRegion, result, doAsym)
+  pdfFittedErrInRegion = Util.getPropagatedError(pdfInRegion, result, doAsym)
   regSys['totsyserr'] = pdfFittedErrInRegion
 
   """
@@ -436,7 +439,7 @@ def latexfitresults_method2(filename,resultname='RooExpandedFitResult_afterFit',
     calculate newly fitted number of events and full error
     """
     nFittedInRegion_1parfixed = pdfInRegion.getVal()
-    pdfFittedErrInRegion_1parfixed = Util.getPropagatedError628(pdfInRegion, expResultAfter_1parfixed, doAsym) #  result_1parfixed)
+    pdfFittedErrInRegion_1parfixed = Util.getPropagatedError(pdfInRegion, expResultAfter_1parfixed, doAsym) #  result_1parfixed)
 
     """
     check whether original total error is smaller then newly-fitted total error

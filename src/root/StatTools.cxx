@@ -23,6 +23,7 @@
 #include "RooRealSumPdf.h"
 #include "RooMinimizer.h"
 #include "RooPlot.h"
+#include "RooNLLVar.h"
 
 #include "RooStats/ModelConfig.h"
 #include "RooStats/ProfileLikelihoodTestStat.h"

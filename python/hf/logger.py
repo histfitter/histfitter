@@ -29,7 +29,8 @@
  **********************************************************************************/
 """
 
-from ROOT import TMsgLogger
+from ROOT import hf
+TMsgLogger = hf.TMsgLogger
 
 # maps 1-on-1 to names used in TMsgLogger.h
 VERBOSE = 1
