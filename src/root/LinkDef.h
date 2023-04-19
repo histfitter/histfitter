@@ -1,7 +1,6 @@
 #ifndef HF_LINKDEF_H
 #define HF_LINKDEF_H
 
-
 #ifdef __CLING__
 
 #pragma link off all globals;
@@ -12,15 +11,12 @@
 #pragma link C++ nestedclass;
 #pragma link C++ nestedtypedef;
 
-//#pragma link C++ namespace hf::TMsgLogger;
-//#pragma link C++ namespace hf
 #pragma link C++ class hf::TMsgLogger+;
 #pragma link C++ class hf::ConfigMgr+;
 #pragma link C++ class hf::FitConfig+;
+#pragma link C++ class hf::TEasyFormula ;
 #pragma link C++ class hf::RooExpandedFitResult+;
 #pragma link C++ class hf::XtraValues+;
-
-//#pragma link C++ TMsgLogger hf::TMsgLogger;
 
 #pragma link C++ namespace hf::Util+;
 #pragma link C++ function hf::Util::GetToyMC+;
@@ -35,30 +31,10 @@
 //////////////////////////////////////
 /// Functions from combination package
 
-// up to 'namespace StatTools', these were previously included
-// by including the entire (now dropped) Combination namespace
-
 //CombinationUtils.cxx
 #pragma link C++ function hf::resetFloatPars;
 
-//CombineWorkSpaces.cxx
-
-//#pragma link C++ function clearVec;
-//#pragma link C++ function CollectWorkspaces;
-//pragma link C++ function GetMatchingWorkspaces;
-//#pragma link C++ function GetWorkspaceFromFile;
-//#pragma link C++ function GetHypoTestResultFromFile;
-//#pragma link C++ function GetFitResultFromFile;
-//#pragma link C++ function GetMCStudy;
-//#pragma link C++ function ParseWorkspaceID;
-
 #pragma link C++ defined_in "../hf/CombineWorkSpaces.h";
-
-//TEasyFormula.cxx
-#pragma link C++ class hf::TEasyFormula ;
-
-//TMsgLogger.cxx
-#pragma link C++ class hf::TMsgLogger;
 
 //toy_utils.cxx
 #pragma link C++ function hf::get_Pvalue;
@@ -103,6 +79,8 @@
 
 //HypoTestTool.cxx
 #pragma link C++ class RooStats::HypoTestTool;
+
+//LimitResults.cxx
 #pragma link C++ class hf::LimitResult;
 
 #endif // __CINT__

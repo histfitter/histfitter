@@ -75,6 +75,7 @@
 #include "RooFormulaVar.h"
 #include "RooPlot.h" //Needed by RooAbsPdf
 #include "RooHist.h"
+#include "RooNLLVar.h"
 
 #include "RooStats/ModelConfig.h"
 #include "RooStats/ProfileLikelihoodTestStat.h"
