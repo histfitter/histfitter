@@ -24,7 +24,6 @@ setup.sh
 
 # output
 results/
-config/
 data/
 *.json
 
