@@ -1,8 +1,10 @@
 #!/bin/bash
 # check Root environment setup. Allow for external setup script.
-
 # Update here when tagged
 VERSION="v1.0.1"
+
+#This script takes one variable $1 which should be the name of the working directory
+#You can have many working directories, but then this script must be activated with the correct path.
 
 #Set variables during build
 INSTALL_DIR=@CMAKE_INSTALL_PREFIX@
@@ -61,8 +63,27 @@ fi
 HISTFITTER_VERSION=$VERSION
 export HISTFITTER_VERSION
 
+#Set histfitter environment path
+if [ -z $1 ];
+then
+  echo "Assuming current directory is the working directory"
+  export HISTFITTER=$(pwd)
+else
+  export HISTFITTER=$1
+echo "Setting the HISTFITTER variable to $HISTFITTER"
+fi
+
+#Set up Histfitter environment with folders and copy necessary files
+echo "Making directories /config /results /data in folder $HISTFITTER."
+mkdir -p "$HISTFITTER/config"
+mkdir -p "$HISTFITTER/results"
+mkdir -p "$HISTFITTER/data"
+echo "Copying HistFactorySchema.dtd to $HISTFITTER/config."
+cp "$SOURCE_DIR/config/HistFactorySchema.dtd" "$HISTFITTER/config/HistFactorySchema.dtd"
+
+
 # update paths
-export ROOT_INCLUDE_PATH="$ROOT_INCLUDE_PATH:$SOURCE_DIR/src/hf:$SOURCE_DIR/src/root" #What does this do?
+export ROOT_INCLUDE_PATH="$ROOT_INCLUDE_PATH:$SOURCE_DIR/src/hf:$SOURCE_DIR/src/root"
 export PATH="$PATH:$SOURCE_DIR/bin:$SOURCE_DIR/scripts"
 export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$LIB_DIR"
 # PYTHONPATH contains all directories that are used for 'import bla' commands
