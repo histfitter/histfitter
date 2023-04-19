@@ -2114,7 +2114,7 @@ RooAbsReal* Util::GetComponent(RooWorkspace* w, TString component, TString regio
     for(unsigned int iReg=0; iReg<regionCompNameVec.size(); iReg++){
         for(unsigned int iComp=0; iComp< componentVec.size(); iComp++){
             Logger << kDEBUG << " GetComponent: regionCompNameVec[" << iReg << "] = " << regionCompNameVec[iReg] << " componentVec[" << iComp << "] = " << componentVec[iComp] << GEndl;
-            TString target = componentVec[iComp]+"_";
+            TString target = componentVec[iComp]+"_"+regionFullName;
             if(  regionCompNameVec[iReg].Contains(target.Data())) {
                 TString func_name = regionCompNameVec[iReg];
                 TString coef_name = func_name;
@@ -2212,7 +2212,7 @@ Double_t Util::GetComponentFracInRegion(RooWorkspace* w, TString component, TStr
     bool found_comp = false;
     for(unsigned int iReg=0; iReg<regionCompNameVec.size(); iReg++){
         for(unsigned int iComp=0; iComp< componentVec.size(); iComp++){
-            TString target = componentVec[iComp]+"_";
+            TString target = componentVec[iComp]+"_"+regionFullName;
             if (regionCompNameVec[iReg].Contains(target.Data())) found_comp = true;
         }
     }
@@ -2235,7 +2235,7 @@ Double_t Util::GetComponentFracInRegion(RooWorkspace* w, TString component, TStr
     double componentFrac = 0.;
     for(unsigned int iReg=0; iReg<regionCompNameVec.size(); iReg++){
         for(unsigned int iComp=0; iComp< componentVec.size(); iComp++){
-            TString target = componentVec[iComp]+"_";
+            TString target = componentVec[iComp]+"_"+regionFullName;
             if(  regionCompNameVec[iReg].Contains(target.Data())) {
                 componentFrac += GetComponentFrac(w,regionCompNameVec[iReg],RRSPdfName,regionVar) ;
             }
