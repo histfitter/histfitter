@@ -16,6 +16,8 @@
  * LICENSE.                                                                       *
 """
 import os
+from ROOT import gROOT, gSystem, gDirectory
+from ROOT import PyConfig
 # this module comes from gSystem.Load("libSusyFitter.so")
 gROOT.SetBatch(True)
 PyConfig.IgnoreCommandLineOptions = True
@@ -27,8 +29,6 @@ Util = hf.Util
 RooExpandedFitResult = hf.RooExpandedFitResult
 gROOT.Reset()
 
-from ROOT import gROOT, gSystem, gDirectory
-from ROOT import PyConfig
 from ROOT import TFile, RooWorkspace, TObject, TString, RooAbsReal, RooRealVar, RooFitResult, RooDataSet, RooAddition, RooArgSet,RooAbsData,RooRandom,RooArgList
 from ROOT import TMath
 from ROOT import RooFit
