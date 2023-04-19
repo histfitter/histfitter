@@ -375,7 +375,7 @@ class PrepareHistos:
 
         return
 
-    def addHisto(self, name, nBins=0, binLow=0., binHigh=0., nBinsY=0, binLowY=0., binHighY=0., useOverflow=False, useUnderflow=False, forceNoFallback=False):
+    def addHisto(self, name, nBins=0, binLow=0., binHigh=0., nBinsY=0, binLowY=0., binHighY=0., useOverflow=False, useUnderflow=False, forceNoFallback=False, hideFindWarning=False):
         """
         Make histogram and add it to the dictionary of prepared histograms
 
@@ -395,7 +395,7 @@ class PrepareHistos:
         log.debug(f"addHisto(): attempting to find {name}")
         if self.useCache:
             log.debug(f"addHisto(): will use cache for {name}")
-            return self.__addHistoFromCache(name, nBins, binLow, binHigh, useOverflow, useUnderflow, forceNoFallback)
+            return self.__addHistoFromCache(name, nBins, binLow, binHigh, useOverflow, useUnderflow, forceNoFallback, hideFindWarning=hideFindWarning)
 
         log.debug(f"addHisto(): will use tree for {name}")
         return self.__addHistoFromTree(name, nBins, binLow, binHigh, nBinsY, binLowY, binHighY, useOverflow, useUnderflow)
@@ -513,7 +513,7 @@ class PrepareHistos:
         return self.__addHistoFromCache(name, nBins, binLow, binHigh, useOverflow, useUnderflow, True, True)
 
 
-    def __addHistoFromCache(self, name, nBins=None, binLow=None, binHigh=None, useOverflow=False, useUnderflow=False, forceNoFallback=False, forceReturn=False):
+    def __addHistoFromCache(self, name, nBins=None, binLow=None, binHigh=None, useOverflow=False, useUnderflow=False, forceNoFallback=False, forceReturn=False, hideFindWarning=False):
         """
         Add this histogram to the dictionary of histograms.
         """
@@ -535,11 +535,11 @@ class PrepareHistos:
                     if forceNoFallback or not self.useCacheToTreeFallback:
                         self.configMgr.hists[name] = None
                         if forceReturn: # used for QCD histograms
-                            log.warning("Could not find histogram <"+name+"> in "+self.cacheFileName+" ! Force return.")
+                            (log.debug if hideFindWarning else log.warning)("Could not find histogram <"+name+"> in "+self.cacheFileName+" ! Force return.")
                             return None
 
                         log.debug(f"__addHistoFromCache(): forceNoFallback={forceNoFallback} useCacheToTreeFallback={self.useCacheToTreeFallback} for {name}")
-                        log.warning("Could not find histogram <"+name+"> in "+self.cacheFileName+" ! ")
+                        (log.debug if hideFindWarning else log.warning)("Could not find histogram <"+name+"> in "+self.cacheFileName+" ! ")
                         return None
                         #raise #Exception("Could not find histogram <"+name+"> in "+self.cacheFileName)
                     else:

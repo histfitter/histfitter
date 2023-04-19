@@ -1,7 +1,7 @@
 # HistFitter
 
 [![stable-release-python2](https://img.shields.io/badge/StablePython2-v0.66.0-green)](https://gitlab.cern.ch/HistFitter/HistFitter/-/releases/v0.66.0)
-[![stable-release-python3](https://img.shields.io/badge/StablePython3-v1.0.1-green)](https://gitlab.cern.ch/HistFitter/HistFitter/-/tree/v1.0.1)
+[![stable-release-python3](https://img.shields.io/badge/StablePython3-v1.2.0-green)](https://gitlab.cern.ch/HistFitter/HistFitter/-/tree/v1.2.0)
 [![Documentation](https://img.shields.io/badge/Documentation-blue)](https://twiki.cern.ch/twiki/bin/viewauth/AtlasProtected/SusyFitter)
 [![Tutorial](https://img.shields.io/badge/Tutorial-orange)](https://twiki.cern.ch/twiki/bin/viewauth/AtlasProtected/HistFitterTutorial)
 
@@ -13,7 +13,7 @@ The HistFitter Group mailing-list, for **any** of your questions: <atlas-phys-su
 
 ## Acquire
 HistFitter has 2 stable versions, one complient with Python2 (v0.66.0) and one with Python3 (v1.x.y).
-If you're going to be using HistFitter directly as a standalone application, clone the latest stable release.  The Python2 version is no longer being updated.
+If you're going to be using HistFitter directly as a standalone application, clone the latest stable release. The Python2 version is no longer being updated.
 
 ```
 git clone https://github.com/histfitter/histfitter
@@ -32,8 +32,13 @@ git add HistFitter && git commit -m "Add HistFitter submodule"
 
 ### Recommended Root version
 
-Recommended Root version is 6.26.08.  This version of HistFitter is not compatible with ROOT versions < 6.26.
+Recommended Root version is 6.28/00. This version of HistFitter is not compatible with ROOT versions < 6.28.
 
+An LCG release with the correct ROOT and Python versions can be loaded with
+
+```
+source setup_lcg.sh
+```
 
 ## Build
 From the root folder do
@@ -53,6 +58,9 @@ cmake -DCMAKE_INSTALL_PREFIX=/path/to/install/ /path/to/histfitter/
 make install
 ```
 Then you have to update the library path in the setup script manually to access it:
+
+
+## Build
 
 ```
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/path/to/install/lib/

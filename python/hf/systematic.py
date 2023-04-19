@@ -538,13 +538,24 @@ class UserSystematic(SystematicBase):
         for lowhigh in ["High_","Low_"]:
             lowhighName = f"h{sam.name}{self.name}{lowhigh}{regionString}_obs_{replaceSymbols(chan.variableName)}"
             if abstract.hists[lowhighName] is None:
+                try:
+                    if abstract.prepare.useCache:
+                        abstract.prepare.addHisto(lowhighName, forceNoFallback=True, hideFindWarning=True)
+                        if abstract.hists[lowhighName] is None:
+                            log.verbose(f'Could not find UserSystematic "{lowhighName}" histogram: building it manually')
+                        else:
+                            continue
+                except:
+                    pass
+                    
+                # If it didn't find the user systematic in the cache files:
                 if lowhigh == "High_":
                     abstract.hists[lowhighName] = histMgr.buildUserHistoSysFromHist(lowhighName, self.high, abstract.hists[nomName])
                 elif lowhigh == "Low_":
                     abstract.hists[lowhighName] = histMgr.buildUserHistoSysFromHist(lowhighName, self.low, abstract.hists[nomName])
         return
 
-    def PrepareGlobalNormalization(self,normString,abstract,topLvl,chan,sam):
+    def PrepareGlobalNormalization(self,normString,abstract,chan,sam,forceNoFallBack=False):
 
         for lowhigh in ["Nom_",self.name+"High_",self.name+"Low_"]:
             histName = f"h{sam.name}{lowhigh}{normString}Norm"
@@ -553,7 +564,7 @@ class UserSystematic(SystematicBase):
                     
                     if not abstract.readFromTree:
                         abstract.hists[histName] = None
-                        abstract.prepare.addHisto(histName)
+                        abstract.prepare.addHisto(histName, forceNoFallback=forceNoFallback)
                     else:
                         abstract.hists[histName] = TH1D(histName, histName, 1, 0.5, 1.5)
                         totNorm=0.0
