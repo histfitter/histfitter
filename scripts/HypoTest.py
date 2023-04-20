@@ -14,7 +14,7 @@ sys.argv.insert(1, '-b')
 gROOT.Reset()
 gROOT.SetBatch(True)
 del sys.argv[1]
-ROOT.gSystem.Load(f"libSusyFitter.so")
+ROOT.gSystem.Load(f"libHistFitter.so")
 gROOT.Reset()
 
 def min_CLs(hypo):
@@ -179,9 +179,9 @@ if __name__ == "__main__":
         print("-x fix cross signal section parameter and run nominal, +- 1 sigma")
         print("\nAlso see the README file.\n")
         print("Command examples:")
-        print("HistFitter.py -i python/MySusyFitterConfig.py           #only runs initialization in interactive mode (try e.g.: configMgr.<tab>)")
-        print("HistFitter.py -t -w -f python/MySusyFitterConfig.py     #runs all steps (TTree->Histos->Workspace->Fit) in batch mode")
-        print("HistFitter.py -f -i python/MySusyFitterConfig.py        #only fit and plot, using existing workspace, in interactive session")
+        print("HistFitter.py -i python/MyHistFitterConfig.py           #only runs initialization in interactive mode (try e.g.: configMgr.<tab>)")
+        print("HistFitter.py -t -w -f python/MyHistFitterConfig.py     #runs all steps (TTree->Histos->Workspace->Fit) in batch mode")
+        print("HistFitter.py -f -i python/MyHistFitterConfig.py        #only fit and plot, using existing workspace, in interactive session")
         print("\nNote: examples of input TTrees can be found in /afs/cern.ch/atlas/groups/susy/1lepton/samples/")
         sys.exit(0)        
     

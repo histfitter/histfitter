@@ -15,7 +15,7 @@ import json
 import glob
 import re
 
-ROOT.gSystem.Load(f"libSusyFitter.so")
+ROOT.gSystem.Load(f"libHistFitter.so")
 
 ROOT.gROOT.SetBatch()
 

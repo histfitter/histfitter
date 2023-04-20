@@ -29,36 +29,36 @@ find_package(ROOT 6 REQUIRED ${root_components})
 list(TRANSFORM root_components PREPEND ROOT::)
 
 # Loop over source code and add files to list of source and headers
-set(SusyFitter_headers "")
-set(SusyFitter_sources "")
+set(HistFitter_headers "")
+set(HistFitter_sources "")
 file(GLOB filePaths src/*/*)
 
 foreach (_filePath ${filePaths})
     get_filename_component(_fileDir ${_filePath} DIRECTORY)
 	get_filename_component(_fileName ${_filePath} NAME_WE)
     	if(NOT ${_fileName} MATCHES "LinkDef" AND NOT ${_fileName} MATCHES "Makefile")
-            list(APPEND SusyFitter_sources "${_fileDir}/${_fileName}.cxx")
-            list(APPEND SusyFitter_headers "${_fileDir}/${_fileName}.h")
+            list(APPEND HistFitter_sources "${_fileDir}/${_fileName}.cxx")
+            list(APPEND HistFitter_headers "${_fileDir}/${_fileName}.h")
 	endif()
 endforeach()
 
 #Remove duplicates
-list(REMOVE_DUPLICATES SusyFitter_sources)
-list(REMOVE_DUPLICATES SusyFitter_headers)
+list(REMOVE_DUPLICATES HistFitter_sources)
+list(REMOVE_DUPLICATES HistFitter_headers)
 
 #Add libraries
-add_library(SusyFitter SHARED ${SusyFitter_sources})
+add_library(HistFitter SHARED ${HistFitter_sources})
 
 #required to make ROOT_GENERATE_DICTIONARY work
-target_include_directories(SusyFitter PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(HistFitter PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 
 # generate the dictionary source code
-ROOT_GENERATE_DICTIONARY(SusyFitter_dict ${SusyFitter_headers} MODULE SusyFitter LINKDEF src/root/LinkDef.h)
+ROOT_GENERATE_DICTIONARY(HistFitter_dict ${HistFitter_headers} MODULE HistFitter LINKDEF src/root/LinkDef.h)
 
 #Require threads
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
-target_link_libraries(SusyFitter PRIVATE ${root_components} Threads::Threads  m dl)
+target_link_libraries(HistFitter PRIVATE ${root_components} Threads::Threads  m dl)
 
 #IPO
 include(CheckIPOSupported)
@@ -67,7 +67,7 @@ check_ipo_supported(RESULT supported OUTPUT error)
 if(CMAKE_BUILD_TYPE STREQUAL Release)
     if(supported)
         message(STATUS "LTO/IPO enabled")
-        set_property(TARGET SusyFitter PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
+        set_property(TARGET HistFitter PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
     else()
         message(STATUS "LTO/IPO not supported: <${error}>")
     endif()
@@ -76,20 +76,20 @@ endif()
 #OpenMP
 find_package(OpenMP)
 if(OpenMP::OpenMP_CXX)
-    target_link_libraries(SusyFitter PRIVATE OpenMP::OpenMP_CXX)
+    target_link_libraries(HistFitter PRIVATE OpenMP::OpenMP_CXX)
 endif()
 
 #MPI
 find_package(MPI)
 if(MPI::MPI_CXX)
-    target_link_libraries(SusyFitter PRIVATE MPI::MPI_CXX)
+    target_link_libraries(HistFitter PRIVATE MPI::MPI_CXX)
 endif()
-set_property(TARGET SusyFitter PROPERTY POSITION_INDEPENDENT_CODE ON)
+set_property(TARGET HistFitter PROPERTY POSITION_INDEPENDENT_CODE ON)
 
 if(MSVC)
-    target_compile_options(SusyFitter PRIVATE /W4 /WX)
+    target_compile_options(HistFitter PRIVATE /W4 /WX)
 else()
-    target_compile_options(SusyFitter PRIVATE -Wall -Wextra -Wpedantic)
+    target_compile_options(HistFitter PRIVATE -Wall -Wextra -Wpedantic)
 endif()
 
 #Make setup script
@@ -99,4 +99,4 @@ configure_file(setup.sh.in "${CMAKE_INSTALL_PREFIX}/setup.sh")
 file(COPY ./python/hf DESTINATION ${CMAKE_INSTALL_PYTHON})
 
 #Install C++ libraries
-install(TARGETS SusyFitter LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
+install(TARGETS HistFitter LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})

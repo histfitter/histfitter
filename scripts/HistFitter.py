@@ -29,7 +29,7 @@ ROOT.SetMemoryPolicy( ROOT.kMemoryStrict )
 from ROOT import gROOT, gSystem, gDirectory, RooAbsData, RooRandom, RooWorkspace
 
 #HistFitter c++ imports
-ROOT.gSystem.Load(f"libSusyFitter.so")
+ROOT.gSystem.Load(f"libHistFitter.so")
 from ROOT import hf
 ConfigMgr = hf.ConfigMgr
 Util = hf.Util

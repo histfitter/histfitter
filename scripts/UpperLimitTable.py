@@ -22,7 +22,7 @@ from ROOT import gROOT, gSystem, gDirectory, PyConfig
 
 gROOT.SetBatch(True)
 PyConfig.IgnoreCommandLineOptions = True
-gSystem.Load(f"libSusyFitter.so")
+gSystem.Load(f"libHistFitter.so")
 from ROOT import hf
 ConfigMgr = hf.ConfigMgr
 FitConfig = hf.FitConfig

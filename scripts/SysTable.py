@@ -18,10 +18,9 @@
 import os
 from ROOT import gROOT, gSystem, gDirectory
 from ROOT import PyConfig
-# this module comes from gSystem.Load("libSusyFitter.so")
 gROOT.SetBatch(True)
 PyConfig.IgnoreCommandLineOptions = True
-gSystem.Load(f"libSusyFitter.so")
+gSystem.Load(f"libHistFitter.so")
 from ROOT import hf
 ConfigMgr = hf.ConfigMgr
 FitConfig = hf.FitConfig

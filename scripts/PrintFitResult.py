@@ -17,7 +17,7 @@
 """
 
 from ROOT import gROOT,gSystem,gDirectory
-gSystem.Load("libSusyFitter.so")
+gSystem.Load("libHistFitter.so")
 from ROOT import hf
 ConfigMgr = hf.ConfigMgr
 FitConfig = hf.FitConfig
