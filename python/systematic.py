@@ -553,7 +553,7 @@ class UserSystematic(SystematicBase):
                     abstract.hists[lowhighName] = histMgr.buildUserHistoSysFromHist(lowhighName, self.low, abstract.hists[nomName])
         return
 
-    def PrepareGlobalNormalization(self,normString,abstract,chan,sam,forceNoFallBack=False):
+    def PrepareGlobalNormalization(self,normString,abstract,chan,sam,forceNoFallback=False):
 
         for lowhigh in ["Nom_",self.name+"High_",self.name+"Low_"]:
             histName = f"h{sam.name}{lowhigh}{normString}Norm"

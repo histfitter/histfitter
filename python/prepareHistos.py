@@ -86,7 +86,7 @@ class PrepareHistos:
         Initialise the preparation object
 
         @param useCache Read out histograms from the cache file rather than trees
-        @param useCacheToTreeFallBack If reading from histograms, fall back to trees in case they are not found
+        @param useCacheToTreeFallback If reading from histograms, fall back to trees in case they are not found
         """
         from configManager import configMgr
 
@@ -388,7 +388,7 @@ class PrepareHistos:
         @param binHighY Higher edge of right Y bin
         @param useOverflow Use the overflow bins or not?
         @param useUnderflow Use the underflow bins or not ?
-        @param forceNoFallBack If true, never use the fallback mechanism for this histogram
+        @param forceNoFallback If true, never use the fallback mechanism for this histogram
 
         @retval The constructed histogram
         """
