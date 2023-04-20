@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.21)
 # Declare the package name:
-project(HistFitter VERSION 1.0.2)
+project(HistFitter VERSION 1.3.1)
+set(VERSION "1.3.1")
 
 #Set CXX requirement
 set(CMAKE_CXX_STANDARD 17)
@@ -12,13 +13,11 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
   file(MAKE_DIRECTORY "${PROJECT_SOURCE_DIR}/lib")
-  file(MAKE_DIRECTORY "${PROJECT_SOURCE_DIR}/bin")
   set(CMAKE_INSTALL_PREFIX ${PROJECT_SOURCE_DIR} CACHE PATH "..." FORCE)
 endif()
 set(CMAKE_INSTALL_LIBDIR "${CMAKE_INSTALL_PREFIX}/lib")
 set(CMAKE_INSTALL_PYTHON "${CMAKE_INSTALL_PREFIX}/python")
 file(MAKE_DIRECTORY "${CMAKE_INSTALL_PREFIX}/python")
-
 
 #Define equired root components
 set(root_components Core;Net;Hist;Graf;Graf3d;Gpad;Tree;Rint;
@@ -29,7 +28,7 @@ set(root_components Core;Net;Hist;Graf;Graf3d;Gpad;Tree;Rint;
 find_package(ROOT 6 REQUIRED ${root_components})
 list(TRANSFORM root_components PREPEND ROOT::)
 
-# Loop over source code and add to list of source and headers
+# Loop over source code and add files to list of source and headers
 set(SusyFitter_headers "")
 set(SusyFitter_sources "")
 file(GLOB filePaths src/*/*)
@@ -93,7 +92,7 @@ else()
     target_compile_options(SusyFitter PRIVATE -Wall -Wextra -Wpedantic)
 endif()
 
-#make setup script
+#Make setup script
 configure_file(setup.sh.in "${CMAKE_INSTALL_PREFIX}/setup.sh")
 
 #Copy python files to install location
