@@ -564,7 +564,7 @@ class UserSystematic(SystematicBase):
                         abstract.hists[histName] = None
                         abstract.prepare.addHisto(histName, forceNoFallback=forceNoFallback)
 
-                    if abstract.hists[histName] is None:
+                    if abstract.readFromTree or abstract.hists[histName] is None:
                         abstract.hists[histName] = TH1D(histName, histName, 1, 0.5, 1.5)
                         totNorm=0.0
                         for normReg in sam.normRegions:
