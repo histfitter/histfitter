@@ -97,6 +97,7 @@ class ConfigManager:
         self.inputLumi = None # Luminosity of input histograms
         self.outputLumi = None # Output luminosity
         self.lumiUnits = 1.0 # 1=fb-1, 1000=pb-1, etc.
+        self.energy = '13.6 TeV' # center-of-mass energy, to be used in plots
         self.nTOYs =- 1 #<=0 means to use real data
         self.nCPUs = 1 # number of CPUs used for toy simulation
         self.calculatorType = 0 # frequentist calculator
@@ -600,6 +601,7 @@ class ConfigManager:
                      if c.lumi is None:
                          style.setLumi(self.outputLumi)
                      else: style.setLumi(c.lumi)
+                     style.setEnergy(self.energy)
                  if not c.lumiX is None:
                      style.setLumiX(c.lumiX)
                  if not c.lumiY is None:

@@ -791,7 +791,7 @@ void HistogramPlot::plot(TDirectory *directory) {
 
     // Lumi
     if(m_style.getShowLumi()){
-        Util::AddText(0.175, 0.775, Form("#int Ldt = %.1f fb^{-1}", m_style.getLumi() ));
+        Util::AddText(m_style.getLumiX(), m_style.getLumiY(), Form("#sqrt{s} = %s, %.1f fb^{-1}", m_style.getEnergy().Data(), m_style.getLumi() ));
     }
 
     // Legend

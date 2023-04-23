@@ -48,6 +48,9 @@ class ChannelStyle : public TObject{
   Float_t getLumi(){ return m_lumi;}
   void setLumi(Double_t lumi){ m_lumi = lumi; }
 
+  TString getEnergy(){ return m_energy;}
+  void setEnergy(TString energy){ m_energy = energy; }
+
   TString getName(){ return m_name;}
   void setName(TString name){ m_name = name; }
 
@@ -173,6 +176,7 @@ private:
   TString m_name;
   TString m_title;
   Float_t m_lumi;
+  TString m_energy;
 
   Int_t m_dataColor;
   Int_t m_totalPdfColor;

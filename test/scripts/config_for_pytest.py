@@ -104,6 +104,8 @@ configMgr.cutsDict = {"SR":"m>100.",
                       "SR_disc":"m>150.",
                       "CR":"m<100."}
 
+configMgr.outputLumi = configMgr.inputLumi = 140.1
+
 ####### Setup Data and Background Samples ############
 bkg1Sample = Sample("bkg1",TColor.GetColor('#fe9929')) 
 bkg1Sample.setStatConfig(useStat)
@@ -172,6 +174,7 @@ SRs.append(SR)
 # Don't include overflow
 for sr in SRs:
     sr.useOverflowBin = False
+    sr.showLumi = True
 
 cfg_fit.addSignalChannels(SRs)
     
@@ -179,6 +182,7 @@ cfg_fit.addSignalChannels(SRs)
 ## Control Regions
 CRs = list()
 CR = cfg_fit.addChannel('m',["CR"],1,50,100)
+CR.showLumi = True
 bkg2Sample.setNormRegions(["CR","m"])
 CRs.append(CR)
 
