@@ -149,7 +149,9 @@ namespace Util
      @param noFit Don't re-run fit, but load parameter from after-fit workspace
      @param plotInterpolation plot the interpolation scheme
   */
-  void GenerateFitAndPlot(TString fcName, TString anaName, Bool_t drawBeforeFit, Bool_t drawAfterFit, Bool_t plotCorrelationMatrix,
+  void GenerateFitAndPlot(TString fcName, TString anaName, Bool_t drawBeforeFit, Bool_t drawAfterFit,
+           Bool_t doStackPlots, Bool_t storeSingleFiles, Bool_t storeMergedFile,
+           Bool_t plotCorrelationMatrix,
 			  Bool_t plotSeparateComponents, Bool_t plotNLL,  Bool_t minos = kFALSE, TString minosPars="", Bool_t doFixParameters = kFALSE, TString fixedPars="", bool ReduceCorrMatrix = true, bool noFit = false, bool plotInterpolation = false);
 
   // Same as above, but now only for afterFit workspace

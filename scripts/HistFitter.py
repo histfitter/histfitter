@@ -33,7 +33,7 @@ import sys
 from logger import Logger
 log = Logger('HistFitter')
 
-def GenerateFitAndPlotCPP(fc, anaName, drawBeforeFit, drawAfterFit, drawCorrelationMatrix, drawSeparateComponents, drawLogLikelihood, minos, minosPars, doFixParameters, fixedPars, ReduceCorrMatrix, noFit, plotInterpolation):
+def GenerateFitAndPlotCPP(fc, anaName, drawBeforeFit, drawAfterFit, drawStackPlots, storeSingleFiles, storeMergedFile, drawCorrelationMatrix, drawSeparateComponents, drawLogLikelihood, minos, minosPars, doFixParameters, fixedPars, ReduceCorrMatrix, noFit, plotInterpolation):
     """ 
     function call to top-level C++ side function Util.GenerateFitAndPlot()
 
@@ -41,6 +41,9 @@ def GenerateFitAndPlotCPP(fc, anaName, drawBeforeFit, drawAfterFit, drawCorrelat
     @param anaName Analysis name defined in config file, mainly used for output file/dir naming
     @param drawBeforeFit Boolean deciding whether before-fit plots are produced
     @param drawAfterFit Boolean deciding whether after-fit plots are produced
+    @param drawStackPlots Boolean deciding whether stacked before/after plots are produced, or just the individual histograms are stored
+    @param storeSingleFiles Boolean deciding whether single files will be created for each before/after plot
+    @param storeMergedFile Boolean deciding whether a central file will be created for all before/after plots
     @param drawCorrelationMatrix Boolean deciding whether correlation matrix plot is produced
     @param drawSeparateComponents Boolean deciding whether separate component (=sample) plots are produced
     @param drawLogLikelihood Boolean deciding whether log-likelihood plots are produced
@@ -57,7 +60,10 @@ def GenerateFitAndPlotCPP(fc, anaName, drawBeforeFit, drawAfterFit, drawCorrelat
     
     log.debug('GenerateFitAndPlotCPP: anaName %s ' % anaName)
     log.debug("GenerateFitAndPlotCPP: drawBeforeFit %s " % drawBeforeFit) 
-    log.debug("GenerateFitAndPlotCPP: drawAfterFit %s " % drawAfterFit) 
+    log.debug("GenerateFitAndPlotCPP: drawAfterFit %s " % drawAfterFit)
+    log.debug("GenerateFitAndPlotCPP: drawStackPlots %s " % drawStackPlots)
+    log.debug("GenerateFitAndPlotCPP: storeSingleFiles %s " % storeSingleFiles)
+    log.debug("GenerateFitAndPlotCPP: storeMergedFile %s " % storeMergedFile)
     log.debug("GenerateFitAndPlotCPP: drawCorrelationMatrix %s " % drawCorrelationMatrix) 
     log.debug("GenerateFitAndPlotCPP: drawSeparateComponents %s " % drawSeparateComponents)
     log.debug("GenerateFitAndPlotCPP: drawLogLikelihood %s " % drawLogLikelihood)
@@ -69,7 +75,7 @@ def GenerateFitAndPlotCPP(fc, anaName, drawBeforeFit, drawAfterFit, drawCorrelat
     log.debug(f"GenerateFitAndPlotCPP: noFit {noFit}")
     log.debug(f"GenerateFitAndPlotCPP: plotInterpolation {plotInterpolation}")
     
-    Util.GenerateFitAndPlot(fc.name, anaName, drawBeforeFit, drawAfterFit, drawCorrelationMatrix,
+    Util.GenerateFitAndPlot(fc.name, anaName, drawBeforeFit, drawAfterFit, drawStackPlots, storeSingleFiles, storeMergedFile, drawCorrelationMatrix,
                             drawSeparateComponents, drawLogLikelihood, minos, minosPars, doFixParameters, fixedPars, ReduceCorrMatrix, noFit, plotInterpolation)
 
 if __name__ == "__main__":
@@ -411,9 +417,10 @@ if __name__ == "__main__":
 
             log.info("Running on fitConfig %s" % configMgr.fitConfigs[i].name)
             log.info(f"Setting noFit = {noFit}")
-            r = GenerateFitAndPlotCPP(configMgr.fitConfigs[i], configMgr.analysisName, drawBeforeFit, drawAfterFit, drawCorrelationMatrix, drawSeparateComponents, drawLogLikelihood, runMinos, minosPars, doFixParameters, fixedPars, ReduceCorrMatrix, noFit, drawInterpolation)
+            r = GenerateFitAndPlotCPP(configMgr.fitConfigs[i], configMgr.analysisName, drawBeforeFit, drawAfterFit, configMgr.plotStacked, configMgr.storeSinglePlotFiles, configMgr.storeMergedPlotFile, 
+                                      drawCorrelationMatrix, drawSeparateComponents, drawLogLikelihood, runMinos, minosPars, doFixParameters, fixedPars, ReduceCorrMatrix, noFit, drawInterpolation)
         
-        log.debug(" GenerateFitAndPlotCPP(configMgr.fitConfigs[%d], configMgr.analysisName, drawBeforeFit, drawAfterFit, drawCorrelationMatrix, drawSeparateComponents, drawLogLikelihood, runMinos, minosPars, doFixParameters, fixedPars, ReduceCorrMatrix, noFit, drawInterpolation)" % idx)
+        log.debug(" GenerateFitAndPlotCPP(configMgr.fitConfigs[%d], configMgr.analysisName, drawBeforeFit, drawAfterFit, configMgr.plotStacked, configMgr.storeSinglePlotFiles, configMgr.storeMergedPlotFile, drawCorrelationMatrix, drawSeparateComponents, drawLogLikelihood, runMinos, minosPars, doFixParameters, fixedPars, ReduceCorrMatrix, noFit, drawInterpolation)" % idx)
         log.debug("   where drawBeforeFit, drawAfterFit, drawCorrelationMatrix, drawSeparateComponents, drawLogLikelihood, ReduceCorrMatrix, noFit, drawInterpolation are booleans")
         pass
 
