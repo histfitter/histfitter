@@ -154,7 +154,7 @@ def test_treeToHist(script_runner):
 
 
 def test_backupCache(script_runner):
-    command = 'mv ${HISTFITTER}/test/data/hf_test/histCache.root ${HISTFITTER}/test/test_backup_cache.root'
+    command = 'mv data/hf_test/histCache.root test_backup_cache.root'
     (ret, outRaw, errRaw) = script_runner(command)
 
     hc = ROOT.TFile.Open('test_backup_cache.root', 'UPDATE')
@@ -164,7 +164,7 @@ def test_backupCache(script_runner):
             hc.Delete(f'{name};*')
     hc.Close()
 
-    command = "HistFitter.py -w -u='--manualBackupCache ${HISTFITTER}/test/test_backup_cache.root' ${HISTFITTER}/test/scripts/config_for_pytest.py"
+    command = "HistFitter.py -w -u='--manualBackupCache test_backup_cache.root' ${HISTFITTER}/test/scripts/config_for_pytest.py"
     (ret,outRaw,errRaw) = script_runner(command)
     assert ret.returncode == 0
 
