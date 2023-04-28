@@ -562,7 +562,7 @@ void Util::SaveInitialSnapshot(RooWorkspace* w){
 
     RooAbsData* data = (RooAbsData*) w->data("obsData");
     RooArgSet* params = (RooArgSet*) pdf->getParameters(*data) ;
-    if(!w->loadSnapshot("snapshot_paramsVals_initial")) {
+    if(!w->getSnapshots().find("snapshot_paramsVals_initial")) {
         w->saveSnapshot("snapshot_paramsVals_initial",*params);
     } else {
         Logger << kWARNING << "Snapshot 'snapshot_paramsVals_initial' already exists in  workspace, will not overwrite it" << GEndl;
