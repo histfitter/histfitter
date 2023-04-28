@@ -5,7 +5,7 @@ from ROOT import kBlack,kWhite,kGray,kRed,kPink,kMagenta,kViolet,kBlue,kAzure,kC
 from ROOT import TColor
 from configWriter import fitConfig,Measurement,Channel,Sample
 from systematic import Systematic
-import math,ROOT,os
+import ROOT,os
 
 from inspect import getframeinfo, currentframe
 
@@ -19,6 +19,7 @@ gROOT.SetBatch(True)
 includeOverflowBin = True
 useStat    = True
 useToys = False
+manualBackupCache = None
 
 
 input_file = "test_tree.root"
@@ -27,12 +28,14 @@ nominal_tree_name = "_NoSys"
 
 parser = argparse.ArgumentParser(description="HistFitter Testing")
 parser.add_argument('--useToys', action="store_true")
+parser.add_argument('--manualBackupCache')
 
 
 if configMgr.userArg != "":
     args = parser.parse_args( configMgr.userArg.split() )
 
     useToys    = args.useToys
+    manualBackupCache = args.manualBackupCache
 
 # name for analysis, used in a lot of directory and filenames
 anaName = "hf_test"
@@ -64,9 +67,14 @@ try: os.mkdir('results/'+configMgr.analysisName )
 except: pass
 
 ##############
-configMgr.useCacheToTreeFallback = True
 configMgr.useHistBackupCacheFile = True # enable the use of an alternate data file
-configMgr.histBackupCacheFile =  "data/" + analysisNameBase + "/histCache.root" # the data file of your previous fit (= the backup cache file)
+if manualBackupCache is None:
+    configMgr.useCacheToTreeFallback = True
+    configMgr.histBackupCacheFile =  "data/" + analysisNameBase + "/histCache.root"
+else:
+    configMgr.useCacheToTreeFallback = False
+    configMgr.histBackupCacheFile =  manualBackupCache
+    configMgr.forceNorm = False # If we don't disable this, HF tries to build the Norm histograms from the trees anyways, even if useCacheToTreeFallback is set to Fale
 
 configMgr.outputFileName = "results/" + configMgr.analysisName  + "/Output.root"
 configMgr.histCacheFile = "data/" + analysisNameBase + "/histCache.root"
@@ -109,6 +117,7 @@ bkg2Sample.setSuffixTreeName("_nom")
 bkg2Sample.addInputs( [input_file] )
 bkg2Sample.setNormByTheory(False)
 bkg2Sample.setNormFactor("mu_bkg",1.,0.,10.)
+bkg2Sample.setNormRegions([('CR', 'm')])
 
 
 dataSample = Sample("data", kBlack)
@@ -121,12 +130,24 @@ sigSample.setNormByTheory(True)
 sigSample.setNormFactor("mu_SIG",1.,0,100)
 
 ######### Systematics
-bkg1Sample.addSystematic( Systematic('user_overallSys', '', 1.05, 0.95, 'user', 'overallSys') )
-bkg1Sample.addSystematic( Systematic('weight_sys', configMgr.weights, ['weight','sys_weight'], ['weight','1./sys_weight'], 'weight', 'histoSys') )
+bkg1Sample.addSystematic( Systematic('weight_histoSys', configMgr.weights, ['weight','sys_weight1'], ['weight','1./sys_weight1'], 'weight', 'histoSys') )
+bkg1Sample.addSystematic( Systematic('weight_overallSys', configMgr.weights, ['weight','sys_weight2'], ['weight','1./sys_weight2'], 'weight', 'overallSys') )
+bkg1Sample.addSystematic( Systematic('weight_overallHistoSys', configMgr.weights, ['weight','sys_weight3'], ['weight','1./sys_weight3'], 'weight', 'overallHistoSys') )
+bkg1Sample.addSystematic( Systematic('weight_histoSysOneSide', configMgr.weights, ['weight', 'sys_weight4'], ['weight', 'sys_weight4'], 'weight', 'histoSysOneSide') )
+bkg1Sample.addSystematic( Systematic('weight_histoSysOneSideSym', configMgr.weights, ['weight', 'sys_weight5'], ['weight', 'sys_weight5'], 'weight', 'histoSysOneSideSym') )
+bkg1Sample.addSystematic( Systematic('weight_histoSysEnvelopeSym', configMgr.weights, ['weight', 'sys_weight6'], ['weight', '1/sys_weight6'], 'weight', 'histoSysEnvelopeSym') )
+bkg1Sample.addSystematic( Systematic('user_overallSys', '', 1.05, 0.95, 'user', 'userOverallSys') )
+bkg1Sample.addSystematic( Systematic('user_histoSys', '', 1.05, 0.95, 'user', 'userHistoSys') )
 
-bkg2Sample.addSystematic( Systematic('tree_sys', '', '_sys', '_sys', 'tree', 'normHistoSysOneSideSym') )
+bkg2Sample.addSystematic( Systematic('weight_overallNormSys', configMgr.weights, ['weight', 'sys_weight1'], ['weight', '1./sys_weight1'], 'weight', 'overallNormSys') )
+bkg2Sample.addSystematic( Systematic('weight_normHistoSys', configMgr.weights, ['weight', 'sys_weight2'], ['weight', '1./sys_weight2'], 'weight', 'normHistoSys') )
+bkg2Sample.addSystematic( Systematic('weight_normHistoSysOneSide', configMgr.weights, ['weight', 'sys_weight3'], ['weight', 'sys_weight3'], 'weight', 'normHistoSysOneSide') )
+bkg2Sample.addSystematic( Systematic('weight_normHistoSysEnvelopeSym', configMgr.weights, ['weight', 'sys_weight4'], ['weight', '1./sys_weight4'], 'weight', 'normHistoSysEnvelopeSym') )
+bkg2Sample.addSystematic( Systematic('weight_overallNormHistoSysEnvelopeSym', configMgr.weights, ['weight', 'sys_weight5'], ['weight', '1./sys_weight5'], 'weight', 'overallNormHistoSysEnvelopeSym') )
+bkg2Sample.addSystematic( Systematic('tree_normHistoSysOneSideSym', '', '_sys', '_sys', 'tree', 'normHistoSysOneSideSym') )
+bkg2Sample.addSystematic( Systematic('user_normHistoSys', '', 1.05, 0.95, 'user', 'userNormHistoSys') )
 
-sigSample.addSystematic( Systematic('flat_sys', '', 1.10, 0.90, 'user', 'overallSys') )
+sigSample.addSystematic( Systematic('flat_sys', '', 1.10, 0.90, 'user', 'userOverallSys') )
 
 ########## Fit Config Base ##########
 bkgName = "BkgOnly"
