@@ -138,6 +138,8 @@ bkg1Sample.addSystematic( Systematic('weight_histoSysOneSideSym', configMgr.weig
 bkg1Sample.addSystematic( Systematic('weight_histoSysEnvelopeSym', configMgr.weights, ['weight', 'sys_weight6'], ['weight', '1/sys_weight6'], 'weight', 'histoSysEnvelopeSym') )
 bkg1Sample.addSystematic( Systematic('user_overallSys', '', 1.05, 0.95, 'user', 'userOverallSys') )
 bkg1Sample.addSystematic( Systematic('user_histoSys', '', 1.05, 0.95, 'user', 'userHistoSys') )
+bkg1Sample.addSystematic( Systematic('weight_overallSysOneSide',  configMgr.weights, ['weight','sys_weight1'], ['weight','sys_weight1'], 'weight', 'overallSysOneSide') )
+bkg1Sample.addSystematic( Systematic('weight_overallSysOneSideSym',  configMgr.weights, ['weight','sys_weight1'], ['weight','sys_weight1'], 'weight', 'overallSysOneSideSym') )
 
 bkg2Sample.addSystematic( Systematic('weight_overallNormSys', configMgr.weights, ['weight', 'sys_weight1'], ['weight', '1./sys_weight1'], 'weight', 'overallNormSys') )
 bkg2Sample.addSystematic( Systematic('weight_normHistoSys', configMgr.weights, ['weight', 'sys_weight2'], ['weight', '1./sys_weight2'], 'weight', 'normHistoSys') )
