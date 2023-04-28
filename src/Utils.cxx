@@ -2614,12 +2614,9 @@ Util::resetError( RooWorkspace* wspace, const RooArgList& parList, const RooArgL
                     << GEndl;
                 continue;
             }
-            // Get the uncertainty on the Lumi:
-            RooRealVar* lumiSigma = (RooRealVar*) lumiConstr->findServer(0);
-            sigma = lumiSigma->getVal();
 
-            RooRealVar* nominalLumi = wspace->var("nominalLumi");
-            double val_nom = nominalLumi->getVal();
+            double val_nom = lumiConstr->getMean().getVal();
+            sigma = lumiConstr->getSigma().getVal();
 
             val_hi  = val_nom + sigma;
             val_low = val_nom - sigma;
