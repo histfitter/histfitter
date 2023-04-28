@@ -1,6 +1,8 @@
 import ROOT
+
 import os
 import math
+import pytest
 
 # snippet to dump test info from cache
 """
@@ -129,7 +131,7 @@ bkg_only_test_values = {
     'hdata_SR_obs_m': 21.0
 }
 
-
+@pytest.mark.order(1)
 def test_treeToHist(script_runner):
 
     # Make input TTree if needed
@@ -152,7 +154,7 @@ def test_treeToHist(script_runner):
 
         assert math.isclose(bkg_only_test_values[name], val) # histogram integral matches test values
 
-
+@pytest.mark.order(2)
 def test_backupCache(script_runner):
     command = 'mv data/hf_test/histCache.root test_backup_cache.root'
     (ret, outRaw, errRaw) = script_runner(command)
@@ -178,14 +180,9 @@ def test_backupCache(script_runner):
 
         assert math.isclose(bkg_only_test_values[name], val) # histogram integral matches test values
 
+@pytest.mark.order(3)
 def test_bkgFit(script_runner):
-
-    # Make input TTree if needed
-    if not os.path.isfile("test_tree.root"): 
-        command = "root -l -b -q ${HISTFITTER}/test/scripts/genTree.C+"
-        (ret,outRaw,errRaw) = script_runner(command)
-        assert ret.returncode == 0 # ROOT file with TTrees generated
-
+    # background workspace
     command = 'HistFitter.py -t -w ${HISTFITTER}/test/scripts/config_for_pytest.py'
     (ret,outRaw,errRaw) = script_runner(command)
     assert ret.returncode == 0
@@ -222,14 +219,9 @@ def test_bkgFit(script_runner):
     out = outRaw.decode('utf-8')
     assert "mu_bkg    1.0000e+00    1.1" in out # postfit bkg norm value
 
-def test_sigExclusionAll(script_runner):
-
-    # Make input TTree if needed
-    if not os.path.isfile("test_tree.root"): 
-        command = "root -l -b -q ${HISTFITTER}/test/scripts/genTree.C+"
-        (ret,outRaw,errRaw) = script_runner(command)
-        assert ret.returncode == 0 # ROOT file with TTrees generated
-
+@pytest.mark.order(4)
+def test_sigExclusionAsymptotics(script_runner):
+    # Exclusion fit
     command = 'HistFitter.py -t -w -F excl -f -D"before,after,corrMatrix" ${HISTFITTER}/test/scripts/config_for_pytest.py'
     (ret,outRaw,errRaw) = script_runner(command)
     assert ret.returncode == 0
@@ -268,6 +260,8 @@ def test_sigExclusionAll(script_runner):
     assert "HypoTestTool:  expected limit (median) 0.80" in out  # expected upper limit asymptotics
 
 
+@pytest.mark.order(5)
+def test_sigExclusionToys(script_runner):
     # Exclusion Toys
     command = 'HistFitter.py -F excl -l -u"--useToys" ${HISTFITTER}/test/scripts/config_for_pytest.py'
     (ret,outRaw,errRaw) = script_runner(command)
@@ -288,14 +282,8 @@ def test_sigExclusionAll(script_runner):
     assert math.isclose(exp_ul, 0.8, abs_tol = 0.1)
 
 
-
+@pytest.mark.order(6)
 def test_discoveryAll(script_runner):
-    # Make input TTree if needed
-    if not os.path.isfile("test_tree.root"): 
-        command = "root -l -b -q ${HISTFITTER}/test/scripts/genTree.C+"
-        (ret,outRaw,errRaw) = script_runner(command)
-        assert ret.returncode == 0 # ROOT file with TTrees generated
-
     # Make discovery workspace and fit
     #command = 'HistFitter.py -t -w -F disc -f -D"before,after,corrMatrix" ${HISTFITTER}/test/scripts/config_for_pytest.py' 
     # plotting crashes, something to fix!

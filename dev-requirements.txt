@@ -1,5 +1,6 @@
 # tests
 pytest~=6.2
+pytest-order~=1.1.0
 # develop
 pre-commit~=2.13
 pyupgrade~=2.19
