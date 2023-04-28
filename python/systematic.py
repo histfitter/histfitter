@@ -64,9 +64,9 @@ class SystematicBase:
         self.constraint = constraint
 
         allowedSys = ["histoSys","overallSys","userOverallSys","overallHistoSys","normHistoSys",
-                      "shapeSys","shapeStat","histoSysOneSide","histoSysOneSideSym","normHistoSysOneSide","normHistoSysOneSideSym","userHistoSys","userNormHistoSys",
+                      "shapeSys","shapeStat","histoSysOneSide","histoSysOneSideSym","normHistoSysOneSide","normHistoSysOneSideSym","userHistoSys","userNormHistoSys","overallSysOneSide",
                       "overallNormHistoSys","overallNormHistoSysOneSide","overallNormHistoSysOneSideSym", "overallNormSys", 
-                      "normHistoSysEnvelopeSym", "histoSysEnvelopeSym", "overallNormHistoSysEnvelopeSym" ]
+                      "normHistoSysEnvelopeSym", "histoSysEnvelopeSym", "overallNormHistoSysEnvelopeSym", "overallSysOneSideSym" ]
 
         if not self.method in allowedSys:
             raise Exception("Given method %s is not known; use one of %s"
