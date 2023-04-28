@@ -1337,8 +1337,6 @@ class ConfigManager:
                 log.warning(f"    generating Low overallSysOneSideSym for {nomName} syst={syst.name} low<0, reverting to non-symmetrised systematic")
                 overallSystLow = 1.0
             chan.getSample(sam.name).addOverallSys(syst.name, overallSystHigh, overallSystLow)
-        elif syst.method == "userOverallSys":
-            chan.getSample(sam.name).addOverallSys(syst.name, syst.high, syst.low)
         elif syst.method == "overallHistoSys":
             chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName, 
                                                 includeOverallSys=True, normalizeSys=False, nomSysName=nomSysName)
