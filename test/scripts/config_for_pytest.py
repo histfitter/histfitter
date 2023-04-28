@@ -5,7 +5,7 @@ from ROOT import kBlack,kWhite,kGray,kRed,kPink,kMagenta,kViolet,kBlue,kAzure,kC
 from ROOT import TColor
 from configWriter import fitConfig,Measurement,Channel,Sample
 from systematic import Systematic
-import math,ROOT,os
+import ROOT,os
 
 from inspect import getframeinfo, currentframe
 

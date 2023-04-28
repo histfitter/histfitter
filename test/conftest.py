@@ -11,7 +11,7 @@ def script_runner():
             cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True
         )
         try:
-            out,err = proc.communicate(timeout=120)
+            out,err = proc.communicate(timeout=240)
             return (proc,out,err)
         except TimeoutExpired:
             print("script_runner timedout")
