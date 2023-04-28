@@ -1,6 +1,7 @@
 import ROOT
 
 import os
+import time
 import math
 import pytest
 
@@ -134,11 +135,18 @@ bkg_only_test_values = {
 @pytest.mark.order(1)
 def test_treeToHist(script_runner):
 
+    if os.path.isfile("test_tree.root"):
+        # Check if ttree file is old, and remove to avoid getting caught offguard by changes
+        if time.time() - os.path.getctime("test_tree.root") > 86400.: # 24 hours in seconds
+            os.remove("test_tree.root")
+
+
     # Make input TTree if needed
     if not os.path.isfile("test_tree.root"): 
         command = "root -l -b -q ${HISTFITTER}/test/scripts/genTree.C+"
         (ret,outRaw,errRaw) = script_runner(command)
         assert ret.returncode == 0 # ROOT file with TTrees generated
+
 
     command = "HistFitter.py -t ${HISTFITTER}/test/scripts/config_for_pytest.py"
     (ret,outRaw,errRaw) = script_runner(command)
