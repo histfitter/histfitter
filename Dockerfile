@@ -28,12 +28,15 @@ RUN root --version && \
     gcc --version && \
     python --version --version && \
     make --version && \
-    . setup.sh && \
-    cd src && \
-    make -j$(($(nproc) - 1)) && \
+    mkdir "/usr/local/HistFitter/build"
+    mkdir "/usr/local/HistFitter/install"
+    cd /usr/local/HistFitter/build
+    cmake -DCMAKE_INSTALL_PREFIX=/usr/local/HistFitter/install /usr/local/HistFitter/
+    make -j$(($(nproc) - 1)) install && \
     mkdir -p "${HOME}/.local/bin" && \
     mkdir -p "${HOME}/data" && \
-    printf '\nif [ -f /usr/local/HistFitter/setup.sh ];then\n    . /usr/local/HistFitter/setup.sh\nfi\n' >> "${HOME}/.profile"
+    cd /usr/local/HistFitter/
+    printf '\nif [ -f /usr/local/HistFitter/install/histfitter_setup.sh ];then\n    . /usr/local/install/histfitter_setup.sh\nfi\n' >> "${HOME}/.profile"
 
 WORKDIR "${HOME}/data"
 

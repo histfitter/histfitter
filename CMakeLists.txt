@@ -93,7 +93,7 @@ else()
 endif()
 
 #Make setup script
-configure_file(setup.sh.in "${CMAKE_INSTALL_PREFIX}/setup.sh")
+configure_file(setup.sh.in "${CMAKE_INSTALL_PREFIX}/histfitter_setup.sh")
 
 #Copy python files to install location
 file(COPY ./python/hf DESTINATION ${CMAKE_INSTALL_PYTHON})

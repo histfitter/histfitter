@@ -67,7 +67,7 @@ This will create a lib folder with the installed libraries.
 The environment must be set by activating the setup script, located in the /install folder, in the directory where you want to work. This will create three new folders in your work folder: /config /data and /results. It also copies the `HistFactorySchema.dtd` file over to the config folder. Most importantly, the setup script sets the environment variable paths which are required for the scripts to work. The paths are set during install, and if any folders are moved, the build and install process must be rerun to update the setup script.
 
 ```
-source /path/to/install/setup.sh
+source /path/to/install/histfitter_setup.sh
 ```
 
 ## Workflow

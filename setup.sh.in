@@ -63,7 +63,7 @@ fi
 export HISTFITTER_VERSION=$VERSION
 
 #Set HistFitter environment path
-if [ -z $1 ];
+if [ -z $1 ]; #check if there is no input
 then
   echo "Assuming current directory is the working directory"
   export HISTFITTER=$(pwd)
@@ -82,7 +82,7 @@ cp "$SOURCE_DIR/config/HistFactorySchema.dtd" "$HISTFITTER/config/HistFactorySch
 
 #Update paths
 export ROOT_INCLUDE_PATH="$ROOT_INCLUDE_PATH:$SOURCE_DIR/src/hf:$SOURCE_DIR/src/root"
-export PATH="$PATH:$SOURCE_DIR/bin:$SOURCE_DIR/scripts"
+export PATH="$SOURCE_DIR/scripts"
 export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$LIB_DIR"
 
 # PYTHONPATH contains all directories that are used for 'import bla' commands
