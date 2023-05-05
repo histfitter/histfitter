@@ -1062,7 +1062,7 @@ class ConfigManager:
 
                     # Do not fall back if the sample has no input files defined!
                     forceNoFallback = len(sam.input_files) == 0
-                    syst.PrepareGlobalNormalization(normString, self, chan, sam, forceNoFallBack)
+                    syst.PrepareGlobalNormalization(normString, self, chan, sam, forceNoFallback)
                     sam.addHistoSys(syst.name, nomName, highName, lowName, False, True, False, False, sam.name, normString)
 
         # post-processing 2: swapping of overall systematics for specified channel by systematics from other channel

@@ -555,7 +555,7 @@ class UserSystematic(SystematicBase):
                     abstract.hists[lowhighName] = histMgr.buildUserHistoSysFromHist(lowhighName, self.low, abstract.hists[nomName])
         return
 
-    def PrepareGlobalNormalization(self,normString,abstract,chan,sam,forceNoFallBack=False):
+    def PrepareGlobalNormalization(self,normString,abstract,chan,sam,forceNoFallback=False):
 
         for lowhigh in ["Nom_",self.name+"High_",self.name+"Low_"]:
             histName = f"h{sam.name}{lowhigh}{normString}Norm"
@@ -565,7 +565,8 @@ class UserSystematic(SystematicBase):
                     if not abstract.readFromTree:
                         abstract.hists[histName] = None
                         abstract.prepare.addHisto(histName, forceNoFallback=forceNoFallback)
-                    else:
+
+                    if abstract.readFromTree or abstract.hists[histName] is None:
                         abstract.hists[histName] = TH1D(histName, histName, 1, 0.5, 1.5)
                         totNorm=0.0
                         for normReg in sam.normRegions:
