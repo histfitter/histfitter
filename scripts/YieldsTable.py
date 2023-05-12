@@ -422,7 +422,7 @@ def latexfitresults(filename,regionList,sampleList,dataname='obsData',showSum=Fa
   tablenumbers['TOTAL_MC_EXP_BKG_err']    =  pdfExpErrInRegionList
   
   """
-  calculate the fitted number of events and propagated error for each requested sample, by splitting off each sample pdf
+  calculate the before-fit number of events and propagated error for each requested sample, by splitting off each sample pdf
   """
   for isam, sample in enumerate(sampleList):
     sampleName=getName(sample)
