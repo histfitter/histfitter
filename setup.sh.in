@@ -77,13 +77,21 @@ echo "Making directories /config /results /data in folder $HISTFITTER."
 mkdir -p "$HISTFITTER/config"
 mkdir -p "$HISTFITTER/results"
 mkdir -p "$HISTFITTER/data"
-echo "Copying HistFactorySchema.dtd to $HISTFITTER/config."
-cp "$SOURCE_DIR/config/HistFactorySchema.dtd" "$HISTFITTER/config/HistFactorySchema.dtd"
-echo "Copying /analysis example folder to $HISTFITTER/analysis."
-cp -r "$SOURCE_DIR/analysis" "$HISTFITTER/analysis"
-echo "Copying /macros folders to $HISTFITTER/macros."
-cp -r "$SOURCE_DIR/macros" "$HISTFITTER/macros"
 
+if [ ! -f $HISTFITTER/config/HistFactorySchema.dtd ]; then
+  echo "Copying HistFactorySchema.dtd to $HISTFITTER/config.";
+  cp "$SOURCE_DIR/config/HistFactorySchema.dtd" "$HISTFITTER/config/HistFactorySchema.dtd";
+fi
+
+if [ ! -d $HISTFITTER/analysis ]; then
+  echo "Copying /analysis example folder to $HISTFITTER/analysis.";
+  cp -r "$SOURCE_DIR/analysis" "$HISTFITTER/analysis";
+fi
+
+if [ ! -d $HISTFITTER/macros ]; then
+  echo "Copying /macros folders to $HISTFITTER/macros.";
+  cp -r "$SOURCE_DIR/macros" "$HISTFITTER/macros";
+fi
 
 #Update paths
 export ROOT_INCLUDE_PATH="$ROOT_INCLUDE_PATH:$SOURCE_DIR/src"
