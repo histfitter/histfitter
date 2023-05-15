@@ -5,7 +5,6 @@ import pytest
 
 from array import array
 
-# the thing we test
 import prepareHistos
 
 # get the object
