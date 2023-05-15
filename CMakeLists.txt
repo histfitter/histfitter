@@ -96,7 +96,7 @@ endif()
 configure_file(setup.sh.in "${CMAKE_INSTALL_PREFIX}/histfitter_setup.sh")
 
 #Copy python files to install location
-file(COPY ./python/hf DESTINATION ${CMAKE_INSTALL_PYTHON})
+file(COPY ./python DESTINATION ${CMAKE_INSTALL_PYTHON})
 
 #Install C++ libraries
 install(TARGETS HistFitter LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})

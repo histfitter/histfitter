@@ -79,6 +79,11 @@ mkdir -p "$HISTFITTER/results"
 mkdir -p "$HISTFITTER/data"
 echo "Copying HistFactorySchema.dtd to $HISTFITTER/config."
 cp "$SOURCE_DIR/config/HistFactorySchema.dtd" "$HISTFITTER/config/HistFactorySchema.dtd"
+echo "Copying /analysis example folder to $HISTFITTER/analysis."
+cp -r "$SOURCE_DIR/analysis" "$HISTFITTER/analysis"
+echo "Copying /macros folders to $HISTFITTER/macros."
+cp -r "$SOURCE_DIR/macros" "$HISTFITTER/macros"
+
 
 #Update paths
 export ROOT_INCLUDE_PATH="$ROOT_INCLUDE_PATH:$SOURCE_DIR/src/hf:$SOURCE_DIR/src/root"
@@ -87,7 +92,7 @@ export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$LIB_DIR"
 
 # PYTHONPATH contains all directories that are used for 'import bla' commands
 # Must prepend so as to catch python/cmdLineUtils.py before ROOT installation's
-export PYTHONPATH="$PYTHON_DIR/hf:$PYTHONPATH"
+export PYTHONPATH="$PYTHON_DIR:$PYTHONPATH"
 export PYTHONPATH="$SOURCE_DIR/scripts:$PYTHONPATH"
 
 # Hack for ssh from mac
