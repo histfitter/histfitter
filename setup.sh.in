@@ -86,8 +86,8 @@ cp -r "$SOURCE_DIR/macros" "$HISTFITTER/macros"
 
 
 #Update paths
-export ROOT_INCLUDE_PATH="$ROOT_INCLUDE_PATH:$SOURCE_DIR/src/hf:$SOURCE_DIR/src/root"
-export PATH="$SOURCE_DIR/scripts"
+export ROOT_INCLUDE_PATH="$ROOT_INCLUDE_PATH:$SOURCE_DIR/src"
+export PATH="$PATH:$SOURCE_DIR/scripts"
 export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$LIB_DIR"
 
 # PYTHONPATH contains all directories that are used for 'import bla' commands

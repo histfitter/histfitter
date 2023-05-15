@@ -31,7 +31,7 @@ list(TRANSFORM root_components PREPEND ROOT::)
 # Loop over source code and add files to list of source and headers
 set(HistFitter_headers "")
 set(HistFitter_sources "")
-file(GLOB filePaths src/*/*)
+file(GLOB filePaths src/*)
 
 foreach (_filePath ${filePaths})
     get_filename_component(_fileDir ${_filePath} DIRECTORY)
@@ -53,7 +53,7 @@ add_library(HistFitter SHARED ${HistFitter_sources})
 target_include_directories(HistFitter PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 
 # generate the dictionary source code
-ROOT_GENERATE_DICTIONARY(HistFitter_dict ${HistFitter_headers} MODULE HistFitter LINKDEF src/root/LinkDef.h)
+ROOT_GENERATE_DICTIONARY(HistFitter_dict ${HistFitter_headers} MODULE HistFitter LINKDEF src/LinkDef.h)
 
 #Require threads
 set(THREADS_PREFER_PTHREAD_FLAG ON)
