@@ -35,7 +35,7 @@ RUN root --version && \
     make -j$(($(nproc) - 1)) install && \
     mkdir -p ${HOME}/.local/bin && \
     mkdir -p ${HOME}/data && \
-    cd /usr/local/HistFitter/
+    cd /usr/local/HistFitter/ && \
     printf '\nif [ -f /usr/local/HistFitter/install/histfitter_setup.sh ];then\n    . /usr/local/install/histfitter_setup.sh\nfi\n' >> "${HOME}/.profile"
 
 WORKDIR "${HOME}/data"
