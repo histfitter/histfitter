@@ -1,4 +1,4 @@
-# HistFitter
+# HistFitter 
 
 [![stable-release-python2](https://img.shields.io/badge/StablePython2-v0.66.0-green)](https://gitlab.cern.ch/HistFitter/HistFitter/-/releases/v0.66.0)
 [![stable-release-python3](https://img.shields.io/badge/StablePython3-v1.2.0-green)](https://gitlab.cern.ch/HistFitter/HistFitter/-/tree/v1.2.0)
