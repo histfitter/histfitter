@@ -572,7 +572,7 @@ void Util::SaveInitialSnapshot(RooWorkspace* w){
 
     RooAbsData* data = (RooAbsData*) w->data("obsData");
     RooArgSet* params = (RooArgSet*) pdf->getParameters(*data) ;
-    if(!w->loadSnapshot("snapshot_paramsVals_initial")) {
+    if(!w->getSnapshots().find("snapshot_paramsVals_initial")) {
         w->saveSnapshot("snapshot_paramsVals_initial",*params);
     } else {
         Logger << kWARNING << "Snapshot 'snapshot_paramsVals_initial' already exists in  workspace, will not overwrite it" << GEndl;
@@ -2624,12 +2624,9 @@ Util::resetError( RooWorkspace* wspace, const RooArgList& parList, const RooArgL
                     << GEndl;
                 continue;
             }
-            // Get the uncertainty on the Lumi:
-            RooRealVar* lumiSigma = (RooRealVar*) lumiConstr->findServer(0);
-            sigma = lumiSigma->getVal();
 
-            RooRealVar* nominalLumi = wspace->var("nominalLumi");
-            double val_nom = nominalLumi->getVal();
+            double val_nom = lumiConstr->getMean().getVal();
+            sigma = lumiConstr->getSigma().getVal();
 
             val_hi  = val_nom + sigma;
             val_low = val_nom - sigma;
