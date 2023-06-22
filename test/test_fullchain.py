@@ -201,7 +201,6 @@ def test_backupCache(script_runner):
             hc.Delete(f'{name};*')
     hc.Close()
 
-
     command = "HistFitter.py -w -u='--manualBackupCache test_backup_cache.root' ${HISTFITTER}/test/scripts/config_for_pytest.py"
     (ret,outRaw,errRaw) = script_runner(command)
     assert ret.returncode == 0
