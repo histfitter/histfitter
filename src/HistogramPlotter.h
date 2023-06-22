@@ -59,12 +59,13 @@ class HistogramPlotter {
         void setPlotRegions(const TString& s);
         void setPlotComponents(bool b);
         void setPlotSeparateComponents(bool b);
+        void setStoreSingleFiles(bool b);
+        void setStoreMergedFile(bool b);
+        void setDoStackPlots(bool b);
 
         void Initialize();
         void PlotRegions();
         void PlotRegion(const TString& r);
-
-        void saveHistograms();
 
     private:
         RooWorkspace* m_workspace;
@@ -74,6 +75,10 @@ class HistogramPlotter {
 
         bool m_plotSeparateComponents;
         bool m_plotComponents;
+        bool m_storeSingleFiles;
+        bool m_storeMergedFile;
+        TString m_mergedFile;
+        bool m_doStackPlots;
         TString m_plotRegions;
         TString m_outputPrefix;
 
@@ -93,15 +98,16 @@ class HistogramPlotter {
 class HistogramPlot {
     public:
         HistogramPlot(RooWorkspace *w, const TString& r, RooAbsPdf *regionPdf, RooDataSet *regionData, const ChannelStyle &style);
-        void plot();
+        void plot(TDirectory *directory = nullptr);
 
-        void saveHistograms();
+        void saveHistograms(TDirectory *directory);
         void plotSeparateComponents();
 
         void setAnalysisName(const TString& anaName);
         void setOutputPrefix(const TString& outputPrefix);
         void setFitResult(RooFitResult *r);
         void setPlotComponents(bool b);
+        void setStoreSingleFiles(bool b);
 
     private:
         HistogramPlot();
@@ -135,6 +141,7 @@ class HistogramPlot {
         TString m_anaName;
 
         bool m_plotComponents;
+        bool m_storeSingleFiles;
         TString m_outputPrefix;
         TString m_plotRatio;
 

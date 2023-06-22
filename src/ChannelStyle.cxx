@@ -106,7 +106,7 @@ TString ChannelStyle::getSampleName(const TString& sample){
       m_logger << kVERBOSE << "getSampleName: requested sample name: "<<sample  
 	       << ", defined m_sampleNames[" << i << "]="<< m_sampleNames[i] << GEndl;
       TString target = m_sampleNames[i]+"_";
-      if( sample.Contains(target.Data())){
+      if( sample.BeginsWith(target.Data())){
             return m_sampleNames[i];
         }
     }

@@ -79,6 +79,9 @@ HistogramPlotter::HistogramPlotter(RooWorkspace *w, const TString& fitConfigName
     m_plotRegions = "ALL";
     m_plotComponents = true;
     m_plotSeparateComponents = false;
+    m_storeSingleFiles = true;
+    m_storeMergedFile = false;
+    m_doStackPlots = true;
 
     m_fitResult = nullptr;
     m_inputData = nullptr;
@@ -100,6 +103,9 @@ HistogramPlotter::HistogramPlotter(RooWorkspace* w, FitConfig* fc) {
     m_plotRatio = mgr->m_plotRatio;
     m_plotRegions = "ALL";
 
+    m_storeSingleFiles = true;
+    m_storeMergedFile = false;
+    m_doStackPlots = true;
 }
 
 HistogramPlotter::~HistogramPlotter() {
@@ -112,6 +118,18 @@ void HistogramPlotter::setPlotSeparateComponents(bool b) {
 
 void HistogramPlotter::setPlotComponents(bool b) {
     m_plotComponents = b;
+}
+
+void HistogramPlotter::setStoreSingleFiles(bool b) {
+    m_storeSingleFiles = b;
+}
+
+void HistogramPlotter::setStoreMergedFile(bool b) {
+    m_storeMergedFile = b;
+}
+
+void HistogramPlotter::setDoStackPlots(bool b) {
+    m_doStackPlots = b;
 }
 
 void HistogramPlotter::setPlotRegions(const TString &s) {
@@ -141,6 +159,7 @@ void HistogramPlotter::Initialize() {
     Logger << kINFO << "HistogramPlotter::Initialize()" << GEndl;
     Logger << kINFO << " ------ Starting Plot with parameters:   analysisName = " << m_fitConfig->m_name << " and " << m_anaName << GEndl;
     Logger << kINFO << "    plotRegions = '" <<  m_plotRegions <<  "'  plotComponents = " << m_plotComponents << "  outputPrefix = " << m_outputPrefix  << GEndl;
+    Logger << kINFO << "    storeSingleFiles = '" <<  m_storeSingleFiles <<  "'  storeMergedFiles = " << m_storeMergedFile << "  doStackPlot = " << m_doStackPlots  << GEndl;
 
     m_pdf = static_cast<RooSimultaneous*>(m_workspace->pdf("simPdf"));
     if(!m_inputData) {
@@ -160,6 +179,14 @@ void HistogramPlotter::Initialize() {
 
 void HistogramPlotter::PlotRegions() {
     Logger << kINFO << "Plotting all known regions in PDF" << GEndl;
+
+    if(m_storeMergedFile) {
+        m_mergedFile = ("results/" + m_anaName + "/histograms_" + m_outputPrefix + ".root");
+        Logger << kINFO << "Will store " << m_outputPrefix << " histograms in " << m_mergedFile << GEndl;
+        TFile *f = TFile::Open(m_mergedFile.Data(), "RECREATE");
+        f->Close();
+    }
+
     // loop loop loop
     for(const auto &categoryLabel : m_regions)  {
         // Does the region actually exist?
@@ -170,26 +197,6 @@ void HistogramPlotter::PlotRegions() {
 
         PlotRegion(categoryLabel);
     }
-}
-
-void HistogramPlotter::saveHistograms() {
-
-    std::string filename("results/" + m_anaName + "/histograms_" + m_outputPrefix + ".root");
-    TFile *f = TFile::Open(filename.c_str(), "RECREATE");
-
-    for(unsigned int i = 0; i < m_regions.size(); ++i){
-        const auto categoryLabel = m_regions[i];
-        const auto hists = m_histograms[i];
-
-        f->mkdir(categoryLabel);
-        f->cd(categoryLabel);
-        for(const auto &h : hists) {
-            h->Write();
-        }
-
-        f->cd();
-    }
-    f->Close();
 }
 
 void HistogramPlotter::PlotRegion(const TString &regionCategoryLabel) {
@@ -218,13 +225,36 @@ void HistogramPlotter::PlotRegion(const TString &regionCategoryLabel) {
     plot.setFitResult(m_fitResult);
     plot.setPlotComponents(m_plotComponents);
     plot.setOutputPrefix(m_outputPrefix);
-    //m_histograms.push_back(hists);
+    plot.setStoreSingleFiles(m_storeSingleFiles);
 
-    plot.plot();
-    plot.saveHistograms();
+    TFile *file = nullptr;
+    TDirectory *directory = nullptr;
+    if(m_storeMergedFile) {
+        //std::string filename("results/" + m_anaName + "/histograms_" + m_outputPrefix + ".root");
+        file = TFile::Open(m_mergedFile.Data(), "UPDATE");
+        directory = file->mkdir(regionCategoryLabel);
+    }
+
+    // This will write single files if m_storeSingleFiles was set, and write to the directory if it was set too
+    if(m_doStackPlots) plot.plot(directory);
+
+    if(m_storeSingleFiles) {
+        //TString canvasName(Form("%s_%s", regionCategoryLabel.Data(), m_outputPrefix.Data()));
+        std::string filename("results/" + m_anaName + "/" + regionCategoryLabel + ".root");
+        TFile *f = TFile::Open(filename.c_str(), "update");
+        plot.saveHistograms(f);
+        f->Close();
+    }
+
+    if(directory) {
+        plot.saveHistograms(directory);
+    }
+
     //if(m_plotSeparateComponents) {
     //plot.plotSeparateComponents();
     //}
+
+    if(file) file->Close();
 
 }
 
@@ -250,10 +280,15 @@ HistogramPlot::HistogramPlot(RooWorkspace *w,
 
     m_fitResult = nullptr;
     m_plotComponents = false;
+    m_storeSingleFiles = false;
 }
 
 void HistogramPlot::setPlotComponents(bool b) {
     m_plotComponents = b;
+}
+
+void HistogramPlot::setStoreSingleFiles(bool b) {
+    m_storeSingleFiles = b;
 }
 
 void HistogramPlot::setOutputPrefix(const TString& outputPrefix) {
@@ -687,7 +722,12 @@ TLegend* HistogramPlot::buildLegend() {
     return leg;
 }
 
-void HistogramPlot::plot() {
+void HistogramPlot::plot(TDirectory *directory) {
+    if(!m_storeSingleFiles && !directory){
+        Logger << kWARNING << "HistogramPlot::plot called with m_storeSingleFiles == false and directory == nullptr - nothing to do here!" << GEndl;
+        return;
+    }
+
     buildFrame();
 
     // Now build the canvas
@@ -751,7 +791,7 @@ void HistogramPlot::plot() {
 
     // Lumi
     if(m_style.getShowLumi()){
-        Util::AddText(0.175, 0.775, Form("#int Ldt = %.1f fb^{-1}", m_style.getLumi() ));
+        Util::AddText(m_style.getLumiX(), m_style.getLumiY(), Form("#sqrt{s} = %s, %.1f fb^{-1}", m_style.getEnergy().Data(), m_style.getLumi() ));
     }
 
     // Legend
@@ -766,9 +806,19 @@ void HistogramPlot::plot() {
     }
 
     // Write output
-    canvas->SaveAs("results/" + m_anaName + "/" + canvasName + ".pdf");
-    canvas->SaveAs("results/" + m_anaName + "/" + canvasName + ".eps");
-    canvas->SaveAs("results/" + m_anaName + "/" + canvasName + ".root");
+    if(m_storeSingleFiles) {
+        canvas->SaveAs("results/" + m_anaName + "/" + canvasName + ".pdf");
+        canvas->SaveAs("results/" + m_anaName + "/" + canvasName + ".eps");
+        canvas->SaveAs("results/" + m_anaName + "/" + canvasName + ".root");
+    }
+
+    // If required (i.e. if directory is set), store a copy
+    if(directory) {
+        TDirectory* currentDir = gDirectory->CurrentDirectory();
+        directory->cd();
+        canvas->Write();
+        currentDir->cd();
+    }
 }
 
 void HistogramPlot::plotSeparateComponents() {
@@ -863,18 +913,14 @@ void HistogramPlot::plotSingleComponent(unsigned int i, double normalisation) {
     leg->Draw();
 }
 
-void HistogramPlot::saveHistograms() {
+void HistogramPlot::saveHistograms(TDirectory *directory) {
     if(m_componentNames.empty()) {
         loadComponentInformation();
     }
 
     // Save the current directory to resume it after this function call
-    gDirectory->pwd();
     TDirectory* currentDir = gDirectory->CurrentDirectory();
-
-    // Try something here
-    TString canvasName(Form("%s_%s", m_regionCategoryLabel.Data(), m_outputPrefix.Data()));
-    TFile f(Form("results/%s/%s.root", m_anaName.Data(), canvasName.Data()), "update");
+    directory->cd();
 
     // Data hist
     RooPlot* frame_dummy = m_regionVariable->frame();
@@ -969,17 +1015,16 @@ void HistogramPlot::saveHistograms() {
         auto h = Util::ComponentToHistogram(m_componentPdfs[component], m_regionVariable, m_fitResult);
 
         h->SetFillColor(m_style.getSampleColor(component));
+
         h->SetName(m_style.getSampleName(component));
+        Logger << kINFO << component << GEndl;
         Logger << kINFO << "Rebinning histogram " << h->GetName() << GEndl;
         if (m_binEdges.size())
             h = remapHistogram(h);
         h->Write();
     }
 
-    Logger << kINFO << "Wrote histogram information to " << f.GetName() << GEndl;
-
-    // Close the output file
-    f.Close();
+    Logger << kINFO << "Wrote histogram information to: " << directory->GetPath() << GEndl;
 
     // Resume the previous directory
     currentDir->cd();

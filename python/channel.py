@@ -97,8 +97,8 @@ class Channel:
         self.ATLASLabelText = None
         self.showLumi = None
         self.lumi = None
-        self.lumiX = None
-        self.lumiY = None
+        self.lumiX = 0.0
+        self.lumiY = 0.775
         self.xErrorSize = None
         self.integerStyle = None
         self.regionLabelX = None
