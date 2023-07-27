@@ -117,7 +117,10 @@ std::list<LimitResult> CollectHypoTestResults( const TString& infile, const TStr
     // collect all hypotest results in input file
     std::map<TString,TString> wsnameMap = GetMatchingWorkspaces( infile, format, interpretation, cutStr );
     if ( wsnameMap.empty() )
+    {
+        ToyUtilsLogger << kWARNING << "Didn't find hypotest results in " << infile << " for format " << format << GEndl;
         return limres;
+    }
 
     // loop over hypotestresults and save results
     std::list<LimitResult> limitres;
