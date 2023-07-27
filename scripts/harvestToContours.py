@@ -116,11 +116,13 @@ else:
     expectedContour = "CLsexp"
     observedContour = "CLs"
     discoveryContour = ""
+    expectedDiscContour = ""
     discoveryThresholds = [3, 5] # significance thresholds to compute
 
     if args.discoverySensitivity:
-        listOfContours += ["p0"]
+        listOfContours += ["p0","p0exp"]
         discoveryContour = "p0"
+        expectedDiscContour = "p0exp"
 
 
 
@@ -274,8 +276,8 @@ def processInputFile(inputFile, outputFile, label = ""):
     outputFile.mkdir("SubGraphs"); outputFile.cd("SubGraphs")
     for whichContour in listOfContours:
 
-        # discovery contours are a special case
-        if discoveryContour == whichContour:
+        # discovery contours are a special case (obs and exp)
+        if whichContour in [discoveryContour, expectedDiscContour]:
                 # loop over significance thresholds and duplicate and write each graph
                 for lvl in discoveryThresholds: 
                     tmp_whichContour = whichContour + "_" + str(lvl)
@@ -334,10 +336,14 @@ def processInputFile(inputFile, outputFile, label = ""):
     if args.discoverySensitivity:
         # Write out each significance threshold
         for lvl in discoveryThresholds:
+            # obs
             for icurve,discCurve in enumerate(outputGraphs[discoveryContour+"_"+str(lvl)]):
                 discCurve.SetLineStyle(7)
                 discCurve.Write(f"Disc_{lvl}sig_{icurve}{label}" )
-
+            # exp
+            for icurve,expDiscCurve in enumerate(outputGraphs[expectedDiscContour+"_"+str(lvl)]):
+                expDiscCurve.SetLineStyle(7)
+                expDiscCurve.Write(f"expDisc_{lvl}sig_{icurve}{label}" )
 
     ############################################################
     # Step 5 - Write out a pretty canvas for further editing
@@ -416,10 +422,13 @@ def harvestToDict( harvestInputFileName = "" , tmpListOfContours = listOfContour
                 # Likewise if the p-value is 0, it will result in an inf.  This sets it to 10 sigma.
                 for x in tmpListOfContours:
                     if not (args.noSig or x in ["upperLimit","expectedUpperLimit"]):
-                        if float(sample["%s"%x])==1.0:
+                        if float(sample["%s"%x])>=1.0: # cap CLs values above 1
                             sample["%s"%x]=0.9999999999
                         if float(sample["%s"%x])==0.0:
                             sample["%s"%x]=7.6198530e-24 # corresponds to 10 sigma
+
+                        #if float(sample["%s"%x])==-1:
+                        #    print(f"Warning sample {sampleParams} value {x} == -1.  Setting to ")
 
                 if not math.isinf(float(sample[expectedContour])) :
                     tmpList = [float(sample["%s"%x]) if (args.noSig or x in ["upperLimit","expectedUpperLimit"]) else ROOT.RooStats.PValueToSignificance( float(sample["%s"%x]) ) for x in tmpListOfContours]
@@ -434,8 +443,8 @@ def harvestToDict( harvestInputFileName = "" , tmpListOfContours = listOfContour
                     if not sampleParams in modelDict:
                         modelDict[sampleParams] = dict(list(zip(tmpListOfContours,  [args.sigmax for x in tmpListOfContours] )) )
                         modelDict[sampleParams]["fID"] = ""
-                if(args.debug):
-                    print((sampleParams, float(sample[observedContour]), float(sample[expectedContour]) if args.noSig else ROOT.RooStats.PValueToSignificance( float(sample[observedContour])     )))
+                if(args.debug):                    
+                    print("(sample params), obs, obs-z ",(sampleParams, float(sample[observedContour]), float(sample[expectedContour]) if args.noSig else ROOT.RooStats.PValueToSignificance( float(sample[observedContour])     )))
 
 
     else:
@@ -486,6 +495,10 @@ def addValuesToDict(inputDict, function, numberOfPoints = 100, value = 0):
     lowerLimit = min(tmpListOfXValues)
     upperLimit = max(tmpListOfXValues)
 
+    if args.debug:
+        print(f"Forbidden function lowerLimit = {lowerLimit}, upperLimit = {upperLimit}")
+    
+    # TODO need unique name for multiple function calls
     forbiddenFunction = ROOT.TF1(f"forbiddenFunction${value}",function,lowerLimit,upperLimit)
     forbiddenFunction.Write(f"forbiddenFunction${value}")
 
@@ -569,11 +582,11 @@ def interpolateSurface(modelDict = {}, interpolationFunction = "linear", useROOT
         while any([math.isinf(tmp) or math.isnan(tmp) for tmp in zValues[whichContour]  ]):#  np.isinf( zValues[whichContour]  ).any():
             myindex = [math.isinf(tmp) or math.isnan(tmp) for tmp in zValues[whichContour] ].index(True)
             if (args.debug):
-                print(">>> ... Remove Inf or NaN at i=%d x=%d y=%d" % (myindex,x[whichContour][myindex],y[whichContour][myindex]))
+                print(f">>> ... Remove Inf or NaN ({zValues[whichContour][myindex]}) at i={myindex} x={x[whichContour][myindex]} y={y[whichContour][myindex]} for {whichContour}")
             x[whichContour].pop(myindex)
             y[whichContour].pop(myindex)
             zValues[whichContour].pop(myindex)
-            pass;
+            pass
 
         if any([math.isinf(tmp) or math.isnan(tmp) for tmp in zValues[whichContour]  ]):
             print(">>> ... Still infs or nans in %s!! This is a problem... Exiting." % whichContour)
@@ -692,7 +705,7 @@ def interpolateSurface(modelDict = {}, interpolationFunction = "linear", useROOT
             #### Turn this surface into contours!
 
             # First the special case of discovery contours where we split this out into n contours at different levels
-            if discoveryContour == whichContour:
+            if whichContour in [discoveryContour, expectedDiscContour]:
                 # loop over the significance thresholds
                 for lvl in discoveryThresholds:
                     tmp_whichContour = whichContour + "_" + str(lvl)
@@ -760,8 +773,8 @@ def createTGraphFromDict(modelDict,myName,listOfFIDs=None):
             value = modelDict[model][myName] if (args.noSig or myName in ["upperLimit","expectedUpperLimit"]) else ROOT.RooStats.SignificanceToPValue(modelDict[model][myName])
 
             # if we're doing the disc significance, ie p0, then we want a significance not pvalue, even if someone used the noSig option
-            if myName in ['p0']:
-                value =  ROOT.RooStats.PValueToSignificance(modelDict[model][myName]) if args.noSig else modelDict[model][myName] 
+            if myName in [discoveryContour, expectedDiscContour]:
+                value =  ROOT.RooStats.PValueToSignificance(modelDict[model][myName]) if args.noSig else modelDict[model][myName]
 
             if args.debug:
                 print(f"createTGraphFromDict: model = {model}, myName={myName}, orig_value = {modelDict[model][myName]}, value = {value}")
