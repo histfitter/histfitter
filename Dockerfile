@@ -22,7 +22,7 @@ RUN apt-get -qq -y update && \
     python -m pip --no-cache-dir install --requirement /usr/local/HistFitter/requirements.txt
 
 # Build HistFitter, make $HOME/.local/bin for .profile to find and add to PATH,
-# make $HOME/data user controlled, and automatically source HistFitter setup.sh
+# automatically source HistFitter setup.sh
 WORKDIR /usr/local
 RUN root --version && \
     gcc --version && \
@@ -32,12 +32,11 @@ RUN root --version && \
     mkdir install && \
     mkdir workdir && \
     cd build && \
-    cmake -DCMAKE_INSTALL_PREFIX=/usr/local/install /usr/local/HistFitter && \
-    make -j$(($(nproc) - 1)) install && \
-    cd ../workdir && \
-    . ../install/bin/histfitter.sh && \
-    . ../install/bin/histfitter_setup_workdir.sh && \
-    mkdir -p ${HOME}/.local/bin && \
-    cd /usr/local/ && \
-    printf '\nif [ -f /usr/local/install/histfitter.sh ];then\n    . /usr/local/install/histfitter.sh\nfi\n' >> "${HOME}/.profile"
+    #cmake -DCMAKE_INSTALL_PREFIX=/usr/local/install /usr/local/HistFitter && \
+    #make -j$(($(nproc) - 1)) install && \
+    #cd ../workdir && \
+    #. ../install/bin/histfitter.sh && \
+    #. ../install/bin/histfitter_setup_workdir.sh && \
+    #mkdir -p ${HOME}/.local/bin && \
+    #printf '\nif [ -f /usr/local/install/histfitter.sh ];then\n    . /usr/local/install/histfitter.sh\nfi\n' >> "${HOME}/.profile"
 
