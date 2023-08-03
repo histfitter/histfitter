@@ -100,6 +100,7 @@ class ConfigManager:
         self.inputLumi = None # Luminosity of input histograms
         self.outputLumi = None # Output luminosity
         self.lumiUnits = 1.0 # 1=fb-1, 1000=pb-1, etc.
+        self.energy = '13 TeV' # center-of-mass energy, to be used in plots
         self.nTOYs =- 1 #<=0 means to use real data
         self.nCPUs = 1 # number of CPUs used for toy simulation
         self.calculatorType = 0 # frequentist calculator
@@ -144,6 +145,9 @@ class ConfigManager:
         self.includeOverallSys = True # Boolean to chose if HistoSys should also have OverallSys
         self.readFromTree = False # Boolean to chose if reading histograms from tree will also write to file
         self.plotHistos = None # Boolean to chose to plot out the histograms
+        self.plotStacked = True # Boolean to choose to do stacked before/after plots, or just individual histograms
+        self.storeSinglePlotFiles = True # Boolean to choose to store single files for each before/after plot
+        self.storeMergedPlotFile = False # Boolean to choose to store a central file for all before/after plots
         self.plotRatio="ratio" #Pass to cppMgr to configure drawing options: "ratio", "pull", "none"
         self.removeEmptyBins = False # Boolean to chose to remove empty bins from data histogram on plot
         self.executeHistFactory = True # Boolean to chose to execute HistFactory
@@ -600,6 +604,7 @@ class ConfigManager:
                      if c.lumi is None:
                          style.setLumi(self.outputLumi)
                      else: style.setLumi(c.lumi)
+                     style.setEnergy(self.energy)
                  if not c.lumiX is None:
                      style.setLumiX(c.lumiX)
                  if not c.lumiY is None:

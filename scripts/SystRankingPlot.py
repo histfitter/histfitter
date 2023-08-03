@@ -125,9 +125,9 @@ def get_syst_ranking(opts):
     fit_name = "STAT_ONLY"
 
     for i in range(float_pars_final.getSize()):
+        par_name = float_pars_final[i].GetName()
         if not par_name.startswith("alpha") and not par_name.startswith("gamma"):
             continue
-        par_name = float_pars_final[i].GetName()
         par = w.var(par_name)
         par.setConstant(True)
         
@@ -138,9 +138,9 @@ def get_syst_ranking(opts):
     poi = get_parameter(float_pars, opts.parameter)
 
     for i in range(float_pars_final.getSize()):
+        par_name = float_pars_final[i].GetName()
         if not par_name.startswith("alpha") and not par_name.startswith("gamma"):
             continue
-        par_name = float_pars_final[i].GetName()
         par = w.var(par_name)
         par.setConstant(False)
 

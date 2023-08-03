@@ -162,9 +162,11 @@ double hf::Util::getNonQcdVal(const TString& proc, const TString& reg, TMap* map
 
 
 //_____________________________________________________________________________
-void hf::Util::GenerateFitAndPlot(TString fcName, TString anaName, Bool_t drawBeforeFit, Bool_t drawAfterFit, Bool_t plotCorrelationMatrix,
+void hf::Util::GenerateFitAndPlot(TString fcName, TString anaName, Bool_t drawBeforeFit, Bool_t drawAfterFit,
+        Bool_t doStackPlots, Bool_t storeSingleFiles, Bool_t storeMergedFile,
+        Bool_t plotCorrelationMatrix,
         Bool_t plotSeparateComponents, Bool_t plotNLL, Bool_t minos, TString minosPars,
-        Bool_t doFixParameters, TString fixedPars, bool ReduceCorrMatrix, bool noFit, bool plotInterpolation ){
+        Bool_t doFixParameters, TString fixedPars, bool ReduceCorrMatrix, bool noFit, bool plotInterpolation){
 
     hf::ConfigMgr* mgr = hf::ConfigMgr::getInstance();
     FitConfig* fc = mgr->getFitConfig(fcName);
@@ -173,6 +175,9 @@ void hf::Util::GenerateFitAndPlot(TString fcName, TString anaName, Bool_t drawBe
     Logger << kINFO << "     analysisName = " << anaName << GEndl;
     Logger << kINFO << "     drawBeforeFit = " << drawBeforeFit << GEndl;
     Logger << kINFO << "     drawAfterFit = " << drawAfterFit << GEndl;
+    Logger << kINFO << "     doStackPlots = " << doStackPlots << GEndl;
+    Logger << kINFO << "     storeSingleFiles = " << storeSingleFiles << GEndl;
+    Logger << kINFO << "     storeMergedFile = " << storeMergedFile << GEndl;
     Logger << kINFO << "     plotCorrelationMatrix = " << plotCorrelationMatrix << GEndl;
     Logger << kINFO << "     plotSeparateComponents = " << plotSeparateComponents << GEndl;
     Logger << kINFO << "     plotNLL = " << plotNLL << GEndl;
@@ -282,13 +287,15 @@ void hf::Util::GenerateFitAndPlot(TString fcName, TString anaName, Bool_t drawBe
         h.setPlotRegions(plotChannels);
         h.setPlotComponents(true);
         h.setPlotSeparateComponents(false);
+        h.setDoStackPlots(doStackPlots);
+        h.setStoreSingleFiles(storeSingleFiles);
+        h.setStoreMergedFile(storeMergedFile);
         h.setOutputPrefix("beforeFit");
         h.setFitResult(expResultBefore);
         h.setInputData(toyMC);
 
         h.Initialize();
         h.PlotRegions();
-        //h.saveHistograms();
     }
 
     // perform fit
@@ -320,6 +327,9 @@ void hf::Util::GenerateFitAndPlot(TString fcName, TString anaName, Bool_t drawBe
         h.setPlotRegions(plotChannels);
         h.setPlotComponents(true);
         h.setPlotSeparateComponents(false);
+        h.setDoStackPlots(doStackPlots);
+        h.setStoreSingleFiles(storeSingleFiles);
+        h.setStoreMergedFile(storeMergedFile);
         h.setOutputPrefix("afterFit");
         h.setFitResult(expResultAfter);
         h.setInputData(toyMC);

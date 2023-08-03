@@ -541,6 +541,7 @@ if __name__ == "__main__":
   chosenSample = False
   tableCaption=""
   tableLabel=""
+  selectSys = -1
 
   """
   set options as given by the user call

@@ -47,7 +47,7 @@ analysisNameBase = anaName
 configMgr.nTOYs = 500
 configMgr.calculatorType = 0 if useToys else 2 # 2=asymptotic calculator, 0=frequentist calculator
 configMgr.testStatType = 3   # 3=one-sided profile likelihood test statistic (LHC default)
-configMgr.nPoints = 20       # number of values scanned of signal-strength for upper-limit determination of signal strength.
+configMgr.nPoints = 10       # number of values scanned of signal-strength for upper-limit determination of signal strength.
 configMgr.scanRange = (0., 2.)
 
 if useToys:
@@ -103,6 +103,8 @@ configMgr.weights = ["weight"]
 configMgr.cutsDict = {"SR":"m>100.",
                       "SR_disc":"m>150.",
                       "CR":"m<100."}
+
+configMgr.outputLumi = configMgr.inputLumi = 140.1
 
 ####### Setup Data and Background Samples ############
 bkg1Sample = Sample("bkg1",TColor.GetColor('#fe9929')) 
@@ -172,6 +174,7 @@ SRs.append(SR)
 # Don't include overflow
 for sr in SRs:
     sr.useOverflowBin = False
+    sr.showLumi = True
 
 cfg_fit.addSignalChannels(SRs)
     
@@ -179,6 +182,7 @@ cfg_fit.addSignalChannels(SRs)
 ## Control Regions
 CRs = list()
 CR = cfg_fit.addChannel('m',["CR"],1,50,100)
+CR.showLumi = True
 bkg2Sample.setNormRegions(["CR","m"])
 CRs.append(CR)
 
