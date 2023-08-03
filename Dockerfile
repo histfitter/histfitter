@@ -27,7 +27,7 @@ WORKDIR /usr/local
 RUN root --version && \
     gcc --version && \
     python --version --version && \
-    make --version && 
+    make --version 
     #mkdir build && \
     #mkdir install && \
     #mkdir workdir && \
