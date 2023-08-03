@@ -30,13 +30,14 @@ RUN root --version && \
     make --version && \
     mkdir /usr/local/HistFitter/build && \
     mkdir /usr/local/HistFitter/install && \
+    mkdir /usr/local/HistFitter/workdir && \
     cd /usr/local/HistFitter/build && \
     cmake -DCMAKE_INSTALL_PREFIX=/usr/local/HistFitter/install /usr/local/HistFitter/ && \
     make -j$(($(nproc) - 1)) install && \
     mkdir -p ${HOME}/.local/bin && \
     mkdir -p ${HOME}/data && \
-    cd /usr/local/HistFitter/ && \
-    printf '\nif [ -f /usr/local/HistFitter/install/histfitter_setup.sh ];then\n    . /usr/local/install/histfitter_setup.sh\nfi\n' >> "${HOME}/.profile"
+    cd /usr/local/ && \
+    printf '\nif [ -f /usr/local/HistFitter/install/histfitter.sh ];then\n    . /usr/local/HistFitter/install/histfitter.sh\nfi\n' >> "${HOME}/.profile"
 
 WORKDIR "${HOME}/data"
 

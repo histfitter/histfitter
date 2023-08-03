@@ -1,17 +1,7 @@
 #!/bin/bash
 # check Root environment setup. Allow for external setup script.
 # Update here when tagged
-VERSION=@VERSION@
-
-#This script takes one variable $1 which should be the name of the working directory
-#You can have many working directories, but then this script must be activated with the correct path.
-
-#Set variables during build
-INSTALL_DIR=@CMAKE_INSTALL_PREFIX@
-LIB_DIR=@CMAKE_INSTALL_LIBDIR@
-PYTHON_DIR=@CMAKE_INSTALL_PYTHON@
-SOURCE_DIR=@PROJECT_SOURCE_DIR@
-#ROOT_INCL=
+VERSION=1.3.1
 
 # check Root environment setup
 if [ -z "$(root-config --libs)" ] && [ -z "$(root-config --libs)"] && [ ! "$ROOTSYS" ]; then
@@ -51,9 +41,10 @@ function validate_ROOT_release {
   fi
 }
 
+# Ensure valid version of ROOT accessible
 validate_ROOT_release
 
-#Check LD_LIBRARY_PATH
+#Check if LD_LIBRARY_PATH is empty
 if [ ! "$LD_LIBRARY_PATH" ]; then
   echo "Warning: so far you haven't setup your ROOT enviroment properly (no LD_LIBRARY_PATH)"
   return
@@ -62,46 +53,19 @@ fi
 #Export version number
 export HISTFITTER_VERSION=$VERSION
 
-#Set HistFitter environment path
-if [ -z $1 ]; #check if there is no input
-then
-  echo "Assuming current directory is the working directory"
-  export HISTFITTER=$(pwd)
-else
-  export HISTFITTER=$1
-echo "Setting the HISTFITTER variable to $HISTFITTER"
-fi
-
-#Set up HistFitter environment with folders and copy necessary files
-echo "Making directories /config /results /data in folder $HISTFITTER."
-mkdir -p "$HISTFITTER/config"
-mkdir -p "$HISTFITTER/results"
-mkdir -p "$HISTFITTER/data"
-
-if [ ! -f $HISTFITTER/config/HistFactorySchema.dtd ]; then
-  echo "Copying HistFactorySchema.dtd to $HISTFITTER/config.";
-  cp "$SOURCE_DIR/config/HistFactorySchema.dtd" "$HISTFITTER/config/HistFactorySchema.dtd";
-fi
-
-if [ ! -d $HISTFITTER/analysis ]; then
-  echo "Copying /analysis example folder to $HISTFITTER/analysis.";
-  cp -r "$SOURCE_DIR/analysis" "$HISTFITTER/analysis";
-fi
-
-if [ ! -d $HISTFITTER/macros ]; then
-  echo "Copying /macros folders to $HISTFITTER/macros.";
-  cp -r "$SOURCE_DIR/macros" "$HISTFITTER/macros";
-fi
+#Find location of script
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+echo "Setting paths: ROOT_INCLUDE_PATH, PATH, LD_LIBRARY_PATH, PYTHONPATH"
 
 #Update paths
-export ROOT_INCLUDE_PATH="$ROOT_INCLUDE_PATH:$SOURCE_DIR/src"
-export PATH="$PATH:$SOURCE_DIR/scripts"
-export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$LIB_DIR"
+export ROOT_INCLUDE_PATH="$ROOT_INCLUDE_PATH:$SCRIPT_DIR/../lib/histfitter"
+export PATH="$PATH:$SCRIPT_DIR/../scripts"
+export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$SCRIPT_DIR/../lib"
 
 # PYTHONPATH contains all directories that are used for 'import bla' commands
 # Must prepend so as to catch python/cmdLineUtils.py before ROOT installation's
-export PYTHONPATH="$PYTHON_DIR:$PYTHONPATH"
-export PYTHONPATH="$SOURCE_DIR/scripts:$PYTHONPATH"
+export PYTHONPATH="$SCRIPT_DIR/../python:$PYTHONPATH"
+export PYTHONPATH="$SCRIPT_DIR/../scripts:$PYTHONPATH"
 
 # Hack for ssh from mac
 export LC_ALL=C

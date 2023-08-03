@@ -16,7 +16,6 @@ if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
   set(CMAKE_INSTALL_PREFIX ${PROJECT_SOURCE_DIR} CACHE PATH "..." FORCE)
 endif()
 set(CMAKE_INSTALL_LIBDIR "${CMAKE_INSTALL_PREFIX}/lib")
-set(CMAKE_INSTALL_PYTHON "${CMAKE_INSTALL_PREFIX}")
 
 #Define equired root components
 set(root_components Core;Net;Hist;Graf;Graf3d;Gpad;Tree;Rint;
@@ -91,11 +90,19 @@ else()
     target_compile_options(HistFitter PRIVATE -Wall -Wextra -Wpedantic)
 endif()
 
-#Make setup script
-configure_file(setup.sh.in "${CMAKE_INSTALL_PREFIX}/histfitter_setup.sh")
+#Copy setup script
+file(COPY histfitter.sh DESTINATION "${CMAKE_INSTALL_PREFIX}/bin")
+
+#Copy files needed for working directories
+file(COPY ./histfitter_setup_workdir.sh DESTINATION "${CMAKE_INSTALL_PREFIX}/bin")
+file(COPY ./config/HistFactorySchema.dtd DESTINATION "${CMAKE_INSTALL_PREFIX}/bin/histfitter/config")
+file(COPY ./analysis DESTINATION "${CMAKE_INSTALL_PREFIX}/bin/histfitter")
+file(COPY ./macros DESTINATION "${CMAKE_INSTALL_PREFIX}/bin/histfitter")
 
 #Copy python files to install location
-file(COPY ./python DESTINATION ${CMAKE_INSTALL_PYTHON})
+file(COPY ./python DESTINATION ${CMAKE_INSTALL_PREFIX})
+file(COPY ./scripts DESTINATION ${CMAKE_INSTALL_PREFIX})
 
 #Install C++ libraries
 install(TARGETS HistFitter LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
+file(COPY ${HistFitter_headers} DESTINATION "${CMAKE_INSTALL_LIBDIR}/histfitter")

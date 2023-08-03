@@ -76,8 +76,6 @@
 
 #include "RooPlot.h" //Needed by RooAbsPdf
 #include "RooHist.h"
-#include "RooPlot.h" //Needed by RooAbsPdf
-#include "RooHist.h"
 #include "RooNLLVar.h"
 
 #include "RooStats/ModelConfig.h"
