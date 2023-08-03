@@ -4,13 +4,18 @@
 #$2 which is w
 #You can have many working directories, but then this script must be activated with the correct path.
 
-while getopts "hpt" flag; do
+path=""
+test=false
+
+while getopts "hp:t" flag; do
   case "$flag" in
     h) echo "Use the flag -p to specify path to work dir and -t to get tests.";;
     p) path="${OPTARG}" ;;
-    t) test='true'  ;;
+    t) test=true  ;;
   esac
 done
+
+echo "${path} and ${test}"
 
 
 #Set histfitter environment path
@@ -50,7 +55,7 @@ if [ ! -d $HISTFITTER/macros ]; then
 fi
 
 #Copy test files if specified
-if [$test]; then
+if [ $test ]; then
   echo "Copying /test folder to $HISTFITTER/test.";
   cp -r "$SCRIPT_DIR/histfitter/test" "$HISTFITTER/test";
 fi

@@ -32,17 +32,12 @@ RUN root --version && \
     mkdir install && \
     mkdir workdir && \
     cd build && \
-    cmake -DCMAKE_INSTALL_PREFIX=/usr/local/install /usr/local/HistFitter/ && \
+    cmake -DCMAKE_INSTALL_PREFIX=/usr/local/install /usr/local/HistFitter && \
     make -j$(($(nproc) - 1)) install && \
     cd ../workdir && \
-    . /usr/local/install/bin/histfitter.sh && \
-    . /usr/local/install/bin/histfitter_setup_workdir.sh && \
+    . ../install/bin/histfitter.sh && \
+    . ../install/bin/histfitter_setup_workdir.sh && \
     mkdir -p ${HOME}/.local/bin && \
-    mkdir -p ${HOME}/data && \
     cd /usr/local/ && \
     printf '\nif [ -f /usr/local/install/histfitter.sh ];then\n    . /usr/local/install/histfitter.sh\nfi\n' >> "${HOME}/.profile"
 
-WORKDIR "${HOME}/data"
-
-ENTRYPOINT ["/bin/bash", "-l", "-c"]
-CMD ["/bin/bash"]
