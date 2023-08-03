@@ -36,8 +36,8 @@ RUN root --version && \
     g++ --version && \
     python --version --version && \
     cmake --version && \
-    cd build && \
-    cmake .
+    cd build
+    #cmake -DCMAKE_INSTALL_PREFIX=/usr/local/install /usr/local/HistFitter
     #make -j$(($(nproc) - 1)) install && \
     #cd ../workdir && \
     #. ../install/bin/histfitter.sh && \
