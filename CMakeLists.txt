@@ -99,6 +99,9 @@ file(COPY ./config/HistFactorySchema.dtd DESTINATION "${CMAKE_INSTALL_PREFIX}/bi
 file(COPY ./analysis DESTINATION "${CMAKE_INSTALL_PREFIX}/bin/histfitter")
 file(COPY ./macros DESTINATION "${CMAKE_INSTALL_PREFIX}/bin/histfitter")
 
+#Copy test files for testing build
+file(COPY ./test DESTINATION "${CMAKE_INSTALL_PREFIX}/bin/histfitter")
+
 #Copy python files to install location
 file(COPY ./python DESTINATION ${CMAKE_INSTALL_PREFIX})
 file(COPY ./scripts DESTINATION ${CMAKE_INSTALL_PREFIX})
