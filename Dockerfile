@@ -6,6 +6,10 @@ USER root
 WORKDIR /usr/local/
 COPY . HistFitter
 
+RUN mkdir build && \
+    mkdir install && \
+    mkdir workdir
+
 # Add non-root user "docker" with relevant control and update pip
 RUN apt-get -qq -y update && \
     apt-get -qq -y install --no-install-recommends \
@@ -18,6 +22,9 @@ RUN apt-get -qq -y update && \
     cp /root/.bashrc /home/docker/ && \
     chown -R --from=root docker /home/docker && \
     chown -R --from=root docker /usr/local/HistFitter && \
+    chown -R --from=root docker /usr/local/build && \
+    chown -R --from=root docker /usr/local/install && \
+    chown -R --from=root docker /usr/local/workdir && \
     python -m pip --no-cache-dir install --upgrade pip setuptools wheel pytest-order && \
     python -m pip --no-cache-dir install --requirement /usr/local/HistFitter/requirements.txt
 
@@ -28,9 +35,6 @@ RUN root --version && \
     gcc --version && \
     python --version --version && \
     cmake --version && \
-    mkdir build && \
-    mkdir install && \
-    mkdir workdir && \
     cd build && \
     cmake -DCMAKE_INSTALL_PREFIX=/usr/local/install /usr/local/HistFitter
     #make -j$(($(nproc) - 1)) install && \
