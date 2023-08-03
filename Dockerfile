@@ -23,24 +23,24 @@ RUN apt-get -qq -y update && \
 
 # Build HistFitter, make $HOME/.local/bin for .profile to find and add to PATH,
 # make $HOME/data user controlled, and automatically source HistFitter setup.sh
-WORKDIR /usr/local/HistFitter
+WORKDIR /usr/local
 RUN root --version && \
     gcc --version && \
     python --version --version && \
     make --version && \
-    mkdir /usr/local/HistFitter/build && \
-    mkdir /usr/local/HistFitter/install && \
-    mkdir /usr/local/HistFitter/workdir && \
-    cd /usr/local/HistFitter/build && \
-    cmake -DCMAKE_INSTALL_PREFIX=/usr/local/HistFitter/install /usr/local/HistFitter/ && \
+    mkdir build && \
+    mkdir install && \
+    mkdir workdir && \
+    cd build && \
+    cmake -DCMAKE_INSTALL_PREFIX=/usr/local/install /usr/local/HistFitter/ && \
     make -j$(($(nproc) - 1)) install && \
-    cd /usr/local/HistFitter/workdir && \
-    . /usr/local/HistFitter/install/bin/histfitter.sh && \
-    . /usr/local/HistFitter/install/bin/histfitter_setup_workdir.sh && \
+    cd ../workdir && \
+    . /usr/local/install/bin/histfitter.sh && \
+    . /usr/local/install/bin/histfitter_setup_workdir.sh && \
     mkdir -p ${HOME}/.local/bin && \
     mkdir -p ${HOME}/data && \
     cd /usr/local/ && \
-    printf '\nif [ -f /usr/local/HistFitter/install/histfitter.sh ];then\n    . /usr/local/HistFitter/install/histfitter.sh\nfi\n' >> "${HOME}/.profile"
+    printf '\nif [ -f /usr/local/install/histfitter.sh ];then\n    . /usr/local/install/histfitter.sh\nfi\n' >> "${HOME}/.profile"
 
 WORKDIR "${HOME}/data"
 
