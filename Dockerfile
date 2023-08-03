@@ -35,8 +35,8 @@ RUN root --version && \
     cmake -DCMAKE_INSTALL_PREFIX=/usr/local/HistFitter/install /usr/local/HistFitter/ && \
     make -j$(($(nproc) - 1)) install && \
     cd /usr/local/HistFitter/workdir && \
-    source /usr/local/HistFitter/install/bin/histfitter.sh && \
-    source /usr/local/HistFitter/install/bin/histfitter_setup_workdir.sh && \
+    . /usr/local/HistFitter/install/bin/histfitter.sh && \
+    . /usr/local/HistFitter/install/bin/histfitter_setup_workdir.sh && \
     mkdir -p ${HOME}/.local/bin && \
     mkdir -p ${HOME}/data && \
     cd /usr/local/ && \
