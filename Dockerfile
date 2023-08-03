@@ -27,11 +27,11 @@ WORKDIR /usr/local
 RUN root --version && \
     gcc --version && \
     python --version --version && \
-    make --version && \
-    mkdir build && \
-    mkdir install && \
-    mkdir workdir && \
-    cd build && \
+    make --version && 
+    #mkdir build && \
+    #mkdir install && \
+    #mkdir workdir && \
+    #cd build && \
     #cmake -DCMAKE_INSTALL_PREFIX=/usr/local/install /usr/local/HistFitter && \
     #make -j$(($(nproc) - 1)) install && \
     #cd ../workdir && \
