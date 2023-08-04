@@ -73,6 +73,8 @@
 #include "RooNumIntConfig.h"
 #include "RooMinimizer.h"
 #include "RooFormulaVar.h"
+//Legacy code, should be updated.
+#include "RooFitLegacy/RooCatTypeLegacy.h"
 
 #include "RooPlot.h" //Needed by RooAbsPdf
 #include "RooHist.h"
@@ -1681,13 +1683,13 @@ vector<TString> hf::Util::TokensALL(RooCategory* cat)
 
     vector<TString> OutStringVec;
     OutStringVec.clear();
+    //Legacy RooCatType use
     TIterator* iter = cat->typeIterator() ;
     RooCatType* catType ;
     while( (catType = (RooCatType*) iter->Next())) {
         TString regionCatLabel = catType->GetName();
         OutStringVec.push_back(regionCatLabel);
     }
-
     return OutStringVec;
 
 }
