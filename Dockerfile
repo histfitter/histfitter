@@ -25,7 +25,7 @@ RUN apt-get -qq -y update && \
     chown -R --from=root docker /usr/local/build && \
     chown -R --from=root docker /usr/local/install && \
     chown -R --from=root docker /usr/local/workdir && \
-    wget -qO- "https://cmake.org/files/v3.27/cmake-3.27.0-linux-x86_64.tar.gz" | tar --strip-components=1 -xz -C /usr/local && \
+    curl -s "https://cmake.org/files/v3.27/cmake-3.27.0-linux-x86_64.tar.gz" | tar --strip-components=1 -xz -C /usr/local && \
     export PATH=/usr/local/cmake-3.27/bin:$PATH && \
     python -m pip --no-cache-dir install --upgrade pip setuptools wheel pytest-order && \
     python -m pip --no-cache-dir install --requirement /usr/local/HistFitter/requirements.txt
