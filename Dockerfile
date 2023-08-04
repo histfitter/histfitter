@@ -39,11 +39,11 @@ RUN root --version && \
     python --version --version && \
     cmake --version && \
     cd build && \
-    cmake -DCMAKE_INSTALL_PREFIX=/usr/local/install /usr/local/HistFitter
-    #make -j$(($(nproc) - 1)) install && \
-    #cd ../workdir && \
-    #. ../install/bin/histfitter.sh && \
-    #. ../install/bin/histfitter_setup_workdir.sh && \
-    #mkdir -p ${HOME}/.local/bin && \
-    #printf '\nif [ -f /usr/local/install/histfitter.sh ];then\n    . /usr/local/install/histfitter.sh\nfi\n' >> "${HOME}/.profile"
+    cmake -DCMAKE_INSTALL_PREFIX=/usr/local/install /usr/local/HistFitter && \
+    make -j$(($(nproc) - 1)) install && \
+    cd ../workdir && \
+    . ../install/bin/histfitter.sh && \
+    . ../install/bin/histfitter_setup_workdir.sh && \
+    mkdir -p ${HOME}/.local/bin && \
+    printf '\nif [ -f /usr/local/install/histfitter.sh ];then\n    . /usr/local/install/histfitter.sh\nfi\n' >> "${HOME}/.profile"
 
