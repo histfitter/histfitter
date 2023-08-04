@@ -10,7 +10,7 @@
 #include "TString.h"
 
 // HistFitter include(s)
-#include "./LimitResult.h"
+#include "LimitResult.h"
 
 class TMap;
 class TTree;

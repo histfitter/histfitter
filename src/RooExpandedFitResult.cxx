@@ -19,7 +19,7 @@
 #include "RooRealVar.h"
 
 // HistFitter include(s)
-#include "./RooExpandedFitResult.h"
+#include "RooExpandedFitResult.h"
 
 using namespace std;
 

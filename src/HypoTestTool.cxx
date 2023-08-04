@@ -52,8 +52,8 @@
 #include "RooStats/HypoTestInverterPlot.h"
 
 // HistFitter include(s)
-#include "./HypoTestTool.h"
-#include "./TMsgLogger.h"
+#include "HypoTestTool.h"
+#include "TMsgLogger.h"
 
 using namespace RooFit;
 using namespace RooStats;

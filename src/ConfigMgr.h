@@ -31,7 +31,7 @@
 #include "RooStats/HypoTestInverterResult.h"
 
 // HistFitter include(s)
-#include "./FitConfig.h"
+#include "FitConfig.h"
 
 class RooWorkspace;
 

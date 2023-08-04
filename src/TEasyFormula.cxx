@@ -21,8 +21,8 @@
 #include "TString.h"
 
 // HistFitter include(s)
-#include "./TEasyFormula.h"
-#include "./TMsgLogger.h"
+#include "TEasyFormula.h"
+#include "TMsgLogger.h"
 
 ClassImp(hf::TEasyFormula)
 

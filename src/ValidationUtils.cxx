@@ -16,8 +16,8 @@
 #include <TFile.h>
 
 // HistFitter include(s)
-#include "./ValidationUtils.h"
-#include "./Significance.h"
+#include "ValidationUtils.h"
+#include "Significance.h"
 
 //________________________________________________________________________________________________
 void hf::ValidationUtils::Horizontal( TH1 *h, Int_t nbin, Bool_t kLINE, Int_t color, float yWidthScaleUp, float yWidthScaleDown)

@@ -54,11 +54,11 @@
 #include "TLine.h"
 
 // HistFitter include(s)
-#include "./HistogramPlotter.h"
-#include "./Utils.h"
-#include "./ConfigMgr.h"
-#include "./TMsgLogger.h"
-#include "./ChannelStyle.h"
+#include "HistogramPlotter.h"
+#include "Utils.h"
+#include "ConfigMgr.h"
+#include "TMsgLogger.h"
+#include "ChannelStyle.h"
 
 static hf::TMsgLogger Logger("HistogramPlotter");
 

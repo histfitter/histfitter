@@ -36,7 +36,7 @@
 #include <iostream>
 
 // HistFitter include(s)
-#include "./XtraValues.h"
+#include "XtraValues.h"
 
 using std::cout;
 using std::endl;

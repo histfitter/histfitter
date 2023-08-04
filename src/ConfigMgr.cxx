@@ -28,10 +28,10 @@
 #include "RooRealSumPdf.h"
 
 // HistFitter include(s)
-#include "./TMsgLogger.h"
-#include "./ConfigMgr.h"
-#include "./Utils.h"
-#include "./StatTools.h"
+#include "TMsgLogger.h"
+#include "ConfigMgr.h"
+#include "Utils.h"
+#include "StatTools.h"
 
 using namespace std;
 

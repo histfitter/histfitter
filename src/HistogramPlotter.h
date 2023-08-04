@@ -19,9 +19,9 @@
 #include "RooBinning.h"
 
 // HistFitter include(s)
-#include "./RooExpandedFitResult.h"
-#include "./ChannelStyle.h"
-#include "./FitConfig.h"
+#include "RooExpandedFitResult.h"
+#include "ChannelStyle.h"
+#include "FitConfig.h"
 
 class TH1D;
 class TMap;

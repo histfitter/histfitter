@@ -16,7 +16,7 @@
  **********************************************************************************/
 
 // HistFitter include(s)
-#include "./XtraValues.h"
+#include "XtraValues.h"
 
 ClassImp(hf::XtraValues);
 

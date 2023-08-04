@@ -51,11 +51,11 @@
 
 
 // HistFitter include(s)
-#include "./StatTools.h"
-#include "./Utils.h"
-#include "./CombineWorkSpaces.h"
-#include "./TMsgLogger.h"
-#include "./HypoTestTool.h"
+#include "StatTools.h"
+#include "Utils.h"
+#include "CombineWorkSpaces.h"
+#include "TMsgLogger.h"
+#include "HypoTestTool.h"
 
 using namespace std;
 using namespace RooFit;

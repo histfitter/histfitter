@@ -38,8 +38,8 @@
 #include "RooStats/HypoTestInverterResult.h"
 
 // HistFitter include(s)
-#include "./RooExpandedFitResult.h"
-#include "./ChannelStyle.h"
+#include "RooExpandedFitResult.h"
+#include "ChannelStyle.h"
 
 //Forward declarations
 class TMap;
@@ -86,7 +86,7 @@ namespace Util{
   /**
      Wrute RooWorkspace to file
   */
-  void WriteWorkspace(RooWorkspace* w, TString outFileName="./results/BkgForumTest_combined_ComHistoSysOverConst_model.root", TString suffix = "");
+  void WriteWorkspace(RooWorkspace* w, TString outFileName="results/BkgForumTest_combined_ComHistoSysOverConst_model.root", TString suffix = "");
   /**
      Load snapshot
   */

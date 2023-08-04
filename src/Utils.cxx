@@ -90,11 +90,11 @@
 #include "RooStats/HistFactory/PiecewiseInterpolation.h"
 
 // HistFitter include(s)
-#include "./Utils.h"
-#include "./ConfigMgr.h"
-#include "./TMsgLogger.h"
-#include "./ChannelStyle.h"
-#include "./HistogramPlotter.h"
+#include "Utils.h"
+#include "ConfigMgr.h"
+#include "TMsgLogger.h"
+#include "ChannelStyle.h"
+#include "HistogramPlotter.h"
 
 using namespace std;
 using namespace RooFit;

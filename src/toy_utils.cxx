@@ -41,13 +41,13 @@
 #include "RooAddition.h"
 
 // HistFitter include(s)
-#include "./toy_utils.h"
-#include "./CombineWorkSpaces.h"
-#include "./Significance.h"
-#include "./Utils.h"
-#include "./StatTools.h"
-#include "./TMsgLogger.h"
-#include "./json.h"
+#include "toy_utils.h"
+#include "CombineWorkSpaces.h"
+#include "Significance.h"
+#include "Utils.h"
+#include "StatTools.h"
+#include "TMsgLogger.h"
+#include "json.h"
 
 using namespace std;
 using namespace RooFit;

@@ -28,8 +28,8 @@
 #include "TLegend.h"
 
 // HistFitter include(s)
-#include "./TMsgLogger.h"
-#include "./ChannelStyle.h"
+#include "TMsgLogger.h"
+#include "ChannelStyle.h"
 
 namespace hf{
 
