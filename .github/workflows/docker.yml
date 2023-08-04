@@ -108,7 +108,8 @@ jobs:
           -w /usr/local/workdir
           histfitter/histfitter:sha-${GITHUB_SHA::8}
           '. /usr/local/install/bin/histfitter.sh && \
-           HistFitter.py -w -f analysis/tutorial/MyUserAnalysis.py'
+           . /usr/local/install/bin/histfitter_setup_workdir.sh -t && \
+           HistFitter.py -w -f ./analysis/tutorial/MyUserAnalysis.py'
 
       - name: Build and publish to registry
         # every PR will trigger a push event on master, so check the push event is actually coming from master
