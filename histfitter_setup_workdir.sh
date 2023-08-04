@@ -1,7 +1,7 @@
 #!/bin/bash
 
-#This script takes up to two variables; $1 which should be the name of the working directory
-#$2 which is w
+#This script takes up three flags; -p to specify path to work dir and -t to get tests.
+#and -h for help
 #You can have many working directories, but then this script must be activated with the correct path.
 
 path=""
@@ -14,9 +14,6 @@ while getopts "hp:t" flag; do
     t) test=true  ;;
   esac
 done
-
-echo "${path} and ${test}"
-
 
 #Set histfitter environment path
 if [ -z $path ];
@@ -55,7 +52,7 @@ if [ ! -d $HISTFITTER/macros ]; then
 fi
 
 #Copy test files if specified
-if [ $test ]; then
+if [ $test = true ]; then
   echo "Copying /test folder to $HISTFITTER/test.";
-  cp -r "$SCRIPT_DIR/histfitter/test" "$HISTFITTER/test";
+  cp -r "$SCRIPT_DIR/histfitter/test" "$HISTFITTER";
 fi
