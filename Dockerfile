@@ -14,6 +14,7 @@ RUN mkdir build && \
 RUN apt-get -qq -y update && \
     apt-get -qq -y install --no-install-recommends \
       git && \
+    sudo apt-get install cmake && \
     apt-get -y autoclean && \
     apt-get -y autoremove && \
     rm -rf /var/lib/apt/lists/* && \
