@@ -1,6 +1,5 @@
 import time
 
-
 def test_help(script_runner):
     command = "HistFitter.py -h"
     start = time.time()

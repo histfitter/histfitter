@@ -16,19 +16,22 @@
  * LICENSE.                                                                       *
 """
 import os
-# this module comes from gSystem.Load("libSusyFitter.so")
-from ROOT import ConfigMgr, FitConfig
 from ROOT import gROOT, gSystem, gDirectory
 from ROOT import PyConfig
+# this module comes from gSystem.Load("libSusyFitter.so")
 gROOT.SetBatch(True)
 PyConfig.IgnoreCommandLineOptions = True
-gSystem.Load(f"{os.getenv('HISTFITTER')}/lib/libSusyFitter.so")
+gSystem.Load(f"libSusyFitter.so")
+from ROOT import hf
+ConfigMgr = hf.ConfigMgr
+FitConfig = hf.FitConfig
+Util = hf.Util
+RooExpandedFitResult = hf.RooExpandedFitResult
 gROOT.Reset()
 
 from ROOT import TFile, RooWorkspace, TObject, TString, RooAbsReal, RooRealVar, RooFitResult, RooDataSet, RooAddition, RooArgSet,RooAbsData,RooRandom,RooArgList
-from ROOT import Util, TMath
+from ROOT import TMath
 from ROOT import RooFit
-from ROOT import RooExpandedFitResult
 
 from cmdLineUtils import getPdfInRegions,getName
 

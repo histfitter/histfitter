@@ -1,6 +1,10 @@
 obj
-lib/*
+lib/
+bin/
+build/
+install/
 src/SusyFitter_Dict.C
+*.o
 
 .*.swp
 data/*.root
@@ -15,10 +19,12 @@ data/*.root
 # copied from the src dir!
 include/*.h
 
+# setup script
+setup.sh
+
 # output
-results/*
-config/*
-data/*
+results/
+data/
 *.json
 
 # Development environments
