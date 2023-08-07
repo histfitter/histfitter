@@ -153,10 +153,10 @@ def test_treeToHist(script_runner):
     (ret,outRaw,errRaw) = script_runner(command)
     assert ret.returncode == 0
 
-    assert os.path.isfile(f"{os.getenv('HISTFITTER')}/data/hf_test/histCache.root") # histcache generated
+    assert os.path.isfile("data/hf_test/histCache.root") # histcache generated
 
     # values from snippet above
-    hc = ROOT.TFile("${HISTFITTER}/data/hf_test/histCache.root")
+    hc = ROOT.TFile("data/hf_test/histCache.root")
     for k in hc.GetListOfKeys():
         name = k.GetName()
         val = hc.Get(name).Integral()
@@ -222,7 +222,7 @@ def test_bkgFit(script_runner):
     (ret,outRaw,errRaw) = script_runner(command)
     assert ret.returncode == 0
 
-    assert os.path.isfile(f"{os.getenv('HISTFITTER')}/results/hf_test/BkgOnly_combined_BasicMeasurement_model.root") # workspace was created
+    assert os.path.isfile("results/hf_test/BkgOnly_combined_BasicMeasurement_model.root") # workspace was created
 
     command = 'HistFitter.py -f -D"before,after,corrMatrix" ${HISTFITTER}/test/scripts/config_for_pytest.py'
     (ret,outRaw,errRaw) = script_runner(command)
@@ -249,7 +249,7 @@ def test_bkgFit(script_runner):
     ]
 
     for f in out_files:
-        assert os.path.isfile(f"{os.getenv('HISTFITTER')}/results/hf_test/{f}") # post fit files exist
+        assert os.path.isfile(f"results/hf_test/{f}") # post fit files exist
 
     out = outRaw.decode('utf-8')
     assert "mu_bkg    1.0000e+00    1.1" in out # postfit bkg norm value
@@ -262,7 +262,7 @@ def test_sigExclusionAsymptotics(script_runner):
     assert ret.returncode == 0
 
     # YieldTable
-    command = "YieldsTable.py -c SR,CR -w ${HISTFITTER}/results/hf_test/Sig_excl_combined_BasicMeasurement_model_afterFit.root -s bkg1,bkg2,signal -b -o yieldTable.tex"
+    command = "YieldsTable.py -c SR,CR -w results/hf_test/Sig_excl_combined_BasicMeasurement_model_afterFit.root -s bkg1,bkg2,signal -b -o yieldTable.tex"
     (ret,outRaw,errRaw) = script_runner(command)
     assert ret.returncode == 0
     assert os.path.isfile(f"yieldTable.tex")
@@ -274,7 +274,7 @@ def test_sigExclusionAsymptotics(script_runner):
 
 
     # SysTable
-    command = "SysTable.py -c SR -w ${HISTFITTER}/results/hf_test/Sig_excl_combined_BasicMeasurement_model_afterFit.root -s bkg1,bkg2,signal -o sysTable.tex -%"
+    command = "SysTable.py -c SR -w results/hf_test/Sig_excl_combined_BasicMeasurement_model_afterFit.root -s bkg1,bkg2,signal -o sysTable.tex -%"
     (ret,outRaw,errRaw) = script_runner(command)
     assert ret.returncode == 0
     assert os.path.isfile(f"sysTable.tex")
@@ -329,7 +329,7 @@ def test_discoveryAll(script_runner):
     assert ret.returncode == 0
 
     # Upper limit table
-    command = 'UpperLimitTable.py -c SR_disc -w ${HISTFITTER}/results/hf_test/Discovery_combined_BasicMeasurement_model.root -l 10 -p mu_Discovery -o ulTable.tex -a -R 10'
+    command = 'UpperLimitTable.py -c SR_disc -w results/hf_test/Discovery_combined_BasicMeasurement_model.root -l 10 -p mu_Discovery -o ulTable.tex -a -R 10'
     (ret,outRaw,errRaw) = script_runner(command)
     assert ret.returncode == 0
 
