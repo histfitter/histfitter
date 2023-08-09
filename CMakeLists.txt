@@ -101,9 +101,22 @@ file(COPY ./macros DESTINATION "${CMAKE_INSTALL_PREFIX}/bin/histfitter")
 #Copy test files for testing build
 file(COPY ./test DESTINATION "${CMAKE_INSTALL_PREFIX}/bin/histfitter")
 
+# Loop over python code and add files to list
+set(Python_files "")
+file(GLOB filePathsPython python/*)
+foreach (_filePath ${filePathsPython})
+    list(APPEND Python_files "${_filePath}")
+endforeach()
+
+set(Python_scripts "")
+file(GLOB filePathsScripts scripts/*)
+foreach (_filePath ${filePathsScripts})
+    list(APPEND Python_scripts "${_filePath}")
+endforeach()
+
 #Copy python files to install location
-file(COPY ./python/* DESTINATION "${CMAKE_INSTALL_PREFIX}/python/histfitter")
-file(COPY ./scripts/* DESTINATION "${CMAKE_INSTALL_PREFIX}/scripts/histfitter")
+file(COPY ${Python_files} DESTINATION "${CMAKE_INSTALL_PREFIX}/python/histfitter")
+file(COPY ${Python_scripts} DESTINATION "${CMAKE_INSTALL_PREFIX}/scripts/histfitter")
 
 #Install C++ libraries
 install(TARGETS HistFitter LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})

@@ -1,13 +1,6 @@
 obj
-lib/
-bin/
-build/
-install/
-src/SusyFitter_Dict.C
 *.o
-
 .*.swp
-data/*.root
 *.pyc
 *.pcm
 *.d
@@ -16,16 +9,15 @@ data/*.root
 *~
 *#
 
-# copied from the src dir!
-include/*.h
-
-# setup script
-setup.sh
-
-# output
-results/
+#In case someone builds in source dir
+lib/
+include/
+bin/
+build/
+install/
 data/
-*.json
+config/
+results/
 
 # Development environments
 .vscode/

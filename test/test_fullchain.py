@@ -136,14 +136,14 @@ bkg_only_test_values = {
 @pytest.mark.order(1)
 def test_treeToHist(script_runner):
 
-    if os.path.isfile("test_tree.root"):
+    if os.path.isfile("data/hf_test/test_tree.root"):
         # Check if ttree file is old, and remove to avoid getting caught offguard by changes
-        if time.time() - os.path.getctime("test_tree.root") > 86400.: # 24 hours in seconds
-            os.remove("test_tree.root")
+        if time.time() - os.path.getctime("data/hf_test/test_tree.root") > 86400.: # 24 hours in seconds
+            os.remove("data/hf_test/test_tree.root")
 
 
     # Make input TTree if needed
-    if not os.path.isfile("test_tree.root"): 
+    if not os.path.isfile("data/hf_test/test_tree.root"): 
         command = "root -l -b -q ${HISTFITTER}/test/scripts/genTree.C+"
         (ret,outRaw,errRaw) = script_runner(command)
         assert ret.returncode == 0 # ROOT file with TTrees generated
@@ -165,17 +165,17 @@ def test_treeToHist(script_runner):
 
 @pytest.mark.order(2)
 def test_backupCache(script_runner):
-    command = 'mv data/hf_test/histCache.root test_backup_cache.root'
+    command = 'mv data/hf_test/histCache.root data/hf_test/test_backup_cache.root'
     (ret, outRaw, errRaw) = script_runner(command)
 
-    hc = ROOT.TFile.Open('test_backup_cache.root', 'UPDATE')
+    hc = ROOT.TFile.Open('data/hf_test/test_backup_cache.root', 'UPDATE')
     for k in hc.GetListOfKeys():
         name = k.GetName()
         if name.endswith('mNorm'):
             hc.Delete(f'{name};*')
     hc.Close()
 
-    command = "HistFitter.py -w -u='--manualBackupCache test_backup_cache.root' ${HISTFITTER}/test/scripts/config_for_pytest.py"
+    command = "HistFitter.py -w -u='--manualBackupCache data/hf_test/test_backup_cache.root' ${HISTFITTER}/test/scripts/config_for_pytest.py"
     (ret,outRaw,errRaw) = script_runner(command)
     assert ret.returncode == 0
 
@@ -191,17 +191,17 @@ def test_backupCache(script_runner):
 
 @pytest.mark.order(3)
 def test_backupCache(script_runner):
-    command = 'mv data/hf_test/histCache.root test_backup_cache.root'
+    command = 'mv data/hf_test/histCache.root data/hf_test/test_backup_cache.root'
     (ret, outRaw, errRaw) = script_runner(command)
 
-    hc = ROOT.TFile.Open('test_backup_cache.root', 'UPDATE')
+    hc = ROOT.TFile.Open('data/hf_test/test_backup_cache.root', 'UPDATE')
     for k in hc.GetListOfKeys():
         name = k.GetName()
         if name.endswith('mNorm'):
             hc.Delete(f'{name};*')
     hc.Close()
 
-    command = "HistFitter.py -w -u='--manualBackupCache test_backup_cache.root' ${HISTFITTER}/test/scripts/config_for_pytest.py"
+    command = "HistFitter.py -w -u='--manualBackupCache data/hf_test/test_backup_cache.root' ${HISTFITTER}/test/scripts/config_for_pytest.py"
     (ret,outRaw,errRaw) = script_runner(command)
     assert ret.returncode == 0
 
@@ -262,10 +262,10 @@ def test_sigExclusionAsymptotics(script_runner):
     assert ret.returncode == 0
 
     # YieldTable
-    command = "YieldsTable.py -c SR,CR -w results/hf_test/Sig_excl_combined_BasicMeasurement_model_afterFit.root -s bkg1,bkg2,signal -b -o yieldTable.tex"
+    command = "YieldsTable.py -c SR,CR -w results/hf_test/Sig_excl_combined_BasicMeasurement_model_afterFit.root -s bkg1,bkg2,signal -b -o results/hf_test/yieldTable.tex"
     (ret,outRaw,errRaw) = script_runner(command)
     assert ret.returncode == 0
-    assert os.path.isfile(f"yieldTable.tex")
+    assert os.path.isfile(f"results/hf_test/yieldTable.tex")
 
     out = outRaw.decode('utf-8')
     assert "YieldsTable: nobs: [21.0, 105.0]" in out  # data yields
@@ -274,12 +274,12 @@ def test_sigExclusionAsymptotics(script_runner):
 
 
     # SysTable
-    command = "SysTable.py -c SR -w results/hf_test/Sig_excl_combined_BasicMeasurement_model_afterFit.root -s bkg1,bkg2,signal -o sysTable.tex -%"
+    command = "SysTable.py -c SR -w results/hf_test/Sig_excl_combined_BasicMeasurement_model_afterFit.root -s bkg1,bkg2,signal -o results/hf_test/sysTable.tex -%"
     (ret,outRaw,errRaw) = script_runner(command)
     assert ret.returncode == 0
-    assert os.path.isfile(f"sysTable.tex")
+    assert os.path.isfile(f"results/hf_test/sysTable.tex")
 
-    with open('sysTable.tex') as f:
+    with open('results/hf_test/sysTable.tex') as f:
         contents = f.read()
         assert "Total background expectation             &  $5.7" in contents # bkg 1 yield
         assert "Total background systematic               & $\\pm 0.9" in contents # bkg 1 sys
@@ -329,10 +329,10 @@ def test_discoveryAll(script_runner):
     assert ret.returncode == 0
 
     # Upper limit table
-    command = 'UpperLimitTable.py -c SR_disc -w results/hf_test/Discovery_combined_BasicMeasurement_model.root -l 10 -p mu_Discovery -o ulTable.tex -a -R 10'
+    command = 'UpperLimitTable.py -c SR_disc -w results/hf_test/Discovery_combined_BasicMeasurement_model.root -l 10 -p mu_Discovery -o results/hf_test/ulTable.tex -a -R 10'
     (ret,outRaw,errRaw) = script_runner(command)
     assert ret.returncode == 0
 
-    with open('ulTable.tex') as f:
+    with open('results/hf_test/ulTable.tex') as f:
         contents = f.read()
         assert 'SR\\_disc    & $0.75$ &  $7.5$ & $ { 5.6 }^{ +3.0 }_{ -1.8 }$ & $0.75$ & $ 0.21$~$(0.81)$' in contents # UL table
