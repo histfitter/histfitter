@@ -32,6 +32,7 @@ RUN apt-get -qq -y update && \
 
 # Build HistFitter, make $HOME/.local/bin for .profile to find and add to PATH,
 # automatically source HistFitter setup.sh
+#Delete source and build repos to properly test install
 WORKDIR /usr/local
 RUN root --version && \
     gcc --version && \
@@ -41,6 +42,8 @@ RUN root --version && \
     cd build && \
     cmake -DCMAKE_INSTALL_PREFIX=/usr/local/install /usr/local/HistFitter && \
     make -j$(($(nproc) - 1)) install && \
+    rm -rf ../HistFitter && \
+    rm -rf ../build && \
     cd ../workdir && \
     . ../install/bin/histfitter.sh && \
     . ../install/bin/histfitter_setup_workdir.sh && \

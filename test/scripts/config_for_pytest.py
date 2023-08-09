@@ -22,7 +22,7 @@ useToys = False
 manualBackupCache = None
 
 
-input_file = "test_tree.root"
+input_file = "data/hf_test/test_tree.root"
 
 nominal_tree_name = "_NoSys"
 
