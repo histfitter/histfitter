@@ -5,10 +5,9 @@ import time
 import math
 import pytest
 
-#To pass tests, pytest-order plugin must be installed.
+#To pass tests in the right order, pytest-order plugin must be installed.
 
 # snippet to dump test info from cache
-
 bkg_only_test_values = {
     'hbkg1Nom_CR_obs_m': 3.2219999999999756, 
     'hbkg1Nom_SR_obs_m': 5.777999999999959, 
