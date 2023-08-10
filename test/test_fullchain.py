@@ -128,14 +128,20 @@ bkg_only_test_values = {
 @pytest.mark.order(1)
 def test_treeToHist(script_runner):
 
+    #make directory
+    if not os.path.isdir("data/hf_test"):
+        os.mkdir("data/hf_test")
+    
     if os.path.isfile("data/hf_test/test_tree.root"):
-        # Check if ttree file is old, and remove to avoid getting caught offguard by changes
+        # Check if ttree file is old, and remove and remake to avoid getting caught offguard by changes
         if time.time() - os.path.getctime("data/hf_test/test_tree.root") > 86400.: # 24 hours in seconds
             os.remove("data/hf_test/test_tree.root")
-
+            command = "root -l -b -q ${HISTFITTER}/test/scripts/genTree.C+"
+            (ret,outRaw,errRaw) = script_runner(command)
+            assert ret.returncode == 0 # ROOT file with TTrees generated
 
     # Make input TTree if needed
-    if not os.path.isfile("data/hf_test/test_tree.root"): 
+    else:
         command = "root -l -b -q ${HISTFITTER}/test/scripts/genTree.C+"
         (ret,outRaw,errRaw) = script_runner(command)
         assert ret.returncode == 0 # ROOT file with TTrees generated
