@@ -8,6 +8,10 @@ path=""
 test=false
 
 while getopts "hp:t" flag; do
+  #Make sure these global variables are not set
+  #Causes the script to not work on second run
+  local OPTIND
+  local OPTARG
   case "$flag" in
     h) echo "Use the flag -p to specify path to work dir and -t to get tests.";;
     p) path="${OPTARG}" ;;
