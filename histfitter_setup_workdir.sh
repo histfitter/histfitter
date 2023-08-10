@@ -8,16 +8,16 @@ path=""
 test=false
 
 while getopts "hp:t" flag; do
-  #Make sure these global variables are not set
-  #Causes the script to not work on second run
-  local OPTIND
-  local OPTARG
   case "$flag" in
     h) echo "Use the flag -p to specify path to work dir and -t to get tests.";;
     p) path="${OPTARG}" ;;
     t) test=true  ;;
   esac
 done
+
+#If we do not set this, the script to not work on second run
+export OPTIND=1
+
 
 #Set histfitter environment path
 if [ -z $path ];
