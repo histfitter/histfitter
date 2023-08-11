@@ -59,13 +59,13 @@ echo "Setting paths: ROOT_INCLUDE_PATH, PATH, LD_LIBRARY_PATH, PYTHONPATH"
 
 #Update paths
 export ROOT_INCLUDE_PATH="$ROOT_INCLUDE_PATH:$SCRIPT_DIR/../include/histfitter"
-export PATH="$PATH:$SCRIPT_DIR/../scripts/histfitter"
+export PATH="$PATH:$SCRIPT_DIR/histfitter"
 export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$SCRIPT_DIR/../lib"
 
 # PYTHONPATH contains all directories that are used for 'import bla' commands
 # Must prepend so as to catch python/cmdLineUtils.py before ROOT installation's
 export PYTHONPATH="$SCRIPT_DIR/../python/histfitter:$PYTHONPATH"
-export PYTHONPATH="$SCRIPT_DIR/../scripts/histfitter:$PYTHONPATH"
+export PYTHONPATH="$SCRIPT_DIR/histfitter:$PYTHONPATH"
 
 # Hack for ssh from mac
 export LC_ALL=C

@@ -18,6 +18,8 @@ done
 #If we do not set this, the script to not work on second run
 export OPTIND=1
 
+#Find location of script
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
 #Set histfitter environment path
 if [ -z $path ];
@@ -30,33 +32,34 @@ fi
 
 echo "Setting the HISTFITTER variable to $HISTFITTER"
 
+#Set other paths
+source "$SCRIPT_DIR/histfitter.sh"
+
 #Set up HistFitter environment with folders
 echo "Making directories /config /results /data in folder $HISTFITTER."
 mkdir -p "$HISTFITTER/config"
 mkdir -p "$HISTFITTER/results"
 mkdir -p "$HISTFITTER/data"
 
-#Find location of script
-SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
 #Copy necessary files
 if [ ! -f $HISTFITTER/config/HistFactorySchema.dtd ]; then
   echo "Copying HistFactorySchema.dtd to $HISTFITTER/config.";
-  cp "$SCRIPT_DIR/histfitter/config/HistFactorySchema.dtd" "$HISTFITTER/config/HistFactorySchema.dtd";
+  cp "$SCRIPT_DIR/../share/histfitter/config/HistFactorySchema.dtd" "$HISTFITTER/config/HistFactorySchema.dtd";
 fi
 
 if [ ! -d $HISTFITTER/analysis ]; then
   echo "Copying /analysis example folder to $HISTFITTER/analysis.";
-  cp -r "$SCRIPT_DIR/histfitter/analysis" "$HISTFITTER/analysis";
+  cp -r "$SCRIPT_DIR/../share//histfitter/analysis" "$HISTFITTER/analysis";
 fi
 
 if [ ! -d $HISTFITTER/macros ]; then
   echo "Copying /macros folders to $HISTFITTER/macros.";
-  cp -r "$SCRIPT_DIR/histfitter/macros" "$HISTFITTER/macros";
+  cp -r "$SCRIPT_DIR/../share/histfitter/macros" "$HISTFITTER/macros";
 fi
 
 #Copy test files if specified
 if [ $test = true ]; then
   echo "Copying /test folder to $HISTFITTER/test.";
-  cp -r "$SCRIPT_DIR/histfitter/test" "$HISTFITTER";
+  cp -r "$SCRIPT_DIR/../share/histfitter/test" "$HISTFITTER";
 fi
