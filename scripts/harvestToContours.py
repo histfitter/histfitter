@@ -65,6 +65,8 @@ parser.add_argument("--nominalLabel",      help = "keyword in filename to look f
 
 parser.add_argument("--useUpperLimit", help="use upper limit information instead of CLs. Automatically turns off significance transform.", action="store_true", default=False)
 
+parser.add_argument("--discoverySensitivity","-z", help="Use p0 to create 3 and 5 sigma discovery sensitivity contours.  Only available with scipy interpolation.", action="store_true", default=False)
+
 parser.add_argument("--closedBands","-b",      help = "if contours are closed shapes in this space, this can help with stitching issues if you're seeing weird effects", action="store_true", default=False)
 
 args = parser.parse_args()
@@ -113,6 +115,14 @@ else:
     listOfContours_TwoSigma = ["clsu2s","clsd2s"]
     expectedContour = "CLsexp"
     observedContour = "CLs"
+    discoveryContour = ""
+    expectedDiscContour = ""
+    discoveryThresholds = [3, 5] # significance thresholds to compute
+
+    if args.discoverySensitivity:
+        listOfContours += ["p0","p0exp"]
+        discoveryContour = "p0"
+        expectedDiscContour = "p0exp"
 
 
 
@@ -266,13 +276,28 @@ def processInputFile(inputFile, outputFile, label = ""):
     outputFile.mkdir("SubGraphs"); outputFile.cd("SubGraphs")
     for whichContour in listOfContours:
 
-        try:
-            for iSubGraph,subGraph in enumerate(outputGraphs[whichContour]):
-                subGraph.Write("%s_Contour_%d%s"%(whichContour,iSubGraph,label))
-        except:
-            print(">>> ... Well that one's no good. You might want to check on that... - %s"%whichContour)
-            if len(outputGraphs[whichContour]):
-                print (">>> ... It appears this has no contours...")
+        # discovery contours are a special case (obs and exp)
+        if whichContour in [discoveryContour, expectedDiscContour]:
+                # loop over significance thresholds and duplicate and write each graph
+                for lvl in discoveryThresholds: 
+                    tmp_whichContour = whichContour + "_" + str(lvl)
+                    try:
+                        for iSubGraph,subGraph in enumerate(outputGraphs[tmp_whichContour]):
+                            subGraph.Write("%s_Contour_%d%s"%(tmp_whichContour,iSubGraph,label))
+                    except:
+                        print(">>> ... Well that one's no good. You might want to check on that... - %s"%tmp_whichContour)
+                        if len(outputGraphs[tmp_whichContour]):
+                            print (">>> ... It appears this has no contours...")
+
+        else:
+
+            try:
+                for iSubGraph,subGraph in enumerate(outputGraphs[whichContour]):
+                    subGraph.Write("%s_Contour_%d%s"%(whichContour,iSubGraph,label))
+            except:
+                print(">>> ... Well that one's no good. You might want to check on that... - %s"%whichContour)
+                if len(outputGraphs[whichContour]):
+                    print (">>> ... It appears this has no contours...")
 
     outputFile.cd()
 
@@ -308,6 +333,17 @@ def processInputFile(inputFile, outputFile, label = ""):
         expCurve.SetLineStyle(7)
         expCurve.Write("Exp_%s%s"%(icurve,label) )
 
+    if args.discoverySensitivity:
+        # Write out each significance threshold
+        for lvl in discoveryThresholds:
+            # obs
+            for icurve,discCurve in enumerate(outputGraphs[discoveryContour+"_"+str(lvl)]):
+                discCurve.SetLineStyle(7)
+                discCurve.Write(f"Disc_{lvl}sig_{icurve}{label}" )
+            # exp
+            for icurve,expDiscCurve in enumerate(outputGraphs[expectedDiscContour+"_"+str(lvl)]):
+                expDiscCurve.SetLineStyle(7)
+                expDiscCurve.Write(f"expDisc_{lvl}sig_{icurve}{label}" )
 
     ############################################################
     # Step 5 - Write out a pretty canvas for further editing
@@ -383,10 +419,16 @@ def harvestToDict( harvestInputFileName = "" , tmpListOfContours = listOfContour
 
                 # If the sensitivity of the region is exactly zero, the transformation to Z-value will give -inf which is bad for interpolation
                 # Hat tip to G Stark for finding this in the context of pyHF studies
+                # Likewise if the p-value is 0, it will result in an inf.  This sets it to 10 sigma.
                 for x in tmpListOfContours:
                     if not (args.noSig or x in ["upperLimit","expectedUpperLimit"]):
-                        if float(sample["%s"%x])==1.0:
+                        if float(sample["%s"%x])>=1.0: # cap CLs values above 1
                             sample["%s"%x]=0.9999999999
+                        if float(sample["%s"%x])==0.0:
+                            sample["%s"%x]=7.6198530e-24 # corresponds to 10 sigma
+
+                        #if float(sample["%s"%x])==-1:
+                        #    print(f"Warning sample {sampleParams} value {x} == -1.  Setting to ")
 
                 if not math.isinf(float(sample[expectedContour])) :
                     tmpList = [float(sample["%s"%x]) if (args.noSig or x in ["upperLimit","expectedUpperLimit"]) else ROOT.RooStats.PValueToSignificance( float(sample["%s"%x]) ) for x in tmpListOfContours]
@@ -401,8 +443,8 @@ def harvestToDict( harvestInputFileName = "" , tmpListOfContours = listOfContour
                     if not sampleParams in modelDict:
                         modelDict[sampleParams] = dict(list(zip(tmpListOfContours,  [args.sigmax for x in tmpListOfContours] )) )
                         modelDict[sampleParams]["fID"] = ""
-                if(args.debug):
-                    print((sampleParams, float(sample[observedContour]), float(sample[expectedContour]) if args.noSig else ROOT.RooStats.PValueToSignificance( float(sample[observedContour])     )))
+                if(args.debug):                    
+                    print("(sample params), obs, obs-z ",(sampleParams, float(sample[observedContour]), float(sample[expectedContour]) if args.noSig else ROOT.RooStats.PValueToSignificance( float(sample[observedContour])     )))
 
 
     else:
@@ -453,6 +495,10 @@ def addValuesToDict(inputDict, function, numberOfPoints = 100, value = 0):
     lowerLimit = min(tmpListOfXValues)
     upperLimit = max(tmpListOfXValues)
 
+    if args.debug:
+        print(f"Forbidden function lowerLimit = {lowerLimit}, upperLimit = {upperLimit}")
+    
+    # TODO need unique name for multiple function calls
     forbiddenFunction = ROOT.TF1(f"forbiddenFunction${value}",function,lowerLimit,upperLimit)
     forbiddenFunction.Write(f"forbiddenFunction${value}")
 
@@ -536,11 +582,11 @@ def interpolateSurface(modelDict = {}, interpolationFunction = "linear", useROOT
         while any([math.isinf(tmp) or math.isnan(tmp) for tmp in zValues[whichContour]  ]):#  np.isinf( zValues[whichContour]  ).any():
             myindex = [math.isinf(tmp) or math.isnan(tmp) for tmp in zValues[whichContour] ].index(True)
             if (args.debug):
-                print(">>> ... Remove Inf or NaN at i=%d x=%d y=%d" % (myindex,x[whichContour][myindex],y[whichContour][myindex]))
+                print(f">>> ... Remove Inf or NaN ({zValues[whichContour][myindex]}) at i={myindex} x={x[whichContour][myindex]} y={y[whichContour][myindex]} for {whichContour}")
             x[whichContour].pop(myindex)
             y[whichContour].pop(myindex)
             zValues[whichContour].pop(myindex)
-            pass;
+            pass
 
         if any([math.isinf(tmp) or math.isnan(tmp) for tmp in zValues[whichContour]  ]):
             print(">>> ... Still infs or nans in %s!! This is a problem... Exiting." % whichContour)
@@ -656,17 +702,37 @@ def interpolateSurface(modelDict = {}, interpolationFunction = "linear", useROOT
             if outputSurfaceTGraph:
                 return createTGraph2DFromMeshGrid(xymeshgrid[0],xymeshgrid[1],ZI)
 
-            # Turn this surface into contours!
-            contourList = getContourPoints(xymeshgrid[0],xymeshgrid[1],ZI, args.level)
+            #### Turn this surface into contours!
 
-            graphs[whichContour] = []
-            for contour in contourList:
-                graph = ROOT.TGraph(len(contour[0]), contour[0].flatten('C'), contour[1].flatten('C') )
-                if graph.Integral() > args.areaThreshold:
-                    graphs[whichContour].append(graph)
+            # First the special case of discovery contours where we split this out into n contours at different levels
+            if whichContour in [discoveryContour, expectedDiscContour]:
+                # loop over the significance thresholds
+                for lvl in discoveryThresholds:
+                    tmp_whichContour = whichContour + "_" + str(lvl)
 
-            # Let's sort output graphs by area so that the band construction later is more likely to get the right pairs
-            graphs[whichContour] = sorted(graphs[whichContour], key=lambda g: g.Integral() , reverse=True)
+                    contourList = getContourPoints(xymeshgrid[0],xymeshgrid[1],ZI, lvl)
+
+                    graphs[tmp_whichContour] = []
+                    for contour in contourList:
+                        graph = ROOT.TGraph(len(contour[0]), contour[0].flatten('C'), contour[1].flatten('C') )
+                        if graph.Integral() > args.areaThreshold:
+                            graphs[tmp_whichContour].append(graph)
+
+                    # Let's sort output graphs by area so that the band construction later is more likely to get the right pairs
+                    graphs[tmp_whichContour] = sorted(graphs[tmp_whichContour], key=lambda g: g.Integral() , reverse=True)
+
+            # The rest of the contours
+            else:
+                contourList = getContourPoints(xymeshgrid[0],xymeshgrid[1],ZI, args.level)
+
+                graphs[whichContour] = []
+                for contour in contourList:
+                    graph = ROOT.TGraph(len(contour[0]), contour[0].flatten('C'), contour[1].flatten('C') )
+                    if graph.Integral() > args.areaThreshold:
+                        graphs[whichContour].append(graph)
+
+                # Let's sort output graphs by area so that the band construction later is more likely to get the right pairs
+                graphs[whichContour] = sorted(graphs[whichContour], key=lambda g: g.Integral() , reverse=True)
 
         return graphs
 
@@ -705,6 +771,14 @@ def createTGraphFromDict(modelDict,myName,listOfFIDs=None):
                 continue
         else:
             value = modelDict[model][myName] if (args.noSig or myName in ["upperLimit","expectedUpperLimit"]) else ROOT.RooStats.SignificanceToPValue(modelDict[model][myName])
+
+            # if we're doing the disc significance, ie p0, then we want a significance not pvalue, even if someone used the noSig option
+            if myName in [discoveryContour, expectedDiscContour]:
+                value =  ROOT.RooStats.PValueToSignificance(modelDict[model][myName]) if args.noSig else modelDict[model][myName]
+
+            if args.debug:
+                print(f"createTGraphFromDict: model = {model}, myName={myName}, orig_value = {modelDict[model][myName]}, value = {value}")
+
             outputGraph.SetPoint(imodel, model[0], model[1], value )
 
     return outputGraph
