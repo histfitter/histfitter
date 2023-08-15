@@ -80,10 +80,10 @@ def main():
     pullPlotUtils.getSampleColor = getSampleColor
 
     # Where's the workspace file? 
-    wsfilename = os.getenv("HISTFITTER")+"/results/MyConfigExample/BkgOnly_combined_NormalMeasurement_model_afterFit.root" # 
+    wsfilename = "./results/MyConfigExample/BkgOnly_combined_NormalMeasurement_model_afterFit.root" # 
 
     # Where's the pickle file?
-    pickleFilename = os.getenv("HISTFITTER")+"/MyYieldsTable.pickle"
+    pickleFilename = "./results/MyYieldsTable.pickle"
     
     # Run blinded?
     doBlind = True
@@ -105,7 +105,7 @@ def main():
         print("will proceed to run yieldstable again")
         
         # Run YieldsTable.py with all regions and samples requested
-        cmd = "YieldsTable.py -c {} -s {} -w {} -o MyYieldsTable.tex".format(",".join(regionList), samples, wsfilename)
+        cmd = "YieldsTable.py -c {} -s {} -w {} -o results/MyYieldsTable.tex".format(",".join(regionList), samples, wsfilename)
         print(cmd)
         subprocess.call(cmd, shell=True)
 
