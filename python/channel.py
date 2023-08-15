@@ -156,7 +156,7 @@ class Channel:
         """
 
         self.prefix = prefix
-        self.xmlFileName = f"{os.getenv('HISTFITTER')}/config/" + self.prefix + "_" + self.channelName + ".xml"
+        self.xmlFileName = f"{os.getenv('HISTFITTER_WORKDIR')}/config/" + self.prefix + "_" + self.channelName + ".xml"
         
         return
 
@@ -514,7 +514,7 @@ class Channel:
         """
         Convert instance to XML string
         """
-        self.writeString = "<!DOCTYPE Channel SYSTEM '"+os.getenv('HISTFITTER')+"/config/HistFactorySchema.dtd'>\n\n"
+        self.writeString = "<!DOCTYPE Channel SYSTEM '"+os.getenv('HISTFITTER_WORKDIR')+"/config/HistFactorySchema.dtd'>\n\n"
         self.writeString += "<Channel Name=\"%s\">\n\n" % self.channelName
         for data in self.dataList:
             if len(data[2]):

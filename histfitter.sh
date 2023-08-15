@@ -25,40 +25,40 @@ SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 if [ -z $path ];
 then
   echo "Assuming current directory is the working directory"
-  export HISTFITTER=$(pwd)
+  export HISTFITTER_WORKDIR=$(pwd)
 else
-  export HISTFITTER=$path
+  export HISTFITTER_WORKDIR=$path
 fi
 
-echo "Setting the HISTFITTER variable to $HISTFITTER"
+echo "Setting the HISTFITTER_WORKDIR variable to $HISTFITTER_WORKDIR"
 
 #Set other paths
 source "$SCRIPT_DIR/histfitter_env_setup.sh"
 
 #Set up HistFitter environment with folders
-echo "Making directories /config /results /data in folder $HISTFITTER if they do not already exist."
-mkdir -p "$HISTFITTER/config"
-mkdir -p "$HISTFITTER/results"
-mkdir -p "$HISTFITTER/data"
+echo "Making directories /config /results /data in folder $HISTFITTER_WORKDIR if they do not already exist."
+mkdir -p "$HISTFITTER_WORKDIR/config"
+mkdir -p "$HISTFITTER_WORKDIR/results"
+mkdir -p "$HISTFITTER_WORKDIR/data"
 
 #Copy necessary files
-if [ ! -f $HISTFITTER/config/HistFactorySchema.dtd ]; then
-  echo "Copying HistFactorySchema.dtd to $HISTFITTER/config.";
-  cp "$SCRIPT_DIR/../share/histfitter/config/HistFactorySchema.dtd" "$HISTFITTER/config/HistFactorySchema.dtd";
+if [ ! -f $HISTFITTER_WORKDIR/config/HistFactorySchema.dtd ]; then
+  echo "Copying HistFactorySchema.dtd to $HISTFITTER_WORKDIR/config.";
+  cp "$SCRIPT_DIR/../share/histfitter/config/HistFactorySchema.dtd" "$HISTFITTER_WORKDIR/config/HistFactorySchema.dtd";
 fi
 
-if [ ! -d $HISTFITTER/analysis ]; then
-  echo "Copying /analysis example folder to $HISTFITTER/analysis.";
-  cp -r "$SCRIPT_DIR/../share//histfitter/analysis" "$HISTFITTER/analysis";
+if [ ! -d $HISTFITTER_WORKDIR/analysis ]; then
+  echo "Copying /analysis example folder to $HISTFITTER_WORKDIR/analysis.";
+  cp -r "$SCRIPT_DIR/../share//histfitter/analysis" "$HISTFITTER_WORKDIR/analysis";
 fi
 
-if [ ! -d $HISTFITTER/macros ]; then
-  echo "Copying /macros folders to $HISTFITTER/macros.";
-  cp -r "$SCRIPT_DIR/../share/histfitter/macros" "$HISTFITTER/macros";
+if [ ! -d $HISTFITTER_WORKDIR/macros ]; then
+  echo "Copying /macros folders to $HISTFITTER_WORKDIR/macros.";
+  cp -r "$SCRIPT_DIR/../share/histfitter/macros" "$HISTFITTER_WORKDIR/macros";
 fi
 
 #Copy test files if specified
 if [ $test = true ]; then
-  echo "Copying /test folder to $HISTFITTER/test.";
-  cp -r "$SCRIPT_DIR/../share/histfitter/test" "$HISTFITTER";
+  echo "Copying /test folder to $HISTFITTER_WORKDIR/test.";
+  cp -r "$SCRIPT_DIR/../share/histfitter/test" "$HISTFITTER_WORKDIR";
 fi
