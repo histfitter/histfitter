@@ -64,13 +64,13 @@ install(DIRECTORY ./scripts/ DESTINATION "${CMAKE_INSTALL_PREFIX}/bin/histfitter
             PATTERN "scripts/*" PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ)
 
 #Copy C++ headers before generating root dictionary
-file(COPY ${HistFitter_headers} DESTINATION "${CMAKE_INSTALL_PREFIX}/include/histfitter")
+install(FILES ${HistFitter_headers} DESTINATION "${CMAKE_INSTALL_PREFIX}/include/histfitter")
 
 #Add libraries
 add_library(HistFitter SHARED ${HistFitter_sources})
 
 #To make ROOT_GENERATE_DICTIONARY find the header files we are including
-target_include_directories(HistFitter PRIVATE "${CMAKE_INSTALL_PREFIX}/include/histfitter")
+target_include_directories(HistFitter PRIVATE ${PROJECT_SOURCE_DIR}/src)
 
 # generate the dictionary source code
 ROOT_GENERATE_DICTIONARY(HistFitter_dict ${HistFitter_filename_headers} MODULE HistFitter LINKDEF src/LinkDef.h)
