@@ -8,6 +8,7 @@ obj
 
 *~
 *#
+.asetup*
 
 #In case someone builds in source dir
 lib/
@@ -16,7 +17,6 @@ bin/
 build/
 install/
 data/
-config/
 results/
 
 # Development environments
