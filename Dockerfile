@@ -48,3 +48,5 @@ RUN root --version && \
     . ../install/bin/histfitter.sh && \
     mkdir -p ${HOME}/.local/bin
 
+ENTRYPOINT ["/bin/bash", "-l", "-c"]
+CMD ["/bin/bash"]
