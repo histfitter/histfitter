@@ -61,7 +61,7 @@ install(DIRECTORY ./test DESTINATION "${CMAKE_INSTALL_PREFIX}/share/histfitter")
 #Copy python files to install location
 install(DIRECTORY ./python/ DESTINATION ${CMAKE_INSTALL_PREFIX}/python/histfitter)
 install(DIRECTORY ./scripts/ DESTINATION "${CMAKE_INSTALL_PREFIX}/bin/histfitter" 
-            PATTERN "scripts/*" PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ)
+        USE_SOURCE_PERMISSIONS)
 
 #Copy C++ headers before generating root dictionary
 install(FILES ${HistFitter_headers} DESTINATION "${CMAKE_INSTALL_PREFIX}/include/histfitter")
