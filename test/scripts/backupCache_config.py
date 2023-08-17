@@ -33,12 +33,12 @@ configMgr.testStatType=3
 configMgr.writeXML = True
 
 configMgr.analysisName = analysis_name
-configMgr.histCacheFile = f"{os.getenv('HISTFITTER')}/data/{analysis_name}.root"
-configMgr.outputFileName = f"{os.getenv('HISTFITTER')}/results/{analysis_name}_Output.root"
+configMgr.histCacheFile = f"data/{analysis_name}/{analysis_name}.root"
+configMgr.outputFileName = f"results/{analysis_name}/Output.root"
 
 configMgr.useCacheToTreeFallback = False
 configMgr.useHistBackupCacheFile = True
-configMgr.histBackupCacheFile =  f"{os.getenv('HISTFITTER')}/data/backupCache_example.root"
+configMgr.histBackupCacheFile =  f"data/{analysis_name}/backupCache_example.root"
 
 configMgr.inputLumi = 36.07456
 configMgr.outputLumi = 36.07456

@@ -2872,6 +2872,7 @@ void hf::Util::RemoveEmptyDataBins( RooPlot* frame){
 
 }
 
+//________________________________________________________________________________________________________________________________________
 RooHist* hf::Util::MakeRatioHist(RooPlot *frame, const char* histname, const char* pdfname, bool useAverage) {
     // Find all curve objects with the name "pdfname" or the name of the last
     // plotted curve (there might be multiple in the case of multi-range fits).
@@ -2987,7 +2988,7 @@ RooHist* hf::Util::MakeRatioHist(RooPlot *frame, const char* histname, const cha
     return ratioHist.release();
 }
 
-
+//________________________________________________________________________________________________________________________________________
 RooHist* hf::Util::MakeRatioOrPullHist(RooAbsData *regionData, RooAbsPdf *regionPdf, RooRealVar *regionVar, bool makePull /*false*/) {
 	// data/pdf ratio histograms are plotted by RooPlot.ratioHist() through a dummy frame
 	RooPlot* frame_dummy = regionVar->frame();
@@ -3737,7 +3738,7 @@ void hf::Util::PlotFitParameters(RooFitResult* r, TString anaName){
 
 }
 
-
+//________________________________________________________________________________________________________________________________________
 TH1* hf::Util::ComponentToHistogram(RooRealSumPdf* component, RooRealVar* variable, RooFitResult *fitResult) {
     // Build a TH1-based histogram from a pdf, an observable and a fit result
 

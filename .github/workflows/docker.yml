@@ -99,8 +99,7 @@ jobs:
           histfitter/histfitter:sha-${GITHUB_SHA::8}
           'python -m pip install "pytest~=6.2" && \
            python -m pip install "pytest-order" && \
-           . /usr/local/install/bin/histfitter.sh && \
-           . /usr/local/install/bin/histfitter_setup_workdir.sh -t && \
+           . /usr/local/install/bin/histfitter.sh -t && \
            python -m pytest test'
 
       - name: Run tutorial check
@@ -108,8 +107,7 @@ jobs:
           docker run --rm
           -w /usr/local/workdir
           histfitter/histfitter:sha-${GITHUB_SHA::8}
-          '. /usr/local/install/bin/histfitter.sh && \
-           . /usr/local/install/bin/histfitter_setup_workdir.sh && \
+          '. /usr/local/install/bin/histfitter.sh -t && \
            HistFitter.py -w -f ./analysis/tutorial/MyUserAnalysis.py'
 
       - name: Build and publish to registry

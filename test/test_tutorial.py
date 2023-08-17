@@ -1,5 +1,5 @@
 def test_tutorial_MyUserAnalysis(script_runner):
-    command = "HistFitter.py -w -f ${HISTFITTER}/analysis/tutorial/MyUserAnalysis.py"
+    command = "HistFitter.py -w -f analysis/tutorial/MyUserAnalysis.py"
     (ret,outRaw,errRaw) = script_runner(command)
 
     stderr = errRaw.decode("utf-8")

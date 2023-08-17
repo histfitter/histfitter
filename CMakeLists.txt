@@ -46,51 +46,31 @@ endforeach()
 list(REMOVE_DUPLICATES HistFitter_sources)
 list(REMOVE_DUPLICATES HistFitter_headers)
 
-#Copy setup script
+#Copy setup scripts
 install(FILES histfitter.sh DESTINATION "${CMAKE_INSTALL_PREFIX}/bin")
+install(FILES ./histfitter_env_setup.sh DESTINATION "${CMAKE_INSTALL_PREFIX}/bin")
 
 #Copy files needed for working directories
-install(FILES ./histfitter_setup_workdir.sh DESTINATION "${CMAKE_INSTALL_PREFIX}/bin")
-install(FILES ./config/HistFactorySchema.dtd DESTINATION "${CMAKE_INSTALL_PREFIX}/bin/histfitter/config")
-install(DIRECTORY ./analysis DESTINATION "${CMAKE_INSTALL_PREFIX}/bin/histfitter")
-install(DIRECTORY ./macros DESTINATION "${CMAKE_INSTALL_PREFIX}/bin/histfitter")
+install(FILES ./config/HistFactorySchema.dtd DESTINATION "${CMAKE_INSTALL_PREFIX}/share/histfitter/config")
+install(DIRECTORY ./analysis DESTINATION "${CMAKE_INSTALL_PREFIX}/share/histfitter")
+install(DIRECTORY ./macros DESTINATION "${CMAKE_INSTALL_PREFIX}/share/histfitter")
 
 #Copy test files for testing build
-install(DIRECTORY ./test DESTINATION "${CMAKE_INSTALL_PREFIX}/bin/histfitter")
-
-# Loop over python code and add files to list
-set(Python_files "")
-file(GLOB filePathsPython python/*)
-foreach (_filePath ${filePathsPython})
-    get_filename_component(_fileDir ${_filePath} DIRECTORY)
-    get_filename_component(_fileName ${_filePath} NAME)
-    if(NOT ${_fileName} MATCHES "README")
-        list(APPEND Python_files "${_fileDir}/${_fileName}")
-    endif()
-endforeach()
-
-set(Python_scripts "")
-file(GLOB filePathsScripts scripts/*)
-foreach (_filePath ${filePathsScripts})
-    get_filename_component(_fileDir ${_filePath} DIRECTORY)
-    get_filename_component(_fileName ${_filePath} NAME)
-    if(NOT ${_fileName} MATCHES "README")
-        list(APPEND Python_scripts "${_fileDir}/${_fileName}")
-    endif()
-endforeach()
+install(DIRECTORY ./test DESTINATION "${CMAKE_INSTALL_PREFIX}/share/histfitter")
 
 #Copy python files to install location
-file(COPY ${Python_files} DESTINATION ${CMAKE_INSTALL_PREFIX}/python/histfitter)
-install(FILES ${Python_scripts} DESTINATION "${CMAKE_INSTALL_PREFIX}/scripts/histfitter")
+install(DIRECTORY ./python/ DESTINATION ${CMAKE_INSTALL_PREFIX}/python/histfitter)
+install(DIRECTORY ./scripts/ DESTINATION "${CMAKE_INSTALL_PREFIX}/bin/histfitter" 
+        USE_SOURCE_PERMISSIONS)
 
-#Install C++ libraries
+#Copy C++ headers before generating root dictionary
 install(FILES ${HistFitter_headers} DESTINATION "${CMAKE_INSTALL_PREFIX}/include/histfitter")
 
 #Add libraries
 add_library(HistFitter SHARED ${HistFitter_sources})
 
 #To make ROOT_GENERATE_DICTIONARY find the header files we are including
-target_include_directories(HistFitter PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src")
+target_include_directories(HistFitter PRIVATE ${PROJECT_SOURCE_DIR}/src)
 
 # generate the dictionary source code
 ROOT_GENERATE_DICTIONARY(HistFitter_dict ${HistFitter_filename_headers} MODULE HistFitter LINKDEF src/LinkDef.h)

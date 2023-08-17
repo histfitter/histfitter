@@ -46,7 +46,7 @@ RUN root --version && \
     rm -rf ../build && \
     cd ../workdir && \
     . ../install/bin/histfitter.sh && \
-    . ../install/bin/histfitter_setup_workdir.sh && \
-    mkdir -p ${HOME}/.local/bin && \
-    printf '\nif [ -f /usr/local/install/histfitter.sh ];then\n    . /usr/local/install/histfitter.sh\nfi\n' >> "${HOME}/.profile"
+    mkdir -p ${HOME}/.local/bin
 
+ENTRYPOINT ["/bin/bash", "-l", "-c"]
+CMD ["/bin/bash"]

@@ -65,11 +65,6 @@ namespace RooStats {
   class HypoTestResult;
   class ModelConfig;
 }
-/*
-namespace hf {
-//class RooPlot;
-class RooHist;
-}*/
 
 namespace hf{
    

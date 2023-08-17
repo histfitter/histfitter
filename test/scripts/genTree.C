@@ -9,7 +9,7 @@ Generate TTree for testing
 void genTree(){
 
     // open file
-    std::string outfileName = "data/hf_test/test_tree.root";
+    std::string outfileName = "data/test_fullchain/test_tree.root";
 
     TFile *f = TFile::Open(outfileName.c_str(),"RECREATE");
 
