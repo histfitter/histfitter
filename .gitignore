@@ -5,6 +5,7 @@ obj
 *.pcm
 *.d
 *.so
+*.xml
 
 *~
 *#
@@ -18,6 +19,8 @@ build/
 install/
 data/
 results/
+config/*
+!HistFactorySchema.dtd
 
 # Development environments
 .vscode/
