@@ -128,27 +128,26 @@ bkg_only_test_values = {
 @pytest.mark.order(1)
 def test_treeToHist(script_runner):
 
-    #make directory
+    #Make directory. This is needed for the root script to work.
     if not os.path.isdir("data/test_fullchain"):
         os.mkdir("data/test_fullchain")
     
-
     if os.path.isfile("data/test_fullchain/test_tree.root"):
         # Check if ttree file is old, and remove and remake to avoid getting caught offguard by changes
         if time.time() - os.path.getctime("data/test_fullchain/test_tree.root") > 86400.: # 24 hours in seconds
             os.remove("data/test_fullchain/test_tree.root")
-            command = "root -l -b -q test/scripts/genTree.C+"
+            command = "root -l -b -q ${HISTFITTER_WORKDIR}/test/scripts/genTree.C+"
             (ret,outRaw,errRaw) = script_runner(command)
             assert ret.returncode == 0 # ROOT file with TTrees generated
 
     # Make input TTree if needed
     else:
-        command = "root -l -b -q test/scripts/genTree.C+"
+        command = "root -l -b -q ${HISTFITTER_WORKDIR}/test/scripts/genTree.C+"
         (ret,outRaw,errRaw) = script_runner(command)
         assert ret.returncode == 0 # ROOT file with TTrees generated
 
 
-    command = "HistFitter.py -t test/scripts/config_for_pytest.py"
+    command = "HistFitter.py -t ${HISTFITTER_WORKDIR}/test/scripts/config_for_pytest.py"
     (ret,outRaw,errRaw) = script_runner(command)
     assert ret.returncode == 0
 
@@ -174,7 +173,7 @@ def test_backupCache(script_runner):
             hc.Delete(f'{name};*')
     hc.Close()
 
-    command = "HistFitter.py -w -u='--manualBackupCache data/test_fullchain/test_backup_cache.root' ./test/scripts/config_for_pytest.py"
+    command = "HistFitter.py -w -u='--manualBackupCache data/test_fullchain/test_backup_cache.root' ${HISTFITTER_WORKDIR}/test/scripts/config_for_pytest.py"
     (ret,outRaw,errRaw) = script_runner(command)
     assert ret.returncode == 0
 
@@ -200,7 +199,7 @@ def test_backupCache(script_runner):
             hc.Delete(f'{name};*')
     hc.Close()
 
-    command = "HistFitter.py -w -u='--manualBackupCache data/test_fullchain/test_backup_cache.root' ./test/scripts/config_for_pytest.py"
+    command = "HistFitter.py -w -u='--manualBackupCache data/test_fullchain/test_backup_cache.root' ${HISTFITTER_WORKDIR}/test/scripts/config_for_pytest.py"
     (ret,outRaw,errRaw) = script_runner(command)
     assert ret.returncode == 0
 
@@ -217,13 +216,13 @@ def test_backupCache(script_runner):
 @pytest.mark.order(4)
 def test_bkgFit(script_runner):
     # background workspace
-    command = 'HistFitter.py -t -w test/scripts/config_for_pytest.py'
+    command = 'HistFitter.py -t -w ${HISTFITTER_WORKDIR}/test/scripts/config_for_pytest.py'
     (ret,outRaw,errRaw) = script_runner(command)
     assert ret.returncode == 0
 
     assert os.path.isfile("results/test_fullchain/BkgOnly_combined_BasicMeasurement_model.root") # workspace was created
 
-    command = 'HistFitter.py -f -D"before,after,corrMatrix" test/scripts/config_for_pytest.py'
+    command = 'HistFitter.py -f -D"before,after,corrMatrix" ${HISTFITTER_WORKDIR}/test/scripts/config_for_pytest.py'
     (ret,outRaw,errRaw) = script_runner(command)
     assert ret.returncode == 0
 
@@ -256,7 +255,7 @@ def test_bkgFit(script_runner):
 @pytest.mark.order(5)
 def test_sigExclusionAsymptotics(script_runner):
     # Exclusion fit
-    command = 'HistFitter.py -t -w -F excl -f -D"before,after,corrMatrix" test/scripts/config_for_pytest.py'
+    command = 'HistFitter.py -t -w -F excl -f -D"before,after,corrMatrix" ${HISTFITTER_WORKDIR}/test/scripts/config_for_pytest.py'
     (ret,outRaw,errRaw) = script_runner(command)
     assert ret.returncode == 0
 
@@ -285,7 +284,7 @@ def test_sigExclusionAsymptotics(script_runner):
         
 
     # Exclusion Asymptotics
-    command = "HistFitter.py -F excl -l test/scripts/config_for_pytest.py"
+    command = "HistFitter.py -F excl -l ${HISTFITTER_WORKDIR}/test/scripts/config_for_pytest.py"
     (ret,outRaw,errRaw) = script_runner(command)
     assert ret.returncode == 0
     
@@ -297,7 +296,7 @@ def test_sigExclusionAsymptotics(script_runner):
 @pytest.mark.order(6)
 def test_sigExclusionToys(script_runner):
     # Exclusion Toys
-    command = 'HistFitter.py -F excl -l -s 1234 -u"--useToys" test/scripts/config_for_pytest.py'
+    command = 'HistFitter.py -F excl -l -s 1234 -u"--useToys" ${HISTFITTER_WORKDIR}/test/scripts/config_for_pytest.py'
     (ret,outRaw,errRaw) = script_runner(command)
     assert ret.returncode == 0
     
@@ -321,9 +320,9 @@ def test_sigExclusionToys(script_runner):
 @pytest.mark.order(7)
 def test_discoveryAll(script_runner):
     # Make discovery workspace and fit
-    #command = 'HistFitter.py -t -w -F disc -f -D"before,after,corrMatrix" test/scripts/config_for_pytest.py' 
+    #command = 'HistFitter.py -t -w -F disc -f -D"before,after,corrMatrix" ${HISTFITTER_WORKDIR}/test/scripts/config_for_pytest.py' 
     # plotting crashes, something to fix!
-    command = 'HistFitter.py -t -w -F disc -f test/scripts/config_for_pytest.py'
+    command = 'HistFitter.py -t -w -F disc -f ${HISTFITTER_WORKDIR}/test/scripts/config_for_pytest.py'
     (ret,outRaw,errRaw) = script_runner(command)
     assert ret.returncode == 0
 
