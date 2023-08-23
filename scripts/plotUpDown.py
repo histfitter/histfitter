@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from histfitter.plotting.systematicsplotter import SystematicsPlotter
+from plotting.systematicsplotter import SystematicsPlotter
 
 import argparse
 import os
