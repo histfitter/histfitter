@@ -5,6 +5,12 @@
 #You can have many working directories, but then this script must be activated with 
 #the correct path when you change directory.
 
+#Check if the bash shell is used
+if [ -z "${BASH_VERSION}" ]; then 
+  echo "Please source this script using a bash shell.";
+  return;
+fi
+
 path=""
 test=false
 
