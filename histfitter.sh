@@ -62,3 +62,9 @@ if [ $test = true ]; then
   echo "Copying /test folder to $HISTFITTER_WORKDIR/test.";
   cp -r "$SCRIPT_DIR/../share/histfitter/test" "$HISTFITTER_WORKDIR";
 fi
+
+#Removing module.modulemap
+if [ -f $HISTFITTER_WORKDIR/module.modulemap ]; then
+  echo "Removing module.modulemap so ROOT is not confused.";
+  rm "$HISTFITTER_WORKDIR/module.modulemap"
+fi

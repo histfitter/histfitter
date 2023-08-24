@@ -12,7 +12,7 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-  set(CMAKE_INSTALL_PREFIX ${PROJECT_SOURCE_DIR} CACHE PATH "..." FORCE)
+  set(CMAKE_INSTALL_PREFIX "${PROJECT_SOURCE_DIR}/install" CACHE PATH "..." FORCE)
 endif()
 set(CMAKE_INSTALL_LIBDIR "${CMAKE_INSTALL_PREFIX}/lib")
 
@@ -59,9 +59,9 @@ install(DIRECTORY ./macros DESTINATION "${CMAKE_INSTALL_PREFIX}/share/histfitter
 install(DIRECTORY ./test DESTINATION "${CMAKE_INSTALL_PREFIX}/share/histfitter")
 
 #Copy python files to install location
-install(DIRECTORY ./python/ DESTINATION ${CMAKE_INSTALL_PREFIX}/python/histfitter)
+install(DIRECTORY ./python/ DESTINATION "${CMAKE_INSTALL_PREFIX}/python/histfitter")
 install(DIRECTORY ./scripts/ DESTINATION "${CMAKE_INSTALL_PREFIX}/bin/histfitter" 
-        USE_SOURCE_PERMISSIONS)
+            USE_SOURCE_PERMISSIONS)
 
 #Copy C++ headers before generating root dictionary
 install(FILES ${HistFitter_headers} DESTINATION "${CMAKE_INSTALL_PREFIX}/include/histfitter")

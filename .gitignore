@@ -10,6 +10,8 @@ obj
 *~
 *#
 .asetup*
+*.rootmap
+*.modulemap
 
 #In case someone builds in source dir
 lib/
@@ -21,6 +23,11 @@ data/
 results/
 config/*
 !HistFactorySchema.dtd
+CMakeCache.txt
+CMakeFiles/
+install_manifest.txt
+*.cmake
+.pytest_cache/
 
 # Development environments
 .vscode/
