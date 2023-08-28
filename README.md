@@ -19,7 +19,7 @@ If you're going to be using HistFitter directly as a standalone application, clo
 git clone https://github.com/histfitter/histfitter
 git checkout vX.XX.X -b vX.XX.X
 ```
-This creates a folder named histfitter with the source code.
+This creates a directory named histfitter with the source code.
 
 If you're using HistFitter as a submodule in a project, specify the latest stable release while adding the submodule
 
@@ -43,7 +43,7 @@ source setup_lcg.sh
 
 ## Build and install
 
-Make your build directory and specify install directory. You have to point cmake to where the cloned source directory is located.
+Make your build directory and specify an install directory. You have to point cmake to where the cloned source directory is located.
 ```
 mkdir build
 cd build
@@ -51,7 +51,7 @@ cmake -DCMAKE_INSTALL_PREFIX=/path/to/install/ /path/to/histfitter/
 make -j4 install
 ```
 
-HistFitter was originally built and used in the same folder as the source code. If you prefer this option, simply go to the source folder and make the build directory there. This will treat the source code folder `histfitter` as the install location, creating the /install folder directly there.
+HistFitter was originally built and used in the same directory as the source code. If you prefer this option, simply go to the source directory and make the build directory there. This will treat the source code directory `histfitter` as the install location, creating the `install` directory directly there.
 ```
 cd histfitter
 mkdir build
@@ -59,27 +59,28 @@ cd build
 cmake  ..
 make install
 ```
-This will create an install folder with the installed libraries as well as other files needed at runtime.
+This will create an install directory with the installed libraries as well as other files needed at runtime.
 
 
 ## Setup
 
-The environment must be set by activating the setup script, located in the install/bin folder, in the directory where you want to work. This will create five new folders in your work folder: `/analysis` `/config` `/data` `/macros` and `/results`. It also copies the `HistFactorySchema.dtd` file over to the config folder. Most importantly, the setup script sets the environment variable paths which are required for the scripts to work.
+The environment must be set by activating the setup script (`install/bin/histfitter_setup.sh`) in the directory where you want to work. This will create five new directorys in your work directory: `analysis`, `config`, `data`, `macros`, and `results`. It also copies the `HistFactorySchema.dtd` file into the config directory. Most importantly, the setup script sets the environment variable paths that are required for the scripts to work.
 
 ```
 source /path/to/install/bin/histfitter_setup.sh
 ```
-You can also run the setup script from any folder if you use the -p flag and the path to the work folder.
+You can also run the setup script from any directory if you use the -p flag and the path to the work directory.
 
 ```
-source /path/to/install/bin/histfitter_setup.sh -p /path/to/work/folder
+source /path/to/install/bin/histfitter_setup.sh -p /path/to/work/directory
 ```
 
 ## Workflow
 
 See the tutorial.
 
-## Directory structure source code
+## Directory structure
+### source code
 
 - `analysis`: Contains all files related to an analysis. E.g. `ZeroLepton/`
 - `config` : Contains HistFactory schema
@@ -90,7 +91,7 @@ See the tutorial.
 - `src`: Source code to make workspaces, do toys.
 - `test`: pytest tests
 
-## Directory structure working folder
+### working directory
 
 - `analysis`: Contains all files related to an analysis. E.g. `ZeroLepton/`
 - `config` : Contains HistFactory schema and xml files
@@ -103,18 +104,15 @@ To check that everything is working properly, you can run the tests. This requir
 ```
 source /path/to/install/bin/histfitter_setup.sh -t
 ```
-This copies the `/test` folder into the work folder. Now run the tests.
+This copies the `/test` directory into the work directory. Now run the tests.
 ```
 pytest test/
 ```
-If you get errors of the type 'no module named ...' the PYTHONPATHS and/or LD_LIBRARY_PATHS are not set correctly which means histfitter is not built/installed properly. If some tests pass and others fail it is most likely a ROOT related issue. You can look at the output from running this command to troubleshoot the issue:
-```
-root -l -b -q ${HISTFITTER_WORKDIR}/test/scripts/genTree.C+
-```
+If you get errors of the type 'no module named ...' the PYTHONPATH and/or LD_LIBRARY_PATH are not set correctly which means HistFitter is not built/installed properly. If some tests pass and others fail it could be related to results from toys, which are non-deterministic, or changes in ROOT. 
 
 ## Contributing
 
 To contribute to development please first fork HistFitter and do all of your development on a feature branch that is **not** `master`.
-If you are planning on making feature changes please first [open up an Issue](https://github.com/histfitter/histfitter/issues) and outline your plans so that development can be discusses with the maintainer team, streamlining the process as your MR is written.
+If you are planning on making feature changes please first [open up an Issue](https://github.com/histfitter/histfitter/issues) and outline your plans so that development can be discusses with the maintainer team, streamlining the process as your PR is written.
 
-When you make a MR, include a summary in the body of the MR of your changes that can be easily found and incorporated into Changelog for the next release.
+When you make a PR, include a summary in the body of the PR of your changes that can be easily found and incorporated into Changelog for the next release.
