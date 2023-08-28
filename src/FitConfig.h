@@ -16,15 +16,22 @@
  * LICENSE.                                                                       *
  **********************************************************************************/
 
-#ifndef FITCONFIG_H
-#define FITCONFIG_H
+#ifndef HF_FITCONFIG_H
+#define HF_FITCONFIG_H
 
+// STL include(s)
 #include <iostream>
 #include <vector>
+
+// ROOT include(s)
 #include "TString.h"
 #include "TLegend.h"
+
+// HistFitter include(s)
 #include "TMsgLogger.h"
 #include "ChannelStyle.h"
+
+namespace hf{
 
 class FitConfig {
  public:
@@ -46,14 +53,16 @@ class FitConfig {
   std::vector<TString> m_channels;
   std::vector<ChannelStyle> m_channelsStyle;
   
-  ChannelStyle getChannelStyle(const TString& channel);
+  hf::ChannelStyle getChannelStyle(const TString& channel);
   
   void findChannel(const TString& channel, Int_t& idx, Bool_t& channelFound);
   void Print();
   TString m_hypoTestName;
 
  private:
-  TMsgLogger m_logger;
+  hf::TMsgLogger m_logger;
 };
 
-#endif
+}  // namespace hf
+
+#endif  // HF_FITCONFIG_H

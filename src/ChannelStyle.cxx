@@ -2,7 +2,7 @@
 /**********************************************************************************
  * Project: HistFitter - A ROOT-based package for statistical data analysis       *
  * Package: HistFitter                                                            *
- * Class  : ChannelStyle                                                          *
+ * Class  : hf::ChannelStyle                                                          *
  * Created: November 2012
  *                                                                                *
  * Description:                                                                   *
@@ -12,21 +12,21 @@
  *                                                                                *
  **********************************************************************************/
 
+// STL include(s)
 #include <iostream>
+
+// HistFitter include(s)
 #include "ChannelStyle.h"
 
-using namespace std;
-
-ClassImp(ChannelStyle);
-
+ClassImp(hf::ChannelStyle);
 
 //_______________________________________________________________________________________
-ChannelStyle::ChannelStyle() : m_logger("ChannelStyle"){
+hf::ChannelStyle::ChannelStyle() : m_logger("ChannelStyle"){
 }
 
 
 //_______________________________________________________________________________________
-ChannelStyle::ChannelStyle(const TString& name) : m_logger("ChannelStyle") {
+hf::ChannelStyle::ChannelStyle(const TString& name) : m_logger("ChannelStyle") {
     m_name = name;
     m_title = "";
     m_dataColor = kBlack;	     
@@ -75,7 +75,7 @@ ChannelStyle::ChannelStyle(const TString& name) : m_logger("ChannelStyle") {
 
 
 //_______________________________________________________________________________________
-Int_t ChannelStyle::getSampleColor(const TString& sample){
+Int_t hf::ChannelStyle::getSampleColor(const TString& sample){
   Bool_t sampleFound = kFALSE;
   for(unsigned int i = 0; i< m_sampleColors.size(); i++){
     m_logger << kVERBOSE << "getSampleColor:  requested sample name: "<<sample  
@@ -89,7 +89,7 @@ Int_t ChannelStyle::getSampleColor(const TString& sample){
   
   if(!sampleFound){
     m_logger << kWARNING << "getSampleColor unknown sample name: "<<sample 
-	     << ", will use default color and add this sample to ChannelStyle"<< GEndl;
+	     << ", will use default color and add this sample to hf::ChannelStyle"<< GEndl;
     Int_t color = m_defaultSampleColor + m_defaultSampleCounter;
     addSample(sample, color);
     m_defaultSampleCounter++;
@@ -101,7 +101,7 @@ Int_t ChannelStyle::getSampleColor(const TString& sample){
 
 
 //_______________________________________________________________________________________
-TString ChannelStyle::getSampleName(const TString& sample){
+TString hf::ChannelStyle::getSampleName(const TString& sample){
     for(unsigned int i = 0; i< m_sampleNames.size(); i++){
       m_logger << kVERBOSE << "getSampleName: requested sample name: "<<sample  
 	       << ", defined m_sampleNames[" << i << "]="<< m_sampleNames[i] << GEndl;
@@ -116,7 +116,7 @@ TString ChannelStyle::getSampleName(const TString& sample){
 
 
 //_______________________________________________________________________________________
-void ChannelStyle::Print(){
+void hf::ChannelStyle::Print(){
     m_logger << kINFO << "*** ChannelStyle: " << m_name << " ***" << GEndl;
         
     m_logger << kINFO << " sampleNames: ";

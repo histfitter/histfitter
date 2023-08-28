@@ -17,29 +17,31 @@
  * LICENSE.                                                                       *
  **********************************************************************************/
 
-#ifndef UTILS_H
-#define UTILS_H
+#ifndef HF_UTILS_H
+#define HF_UTILS_H
 
+// STL include(s)
 #include <map>
 #include <vector>
 #include <string>
 #include <iostream>
 
+// ROOT include(s)
 #include "TString.h"
 #include "TH1.h"
 #include "TH2.h"
 #include "TFile.h"
 #include "TGraphAsymmErrors.h"
-
-
 #include "RooFitResult.h"
 #include "RooArgSet.h"
 #include "RooArgList.h"
-#include "RooExpandedFitResult.h"
-#include "ChannelStyle.h"
 #include "RooStats/HypoTestInverterResult.h"
 
+// HistFitter include(s)
+#include "RooExpandedFitResult.h"
+#include "ChannelStyle.h"
 
+//Forward declarations
 class TMap;
 class TTree;
 
@@ -51,21 +53,23 @@ class RooAbsPdf;
 class RooAbsData;
 class RooSimultaneous;
 class RooCategory;
-class RooPlot;
 class RooMCStudy;
 class FitConfig;
 class RooProdPdf;
-class RooHist;
 class RooCurve;
 class RooRealSumPdf;
+class RooHist;
+class RooPlot;
 
 namespace RooStats {
   class HypoTestResult;
   class ModelConfig;
 }
 
-namespace Util
-{
+namespace hf{
+   
+namespace Util{
+
 
   extern bool deactivateBinnedLikelihood;
 
@@ -77,7 +81,7 @@ namespace Util
   /**
      Wrute RooWorkspace to file
   */
-  void WriteWorkspace(RooWorkspace* w, TString outFileName="./results/BkgForumTest_combined_ComHistoSysOverConst_model.root", TString suffix = "");
+  void WriteWorkspace(RooWorkspace* w, TString outFileName="results/BkgForumTest_combined_ComHistoSysOverConst_model.root", TString suffix = "");
   /**
      Load snapshot
   */
@@ -190,7 +194,7 @@ namespace Util
      @param style Instance of ChannelStyle class defined for the FitConfig fc, that carries info on plot colors etc
   */
   void AddComponentsToPlot(RooWorkspace* w,FitConfig* fc, RooPlot* frame, RooAbsPdf* regionPdf,
-			   RooRealVar* obsRegion, TString regionCatLabel, ChannelStyle style);
+			   RooRealVar* obsRegion, TString regionCatLabel, hf::ChannelStyle style);
 
   /**
      Function to plot each component(=sample) separately in each region
@@ -251,6 +255,7 @@ namespace Util
      @param regionVar RooRealVar pointer to the observable for this region
      @param makePull Boolean flag to set whether a ratio or pull is returned
   */
+
   RooHist* MakeRatioOrPullHist(RooAbsData *regionData, RooAbsPdf *regionPdf, RooRealVar *regionVar, bool makePull=false);
 
   /**
@@ -494,7 +499,7 @@ namespace Util
  */
  void getExpectedCLsFromHypoTest(RooStats::HypoTestInverterResult* HTIR, int index, double *q);
 
+}  // namespace Util
+}  // namespace hf
 
-}
-
-# endif
+#endif  //HF_UTILS_H

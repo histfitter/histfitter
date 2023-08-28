@@ -19,7 +19,10 @@
 """
 
 from ROOT import THStack, TLegend, TCanvas, TFile, std, TH1D, TH2D, gStyle
-from ROOT import ConfigMgr, FitConfig, ChannelStyle #this module comes from gSystem.Load("libSusyFitter.so")
+from ROOT import hf
+ConfigMgr = hf.ConfigMgr
+FitConfig = hf.FitConfig
+ChannelStyle = hf.ChannelStyle
 from ROOT import gROOT, TObject, TProof
 from prepareHistos import PrepareHistos
 from copy import copy, deepcopy

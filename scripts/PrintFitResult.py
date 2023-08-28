@@ -17,14 +17,17 @@
 """
 
 from ROOT import gROOT,gSystem,gDirectory
-gSystem.Load("libSusyFitter.so")
-from ROOT import ConfigMgr,FitConfig 
+gSystem.Load("libHistFitter.so")
+from ROOT import hf
+ConfigMgr = hf.ConfigMgr
+FitConfig = hf.FitConfig
+Util = hf.Util
+RooExpandedFitResult = hf.RooExpandedFitResult
 gROOT.Reset()
 
 from ROOT import TFile, RooWorkspace, TObject, TString, RooAbsReal, RooRealVar, RooFitResult, RooDataSet, RooAddition, RooArgSet,RooAbsData,RooRandom 
-from ROOT import Util, TMath
+from ROOT import TMath
 from ROOT import RooFit
-from ROOT import RooExpandedFitResult
     
 import os
 import sys

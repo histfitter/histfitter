@@ -14,13 +14,14 @@
  * LICENSE.                                                                       *
  **********************************************************************************
 """
+#ROOT imports 
+import ROOT
 
+#HistFitter imports
 from configManager import configMgr
 from configWriter import fitConfig,Measurement,Channel,Sample
 from systematic import Systematic
 from logger import Logger,INFO
-
-import ROOT
 
 analysis_name = "BackupCacheExample"
 
@@ -32,12 +33,12 @@ configMgr.testStatType=3
 configMgr.writeXML = True
 
 configMgr.analysisName = analysis_name
-configMgr.histCacheFile = "data/"+analysis_name+".root"
-configMgr.outputFileName = "results/"+analysis_name+"_Output.root"
+configMgr.histCacheFile = f"data/{analysis_name}/{analysis_name}.root"
+configMgr.outputFileName = f"results/{analysis_name}/Output.root"
 
 configMgr.useCacheToTreeFallback = False
 configMgr.useHistBackupCacheFile = True
-configMgr.histBackupCacheFile =  "data/backupCache_example.root"
+configMgr.histBackupCacheFile =  f"data/{analysis_name}/backupCache_example.root"
 
 configMgr.inputLumi = 36.07456
 configMgr.outputLumi = 36.07456

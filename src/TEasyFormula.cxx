@@ -11,44 +11,48 @@
  *                                                                                *
  **********************************************************************************/
 
-#include "TEasyFormula.h"
-#include "TMsgLogger.h"
-
-#include "TString.h"
+// STL include(s)
 #include <stdio.h>
 #include <iostream>
 #include <stdlib.h>
 #include <algorithm>
 
-ClassImp(TEasyFormula)
+// ROOT include(s)
+#include "TString.h"
+
+// HistFitter include(s)
+#include "TEasyFormula.h"
+#include "TMsgLogger.h"
+
+ClassImp(hf::TEasyFormula)
 
 //_____________________________________________________________________________
-TEasyFormula::TEasyFormula()
+hf::TEasyFormula::TEasyFormula()
 : TFormula(), m_logger("TEasyFormula") {
 }
 
 
 //_____________________________________________________________________________
-TEasyFormula::TEasyFormula(const char* expression)
+hf::TEasyFormula::TEasyFormula(const char* expression)
     : TFormula(), m_logger("TEasyFormula") {
     (void) this->SetFormula(expression);
 }
 
 
 //_____________________________________________________________________________
-TEasyFormula::TEasyFormula(const char* name,const char* expression) 
+hf::TEasyFormula::TEasyFormula(const char* name,const char* expression) 
     : TFormula(name,"1"), m_logger("TEasyFormula")  {
     (void) this->SetFormula(expression);
 }
 
 
 //_____________________________________________________________________________
-TEasyFormula::~TEasyFormula() {
+hf::TEasyFormula::~TEasyFormula() {
 }
 
 
 //_____________________________________________________________________________
-TEasyFormula::TEasyFormula(const TEasyFormula& other)
+hf::TEasyFormula::TEasyFormula(const TEasyFormula& other)
     : TFormula(other)
     , m_expr(other.m_expr)
     , m_par(other.m_par)
@@ -59,7 +63,7 @@ TEasyFormula::TEasyFormula(const TEasyFormula& other)
 
 
 //_____________________________________________________________________________
-TEasyFormula& TEasyFormula::operator=(const TEasyFormula& other) {
+hf::TEasyFormula& hf::TEasyFormula::operator=(const TEasyFormula& other) {
     if (&other == this) {
         return *this;
     }
@@ -75,7 +79,7 @@ TEasyFormula& TEasyFormula::operator=(const TEasyFormula& other) {
 }
 
 //_____________________________________________________________________________
-Int_t TEasyFormula::SetFormula(const char *expression) {
+Int_t hf::TEasyFormula::SetFormula(const char *expression) {
     m_par.clear();
     m_stod.clear();
     m_itos.clear();
@@ -87,7 +91,7 @@ Int_t TEasyFormula::SetFormula(const char *expression) {
 
 
 //_____________________________________________________________________________
-void TEasyFormula::SetValue(const TString& name, const double& value) {
+void hf::TEasyFormula::SetValue(const TString& name, const double& value) {
     if ( m_stod.find(name)==m_stod.end() ) {
         TString newname(name);
         (void) this->DefinedVariable(newname); // define new variable
@@ -97,7 +101,7 @@ void TEasyFormula::SetValue(const TString& name, const double& value) {
 
 
 //_____________________________________________________________________________
-Double_t TEasyFormula::DefinedValue(Int_t code) {
+Double_t hf::TEasyFormula::DefinedValue(Int_t code) {
   /* Interface to TFormula, return value defined by object with id 'code'
    * Object ids are mapped from object names by method DefinedVariable()
    * Return current value for variable indicated by internal reference code
@@ -112,7 +116,7 @@ Double_t TEasyFormula::DefinedValue(Int_t code) {
 
 
 //_____________________________________________________________________________
-Int_t TEasyFormula::DefinedVariable(TString &name, int& action) {
+Int_t hf::TEasyFormula::DefinedVariable(TString &name, int& action) {
   /* Interface to TFormula. If name passed by TFormula is recognized
    * as one of our RooAbsArg servers, return a unique id integer
    * that represent this variable.
@@ -125,7 +129,7 @@ Int_t TEasyFormula::DefinedVariable(TString &name, int& action) {
 
 
 //_____________________________________________________________________________
-Int_t TEasyFormula::DefinedVariable(TString &name) {
+Int_t hf::TEasyFormula::DefinedVariable(TString &name) {
   /* Interface to TFormula. If name passed by TFormula is recognized
    * as one of our RooAbsArg servers, return a unique id integer
    * that represent this variable.
@@ -150,19 +154,19 @@ Int_t TEasyFormula::DefinedVariable(TString &name) {
 
 
 //_____________________________________________________________________________
-void TEasyFormula::Summary() {
+void hf::TEasyFormula::Summary() {
     m_logger << kINFO << "Formula : " << m_expr << GEndl;
 }
 
 
 //_____________________________________________________________________________
-Bool_t TEasyFormula::Contains(const TString& parname) const {
+Bool_t hf::TEasyFormula::Contains(const TString& parname) const {
     return (m_stod.find(parname)!=m_stod.end());
 }
 
 
 //_____________________________________________________________________________
-Bool_t TEasyFormula::Contains(const std::vector<TString>& parList) const {
+Bool_t hf::TEasyFormula::Contains(const std::vector<TString>& parList) const {
     if (parList.empty()) { return kTRUE; }
 
     Bool_t found(kFALSE);

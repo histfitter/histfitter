@@ -12,12 +12,10 @@
  *                                                                                *
  * See corresponding .h file for author and license information                   *
  **********************************************************************************/
-
-#include "CombineWorkSpaces.h"
-#include "CombinationUtils.h"
-#include "Utils.h"
+// STL include(s):
 #include <stdio.h>
 
+// ROOT include(s)
 #include "RooArgSet.h"
 #include "RooAbsPdf.h"
 #include "RooRealVar.h"
@@ -44,19 +42,29 @@
 #include "TEasyFormula.h"
 #include "RooMCStudy.h"
 #include "RooFitResult.h"
-#include "TMsgLogger.h"
-
 #include "Roo1DTable.h"
 
-using namespace std;
-using namespace RooFit ;
-using namespace RooStats ;
+// HistFitter include(s)
+#include "CombineWorkSpaces.h"
+#include "CombinationUtils.h"
+#include "Utils.h"
+#include "TMsgLogger.h"
 
-static TMsgLogger CombineWorkSpacesLogger("CombineWorkSpaces");
+using namespace std;
+using namespace RooFit;
+using namespace RooStats;
+
+using hf::kDEBUG;
+using hf::kINFO;
+using hf::kERROR;
+using hf::kFATAL;
+
+
+static hf::TMsgLogger CombineWorkSpacesLogger("CombineWorkSpaces");
 
 
 //________________________________________________________________________________________________
-void clearVec( std::vector<RooWorkspace*>& wsVec ) {
+void hf::clearVec( std::vector<RooWorkspace*>& wsVec ) {
     //std::vector<RooWorkspace*>::iterator wItr=wsVec.begin(), wEnd=wsVec.end();
     //for (; wItr!=wEnd; ++wItr) {
     for(auto *wItr: wsVec) {
@@ -81,7 +89,7 @@ std::vector<RooWorkspace*> CollectWorkspaces( const std::map< TString,TString >&
     for(auto const &wfItr : fwnameMap) {
         //for (int i=0; wfItr!=wfEnd; ++wfItr, ++i) {
         ++i;
-        RooWorkspace* w = Util::GetWorkspaceFromFile( wfItr.first.Data(), wfItr.second );
+        RooWorkspace* w = hf::Util::GetWorkspaceFromFile( wfItr.first.Data(), wfItr.second );
         if ( w==0 ) {
             CombineWorkSpacesLogger << kFATAL << "Cannot open workspace <" << wfItr.second << "> in file <" << wfItr.second << ">" << GEndl;
         }
@@ -164,7 +172,7 @@ std::map< TString,TString > GetMatchingWorkspaces( const TString& infile, const 
 
     file->cd();
 
-    TEasyFormula formula( cutStr.Data() );
+    hf::TEasyFormula formula( cutStr.Data() );
 
     TList* list = file->GetListOfKeys();
     CombineWorkSpacesLogger << kDEBUG << " 5 list : "  << GEndl;
@@ -218,7 +226,7 @@ std::map< TString,TString > GetMatchingWorkspaces( const TString& infile, const 
 
         if ((ORTree!=0) && fID>=0) { // logical orring
             float searchVal(-1);
-            bool found = Util::findValueFromTree(ORTree,"fID",searchVal,wsidvec,wsarg);
+            bool found = hf::Util::findValueFromTree(ORTree,"fID",searchVal,wsidvec,wsarg);
             if (!found)
                 continue;
             if ( fID!=static_cast<int>(searchVal) )
@@ -368,6 +376,3 @@ std::map<std::string, float> ParseWorkspaceID( const TString& wid ) {
     delete iArr;
     return wconf;
 }
-
-
-

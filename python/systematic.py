@@ -18,7 +18,9 @@
 """
 
 from ROOT import THStack,TLegend,TCanvas,TFile,TH1D
-from ROOT import ConfigMgr,FitConfig  #from gSystem.Load("libSusyFitter.so")
+from ROOT import hf
+ConfigMgr = hf.ConfigMgr
+FitConfig = hf.FitConfig
 from histogramsManager import histMgr
 from copy import deepcopy
 from logger import Logger

@@ -16,15 +16,19 @@
  * LICENSE.                                                                       *
  **********************************************************************************/
 
-#ifndef ROOEXPANDEDFITRESULT_H
-#define ROOEXPANDEDFITRESULT_H
+#ifndef HF_ROOEXPANDEDFITRESULT_H
+#define HF_ROOEXPANDEDFITRESULT_H
 
+// STL include(s)
+#include <iostream>
+#include <vector>
+
+// ROOT include(s)
 #include "TString.h"
 #include "RooFitResult.h"
 #include "RooArgList.h"
 
-#include <iostream>
-#include <vector>
+namespace hf{
 
 class RooExpandedFitResult: public RooFitResult{
 
@@ -37,4 +41,6 @@ class RooExpandedFitResult: public RooFitResult{
         ClassDef(RooExpandedFitResult,1) // Container class for expanded fit result
 };
 
-#endif
+}  // namespace hf
+
+#endif  // HF_ROOEXPANDEDFITRESULT_H

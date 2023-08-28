@@ -16,58 +16,19 @@
  *                                                                                *
  * See corresponding .h file for author and license information                   *
  **********************************************************************************/
+
+// STL include(s)
+#include <iostream>
+#include <fstream>
+#include <vector>
 #include <memory>
 
-#include "Utils.h"
-#include "ConfigMgr.h"
-#include "TMsgLogger.h"
-#include "ChannelStyle.h"
-#include "HistogramPlotter.h"
-
+// ROOT include(s)
 #include "TMap.h"
 #include "TString.h"
 #include "TObjString.h"
 #include "TObjArray.h"
-
-#include "RooArgSet.h"
 #include "TIterator.h"
-#include "RooAbsReal.h"
-#include "RooAbsPdf.h"
-#include "RooAbsArg.h"
-#include "RooFitResult.h"
-#include "RooRealVar.h"
-#include "RooWorkspace.h"
-#include "RooSimultaneous.h"
-#include "RooProdPdf.h"
-#include "RooAddPdf.h"
-#include "RooDataSet.h"
-#include "RooPlot.h"
-#include "RooProduct.h"
-#include "RooMCStudy.h"
-#include "Roo1DTable.h"
-#include "RooCategory.h"
-#include "RooRealSumPdf.h"
-#include "RooGaussian.h"
-#include "RooCurve.h"
-#include "RooHist.h"
-#include "RooMinimizer.h"
-#include "RooConstVar.h"
-#include "RooNumIntConfig.h"
-#include "RooMinimizer.h"
-#include "RooFormulaVar.h"
-#include "RooNLLVar.h"
-
-#include "RooStats/ModelConfig.h"
-#include "RooStats/ProfileLikelihoodTestStat.h"
-#include "RooStats/ProfileLikelihoodCalculator.h"
-#include "RooStats/LikelihoodInterval.h"
-#include "RooStats/ToyMCSampler.h"
-#include "RooStats/SamplingDistPlot.h"
-#include "RooStats/HypoTestInverterResult.h"
-#include "RooStats/HypoTestResult.h"
-#include "RooStats/RooStatsUtils.h"
-#include "RooStats/HistFactory/PiecewiseInterpolation.h"
-
 #include "TAxis.h"
 #include "TArrow.h"
 #include "TF1.h"
@@ -80,7 +41,6 @@
 #include "TPad.h"
 #include "TGaxis.h"
 #include "TStyle.h"
-
 #include "TVectorD.h"
 #include "TFile.h"
 #include "TLine.h"
@@ -88,25 +48,67 @@
 #include "TCanvas.h"
 #include "TLegend.h"
 #include "TLegendEntry.h"
-
 #include "TROOT.h"
 
+#include "RooArgSet.h"
+#include "RooAbsReal.h"
+#include "RooAbsPdf.h"
+#include "RooAbsArg.h"
+#include "RooFitResult.h"
+#include "RooRealVar.h"
+#include "RooWorkspace.h"
+#include "RooSimultaneous.h"
+#include "RooProdPdf.h"
+#include "RooAddPdf.h"
+#include "RooDataSet.h"
+#include "RooProduct.h"
+#include "RooMCStudy.h"
+#include "Roo1DTable.h"
+#include "RooCategory.h"
+#include "RooRealSumPdf.h"
+#include "RooGaussian.h"
+#include "RooCurve.h"
+#include "RooMinimizer.h"
+#include "RooConstVar.h"
+#include "RooNumIntConfig.h"
+#include "RooMinimizer.h"
+#include "RooFormulaVar.h"
+//Legacy code, should be updated.
+#include "RooFitLegacy/RooCatTypeLegacy.h"
 
-#include <iostream>
-#include <fstream>
-#include <vector>
+#include "RooPlot.h" //Needed by RooAbsPdf
+#include "RooHist.h"
+#include "RooNLLVar.h"
+
+#include "RooStats/ModelConfig.h"
+#include "RooStats/ProfileLikelihoodTestStat.h"
+#include "RooStats/ProfileLikelihoodCalculator.h"
+#include "RooStats/LikelihoodInterval.h"
+#include "RooStats/ToyMCSampler.h"
+//#include "RooStats/SamplingDistPlot.h"
+#include "RooStats/HypoTestInverterResult.h"
+#include "RooStats/HypoTestResult.h"
+#include "RooStats/RooStatsUtils.h"
+#include "RooStats/HistFactory/PiecewiseInterpolation.h"
+
+// HistFitter include(s)
+#include "Utils.h"
+#include "ConfigMgr.h"
+#include "TMsgLogger.h"
+#include "ChannelStyle.h"
+#include "HistogramPlotter.h"
 
 using namespace std;
 using namespace RooFit;
 using namespace RooStats;
 
-namespace Util {
-  static TMsgLogger Logger("Util");
+namespace hf::Util {
+  static hf::TMsgLogger Logger("Util");
   bool deactivateBinnedLikelihood = false;
 }
 
 //_____________________________________________________________________________
-double Util::looseToTightVal(const TString& reg, TMap* map){
+double hf::Util::looseToTightVal(const TString& reg, TMap* map){
   double nLMT=((TObjString*)map->GetValue("DATA_DATA_"+reg+"lmt"))->GetString().Atof();
   double nTopTight=((TObjString*)map->GetValue("MC_tt_"+reg))->GetString().Atof();
   double nWTight=((TObjString*)map->GetValue("MC_WZ_"+reg))->GetString().Atof();
@@ -132,7 +134,7 @@ double Util::looseToTightVal(const TString& reg, TMap* map){
 }
 
 //_____________________________________________________________________________
-double Util::looseToTightErr(const TString& reg, TMap* map){
+double hf::Util::looseToTightErr(const TString& reg, TMap* map){
     double nLMT=((TObjString*)map->GetValue("DATA_DATA_"+reg+"lmt"))->GetString().Atof();
     double LtoTeffFake=((TObjString*)map->GetValue("LtoTeffFake_QCD"+reg+"_"+reg+"lmt"))->GetString().Atof();
     double err=sqrt(nLMT)/LtoTeffFake; //incomplete and temporary
@@ -140,7 +142,7 @@ double Util::looseToTightErr(const TString& reg, TMap* map){
 }
 
 //_____________________________________________________________________________
-double Util::getNonQcdVal(const TString& proc, const TString& reg, TMap* map,const TString& opt){
+double hf::Util::getNonQcdVal(const TString& proc, const TString& reg, TMap* map,const TString& opt){
     TString prefix="MC_";
     if(proc=="DATA"){ prefix="DATA_"; }
 
@@ -160,13 +162,13 @@ double Util::getNonQcdVal(const TString& proc, const TString& reg, TMap* map,con
 
 
 //_____________________________________________________________________________
-void Util::GenerateFitAndPlot(TString fcName, TString anaName, Bool_t drawBeforeFit, Bool_t drawAfterFit,
+void hf::Util::GenerateFitAndPlot(TString fcName, TString anaName, Bool_t drawBeforeFit, Bool_t drawAfterFit,
         Bool_t doStackPlots, Bool_t storeSingleFiles, Bool_t storeMergedFile,
         Bool_t plotCorrelationMatrix,
         Bool_t plotSeparateComponents, Bool_t plotNLL, Bool_t minos, TString minosPars,
         Bool_t doFixParameters, TString fixedPars, bool ReduceCorrMatrix, bool noFit, bool plotInterpolation){
 
-    ConfigMgr* mgr = ConfigMgr::getInstance();
+    hf::ConfigMgr* mgr = hf::ConfigMgr::getInstance();
     FitConfig* fc = mgr->getFitConfig(fcName);
 
     Logger << kINFO << " GenerateFitAndPlot for FitConfig = " << fc->m_name << GEndl;
@@ -215,7 +217,7 @@ void Util::GenerateFitAndPlot(TString fcName, TString anaName, Bool_t drawBefore
         return;
     }
 
-    Util::SetInterpolationCode(w,4);
+    hf::Util::SetInterpolationCode(w,4);
     if (not noFit ) {
         // only modify the workspace when actually fitting
         SaveInitialSnapshot(w);
@@ -245,13 +247,13 @@ void Util::GenerateFitAndPlot(TString fcName, TString anaName, Bool_t drawBefore
     if(not noFit) {
         if( mgr->m_seed != 0 && !mgr->m_useAsimovSet){
             // generate a toy dataset
-            Logger << kINFO << " Util::GenerateFitAndPlot() : generating toy MC set for fitting and plotting.      Seed =" << mgr->m_seed << GEndl;
+            Logger << kINFO << " hf::Util::GenerateFitAndPlot() : generating toy MC set for fitting and plotting.      Seed =" << mgr->m_seed << GEndl;
             toyMC = GetToyMC();    // this generates one toy dataset
         } else if (mgr->m_useAsimovSet && mgr->m_seed == 0 ){
-            Logger << kINFO << " Util::GenerateFitAndPlot() : using Asimov set for fitting and plotting." << GEndl;
+            Logger << kINFO << " hf::Util::GenerateFitAndPlot() : using Asimov set for fitting and plotting." << GEndl;
             toyMC = GetAsimovSet(w);  // this returns the asimov set
         } else {
-            Logger << kINFO << " Util::GenerateFitAndPlot()  : using data for fitting and plotting." <<  GEndl;
+            Logger << kINFO << " hf::Util::GenerateFitAndPlot()  : using data for fitting and plotting." <<  GEndl;
         }
     }
 
@@ -280,7 +282,7 @@ void Util::GenerateFitAndPlot(TString fcName, TString anaName, Bool_t drawBefore
 
     // plot before fit
     if (drawBeforeFit) {
-        HistogramPlotter h(w, fc->m_name);
+        hf::HistogramPlotter h(w, fc->m_name);
         h.setAnalysisName(anaName);
         h.setPlotRegions(plotChannels);
         h.setPlotComponents(true);
@@ -320,7 +322,7 @@ void Util::GenerateFitAndPlot(TString fcName, TString anaName, Bool_t drawBefore
 
     // plot after fit
     if (drawAfterFit) {
-        HistogramPlotter h(w, fc->m_name);
+        hf::HistogramPlotter h(w, fc->m_name);
         h.setAnalysisName(anaName);
         h.setPlotRegions(plotChannels);
         h.setPlotComponents(true);
@@ -378,7 +380,7 @@ void Util::GenerateFitAndPlot(TString fcName, TString anaName, Bool_t drawBefore
 ///////////////
 
 //_____________________________________________________________________________
-void Util::GeneratePlots(TString filename, TString anaName, Bool_t drawBeforeFit, Bool_t drawAfterFit, Bool_t plotCorrelationMatrix,
+void hf::Util::GeneratePlots(TString filename, TString anaName, Bool_t drawBeforeFit, Bool_t drawAfterFit, Bool_t plotCorrelationMatrix,
         Bool_t plotSeparateComponents, Bool_t plotNLL, Bool_t minos, TString minosPars,
         Bool_t doFixParameters, TString fixedPars, bool ReduceCorrMatrix){
 
@@ -425,7 +427,7 @@ void Util::GeneratePlots(TString filename, TString anaName, Bool_t drawBeforeFit
         return;
     }
 
-    Util::SetInterpolationCode(w,4);
+    hf::Util::SetInterpolationCode(w,4);
     if (not noFit ) {
         // only modify the workspace when actually fitting
         SaveInitialSnapshot(w);
@@ -455,13 +457,13 @@ void Util::GeneratePlots(TString filename, TString anaName, Bool_t drawBeforeFit
 /*    if(not noFit) {*/
         //if( mgr->m_seed != 0 && !mgr->m_useAsimovSet){
             //// generate a toy dataset
-            //Logger << kINFO << " Util::GenerateFitAndPlot() : generating toy MC set for fitting and plotting.      Seed =" << mgr->m_seed << GEndl;
+            //Logger << kINFO << " hf::Util::GenerateFitAndPlot() : generating toy MC set for fitting and plotting.      Seed =" << mgr->m_seed << GEndl;
             //toyMC = GetToyMC();    // this generates one toy dataset
         //} else if (mgr->m_useAsimovSet && mgr->m_seed == 0 ){
-            //Logger << kINFO << " Util::GenerateFitAndPlot() : using Asimov set for fitting and plotting." << GEndl;
+            //Logger << kINFO << " hf::Util::GenerateFitAndPlot() : using Asimov set for fitting and plotting." << GEndl;
             //toyMC = GetAsimovSet(w);  // this returns the asimov set
         //} else {
-            //Logger << kINFO << " Util::GenerateFitAndPlot()  : using data for fitting and plotting." <<  GEndl;
+            //Logger << kINFO << " hf::Util::GenerateFitAndPlot()  : using data for fitting and plotting." <<  GEndl;
         //}
     /*}*/
 
@@ -550,10 +552,10 @@ void Util::GeneratePlots(TString filename, TString anaName, Bool_t drawBeforeFit
 
 
 //_____________________________________________________________________________
-void Util::SaveInitialSnapshot(RooWorkspace* w){
+void hf::Util::SaveInitialSnapshot(RooWorkspace* w){
 
     if(w==NULL){
-        Logger << kINFO << "Util::SaveInitialSnapshot():   workspace does not exist" << GEndl;
+        Logger << kINFO << "hf::Util::SaveInitialSnapshot():   workspace does not exist" << GEndl;
         return;
     }
 
@@ -566,7 +568,7 @@ void Util::SaveInitialSnapshot(RooWorkspace* w){
       pdf = (RooSimultaneous*) w->pdf("combPdf");
     }
     if(pdf==NULL){
-        Logger << kWARNING << "Util::SaveInitialSnapshot():   not saving the initial snapshot as cannot find pdf (simPdf or combPdf) in workspace" << GEndl;
+        Logger << kWARNING << "hf::Util::SaveInitialSnapshot():   not saving the initial snapshot as cannot find pdf (simPdf or combPdf) in workspace" << GEndl;
         return;
     }
 
@@ -585,7 +587,7 @@ void Util::SaveInitialSnapshot(RooWorkspace* w){
 
 
 //_____________________________________________________________________________
-void Util::LoadSnapshotInWorkspace(RooWorkspace* w,TString snapshot){
+void hf::Util::LoadSnapshotInWorkspace(RooWorkspace* w,TString snapshot){
 
     Bool_t loaded =  w->loadSnapshot(snapshot);
 
@@ -602,7 +604,7 @@ void Util::LoadSnapshotInWorkspace(RooWorkspace* w,TString snapshot){
 
 
 //_____________________________________________________________________________
-void Util::WriteWorkspace(RooWorkspace* w, TString outFileName, TString suffix){
+void hf::Util::WriteWorkspace(RooWorkspace* w, TString outFileName, TString suffix){
 
     if(w==NULL){
         Logger << kERROR << "Workspace not found, not writing workspace to file" << GEndl;
@@ -621,7 +623,7 @@ void Util::WriteWorkspace(RooWorkspace* w, TString outFileName, TString suffix){
 
     w->writeToFile(outFileName.Data());
 
-    Logger << kINFO << " Util::WriteWorkspace():   have written workspace to file " <<  outFileName << GEndl;
+    Logger << kINFO << " hf::Util::WriteWorkspace():   have written workspace to file " <<  outFileName << GEndl;
 
     return;
 }
@@ -635,7 +637,7 @@ void Util::WriteWorkspace(RooWorkspace* w, TString outFileName, TString suffix){
  */
 
 //_____________________________________________________________________________
-RooFitResult* Util::FitPdf( RooWorkspace* w, TString fitRegions, Bool_t lumiConst, RooAbsData* inputData, TString suffix, Bool_t minos, TString minosPars, Bool_t doFixParameters, TString fixedPars)
+RooFitResult* hf::Util::FitPdf( RooWorkspace* w, TString fitRegions, Bool_t lumiConst, RooAbsData* inputData, TString suffix, Bool_t minos, TString minosPars, Bool_t doFixParameters, TString fixedPars)
 {
 
     Logger << kINFO << " ------ Starting FitPdf with parameters:    fitRegions = " <<  fitRegions << GEndl;
@@ -706,14 +708,14 @@ RooFitResult* Util::FitPdf( RooWorkspace* w, TString fitRegions, Bool_t lumiCons
      for (unsigned int j=0; j<fixedParsVector.size(); j++) {
          std::vector<TString> fixedParsPair = Tokens(fixedParsVector[j],":");
          if (fixedParsPair.size() != 2) {
-             Logger << kERROR << " Util::FitPdf() fixing parameters to constant: wrong arguments given: " <<  fixedParsVector[j] << GEndl;
-             Logger << kERROR << " Util::FitPdf() Ignore this and continue." << GEndl;
+             Logger << kERROR << " hf::Util::FitPdf() fixing parameters to constant: wrong arguments given: " <<  fixedParsVector[j] << GEndl;
+             Logger << kERROR << " hf::Util::FitPdf() Ignore this and continue." << GEndl;
              continue;
          }
          RooRealVar* var = (RooRealVar*) w->var(fixedParsPair[0]);
-         if(var==NULL)  Logger << kWARNING << " Util::FitPdf()   could not find parameter(" << fixedParsPair[0] << ") in workspace while trying to fix this parameter" << GEndl;
+         if(var==NULL)  Logger << kWARNING << " hf::Util::FitPdf()   could not find parameter(" << fixedParsPair[0] << ") in workspace while trying to fix this parameter" << GEndl;
          else {
-             Logger << kINFO << " Util::FitPdf() Setting parameter " <<  fixedParsPair[0] << " to constant value " << fixedParsPair[1].Atof() << GEndl;
+             Logger << kINFO << " hf::Util::FitPdf() Setting parameter " <<  fixedParsPair[0] << " to constant value " << fixedParsPair[1].Atof() << GEndl;
              var->setVal(fixedParsPair[1].Atof());
              var->setConstant(kTRUE);
          }
@@ -776,7 +778,7 @@ RooFitResult* Util::FitPdf( RooWorkspace* w, TString fitRegions, Bool_t lumiCons
         std::vector<TString> parsVec = Tokens(minosPars,",");
         for(unsigned int i=0; i<parsVec.size();i++){
             RooRealVar* var = (RooRealVar*) w->var(parsVec[i]);
-            if(var==NULL)  Logger << kWARNING << " Util::FitPdf()   could not find parameter(" << parsVec[i] << ") in workspace while setting up minos" << GEndl;
+            if(var==NULL)  Logger << kWARNING << " hf::Util::FitPdf()   could not find parameter(" << parsVec[i] << ") in workspace while setting up minos" << GEndl;
             else{
                 minosParams->add(*var);
             }
@@ -795,7 +797,7 @@ RooFitResult* Util::FitPdf( RooWorkspace* w, TString fitRegions, Bool_t lumiCons
     RooArgSet* allParams = pdf_FR->getParameters(data_FR);
     RooStats::RemoveConstantParameters(allParams);
 
-    RooStats::ModelConfig* mc = Util::GetModelConfig( w );
+    RooStats::ModelConfig* mc = hf::Util::GetModelConfig( w );
     const RooArgSet* globObs = mc->GetGlobalObservables();
 
     RooAbsReal* nll = (RooNLLVar*) pdf_FR->createNLL(*data_FR, RooFit::GlobalObservables(*globObs), RooFit::Offset(true) );
@@ -819,7 +821,7 @@ RooFitResult* Util::FitPdf( RooWorkspace* w, TString fitRegions, Bool_t lumiCons
     TString minimizer = "Minuit2"; //ROOT::Math::MinimizerOptions::DefaultMinimizerType();
     TString algorithm = ROOT::Math::MinimizerOptions::DefaultMinimizerAlgo();
 
-    Logger << kINFO << "Util::FitPdf()  ........ using " << minimizer << " / " << algorithm << GEndl;
+    Logger << kINFO << "hf::Util::FitPdf()  ........ using " << minimizer << " / " << algorithm << GEndl;
     Logger << kINFO << " with strategy  " << strategy << " and tolerance " << tol << GEndl;
 
 
@@ -895,7 +897,7 @@ RooFitResult* Util::FitPdf( RooWorkspace* w, TString fitRegions, Bool_t lumiCons
 
 //_____________________________________________________________________________
 void
-Util::SetInterpolationCode(RooWorkspace* w, Int_t code)
+hf::Util::SetInterpolationCode(RooWorkspace* w, Int_t code)
 {
     if(w==NULL){
         Logger << kERROR << "Workspace is NULL. Return." << GEndl;
@@ -918,7 +920,7 @@ Util::SetInterpolationCode(RooWorkspace* w, Int_t code)
 
 //_____________________________________________________________________________
 RooAbsData*
-Util::GetAsimovSet( RooWorkspace* inputws  )
+hf::Util::GetAsimovSet( RooWorkspace* inputws  )
 {
     RooWorkspace* w(0);
     if (inputws!=NULL) { w = inputws; }
@@ -941,7 +943,7 @@ Util::GetAsimovSet( RooWorkspace* inputws  )
 
 //_____________________________________________________________________________
     RooAbsData*
-Util::GetToyMC( RooWorkspace* inputws  )
+hf::Util::GetToyMC( RooWorkspace* inputws  )
 {
     RooWorkspace* w(0);
     if (inputws!=NULL) { w = inputws; }
@@ -951,7 +953,7 @@ Util::GetToyMC( RooWorkspace* inputws  )
         return 0;
     }
 
-    RooStats::ModelConfig* mc = Util::GetModelConfig( w );
+    RooStats::ModelConfig* mc = hf::Util::GetModelConfig( w );
     if (mc==NULL) {
         Logger << kERROR << "No model config found. Return." << GEndl;
         return 0;
@@ -975,7 +977,7 @@ Util::GetToyMC( RooWorkspace* inputws  )
         return 0;
     }
 
-    Logger << kINFO << "Util::GetToyMC() : now generating toy MC set with # events : " << data->sumEntries() << GEndl;
+    Logger << kINFO << "hf::Util::GetToyMC() : now generating toy MC set with # events : " << data->sumEntries() << GEndl;
 
     RooAbsData* toymc = pdf->generate( *obsSet, RooFit::NumEvents(int(data->sumEntries())), RooFit::AutoBinned(false) );
 
@@ -983,7 +985,7 @@ Util::GetToyMC( RooWorkspace* inputws  )
 }
 
 //_____________________________________________________________________________________________________________________________________
-vector<TString> Util::GetRegionsVec(TString regions, RooCategory* regionCat){
+vector<TString> hf::Util::GetRegionsVec(TString regions, RooCategory* regionCat){
 
     std::vector<TString> regionsVec;
     std::vector<TString> regionsAllVec = TokensALL(regionCat);
@@ -1006,10 +1008,10 @@ vector<TString> Util::GetRegionsVec(TString regions, RooCategory* regionCat){
 
 
 //_____________________________________________________________________________________________________________________________________
-void Util::DecomposeWS(const char* infile, const char* wsname, const char* outfile)
+void hf::Util::DecomposeWS(const char* infile, const char* wsname, const char* outfile)
 {
 
-    Logger << kINFO << " ------ Util::DecomposeWS with parameters:   infile " << infile << "  wsname = " << wsname << "  outfile = " << outfile  << GEndl;
+    Logger << kINFO << " ------ hf::Util::DecomposeWS with parameters:   infile " << infile << "  wsname = " << wsname << "  outfile = " << outfile  << GEndl;
 
     TString fileName(infile);
     if (fileName.IsNull()) {
@@ -1089,9 +1091,9 @@ void Util::DecomposeWS(const char* infile, const char* wsname, const char* outfi
 
 
 //__________________________________________________________________________________________________________________________________________________________
-void Util::PlotPdfWithComponents(RooWorkspace* w, TString fcName, TString anaName, TString plotRegions, TString outputPrefix, RooFitResult* rFit, RooAbsData* inputData)
+void hf::Util::PlotPdfWithComponents(RooWorkspace* w, TString fcName, TString anaName, TString plotRegions, TString outputPrefix, RooFitResult* rFit, RooAbsData* inputData)
 {
-    HistogramPlotter h(w, fcName);
+    hf::HistogramPlotter h(w, fcName);
     h.setAnalysisName(anaName);
     h.setPlotRegions(plotRegions);
     h.setPlotComponents(true);
@@ -1105,7 +1107,7 @@ void Util::PlotPdfWithComponents(RooWorkspace* w, TString fcName, TString anaNam
 }
 
 //_____________________________________________________________________________________________________________________________________
-void Util::PlotSeparateComponents(RooWorkspace* w,TString fcName, TString anaName, TString plotRegions,TString outputPrefix, RooFitResult* rFit, RooAbsData* inputData)
+void hf::Util::PlotSeparateComponents(RooWorkspace* w,TString fcName, TString anaName, TString plotRegions,TString outputPrefix, RooFitResult* rFit, RooAbsData* inputData)
 {
     if(rFit==NULL){
         Logger << kWARNING << " Running PlotSeparateComponents() without a RooFitResult is pointless, I'm done" << GEndl ;
@@ -1113,7 +1115,7 @@ void Util::PlotSeparateComponents(RooWorkspace* w,TString fcName, TString anaNam
     }
 
     Bool_t plotComponents=true;
-    ConfigMgr* mgr = ConfigMgr::getInstance();
+    hf::ConfigMgr* mgr = hf::ConfigMgr::getInstance();
     FitConfig* fc = mgr->getFitConfig(fcName);
 
     Logger << kINFO << " ------ Starting PlotSeparateComponents with parameters:   analysisName = " << fcName << GEndl;
@@ -1144,7 +1146,7 @@ void Util::PlotSeparateComponents(RooWorkspace* w,TString fcName, TString anaNam
             RooAbsPdf* regionPdf = (RooAbsPdf*) pdf->getPdf(regionCatLabel.Data());
             TString dataCatLabel = Form("channelCat==channelCat::%s",regionCatLabel.Data());
             RooAbsData* regionData = (RooAbsData*) data->reduce(dataCatLabel.Data());
-            ChannelStyle style = fc->getChannelStyle(regionCatLabel);
+            hf::ChannelStyle style = fc->getChannelStyle(regionCatLabel);
             if(regionPdf==NULL || regionData==NULL){
                 Logger << kERROR << " Either the Pdf or the Dataset do not have an appropriate state for the region = " << regionCatLabel << ", check the Workspace file" << GEndl;
                 Logger << kERROR << " regionPdf = " << regionPdf << "   regionData = " << regionData << GEndl;
@@ -1217,7 +1219,7 @@ void Util::PlotSeparateComponents(RooWorkspace* w,TString fcName, TString anaNam
 
 
 //_____________________________________________________________________________________________________________________________________
-void Util::PlotNLL(RooWorkspace* w, RooFitResult* rFit, Bool_t plotPLL, TString anaName, TString outputPrefix, RooAbsData* inputData, TString plotPars, TString fitRegions, Bool_t lumiConst)
+void hf::Util::PlotNLL(RooWorkspace* w, RooFitResult* rFit, Bool_t plotPLL, TString anaName, TString outputPrefix, RooAbsData* inputData, TString plotPars, TString fitRegions, Bool_t lumiConst)
 {
     if(rFit==NULL){
         Logger << kWARNING << " Running PlotNLL() without a RooFitResult is pointless, I'm done" << GEndl ;
@@ -1308,7 +1310,7 @@ void Util::PlotNLL(RooWorkspace* w, RooFitResult* rFit, Bool_t plotPLL, TString 
         std::vector<TString> parsVec = Tokens(plotPars,",");
         for(unsigned int i=0; i<parsVec.size();i++){
             RooRealVar* var = (RooRealVar*) w->var(parsVec[i]);
-            if(var==NULL)  Logger << kWARNING << " Util::PlotNLL() could not find parameter(" << parsVec[i] << ") in workspace while setting up minos" << GEndl;
+            if(var==NULL)  Logger << kWARNING << " hf::Util::PlotNLL() could not find parameter(" << parsVec[i] << ") in workspace while setting up minos" << GEndl;
             else{
                 plotParams->add(*var);
             }
@@ -1318,7 +1320,7 @@ void Util::PlotNLL(RooWorkspace* w, RooFitResult* rFit, Bool_t plotPLL, TString 
     // Get all parameters of result
     RooArgList  fpf =  rFit->floatParsFinal();
 
-    RooStats::ModelConfig* mc = Util::GetModelConfig( w );
+    RooStats::ModelConfig* mc = hf::Util::GetModelConfig( w );
     const RooArgSet* globObs = mc->GetGlobalObservables();
 
     // Create Log Likelihood
@@ -1329,10 +1331,10 @@ void Util::PlotNLL(RooWorkspace* w, RooFitResult* rFit, Bool_t plotPLL, TString 
 
     unsigned int numPars = fpf.getSize();
     if(numPars<1){
-        Logger << kWARNING << "Util::PlotNLL rFit contains no floating parameters" << GEndl;
+        Logger << kWARNING << "hf::Util::PlotNLL rFit contains no floating parameters" << GEndl;
         return;
     }
-    Logger << kINFO << "Util::PlotNLL rFit contains no floating parameters: " << numParsP << GEndl;
+    Logger << kINFO << "hf::Util::PlotNLL rFit contains no floating parameters: " << numParsP << GEndl;
 
     TCanvas* canVec[numPars];
 
@@ -1490,7 +1492,7 @@ void Util::PlotNLL(RooWorkspace* w, RooFitResult* rFit, Bool_t plotPLL, TString 
 }
 
 //_____________________________________________________________________________
-TH2D* Util::PlotCorrelationMatrix(RooFitResult* rFit, TString anaName,  bool ReduceMatrix){
+TH2D* hf::Util::PlotCorrelationMatrix(RooFitResult* rFit, TString anaName,  bool ReduceMatrix){
 
 
     if(rFit==NULL){
@@ -1633,8 +1635,8 @@ TH2D* Util::PlotCorrelationMatrix(RooFitResult* rFit, TString anaName,  bool Red
 }
 
 //_____________________________________________________________________________
-TH2D* Util::GetCorrelations(RooFitResult* rFit, double threshold, TString anaName) {
-    TH2D* h_corr = Util::PlotCorrelationMatrix(rFit, anaName);
+TH2D* hf::Util::GetCorrelations(RooFitResult* rFit, double threshold, TString anaName) {
+    TH2D* h_corr = hf::Util::PlotCorrelationMatrix(rFit, anaName);
 
     unsigned int nBinsX = h_corr->GetNbinsX();
     unsigned int nBinsY = h_corr->GetNbinsY();
@@ -1655,7 +1657,7 @@ TH2D* Util::GetCorrelations(RooFitResult* rFit, double threshold, TString anaNam
 
 
 //_____________________________________________________________________________
-vector<TString> Util::Tokens(TString aline,TString aDelim)
+vector<TString> hf::Util::Tokens(TString aline,TString aDelim)
 {
     Int_t i;
     TObjArray* InObjArray;
@@ -1676,18 +1678,18 @@ vector<TString> Util::Tokens(TString aline,TString aDelim)
 
 
 //_____________________________________________________________________________
-vector<TString> Util::TokensALL(RooCategory* cat)
+vector<TString> hf::Util::TokensALL(RooCategory* cat)
 {
 
     vector<TString> OutStringVec;
     OutStringVec.clear();
+    //Legacy RooCatType use
     TIterator* iter = cat->typeIterator() ;
     RooCatType* catType ;
     while( (catType = (RooCatType*) iter->Next())) {
         TString regionCatLabel = catType->GetName();
         OutStringVec.push_back(regionCatLabel);
     }
-
     return OutStringVec;
 
 }
@@ -1695,7 +1697,7 @@ vector<TString> Util::TokensALL(RooCategory* cat)
 
 
 //__________________________________________________________________________________________________________________________________________________________
-Double_t Util::GetComponentFrac(RooWorkspace* w, const char* Component, const char* RRSPdfName, RooRealVar* observable){
+Double_t hf::Util::GetComponentFrac(RooWorkspace* w, const char* Component, const char* RRSPdfName, RooRealVar* observable){
 
     // Components are now the shape (func) * scaleFactor (coef)
     TString coefName = TString(Component).ReplaceAll("_shapes", "_scaleFactors");
@@ -1727,7 +1729,7 @@ Double_t Util::GetComponentFrac(RooWorkspace* w, const char* Component, const ch
 
 
 //________________________________________________________________________________________________
-RooWorkspace* Util::GetWorkspaceFromFile( const TString& infile, const TString& wsname ) {
+RooWorkspace* hf::Util::GetWorkspaceFromFile( const TString& infile, const TString& wsname ) {
     TFile* file = TFile::Open(infile.Data(), "READ");
     if (!file || file->IsZombie()) {
         Logger << kERROR << "Cannot open file: " << infile << GEndl;
@@ -1760,7 +1762,7 @@ RooWorkspace* Util::GetWorkspaceFromFile( const TString& infile, const TString& 
 
 
 //________________________________________________________________________________________________
-RooStats::ModelConfig* Util::GetModelConfig( const RooWorkspace* w, const TString& mcName  ) {
+RooStats::ModelConfig* hf::Util::GetModelConfig( const RooWorkspace* w, const TString& mcName  ) {
     if (w==0) {
         Logger << kERROR << "Workspace is a null pointer." << GEndl;
         return NULL;
@@ -1784,14 +1786,14 @@ RooStats::ModelConfig* Util::GetModelConfig( const RooWorkspace* w, const TStrin
 
 //________________________________________________________________________________________________
     RooRealVar*
-Util::GetPOI( const RooWorkspace* w  )
+hf::Util::GetPOI( const RooWorkspace* w  )
 {
     if(w==0){
         Logger << kERROR << "Input workspace is null!" << GEndl;
         return NULL;
     }
 
-    RooStats::ModelConfig* mc = Util::GetModelConfig(w);
+    RooStats::ModelConfig* mc = hf::Util::GetModelConfig(w);
     if(mc==0){
         Logger << kERROR << "ModelConfig is null!" << GEndl;
         return NULL;
@@ -1806,7 +1808,7 @@ Util::GetPOI( const RooWorkspace* w  )
 
 //________________________________________________________________________________________________
     RooFitResult*
-Util::doFreeFit( RooWorkspace* w, RooDataSet* inputdata, const bool& verbose, const bool& resetAfterFit, bool hesse, Bool_t minos, TString minosPars )
+hf::Util::doFreeFit( RooWorkspace* w, RooDataSet* inputdata, const bool& verbose, const bool& resetAfterFit, bool hesse, Bool_t minos, TString minosPars )
 {
     // fit to reset the workspace
 
@@ -1826,7 +1828,7 @@ Util::doFreeFit( RooWorkspace* w, RooDataSet* inputdata, const bool& verbose, co
         }
     }
 
-    RooStats::ModelConfig* mc = Util::GetModelConfig(w);
+    RooStats::ModelConfig* mc = hf::Util::GetModelConfig(w);
 
     if(mc==0){
         Logger << kERROR << "ModelConfig is null!" << GEndl;
@@ -1874,7 +1876,7 @@ Util::doFreeFit( RooWorkspace* w, RooDataSet* inputdata, const bool& verbose, co
       std::vector<TString> parsVec = Tokens(minosPars,",");
       for(unsigned int i=0; i<parsVec.size();i++){
         RooRealVar* var = (RooRealVar*) w->var(parsVec[i]);
-        if(var==NULL)  Logger << kWARNING << " Util::doFreeFit()   could not find parameter(" << parsVec[i] << ") in workspace while setting up minos" << GEndl;
+        if(var==NULL)  Logger << kWARNING << " hf::Util::doFreeFit()   could not find parameter(" << parsVec[i] << ") in workspace while setting up minos" << GEndl;
         else{
           minosParams->add(*var);
         }
@@ -1905,7 +1907,7 @@ Util::doFreeFit( RooWorkspace* w, RooDataSet* inputdata, const bool& verbose, co
     // require covQual = 3 from any fit while retrying?
     bool requireGoodCovQual = true;
 
-    Logger << kINFO << "Util::doFreeFit()  ........ using " << minimizer << " / " << algorithm
+    Logger << kINFO << "hf::Util::doFreeFit()  ........ using " << minimizer << " / " << algorithm
         << " with strategy  " << strategy << " and tolerance " << tol << GEndl;
 
     for (int tries = 1, maxtries = 5; tries <= maxtries; ++tries) {
@@ -1991,14 +1993,14 @@ Util::doFreeFit( RooWorkspace* w, RooDataSet* inputdata, const bool& verbose, co
 
 //________________________________________________________________________________________________
     RooMCStudy*
-Util::GetMCStudy( const RooWorkspace* w )
+hf::Util::GetMCStudy( const RooWorkspace* w )
 {
     if (w==0) {
         Logger << kERROR << "Input workspace is null. Return." << GEndl;
         return NULL;
     }
 
-    RooStats::ModelConfig* mc = Util::GetModelConfig(w);
+    RooStats::ModelConfig* mc = hf::Util::GetModelConfig(w);
 
     if(mc==0){
         Logger << kERROR << "ModelConfig is null!" << GEndl;
@@ -2023,7 +2025,7 @@ Util::GetMCStudy( const RooWorkspace* w )
 
 //________________________________________________________________________________________________
 // ATLAS specific - FIXME ; remove for public release
-void Util::ATLASLabel(Double_t x,Double_t y,const char* text,Color_t color)
+void hf::Util::ATLASLabel(Double_t x,Double_t y,const char* text,Color_t color)
 {
 
     TLatex l;
@@ -2046,7 +2048,7 @@ void Util::ATLASLabel(Double_t x,Double_t y,const char* text,Color_t color)
 
 
 //________________________________________________________________________________________________
-void Util::AddText(Double_t x,Double_t y,char* text,Color_t color)
+void hf::Util::AddText(Double_t x,Double_t y,char* text,Color_t color)
 {
 
     TLatex l;
@@ -2065,7 +2067,7 @@ void Util::AddText(Double_t x,Double_t y,char* text,Color_t color)
     }
 }
 
-void Util::AddTextLabel(Double_t x, Double_t y, const char* text, Color_t color)
+void hf::Util::AddTextLabel(Double_t x, Double_t y, const char* text, Color_t color)
 {
 
     TLatex l;
@@ -2085,7 +2087,7 @@ void Util::AddTextLabel(Double_t x, Double_t y, const char* text, Color_t color)
 }
 
 //_____________________________________________________________________________
-RooAbsReal* Util::GetComponent(RooWorkspace* w, TString component, TString region, bool exactRegionName, TString rangeName){
+RooAbsReal* hf::Util::GetComponent(RooWorkspace* w, TString component, TString region, bool exactRegionName, TString rangeName){
 
     std::vector<TString> componentVec = Tokens(component,",");
     if(componentVec.size() <1) { Logger << kWARNING << " componentVec.size() < 1, for components = " << component << GEndl; }
@@ -2137,7 +2139,7 @@ RooAbsReal* Util::GetComponent(RooWorkspace* w, TString component, TString regio
     }
 
     if (compFuncList.getSize()==0 || compCoefList.getSize()==0 || compCoefList.getSize()!=compFuncList.getSize()){
-        Logger << kERROR << " Something wrong with compFuncList or compCoefList in Util::GetComponent(w," << component << "," << region
+        Logger << kERROR << " Something wrong with compFuncList or compCoefList in hf::Util::GetComponent(w," << component << "," << region
             << ") " << GEndl << "         compFuncList.getSize() = " << compFuncList.getSize() << " compCoefList.getSize() = " << compCoefList.getSize() << GEndl;
         return NULL;
     }
@@ -2149,7 +2151,7 @@ RooAbsReal* Util::GetComponent(RooWorkspace* w, TString component, TString regio
 
     RooRealSumPdf* compRRS = new RooRealSumPdf(Form("RRS_region_%s_%s",region.Data(),compName.Data()),Form("RRS_region_%s_%s",region.Data(),compName.Data()),compFuncList,compCoefList);
     if(!compRRS){
-        Logger << kERROR << " Cannot create a RooRealSumPdf in Util::GetComponent() "<< GEndl;
+        Logger << kERROR << " Cannot create a RooRealSumPdf in hf::Util::GetComponent() "<< GEndl;
         return NULL;
     }
 
@@ -2188,7 +2190,7 @@ RooAbsReal* Util::GetComponent(RooWorkspace* w, TString component, TString regio
 
 
 //_____________________________________________________________________________
-Double_t Util::GetComponentFracInRegion(RooWorkspace* w, TString component, TString region){
+Double_t hf::Util::GetComponentFracInRegion(RooWorkspace* w, TString component, TString region){
 
     std::vector<TString> componentVec = Tokens(component,",");
     if(componentVec.size() <1) {
@@ -2259,7 +2261,7 @@ Double_t Util::GetComponentFracInRegion(RooWorkspace* w, TString component, TStr
 
 
 //_____________________________________________________________________________
-RooAbsPdf* Util::GetRegionPdf(RooWorkspace* w, TString region){  //, unsigned int bin){
+RooAbsPdf* hf::Util::GetRegionPdf(RooWorkspace* w, TString region){  //, unsigned int bin){
 
     if(w==NULL){
         Logger << kERROR << " Workspace not found, no GetRegionPdf performed" << GEndl;
@@ -2284,7 +2286,7 @@ RooAbsPdf* Util::GetRegionPdf(RooWorkspace* w, TString region){  //, unsigned in
 
 
 //_____________________________________________________________________________
-RooRealVar* Util::GetRegionVar(RooWorkspace* w, TString region){
+RooRealVar* hf::Util::GetRegionVar(RooWorkspace* w, TString region){
 
     if(w==NULL){
         Logger << kERROR << " Workspace not found, no GetComponent performed" << GEndl;
@@ -2314,7 +2316,7 @@ RooRealVar* Util::GetRegionVar(RooWorkspace* w, TString region){
 
 
 //__________________________________________________________________________________________
-TString Util::GetFullRegionName(RooCategory* regionCat,  TString regionShortName){
+TString hf::Util::GetFullRegionName(RooCategory* regionCat,  TString regionShortName){
 
     std::vector<TString> regionsAllVec = TokensALL(regionCat);
 
@@ -2338,13 +2340,13 @@ TString Util::GetFullRegionName(RooCategory* regionCat,  TString regionShortName
 }
 
 //__________________________________________________________________________________________
-vector<TString> Util::GetAllComponentNamesInRegion(TString region, RooAbsPdf* regionPdf){
+vector<TString> hf::Util::GetAllComponentNamesInRegion(TString region, RooAbsPdf* regionPdf){
 
     TString RRSPdfName = Form("%s_model",region.Data());
     RooRealSumPdf* RRSPdf = (RooRealSumPdf*) regionPdf->getComponents()->find(RRSPdfName);
 
     if(RRSPdf==NULL){
-        Logger << kERROR << " Util::GetAllComponentNamesInRegion() cannot find a RooRealSumPdf named " <<  RRSPdfName << GEndl ;
+        Logger << kERROR << " hf::Util::GetAllComponentNamesInRegion() cannot find a RooRealSumPdf named " <<  RRSPdfName << GEndl ;
         vector<TString> vec;
         return vec;
     }
@@ -2368,7 +2370,7 @@ vector<TString> Util::GetAllComponentNamesInRegion(TString region, RooAbsPdf* re
 
 
 //__________________________________________________________________________________________
-vector<double> Util::GetAllComponentFracInRegion(RooWorkspace* w, TString region, RooAbsPdf* regionPdf, RooRealVar* obsRegion){
+vector<double> hf::Util::GetAllComponentFracInRegion(RooWorkspace* w, TString region, RooAbsPdf* regionPdf, RooRealVar* obsRegion){
 
     TString RRSPdfName = Form("%s_model",region.Data());
     RooRealSumPdf* RRSPdf = (RooRealSumPdf*) regionPdf->getComponents()->find(RRSPdfName);
@@ -2399,7 +2401,7 @@ vector<double> Util::GetAllComponentFracInRegion(RooWorkspace* w, TString region
 
 
 //_____________________________________________________________________________
-double Util::getPropagatedError(RooAbsReal* var, const RooFitResult& fr, const bool& doAsym)
+double hf::Util::getPropagatedError(RooAbsReal* var, const RooFitResult& fr, const bool& doAsym)
 {
     Logger << kDEBUG << " GPP for variable = " << var->GetName() << GEndl;
 
@@ -2490,9 +2492,9 @@ double Util::getPropagatedError(RooAbsReal* var, const RooFitResult& fr, const b
 
 //_____________________________________________________________________________
 void
-Util::resetAllErrors( RooWorkspace* wspace )
+hf::Util::resetAllErrors( RooWorkspace* wspace )
 {
-    RooStats::ModelConfig* mc  = Util::GetModelConfig(wspace);
+    RooStats::ModelConfig* mc  = hf::Util::GetModelConfig(wspace);
     if (mc==0) return;
 
     const RooArgSet* obsSet = mc->GetObservables();
@@ -2501,17 +2503,17 @@ Util::resetAllErrors( RooWorkspace* wspace )
     RooAbsPdf* pdf = mc->GetPdf();
     if (pdf==0) return;
 
-    RooArgList floatParList = Util::getFloatParList( *pdf, *obsSet );
+    RooArgList floatParList = hf::Util::getFloatParList( *pdf, *obsSet );
 
-    Util::resetError(wspace,floatParList);
+    hf::Util::resetError(wspace,floatParList);
 }
 
 
 //_____________________________________________________________________________
 void
-Util::resetAllValues( RooWorkspace* wspace )
+hf::Util::resetAllValues( RooWorkspace* wspace )
 {
-    RooStats::ModelConfig* mc  = Util::GetModelConfig(wspace);
+    RooStats::ModelConfig* mc  = hf::Util::GetModelConfig(wspace);
     if (mc==0) return;
 
     const RooArgSet* obsSet = mc->GetObservables();
@@ -2520,17 +2522,17 @@ Util::resetAllValues( RooWorkspace* wspace )
     RooAbsPdf* pdf = mc->GetPdf();
     if (pdf==0) return;
 
-    RooArgList floatParList = Util::getFloatParList( *pdf, *obsSet );
+    RooArgList floatParList = hf::Util::getFloatParList( *pdf, *obsSet );
 
-    Util::resetValue(wspace,floatParList);
+    hf::Util::resetValue(wspace,floatParList);
 }
 
 
 //_____________________________________________________________________________
 void
-Util::resetAllNominalValues( RooWorkspace* wspace )
+hf::Util::resetAllNominalValues( RooWorkspace* wspace )
 {
-    RooStats::ModelConfig* mc  = Util::GetModelConfig(wspace);
+    RooStats::ModelConfig* mc  = hf::Util::GetModelConfig(wspace);
     if (mc==0) return;
 
     const RooArgSet* gobsSet = mc->GetGlobalObservables();
@@ -2538,13 +2540,13 @@ Util::resetAllNominalValues( RooWorkspace* wspace )
 
     gobsSet->Print("v");
 
-    Util::resetNominalValue( wspace,*gobsSet );
+    hf::Util::resetNominalValue( wspace,*gobsSet );
 }
 
 
 //_____________________________________________________________________________
 RooArgList
-Util::getFloatParList( const RooAbsPdf& pdf, const RooArgSet& obsSet )
+hf::Util::getFloatParList( const RooAbsPdf& pdf, const RooArgSet& obsSet )
 {
     RooArgList floatParList;
 
@@ -2567,7 +2569,7 @@ Util::getFloatParList( const RooAbsPdf& pdf, const RooArgSet& obsSet )
 
 //_____________________________________________________________________________
 void
-Util::resetError( RooWorkspace* wspace, const RooArgList& parList, const RooArgList& vetoList )
+hf::Util::resetError( RooWorkspace* wspace, const RooArgList& parList, const RooArgList& vetoList )
 
 {
     /// For the given workspace,
@@ -2705,7 +2707,7 @@ Util::resetError( RooWorkspace* wspace, const RooArgList& parList, const RooArgL
 
 //_____________________________________________________________________________
     void
-Util::resetValue( RooWorkspace* wspace, const RooArgList& parList, const RooArgList& vetoList )
+hf::Util::resetValue( RooWorkspace* wspace, const RooArgList& parList, const RooArgList& vetoList )
 
 {
     /// For the given workspace,
@@ -2765,7 +2767,7 @@ Util::resetValue( RooWorkspace* wspace, const RooArgList& parList, const RooArgL
 
 //_____________________________________________________________________________
     void
-Util::resetNominalValue( RooWorkspace* wspace, const RooArgSet& globSet )
+hf::Util::resetNominalValue( RooWorkspace* wspace, const RooArgSet& globSet )
 {
     /// For the given workspace,
     /// find the input systematic with
@@ -2818,7 +2820,7 @@ Util::resetNominalValue( RooWorkspace* wspace, const RooArgSet& globSet )
 
 
 //______________________________________________________________________________________________
-void Util::ImportInWorkspace( RooWorkspace* wspace, TObject* obj, TString name) {
+void hf::Util::ImportInWorkspace( RooWorkspace* wspace, TObject* obj, TString name) {
 
     if(obj){
 
@@ -2830,7 +2832,7 @@ void Util::ImportInWorkspace( RooWorkspace* wspace, TObject* obj, TString name) 
         wspace->import(*obj,kTRUE) ;
     }
     else{
-        Logger << kWARNING << "Util::Import called with a NULL pointer, nothing will be imported" << GEndl;
+        Logger << kWARNING << "hf::Util::Import called with a NULL pointer, nothing will be imported" << GEndl;
     }
 
     // save snapshot
@@ -2844,7 +2846,7 @@ void Util::ImportInWorkspace( RooWorkspace* wspace, TObject* obj, TString name) 
 
 
 //________________________________________________________________________________________________________________________________________
-void Util::RemoveEmptyDataBins( RooPlot* frame){
+void hf::Util::RemoveEmptyDataBins( RooPlot* frame){
 
     // histname=0 means that the last RooHist is taken from the RooPlot
     const char* histname = 0;
@@ -2852,7 +2854,7 @@ void Util::RemoveEmptyDataBins( RooPlot* frame){
     // Find histogram object
     RooHist* hist = (RooHist*) frame->findObject(histname,RooHist::Class()) ;
     if (!hist) {
-        Logger << kERROR << " Util::RemoveEmptyDataBins(" << frame->GetName() << ") cannot find histogram" << GEndl ;
+        Logger << kERROR << " hf::Util::RemoveEmptyDataBins(" << frame->GetName() << ") cannot find histogram" << GEndl ;
         return ;
     }
 
@@ -2871,7 +2873,7 @@ void Util::RemoveEmptyDataBins( RooPlot* frame){
 }
 
 //________________________________________________________________________________________________________________________________________
-RooHist* Util::MakeRatioHist(RooPlot *frame, const char* histname, const char* pdfname, bool useAverage) {
+RooHist* hf::Util::MakeRatioHist(RooPlot *frame, const char* histname, const char* pdfname, bool useAverage) {
     // Find all curve objects with the name "pdfname" or the name of the last
     // plotted curve (there might be multiple in the case of multi-range fits).
     std::vector<RooCurve*> curves;
@@ -2987,10 +2989,11 @@ RooHist* Util::MakeRatioHist(RooPlot *frame, const char* histname, const char* p
 }
 
 //________________________________________________________________________________________________________________________________________
-RooHist* Util::MakeRatioOrPullHist(RooAbsData *regionData, RooAbsPdf *regionPdf, RooRealVar *regionVar, bool makePull /*false*/) {
+RooHist* hf::Util::MakeRatioOrPullHist(RooAbsData *regionData, RooAbsPdf *regionPdf, RooRealVar *regionVar, bool makePull /*false*/) {
 	// data/pdf ratio histograms are plotted by RooPlot.ratioHist() through a dummy frame
 	RooPlot* frame_dummy = regionVar->frame();
 	regionData->plotOn(frame_dummy, RooFit::DataError(RooAbsData::Poisson));
+      //Adding function which does not exist in original RooHist.h
 
 	// normalize pdf to number of expected events, not to number of events in dataset
 	regionPdf->plotOn(frame_dummy, RooFit::Normalization(1, RooAbsReal::RelativeExpected),
@@ -3006,7 +3009,7 @@ RooHist* Util::MakeRatioOrPullHist(RooAbsData *regionData, RooAbsPdf *regionPdf,
 }
 
 //________________________________________________________________________________________________________________________________________
-RooCurve* Util::MakePdfErrorRatioHist(RooAbsData* regionData, RooAbsPdf* regionPdf, RooRealVar* regionVar, RooFitResult* rFit, Double_t Nsigma){
+RooCurve* hf::Util::MakePdfErrorRatioHist(RooAbsData* regionData, RooAbsPdf* regionPdf, RooRealVar* regionVar, RooFitResult* rFit, Double_t Nsigma){
 
     RooPlot* frame = regionVar->frame();
     regionData->plotOn(frame, RooFit::DataError(RooAbsData::Poisson));
@@ -3015,7 +3018,7 @@ RooCurve* Util::MakePdfErrorRatioHist(RooAbsData* regionData, RooAbsPdf* regionP
     regionPdf->plotOn(frame, Normalization(1, RooAbsReal::RelativeExpected), Precision(1e-5));
     RooCurve* curveNom = (RooCurve*) frame->findObject(nullptr, RooCurve::Class()) ;
     if (!curveNom) {
-        Logger << kERROR << "Util::MakePdfErrorRatioHist(" << frame->GetName() << ") cannot find curveNom" << curveNom->GetName() << GEndl ;
+        Logger << kERROR << "hf::Util::MakePdfErrorRatioHist(" << frame->GetName() << ") cannot find curveNom" << curveNom->GetName() << GEndl ;
         return 0 ;
     }
 
@@ -3031,7 +3034,7 @@ RooCurve* Util::MakePdfErrorRatioHist(RooAbsData* regionData, RooAbsPdf* regionP
     // Find curve object
     RooCurve* curveError = (RooCurve*) frame->findObject(nullptr, RooCurve::Class()) ;
     if (!curveError) {
-        Logger << kERROR << "Util::makePdfErrorRatioHist(" << frame->GetName() << ") cannot find curveError" << GEndl ;
+        Logger << kERROR << "hf::Util::makePdfErrorRatioHist(" << frame->GetName() << ") cannot find curveError" << GEndl ;
         return 0 ;
     }
 
@@ -3086,9 +3089,9 @@ RooCurve* Util::MakePdfErrorRatioHist(RooAbsData* regionData, RooAbsPdf* regionP
 
 
 //_____________________________________________________________________________
-void Util::SetPdfParError(RooWorkspace* w, double Nsigma){
+void hf::Util::SetPdfParError(RooWorkspace* w, double Nsigma){
 
-    RooStats::ModelConfig* mc  = Util::GetModelConfig(w);
+    RooStats::ModelConfig* mc  = hf::Util::GetModelConfig(w);
     if (mc==0) return;
 
     const RooArgSet* obsSet = mc->GetObservables();
@@ -3097,7 +3100,7 @@ void Util::SetPdfParError(RooWorkspace* w, double Nsigma){
     RooAbsPdf* pdf = mc->GetPdf();
     if (pdf==0) return;
 
-    RooArgList floatParList = Util::getFloatParList( *pdf, *obsSet );
+    RooArgList floatParList = hf::Util::getFloatParList( *pdf, *obsSet );
 
     TIterator* iter = floatParList.createIterator() ;
     RooAbsArg* arg ;
@@ -3121,7 +3124,7 @@ void Util::SetPdfParError(RooWorkspace* w, double Nsigma){
 
 
 //_____________________________________________________________________________
-RooAbsReal* Util::CreateNLL( RooWorkspace* w, TString fitRegions, Bool_t lumiConst)
+RooAbsReal* hf::Util::CreateNLL( RooWorkspace* w, TString fitRegions, Bool_t lumiConst)
 {
     if(w==NULL){
         Logger << kERROR << "Workspace not found, no fitting performed" << GEndl;
@@ -3188,7 +3191,7 @@ RooAbsReal* Util::CreateNLL( RooWorkspace* w, TString fitRegions, Bool_t lumiCon
     RooAbsPdf* pdf_FR = simPdfFitRegions;
     RooDataSet* data_FR = dataFitRegions;
 
-    RooStats::ModelConfig* mc = Util::GetModelConfig( w );
+    RooStats::ModelConfig* mc = hf::Util::GetModelConfig( w );
     const RooArgSet* globObs = mc->GetGlobalObservables();
 
     RooAbsReal* nll = (RooNLLVar*) pdf_FR->createNLL(*data_FR, RooFit::GlobalObservables(*globObs) );
@@ -3199,7 +3202,7 @@ RooAbsReal* Util::CreateNLL( RooWorkspace* w, TString fitRegions, Bool_t lumiCon
 
 
     TString
-Util::scanStrForFloats(const TString& toscan, const TString& format)
+hf::Util::scanStrForFloats(const TString& toscan, const TString& format)
 {
     int narg1 = format.CountChar('%');
     TString wsid;
@@ -3208,7 +3211,7 @@ Util::scanStrForFloats(const TString& toscan, const TString& format)
     int narg2 = sscanf( toscan.Data(), format.Data(), &wsarg[0],&wsarg[1],&wsarg[2],&wsarg[3],&wsarg[4],&wsarg[5],&wsarg[6],&wsarg[7],&wsarg[8],&wsarg[9] );
 
     if ( !(narg1==narg2 && narg2>0) ) {
-        Logger << kERROR << "Util::scanStringForFloats incorrect lengths" << GEndl;
+        Logger << kERROR << "hf::Util::scanStringForFloats incorrect lengths" << GEndl;
         return wsid;
     }
 
@@ -3224,7 +3227,7 @@ Util::scanStrForFloats(const TString& toscan, const TString& format)
 
 //---------------------------------------------------------------------------------------
 
-TGraph* Util::getErrorBand(TH1F* hNom, TH1F* hHigh, TH1F* hLow){
+TGraph* hf::Util::getErrorBand(TH1F* hNom, TH1F* hHigh, TH1F* hLow){
 
    vector<double> nom(0), high(0), low(0);
    vector<double> X(0), ErrXl(0), ErrXh(0);
@@ -3312,7 +3315,7 @@ TGraph* Util::getErrorBand(TH1F* hNom, TH1F* hHigh, TH1F* hLow){
 
 }
 
-void Util::plotDistribution(TFile* f, TString hNomName, TString Syst, TString NameSample, TString Region, TString Var){
+void hf::Util::plotDistribution(TFile* f, TString hNomName, TString Syst, TString NameSample, TString Region, TString Var){
 
 
    TH1F* hNom = (TH1F*)f->Get(hNomName);
@@ -3465,7 +3468,7 @@ void Util::plotDistribution(TFile* f, TString hNomName, TString Syst, TString Na
 
 }
 
-void Util::plotSystematics(TFile* f,TString hNomName, vector<TString> Syst, TString NameSample, TString Region, TString Var){
+void hf::Util::plotSystematics(TFile* f,TString hNomName, vector<TString> Syst, TString NameSample, TString Region, TString Var){
 
    TH1F* h = (TH1F*)f->Get(hNomName);
    if(!h) return;
@@ -3551,7 +3554,7 @@ void Util::plotSystematics(TFile* f,TString hNomName, vector<TString> Syst, TStr
 
 }
 
-void Util::plotUpDown(TString FileName, TString NameSample, TString SystName, TString Region, TString Var){
+void hf::Util::plotUpDown(TString FileName, TString NameSample, TString SystName, TString Region, TString Var){
 
  TFile* f = TFile::Open(FileName.Data(), "READ");
  if (f->IsZombie()) {
@@ -3596,7 +3599,7 @@ void Util::plotUpDown(TString FileName, TString NameSample, TString SystName, TS
 }
 
 //-------------------------------------------------------------------------------------------------------
-void Util::PlotFitParameters(RooFitResult* r, TString anaName){
+void hf::Util::PlotFitParameters(RooFitResult* r, TString anaName){
 
  RooArgList ListParams = r->floatParsFinal();
 
@@ -3735,9 +3738,8 @@ void Util::PlotFitParameters(RooFitResult* r, TString anaName){
 
 }
 
-
-//-------------------------------------------------------------------------------------------------------
-TH1* Util::ComponentToHistogram(RooRealSumPdf* component, RooRealVar* variable, RooFitResult *fitResult) {
+//________________________________________________________________________________________________________________________________________
+TH1* hf::Util::ComponentToHistogram(RooRealSumPdf* component, RooRealVar* variable, RooFitResult *fitResult) {
     // Build a TH1-based histogram from a pdf, an observable and a fit result
 
     // Get the stepsize and build a histogram according to the binning of the variable
@@ -3771,7 +3773,7 @@ TH1* Util::ComponentToHistogram(RooRealSumPdf* component, RooRealVar* variable, 
     return hist;
 }
 
-void Util::ScaleGraph(TGraphAsymmErrors *g, TH1* h) {
+void hf::Util::ScaleGraph(TGraphAsymmErrors *g, TH1* h) {
     if (g->GetN() != h->GetNbinsX() ) {
         Logger << kERROR << "Cannot multiply graph with " << g->GetN() << " points with histogram with " << h->GetNbinsX() << " points" << GEndl ;
         throw 1 ;
@@ -3792,7 +3794,7 @@ void Util::ScaleGraph(TGraphAsymmErrors *g, TH1* h) {
     return;
 }
 
-void Util::plotInterpolationScheme(RooWorkspace *w) {
+void hf::Util::plotInterpolationScheme(RooWorkspace *w) {
 
     RooAbsData* data = w->data("obsData");
     RooArgSet funcs = w->allFunctions();
@@ -3878,7 +3880,7 @@ void Util::plotInterpolationScheme(RooWorkspace *w) {
 
 
 //________________________________________________________________________________________________
-void Util::getExpectedCLsFromHypoTest(HypoTestInverterResult* HTIR, int index, double *q)
+void hf::Util::getExpectedCLsFromHypoTest(HypoTestInverterResult* HTIR, int index, double *q)
 {
     // Get expected CLs
     // See https://root.cern.ch/doc/master/HypoTestInverterPlot_8cxx_sourcehtml#l00150

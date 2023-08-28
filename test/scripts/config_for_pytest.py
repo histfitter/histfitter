@@ -22,7 +22,7 @@ useToys = False
 manualBackupCache = None
 
 
-input_file = "test_tree.root"
+input_file = "data/test_fullchain/test_tree.root"
 
 nominal_tree_name = "_NoSys"
 
@@ -38,7 +38,7 @@ if configMgr.userArg != "":
     manualBackupCache = args.manualBackupCache
 
 # name for analysis, used in a lot of directory and filenames
-anaName = "hf_test"
+anaName = "test_fullchain"
 
 configMgr.analysisName = anaName
 analysisNameBase = anaName

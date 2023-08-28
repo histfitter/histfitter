@@ -68,7 +68,7 @@ configMgr.keepSignalRegionType = True
 
 # Give the analysis a name
 configMgr.analysisName = "MyUserAnalysis"
-configMgr.outputFileName = f"results/{configMgr.analysisName}s_Output.root"
+configMgr.outputFileName = f"results/{configMgr.analysisName}_Output.root"
 
 # Define cuts
 configMgr.cutsDict["UserRegion"] = "1."

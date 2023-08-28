@@ -16,25 +16,27 @@
  * LICENSE.                                                                       *
  **********************************************************************************/
 
+// STL include(s)
 #include <iostream>
+
+// HistFitter include(s)
 #include "FitConfig.h"
 
 using namespace std;
 
-
 //_______________________________________________________________________________________
-FitConfig::FitConfig() : m_logger("FitConfig"){
+hf::FitConfig::FitConfig() : m_logger("FitConfig"){
 }
 
 
 //_______________________________________________________________________________________
-FitConfig::FitConfig(const TString& name) : m_logger("FitConfig") {
+hf::FitConfig::FitConfig(const TString& name) : m_logger("FitConfig") {
     m_name=name;
 }
 
 
 //_______________________________________________________________________________________
-void FitConfig::Print(){
+void hf::FitConfig::Print(){
     m_logger << kINFO << "*** Fit Config: " << m_name << " ***" << GEndl;
     m_logger << kINFO << " inputWorkspaceFileName: " << m_inputWorkspaceFileName << GEndl;
     
@@ -58,7 +60,7 @@ void FitConfig::Print(){
 
 
 //_______________________________________________________________________________________
-void FitConfig::findChannel(const TString& channel, Int_t& idx, Bool_t& channelFound) {
+void hf::FitConfig::findChannel(const TString& channel, Int_t& idx, Bool_t& channelFound) {
     for(unsigned int i=0; i < m_channels.size(); i++){
         if(m_channels[i].EqualTo(channel) && !channelFound){
             idx = i;
@@ -75,7 +77,7 @@ void FitConfig::findChannel(const TString& channel, Int_t& idx, Bool_t& channelF
 
 
 //_______________________________________________________________________________________
-ChannelStyle FitConfig::getChannelStyle(const TString& channel) {
+hf::ChannelStyle hf::FitConfig::getChannelStyle(const TString& channel) {
   
   Int_t idx = 0;
   Bool_t channelFound = kFALSE;
@@ -93,7 +95,7 @@ ChannelStyle FitConfig::getChannelStyle(const TString& channel) {
       m_logger << kINFO << "FitConfig m_channelsStyle[" << j << "] = " << m_channelsStyle[j].getName() << GEndl;
     }
     
-    ChannelStyle* style = new ChannelStyle(channel);
+    hf::ChannelStyle* style = new hf::ChannelStyle(channel);
     m_channelsStyle.push_back(*style);
     return *style;
   }

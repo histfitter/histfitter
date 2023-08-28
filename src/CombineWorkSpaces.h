@@ -15,17 +15,22 @@
  * LICENSE.                                                                       *
  **********************************************************************************/
 
-#ifndef COMBINEWORKSPACES_H
-#define COMBINEWORKSPACES_H
+#ifndef HF_COMBINEWORKSPACES_H
+#define HF_COMBINEWORKSPACES_H
 
-#include "TString.h"
+// STL include(s):
 #include <string>
 #include <vector>
 #include <map>
 
+// ROOT include(s)
+#include "TString.h"
+
 // -------------------------------
 // Combines workspaces
 // -------------------------------
+
+
 
 class RooWorkspace;
 class RooArgSet;
@@ -38,6 +43,8 @@ class TFile;
 namespace RooStats {
     class HypoTestInverterResult;
 }
+
+namespace hf{
 
 std::map<TString,TString> GetMatchingWorkspaces( const TString& infile, const TString& theformat, const TString& interpretation, const TString& cutStr="1", const Int_t& fID=-1, TTree* ORTree=0 );
 std::vector<RooWorkspace*> CollectWorkspaces( const std::map< TString,TString >& fwnameMap, const TString& wid );
@@ -52,5 +59,7 @@ RooMCStudy* GetMCStudy( const RooWorkspace* w );
 
 std::map<std::string, float> ParseWorkspaceID( const TString& wid );
 
-#endif
+}  // namespace hf
+
+#endif  // HF_COMBINEWORKSPACES_H
 

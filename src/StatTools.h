@@ -1,10 +1,15 @@
 // vim: ts=4:sw=4
-#ifndef STATTOOLS_H
-#define STATTOOLS_H
+#ifndef HF_STATTOOLS_H
+#define HF_STATTOOLS_H
 
-#include "TString.h"
+// STL include(s)
 #include <iostream>
 #include <vector>
+
+// ROOT include(s)
+#include "TString.h"
+
+// HistFitter include(s)
 #include "LimitResult.h"
 
 class TMap;
@@ -29,6 +34,7 @@ namespace RooStats {
     class HypoTestInverterResult;
     class ModelConfig;
 }
+
 
 namespace RooStats
 {
@@ -108,7 +114,7 @@ namespace RooStats
                 bool useNumberCounting = false,
                 const char * nuisPriorName = 0) ;
 
-    LimitResult get_Pvalue(     RooWorkspace* w,
+    hf::LimitResult get_Pvalue(     RooWorkspace* w,
                 bool doUL = true, // true = exclusion, false = discovery
                 int ntoys = 1000,
                 int calculatorType = 0,
@@ -147,11 +153,11 @@ namespace RooStats
                 bool useCLs = true ,
                 int npoints = 20 ) ;
 
-    LimitResult get_Pvalue( const RooStats::HypoTestInverterResult* fResults, bool doUL=true );
-    LimitResult get_Pvalue( const RooStats::HypoTestResult* fResult, bool doUL=true );
+    hf::LimitResult get_Pvalue( const RooStats::HypoTestInverterResult* fResults, bool doUL=true );
+    hf::LimitResult get_Pvalue( const RooStats::HypoTestResult* fResult, bool doUL=true );
     
     double nextTestPOI(std::vector<double> &test_pois, HypoTestInverterResult *HTIR, int method=0);
 
-}
+}  // end namespace RooStats
 
-# endif
+# endif  //HF_STATTOOLS_H

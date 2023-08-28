@@ -1,25 +1,33 @@
 obj
-lib/*
-src/SusyFitter_Dict.C
-
+*.o
 .*.swp
-data/*.root
 *.pyc
 *.pcm
 *.d
 *.so
+*.xml
 
 *~
 *#
+.asetup*
+*.rootmap
+*.modulemap
 
-# copied from the src dir!
-include/*.h
-
-# output
-results/*
+#In case someone builds in source dir
+lib/
+include/
+bin/
+build/
+install/
+data/
+results/
 config/*
-data/*
-*.json
+!HistFactorySchema.dtd
+CMakeCache.txt
+CMakeFiles/
+install_manifest.txt
+*.cmake
+.pytest_cache/
 
 # Development environments
 .vscode/

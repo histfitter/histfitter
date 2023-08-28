@@ -12,7 +12,7 @@ Dec, 2021
 import ast
 
 from ROOT import gROOT,gSystem,gDirectory
-gSystem.Load("libSusyFitter.so")
+gSystem.Load("libHistFitter.so")
 
 from SysTableTex import *
 

@@ -37,10 +37,10 @@
 #include "TObject.h"
 #include "TString.h"
 
-// Local include(s):
+// HistFitter include(s)
 #include "TMsgLogger.h"
 
-ClassImp(TMsgLogger);
+ClassImp(hf::TMsgLogger);
 
 using namespace std;
 
@@ -60,11 +60,11 @@ static const char* SUFFIX = ": ";
 #define SUFFIX ": "
 #endif
 
-TMsgLevel TMsgLogger::m_minLevel = kINFO;
-bool TMsgLogger::m_levelLock = false;
+hf::TMsgLevel hf::TMsgLogger::m_minLevel = kINFO;
+bool hf::TMsgLogger::m_levelLock = false;
 
 //_____________________________________________________________________________
-TMsgLogger::TMsgLogger( const TObject* source, TMsgLevel /*minLevel*/ )
+hf::TMsgLogger::TMsgLogger( const TObject* source, TMsgLevel /*minLevel*/ )
    : m_objSource( source ), 
      m_strSource( "" ), 
      m_prefix( PREFIX ), 
@@ -76,7 +76,7 @@ TMsgLogger::TMsgLogger( const TObject* source, TMsgLevel /*minLevel*/ )
 }
 
 //_____________________________________________________________________________
-TMsgLogger::TMsgLogger( const string& source, TMsgLevel /*minLevel*/ )
+hf::TMsgLogger::TMsgLogger( const string& source, TMsgLevel /*minLevel*/ )
    : m_objSource( 0 ),
      m_strSource( source ), 
      m_prefix( PREFIX ), 
@@ -88,7 +88,7 @@ TMsgLogger::TMsgLogger( const string& source, TMsgLevel /*minLevel*/ )
 }
 
 //_____________________________________________________________________________
-TMsgLogger::TMsgLogger( TMsgLevel /*minLevel*/ )
+hf::TMsgLogger::TMsgLogger( TMsgLevel /*minLevel*/ )
    : m_objSource( 0 ), 
      m_strSource( "Unknown" ), 
      m_prefix( PREFIX ), 
@@ -100,9 +100,9 @@ TMsgLogger::TMsgLogger( TMsgLevel /*minLevel*/ )
 }
 
 //_____________________________________________________________________________
-TMsgLogger::TMsgLogger( const TMsgLogger& parent )
-   //: basic_ios< TMsgLogger::char_type, TMsgLogger::traits_type >( new TMsgLogger::__stringbuf_type() ),
-   : basic_ios< TMsgLogger::char_type, TMsgLogger::traits_type >( new std::basic_stringbuf< TMsgLogger::char_type >() ),
+hf::TMsgLogger::TMsgLogger( const TMsgLogger& parent )
+   //: basic_ios< hf::TMsgLogger::char_type, hf::TMsgLogger::traits_type >( new hf::TMsgLogger::__stringbuf_type() ),
+   : basic_ios< hf::TMsgLogger::char_type, hf::TMsgLogger::traits_type >( new std::basic_stringbuf< hf::TMsgLogger::char_type >() ),
      ostringstream(),
      TObject(),
      m_prefix( PREFIX ), 
@@ -113,11 +113,11 @@ TMsgLogger::TMsgLogger( const TMsgLogger& parent )
 }
 
 //_____________________________________________________________________________
-TMsgLogger::~TMsgLogger() {
+hf::TMsgLogger::~TMsgLogger() {
 }
 
 //_____________________________________________________________________________
-TMsgLogger& TMsgLogger::operator= ( const TMsgLogger& parent )  {
+hf::TMsgLogger& hf::TMsgLogger::operator= ( const TMsgLogger& parent )  {
     m_objSource   = parent.m_objSource;
     m_strSource   = parent.m_strSource;
     m_activeLevel = parent.m_activeLevel;
@@ -126,7 +126,7 @@ TMsgLogger& TMsgLogger::operator= ( const TMsgLogger& parent )  {
 }
 
 //_____________________________________________________________________________
-string TMsgLogger::GetFormattedSource() const {
+string hf::TMsgLogger::GetFormattedSource() const {
     // make sure the source name is no longer than m_maxSourceSize:
     string source_name;
     if (m_objSource) source_name = m_objSource->GetName();
@@ -141,7 +141,7 @@ string TMsgLogger::GetFormattedSource() const {
 }
 
 //_____________________________________________________________________________
-string TMsgLogger::GetPrintedSource() const { 
+string hf::TMsgLogger::GetPrintedSource() const { 
     // the full logger prefix
     string source_name = GetFormattedSource();
 
@@ -149,7 +149,7 @@ string TMsgLogger::GetPrintedSource() const {
 }
 
 //_____________________________________________________________________________
-void TMsgLogger::Send() {
+void hf::TMsgLogger::Send() {
     // activates the logger writer
 
     // make sure the source name is no longer than m_maxSourceSize:
@@ -181,7 +181,7 @@ void TMsgLogger::Send() {
 }
 
 //_____________________________________________________________________________
-void TMsgLogger::WriteMsg( TMsgLevel mlevel, const std::string& line ) const  {
+void hf::TMsgLogger::WriteMsg( TMsgLevel mlevel, const std::string& line ) const  {
     if (mlevel < GetMinLevel()) 
         return;
     
@@ -209,14 +209,14 @@ void TMsgLogger::WriteMsg( TMsgLevel mlevel, const std::string& line ) const  {
 }
 
 //_____________________________________________________________________________
-TMsgLogger& TMsgLogger::endmsg( TMsgLogger& logger ) {
+hf::TMsgLogger& hf::TMsgLogger::endmsg( TMsgLogger& logger ) {
     // end line
     logger.Send();
     return logger;
 }
 
 //_____________________________________________________________________________
-TMsgLevel TMsgLogger::MapLevel( const TString& instr ) const {
+hf::TMsgLevel hf::TMsgLogger::MapLevel( const TString& instr ) const {
     TString ins = instr; // need to copy
     ins.ToUpper();
 
@@ -228,7 +228,7 @@ TMsgLevel TMsgLogger::MapLevel( const TString& instr ) const {
     }
 
     // not found --> fatal error
-    TString line( Form( "fatal error in <TMsgLogger::MapLevel> unknown output level: %s ==> abort", ins.Data() ) );
+    TString line( Form( "fatal error in <hf::TMsgLogger::MapLevel> unknown output level: %s ==> abort", ins.Data() ) );
     std::cout << m_colorMap.find( kFATAL )->second << m_prefix << line << "\033[0m" << std::endl;
     abort();
 
@@ -236,7 +236,7 @@ TMsgLevel TMsgLogger::MapLevel( const TString& instr ) const {
 }
 
 //_____________________________________________________________________________
-void TMsgLogger::InitMaps() {
+void hf::TMsgLogger::InitMaps() {
     m_levelMap[kVERBOSE] = "VERBOSE";
     m_levelMap[kDEBUG]   = "DEBUG";
     m_levelMap[kINFO]    = "INFO";

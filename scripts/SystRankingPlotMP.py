@@ -654,7 +654,7 @@ def parse_opts():
 def main():
     opts = parse_opts()
 
-    gSystem.Load("libSusyFitter.so")
+    gSystem.Load("libHistFitter.so")
     # this is strange but in oder to access some HF
     # objects from the library we need to somehow touch
     # (ROOT.)LimitResult

@@ -15,10 +15,11 @@
  * LICENSE.                                                                       *
  **********************************************************************************/
 
+// HistFitter include(s)
 #include "XtraValues.h"
 
-ClassImp(XtraValues);
+ClassImp(hf::XtraValues);
 
-int XtraValues::size(){ 
+int hf::XtraValues::size(){ 
     return m_nObs.size(); 
 }

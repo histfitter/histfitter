@@ -15,14 +15,21 @@
  * LICENSE.                                                                       *
  **********************************************************************************/
 
-#ifndef CHANNELSTYLE_H
-#define CHANNELSTYLE_H
+#ifndef HF_CHANNELSTYLE_H
+#define HF_CHANNELSTYLE_H
 
+// STL include(s):
 #include <iostream>
 #include <vector>
+
+// ROOT include(s)
 #include "TString.h"
 #include "TLegend.h"
+
+// HistFitter include(s)
 #include "TMsgLogger.h"
+
+namespace hf{
 
 class ChannelStyle : public TObject{
  public:
@@ -225,4 +232,6 @@ private:
 
 };
 
-#endif
+}  // namespace hf
+
+#endif  // HF_CHANNELSTYLE_H

@@ -14,18 +14,21 @@
  * LICENSE.                                                                       *
  **********************************************************************************/
 
-#ifndef COMBINATIONUTILS_H
-#define COMBINATIONUTILS_H
+#ifndef HF_COMBINATIONUTILS_H
+#define HF_COMBINATIONUTILS_H
 
+// STL include(s):
 #include <string>
+
+// ROOT include(s)
 #include "TString.h"
 
 
 class RooFitResult;
 class RooWorkspace;
-
 class TTree;
 
+namespace hf{
 //________________________________________________________________________________________________
 void resetFloatPars( const RooWorkspace* w, const RooFitResult* result );
 
@@ -54,5 +57,6 @@ namespace Util
 
 }
 
+}  // namespace hf
 
-#endif
+#endif  // HF_COMBINATIONUTILS_H

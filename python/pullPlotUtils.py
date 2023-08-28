@@ -24,7 +24,7 @@ A module to generate pull plots. Import and overwrite getSampleColor and getRegi
 import ROOT
 from ROOT import *
 ROOT.PyConfig.IgnoreCommandLineOptions = True
-gSystem.Load("libSusyFitter.so")
+gSystem.Load("libHistFitter.so")
 #gROOT.Reset()
 ROOT.gROOT.SetBatch(True)
 from pValue import * # to compute significance as in https://github.com/dcasadei/psde

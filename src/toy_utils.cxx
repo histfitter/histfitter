@@ -13,26 +13,23 @@
  * See corresponding .h file for author and license information                   *
  **********************************************************************************/
 
-#include "toy_utils.h"
-#include "CombineWorkSpaces.h"
-#include "Significance.h"
-#include "Utils.h"
-#include "StatTools.h"
-#include "TMsgLogger.h"
-#include "RooStats/HypoTestInverterResult.h"
-#include "json.h"
+// STL include(s)
+#include <stdexcept>
+#include <stdlib.h>
+#include <sstream>
+#include <math.h>
+#include <iostream>
+#include <fstream>
 
+// ROOT include(s)
 #include "TTree.h"
 #include "TFile.h"
 #include "TMath.h"
 #include "TSystem.h"
 #include "TObjString.h"
 #include "RooRandom.h"
-#include <sstream>
-#include <math.h>
-#include <iostream>
-#include <fstream>
 #include "RooStats/ModelConfig.h"
+#include "RooStats/HypoTestInverterResult.h"
 #include "RooMsgService.h"
 #include "RooRandom.h"
 #include "RooFitResult.h"
@@ -41,12 +38,16 @@
 #include "RooProdPdf.h"
 #include "RooRealVar.h"
 #include "RooMCStudy.h"
-
-#include <stdlib.h>
-
 #include "RooAddition.h"
 
-#include <stdexcept>
+// HistFitter include(s)
+#include "toy_utils.h"
+#include "CombineWorkSpaces.h"
+#include "Significance.h"
+#include "Utils.h"
+#include "StatTools.h"
+#include "TMsgLogger.h"
+#include "json.h"
 
 using namespace std;
 using namespace RooFit;
@@ -55,11 +56,11 @@ using namespace RooStats;
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 /// Code to collect hypotest results and write to text files
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
-static TMsgLogger ToyUtilsLogger("toy_utils");
+static hf::TMsgLogger ToyUtilsLogger("toy_utils");
 
 
 //________________________________________________________________________________________________
-void CollectAndWriteHypoTestResults( const TString& infile, const TString& format, const TString& interpretation, const TString& cutStr, const bool rejectFailedPrefit, const TString& outDir, const TString& fileprefix  ){
+void hf::CollectAndWriteHypoTestResults( const TString& infile, const TString& format, const TString& interpretation, const TString& cutStr, const bool rejectFailedPrefit, const TString& outDir, const TString& fileprefix  ){
     // outdir
     TString outdir = gSystem->pwd();
     if ( !gSystem->cd( outDir.Data() ) ) {
@@ -98,7 +99,7 @@ void CollectAndWriteHypoTestResults( const TString& infile, const TString& forma
     TString rootoutfilestub = outdir + listname;
 
     // collect p-values, store rootfile if needed
-    std::list<LimitResult> summary = CollectHypoTestResults( infile, format, interpretation, cutStr, rejectFailedPrefit );
+    std::list<hf::LimitResult> summary = CollectHypoTestResults( infile, format, interpretation, cutStr, rejectFailedPrefit );
 
     // store harvest in text file
     //return WriteResultSet( summary, listname, outdir );
@@ -107,10 +108,10 @@ void CollectAndWriteHypoTestResults( const TString& infile, const TString& forma
 
 
 //________________________________________________________________________________________________
-std::list<LimitResult> CollectHypoTestResults( const TString& infile, const TString& format, const TString& interpretation,
+std::list<hf::LimitResult> hf::CollectHypoTestResults( const TString& infile, const TString& format, const TString& interpretation,
         const TString& cutStr, const bool& rejectFailedPrefit )
 {
-    std::list<LimitResult> limres;
+    std::list<hf::LimitResult> limres;
     if ( infile.IsNull() || format.IsNull() || interpretation.IsNull() )
         return limres;
 
@@ -123,7 +124,7 @@ std::list<LimitResult> CollectHypoTestResults( const TString& infile, const TStr
     }
 
     // loop over hypotestresults and save results
-    std::list<LimitResult> limitres;
+    std::list<hf::LimitResult> limitres;
     //std::map<TString,TString>::const_iterator itr = wsnameMap.begin(), end = wsnameMap.end();
 
     int counter_failed_fits = 0;
@@ -244,7 +245,7 @@ std::list<LimitResult> CollectHypoTestResults( const TString& infile, const TStr
 
 
 //________________________________________________________________________________________________
-void WriteResultSetJSON( const std::list<LimitResult>& summary, const TString& listname, const TString& outDir ){
+void hf::WriteResultSetJSON( const std::list<hf::LimitResult>& summary, const TString& listname, const TString& outDir ){
     if (summary.empty()) {
         return;
     }
@@ -285,7 +286,7 @@ void WriteResultSetJSON( const std::list<LimitResult>& summary, const TString& l
 }
 
 //________________________________________________________________________________________________
-void WriteResultSet( const std::list<LimitResult>& summary, const TString& listname, const TString& outDir ){
+void hf::WriteResultSet( const std::list<hf::LimitResult>& summary, const TString& listname, const TString& outDir ){
     if (summary.empty()) {
         return;
     }
@@ -303,7 +304,7 @@ void WriteResultSet( const std::list<LimitResult>& summary, const TString& listn
     }
     outdir = ( outdir.EndsWith("/") ? outdir : outdir+"/" );
 
-    std::list<LimitResult>::const_iterator itr=summary.begin(), end=summary.end();
+    std::list<hf::LimitResult>::const_iterator itr=summary.begin(), end=summary.end();
 
     TString outfile = outdir + listname + "_harvest_list" ;
     TString outdesc = outdir + "summary_harvest_tree_description.h" ;
@@ -411,7 +412,7 @@ void WriteResultSet( const std::list<LimitResult>& summary, const TString& listn
 
 /// Same code, but takes workspaces as input from which p-values are evaluated, then stored
 //________________________________________________________________________________________________
-void CollectAndWriteResultSet( const TString& infile, const TString& format, const TString& interpretation, const TString& cutStr, const int& mode, const int& n_toys, const int& in_doFreeFitFirst, const int& do_ul, const TString& outDir, const TString& fileprefix ) {
+void hf::CollectAndWriteResultSet( const TString& infile, const TString& format, const TString& interpretation, const TString& cutStr, const int& mode, const int& n_toys, const int& in_doFreeFitFirst, const int& do_ul, const TString& outDir, const TString& fileprefix ) {
     // outdir
     TString outdir = gSystem->pwd();
     if ( !gSystem->cd( outDir.Data() ) ) {
@@ -450,7 +451,7 @@ void CollectAndWriteResultSet( const TString& infile, const TString& format, con
     TString rootoutfilestub = outdir + listname;
 
     // collect p-values, store rootfile if needed
-    std::list<LimitResult> summary = CollectLimitResults( infile, format, interpretation, cutStr, mode, n_toys, do_ul );
+    std::list<hf::LimitResult> summary = CollectLimitResults( infile, format, interpretation, cutStr, mode, n_toys, do_ul );
 
     // store harvest in text file
     //return WriteResultSet( summary, listname, outdir );
@@ -459,8 +460,8 @@ void CollectAndWriteResultSet( const TString& infile, const TString& format, con
 
 
 //________________________________________________________________________________________________
-std::list<LimitResult> CollectLimitResults( const TString& infile, const TString& format, const TString& interpretation, const TString& cutStr, const int& mode, const int& n_toys, const int& do_ul) {
-    std::list<LimitResult> limres;
+std::list<hf::LimitResult> hf::CollectLimitResults( const TString& infile, const TString& format, const TString& interpretation, const TString& cutStr, const int& mode, const int& n_toys, const int& do_ul) {
+    std::list<hf::LimitResult> limres;
     if ( infile.IsNull() || format.IsNull() || interpretation.IsNull() )
         return limres;
 
@@ -470,12 +471,12 @@ std::list<LimitResult> CollectLimitResults( const TString& infile, const TString
         return limres;
 
     // loop over workspaces and print results
-    std::list<LimitResult> limitres;
+    std::list<hf::LimitResult> limitres;
     //std::map<TString,TString>::const_iterator itr=wsnameMap.begin(), end=wsnameMap.end();
 
     //for (; itr!=end; ++itr) {
     for (const auto &itr : wsnameMap) {
-        RooWorkspace* w = Util::GetWorkspaceFromFile( infile, itr.second );
+        RooWorkspace* w = hf::Util::GetWorkspaceFromFile( infile, itr.second );
         LimitResult result = get_Pvalue( w, mode, n_toys, do_ul, itr.first );
         limres.push_back(result);
         delete w;
@@ -486,7 +487,7 @@ std::list<LimitResult> CollectLimitResults( const TString& infile, const TString
 
 
 //________________________________________________________________________________________________
-LimitResult get_Pvalue( RooWorkspace* w, const int& mode, const int& n_toys, const int& do_ul, const TString& wid ) {
+hf::LimitResult hf::get_Pvalue( RooWorkspace* w, const int& mode, const int& n_toys, const int& do_ul, const TString& wid ) {
     LimitResult result;
 
     bool doUL = bool(do_ul);

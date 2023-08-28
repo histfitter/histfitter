@@ -16,6 +16,7 @@ You should have received a copy of the GNU General Public License
 along with Bit Powder Libraries.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+// STL include(s)
 #include <functional>
 #include <iterator>
 #include <map>
@@ -26,7 +27,9 @@ along with Bit Powder Libraries.  If not, see <http://www.gnu.org/licenses/>.
 #include <iomanip>
 #include <cmath>
 
+// HistFitter include(s)
 #include "json.h"
+
 
 template <class T>
 inline void destroy(T* object) {
@@ -178,4 +181,3 @@ inline std::ostream& operator<< (std::ostream& out, const JSON& json) {
     return out;
 }
 }
-

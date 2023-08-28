@@ -18,14 +18,20 @@
 """
 import os
 import ROOT
-from ROOT import ConfigMgr, FitConfig
-from ROOT import gROOT, gSystem, gDirectory
-gSystem.Load(f"{os.getenv('HISTFITTER')}/lib/libSusyFitter.so")
+from ROOT import gROOT, gSystem, gDirectory, PyConfig
+
 gROOT.SetBatch(True)
+PyConfig.IgnoreCommandLineOptions = True
+gSystem.Load(f"libHistFitter.so")
+from ROOT import hf
+ConfigMgr = hf.ConfigMgr
+FitConfig = hf.FitConfig
+StatTools = hf.StatTools
+Util = hf.Util
 gROOT.Reset()
 
 from ROOT import TFile, RooWorkspace, TObject, TString, RooAbsReal, RooRealVar, RooFitResult, RooDataSet, RooAddition, RooArgSet,RooAbsData,RooRandom
-from ROOT import Util, TMath, RooStats, StatTools
+from ROOT import TMath, RooStats
 from ROOT import RooFit
 from ROOT.std import vector
 from ROOT import double

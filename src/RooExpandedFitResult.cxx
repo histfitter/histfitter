@@ -12,16 +12,21 @@
  *                                                                                *
  **********************************************************************************/
 
+// STL include(s)
+#include <iostream>
+
+// ROOT include(s)
+#include "RooRealVar.h"
+
+// HistFitter include(s)
 #include "RooExpandedFitResult.h"
 
-#include "RooRealVar.h"
-#include <iostream>
 using namespace std;
 
-ClassImp(RooExpandedFitResult);
+ClassImp(hf::RooExpandedFitResult);
 
 //_______________________________________________________________________________________
-RooExpandedFitResult::RooExpandedFitResult(RooFitResult* origResult, RooArgList extraPars){
+hf::RooExpandedFitResult::RooExpandedFitResult(RooFitResult* origResult, RooArgList extraPars){
 
     TString name,title ;
     name = Form("Expanded%s", origResult->GetName()) ;
@@ -118,7 +123,7 @@ RooExpandedFitResult::RooExpandedFitResult(RooFitResult* origResult, RooArgList 
 
 
 //______________________________________________________________________________________
-RooExpandedFitResult::RooExpandedFitResult(RooArgList extraPars){
+hf::RooExpandedFitResult::RooExpandedFitResult(RooArgList extraPars){
 
     TString name,title ;
     name = "RooExpandedFitResult";

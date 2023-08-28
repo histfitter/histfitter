@@ -16,9 +16,10 @@ You should have received a copy of the GNU General Public License
 along with Bit Powder Libraries.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef JSON_H
-#define JSON_H
+#ifndef HF_JSON_H
+#define HF_JSON_H
 
+// STL include(s)
 #include <functional>
 #include <iterator>
 #include <map>
@@ -239,4 +240,4 @@ typedef std::vector<JSON> ArrayT;
 typedef std::map<Key, JSON> ObjectT;
 typedef double NumberT;
 
-#endif
+#endif  // HF_JSON_H

@@ -15,11 +15,16 @@
  * LICENSE.                                                                       *
  **********************************************************************************/
 
-#ifndef XTRAVALUES_H
-#define XTRAVALUES_H
+#ifndef HF_XTRAVALUES_H
+#define HF_XTRAVALUES_H
 
-#include "TString.h"
+// STL include(s)
 #include <vector>
+
+// ROOT include(s)
+#include "TString.h"
+
+namespace hf{
 
 class XtraValues {
     public:
@@ -39,4 +44,6 @@ class XtraValues {
         ClassDef(XtraValues,1) // Container class
 };
 
-#endif
+}  // namespace hf
+
+#endif  // HF_XTRAVALUES_H

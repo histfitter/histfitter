@@ -27,8 +27,8 @@
  * (http://tmva.sourceforge.net/LICENSE)                                          *
  **********************************************************************************/
 
-#ifndef TMSGLOGGER_H
-#define TMSGLOGGER_H
+#ifndef HF_TMSGLOGGER_H
+#define HF_TMSGLOGGER_H
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -49,6 +49,8 @@
 #include "TString.h"
 #include "RooGlobalFunc.h"
 
+namespace hf {
+
 enum TMsgLevel {
     kVERBOSE = 1,
     kDEBUG   = 2,
@@ -58,6 +60,7 @@ enum TMsgLevel {
     kFATAL   = 6,
     kALWAYS  = 7
 };
+
 
 class TMsgLogger : public std::ostringstream, public TObject {
     public:
@@ -193,6 +196,8 @@ inline TMsgLogger& TMsgLogger::operator<< ( TMsgLevel level ) {
 // would be nicer C++-wise, it introduces some "unused variable"
 // warnings so let's use the #define definition after all...
 // [ static TMsgLogger& ( *Endl )( TMsgLogger& ) = &TMsgLogger::endmsg; ]
-#define GEndl TMsgLogger::endmsg
+#define GEndl hf::TMsgLogger::endmsg
 
-#endif // Combination_TMsgLogger
+}  // namespace hf
+
+#endif // HF_TMSGLOGGER_H
