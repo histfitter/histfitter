@@ -33,7 +33,7 @@ and the value for the luminosity.
 void Config_pythonFree(){
 
   //Loading HistFitter library
-  gSystem->Load("libSusyFitter.so");
+  gSystem->Load("libHistFitter.so");
 
   //create configMgr instance
   ConfigMgr* mgr = ConfigMgr::getInstance();

@@ -22,7 +22,7 @@
 import ROOT
 from ROOT import *
 ROOT.PyConfig.IgnoreCommandLineOptions = True
-gSystem.Load("libSusyFitter.so")
+gSystem.Load("libHistFitter.so")
 #gROOT.Reset()
 ROOT.gROOT.SetBatch(True)
 
