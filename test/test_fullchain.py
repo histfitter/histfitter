@@ -5,6 +5,18 @@ import time
 import math
 import pytest
 
+
+# snippet to dump test info from cache
+"""
+import ROOT
+f = ROOT.TFile("data/hf_test/histCache.root")
+
+
+for k in f.GetListOfKeys():
+    val = f.Get(k.GetName()).Integral()
+    print(f"{k.GetName()}: {val},")
+"""
+
 #To pass tests in the right order, pytest-order plugin must be installed.
 
 # snippet to dump test info from cache

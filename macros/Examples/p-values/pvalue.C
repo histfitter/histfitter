@@ -50,7 +50,7 @@ pvalue()
   bool doUL = true;      // true = exclusion, false = discovery
 
   // load the linaray of HistFitter
-  gSystem->Load("libSusyFitter.so");
+  gSystem->Load("libHistFitter.so");
 
 
   // open workspace containing the statistical model
