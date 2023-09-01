@@ -50,6 +50,7 @@ cd build
 cmake -DCMAKE_INSTALL_PREFIX=/path/to/install/ /path/to/histfitter/
 make install
 ```
+Depending on your cmake version, you may need to add '-B.' in order to get cmake to put the build files into the current directory.
 
 HistFitter was originally built and used in the same directory as the source code. If you prefer this option, simply go to the source directory and make the build directory there. This will treat the source code directory `histfitter` as the install location, creating the `install` directory directly there.
 ```
