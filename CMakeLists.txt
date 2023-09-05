@@ -47,7 +47,7 @@ list(REMOVE_DUPLICATES HistFitter_sources)
 list(REMOVE_DUPLICATES HistFitter_headers)
 
 #Copy setup scripts
-install(FILES histfitter.sh DESTINATION "${CMAKE_INSTALL_PREFIX}/bin")
+install(FILES setup_histfitter.sh DESTINATION "${CMAKE_INSTALL_PREFIX}/bin")
 install(FILES ./histfitter_env_setup.sh DESTINATION "${CMAKE_INSTALL_PREFIX}/bin")
 
 #Copy files needed for working directories

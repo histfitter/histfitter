@@ -57,7 +57,7 @@ upperlimit()
   int npoints=20;       // number of points on the signal strength axis.
 
   // open the workspace
-  gSystem->Load("libSusyFitter.so");
+  gSystem->Load("libHistFitter.so");
 
   RooMsgService::instance().setGlobalKillBelow(RooFit::FATAL); // Reduce the noise from RooFit
   ROOT::Math::MinimizerOptions::SetDefaultMinimizer("Minuit2"); // More stable minimizer - otherwise "Minuit"

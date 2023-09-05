@@ -29,7 +29,7 @@ Initialzing the macro: loading the description of the list text file from summar
 */
 void initialize() {
   //gROOT->ProcessLine(".L summary_harvest_tree_description.h+");
-  gSystem->Load("libSusyFitter.so");
+  gSystem->Load("libHistFitter.so");
 }
 
 /**

@@ -26,7 +26,7 @@ Check the macro for further information.
 */
 void makelistfiles()
 {
-  gSystem->Load("libSusyFitter.so");
+  gSystem->Load("libHistFitter.so");
 
   // input root file with HypoTestInverterResults, 
   // as obtained from running: 
