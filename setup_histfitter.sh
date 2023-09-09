@@ -15,7 +15,7 @@ path=""
 test=false
 examples=false
 
-while getopts "hp:t" flag; do
+while getopts "hp:te" flag; do
   case "$flag" in
     h) echo "Use the flag -p to specify path to work dir, -t to copy pytest directory to your working directory, -e to copy example analysis and macros to your working directory.";;
     p) path="${OPTARG}" ;;
