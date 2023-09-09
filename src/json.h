@@ -29,6 +29,8 @@ along with Bit Powder Libraries.  If not, see <http://www.gnu.org/licenses/>.
 #include <iostream>
 #include <exception>
 
+#define UNUSED(x) (void)(x)
+
 class JSONException : public std::exception {
     const char* reason;
 public:
@@ -78,6 +80,7 @@ class JSON {
     template <class NumericType>
     JSON(NumericType number, typename std::enable_if<!std::is_same<bool,NumericType>::value and std::is_arithmetic<NumericType>::value,NumericType>::type* enabler = nullptr) : 
         type(JSONNumber), number(number) {
+            UNUSED(enabler);
     } 
     
     JSON(const std::string& str) : type(JSONString), str(str) {
@@ -199,7 +202,7 @@ class JSON {
         return asBool();
     }
 
-    virtual void print(std::ostream& out) const;
+    void print(std::ostream& out) const;
 
     JSON& operator[](const std::string& lookup) {
         return asObject()[lookup];
