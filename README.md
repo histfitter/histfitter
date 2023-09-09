@@ -41,7 +41,7 @@ An LCG release with the correct ROOT, Python, and cmake versions can be loaded o
 source setup_lcg.sh
 ```
 
-HistFitter is also available in the ATLAS StatAnalysis release, e.g.:
+HistFitter is also available in the ATLAS StatAnalysis release, which can be loaded with `source setup_lcg.sh -s`, or standalone with:
 
 ```
 setupATLAS
