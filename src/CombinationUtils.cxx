@@ -118,8 +118,10 @@ bool hf::Util::findValueFromTree( TTree* tree, const std::string& searchpar, flo
 
     const int nidpar = static_cast<int>( pnVec.size() ); 
 
-    float val[nidpar], sval(defaultVal);
-    TBranch* branch[nidpar], *sbranch(0);
+    float sval = defaultVal;
+    std::vector<float> val(nidpar, 0);
+    TBranch* sbranch = nullptr;
+    std::vector<TBranch*> branch(nidpar, nullptr);
 
     // set branches
     for (Int_t i=0; i<nidpar; ++i) { 

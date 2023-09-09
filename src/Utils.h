@@ -66,6 +66,8 @@ namespace RooStats {
   class ModelConfig;
 }
 
+#define UNUSED(x) (void)(x)
+
 namespace hf{
    
 namespace Util{
