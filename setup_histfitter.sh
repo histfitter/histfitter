@@ -13,12 +13,14 @@ fi
 
 path=""
 test=false
+examples=false
 
 while getopts "hp:t" flag; do
   case "$flag" in
-    h) echo "Use the flag -p to specify path to work dir and -t to copy pytest directory to your working directory.";;
+    h) echo "Use the flag -p to specify path to work dir, -t to copy pytest directory to your working directory, -e to copy example analysis and macros to your working directory.";;
     p) path="${OPTARG}" ;;
     t) test=true  ;;
+    e) examples=true ;;
   esac
 done
 #If we do not set this, the script does not work on second run
@@ -42,10 +44,12 @@ echo "Setting the HISTFITTER_WORKDIR variable to $HISTFITTER_WORKDIR"
 source "$SCRIPT_DIR/histfitter_env_setup.sh"
 
 #Set up HistFitter environment with folders
-echo "Making directories /config /results /data in folder $HISTFITTER_WORKDIR if they do not already exist."
-mkdir -p "$HISTFITTER_WORKDIR/config"
-mkdir -p "$HISTFITTER_WORKDIR/results"
-mkdir -p "$HISTFITTER_WORKDIR/data"
+if [ ! -d "$HISTFITTER_WORKDIR/config" || ! -d "$HISTFITTER_WORKDIR/results" || ! -d "$HISTFITTER_WORKDIR/data" ]; then
+    echo "Making directories ./config ./results ./data in $HISTFITTER_WORKDIR"
+    mkdir -p "$HISTFITTER_WORKDIR/config"
+    mkdir -p "$HISTFITTER_WORKDIR/results"
+    mkdir -p "$HISTFITTER_WORKDIR/data"
+fi
 
 #Copy necessary files
 if [ ! -f $HISTFITTER_WORKDIR/config/HistFactorySchema.dtd ]; then
@@ -53,13 +57,13 @@ if [ ! -f $HISTFITTER_WORKDIR/config/HistFactorySchema.dtd ]; then
   cp "$SCRIPT_DIR/../share/histfitter/config/HistFactorySchema.dtd" "$HISTFITTER_WORKDIR/config/HistFactorySchema.dtd";
 fi
 
-if [ ! -d $HISTFITTER_WORKDIR/analysis ]; then
+if [ "$examples" == "true" && ! -d $HISTFITTER_WORKDIR/analysis ]; then
   echo "Copying /analysis example folder to $HISTFITTER_WORKDIR/analysis.";
   cp -r "$SCRIPT_DIR/../share//histfitter/analysis" "$HISTFITTER_WORKDIR/analysis";
 fi
 
-if [ ! -d $HISTFITTER_WORKDIR/macros ]; then
-  echo "Copying /macros folders to $HISTFITTER_WORKDIR/macros.";
+if [ "$examples" == "true" && ! -d $HISTFITTER_WORKDIR/macros ]; then
+  echo "Copying /macros example folders to $HISTFITTER_WORKDIR/macros.";
   cp -r "$SCRIPT_DIR/../share/histfitter/macros" "$HISTFITTER_WORKDIR/macros";
 fi
 
