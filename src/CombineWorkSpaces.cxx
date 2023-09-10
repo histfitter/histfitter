@@ -81,7 +81,7 @@ void hf::clearVec( std::vector<RooWorkspace*>& wsVec ) {
  * the key is the filename, and map[key] gives the identifyer of the workspace.
  * wid is the new names of the retrieved workspaces
  */
-std::vector<RooWorkspace*> CollectWorkspaces( const std::map< TString,TString >& fwnameMap, const TString& wid ) {
+std::vector<RooWorkspace*> hf::CollectWorkspaces( const std::map< TString,TString >& fwnameMap, const TString& wid ) {
     std::vector<RooWorkspace*> wsVec;
     //std::map< TString,TString >::const_iterator wfItr=fwnameMap.begin(), wfEnd=fwnameMap.end();
 
@@ -108,7 +108,7 @@ return wsVec;
 /* this function categorizes all workspaces found in infile, whose names match the format
  * string, eg. "muSUSY10_3j_20pb_SU_%f_%f_0_3", where %f and %f are mapped onto the parameters "m0:m12"
  */
-std::map< TString,TString > GetMatchingWorkspaces( const TString& infile, const TString& theformat, const TString& interpretation, const TString& cutStr, const Int_t& fID, TTree* ORTree ) {
+std::map< TString,TString > hf::GetMatchingWorkspaces( const TString& infile, const TString& theformat, const TString& interpretation, const TString& cutStr, const Int_t& fID, TTree* ORTree ) {
 
     CombineWorkSpacesLogger << kDEBUG   << " GetMatchingWorkspaces() : infile = " << infile << GEndl;
     CombineWorkSpacesLogger << kDEBUG   << " GetMatchingWorkspaces() : theformat = " << theformat << GEndl ;
@@ -247,7 +247,7 @@ std::map< TString,TString > GetMatchingWorkspaces( const TString& infile, const 
 }
 
 //________________________________________________________________________________________________
-RooStats::HypoTestInverterResult* GetHypoTestResultFromFile( TFile* file, const TString& wsname ) {
+RooStats::HypoTestInverterResult* hf::GetHypoTestResultFromFile( TFile* file, const TString& wsname ) {
 
     if (!file || file->IsZombie()) {
         CombineWorkSpacesLogger << kERROR << "Invalid file. Pointer: " << file << GEndl;
@@ -280,7 +280,7 @@ RooStats::HypoTestInverterResult* GetHypoTestResultFromFile( TFile* file, const 
 
 
 //________________________________________________________________________________________________
-RooFitResult* GetFitResultFromFile( TFile* file, const TString& fitname ) {
+RooFitResult* hf::GetFitResultFromFile( TFile* file, const TString& fitname ) {
 
     if (!file || file->IsZombie()) {
         CombineWorkSpacesLogger << kERROR << "Invalid file. Pointer: " << file << GEndl;
@@ -313,7 +313,7 @@ RooFitResult* GetFitResultFromFile( TFile* file, const TString& fitname ) {
 
 
 //________________________________________________________________________________________________
-RooMCStudy* GetMCStudy( const RooWorkspace* w ) {
+RooMCStudy* hf::GetMCStudy( const RooWorkspace* w ) {
     if (w==0) {
         CombineWorkSpacesLogger << kERROR << "Input workspace is null. Return." << GEndl;
         return 0;
@@ -348,7 +348,7 @@ RooMCStudy* GetMCStudy( const RooWorkspace* w ) {
 
 
 //________________________________________________________________________________________________
-std::map<std::string, float> ParseWorkspaceID( const TString& wid ) {
+std::map<std::string, float> hf::ParseWorkspaceID( const TString& wid ) {
     // workspace id has form "m0=300.00_m12=700_"
     std::map<std::string, float> wconf;
 

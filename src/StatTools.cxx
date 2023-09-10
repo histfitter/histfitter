@@ -420,6 +420,8 @@ RooStats::HypoTestInverterResult* RooStats::DoHypoTestInversionAutoScan(RooWorks
         int nCPUs,
         std::vector<double> hints)
 {
+    UNUSED(poimin);
+    UNUSED(poimax);
 
     double initial_guess_mult = 1; // multi POI error by this much for first guess
 
