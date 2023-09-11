@@ -5,36 +5,39 @@
 #You can have many working directories, but then this script must be activated with 
 #the correct path when you change directory.
 
-#Check if the bash shell is used
-if [ -z "${BASH_VERSION}" ]; then 
-  echo "Please source this script using a bash shell.";
+#Check if the bash or zsh shells are being used
+if [ ! -z "${BASH_VERSION}" ]; then
+  #Find location of script
+  SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+elif [ ! -z "${ZSH_VERSION}" ]; then 
+  #Find location of script
+  SCRIPT_DIR="${0:A:h}"
+else
+  echo "Please source this script using a bash or zsh shell.";
   return;
 fi
 
-path=""
+HISTFITTER_WORKDIR=""
 test=false
+examples=false
 
-while getopts "hp:t" flag; do
+while getopts "hp:te" flag; do
   case "$flag" in
-    h) echo "Use the flag -p to specify path to work dir and -t to copy pytest directory to your working directory.";;
-    p) path="${OPTARG}" ;;
+    h) echo "Use the flag -p to specify path to work dir, -t to copy pytest directory to your working directory, -e to copy example analysis and macros to your working directory.";;
+    p) HISTFITTER_WORKDIR="${OPTARG}" ;;
     t) test=true  ;;
+    e) examples=true ;;
   esac
 done
 #If we do not set this, the script does not work on second run
 export OPTIND=1
 
-#Find location of script
-SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
-
 #Set histfitter environment path
-if [ -z $path ];
-then
+if [ -z $HISTFITTER_WORKDIR ]; then
   echo "Assuming current directory is the working directory"
-  export HISTFITTER_WORKDIR=$(pwd)
-else
-  export HISTFITTER_WORKDIR=$path
+  HISTFITTER_WORKDIR=$(pwd)
 fi
+export HISTFITTER_WORKDIR
 
 echo "Setting the HISTFITTER_WORKDIR variable to $HISTFITTER_WORKDIR"
 
@@ -42,10 +45,12 @@ echo "Setting the HISTFITTER_WORKDIR variable to $HISTFITTER_WORKDIR"
 source "$SCRIPT_DIR/histfitter_env_setup.sh"
 
 #Set up HistFitter environment with folders
-echo "Making directories /config /results /data in folder $HISTFITTER_WORKDIR if they do not already exist."
-mkdir -p "$HISTFITTER_WORKDIR/config"
-mkdir -p "$HISTFITTER_WORKDIR/results"
-mkdir -p "$HISTFITTER_WORKDIR/data"
+if [[ ! -d "$HISTFITTER_WORKDIR/config" || ! -d "$HISTFITTER_WORKDIR/results" || ! -d "$HISTFITTER_WORKDIR/data" ]]; then
+    echo "Making directories ./config ./results ./data in $HISTFITTER_WORKDIR"
+    mkdir -p "$HISTFITTER_WORKDIR/config"
+    mkdir -p "$HISTFITTER_WORKDIR/results"
+    mkdir -p "$HISTFITTER_WORKDIR/data"
+fi
 
 #Copy necessary files
 if [ ! -f $HISTFITTER_WORKDIR/config/HistFactorySchema.dtd ]; then
@@ -53,13 +58,13 @@ if [ ! -f $HISTFITTER_WORKDIR/config/HistFactorySchema.dtd ]; then
   cp "$SCRIPT_DIR/../share/histfitter/config/HistFactorySchema.dtd" "$HISTFITTER_WORKDIR/config/HistFactorySchema.dtd";
 fi
 
-if [ ! -d $HISTFITTER_WORKDIR/analysis ]; then
+if [[ "$examples" == "true" && ! -d $HISTFITTER_WORKDIR/analysis ]]; then
   echo "Copying /analysis example folder to $HISTFITTER_WORKDIR/analysis.";
   cp -r "$SCRIPT_DIR/../share//histfitter/analysis" "$HISTFITTER_WORKDIR/analysis";
 fi
 
-if [ ! -d $HISTFITTER_WORKDIR/macros ]; then
-  echo "Copying /macros folders to $HISTFITTER_WORKDIR/macros.";
+if [[ "$examples" == "true" && ! -d $HISTFITTER_WORKDIR/macros ]]; then
+  echo "Copying /macros example folders to $HISTFITTER_WORKDIR/macros.";
   cp -r "$SCRIPT_DIR/../share/histfitter/macros" "$HISTFITTER_WORKDIR/macros";
 fi
 

@@ -1134,9 +1134,7 @@ void hf::Util::PlotSeparateComponents(RooWorkspace* w,TString fcName, TString an
     if(plotRegions =="") plotRegions = "ALL";
     std::vector<TString> regionsVec = GetRegionsVec(plotRegions, regionCat);
 
-    unsigned  int numRegions = regionsVec.size();
-    TCanvas* canVec[numRegions];
-
+    unsigned int numRegions = regionsVec.size();
     for(unsigned int iVec=0; iVec<numRegions; iVec++){
 
         TString regionCatLabel = regionsVec[iVec];
@@ -1160,21 +1158,21 @@ void hf::Util::PlotSeparateComponents(RooWorkspace* w,TString fcName, TString an
             Int_t numComps = regionCompNameVec.size();
 
             // divide the canvas
-            Int_t canVecDivX = 1;
-            Int_t canVecDivY = 1;
+            Int_t canvasDivX = 1;
+            Int_t canvasDivY = 1;
             if(numComps>0){
-                canVecDivX = ((Int_t) (sqrt(numComps)));
-                canVecDivY = ((Int_t) (sqrt(numComps)+0.5));
+                canvasDivX = ((Int_t) (sqrt(numComps)));
+                canvasDivY = ((Int_t) (sqrt(numComps)+0.5));
 
-                if(canVecDivX<1)
-                    canVecDivX = 1;
-                if(canVecDivY<1)
-                    canVecDivY = 1;
+                if(canvasDivX<1)
+                    canvasDivX = 1;
+                if(canvasDivY<1)
+                    canvasDivY = 1;
             }
 
             TString canName=Form("can_%s_%s_separateComponents",regionCatLabel.Data(),outputPrefix.Data());
-            canVec[iVec] = new TCanvas(canName,canName,600,600); // .c_str())
-            canVec[iVec]->Divide(canVecDivX , canVecDivY);
+            TCanvas* canvas = new TCanvas(canName,canName,600,600); // .c_str())
+            canvas->Divide(canvasDivX , canvasDivY);
 
             //iterate over all samples and plot
             for( unsigned int iComp=0; iComp<regionCompFracVec.size(); iComp++){
@@ -1192,7 +1190,7 @@ void hf::Util::PlotSeparateComponents(RooWorkspace* w,TString fcName, TString an
 
                 regionPdf->plotOn(frame,Components(regionCompNameVec[iComp].Data()),LineColor(compPlotColor),Normalization(regionCompFracVec[iComp]*normCount,RooAbsReal::NumEvent),Precision(1e-5));
 
-                canVec[iVec]->cd(iComp+1);
+                canvas->cd(iComp+1);
                 frame->SetMinimum(0.);
                 frame->Draw();
 
@@ -1210,8 +1208,8 @@ void hf::Util::PlotSeparateComponents(RooWorkspace* w,TString fcName, TString an
                 leg->Draw();
             }
 
-            canVec[iVec]->SaveAs("results/"+anaName+"/"+canName+".pdf");
-            canVec[iVec]->SaveAs("results/"+anaName+"/"+canName+".eps");
+            canvas->SaveAs("results/"+anaName+"/"+canName+".pdf");
+            canvas->SaveAs("results/"+anaName+"/"+canName+".eps");
         }
     }
 }
@@ -1336,16 +1334,12 @@ void hf::Util::PlotNLL(RooWorkspace* w, RooFitResult* rFit, Bool_t plotPLL, TStr
     }
     Logger << kINFO << "hf::Util::PlotNLL rFit contains no floating parameters: " << numParsP << GEndl;
 
-    TCanvas* canVec[numPars];
-
     // loop over all floating pars
-    for(unsigned int iPar=0, jPar=0; iPar<numPars ; iPar++){
+    for(unsigned int iPar=0; iPar<numPars ; iPar++){
         RooAbsArg* arg = fpf.at(iPar);
 
         if ( (plotParams->getSize()>0) && plotParams->find(arg->GetName())==0 ) { continue; }
         if ( !arg->InheritsFrom("RooRealVar") ) { continue; }
-
-        jPar++; // special counter when selecting parameters
 
         RooRealVar* par = (RooRealVar*) arg;
         TString parName = par->GetName();
@@ -1446,8 +1440,8 @@ void hf::Util::PlotNLL(RooWorkspace* w, RooFitResult* rFit, Bool_t plotPLL, TStr
 
 
         TString canName=Form("can_NLL_%s_%s_%s", outputPrefix.Data(), rFit->GetName(), parName.Data());
-        canVec[iPar] = new TCanvas(canName, canName, 600, 600);
-        canVec[iPar]->cd();
+        TCanvas* canvas = new TCanvas(canName, canName, 600, 600);
+        canvas->cd();
         frame->Draw();
 
         TLegend* leg = new TLegend(0.55, 0.65, 0.85, 0.9, "");
@@ -1464,7 +1458,7 @@ void hf::Util::PlotNLL(RooWorkspace* w, RooFitResult* rFit, Bool_t plotPLL, TStr
         leg->Draw();
 
         // update plot
-        canVec[iPar]->Draw();
+        canvas->Draw();
 
         // reset parameter range to previous values
         par->setMin(minRange);
@@ -1474,9 +1468,9 @@ void hf::Util::PlotNLL(RooWorkspace* w, RooFitResult* rFit, Bool_t plotPLL, TStr
             delete pll; pll=0;
         }
 
-        canVec[iPar]->SaveAs("results/"+anaName+"/"+canName+".pdf");
-        canVec[iPar]->SaveAs("results/"+anaName+"/"+canName+".C");
-        canVec[iPar]->SaveAs("results/"+anaName+"/"+canName+".eps");
+        canvas->SaveAs("results/"+anaName+"/"+canName+".pdf");
+        canvas->SaveAs("results/"+anaName+"/"+canName+".C");
+        canvas->SaveAs("results/"+anaName+"/"+canName+".eps");
 
         TString fname("results/"+anaName+"/"+canName+".root");
         TFile *f = TFile::Open(fname, "RECREATE");

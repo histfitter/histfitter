@@ -599,7 +599,7 @@ RooStats::HypoTestTool::SetupHypoTestCalculator(RooWorkspace * w, bool doUL,
             // add all remaining parameters from old snapshot
             TIterator* vrItr = prevSnapSet->createIterator();
             RooRealVar* vr(0);
-            for (Int_t i=0; (vr = (RooRealVar*)vrItr->Next()); ++i) {
+            while((vr = (RooRealVar*)vrItr->Next())) {
                 if (vr==0) continue;
                 TString vrName = vr->GetName();
                 RooRealVar* par = (RooRealVar*)newSnapSet.find(vrName.Data());

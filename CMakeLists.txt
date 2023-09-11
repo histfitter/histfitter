@@ -69,6 +69,12 @@ install(FILES ${HistFitter_headers} DESTINATION "${CMAKE_INSTALL_PREFIX}/include
 #Add libraries
 add_library(HistFitter SHARED ${HistFitter_sources})
 
+#Change .dylib extension to .so on macOS; not pretty, but simpler than changing the
+#library file extension in all inports/loads dynamically
+if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+    set(CMAKE_SHARED_LIBRARY_SUFFIX .so)
+endif()
+
 #To make ROOT_GENERATE_DICTIONARY find the header files we are including
 target_include_directories(HistFitter PRIVATE ${PROJECT_SOURCE_DIR}/src)
 
