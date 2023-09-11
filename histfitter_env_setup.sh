@@ -16,22 +16,28 @@ function validate_ROOT_release {
   local ROOT_version_minimum
   local ROOT_version_minimum_major
   local ROOT_version_minimum_minor
+  local ROOT_version_minimum_rev
   local ROOT_version
   local ROOT_version_major
   local ROOT_version_minor
+  local ROOT_version_rev
   local compatible_ROOT_version
 
-  ROOT_version_minimum="6.28"
+  ROOT_version_minimum="6.28/00"
   ROOT_version_minimum_major="$(echo $ROOT_version_minimum | cut -d "." -f 1)"
-  ROOT_version_minimum_minor="$(echo $ROOT_version_minimum | cut -d "." -f 2)"
+  ROOT_version_minimum_minor="$(echo $ROOT_version_minimum | cut -d "." -f 2 | cut -d "/" -f 1)"
+  ROOT_version_minimum_rev="$(echo $ROOT_version_minimum | cut -d "/" -f 2)"
   ROOT_version="$(root-config --version)"
   ROOT_version_major="$(echo "$ROOT_version" | cut -d "." -f 1)"
   ROOT_version_minor="$(echo "$ROOT_version" | cut -d "." -f 2 | cut -d "/" -f 1)"
+  ROOT_version_rev="$(echo "$ROOT_version" | cut -d "/" -f 2)"
   compatible_ROOT_version=true
 
   if [[ "$ROOT_version_major" -lt "$ROOT_version_minimum_major" ]]; then
     compatible_ROOT_version=false
   elif [ "$ROOT_version_major" -eq "$ROOT_version_minimum_major" ] && [ "$ROOT_version_minor" -lt "$ROOT_version_minimum_minor" ]; then
+    compatible_ROOT_version=false
+  elif [ "$ROOT_version_major" -eq "$ROOT_version_minimum_major" ] && [ "$ROOT_version_minor" -eq "$ROOT_version_minimum_minor" ] && [ "$ROOT_version_rev" -lt "$ROOT_version_minimum_rev" ]; then
     compatible_ROOT_version=false
   fi
   if [[ "$compatible_ROOT_version" = false ]]; then
