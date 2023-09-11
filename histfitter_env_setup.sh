@@ -54,8 +54,17 @@ fi
 export HISTFITTER_VERSION=$VERSION
 
 #Find location of script
-SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
-echo "Setting paths: ROOT_INCLUDE_PATH, PATH, LD_LIBRARY_PATH, PYTHONPATH"
+if [ ! -z "${BASH_VERSION}" ]; then
+  #Find location of script
+  SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+elif [ ! -z "${ZSH_VERSION}" ]; then 
+  #Find location of script
+  SCRIPT_DIR="${0:A:h}"
+else
+  echo "Please source this script using a bash or zsh shell.";
+  return;
+fi
+echo "Adding HistFitter paths: ROOT_INCLUDE_PATH, PATH, LD_LIBRARY_PATH, PYTHONPATH"
 
 #Update paths
 export ROOT_INCLUDE_PATH="$ROOT_INCLUDE_PATH:$SCRIPT_DIR/../include/histfitter"
