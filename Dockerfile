@@ -45,7 +45,7 @@ RUN root --version && \
     rm -rf ../HistFitter && \
     rm -rf ../build && \
     cd ../workdir && \
-    . ../install/bin/setup_histfitter.sh && \
+    . ../install/bin/setup_histfitter.sh -e && \
     mkdir -p ${HOME}/.local/bin
 
 ENTRYPOINT ["/bin/bash", "-l", "-c"]
