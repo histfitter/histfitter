@@ -401,7 +401,7 @@ TString hf::ConfigMgr::makeCorrectedBkgModelConfig( RooWorkspace* w, const char*
         // add all remaining parameters from old snapshot
         TIterator* vrItr = prevSnapSet->createIterator();
         RooRealVar* vr(0);
-        for (Int_t i=0; (vr = (RooRealVar*)vrItr->Next()); ++i) {
+        while((vr = (RooRealVar*)vrItr->Next())) {
             if (vr==0) 
                 continue;
 
