@@ -24,6 +24,7 @@ do_SA=false
 
 main()
 {
+    local OPTIND OPTARG flag
     while getopts ":hs" flag; do
         case "$flag" in
             h) help_fn; return 0 ;;
@@ -37,9 +38,6 @@ main()
         help_fn
         return 1
     fi
-    
-    #If we do not set this, the script does not work on second run
-    #export OPTIND=1
 
     # Check that CVMFS is mounted
     if [ ! -d /cvmfs/atlas.cern.ch/repo/ATLASLocalRootBase ]; then
