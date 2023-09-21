@@ -22,6 +22,7 @@ from code import InteractiveConsole
 import argparse
 import sys
 import subprocess
+import json
 
 #ROOT imports
 import ROOT
@@ -38,7 +39,7 @@ Util = hf.Util
 #Histfitter imports
 from logger import Logger
 from configManager import configMgr
-from hfpyhf import conversions
+from usepyhf import conversions
 
 #Create logger
 log = Logger('HistFitter')
@@ -116,9 +117,9 @@ if __name__ == "__main__":
     doCodeProfiling = False
     doFixParameters = False
     fixedPars = ""
+    usePyhf = False
     
     FitType = configMgr.FitType #enum('FitType','Discovery , Exclusion , Background')
-    prefix = "FitType"
     myFitType=FitType.Background
     doValidation = False
     
@@ -176,7 +177,8 @@ if __name__ == "__main__":
     parser.add_argument("-A", "--use-archive-histfile", help="use backup histogram cache file", action="store_true")
     parser.add_argument("-P", "--run-profiling", help="Run a python profiler during main HistFitter execution", action="store_true")
     parser.add_argument("-C", "--constant", help="Set parameters to constant in the fit, Give list of parameters and their values as parameter1:value1,parameter2:value2:...", metavar="PARAM")
-    
+    parser.add_argument("-pyhf", "--use-pyhf", help="Use pyhf as backend where possible.", action="store_true")
+
     HistFitterArgs = parser.parse_args()
 
     """
@@ -187,15 +189,12 @@ if __name__ == "__main__":
         sys.exit(-1)
     if HistFitterArgs.fit_type == "bkg":
         myFitType = FitType.Background
-        prefix = "Background"
         log.info("Will run in background-only fit mode")
     elif HistFitterArgs.fit_type == "excl" or HistFitterArgs.fit_type == "model-dep":
         myFitType = FitType.Exclusion
-        prefix = "Exclusion"
         log.info("Will run in exclusion (model-dependent) fit mode")
     elif HistFitterArgs.fit_type == "disc" or HistFitterArgs.fit_type == "model-indep":
         myFitType = FitType.Discovery
-        prefix = "Discovery"
         log.info("Will run in discovery (model-independent) fit mode")
     
     # Combining -p and -z can give funny results. It's not recommend. We stop the user from doing this and
@@ -204,6 +203,24 @@ if __name__ == "__main__":
         log.error("You specified both -p and -z in the options. This can currently lead to unexpected results for the obtained CLs values for the -p option.")
         log.error("Please run these two steps separately - there is no need to regenerate the workspace, so there is no overhead to do so.")
         sys.exit()
+
+    if HistFitterArgs.use_pyhf:
+        usePyhf = True
+        log.info("Will use pyhf as backend where possible. Checking that pyhf is installed.")
+        #Check that pyhf python module is installed
+        try:
+            import pyhf
+            log.info("import pyhf successful.")
+        except ImportError:
+            log.error("import pyhf failed. Install the python pyhf module by running 'pip install pyhf'.")
+            sys.exit()
+        #Check that pyhf is installed on the command line
+        process = subprocess.run(["pyhf"])
+        if process.returncode == 0:
+            log.info("pyhf command installed.")
+        else:
+            log.error("Install the python pyhf module by running 'pip install pyhf'.")
+            sys.exit()
 
     configMgr.myFitType = myFitType
  
@@ -247,7 +264,8 @@ if __name__ == "__main__":
         printLimits = True
 
     if HistFitterArgs.hypotest:
-        configMgr.doHypoTest = True
+        if not usePyhf:
+            configMgr.doHypoTest = True
         doHypoTests = True
 
     if HistFitterArgs.discovery_hypotest:
@@ -399,6 +417,16 @@ if __name__ == "__main__":
                   if Systs != "": Util.plotUpDown(configMgr.histCacheFile,sam.name,Systs,chan.regionString,chan.variableName)
 
     """
+    create JSONs
+    """
+    if createJSON:
+        if not os.path.isdir("./json"):
+            log.info("no directory './json' found - attempting to create one")
+            os.mkdir("./json")
+        for fc in configMgr.fitConfigs:
+            conversions.create_json(fc.name, configMgr.analysisName)
+    
+    """
     runs fitting and plotting, by calling C++ side functions
     """
     if runFit or HistFitterArgs.draw:
@@ -461,7 +489,16 @@ if __name__ == "__main__":
             configMgr.cppMgr.doHypoTestAll('results/', False)
         
         if doHypoTests:
-            configMgr.cppMgr.doHypoTestAll('results/', True)
+            if usePyhf:
+                from usepyhf import hypotest
+                for fc in configMgr.fitConfigs:
+                    json_file_path = f"./json/{configMgr.analysisName}/{configMgr.analysisName}_{fc.name}.json"
+                    with open(json_file_path) as serialized:
+                        json_file = json.load(serialized)
+                    workspace = pyhf.Workspace(json_file)
+                    hypotest.p_values(workspace)
+            else:
+                configMgr.cppMgr.doHypoTestAll('results/', True)
 
         pass
 
@@ -473,15 +510,5 @@ if __name__ == "__main__":
         cons = InteractiveConsole(locals())
         cons.interact("Continuing interactive session... press Ctrl+d to exit")
         pass
-    """
-    create JSONs
-    """
-
-    if createJSON:
-        if not os.path.isdir("./json"):
-            log.info("no directory './json' found - attempting to create one")
-            os.mkdir("./json")
-        for fc in configMgr.fitConfigs:
-            conversions.create_json(fc.name, configMgr.analysisName)
-
+    
     log.info("Leaving HistFitter... Bye!")
