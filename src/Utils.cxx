@@ -2785,7 +2785,7 @@ Util::resetNominalValue( RooWorkspace* wspace, const RooArgSet& globSet )
         else if( UncertaintyName == TString("nominalLumi") ) {
             valnom = 1.0;
         }
-        // If it is a standard (gaussian) uncertainty
+        // If it is a Gaussian stat uncertainty
         else if( string(UncertaintyName).find("gamma")!=string::npos ){
             // Poisson obs gamma terms are set to tau=1/sigma^2, therefore they should not be touched
             // by this. TODO: In case there is a way of obtaining the tau value we should set it to that
