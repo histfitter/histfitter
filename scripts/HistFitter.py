@@ -473,7 +473,18 @@ if __name__ == "__main__":
             if len(fc.validationChannels) > 0:
                 raise Exception
             pass
-        configMgr.cppMgr.doUpperLimitAll()
+        if usePyhf:
+            from usepyhf import plot, upper_limits
+            for fc in configMgr.fitConfigs:
+                json_file_path = f"./json/{configMgr.analysisName}/{configMgr.analysisName}_{fc.name}.json"
+                with open(json_file_path) as serialized:
+                    json_file = json.load(serialized)
+                workspace = pyhf.Workspace(json_file)
+                fig, ax = plot.brazil_plot(workspace)
+                fig.savefig(f"./results/{configMgr.analysisName}/{fc.name}.png")
+                upper_limits.upper_limit(workspace)
+        else:
+            configMgr.cppMgr.doUpperLimitAll()
         pass
 
     """
@@ -486,8 +497,17 @@ if __name__ == "__main__":
             pass
         
         if doDiscoveryHypoTests:
-            configMgr.cppMgr.doHypoTestAll('results/', False)
-        
+            if usePyhf:
+                from usepyhf import hypotest
+                for fc in configMgr.fitConfigs:
+                    json_file_path = f"./json/{configMgr.analysisName}/{configMgr.analysisName}_{fc.name}.json"
+                    with open(json_file_path) as serialized:
+                        json_file = json.load(serialized)
+                    workspace = pyhf.Workspace(json_file)
+                    hypotest.p_values_disc(workspace)
+            else:
+                configMgr.cppMgr.doHypoTestAll('results/', False)
+            
         if doHypoTests:
             if usePyhf:
                 from usepyhf import hypotest
@@ -496,7 +516,7 @@ if __name__ == "__main__":
                     with open(json_file_path) as serialized:
                         json_file = json.load(serialized)
                     workspace = pyhf.Workspace(json_file)
-                    hypotest.p_values(workspace)
+                    hypotest.p_values_excl(workspace)
             else:
                 configMgr.cppMgr.doHypoTestAll('results/', True)
 

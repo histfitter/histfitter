@@ -48,19 +48,22 @@ print(f"samples (  model  ): {model.config.samples}")
 print("---------------------------------")
 
 #Make a plot
-#fig, ax = plot.brazil_plot(data, model)
-#fig.savefig(f"./results/{ana_name}/{config_name}.png")
+fig, ax = plot.brazil_plot(workspace)
+fig.savefig(f"./results/{ana_name}/{config_name}.png")
 
 #p values
-print("Test p-value script")
-p_values = hypotest.p_values(workspace, poi_value, test_stat, return_values=True)
+print("Exclusion")
+hypotest.p_values_excl(workspace, test_stat)
+
 print("---------------------------------")
+
+#p values
+print("BkgOnly")
+hypotest.p_values_disc(workspace, test_stat)
+print("---------------------------------")
+
+#Upper limit
+print(pyhf.infer.intervals.upper_limits.upper_limit(data, model, scan=np.linspace(0,5,50)))
 
 #Maximum likelihood fit
 bestfit_pars = inference.mle_fit(workspace)
-
-#test fitted value
-print("Test p-value script")
-poi_index = model.config.poi_index
-p_values = hypotest.p_values(workspace, bestfit_pars[poi_index][0], test_stat, return_values=True)
-print("---------------------------------")
