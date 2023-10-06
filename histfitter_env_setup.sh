@@ -61,10 +61,10 @@ export HISTFITTER_VERSION=$VERSION
 
 #Find location of script
 if [ ! -z "${BASH_VERSION}" ]; then
-  #Find location of script
+  #Find location of this script in the install area
   SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 elif [ ! -z "${ZSH_VERSION}" ]; then 
-  #Find location of script
+  #Find location of this script in the install area
   SCRIPT_DIR="${0:A:h}"
 else
   echo "Please source this script using a bash or zsh shell.";
