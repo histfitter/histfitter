@@ -215,12 +215,15 @@ if __name__ == "__main__":
             log.error("import pyhf failed. Install the python pyhf module by running 'pip install pyhf'.")
             sys.exit()
         #Check that pyhf is installed on the command line
-        process = subprocess.run(["pyhf"])
+        process = subprocess.run(["pyhf", "-h"])
         if process.returncode == 0:
-            log.info("pyhf command installed.")
+            log.info("pyhf command line tool installed.")
         else:
-            log.error("Install the python pyhf module by running 'pip install pyhf'.")
+            log.error("Install the pyhf command line tool by running 'pip install pyhf'.")
             sys.exit()
+        #Import modules and set up backend
+        import usepyhf
+        pyhf.set_backend(pyhf.tensorlib, pyhf.optimize.minuit_optimizer(tolerance=1e-3))
 
     configMgr.myFitType = myFitType
  
@@ -424,7 +427,7 @@ if __name__ == "__main__":
             log.info("no directory './json' found - attempting to create one")
             os.mkdir("./json")
         for fc in configMgr.fitConfigs:
-            conversions.create_json(fc.name, configMgr.analysisName)
+            usepyhf.util.create_json(configMgr.analysisName, fc.name)
     
     """
     runs fitting and plotting, by calling C++ side functions
@@ -464,7 +467,7 @@ if __name__ == "__main__":
         log.debug(" GenerateFitAndPlotCPP(configMgr.fitConfigs[%d], configMgr.analysisName, drawBeforeFit, drawAfterFit, configMgr.plotStacked, configMgr.storeSinglePlotFiles, configMgr.storeMergedPlotFile, drawCorrelationMatrix, drawSeparateComponents, drawLogLikelihood, runMinos, minosPars, doFixParameters, fixedPars, ReduceCorrMatrix, noFit, drawInterpolation)" % idx)
         log.debug("   where drawBeforeFit, drawAfterFit, drawCorrelationMatrix, drawSeparateComponents, drawLogLikelihood, ReduceCorrMatrix, noFit, drawInterpolation are booleans")
         pass
-
+    
     """
     calculating and printing upper limits for model-(in)dependent signal fit configurations (aka Exclusion/Discovery fit setup)
     """
@@ -474,15 +477,17 @@ if __name__ == "__main__":
                 raise Exception
             pass
         if usePyhf:
-            from usepyhf import plot, upper_limits
+            from usepyhf import plot, confidence, inference
             for fc in configMgr.fitConfigs:
                 json_file_path = f"./json/{configMgr.analysisName}/{configMgr.analysisName}_{fc.name}.json"
                 with open(json_file_path) as serialized:
                     json_file = json.load(serialized)
                 workspace = pyhf.Workspace(json_file)
+                best_fit = inference.mle_fit(workspace)
+                log.info(f"Making plot and saving it as ./results/{configMgr.analysisName}/upperlimit_{fc.name}.png")
                 fig, ax = plot.brazil_plot(workspace)
-                fig.savefig(f"./results/{configMgr.analysisName}/{fc.name}.png")
-                upper_limits.upper_limit(workspace)
+                fig.savefig(f"./results/{configMgr.analysisName}/upperlimit_{fc.name}.png")
+                confidence.upper_limit(workspace)
         else:
             configMgr.cppMgr.doUpperLimitAll()
         pass
@@ -498,25 +503,27 @@ if __name__ == "__main__":
         
         if doDiscoveryHypoTests:
             if usePyhf:
-                from usepyhf import hypotest
+                from usepyhf import inference
                 for fc in configMgr.fitConfigs:
                     json_file_path = f"./json/{configMgr.analysisName}/{configMgr.analysisName}_{fc.name}.json"
                     with open(json_file_path) as serialized:
                         json_file = json.load(serialized)
                     workspace = pyhf.Workspace(json_file)
-                    hypotest.p_values_disc(workspace)
+                    best_fit = inference.mle_fit(workspace)
+                    inference.p_values_disc(workspace)
             else:
                 configMgr.cppMgr.doHypoTestAll('results/', False)
             
         if doHypoTests:
             if usePyhf:
-                from usepyhf import hypotest
+                from usepyhf import inference
                 for fc in configMgr.fitConfigs:
                     json_file_path = f"./json/{configMgr.analysisName}/{configMgr.analysisName}_{fc.name}.json"
                     with open(json_file_path) as serialized:
                         json_file = json.load(serialized)
                     workspace = pyhf.Workspace(json_file)
-                    hypotest.p_values_excl(workspace)
+                    best_fit = inference.mle_fit(workspace)
+                    inference.p_values_excl(workspace)
             else:
                 configMgr.cppMgr.doHypoTestAll('results/', True)
 

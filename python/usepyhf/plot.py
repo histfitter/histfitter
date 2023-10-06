@@ -2,11 +2,11 @@ import pyhf
 import numpy as np
 import matplotlib.pyplot as plt
 from pyhf.contrib.viz import brazil
-from usepyhf import hypotest
+from usepyhf import util
 
-def brazil_plot(workspace:pyhf.Workspace, poi_value:float=None, test_stat:str="qtilde"):
+def brazil_plot(workspace:pyhf.Workspace, test_stat:str="qtilde", size=[7, 5]):
     """
-    ...
+    Make a brazil band plot to show the upper limit CI and +/- [1, 2] sigma CL.
     """
     #Extract model and data
     model = workspace.model()
@@ -15,30 +15,27 @@ def brazil_plot(workspace:pyhf.Workspace, poi_value:float=None, test_stat:str="q
     #Find parameter of interest
     poi_index = model.config.poi_index
     poi_name = model.config.par_order[poi_index]
-    print(f"Parameter of interest: {poi_name}")
 
     #Find bounds
     poi_min, poi_max = model.config.suggested_bounds()[poi_index]
     poi_vals = np.linspace(poi_min, poi_max, 100)
-    print(f"Suggested bounds for POI: {poi_min}, {poi_max}")
     
-    #Match parameter name and indices
-    #Fix SigXSec
-    par_order = model.config.par_order
-    if "SigXsec" in par_order:
-        sigXsec_idx = [i for i in range(len(par_order)) if par_order[i] == "SigXsec"][0]
-        fix_pars = [False]*len(par_order)
-        fix_pars[sigXsec_idx]=True
-    else:
-        fix_pars = [False]*len(par_order)
+    #Fix the parameter "SigXsec" if it exists
+    fix_pars = util.fix_sigxsec(model)
 
+    #Calculate p-value for each POI value
     results = [
         pyhf.infer.hypotest(
             test_poi, data, model, test_stat=test_stat, fixed_params=fix_pars, return_expected_set=True
         )
         for test_poi in poi_vals
     ]
+    
+    #Plot
     fig, ax = plt.subplots()
-    fig.set_size_inches(7, 5)
+    fig.set_size_inches(size[0], size[1])
     brazil.plot_results(poi_vals, results, ax=ax)
+    ax.set_xlabel(poi_name)
+    ax.set_ylabel("p-value")
+    ax.set_xlim(left=0)
     return fig, ax
