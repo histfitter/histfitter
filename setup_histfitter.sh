@@ -44,6 +44,8 @@ echo "Setting the HISTFITTER_WORKDIR variable to $HISTFITTER_WORKDIR"
 #Set other paths
 source "$SCRIPT_DIR/histfitter_env_setup.sh"
 
+export PYTHONPATH=$PYTHONPATH:$HISTFITTER_WORKDIR/analysis
+
 #Set up HistFitter environment with folders
 if [[ ! -d "$HISTFITTER_WORKDIR/config" || ! -d "$HISTFITTER_WORKDIR/results" || ! -d "$HISTFITTER_WORKDIR/data" ]]; then
     echo "Making directories ./config ./results ./data in $HISTFITTER_WORKDIR"

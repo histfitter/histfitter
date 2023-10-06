@@ -73,7 +73,7 @@ This will create an install directory with the installed libraries as well as ot
 
 ## Setup
 
-The environment must be set by activating the setup script (`install/bin/histfitter_setup.sh`) in the directory where you want to work. This will create five new directorys in your work directory: `analysis`, `config`, `data`, `macros`, and `results`. It also copies the `HistFactorySchema.dtd` file into the config directory. Most importantly, the setup script sets the environment variable paths that are required for the scripts to work.
+The environment must be set by activating the setup script (`install/bin/histfitter_setup.sh`) in the directory where you want to work. This will create five new directorys in your work directory: `analysis`, `config`, `data`, `macros`, and `results`. It also copies the `HistFactorySchema.dtd` file into the config directory. Most importantly, the setup script sets the environment variable paths that are required for the scripts to work.  The setup also adds the analysis directory in the working area to the Python path.  This makes it convenient to import additional python files without needing to install them in the build area.
 
 ```
 source /path/to/install/bin/histfitter_setup.sh
