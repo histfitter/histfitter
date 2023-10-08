@@ -39,7 +39,6 @@ Util = hf.Util
 #Histfitter imports
 from logger import Logger
 from configManager import configMgr
-from usepyhf import conversions
 
 #Create logger
 log = Logger('HistFitter')
