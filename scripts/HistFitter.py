@@ -204,7 +204,7 @@ if __name__ == "__main__":
         log.error("Please run these two steps separately - there is no need to regenerate the workspace, so there is no overhead to do so.")
         sys.exit()
 
-    if HistFitterArgs.use_pyhf:
+    if HistFitterArgs.pyhf:
         usePyhf = True
         createJSON = True
         log.info("Will use pyhf as backend where possible. Checking that pyhf is installed.")
