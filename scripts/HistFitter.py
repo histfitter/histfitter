@@ -177,7 +177,7 @@ if __name__ == "__main__":
     parser.add_argument("-A", "--use-archive-histfile", help="use backup histogram cache file", action="store_true")
     parser.add_argument("-P", "--run-profiling", help="Run a python profiler during main HistFitter execution", action="store_true")
     parser.add_argument("-C", "--constant", help="Set parameters to constant in the fit, Give list of parameters and their values as parameter1:value1,parameter2:value2:...", metavar="PARAM")
-    parser.add_argument("-pyhf", "--use-pyhf", help="Use pyhf as backend where possible.", action="store_true")
+    parser.add_argument("--pyhf", help="Use pyhf as backend where possible.", action="store_true")
 
     HistFitterArgs = parser.parse_args()
 
