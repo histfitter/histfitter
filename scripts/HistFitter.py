@@ -39,6 +39,7 @@ Util = hf.Util
 #Histfitter imports
 from logger import Logger
 from configManager import configMgr
+import usepyhf
 
 #Create logger
 log = Logger('HistFitter')
@@ -205,6 +206,7 @@ if __name__ == "__main__":
 
     if HistFitterArgs.use_pyhf:
         usePyhf = True
+        createJSON = True
         log.info("Will use pyhf as backend where possible. Checking that pyhf is installed.")
         #Check that pyhf python module is installed
         try:
@@ -422,6 +424,7 @@ if __name__ == "__main__":
     create JSONs
     """
     if createJSON:
+        from usepyhf import util
         if not os.path.isdir("./json"):
             log.info("no directory './json' found - attempting to create one")
             os.mkdir("./json")
