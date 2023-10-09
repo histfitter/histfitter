@@ -99,7 +99,6 @@ jobs:
           histfitter/histfitter:sha-${GITHUB_SHA::8}
           'python -m pip install "pytest~=6.2" && \
            python -m pip install "pytest-order" && \
-           python -m pip install pyhf[backends] && \
            . /usr/local/install/bin/setup_histfitter.sh -t && \
            python -m pytest test'
 
