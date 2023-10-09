@@ -110,7 +110,7 @@ def p_values_excl(workspace:pyhf.Workspace):
     else:
         #Print information
         print(f"Suggested bounds for POI: { model.config.suggested_bounds()[poi_index] }")
-        print(f"Calculating p-values for POI {poi_name} = 0:")
+        print(f"Calculating p-values for POI {poi_name} = 1:")
         print("")
         #Calculate and print p-values
         results = pyhf.infer.hypotest(
