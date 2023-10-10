@@ -86,7 +86,17 @@ source /path/to/install/bin/histfitter_setup.sh -p /path/to/work/directory
 
 ## Workflow
 
-See the tutorial.
+See the ATLAS tutorial.
+
+## pyhf
+
+pyhf is now enabled as a backend for running maximum likelihood fits, calculating upper limits and hypothesis testing. Use the -pyhf flag to use pyhf. This requires pyhf to be installed, both on the command line and as a python library. Both can be done through pip:
+
+```
+pip install pyhf[xmlio]
+pip install pyhf[minuit]
+```
+If you want other backends you can install them in a similar manner. See the pyhf [documentation](https://scikit-hep.org/pyhf/installation.html) for more information.
 
 ## Directory structure
 ### source code
