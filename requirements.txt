@@ -1,4 +1,3 @@
 scipy~=1.5
 matplotlib~=3.3
-pyhf[minuit]~=0.7.4
-pyhf[xmlio]~=0.7.4
+pyhf[minuit, xmlio]~=0.7.4

@@ -7,7 +7,7 @@ def create_json(ana_name:str, prefix:str):
     https://pyhf.readthedocs.io/en/v0.7.2/babel.html
     """
     if not os.path.isdir(f"./json/{ana_name}"):
-        os.mkdir(f"./json/{ana_name}")
+        os.makedirs(f"./json/{ana_name}")
     fileName = f"{ana_name}_{prefix}.json"
     filePath = f"./json/{ana_name}/{fileName}"
     xmlPath = f"./config/{ana_name}/{prefix}.xml"
