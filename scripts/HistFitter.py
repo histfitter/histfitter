@@ -178,6 +178,7 @@ if __name__ == "__main__":
     parser.add_argument("-P", "--run-profiling", help="Run a python profiler during main HistFitter execution", action="store_true")
     parser.add_argument("-C", "--constant", help="Set parameters to constant in the fit, Give list of parameters and their values as parameter1:value1,parameter2:value2:...", metavar="PARAM")
     parser.add_argument("--pyhf", help="Use pyhf as backend where possible.", action="store_true")
+    parser.add_argument("--pyhf-backend", help="Use specific pyhf backend. Options: ['numpy', 'tensorflow', 'pytorch', 'jax'].", choices=['numpy', 'tensorflow', 'pytorch', 'jax'], default="numpy")
 
     HistFitterArgs = parser.parse_args()
 
@@ -222,9 +223,44 @@ if __name__ == "__main__":
         else:
             log.error("Install the pyhf command line tool by running 'pip install pyhf'.")
             sys.exit()
-        #Import modules and set up backend
+        #Import modules
         import usepyhf
-        pyhf.set_backend(pyhf.tensorlib, pyhf.optimize.minuit_optimizer(tolerance=1e-3))
+        #Set up backend
+        if HistFitterArgs.pyhf_backend=="numpy":
+            try:
+                import numpy
+                log.info("import numpy successful. Setting it as pyhf backend.")
+                pyhf.set_backend("numpy", custom_optimizer=pyhf.optimize.minuit_optimizer(tolerance=1e-3))
+            except ImportError:
+                log.error("import numpy failed. Install the python numpy module by running 'pip install numpy'.")
+                sys.exit()
+        elif HistFitterArgs.pyhf_backend=="tensorflow":
+            try:
+                import tensorflow
+                log.info("import tensorflow successful. Setting it as pyhf backend.")
+                pyhf.set_backend("tensorflow", custom_optimizer=pyhf.optimize.minuit_optimizer(tolerance=1e-3))
+            except ImportError:
+                log.error("import tensorflow failed. Install the python tensorflow module by running 'pip install tensorflow'.")
+                sys.exit()
+        elif HistFitterArgs.pyhf_backend=="pytorch":
+            try:
+                import pytorch
+                log.info("import pytorch successful. Setting it as pyhf backend.")
+                pyhf.set_backend("pytorch", custom_optimizer=pyhf.optimize.minuit_optimizer(tolerance=1e-3))
+            except ImportError:
+                log.error("import pytorch failed. Install the python pytorch module by running 'pip install pytorch'.")
+                sys.exit()
+        elif HistFitterArgs.pyhf_backend=="jax":
+            try:
+                import jax
+                log.info("import jax successful. Setting it as pyhf backend.")
+                pyhf.set_backend("jax", custom_optimizer=pyhf.optimize.minuit_optimizer(tolerance=1e-3))
+            except ImportError:
+                log.error("import jax failed. Install the python jax module by running 'pip install jax'.")
+                sys.exit()
+
+            
+        #pyhf.set_backend(custom_optimizer=pyhf.optimize.minuit_optimizer(tolerance=1e-3))
 
     configMgr.myFitType = myFitType
  
