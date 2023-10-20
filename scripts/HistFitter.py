@@ -431,8 +431,9 @@ if __name__ == "__main__":
         if not Path("./json").exists():
             log.info("no directory './json' found - attempting to create one")
             Path("./json").mkdir(parents=True, exist_ok=True)
+            log.info("json directory created")
         for fc in configMgr.fitConfigs:
-            usepyhf.util.create_json(configMgr.analysisName, fc.name)
+            util.create_json(configMgr.analysisName, fc.name)
     
     """
     runs fitting and plotting, by calling C++ side functions
