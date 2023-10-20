@@ -23,6 +23,7 @@ import argparse
 import sys
 import subprocess
 import json
+from pathlib import Path
 
 #ROOT imports
 import ROOT
@@ -427,9 +428,9 @@ if __name__ == "__main__":
     """
     if createJSON:
         from usepyhf import util
-        if not os.path.isdir("./json"):
+        if not Path("./json").exists():
             log.info("no directory './json' found - attempting to create one")
-            os.mkdir("./json")
+            Path("./json").mkdir(parents=True, exist_ok=True)
         for fc in configMgr.fitConfigs:
             usepyhf.util.create_json(configMgr.analysisName, fc.name)
     
