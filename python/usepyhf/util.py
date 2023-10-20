@@ -1,4 +1,4 @@
-import os
+from pathlib import Path
 import subprocess
 
 def create_json(ana_name:str, prefix:str):
@@ -6,13 +6,14 @@ def create_json(ana_name:str, prefix:str):
     Creates a JSON file in the /json folder with the name {ana_name}_{prefix}.json.
     https://pyhf.readthedocs.io/en/v0.7.2/babel.html
     """
-    if not os.path.isdir(f"./json/{ana_name}"):
-        os.makedirs(f"./json/{ana_name}")
-    fileName = f"{ana_name}_{prefix}.json"
-    filePath = f"./json/{ana_name}/{fileName}"
-    xmlPath = f"./config/{ana_name}/{prefix}.xml"
-    create_file = subprocess.run(["pyhf", "xml2json", f"{xmlPath}", "--basedir", ".", 
-                                "--output-file", f"{filePath}"])
+    folder_path = Path(f"./json/{ana_name}/")
+    if not folder_path.exists():
+        folder_path.mkdir(parents=True, exist_ok=True)
+    file_name = f"{ana_name}_{prefix}.json"
+    file_path = f"./json/{ana_name}/{file_name}"
+    xml_path = f"./config/{ana_name}/{prefix}.xml"
+    create_file = subprocess.run(["pyhf", "xml2json", f"{xml_path}", "--basedir", ".", 
+                                "--output-file", f"{file_path}"])
     
 def fix_sigxsec(model):
     """

@@ -226,41 +226,7 @@ if __name__ == "__main__":
         #Import modules
         import usepyhf
         #Set up backend
-        if HistFitterArgs.pyhf_backend=="numpy":
-            try:
-                import numpy
-                log.info("import numpy successful. Setting it as pyhf backend.")
-                pyhf.set_backend("numpy", custom_optimizer=pyhf.optimize.minuit_optimizer(tolerance=1e-3))
-            except ImportError:
-                log.error("import numpy failed. Install the python numpy module by running 'pip install numpy'.")
-                sys.exit()
-        elif HistFitterArgs.pyhf_backend=="tensorflow":
-            try:
-                import tensorflow
-                log.info("import tensorflow successful. Setting it as pyhf backend.")
-                pyhf.set_backend("tensorflow", custom_optimizer=pyhf.optimize.minuit_optimizer(tolerance=1e-3))
-            except ImportError:
-                log.error("import tensorflow failed. Install the python tensorflow module by running 'pip install tensorflow'.")
-                sys.exit()
-        elif HistFitterArgs.pyhf_backend=="pytorch":
-            try:
-                import pytorch
-                log.info("import pytorch successful. Setting it as pyhf backend.")
-                pyhf.set_backend("pytorch", custom_optimizer=pyhf.optimize.minuit_optimizer(tolerance=1e-3))
-            except ImportError:
-                log.error("import pytorch failed. Install the python pytorch module by running 'pip install pytorch'.")
-                sys.exit()
-        elif HistFitterArgs.pyhf_backend=="jax":
-            try:
-                import jax
-                log.info("import jax successful. Setting it as pyhf backend.")
-                pyhf.set_backend("jax", custom_optimizer=pyhf.optimize.minuit_optimizer(tolerance=1e-3))
-            except ImportError:
-                log.error("import jax failed. Install the python jax module by running 'pip install jax'.")
-                sys.exit()
-
-            
-        #pyhf.set_backend(custom_optimizer=pyhf.optimize.minuit_optimizer(tolerance=1e-3))
+        pyhf.set_backend(HistFitterArgs.pyhf_backend, custom_optimizer=pyhf.optimize.minuit_optimizer(tolerance=1e-3))
 
     configMgr.myFitType = myFitType
  

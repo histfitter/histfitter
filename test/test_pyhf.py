@@ -3,7 +3,9 @@ def test_tutorial_MyUserAnalysis_pytest(script_runner):
     (ret,outRaw,errRaw) = script_runner(command)
 
     stdout = outRaw.decode("utf-8")
+    assert "* * * Welcome to HistFitter * * *" in stdout
     assert "import pyhf successful" in stdout
     assert "pyhf command line tool installed" in stdout
+    assert "Running a discovery hypothesis test" in stdout
     assert "HistFitter: Leaving HistFitter... Bye!" in stdout
-    assert "* * * Welcome to HistFitter * * *" in stdout
+    
