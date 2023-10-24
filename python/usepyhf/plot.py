@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from pyhf.contrib.viz import brazil
 from usepyhf import util
 
-def brazil_plot(workspace:pyhf.Workspace, test_stat:str="qtilde", size=[7, 5]):
+def brazil_plot(workspace:pyhf.Workspace, n_points:int=20, bounds=None, test_stat:str="qtilde", size=[7, 5]):
     """
     Make a brazil band plot to show the upper limit CI and +/- [1, 2] sigma CL.
     """
@@ -17,8 +17,13 @@ def brazil_plot(workspace:pyhf.Workspace, test_stat:str="qtilde", size=[7, 5]):
     poi_name = model.config.par_order[poi_index]
 
     #Find bounds
-    poi_min, poi_max = model.config.suggested_bounds()[poi_index]
-    poi_vals = np.linspace(poi_min, poi_max, 100)
+    if type(bounds)==tuple and len(bounds)==2:
+        poi_min, poi_max = bounds
+    else:
+        poi_min, poi_max = model.config.suggested_bounds()[poi_index]
+    
+    #Values to scan over
+    poi_vals = np.linspace(poi_min, poi_max, n_points)
     
     #Fix the parameter "SigXsec" if it exists
     fix_pars = util.fix_sigxsec(model)

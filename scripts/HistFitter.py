@@ -208,7 +208,6 @@ if __name__ == "__main__":
 
     if HistFitterArgs.pyhf:
         usePyhf = True
-        createJSON = True
         log.info("Will use pyhf as backend where possible. Checking that pyhf is installed.")
         #Check that pyhf python module is installed
         try:
@@ -491,9 +490,9 @@ if __name__ == "__main__":
                 workspace = pyhf.Workspace(json_file)
                 best_fit = inference.mle_fit(workspace)
                 log.info(f"Making plot and saving it as ./results/{configMgr.analysisName}/upperlimit_{fc.name}.png")
-                fig, ax = plot.brazil_plot(workspace)
+                fig, ax = plot.brazil_plot(workspace, n_points=configMgr.nPoints, bounds=configMgr.scanRange)
                 fig.savefig(f"./results/{configMgr.analysisName}/upperlimit_{fc.name}.png")
-                confidence.upper_limit(workspace)
+                confidence.upper_limit(workspace, configMgr.nPoints, bounds=configMgr.scanRange)
         else:
             configMgr.cppMgr.doUpperLimitAll()
         pass

@@ -90,12 +90,20 @@ See the ATLAS tutorial.
 
 ## pyhf
 
-pyhf is now enabled as a backend for running maximum likelihood fits, calculating upper limits and hypothesis testing. Use the -pyhf flag to use pyhf. This requires pyhf to be installed, both on the command line and as a python library. This can be done through pip:
+pyhf is now enabled as a backend for running maximum likelihood fits, calculating upper limits and hypothesis testing. Use the --pyhf flag to use pyhf. This requires pyhf to be installed, both on the command line and as a python library. This can be done through pip:
 
 ```
 pip install pyhf[xmlio, minuit]
 ```
 If you want other backends you can install them in a similar manner. See the pyhf [documentation](https://pyhf.readthedocs.io/en/v0.7.4/installation.html) for more information.
+
+You can change the backend by setting it using the --pyhf-backend flag. The options are ['numpy', 'tensorflow', 'pytorch', 'jax']. The corresponding pyhf extension library must be installed. The default backend is numpy.
+
+```
+pip install pyhf['jax']
+```
+
+For pyhf to work, we must convert the xml config files to json files. Do this by using the -j flag. An error will appear if the `configMgr.writeXML` option is set to `False`.
 
 ## Directory structure
 ### source code
