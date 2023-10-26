@@ -94,8 +94,6 @@ def p_values_excl(workspace:pyhf.Workspace):
         print(f"CLs: [{CLs[0]:.6f}, {CLs[1]:.6f}, {CLs[2]:.6f}]")
         print(f"CLb: [{CLb[0]:.6f}, {CLb[1]:.6f}, {CLb[2]:.6f}]")
         print(f"CLs+b: [{CLsplusb[0]:.6f}, {CLsplusb[1]:.6f}, {CLsplusb[2]:.6f}]\n")
-        print(f"Null hypothesis modified p-value: {CLs[0]:.6f}")
-        print(f"Significance level: {pValueToSignificance(CLs[0], True):.6f}")
 
     else:
         #Print information
@@ -109,8 +107,6 @@ def p_values_excl(workspace:pyhf.Workspace):
         print(f"CLs: {results[0]:.6f}")
         print(f"CLb: {results[1][1]:.6f}")
         print(f"CLs+b: {results[1][0]:.6f}\n")
-        print(f"Null hypothesis p-value: {results[0]:.6f}")
-        print(f"Significance level: {pValueToSignificance(results[0], True):.6f}")
     
 
 def mle_fit(workspace:pyhf.Workspace):
