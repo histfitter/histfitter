@@ -570,7 +570,7 @@ class UserSystematic(SystematicBase):
                         abstract.hists[histName] = TH1D(histName, histName, 1, 0.5, 1.5)
                         totNorm=0.0
                         for normReg in sam.normRegions:
-                            nameTmp = "h" + sam.name + lowhigh + normReg[0] + "_obs_" + replaceSymbols(chan.variableName)
+                            nameTmp = "h" + sam.name + lowhigh + normReg[0] + "_obs_" + replaceSymbols(normReg[1])
                             try:
                                 totNorm += abstract.hists[nameTmp].GetSumOfWeights()
                             except:
