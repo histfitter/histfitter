@@ -21,6 +21,9 @@ import cProfile
 from code import InteractiveConsole
 import argparse
 import sys
+import subprocess
+import json
+from pathlib import Path
 
 #ROOT imports
 import ROOT
@@ -37,6 +40,7 @@ Util = hf.Util
 #Histfitter imports
 from logger import Logger
 from configManager import configMgr
+import usepyhf
 
 #Create logger
 log = Logger('HistFitter')
@@ -96,6 +100,7 @@ if __name__ == "__main__":
     configMgr.executeHistFactory = False
     runInterpreter = False
     runFit = False
+    createJSON = False
     printLimits = False
     doHypoTests = False
     doDiscoveryHypoTests = False
@@ -113,6 +118,7 @@ if __name__ == "__main__":
     doCodeProfiling = False
     doFixParameters = False
     fixedPars = ""
+    usePyhf = False
     
     FitType = configMgr.FitType #enum('FitType','Discovery , Exclusion , Background')
     myFitType=FitType.Background
@@ -137,6 +143,7 @@ if __name__ == "__main__":
     parser.add_argument("-t", "--create-histograms", help="re-create histograms from TTrees", action="store_true", default=configMgr.readFromTree)
     parser.add_argument("-w", "--create-workspace", help="re-create workspace from histograms", action="store_true", default=configMgr.executeHistFactory)
     parser.add_argument("-x", "--use-XML", help="write XML files by hand and call hist2workspace on them, instead of directly writing workspaces", action="store_true", default=configMgr.writeXML)
+    parser.add_argument("-j", "--create-JSON", help="write JSON file from XML output.", action="store_true", default=createJSON)
     parser.add_argument("-f", "--fit", help="fit the workspace", action="store_true", default=configMgr.executeHistFactory)
     parser.add_argument("--fitname", dest="fitname", help="workspace name for fit (not specified takes 1st available fitConfig)", default="")
     parser.add_argument("-m", "--minos", help="run minos for asymmetric error calculation, optionally give parameter names for which minos should be run, space separated. For all params, use ALL", metavar="PARAM")
@@ -171,7 +178,9 @@ if __name__ == "__main__":
     parser.add_argument("-A", "--use-archive-histfile", help="use backup histogram cache file", action="store_true")
     parser.add_argument("-P", "--run-profiling", help="Run a python profiler during main HistFitter execution", action="store_true")
     parser.add_argument("-C", "--constant", help="Set parameters to constant in the fit, Give list of parameters and their values as parameter1:value1,parameter2:value2:...", metavar="PARAM")
-    
+    parser.add_argument("--pyhf", help="Use pyhf as backend where possible.", action="store_true")
+    parser.add_argument("--pyhf-backend", help="Use specific pyhf backend. Options: ['numpy', 'tensorflow', 'pytorch', 'jax'].", choices=['numpy', 'tensorflow', 'pytorch', 'jax'], default="numpy")
+
     HistFitterArgs = parser.parse_args()
 
     """
@@ -180,7 +189,6 @@ if __name__ == "__main__":
     if not os.path.exists(HistFitterArgs.configFile[0]) and not os.path.isfile(HistFitterArgs.configFile[0]):
         log.fatal(f"Specified input file '{HistFitterArgs.configFile[0]}' does not exist or is not a file")
         sys.exit(-1)
-
     if HistFitterArgs.fit_type == "bkg":
         myFitType = FitType.Background
         log.info("Will run in background-only fit mode")
@@ -197,6 +205,28 @@ if __name__ == "__main__":
         log.error("You specified both -p and -z in the options. This can currently lead to unexpected results for the obtained CLs values for the -p option.")
         log.error("Please run these two steps separately - there is no need to regenerate the workspace, so there is no overhead to do so.")
         sys.exit()
+
+    if HistFitterArgs.pyhf:
+        usePyhf = True
+        log.info("Will use pyhf as backend where possible. Checking that pyhf is installed.")
+        #Check that pyhf python module is installed
+        try:
+            import pyhf
+            log.info("import pyhf successful.")
+        except ImportError:
+            log.error("import pyhf failed. Install the python pyhf module by running 'pip install pyhf'.")
+            sys.exit()
+        #Check that pyhf is installed on the command line
+        process = subprocess.run(["pyhf", "-h"])
+        if process.returncode == 0:
+            log.info("pyhf command line tool installed.")
+        else:
+            log.error("Install the pyhf command line tool by running 'pip install pyhf'.")
+            sys.exit()
+        #Import modules
+        import usepyhf
+        #Set up backend
+        pyhf.set_backend(HistFitterArgs.pyhf_backend, custom_optimizer=pyhf.optimize.minuit_optimizer(tolerance=1e-3))
 
     configMgr.myFitType = myFitType
  
@@ -218,6 +248,10 @@ if __name__ == "__main__":
     if HistFitterArgs.use_XML:
         configMgr.writeXML = True
 
+    if HistFitterArgs.create_JSON:
+        createJSON = True
+        configMgr.writeXML = True
+
     if HistFitterArgs.fit:
         runFit = True
 
@@ -236,7 +270,8 @@ if __name__ == "__main__":
         printLimits = True
 
     if HistFitterArgs.hypotest:
-        configMgr.doHypoTest = True
+        if not usePyhf:
+            configMgr.doHypoTest = True
         doHypoTests = True
 
     if HistFitterArgs.discovery_hypotest:
@@ -388,6 +423,18 @@ if __name__ == "__main__":
                   if Systs != "": Util.plotUpDown(configMgr.histCacheFile,sam.name,Systs,chan.regionString,chan.variableName)
 
     """
+    create JSONs
+    """
+    if createJSON:
+        from usepyhf import util
+        if not Path("./json").exists():
+            log.info("no directory './json' found - attempting to create one")
+            Path("./json").mkdir(parents=True, exist_ok=True)
+            log.info("json directory created")
+        for fc in configMgr.fitConfigs:
+            util.create_json(configMgr.analysisName, fc.name)
+    
+    """
     runs fitting and plotting, by calling C++ side functions
     """
     if runFit or HistFitterArgs.draw:
@@ -425,7 +472,7 @@ if __name__ == "__main__":
         log.debug(" GenerateFitAndPlotCPP(configMgr.fitConfigs[%d], configMgr.analysisName, drawBeforeFit, drawAfterFit, configMgr.plotStacked, configMgr.storeSinglePlotFiles, configMgr.storeMergedPlotFile, drawCorrelationMatrix, drawSeparateComponents, drawLogLikelihood, runMinos, minosPars, doFixParameters, fixedPars, ReduceCorrMatrix, noFit, drawInterpolation)" % idx)
         log.debug("   where drawBeforeFit, drawAfterFit, drawCorrelationMatrix, drawSeparateComponents, drawLogLikelihood, ReduceCorrMatrix, noFit, drawInterpolation are booleans")
         pass
-
+    
     """
     calculating and printing upper limits for model-(in)dependent signal fit configurations (aka Exclusion/Discovery fit setup)
     """
@@ -434,7 +481,20 @@ if __name__ == "__main__":
             if len(fc.validationChannels) > 0:
                 raise Exception
             pass
-        configMgr.cppMgr.doUpperLimitAll()
+        if usePyhf:
+            from usepyhf import plot, confidence, inference
+            for fc in configMgr.fitConfigs:
+                json_file_path = f"./json/{configMgr.analysisName}/{configMgr.analysisName}_{fc.name}.json"
+                with open(json_file_path) as serialized:
+                    json_file = json.load(serialized)
+                workspace = pyhf.Workspace(json_file)
+                best_fit = inference.mle_fit(workspace)
+                log.info(f"Making plot and saving it as ./results/{configMgr.analysisName}/upperlimit_{fc.name}.png")
+                fig, ax = plot.brazil_plot(workspace, n_points=configMgr.nPoints, bounds=configMgr.scanRange)
+                fig.savefig(f"./results/{configMgr.analysisName}/upperlimit_{fc.name}.png")
+                confidence.upper_limit(workspace, configMgr.nPoints, bounds=configMgr.scanRange)
+        else:
+            configMgr.cppMgr.doUpperLimitAll()
         pass
 
     """
@@ -447,10 +507,30 @@ if __name__ == "__main__":
             pass
         
         if doDiscoveryHypoTests:
-            configMgr.cppMgr.doHypoTestAll('results/', False)
-        
+            if usePyhf:
+                from usepyhf import inference
+                for fc in configMgr.fitConfigs:
+                    json_file_path = f"./json/{configMgr.analysisName}/{configMgr.analysisName}_{fc.name}.json"
+                    with open(json_file_path) as serialized:
+                        json_file = json.load(serialized)
+                    workspace = pyhf.Workspace(json_file)
+                    best_fit = inference.mle_fit(workspace)
+                    inference.p_values_disc(workspace)
+            else:
+                configMgr.cppMgr.doHypoTestAll('results/', False)
+            
         if doHypoTests:
-            configMgr.cppMgr.doHypoTestAll('results/', True)
+            if usePyhf:
+                from usepyhf import inference
+                for fc in configMgr.fitConfigs:
+                    json_file_path = f"./json/{configMgr.analysisName}/{configMgr.analysisName}_{fc.name}.json"
+                    with open(json_file_path) as serialized:
+                        json_file = json.load(serialized)
+                    workspace = pyhf.Workspace(json_file)
+                    best_fit = inference.mle_fit(workspace)
+                    inference.p_values_excl(workspace)
+            else:
+                configMgr.cppMgr.doHypoTestAll('results/', True)
 
         pass
 
@@ -462,5 +542,5 @@ if __name__ == "__main__":
         cons = InteractiveConsole(locals())
         cons.interact("Continuing interactive session... press Ctrl+d to exit")
         pass
-
+    
     log.info("Leaving HistFitter... Bye!")
