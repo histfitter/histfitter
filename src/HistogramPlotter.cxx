@@ -63,7 +63,7 @@
 static hf::TMsgLogger Logger("HistogramPlotter");
 
 hf::HistogramPlotter::HistogramPlotter(RooWorkspace *w, const TString& fitConfigName) {
-    
+
     hf::ConfigMgr* mgr = hf::ConfigMgr::getInstance();
     hf::FitConfig* fc = mgr->getFitConfig(fitConfigName);
     if(!w) {
@@ -156,7 +156,7 @@ void hf::HistogramPlotter::setInputData(RooAbsData* data) {
 }
 
 void hf::HistogramPlotter::Initialize() {
-    
+
     RooMsgService::instance().getStream(1).removeTopic(RooFit::NumIntegration);
     RooMsgService::instance().getStream(1).removeTopic(RooFit::Plotting);
 
@@ -182,7 +182,7 @@ void hf::HistogramPlotter::Initialize() {
 }
 
 void hf::HistogramPlotter::PlotRegions() {
-    
+
     Logger << kINFO << "Plotting all known regions in PDF" << GEndl;
 
     if(m_storeMergedFile) {
@@ -382,7 +382,7 @@ void hf::HistogramPlot::buildFrame() {
         Logger << kDEBUG << "Removing empty bins" << GEndl;
         hf::Util::RemoveEmptyDataBins(m_frame);
     }
-        
+
     // Set NaN/infinite numbers to 0
     Logger << kDEBUG << "Setting NaN/infinite entries to 0 in graphs" << GEndl;
     for (Int_t i = 0; i < m_frame->numItems(); ++i) {
@@ -391,12 +391,12 @@ void hf::HistogramPlot::buildFrame() {
 
         if (hname.BeginsWith(TString("model"))) {
             Logger << kDEBUG << " Fixing up graph " << hname << GEndl;
-            
+
             for (Int_t i = 0; i < h->GetN(); ++i) {
                 Double_t x, y;
                 h->GetPoint(i, x, y);
 
-                if (!isfinite(y)) {
+                if (!std::isfinite(y)) {
                     Logger << kWARNING << "  Zeroing non-finite bin: " << x << " " << y << " of graph " << hname << GEndl;
                     h->SetPoint(i, x, 0.);
                 }
