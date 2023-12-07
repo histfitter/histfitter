@@ -16,6 +16,7 @@ void genTree(){
     TRandom3 rnd(1000);
 
     double m = 0; //{50,100,150,200}
+    double p = 0; 
     double weight = 1;
     double sys_weight1 = 1;
     double sys_weight2 = 1;
@@ -27,16 +28,19 @@ void genTree(){
     // Data tree
     TTree *data_tree = new TTree("data","data");
     data_tree->Branch("m", &m, "m/D");
+    data_tree->Branch("p", &p, "p/D");
     data_tree->Branch("weight", &weight, "weight/D");
 
     // Signal tree
     TTree *signal_tree = new TTree("signal","signal");
     signal_tree->Branch("m", &m, "m/D");
+    signal_tree->Branch("p", &p, "p/D");
     signal_tree->Branch("weight", &weight, "weight/D");
 
     // Bkg1 tree (flat)
     TTree *bkg1_tree = new TTree("bkg1_nom","bkg1_nom");
     bkg1_tree->Branch("m", &m, "m/D");
+    bkg1_tree->Branch("p", &p, "p/D");
     bkg1_tree->Branch("weight", &weight, "weight/D");
     bkg1_tree->Branch("sys_weight1", &sys_weight1, "sys_weight1/D");
     bkg1_tree->Branch("sys_weight2", &sys_weight2, "sys_weight2/D");
@@ -48,6 +52,7 @@ void genTree(){
     // Bkg2 tree (falling)
     TTree *bkg2_nom_tree = new TTree("bkg2_nom","bkg2_nom");
     bkg2_nom_tree->Branch("m", &m, "m/D");
+    bkg2_nom_tree->Branch("p", &p, "p/D");
     bkg2_nom_tree->Branch("weight", &weight, "weight/D");
     bkg2_nom_tree->Branch("sys_weight1", &sys_weight1, "sys_weight1/D");
     bkg2_nom_tree->Branch("sys_weight2", &sys_weight2, "sys_weight2/D");
@@ -58,6 +63,7 @@ void genTree(){
 
     TTree *bkg2_sys_tree = new TTree("bkg2_sys","bkg2_sys");
     bkg2_sys_tree->Branch("m", &m, "m/D");
+    bkg2_sys_tree->Branch("p", &p, "p/D");
     bkg2_sys_tree->Branch("weight", &weight, "weight/D");
 
 

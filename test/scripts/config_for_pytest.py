@@ -119,7 +119,7 @@ bkg2Sample.setSuffixTreeName("_nom")
 bkg2Sample.addInputs( [input_file] )
 bkg2Sample.setNormByTheory(False)
 bkg2Sample.setNormFactor("mu_bkg",1.,0.,10.)
-bkg2Sample.setNormRegions([('CR', 'm')])
+bkg2Sample.setNormRegions([('CR', 'p')])
 
 
 dataSample = Sample("data", kBlack)
@@ -181,9 +181,9 @@ cfg_fit.addSignalChannels(SRs)
 ######################
 ## Control Regions
 CRs = list()
-CR = cfg_fit.addChannel('m',["CR"],1,50,100)
+CR = cfg_fit.addChannel('p',["CR"],1,-1,1)
 CR.showLumi = True
-bkg2Sample.setNormRegions(["CR","m"])
+bkg2Sample.setNormRegions(["CR","p"])
 CRs.append(CR)
 
 for cr in CRs:
