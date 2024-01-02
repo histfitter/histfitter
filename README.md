@@ -73,15 +73,15 @@ This will create an install directory with the installed libraries as well as ot
 
 ## Setup
 
-The environment must be set by activating the setup script (`install/bin/histfitter_setup.sh`) in the directory where you want to work. This will create five new directorys in your work directory: `analysis`, `config`, `data`, `macros`, and `results`. It also copies the `HistFactorySchema.dtd` file into the config directory. Most importantly, the setup script sets the environment variable paths that are required for the scripts to work.  The setup also adds the analysis directory in the working area to the Python path.  This makes it convenient to import additional python files without needing to install them in the build area.
+The environment must be set by activating the setup script (`install/bin/setup_histfitter.sh`) in the directory where you want to work. This will create five new directories in your work directory: `analysis`, `config`, `data`, `macros`, and `results`. It also copies the `HistFactorySchema.dtd` file into the config directory. Most importantly, the setup script sets the environment variable paths that are required for the scripts to work.  The setup also adds the analysis directory in the working area to the Python path.  This makes it convenient to import additional python files without needing to install them in the build area.
 
 ```
-source /path/to/install/bin/histfitter_setup.sh
+source /path/to/install/bin/setup_histfitter.sh
 ```
 You can also run the setup script from any directory if you use the -p flag and the path to the work directory.
 
 ```
-source /path/to/install/bin/histfitter_setup.sh -p /path/to/work/directory
+source /path/to/install/bin/setup_histfitter.sh -p /path/to/work/directory
 ```
 
 ## Workflow
@@ -128,7 +128,7 @@ For pyhf to work, we must convert the xml config files to json files. Do this by
 ## Tests and troubleshooting
 To check that everything is working properly, you can run the tests. This requires you to have the pytest python module installed. Run the setup script with the -t flag.
 ```
-source /path/to/install/bin/histfitter_setup.sh -t
+source /path/to/install/bin/setup_histfitter.sh -t
 ```
 This copies the `/test` directory into the work directory. Now run the tests.
 ```
