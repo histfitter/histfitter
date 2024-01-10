@@ -90,7 +90,7 @@ See the ATLAS tutorial.
 
 ## pyhf
 
-pyhf is now enabled as a backend for running maximum likelihood fits, calculating upper limits and hypothesis testing. Use the --pyhf flag to use pyhf. This requires pyhf to be installed, both on the command line and as a python library. This can be done through pip:
+pyhf is now enabled as a backend for running maximum likelihood fits, calculating upper limits and hypothesis testing. Use the --pyhf flag to use pyhf. For pyhf to work, JSON files must be created from the existing XML files. You can do this by using the -j flag. Both these functions require pyhf to be installed on the command line and as a python library. This can be done through pip:
 
 ```
 pip install pyhf[xmlio, minuit]
