@@ -485,14 +485,18 @@ if __name__ == "__main__":
             from usepyhf import plot, confidence, inference
             for fc in configMgr.fitConfigs:
                 json_file_path = f"./json/{configMgr.analysisName}/{configMgr.analysisName}_{fc.name}.json"
-                with open(json_file_path) as serialized:
-                    json_file = json.load(serialized)
-                workspace = pyhf.Workspace(json_file)
-                best_fit = inference.mle_fit(workspace)
-                log.info(f"Making plot and saving it as ./results/{configMgr.analysisName}/upperlimit_{fc.name}.png")
-                fig, ax = plot.brazil_plot(workspace, n_points=configMgr.nPoints, bounds=configMgr.scanRange)
-                fig.savefig(f"./results/{configMgr.analysisName}/upperlimit_{fc.name}.png")
-                confidence.upper_limit(workspace, configMgr.nPoints, bounds=configMgr.scanRange)
+                if not Path(json_file_path).exists():
+                    log.error("Please use the -j flag at least once to create JSON files for the pyhf analysis.")
+                    sys.exit()
+                else:
+                    with open(json_file_path) as serialized:
+                        json_file = json.load(serialized)
+                    workspace = pyhf.Workspace(json_file)
+                    best_fit = inference.mle_fit(workspace)
+                    log.info(f"Making plot and saving it as ./results/{configMgr.analysisName}/upperlimit_{fc.name}.png")
+                    fig, ax = plot.brazil_plot(workspace, n_points=configMgr.nPoints, bounds=configMgr.scanRange)
+                    fig.savefig(f"./results/{configMgr.analysisName}/upperlimit_{fc.name}.png")
+                    confidence.upper_limit(workspace, configMgr.nPoints, bounds=configMgr.scanRange)
         else:
             configMgr.cppMgr.doUpperLimitAll()
         pass
@@ -511,11 +515,15 @@ if __name__ == "__main__":
                 from usepyhf import inference
                 for fc in configMgr.fitConfigs:
                     json_file_path = f"./json/{configMgr.analysisName}/{configMgr.analysisName}_{fc.name}.json"
-                    with open(json_file_path) as serialized:
-                        json_file = json.load(serialized)
-                    workspace = pyhf.Workspace(json_file)
-                    best_fit = inference.mle_fit(workspace)
-                    inference.p_values_disc(workspace)
+                    if not Path(json_file_path).exists():
+                        log.error("Please use the -j flag at least once to create JSON files for the pyhf analysis.")
+                        sys.exit()
+                    else:
+                        with open(json_file_path) as serialized:
+                            json_file = json.load(serialized)
+                        workspace = pyhf.Workspace(json_file)
+                        best_fit = inference.mle_fit(workspace)
+                        inference.p_values_disc(workspace)
             else:
                 configMgr.cppMgr.doHypoTestAll('results/', False)
             
@@ -524,11 +532,15 @@ if __name__ == "__main__":
                 from usepyhf import inference
                 for fc in configMgr.fitConfigs:
                     json_file_path = f"./json/{configMgr.analysisName}/{configMgr.analysisName}_{fc.name}.json"
-                    with open(json_file_path) as serialized:
-                        json_file = json.load(serialized)
-                    workspace = pyhf.Workspace(json_file)
-                    best_fit = inference.mle_fit(workspace)
-                    inference.p_values_excl(workspace)
+                    if not Path(json_file_path).exists():
+                        log.error("Please use the -j flag at least once to create JSON files for the pyhf analysis.")
+                        sys.exit()
+                    else:
+                        with open(json_file_path) as serialized:
+                            json_file = json.load(serialized)
+                        workspace = pyhf.Workspace(json_file)
+                        best_fit = inference.mle_fit(workspace)
+                        inference.p_values_excl(workspace)
             else:
                 configMgr.cppMgr.doHypoTestAll('results/', True)
 
