@@ -144,7 +144,7 @@ def processFile(file):
 
     print("")
     if os.path.isfile(file):
-        ROOT.CollectAndWriteHypoTestResults(
+        ROOT.hf.CollectAndWriteHypoTestResults(
             file, args.format, args.interpretation, args.cut
         )
     else:
