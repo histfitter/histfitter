@@ -63,8 +63,8 @@ static hf::TMsgLogger ToyUtilsLogger("toy_utils");
 void hf::CollectAndWriteHypoTestResults( const TString& infile, const TString& format, const TString& interpretation, const TString& cutStr, const bool rejectFailedPrefit, const TString& outDir, const TString& fileprefix  ){
     // outdir
     TString outdir = gSystem->pwd();
-    if ( !gSystem->cd( outDir.Data() ) ) {
-        ToyUtilsLogger << kERROR << "output dir <" << outDir << "> does not exist. Return." << GEndl;
+    if ( !gSystem->cd( outdir.Data() ) ) {
+        ToyUtilsLogger << kERROR << "output dir <" << outdir << "> does not exist. Return." << GEndl;
         return;
     } else {
         TString fulloutdir = gSystem->pwd();
