@@ -48,7 +48,8 @@ export PYTHONPATH=$PYTHONPATH:$HISTFITTER_WORKDIR/analysis
 
 #Set up HistFitter environment with folders
 if [[ ! -d "$HISTFITTER_WORKDIR/config" || ! -d "$HISTFITTER_WORKDIR/results" || ! -d "$HISTFITTER_WORKDIR/data" ]]; then
-    echo "Making directories ./config ./results ./data in $HISTFITTER_WORKDIR"
+    echo "Making directories ./analysis ./config ./results ./data in $HISTFITTER_WORKDIR"
+    mkdir -p "$HISTFITTER_WORKDIR/analysis"
     mkdir -p "$HISTFITTER_WORKDIR/config"
     mkdir -p "$HISTFITTER_WORKDIR/results"
     mkdir -p "$HISTFITTER_WORKDIR/data"
@@ -60,12 +61,10 @@ if [ ! -f $HISTFITTER_WORKDIR/config/HistFactorySchema.dtd ]; then
   cp "$SCRIPT_DIR/../share/histfitter/config/HistFactorySchema.dtd" "$HISTFITTER_WORKDIR/config/HistFactorySchema.dtd";
 fi
 
-if [[ "$examples" == "true" && ! -d $HISTFITTER_WORKDIR/analysis ]]; then
-  echo "Copying /analysis example folder to $HISTFITTER_WORKDIR/analysis.";
-  cp -r "$SCRIPT_DIR/../share//histfitter/analysis" "$HISTFITTER_WORKDIR/analysis";
-fi
-
 if [[ "$examples" == "true" && ! -d $HISTFITTER_WORKDIR/macros ]]; then
+  echo "Copying analysis example folders to $HISTFITTER_WORKDIR/analysis.";
+  cp -r "$SCRIPT_DIR/../share/histfitter/analysis/tutorial" "$HISTFITTER_WORKDIR/analysis/tutorial";
+  cp -r "$SCRIPT_DIR/../share/histfitter/analysis/simplechannel" "$HISTFITTER_WORKDIR/analysis/simplechannel";
   echo "Copying /macros example folders to $HISTFITTER_WORKDIR/macros.";
   cp -r "$SCRIPT_DIR/../share/histfitter/macros" "$HISTFITTER_WORKDIR/macros";
 fi
