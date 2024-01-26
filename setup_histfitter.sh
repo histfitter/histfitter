@@ -19,7 +19,13 @@ fi
 
 HISTFITTER_WORKDIR=""
 test=false
-examples=false
+
+#Tests rely on examples.
+if [ $test = true ]; then
+  example=true
+else
+  example=false
+fi
 
 while getopts "hp:te" flag; do
   case "$flag" in
