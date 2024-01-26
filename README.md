@@ -13,7 +13,6 @@ The HistFitter Group mailing-list, for **any** of your questions: <atlas-phys-su
 
 ## Acquire
 
-### Building from source
 HistFitter has 2 stable versions, one compliant with Python2 (v0.66.0) and one with Python3 (v1.x.y).
 If you're going to be using HistFitter directly as a standalone application, clone the latest stable release. The Python2 version is no longer being updated.
 
