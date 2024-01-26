@@ -13,16 +13,6 @@ The HistFitter Group mailing-list, for **any** of your questions: <atlas-phys-su
 
 ## Acquire
 
-### StatAnalysis
-
-HistFitter is available in the ATLAS StatAnalysis release, which can be loaded with:
-
-```
-setupATLAS
-asetup StatAnalysis, 0.3.0
-```
-If you use this option you can skip the next step and go straight to Setup.
-
 ### Building from source
 HistFitter has 2 stable versions, one compliant with Python2 (v0.66.0) and one with Python3 (v1.x.y).
 If you're going to be using HistFitter directly as a standalone application, clone the latest stable release. The Python2 version is no longer being updated.
@@ -42,15 +32,26 @@ cd HistFitter && git checkout vX.XX.X -b vX.XX.X && cd ..
 git add HistFitter && git commit -m "Add HistFitter submodule"
 ```
 
-### Recommended Root version
+### Requirements
 
-The recommended Root version is `6.30/02`. This version of HistFitter is not compatible with ROOT versions < 6.28.  The minimum cmake version is `3.21`.
+The recommended ROOT version is `6.30/02`. This version of HistFitter is not compatible with ROOT versions < 6.28.  The minimum cmake version is `3.21`.
 
-An LCG release with the correct ROOT, Python, and cmake versions can be loaded on lxplus via the ATLAS software setup:
+For CERN/ATLAS users, an LCG release with the correct ROOT, Python, and cmake versions can be loaded on lxplus via the ATLAS software setup:
 
 ```
 lsetup "views LCG_105 x86_64-el9-gcc12-opt"
 ```
+
+
+### StatAnalysis
+
+HistFitter is available in the ATLAS StatAnalysis release, which can be loaded with:
+
+```
+setupATLAS
+asetup StatAnalysis, 0.3.0
+```
+If you use this option you do not need to clone the source code, and you can skip the next step and go straight to Setup.
 
 ## Build and install
 
