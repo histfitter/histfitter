@@ -25,7 +25,7 @@ This creates a directory named histfitter with the source code.
 If you're using HistFitter as a submodule in a project, specify the latest stable release while adding the submodule
 
 ```
-# Relative path gives nicer clones in CI if the parent project on CERN's GitLab
+# Relative path gives nicer clones in CI if the parent project is on CERN's GitLab
 git submodule add ../../HistFitter/HistFitter.git
 cd HistFitter && git checkout vX.XX.X -b vX.XX.X && cd ..
 git add HistFitter && git commit -m "Add HistFitter submodule"
@@ -76,26 +76,29 @@ This will create an install directory with the installed libraries as well as ot
 
 ## Setup
 
-The environment must be set by activating the setup script (`install/bin/setup_histfitter.sh`) in the directory where you want to work. This will create three new directories in your work directory: `config`, `data`, and `results`. It also copies the `HistFactorySchema.dtd` file into the config directory. Most importantly, the setup script sets the environment variable paths that are required for the scripts to work. Use the `-e` flag to obtain a copy of the `analysis` and `macros` folders containing the examples, which are a good starting point for creating your own analysis. If you want to import additional python files, make sure that they are located in a folder which is added to the `PYTHONPATH` environment variable (like `analysis`).
+First make a directory to work in:
 
 ```
 mkdir HistFitterProject
 cd HistFitterProject
+```
+
+Then setup the necessary environment variables (`ROOT_INCLUDE_PATH`, `PATH`, `LD_LIBRARY_PATH`, `PYTHONPATH`) to include HistFitter and this working area. With a local build from source, this can be done via:
+
+```
 source /path/to/install/bin/setup_histfitter.sh
 ```
-You can also run the setup script from any directory if you use the -p flag and the path to the work directory.
+or you can also run the setup script from any directory if you use the -p flag and the path to the work directory.
+`source /path/to/install/bin/setup_histfitter.sh -p /path/to/HistFitterProject`
+
+If you are using HistFitter through StatAnalysis, the setup script location is already in the PATH environment variable. :
 
 ```
-source /path/to/install/bin/setup_histfitter.sh -p /path/to/HistFitterProject
-```
-
-If you are using HistFitter through StatAnalysis, the setup script location is already in the PATH environment variable:
-
-```
-mkdir HistFitterProject
-cd HistFitterProject
 source setup_histfitter.sh
 ```
+
+This will create four new directories in your work directory: `analysis`, `config`, `data`, and `results`. It also copies the `HistFactorySchema.dtd` file into the config directory. Most importantly, the setup script sets the environment variable paths that are required for the scripts to work. Use the `-e` flag to obtain a copy of the `analysis/tutorial`, `analysis/simplechannel` and `macros` folders containing some analysis examples, which are a good starting point for creating your own analysis. If you want to import additional python files, make sure that they are located in a folder which is added to the `PYTHONPATH` environment variable (like `analysis`).
+
 
 ## Workflow
 
@@ -119,7 +122,7 @@ pip install pyhf['jax']
 ## Directory structure
 ### source code
 
-- `analysis`: Contains example configuration files in `tutorial/`.
+- `analysis`: Gets copied to the working directory, and is where analysis configuration files go. Contains example configuration files in `tutorial/` and `simplechannel/`.
 - `config`: Contains HistFactory schema
 - `doc`: This is a placeholder directory for Doxygen's output.
 - `macros`: Macros for making plots, testing the fit, ongoing work, etc
