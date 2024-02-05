@@ -73,7 +73,7 @@ parser.add_argument("--logY", help="use log10 of y variable", action="store_true
 
 parser.add_argument("--fixedParamsFile","-f",   type=str, help="give a json file with key=variable and value=value. e.g. use for pinning down third parameter in harvest list", default="")
 parser.add_argument("--forbiddenFunction","-l", type=str, help="""a ROOT TF1 definition for a forbidden line e.g. kinematically forbidden regions. (defaults to diagonal, i.e. -l 'x'). Set to 'None' to turn off.  Can enter multiple comma separated arguments""", default="x")
-parser.add_argument("--forbiddenPoints","-p", type=str, help="""Insert these points as forbidden values, syntac is a space separated list \"0,0 600,0 0,600\" """, default="")
+parser.add_argument("--forbiddenPoints","-p", type=str, help="""Insert these points as forbidden values, syntax is a space separated list \"0,0 600,0 0,600\" """, default="")
 parser.add_argument("--ignoreUncertainty","-u", help="""Don't care about uncertainty bands!""", action="store_true", default=False)
 
 parser.add_argument("--areaThreshold","-a",     type = float, help="Throw away contours with areas less than threshold", default=0)
