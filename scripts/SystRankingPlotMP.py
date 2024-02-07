@@ -10,6 +10,7 @@ from ROOT import *
 gROOT.SetBatch(True)
 gSystem.Load("libHistFitter.so")
 from ROOT import hf
+Util = hf.Util
 LimitResult = hf.LimitResult #Must be imported to avoid an error in loading GetWorkspaceFromFile (Aurora 2024)
 RooExpandedFitResult = hf.RooExpandedFitResult
 
