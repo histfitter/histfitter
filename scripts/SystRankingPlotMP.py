@@ -7,6 +7,12 @@ from collections import namedtuple
 from copy import deepcopy
 
 from ROOT import *
+gROOT.SetBatch(True)
+gSystem.Load("libHistFitter.so")
+from ROOT import hf
+Util = hf.Util
+LimitResult = hf.LimitResult #Must be imported to avoid an error in loading GetWorkspaceFromFile (Aurora 2024)
+RooExpandedFitResult = hf.RooExpandedFitResult
 
 AFTER_FIT = 'RooExpandedFitResult_afterFit'
 AFTER_FIT_SNAPSHOT = 'snapshot_paramsVals_' + AFTER_FIT
@@ -653,13 +659,6 @@ def parse_opts():
 
 def main():
     opts = parse_opts()
-
-    gSystem.Load("libHistFitter.so")
-    # this is strange but in oder to access some HF
-    # objects from the library we need to somehow touch
-    # (ROOT.)LimitResult
-    _ = LimitResult
-
     ranking = get_syst_ranking(opts)
 
     plot_ranking(opts, ranking)
