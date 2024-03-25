@@ -1,6 +1,6 @@
 # HistFitter 
 
-[![stable-release-python3](https://img.shields.io/badge/StablePython3-v1.3.1-green)](https://github.com/histfitter/histfitter/releases/tag/v1.3.1)
+[![stable-release-python3](https://img.shields.io/badge/StablePython3-v1.3.2-green)](https://github.com/histfitter/histfitter/releases/tag/v1.3.2)
 [![stable-release-python2](https://img.shields.io/badge/StablePython2-v0.66.0-green)](https://gitlab.cern.ch/HistFitter/HistFitter/-/releases/v0.66.0)
 [![Documentation](https://img.shields.io/badge/Documentation-blue)](https://twiki.cern.ch/twiki/bin/viewauth/AtlasProtected/SusyFitter)
 [![Tutorial](https://img.shields.io/badge/Tutorial-orange)](https://twiki.cern.ch/twiki/bin/viewauth/AtlasProtected/HistFitterTutorial)
