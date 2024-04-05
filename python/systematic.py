@@ -450,7 +450,7 @@ class TreeWeightSystematic(SystematicBase):
                 highandlow.append("weight"+str(j)+"_")
             highandlow.append("High_")
             highandlow.append("Low_")
-            log.debug(f"makeEnvelope is true, creating an extended list of highandlow: {highandlow}")
+            log.debug(f"makeEnvelope is true, creating an extended list of variations: {highandlow}")
 
         for idx,highorlow in enumerate(highandlow):
             
