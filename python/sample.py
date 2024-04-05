@@ -147,6 +147,36 @@ def symmetrizeSystematicEnvelope(nomName, lowName, highName):
 
     return
 
+
+# This method is specifically for histoEnvelopeHisto, merging >2 systematic variations into exactly High and Low
+def createSystematicEnvelope(syst, nomName, lowName, highName):
+    for iBin in range(1, configMgr.hists[nomName].GetNbinsX()+1):
+        nomVal = configMgr.hists[nomName].GetBinContent(iBin)
+        altValVector = []
+        #temphistname = self.getHistogramName(fitConfig, syst.name, "High")
+        temphistname = highName
+        n_weights = syst.envelopeSize
+        for i in range(n_weights):
+            newweightname = "weight"+str(i)
+            newhistname = temphistname.replace("High",newweightname)
+            altValVector.append(configMgr.hists[newhistname].GetBinContent(iBin))
+        # just pick the highest and lowest values, they are by definition what we want.
+        newHighVal = max(altValVector)
+        newLowVal =  min(altValVector)
+
+        if newLowVal < 0.0:
+            log.warning(f"createSystematicEnvelope(): low={newLowVal:f} is < 0.0 in {lowName:s} bin {iBin:d}. Setting negative bins to 0.0.")
+            newLowVal = 0.0;
+
+        log.debug(f"createSystematicEnvelope(): bin {iBin:d} -> found nom={nomVal}, alt={altValVector} => envelope error to low={newLowVal} high={newHighVal}")
+
+        configMgr.hists[highName].SetBinContent(iBin, newHighVal)
+        configMgr.hists[lowName].SetBinContent(iBin, newLowVal)
+
+    return
+
+
+
 class Sample:
     """
     Defines a Sample belonging to a Channel
@@ -522,7 +552,18 @@ class Sample:
                 yield self.getHistogramName(fitConfig, mergedName) 
                 for var in ["Nom", "High", "Low"]:
                     yield self.getHistogramName(fitConfig, mergedName, var) 
-    
+
+            if syst.method=="histoSysEnvelope":
+                log.debug(f"getAllHistogramNamesForSystematics():  histoSysEnvelope method is used, changing syst histograms names.")
+                temphistname = self.getHistogramName(fitConfig, syst.name, "High")
+                n_weights = syst.envelopeSize
+                for i in range(n_weights):
+                    newweightname = "weight"+str(i)
+                    newhistname = temphistname.replace("High",newweightname)
+                    yield newhistname
+
+
+
         #return retval
 
     def getHistogramName(self, fitConfig, syst_name="", variation=""):
@@ -656,7 +697,7 @@ class Sample:
     # NOTE: not using @property because of the optional argument
     treename = property(getTreename)
 
-    def addHistoSys(self, systName, nomName, highName, lowName, includeOverallSys, normalizeSys, symmetrize=False, oneSide=False, samName="", normString="", nomSysName="", symmetrizeEnvelope=False):
+    def addHistoSys(self, systName, nomName, highName, lowName, includeOverallSys, normalizeSys, symmetrize=False, oneSide=False, samName="", normString="", nomSysName="", symmetrizeEnvelope=False,createEnvelope=False):
         """
         Add a HistoSys entry using the nominal, high and low histograms, set if to include OverallSys
 
@@ -985,6 +1026,13 @@ class Sample:
         if not includeOverallSys and not normalizeSys: # no renormalization, and no overall systematic
             log.verbose("Case 3: non-normalized systematic without includeOverallSys")
 
+            if createEnvelope:
+                log.verbose("Creating envelope of multiple histograms: building error = ( max(up_i-nom), max(nom-down_i) )")
+                log.verbose(f"(nom={nomName} / low={lowName} / high={highName}")
+                env_syst = self.systDict[systName]
+                createSystematicEnvelope(env_syst, nomName, lowName, highName)
+
+
             if symmetrize and not (oneSide or symmetrizeEnvelope): ## symmetrize the systematic uncertainty
                 log.verbose("Symmetrizing histogram; _NOT_ using oneSide or symmetrizeEnvelope")
                 nomIntegral = configMgr.hists[nomName].Integral()
@@ -1046,7 +1094,6 @@ class Sample:
                 
             else: # default: don't do anything special
                 log.verbose("Adding a simple variation")
-
                 nomIntegral = configMgr.hists[nomName].Integral()
                 lowIntegral = configMgr.hists[lowName].Integral()
                 highIntegral = configMgr.hists[highName].Integral()
