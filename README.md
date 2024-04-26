@@ -41,6 +41,12 @@ For CERN/ATLAS users, an LCG release with the correct ROOT, Python, and cmake ve
 lsetup "views LCG_105 x86_64-el9-gcc12-opt"
 ```
 
+When running some configurations with toys, there is a segfault that seems to be in ROOT.  See issue #213.
+Reverting to an earlier version of ROOT (6.28.X) gets around this for now.  This is also available via ATLAS software setup:
+```
+lsetup "views LCG_104c x86_64-el9-gcc13-opt"
+```
+
 
 ### StatAnalysis
 
