@@ -147,7 +147,7 @@ if drawTheorySysts:
     # coordinate in NDC
     #plot.drawTheoryLegendLines( xyCoord=(0.195,0.6625), length=0.057 )
         # Annoying, but tweak the extra lines in the legend
-        plot.drawTheoryLegendLines( xyCoord=(0.195,0.6625), length=0.08 )
+    plot.drawTheoryLegendLines( xyCoord=(0.195,0.6625), length=0.08 )
 
 plot.decorateCanvas( )
 plot.writePlot( )
