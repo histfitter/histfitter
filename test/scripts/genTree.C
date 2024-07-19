@@ -24,6 +24,7 @@ void genTree(){
     double sys_weight4 = 1;
     double sys_weight5 = 1;
     double sys_weight6 = 1;
+    std::vector<double> vector_of_weights;
 
     // Data tree
     TTree *data_tree = new TTree("data","data");
@@ -48,6 +49,7 @@ void genTree(){
     bkg1_tree->Branch("sys_weight4", &sys_weight4, "sys_weight4/D");
     bkg1_tree->Branch("sys_weight5", &sys_weight5, "sys_weight5/D");
     bkg1_tree->Branch("sys_weight6", &sys_weight6, "sys_weight6/D");
+    bkg1_tree->Branch("vector_of_weights",&vector_of_weights);
 
     // Bkg2 tree (falling)
     TTree *bkg2_nom_tree = new TTree("bkg2_nom","bkg2_nom");
@@ -103,7 +105,14 @@ void genTree(){
         sys_weight4 = 1.02 + .03*(m-50.)/150.;
         sys_weight5 = 1.03 + .04*(m-50.)/150.;
         sys_weight6 = 1.01 + .06*(m-50.)/150.;
-        bkg1_tree->Fill();
+
+	vector_of_weights.push_back(sys_weight1);
+	vector_of_weights.push_back(sys_weight2);
+	vector_of_weights.push_back(sys_weight3);
+	vector_of_weights.push_back(sys_weight4);
+	vector_of_weights.push_back(sys_weight5);
+	vector_of_weights.push_back(sys_weight6);
+	bkg1_tree->Fill();
     }
 
     // bkg2
