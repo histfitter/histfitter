@@ -142,10 +142,10 @@ else:
 
 
 if drawTheorySysts:
-	plot.drawTheoryUncertaintyCurve( f_reg.Get("Obs_u1s") )
-	plot.drawTheoryUncertaintyCurve( f_reg.Get("Obs_d1s") )
-	# coordinate in NDC
-	#plot.drawTheoryLegendLines( xyCoord=(0.195,0.6625), length=0.057 )
+    plot.drawTheoryUncertaintyCurve( f_reg.Get("Obs_u1s") )
+    plot.drawTheoryUncertaintyCurve( f_reg.Get("Obs_d1s") )
+    # coordinate in NDC
+    #plot.drawTheoryLegendLines( xyCoord=(0.195,0.6625), length=0.057 )
         # Annoying, but tweak the extra lines in the legend
         plot.drawTheoryLegendLines( xyCoord=(0.195,0.6625), length=0.08 )
 
