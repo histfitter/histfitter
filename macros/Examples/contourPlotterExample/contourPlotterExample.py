@@ -53,10 +53,10 @@ plot.setYAxisLabel( "m_{1/2} [GeV]"  )
 plot.createLegend(shape=(0.22,0.58,0.55,0.77) ).Draw()
 
 if drawTheorySysts:
-	plot.drawTheoryUncertaintyCurve( f.Get("Obs_0_Up") )
-	plot.drawTheoryUncertaintyCurve( f.Get("Obs_0_Down") )
-	# coordinate in NDC
-	plot.drawTheoryLegendLines( xyCoord=(0.234,0.6625), length=0.057 )
+    plot.drawTheoryUncertaintyCurve( f.Get("Obs_0_Up") )
+    plot.drawTheoryUncertaintyCurve( f.Get("Obs_0_Down") )
+    # coordinate in NDC
+    plot.drawTheoryLegendLines( xyCoord=(0.234,0.6625), length=0.057 )
 
 plot.decorateCanvas( )
 plot.writePlot( )

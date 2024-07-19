@@ -9,7 +9,7 @@ import pytest
 # snippet to dump test info from cache
 """
 import ROOT
-f = ROOT.TFile("data/hf_test/histCache.root")
+f = ROOT.TFile("data/test_fullchain/histCache.root")
 
 
 for k in f.GetListOfKeys():
@@ -58,7 +58,23 @@ bkg_only_test_values = {
     'hbkg1weight_overallSysHigh_CR_obs_p': 3.2915131101941175, 
     'hbkg1weight_overallSysHigh_SR_obs_m': 5.9326817545241175, 
     'hbkg1weight_overallSysLow_CR_obs_p': 3.1539577128203415, 
-    'hbkg1weight_overallSysLow_SR_obs_m': 5.627371169475674, 
+    'hbkg1weight_overallSysLow_SR_obs_m': 5.627371169475674,
+    'hbkg1weight_histoSysEnvelopeHigh_CR_obs_p': 3.3440255509705903,
+    'hbkg1weight_histoSysEnvelopeHigh_SR_obs_m': 6.146948772620593,
+    'hbkg1weight_histoSysEnvelopeLow_CR_obs_p': 3.264366220388233,
+    'hbkg1weight_histoSysEnvelopeLow_SR_obs_m': 5.914023509048238,
+    'hbkg1weight_histoSysEnvelopeweight0_CR_obs_p': 3.3440255509705903,
+    'hbkg1weight_histoSysEnvelopeweight0_SR_obs_m': 6.146948772620593,
+    'hbkg1weight_histoSysEnvelopeweight1_CR_obs_p': 3.2915131101941175,
+    'hbkg1weight_histoSysEnvelopeweight1_SR_obs_m': 5.9326817545241175,
+    'hbkg1weight_histoSysEnvelopeweight2_CR_obs_p': 3.264366220388233,
+    'hbkg1weight_histoSysEnvelopeweight2_SR_obs_m': 5.914023509048238,
+    'hbkg1weight_histoSysEnvelopeweight3_CR_obs_p': 3.301659330582352,
+    'hbkg1weight_histoSysEnvelopeweight3_SR_obs_m': 6.010925263572357,
+    'hbkg1weight_histoSysEnvelopeweight4_CR_obs_p': 3.3389524407764695,
+    'hbkg1weight_histoSysEnvelopeweight4_SR_obs_m': 6.107827018096476,
+    'hbkg1weight_histoSysEnvelopeweight5_CR_obs_p': 3.2846586611647037,
+    'hbkg1weight_histoSysEnvelopeweight5_SR_obs_m': 6.070510527144715,
     'hbkg2Nom_CRNorm': 90.99999999999979, 
     'hbkg2Nom_CR_obs_p': 90.99999999999979, 
     'hbkg2Nom_SR_obs_m': 12.000000000000002, 

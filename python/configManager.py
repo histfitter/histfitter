@@ -1296,6 +1296,9 @@ class ConfigManager:
         if syst.method == "histoSys":
             chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName, 
                                                 includeOverallSys=False, normalizeSys=False, nomSysName=nomSysName)
+        elif syst.method == "histoSysEnvelope":
+            chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName,
+                                                includeOverallSys=False, normalizeSys=False, nomSysName=nomSysName,createEnvelope=True)
         elif syst.method == "histoSysOneSide":
             chan.getSample(sam.name).addHistoSys(syst.name, nomName, highName, lowName, 
                                                 includeOverallSys=False, normalizeSys=False, symmetrize=False, oneSide=True, nomSysName=nomSysName)

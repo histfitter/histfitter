@@ -59,6 +59,8 @@ class SystematicBase:
         self.treeHiName = {}
         self.allowRemapOfSyst = False
         self.differentNominalTreeWeight = False
+        self.makeEnvelope = False
+        self.envelopeSize = 2
 
         if not constraint == "Gaussian" and not (method == "shapeSys" or method == "shapeStat"):
             raise ValueError("Constraints can only be specified for shapeSys")
@@ -68,11 +70,16 @@ class SystematicBase:
         allowedSys = ["histoSys","overallSys","userOverallSys","overallHistoSys","normHistoSys",
                       "shapeSys","shapeStat","histoSysOneSide","histoSysOneSideSym","normHistoSysOneSide","normHistoSysOneSideSym","userHistoSys","userNormHistoSys",
                       "overallNormHistoSys","overallNormHistoSysOneSide","overallNormHistoSysOneSideSym", "overallNormSys", 
-                      "normHistoSysEnvelopeSym", "histoSysEnvelopeSym", "overallNormHistoSysEnvelopeSym" ]
+                      "normHistoSysEnvelopeSym", "histoSysEnvelopeSym", "overallNormHistoSysEnvelopeSym" , "histoSysEnvelope"]
 
         if not self.method in allowedSys:
             raise Exception("Given method %s is not known; use one of %s"
                              % (self.method, allowedSys))
+ 
+        # For the envelope from vector method, switch the flag, set size of vector = self.low. Maybe this can be done somewhere else not to contaminate the definition...
+        if self.method == "histoSysEnvelope":
+            self.makeEnvelope = True
+            self.envelopeSize = int(self.low[-1])
 
         log.debug(f"Defining new systematic '{self.name}' of type {self.method}")
 
@@ -436,14 +443,29 @@ class TreeWeightSystematic(SystematicBase):
         highandlow = ["High_", "Low_"] # ,"Nom_"]
         if self.differentNominalTreeWeight:
             highandlow = ["High_", "Low_", "Nom_"]
+        if self.makeEnvelope:
+            highandlow = []
+            n_weights = self.envelopeSize
+            for j in range(n_weights):
+                highandlow.append("weight"+str(j)+"_")
+            highandlow.append("High_")
+            highandlow.append("Low_")
+            log.debug(f"makeEnvelope is true, creating an extended list of variations: {highandlow}")
 
-        for highorlow in highandlow:
+        for idx,highorlow in enumerate(highandlow):
             
             _weights = self.nominal
             if highorlow == "High_":
                 _weights = self.high
             elif highorlow == "Low_":
                 _weights = self.low
+
+            elif self.makeEnvelope:
+                tempweight = []
+                for i in range(len(self.high)):
+                    tempweight.append(self.high[i])
+                tempweight[-1] = tempweight[-1] + "["+str(idx)+"]"
+                _weights = tuple(tempweight)  
 
             abstract.prepare.weights = "{} * {}".format(str(abstract.lumiUnits * abstract.outputLumi/abstract.inputLumi), 
                                                         " * ".join(w for w in _weights))
