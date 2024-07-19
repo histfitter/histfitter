@@ -106,13 +106,14 @@ void genTree(){
         sys_weight5 = 1.03 + .04*(m-50.)/150.;
         sys_weight6 = 1.01 + .06*(m-50.)/150.;
 
-	vector_of_weights.push_back(sys_weight1);
-	vector_of_weights.push_back(sys_weight2);
-	vector_of_weights.push_back(sys_weight3);
-	vector_of_weights.push_back(sys_weight4);
-	vector_of_weights.push_back(sys_weight5);
-	vector_of_weights.push_back(sys_weight6);
-	bkg1_tree->Fill();
+        vector_of_weights.push_back(sys_weight1);
+        vector_of_weights.push_back(sys_weight2);
+        vector_of_weights.push_back(sys_weight3);
+        vector_of_weights.push_back(sys_weight4);
+        vector_of_weights.push_back(sys_weight5);
+        vector_of_weights.push_back(sys_weight6);
+        bkg1_tree->Fill();
+        vector_of_weights.clear();
     }
 
     // bkg2
