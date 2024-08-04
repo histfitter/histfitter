@@ -245,14 +245,14 @@ void hf::HistogramPlotter::PlotRegion(const TString &regionCategoryLabel) {
 
     if(m_storeSingleFiles) {
         //TString canvasName(Form("%s_%s", regionCategoryLabel.Data(), m_outputPrefix.Data()));
-        std::string filename("results/" + m_anaName + "/" + regionCategoryLabel + ".root");
+        std::string filename("results/" + m_anaName + "/" + regionCategoryLabel +"_" + m_outputPrefix + ".root");
         TFile *f = TFile::Open(filename.c_str(), "update");
-        plot.saveHistograms(f);
+        plot.saveHistograms(f, m_outputPrefix);
         f->Close();
     }
 
     if(directory) {
-        plot.saveHistograms(directory);
+        plot.saveHistograms(directory, m_outputPrefix);
     }
 
     //if(m_plotSeparateComponents) {
@@ -918,7 +918,7 @@ void hf::HistogramPlot::plotSingleComponent(unsigned int i, double normalisation
     leg->Draw();
 }
 
-void hf::HistogramPlot::saveHistograms(TDirectory *directory) {
+void hf::HistogramPlot::saveHistograms(TDirectory *directory, const TString &outputPrefix) {
     if(m_componentNames.empty()) {
         loadComponentInformation();
     }
@@ -944,7 +944,7 @@ void hf::HistogramPlot::saveHistograms(TDirectory *directory) {
     mc_hist->SetLineColor(m_style.getTotalPdfColor());
     if (m_binEdges.size())
         mc_hist = remapHistogram(mc_hist);
-    mc_hist->Write("SM_total");
+    mc_hist->Write("SM_total_"+outputPrefix);
 
     // Data/model ratio
     auto hratio = hf::Util::MakeRatioOrPullHist(m_regionData, m_regionPdf, m_regionVariable);
@@ -954,7 +954,7 @@ void hf::HistogramPlot::saveHistograms(TDirectory *directory) {
         TGraphAsymmErrors* g_hratio = remapGraph(static_cast<TGraphAsymmErrors*>(hratio), static_cast<TGraphAsymmErrors*>(data_hist));
         hratio = static_cast<RooHist*>(g_hratio);
     }
-    hratio->Write("h_ratio"); // "ratio" is a reserved keyword in root
+    hratio->Write("h_ratio_"+outputPrefix); // "ratio" is a reserved keyword in root
 
     // Data/bkg ratio -- check if we have a POI, if so, calculate the ratio with it set to 0
     RooStats::ModelConfig* mc = hf::Util::GetModelConfig( m_workspace );
@@ -978,7 +978,7 @@ void hf::HistogramPlot::saveHistograms(TDirectory *directory) {
             TGraphAsymmErrors* g_hratio2 = remapGraph(static_cast<TGraphAsymmErrors*>(hratio2), static_cast<TGraphAsymmErrors*>(data_hist));
             hratio2 = static_cast<RooHist*>(g_hratio2);
         }
-        hratio2->Write("h_ratio_excl_sig");
+        hratio2->Write("h_ratio_excl_sig_"+outputPrefix);
 
         poi->setVal(poi_val_old);
     }
@@ -994,7 +994,7 @@ void hf::HistogramPlot::saveHistograms(TDirectory *directory) {
         if (m_binEdges.size()) {
             remapCurve(hratioPdfError);
         }
-        hratioPdfError->Write("h_rel_error_band");
+        hratioPdfError->Write("h_rel_error_band_"+outputPrefix);
 
         // We get the total error directly from RooFit
         // Needs to be drawn again for some reason; we cannot just get it from above and using m_frame
@@ -1012,7 +1012,7 @@ void hf::HistogramPlot::saveHistograms(TDirectory *directory) {
         if (m_binEdges.size()) {
             remapCurve(total_err);
         }
-        total_err->Write("h_total_error_band");
+        total_err->Write("h_total_error_band_"+outputPrefix);
     }
 
     // Every seperate component
@@ -1021,7 +1021,7 @@ void hf::HistogramPlot::saveHistograms(TDirectory *directory) {
 
         h->SetFillColor(m_style.getSampleColor(component));
 
-        h->SetName(m_style.getSampleName(component));
+        h->SetName(m_style.getSampleName(component)+"_"+outputPrefix);
         Logger << kINFO << component << GEndl;
         Logger << kINFO << "Rebinning histogram " << h->GetName() << GEndl;
         if (m_binEdges.size())
