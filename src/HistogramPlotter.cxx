@@ -622,7 +622,11 @@ void hf::HistogramPlot::addComponents() {
 
         m_regionPdf->plotOn(m_frame, //RooFit::Normalization(1, RooAbsReal::RelativeExpected),
                 RooFit::Components(m_componentStackedNames[i].Data()),
-                RooFit::Normalization(m_componentStackedFractions[i]*normalisation, RooAbsReal::NumEvent),
+                #if ROOT_VERSION_CODE >= ROOT_VERSION(6,30,0)
+                    RooFit::Normalization(normalisation, RooAbsReal::NumEvent),
+                #else
+                    RooFit::Normalization(m_componentStackedFractions[i]*normalisation, RooAbsReal::NumEvent),
+                #endif
                 RooFit::FillColor(color),
                 RooFit::FillStyle(1001),
                 RooFit::DrawOption("F"),
