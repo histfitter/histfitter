@@ -81,7 +81,6 @@ hf::HistogramPlotter::HistogramPlotter(RooWorkspace *w, const TString& fitConfig
 
     m_plotRegions = "ALL";
     m_plotComponents = true;
-    //m_plotSeparateComponents = false;
     m_storeSingleFiles = true;
     m_storeMergedFile = false;
     m_doStackPlots = true;
@@ -115,9 +114,6 @@ hf::HistogramPlotter::~HistogramPlotter() {
     // we do NOT own the pointers. leave them be.
 }
 
-//void hf::HistogramPlotter::setPlotSeparateComponents(bool b) {
-//    m_plotSeparateComponents = b;
-//}
 
 void hf::HistogramPlotter::setPlotComponents(bool b) {
     m_plotComponents = b;
@@ -255,9 +251,6 @@ void hf::HistogramPlotter::PlotRegion(const TString &regionCategoryLabel) {
         plot.saveHistograms(directory, m_outputPrefix);
     }
 
-    //if(m_plotSeparateComponents) {
-    //plot.plotSeparateComponents();
-    //}
 
     if(file) file->Close();
 
@@ -830,46 +823,6 @@ void hf::HistogramPlot::plot(TDirectory *directory) {
     }
 }
 
-/*
-void hf::HistogramPlot::plotSeparateComponents() {
-    if(m_componentNames.empty()) {
-        loadComponentInformation();
-    }
-
-    int nComponents = m_componentNames.size();
-    if(nComponents == 0) {
-        // this doesn't make any sense, so stop
-        Logger << kWARNING << "No components found for '" << m_regionCategoryLabel << "' - returning." << GEndl;
-        return;
-    }
-
-    Logger << kDEBUG << "Will plot " << nComponents << " single components for " << m_regionCategoryLabel << GEndl;
-
-    // divide the canvas
-    int nPlotsX = static_cast<int>(std::sqrt(nComponents));
-    int nPlotsY = static_cast<int>(std::sqrt(nComponents)+0.5);
-
-    if(nPlotsX < 1) nPlotsX = 1;
-    if(nPlotsY < 1) nPlotsY = 1;
-
-    TString canvasName(Form("%s_%s_separateComponents", m_regionCategoryLabel.Data(), m_outputPrefix.Data()));
-    auto canvas = new TCanvas(canvasName, canvasName, 600, 600);
-    canvas->Divide(nPlotsX, nPlotsY);
-
-    // normalize pdf to number of expected events, not to number of events in dataset
-    const double normalisation = m_regionPdf->expectedEvents(*m_regionVariable);
-
-    //iterate over all samples and plot
-    for( unsigned int i=0; i < m_componentNames.size(); i++){
-        canvas->cd(i+1);
-        plotSingleComponent(i, normalisation);
-    }
-
-    canvas->SaveAs("results/" + m_anaName + "/" + canvasName + ".pdf");
-    canvas->SaveAs("results/" + m_anaName + "/" + canvasName + ".eps");
-    canvas->SaveAs("results/" + m_anaName + "/" + canvasName + ".root");
-}
-*/
 
 void hf::HistogramPlot::plotSingleComponent(unsigned int i, double normalisation) {
     if(m_componentNames.empty()) {
