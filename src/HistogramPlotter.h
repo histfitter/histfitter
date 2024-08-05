@@ -110,7 +110,7 @@ class HistogramPlot {
         HistogramPlot(RooWorkspace *w, const TString& r, RooAbsPdf *regionPdf, RooDataSet *regionData, const hf::ChannelStyle &style);
         void plot(TDirectory *directory = nullptr);
 
-        void saveHistograms(TDirectory *directory);
+        void saveHistograms(TDirectory *directory, const TString &outputPrefix);
         void plotSeparateComponents();
 
         void setAnalysisName(const TString& anaName);

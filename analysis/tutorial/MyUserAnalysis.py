@@ -60,7 +60,8 @@ configMgr.testStatType=3   # 3=one-sided profile likelihood test statistic (LHC 
 configMgr.nPoints=20       # number of values scanned of signal-strength for upper-limit determination of signal strength.
 
 configMgr.writeXML = True
-
+configMgr.storeSinglePlotFiles = True
+configMgr.storeMergedPlotFile = False
 ##########################
 
 # Keep SRs also in background fit confuguration
