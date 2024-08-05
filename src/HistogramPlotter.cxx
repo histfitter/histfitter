@@ -81,7 +81,7 @@ hf::HistogramPlotter::HistogramPlotter(RooWorkspace *w, const TString& fitConfig
 
     m_plotRegions = "ALL";
     m_plotComponents = true;
-    m_plotSeparateComponents = false;
+    //m_plotSeparateComponents = false;
     m_storeSingleFiles = true;
     m_storeMergedFile = false;
     m_doStackPlots = true;
@@ -115,9 +115,9 @@ hf::HistogramPlotter::~HistogramPlotter() {
     // we do NOT own the pointers. leave them be.
 }
 
-void hf::HistogramPlotter::setPlotSeparateComponents(bool b) {
-    m_plotSeparateComponents = b;
-}
+//void hf::HistogramPlotter::setPlotSeparateComponents(bool b) {
+//    m_plotSeparateComponents = b;
+//}
 
 void hf::HistogramPlotter::setPlotComponents(bool b) {
     m_plotComponents = b;
@@ -830,6 +830,7 @@ void hf::HistogramPlot::plot(TDirectory *directory) {
     }
 }
 
+/*
 void hf::HistogramPlot::plotSeparateComponents() {
     if(m_componentNames.empty()) {
         loadComponentInformation();
@@ -868,6 +869,7 @@ void hf::HistogramPlot::plotSeparateComponents() {
     canvas->SaveAs("results/" + m_anaName + "/" + canvasName + ".eps");
     canvas->SaveAs("results/" + m_anaName + "/" + canvasName + ".root");
 }
+*/
 
 void hf::HistogramPlot::plotSingleComponent(unsigned int i, double normalisation) {
     if(m_componentNames.empty()) {
@@ -884,7 +886,7 @@ void hf::HistogramPlot::plotSingleComponent(unsigned int i, double normalisation
     auto sampleName = m_style.getSampleName(m_componentNames[i]);
 
     Logger << kDEBUG << "Plotting single component " << sampleName << " for " << m_regionCategoryLabel << GEndl;
-
+    // JDL here
     if (m_fitResult) {
         m_regionPdf->plotOn(frame, RooFit::Components(m_componentNames[i].Data()),
                 RooFit::VisualizeError(*m_fitResult),
