@@ -839,7 +839,6 @@ void hf::HistogramPlot::plotSingleComponent(unsigned int i, double normalisation
     auto sampleName = m_style.getSampleName(m_componentNames[i]);
 
     Logger << kDEBUG << "Plotting single component " << sampleName << " for " << m_regionCategoryLabel << GEndl;
-    // JDL here
     if (m_fitResult) {
         m_regionPdf->plotOn(frame, RooFit::Components(m_componentNames[i].Data()),
                 RooFit::VisualizeError(*m_fitResult),
