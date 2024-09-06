@@ -185,18 +185,6 @@ namespace Util{
   void PlotPdfWithComponents(RooWorkspace* w, FitConfig* fc,  TString anaName="Analysis", TString plotRegions= "ALL", TString outputPrefix = "",
 			     RooFitResult* rFit= NULL, RooAbsData* inputData=0 );
 
-  /**
-     Function to add components(=samples) in plot, called for each region in turn
-     @param w RooWorkspace pointer
-     @param fc FitConfig pointer
-     @param frame RooPlot pointer to which the components need to be added to
-     @param regionPdf RooAbsPdf pointer to the total-pdf for this specific region
-     @param obsRegion RooRealVar pointer to the observable for this region
-     @param regionCatLabel TString that defines this region in simultaneous pdf
-     @param style Instance of ChannelStyle class defined for the FitConfig fc, that carries info on plot colors etc
-  */
-  void AddComponentsToPlot(RooWorkspace* w,FitConfig* fc, RooPlot* frame, RooAbsPdf* regionPdf,
-			   RooRealVar* obsRegion, TString regionCatLabel, hf::ChannelStyle style);
 
   /**
      Function to plot each component(=sample) separately in each region

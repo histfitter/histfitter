@@ -68,7 +68,6 @@ class HistogramPlotter {
         void setInputData(RooAbsData* data);
         void setPlotRegions(const TString& s);
         void setPlotComponents(bool b);
-        void setPlotSeparateComponents(bool b);
         void setStoreSingleFiles(bool b);
         void setStoreMergedFile(bool b);
         void setDoStackPlots(bool b);
@@ -83,7 +82,6 @@ class HistogramPlotter {
         hf::FitConfig* m_fitConfig;
         TString m_anaName;
 
-        bool m_plotSeparateComponents;
         bool m_plotComponents;
         bool m_storeSingleFiles;
         bool m_storeMergedFile;
@@ -111,7 +109,6 @@ class HistogramPlot {
         void plot(TDirectory *directory = nullptr);
 
         void saveHistograms(TDirectory *directory, const TString &outputPrefix);
-        void plotSeparateComponents();
 
         void setAnalysisName(const TString& anaName);
         void setOutputPrefix(const TString& outputPrefix);
