@@ -19,7 +19,7 @@ set(CMAKE_INSTALL_LIBDIR "${CMAKE_INSTALL_PREFIX}/lib")
 #Define equired root components
 set(root_components Core;Net;Hist;Graf;Graf3d;Gpad;Tree;Rint;
         Postscript;Matrix;Physics;Gui;RooFitCore;RooFit;RooStats;
-        HistFactory;XMLParser;Foam;Html;Minuit)
+        HistFactory;XMLParser;Foam;Minuit)
 
 #Require root
 find_package(ROOT 6 REQUIRED ${root_components})

@@ -345,14 +345,7 @@ namespace Util{
      @return RooStats::ModelConfig pointer
   */
   RooStats::ModelConfig* GetModelConfig( const RooWorkspace* w, const TString& mcName="ModelConfig");
-  /**
-     Create log-likelihood (NLL) from workspace and fit-regions given
-     @param w RooWorkspace pointer
-     @param fitRegions Comma-separated input TString of regions to be used for the fit
-     @param lumiConst Boolean deciding whether "Lumi" parameter (with a special treatment in HistFactory) is to be set constant or not
-     @return RooAbsReal pointer to log-likelihood
-  */
-  RooAbsReal* CreateNLL( RooWorkspace* w, TString fitRegions, Bool_t lumiConst=false);
+
   /**
      Perform fit using PDF/data as stored in ModelCOnfig inside the workspace
      @param w RooWorkspace pointer
