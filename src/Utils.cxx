@@ -78,7 +78,6 @@
 
 #include "RooPlot.h" //Needed by RooAbsPdf
 #include "RooHist.h"
-//#include "RooNLLVar.h"
 
 #include "RooStats/ModelConfig.h"
 #include "RooStats/ProfileLikelihoodTestStat.h"
@@ -654,9 +653,6 @@ RooFitResult* hf::Util::FitPdf( RooWorkspace* w, TString fitRegions, Bool_t lumi
     }
 
     if(!deactivateBinnedLikelihood) {
-        //RooFIter iter = w->components().fwdIterator();
-        //RooAbsArg* arg;
-        //while ((arg = iter.next())) {
         for (auto arg: w->components()){
             if (arg->IsA() == RooRealSumPdf::Class()) {
                 arg->setAttribute("BinnedLikelihood");
@@ -906,17 +902,12 @@ hf::Util::SetInterpolationCode(RooWorkspace* w, Int_t code)
     }
 
     RooArgSet funcs = w->allFunctions();
-    //TIterator* iter = funcs.createIterator() ;
-
-    //RooAbsArg* parg(0);
-    //while((parg=(RooAbsArg*)iter->Next())) {
     for (auto parg: funcs){
         if ( parg->ClassName()!=TString("PiecewiseInterpolation") ) { continue; }
         PiecewiseInterpolation* p = (PiecewiseInterpolation*)w->function( parg->GetName() ); // something I can modifiy :)
         p->setAllInterpCodes(code);
     }
 
-    //delete iter;
 }
 
 
@@ -1235,9 +1226,6 @@ void hf::Util::PlotNLL(RooWorkspace* w, RooFitResult* rFit, Bool_t plotPLL, TStr
     }
 
     if(!deactivateBinnedLikelihood) {
-        //RooFIter iter = w->components().fwdIterator();
-        //RooAbsArg* arg;
-        //while ((arg = iter.next())) {
         for (auto arg: w->components()){
             if (arg->IsA() == RooRealSumPdf::Class()) {
                 arg->setAttribute("BinnedLikelihood");
@@ -1680,10 +1668,6 @@ vector<TString> hf::Util::TokensALL(RooCategory* cat)
 
     vector<TString> OutStringVec;
     OutStringVec.clear();
-    //Legacy RooCatType use
-    //TIterator* iter = cat->typeIterator() ;
-    //RooCatType* catType ;
-    //while( (catType = (RooCatType*) iter->Next())) {
     for (auto catType : *cat){
         TString regionCatLabel = catType.first;
         OutStringVec.push_back(regionCatLabel);
@@ -1816,9 +1800,6 @@ hf::Util::doFreeFit( RooWorkspace* w, RooDataSet* inputdata, const bool& verbose
     }
 
     if(!deactivateBinnedLikelihood) {
-        //RooFIter iter = w->components().fwdIterator();
-        //RooAbsArg* arg;
-        //while ((arg = iter.next())) {
         for (auto arg: w->components()){
             if (arg->IsA() == RooRealSumPdf::Class()) {
                 arg->setAttribute("BinnedLikelihood");
@@ -2352,12 +2333,9 @@ vector<TString> hf::Util::GetAllComponentNamesInRegion(TString region, RooAbsPdf
 
     RooArgList RRSComponentsList =  RRSPdf->funcList();
 
-    //RooLinkedListIter iter = RRSComponentsList.iterator() ;
-    //RooProduct* component;
     vector<TString> compNameVec;
     compNameVec.clear();
 
-    //while( (component = (RooProduct*) iter.Next())) {
     for (auto component : RRSComponentsList){
         TString  componentName = component->GetName();
         compNameVec.push_back(componentName);
@@ -2377,12 +2355,11 @@ vector<double> hf::Util::GetAllComponentFracInRegion(RooWorkspace* w, TString re
 
     RooArgList RRSComponentsList =  RRSPdf->funcList();
 
-    //RooLinkedListIter iter = RRSComponentsList.iterator() ;
-    //RooProduct* component;
+
     vector<double> compFracVec;
     compFracVec.clear();
 
-    //while( (component = (RooProduct*) iter.Next())) {
+
     for (auto component : RRSComponentsList){
         TString  componentName = component->GetName();
         double componentFrac = GetComponentFrac(w,componentName,RRSPdfName,obsRegion) ;
@@ -2554,15 +2531,12 @@ hf::Util::getFloatParList( const RooAbsPdf& pdf, const RooArgSet& obsSet )
     const RooArgSet* pars = pdf.getParameters( obsSet );
     if (pars==0) { return floatParList; }
 
-    //TIterator* iter = pars->createIterator() ;
-    //RooAbsArg* arg ;
-    //while( (arg=(RooAbsArg*)iter->Next()) ) {
     for (auto arg : *pars){
         if(arg->InheritsFrom("RooRealVar") && !arg->isConstant()){
             floatParList.add( *arg );
         }
     }
-    //delete iter;
+
 
     return floatParList;
 }
@@ -2581,9 +2555,6 @@ hf::Util::resetError( RooWorkspace* wspace, const RooArgList& parList, const Roo
 
     Logger << kINFO << " starting with workspace: " << wspace->GetName() << "   parList.getSize(): " << parList.getSize() << "  vetoList.size() = " << vetoList.getSize() << GEndl;
 
-    //TIterator* iter = parList.createIterator() ;
-    //RooAbsArg* arg ;
-    //while( (arg=(RooAbsArg*)iter->Next()) ) {
     for (auto arg : parList){
 
         std::string UncertaintyName;
@@ -2703,8 +2674,6 @@ hf::Util::resetError( RooWorkspace* wspace, const RooArgList& parList, const Roo
 
         // Done
     } // end loop
-
-    //delete iter ;
 }
 
 
@@ -2718,9 +2687,6 @@ hf::Util::resetValue( RooWorkspace* wspace, const RooArgList& parList, const Roo
     /// the given name and shift that
     /// systematic by 1-sigma
 
-    //TIterator* iter = parList.createIterator() ;
-    //RooAbsArg* arg ;
-    //while( (arg=(RooAbsArg*)iter->Next()) ) {
     for (auto arg : parList){
         std::string UncertaintyName;
         if(arg->InheritsFrom("RooRealVar") && !arg->isConstant()){
@@ -2763,8 +2729,6 @@ hf::Util::resetValue( RooWorkspace* wspace, const RooArgList& parList, const Roo
         var->setVal(valnom);
         // Done
     } // end loop
-
-    //delete iter ;
 }
 
 
@@ -2777,9 +2741,6 @@ hf::Util::resetNominalValue( RooWorkspace* wspace, const RooArgSet& globSet )
     /// the given name and shift that
     /// systematic by 1-sigma
 
-    //TIterator* iter = globSet.createIterator() ;
-    //RooAbsArg* arg ;
-    //while( (arg=(RooAbsArg*)iter->Next()) ) {
     for (auto arg : globSet){
         TString UncertaintyName;
         if(arg->InheritsFrom("RooRealVar") && arg->isConstant()){
@@ -2827,8 +2788,6 @@ hf::Util::resetNominalValue( RooWorkspace* wspace, const RooArgSet& globSet )
         Logger << kDEBUG << "Now resetting: " << UncertaintyName << " to " << valnom << GEndl;
         // Done
     } // end loop
-
-    //delete iter ;
 }
 
 
@@ -3115,9 +3074,6 @@ void hf::Util::SetPdfParError(RooWorkspace* w, double Nsigma){
 
     RooArgList floatParList = hf::Util::getFloatParList( *pdf, *obsSet );
 
-    //TIterator* iter = floatParList.createIterator() ;
-    //RooAbsArg* arg ;
-    //while( (arg=(RooAbsArg*)iter->Next()) ) {
     for (auto arg : floatParList){
         TString parName;
         if(arg->InheritsFrom("RooRealVar") && !arg->isConstant()){
@@ -3136,9 +3092,7 @@ void hf::Util::SetPdfParError(RooWorkspace* w, double Nsigma){
 
 
 
-
-    TString
-hf::Util::scanStrForFloats(const TString& toscan, const TString& format)
+TString hf::Util::scanStrForFloats(const TString& toscan, const TString& format)
 {
     int narg1 = format.CountChar('%');
     TString wsid;
@@ -3734,7 +3688,6 @@ void hf::Util::plotInterpolationScheme(RooWorkspace *w) {
 
     RooAbsData* data = w->data("obsData");
     RooArgSet funcs = w->allFunctions();
-    //TIterator* iter = funcs.createIterator() ;
 
     gDirectory->pwd();
     TDirectory* currentDir = gDirectory->CurrentDirectory();
@@ -3745,8 +3698,7 @@ void hf::Util::plotInterpolationScheme(RooWorkspace *w) {
     gStyle->SetOptStat(0);
     gStyle->SetOptTitle(0);
 
-    //RooAbsArg* parg(0);
-    //while((parg=(RooAbsArg*)iter->Next())) {
+
     for (auto parg : funcs){
         if ( parg->ClassName()!=TString("PiecewiseInterpolation") ) { continue; }
         PiecewiseInterpolation* p = (PiecewiseInterpolation*)w->function( parg->GetName() );

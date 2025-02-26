@@ -646,11 +646,8 @@ void hf::HistogramPlot::loadComponentInformation() {
 
     // Build the components list to iterate over
     RooArgList RRSComponentsList =  RRSPdf->funcList();
-    //RooLinkedListIter iter = RRSComponentsList.iterator() ;
-    RooProduct* component = nullptr;
 
     // Now load the names and calculate the fractions to be able to build the plot
-    //while( (component = dynamic_cast<RooProduct*>(iter.Next()))) {
     for (auto iter : RRSComponentsList) {
         RooProduct* component = dynamic_cast<RooProduct*>(iter);
         TString componentName(component->GetName());
