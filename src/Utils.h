@@ -352,7 +352,7 @@ namespace Util{
      @param lumiConst Boolean deciding whether "Lumi" parameter (with a special treatment in HistFactory) is to be set constant or not
      @return RooAbsReal pointer to log-likelihood
   */
-  RooAbsReal* CreateNLL( RooWorkspace* w, TString fitRegions, Bool_t lumiConst=false);
+ std::unique_ptr<RooAbsReal> CreateNLL( RooWorkspace* w, TString fitRegions, Bool_t lumiConst=false);
   /**
      Perform fit using PDF/data as stored in ModelCOnfig inside the workspace
      @param w RooWorkspace pointer

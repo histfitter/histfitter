@@ -597,15 +597,17 @@ RooStats::HypoTestTool::SetupHypoTestCalculator(RooWorkspace * w, bool doUL,
 
         if ((prevSnapSet!=0)) {
             // add all remaining parameters from old snapshot
-            TIterator* vrItr = prevSnapSet->createIterator();
-            RooRealVar* vr(0);
-            while((vr = (RooRealVar*)vrItr->Next())) {
+            //TIterator* vrItr = prevSnapSet->createIterator();
+            //RooRealVar* vr(0);
+            //while((vr = (RooRealVar*)vrItr->Next())) {
+            for (auto vrItr: *prevSnapSet) {
+                RooRealVar* vr = (RooRealVar*)vrItr;
                 if (vr==0) continue;
                 TString vrName = vr->GetName();
                 RooRealVar* par = (RooRealVar*)newSnapSet.find(vrName.Data());
                 if (par==0) { newSnapSet.add(*vr); } // add if not yet present 
             }
-            delete vrItr;
+            //delete vrItr;
         }
 
         //save best fit value in the poi snapshot 
