@@ -336,6 +336,7 @@ void hf::ConfigMgr::doHypoTest(hf::FitConfig* fc, TString outdir, double SigXSec
 
     inFile->Close();  
     outfile->Close();
+    delete w;
 
     return;
 }

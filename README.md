@@ -41,20 +41,14 @@ For CERN/ATLAS users, an LCG release with the correct ROOT, Python, and cmake ve
 lsetup "views LCG_107a x86_64-el9-gcc13-opt"
 ```
 
-When running some configurations with toys, there is a segfault that seems to be in ROOT (unfortunately persists in 6.34.04).  See issue #213.
-Reverting to an earlier version of ROOT (6.28.X) gets around this for now (maybe only compatible with 1.3.X).  This is also available via ATLAS software setup:
-```
-lsetup "views LCG_104c x86_64-el9-gcc13-opt"
-```
-
 
 ### StatAnalysis
 
-HistFitter is available in the ATLAS StatAnalysis release, which can be loaded with:
+HistFitter is available in the ATLAS StatAnalysis release, which can be loaded with an appropriate version:
 
 ```
 setupATLAS
-asetup StatAnalysis, 0.3.0
+asetup StatAnalysis, 0.5.X
 ```
 If you use this option you do not need to clone the source code, and you can skip the next step and go straight to Setup.
 
