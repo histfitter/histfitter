@@ -41,7 +41,6 @@ For CERN/ATLAS users, an LCG release with the correct ROOT, Python, and cmake ve
 lsetup "views LCG_107a x86_64-el9-gcc13-opt"
 ```
 
-
 ### StatAnalysis
 
 HistFitter is available in the ATLAS StatAnalysis release, which can be loaded with an appropriate version:
