@@ -336,6 +336,7 @@ void hf::ConfigMgr::doHypoTest(hf::FitConfig* fc, TString outdir, double SigXSec
 
     inFile->Close();  
     outfile->Close();
+    delete w;
 
     return;
 }
@@ -399,12 +400,10 @@ TString hf::ConfigMgr::makeCorrectedBkgModelConfig( RooWorkspace* w, const char*
 
     if ((prevSnapSet!=0)) {
         // add all remaining parameters from old snapshot
-        TIterator* vrItr = prevSnapSet->createIterator();
-        RooRealVar* vr(0);
-        while((vr = (RooRealVar*)vrItr->Next())) {
-            if (vr==0) 
-                continue;
-
+        for (auto vrItr: *prevSnapSet)
+        {
+            RooRealVar* vr = (RooRealVar*)vrItr;
+            if (vr == 0) continue;
             TString vrName = vr->GetName();
             RooRealVar* par = (RooRealVar*)newSnapSet.find(vrName.Data());
 
@@ -412,7 +411,6 @@ TString hf::ConfigMgr::makeCorrectedBkgModelConfig( RooWorkspace* w, const char*
                 newSnapSet.add(*vr); // add back if not already present 
             } 
         }
-        delete vrItr;
     }
 
     bModelStr = TString(modelSBName)+TString("_with_poi_0");
@@ -515,9 +513,8 @@ void hf::ConfigMgr::doUpperLimit(hf::FitConfig* fc) {
     bool generateAsimovDataForObserved = m_generateAsimovDataForObserved;
 
     if(!m_deactivateBinnedLikelihood) { 
-        RooFIter iter = w->components().fwdIterator();
-        RooAbsArg* arg;
-        while ((arg = iter.next())) {
+        for (auto arg: w->components())
+        {
             if (arg->IsA() == RooRealSumPdf::Class()) {
                 arg->setAttribute("BinnedLikelihood");
                 cout << "Activating binned likelihood attribute for " << arg->GetName() << endl;

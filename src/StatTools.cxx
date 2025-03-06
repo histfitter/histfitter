@@ -23,7 +23,6 @@
 #include "RooRealSumPdf.h"
 #include "RooMinimizer.h"
 #include "RooPlot.h"
-#include "RooNLLVar.h"
 
 #include "RooStats/ModelConfig.h"
 #include "RooStats/ProfileLikelihoodTestStat.h"
@@ -165,7 +164,6 @@ TTree* RooStats::toyMC_gen_fit( RooWorkspace* w, const int& nexp, const double& 
     */
 
 
-    RooNLLVar * fNLL = NULL;
     for (int i=0; i<nexp; ++i) {
 
         if ((i%10)==0) {
@@ -183,11 +181,8 @@ TTree* RooStats::toyMC_gen_fit( RooWorkspace* w, const int& nexp, const double& 
         //subset->Print("v");
         //cout << "S3 = " << subset->sumEntries() << GEndl;
 
-        if (fNLL == NULL) {
-            fNLL = (RooNLLVar*) mc->GetPdf()->createNLL( *toyMC, RooFit::Extended(), RooFit::CloneData(kFALSE), RooFit::Constrain(*mc->GetPdf()->getParameters(*toyMC)) );
-        } else {
-            fNLL->setData( *toyMC );
-        }
+        std::unique_ptr<RooAbsReal> fNLL{ mc->GetPdf()->createNLL( *toyMC, RooFit::Extended(), RooFit::CloneData(kFALSE), RooFit::Constrain(*mc->GetPdf()->getParameters(*toyMC)) ) };
+        fNLL->setData(*toyMC);
 
         RooMinimizer minim(*fNLL);
         minim.setMinimizerType("Minuit2");
@@ -221,9 +216,7 @@ TTree* RooStats::toyMC_gen_fit( RooWorkspace* w, const int& nexp, const double& 
         delete toyMC;
     }
 
-    if (fNLL != NULL) { 
-        delete fNLL; 
-    }
+
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////
     // End the toy loop 
@@ -264,14 +257,13 @@ TTree* RooStats::ConvertMCStudyResults( RooMCStudy* mcstudy ){
     const RooArgSet* args = toymc.get();
     varVals.resize( args->getSize(), -999. );
 
-    RooRealVar* var(0);
-    TIterator* varItr = args->createIterator();
-    for (Int_t i=0; (var = (RooRealVar*)varItr->Next()); ++i) {
+    int i = 0;
+    for (auto var: *args){
         TString varName = var->GetName();
         TString varNameF = TString(var->GetName()) + "/F";
         myTree->Branch( varName.Data(), &varVals[i], varName.Data() ); 
+        i++;
     }
-    delete varItr;
 
     /// and fill the tree by looping over mcstudy
     for(int iToy=0; iToy<toymc.numEntries(); iToy++) {
@@ -280,9 +272,12 @@ TTree* RooStats::ConvertMCStudyResults( RooMCStudy* mcstudy ){
         minNll  = mcstudy->fitResult(iToy)->minNll();
 
         toymc.get(iToy); // this resets args to new value
-        varItr = args->createIterator();
-        for (Int_t i=0; (var=(RooRealVar*)varItr->Next()); ++i) { varVals[i] = var->getVal(); }
-        delete varItr;
+        int i = 0;
+        for (auto var: *args)
+        {
+            varVals[i] = ((RooRealVar*)var)->getVal();
+            i++;
+        }
 
         myTree->Fill();  
     }

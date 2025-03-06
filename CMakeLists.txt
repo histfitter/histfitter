@@ -6,6 +6,7 @@ set(VERSION "1.3.1")
 #Set CXX requirement
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+#SET(CMAKE_CXX_FLAGS_DEBUG "-g")
 
 #Set CMAKE paths and create folders
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
@@ -19,7 +20,7 @@ set(CMAKE_INSTALL_LIBDIR "${CMAKE_INSTALL_PREFIX}/lib")
 #Define equired root components
 set(root_components Core;Net;Hist;Graf;Graf3d;Gpad;Tree;Rint;
         Postscript;Matrix;Physics;Gui;RooFitCore;RooFit;RooStats;
-        HistFactory;XMLParser;Foam;Html;Minuit)
+        HistFactory;XMLParser;Foam;Minuit)
 
 #Require root
 find_package(ROOT 6 REQUIRED ${root_components})
