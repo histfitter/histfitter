@@ -23,7 +23,7 @@ from ROOT import hf
 ConfigMgr = hf.ConfigMgr
 FitConfig = hf.FitConfig
 ChannelStyle = hf.ChannelStyle
-from ROOT import gROOT, TObject, TProof
+from ROOT import gROOT, TObject
 from prepareHistos import PrepareHistos
 from copy import copy, deepcopy
 from histogramsManager import histMgr
