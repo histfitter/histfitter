@@ -6,6 +6,12 @@
 
 [![pre-commit.ci status](https://results.pre-commit.ci/badge/github/histfitter/histfitter/master.svg)](https://results.pre-commit.ci/latest/github/histfitter/histfitter/master)
 
+
+## Cite
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.18850807.svg)](https://doi.org/10.5281/zenodo.18850807)
+
+
+
 ## Contact
 
 The HistFitter Group mailing-list, for **any** of your questions: <atlas-phys-susy-histfitter@cern.ch>
