@@ -335,7 +335,6 @@ If not given by default the prior pdf from ModelConfig is used.
 extra options are available as global paramwters of the macro. They major ones are: 
 
 plotHypoTestResult   plot result of tests at each point (TS distributions) (defauly is true)
-useProof             use Proof   (default is true) 
 writeResult          write result of scan (default is true)
 rebuild              rebuild scan for expected limits (require extra toys) (default is false)
 generateBinned       generate binned data sets for toys (default is false) - be careful not to activate with 
@@ -360,7 +359,6 @@ nToyRatio            ratio of S+B/B toys (default is 2)
        calc.SetParameter("GenerateBinned", generateBinned);
        calc.SetParameter("NToysRatio", nToysRatio);
        calc.SetParameter("MaxPOI", maxPOI);
-       calc.SetParameter("UseProof", useProof);
        calc.SetParameter("EnableDetailedOutput", true);
        calc.SetParameter("NWorkers", nworkers);
        calc.SetParameter("Rebuild", rebuild);
@@ -372,11 +370,7 @@ nToyRatio            ratio of S+B/B toys (default is 2)
        calc.SetParameter("ResultFileName",resultFileName);
        calc.SetParameter("RandomSeed",randomSeed);
        */
-    if (nCPUs > 1){
-        StatToolsLogger << kINFO << "setting use of PROOF to true, nCPUs=" << nCPUs << GEndl; 
-        calc.SetParameter("UseProof", true);
-        calc.SetParameter("NWorkers", nCPUs);
-    }
+
 
     calc.SetParameter("GenerateAsimovDataForObserved", generateAsimovDataForObserved);
 
@@ -430,11 +424,6 @@ RooStats::HypoTestInverterResult* RooStats::DoHypoTestInversionAutoScan(RooWorks
     calc.SetParameter("EnableDetailedOutput", true);
     
     
-    if (nCPUs > 1){
-        StatToolsLogger << kINFO << "setting use of PROOF to true, nCPUs=" << nCPUs << GEndl; 
-        calc.SetParameter("UseProof", true);
-        calc.SetParameter("NWorkers", nCPUs);
-    }
 
     calc.SetParameter("GenerateAsimovDataForObserved", generateAsimovDataForObserved);
 
@@ -640,7 +629,6 @@ If not given by default the prior pdf from ModelConfig is used.
 extra options are available as global paramwters of the macro. They major ones are: 
 
 plotHypoTestResult   plot result of tests at each point (TS distributions) (defauly is true)
-useProof             use Proof   (default is true) 
 writeResult          write result of scan (default is true)
 rebuild              rebuild scan for expected limits (require extra toys) (default is false)
 generateBinned       generate binned data sets for toys (default is false) - be careful not to activate with 
@@ -667,7 +655,6 @@ nToyRatio            ratio of S+B/B toys (default is 2)
        calc.SetParameter("GenerateBinned", generateBinned);
        calc.SetParameter("NToysRatio", nToysRatio);
        calc.SetParameter("MaxPOI", maxPOI);
-       calc.SetParameter("UseProof", useProof);
        calc.SetParameter("EnableDetailedOutput", true);
        calc.SetParameter("Nworkers", nworkers);
        calc.SetParameter("Rebuild", rebuild);
@@ -770,7 +757,6 @@ void RooStats::AnalyzeHypoTestInverterResult(RooStats::HypoTestInverterResult* r
        calc.SetParameter("GenerateBinned", generateBinned);
        calc.SetParameter("NToysRatio", nToysRatio);
        calc.SetParameter("MaxPOI", maxPOI);
-       calc.SetParameter("UseProof", useProof);
        calc.SetParameter("EnableDetailedOutput", true);
        calc.SetParameter("Nworkers", nworkers);
        calc.SetParameter("Rebuild", rebuild);
