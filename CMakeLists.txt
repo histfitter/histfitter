@@ -121,3 +121,10 @@ if(MSVC)
 else()
     target_compile_options(HistFitter PRIVATE -Wall -Wextra -Wpedantic)
 endif()
+
+install(CODE "execute_process(COMMAND rm -f
+    \"\${CMAKE_INSTALL_PREFIX}/lib/gdk-pixbuf-2.0/2.10.0/loaders.cache\"
+    \"\${CMAKE_INSTALL_PREFIX}/lib/graphviz/config8\"
+    \"\${CMAKE_INSTALL_PREFIX}/lib/gtk-3.0/3.0.0/immodules.cache\"
+    \"\${CMAKE_INSTALL_PREFIX}/share/glib-2.0/schemas/gschemas.compiled\"
+    \"\${CMAKE_INSTALL_PREFIX}/share/icons/hicolor/icon-theme.cache\")")
