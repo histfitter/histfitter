@@ -69,6 +69,8 @@ install(DIRECTORY ./macros DESTINATION ${CMAKE_INSTALL_DATADIR}/histfitter
 
 #Copy python files to install location
 install(DIRECTORY ./python/ DESTINATION "${Python3_SITEARCH}/HistFitter")
+file(WRITE "${CMAKE_BINARY_DIR}/HistFitter/__init__.py" "")
+install(FILES "${CMAKE_BINARY_DIR}/HistFitter/__init__.py" DESTINATION "${Python3_SITEARCH}/HistFitter")
 install(PROGRAMS scripts/HistFitter.py
         DESTINATION ${CMAKE_INSTALL_BINDIR}
         RENAME histfitter)
