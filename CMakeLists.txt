@@ -22,6 +22,9 @@ set(root_components Core;Net;Hist;Graf;Graf3d;Gpad;Tree;Rint;
         Postscript;Matrix;Physics;Gui;RooFitCore;RooFit;RooStats;
         HistFactory;XMLParser;Foam;Minuit)
 
+include(GNUInstallDirs)
+find_package(Python3 COMPONENTS Interpreter REQUIRED)
+
 #Require root
 find_package(ROOT 6 REQUIRED ${root_components})
 list(TRANSFORM root_components PREPEND ROOT::)
@@ -60,8 +63,8 @@ install(DIRECTORY ./macros DESTINATION "${CMAKE_INSTALL_PREFIX}/share/histfitter
 install(DIRECTORY ./test DESTINATION "${CMAKE_INSTALL_PREFIX}/share/histfitter")
 
 #Copy python files to install location
-install(DIRECTORY ./python/ DESTINATION "${CMAKE_INSTALL_PREFIX}/python/histfitter")
-install(DIRECTORY ./scripts/ DESTINATION "${CMAKE_INSTALL_PREFIX}/bin/histfitter" 
+install(DIRECTORY ./python/ DESTINATION "${Python3_SITEARCH}/HistFitter")
+install(DIRECTORY ./scripts/ DESTINATION "${CMAKE_INSTALL_PREFIX}/bin/histfitter"
             USE_SOURCE_PERMISSIONS)
 
 #Copy C++ headers before generating root dictionary
