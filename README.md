@@ -58,24 +58,26 @@ If you use this option you do not need to clone the source code, and you can ski
 
 ## Build and install
 
-Make your build directory and specify an install directory. You have to point cmake to where the cloned source directory is located.
-```
-mkdir build
-cd build
-cmake -DCMAKE_INSTALL_PREFIX=/path/to/install/ /path/to/histfitter/
-make install
-```
-Depending on your cmake version, you may need to add '-B.' in order to get cmake to put the build files into the current directory.
+Configure, build, and install from the source directory. An optional install prefix can be specified; if omitted it defaults to `install/` within the source tree.
 
-HistFitter was originally built and used in the same directory as the source code. If you prefer this option, simply go to the source directory and make the build directory there. This will treat the source code directory `histfitter` as the install location, creating the `install` directory directly there.
 ```
-cd histfitter
-mkdir build
-cd build
-cmake  ..
-make install
+cmake -S . -B build [-DCMAKE_INSTALL_PREFIX=/path/to/install]
+cmake --build build
+cmake --install build
 ```
-This will create an install directory with the installed libraries as well as other files needed at runtime.
+
+This will create an install directory with the installed libraries and all other files needed at runtime. The install layout within the prefix is:
+
+- `bin/` — `histfitter` entry point and utility scripts
+- `lib/` — shared library
+- `include/histfitter/` — C++ headers
+- `python/histfitter/` — Python library (path baked into `histfitter_env_setup.sh` at configure time)
+- `share/histfitter/` — data files: schema, analysis examples, macros
+
+Test files are not installed by default. To include them (required for the `-t` flag in `setup_histfitter.sh`):
+```
+cmake -S . -B build -DHISTFITTER_INSTALL_TESTS=ON
+```
 
 
 ## Setup
@@ -143,7 +145,7 @@ pip install pyhf['jax']
 - `data`: Contains data root files, provided externally, used to create workspaces for analysis
 
 ## Tests and troubleshooting
-To check that everything is working properly, you can run the tests. This requires you to have the pytest python module installed. Run the setup script with the `-t` flag.
+To check that everything is working properly, you can run the tests. This requires you to have the pytest python module installed. First ensure HistFitter was built with `-DHISTFITTER_INSTALL_TESTS=ON`, then run the setup script with the `-t` flag.
 ```
 source /path/to/install/bin/setup_histfitter.sh -t
 ```

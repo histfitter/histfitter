@@ -15,12 +15,17 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
   set(CMAKE_INSTALL_PREFIX "${PROJECT_SOURCE_DIR}/install" CACHE PATH "..." FORCE)
 endif()
-set(CMAKE_INSTALL_LIBDIR "${CMAKE_INSTALL_PREFIX}/lib")
 
 #Define equired root components
 set(root_components Core;Net;Hist;Graf;Graf3d;Gpad;Tree;Rint;
         Postscript;Matrix;Physics;Gui;RooFitCore;RooFit;RooStats;
         HistFactory;XMLParser;Foam;Minuit)
+
+include(GNUInstallDirs)
+find_package(Python3 COMPONENTS Interpreter REQUIRED)
+
+set(HISTFITTER_PYTHON_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/python/histfitter")
+configure_file(histfitter_env_setup.sh.in "${CMAKE_CURRENT_BINARY_DIR}/histfitter_env_setup.sh" @ONLY)
 
 #Require root
 find_package(ROOT 6 REQUIRED ${root_components})
@@ -49,23 +54,67 @@ list(REMOVE_DUPLICATES HistFitter_headers)
 
 #Copy setup scripts
 install(PROGRAMS setup_histfitter.sh DESTINATION "${CMAKE_INSTALL_PREFIX}/bin")
-install(FILES ./histfitter_env_setup.sh DESTINATION "${CMAKE_INSTALL_PREFIX}/bin")
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/histfitter_env_setup.sh" DESTINATION "${CMAKE_INSTALL_PREFIX}/bin")
 
 #Copy files needed for working directories
-install(FILES ./config/HistFactorySchema.dtd DESTINATION "${CMAKE_INSTALL_PREFIX}/share/histfitter/config")
-install(DIRECTORY ./analysis DESTINATION "${CMAKE_INSTALL_PREFIX}/share/histfitter")
-install(DIRECTORY ./macros DESTINATION "${CMAKE_INSTALL_PREFIX}/share/histfitter")
+install(FILES ./config/HistFactorySchema.dtd DESTINATION "${CMAKE_INSTALL_DATADIR}/histfitter/config")
+install(DIRECTORY ./analysis DESTINATION ${CMAKE_INSTALL_DATADIR}/histfitter
+    PATTERN "__pycache__" EXCLUDE
+    PATTERN "*.pyc" EXCLUDE
+)
+install(DIRECTORY ./macros DESTINATION ${CMAKE_INSTALL_DATADIR}/histfitter
+    PATTERN "__pycache__" EXCLUDE
+    PATTERN "*.pyc" EXCLUDE
+)
 
 #Copy test files for testing build
-install(DIRECTORY ./test DESTINATION "${CMAKE_INSTALL_PREFIX}/share/histfitter")
+option(HISTFITTER_INSTALL_TESTS "Install test files for use with setup_histfitter.sh -t" OFF)
+if(HISTFITTER_INSTALL_TESTS)
+  install(DIRECTORY ./test DESTINATION "${CMAKE_INSTALL_DATADIR}/histfitter"
+    PATTERN "__pycache__" EXCLUDE
+    PATTERN "*.pyc" EXCLUDE
+  )
+endif()
 
 #Copy python files to install location
-install(DIRECTORY ./python/ DESTINATION "${CMAKE_INSTALL_PREFIX}/python/histfitter")
-install(DIRECTORY ./scripts/ DESTINATION "${CMAKE_INSTALL_PREFIX}/bin/histfitter" 
-            USE_SOURCE_PERMISSIONS)
+install(DIRECTORY ./python/ DESTINATION "${HISTFITTER_PYTHON_INSTALL_DIR}")
+install(PROGRAMS scripts/HistFitter.py
+        DESTINATION ${CMAKE_INSTALL_BINDIR}
+        RENAME histfitter)
+
+install( CODE "
+set(INSTALL_DEST \"\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_BINDIR}\")
+file(CREATE_LINK \"histfitter\" \"\${INSTALL_DEST}/HistFitter.py\" SYMBOLIC)
+")
+
+install(PROGRAMS
+  scripts/GenerateJSONOutput.py
+  scripts/GenerateTreeDescriptionFromJSON.py
+  scripts/HypoTest.py
+  scripts/PrintFitResult.py
+  scripts/PrintFitResultTex.py
+  scripts/SysTable.py
+  scripts/SysTableTex.py
+  scripts/SystRankingPlot.py
+  scripts/SystRankingPlotMP.py
+  scripts/UpperLimitTable.py
+  scripts/UpperLimitTableTex.py
+  scripts/YieldsTable.py
+  scripts/YieldsTableTex.py
+  scripts/contourPlotter.py
+  scripts/getFinalFullJER.py
+  scripts/harvestHepdataToContours.py
+  scripts/harvestToContours.py
+  scripts/mergeSysTableBreakdown.py
+  scripts/multiplexContours.py
+  scripts/multiplexJSON.py
+  scripts/plotUpDown.py
+  scripts/pull_maker.py
+  DESTINATION ${CMAKE_INSTALL_BINDIR}
+)
 
 #Copy C++ headers before generating root dictionary
-install(FILES ${HistFitter_headers} DESTINATION "${CMAKE_INSTALL_PREFIX}/include/histfitter")
+install(FILES ${HistFitter_headers} DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/histfitter")
 
 #Add libraries
 add_library(HistFitter SHARED ${HistFitter_sources})
@@ -121,3 +170,10 @@ if(MSVC)
 else()
     target_compile_options(HistFitter PRIVATE -Wall -Wextra -Wpedantic)
 endif()
+
+install(CODE "execute_process(COMMAND rm -f
+    \"\${CMAKE_INSTALL_PREFIX}/lib/gdk-pixbuf-2.0/2.10.0/loaders.cache\"
+    \"\${CMAKE_INSTALL_PREFIX}/lib/graphviz/config8\"
+    \"\${CMAKE_INSTALL_PREFIX}/lib/gtk-3.0/3.0.0/immodules.cache\"
+    \"\${CMAKE_INSTALL_PREFIX}/share/glib-2.0/schemas/gschemas.compiled\"
+    \"\${CMAKE_INSTALL_PREFIX}/share/icons/hicolor/icon-theme.cache\")")
