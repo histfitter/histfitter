@@ -81,6 +81,12 @@ install(DIRECTORY ./python/ DESTINATION "${HISTFITTER_PYTHON_INSTALL_DIR}")
 install(PROGRAMS scripts/HistFitter.py
         DESTINATION ${CMAKE_INSTALL_BINDIR}
         RENAME histfitter)
+
+install( CODE "
+set(INSTALL_DEST \"\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_BINDIR}\")
+file(CREATE_LINK \"histfitter\" \"\${INSTALL_DEST}/HistFitter.py\" SYMBOLIC)
+")
+
 install(PROGRAMS
   scripts/GenerateJSONOutput.py
   scripts/GenerateTreeDescriptionFromJSON.py
