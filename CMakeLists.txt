@@ -24,6 +24,9 @@ set(root_components Core;Net;Hist;Graf;Graf3d;Gpad;Tree;Rint;
 include(GNUInstallDirs)
 find_package(Python3 COMPONENTS Interpreter REQUIRED)
 
+set(HISTFITTER_PYTHON_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/python/histfitter")
+configure_file(histfitter_env_setup.sh.in "${CMAKE_CURRENT_BINARY_DIR}/histfitter_env_setup.sh" @ONLY)
+
 #Require root
 find_package(ROOT 6 REQUIRED ${root_components})
 list(TRANSFORM root_components PREPEND ROOT::)
@@ -51,7 +54,7 @@ list(REMOVE_DUPLICATES HistFitter_headers)
 
 #Copy setup scripts
 install(PROGRAMS setup_histfitter.sh DESTINATION "${CMAKE_INSTALL_PREFIX}/bin")
-install(FILES ./histfitter_env_setup.sh DESTINATION "${CMAKE_INSTALL_PREFIX}/bin")
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/histfitter_env_setup.sh" DESTINATION "${CMAKE_INSTALL_PREFIX}/bin")
 
 #Copy files needed for working directories
 install(FILES ./config/HistFactorySchema.dtd DESTINATION "${CMAKE_INSTALL_DATADIR}/histfitter/config")
@@ -65,10 +68,16 @@ install(DIRECTORY ./macros DESTINATION ${CMAKE_INSTALL_DATADIR}/histfitter
 )
 
 #Copy test files for testing build
-# install(DIRECTORY ./test DESTINATION "${CMAKE_INSTALL_PREFIX}/share/histfitter")
+option(HISTFITTER_INSTALL_TESTS "Install test files for use with setup_histfitter.sh -t" OFF)
+if(HISTFITTER_INSTALL_TESTS)
+  install(DIRECTORY ./test DESTINATION "${CMAKE_INSTALL_DATADIR}/histfitter"
+    PATTERN "__pycache__" EXCLUDE
+    PATTERN "*.pyc" EXCLUDE
+  )
+endif()
 
 #Copy python files to install location
-install(DIRECTORY ./python/ DESTINATION "${Python3_SITEARCH}/HistFitter")
+install(DIRECTORY ./python/ DESTINATION "${HISTFITTER_PYTHON_INSTALL_DIR}")
 install(PROGRAMS scripts/HistFitter.py
         DESTINATION ${CMAKE_INSTALL_BINDIR}
         RENAME histfitter)

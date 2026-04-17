@@ -77,8 +77,12 @@ fi
 
 #Copy test files if specified
 if [ $test = true ]; then
-  echo "Copying /test folder to $HISTFITTER_WORKDIR/test.";
-  cp -r "$SCRIPT_DIR/../share/histfitter/test" "$HISTFITTER_WORKDIR";
+  if [ ! -d "$SCRIPT_DIR/../share/histfitter/test" ]; then
+    echo "Warning: test directory not found in install. Was HistFitter built with -DHISTFITTER_INSTALL_TESTS=ON?";
+  else
+    echo "Copying /test folder to $HISTFITTER_WORKDIR/test.";
+    cp -r "$SCRIPT_DIR/../share/histfitter/test" "$HISTFITTER_WORKDIR";
+  fi
 fi
 
 #Removing module.modulemap

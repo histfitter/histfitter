@@ -63,7 +63,7 @@ export HISTFITTER_VERSION=$VERSION
 if [ ! -z "${BASH_VERSION}" ]; then
   #Find location of this script in the install area
   SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
-elif [ ! -z "${ZSH_VERSION}" ]; then 
+elif [ ! -z "${ZSH_VERSION}" ]; then
   #Find location of this script in the install area
   SCRIPT_DIR="${0:A:h}"
 else
@@ -74,13 +74,12 @@ echo "Adding HistFitter paths: ROOT_INCLUDE_PATH, PATH, LD_LIBRARY_PATH, PYTHONP
 
 #Update paths
 export ROOT_INCLUDE_PATH="$ROOT_INCLUDE_PATH:$SCRIPT_DIR/../include/histfitter"
-export PATH="$PATH:$SCRIPT_DIR/histfitter"
+export PATH="$PATH:$SCRIPT_DIR"
 export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$SCRIPT_DIR/../lib"
 
 # PYTHONPATH contains all directories that are used for 'import bla' commands
-# Must prepend so as to catch python/cmdLineUtils.py before ROOT installation's
-export PYTHONPATH="$SCRIPT_DIR/../python/histfitter:$PYTHONPATH"
-export PYTHONPATH="$SCRIPT_DIR/histfitter:$PYTHONPATH"
+# Must prepend so as to catch histfitter modules before ROOT installation's
+export PYTHONPATH="@HISTFITTER_PYTHON_INSTALL_DIR@:$PYTHONPATH"
 
 # Hack for ssh from mac
 export LC_ALL=C
