@@ -4,7 +4,7 @@ ci:
 
 repos:
 -   repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v6.0.0
+    rev: 3e8a8703264a2f4a69428a0aa4dcb512790b2c8c  # frozen: v6.0.0
     hooks:
     - id: check-added-large-files
     - id: check-case-conflict
@@ -16,7 +16,14 @@ repos:
     - id: check-xml
 
 -   repo: https://github.com/asottile/pyupgrade
-    rev: v3.21.2
+    rev: 75992aaa40730136014f34227e0135f63fc951b4  # frozen: v3.21.2
     hooks:
     - id: pyupgrade
       args: ["--py36-plus"]
+
+-   repo: https://github.com/zizmorcore/zizmor-pre-commit
+    rev: 451b56af716f9f0d0c2b816503a3fd0cf8b036fa  # frozen: v1.29.0
+    hooks:
+    - id: zizmor
+      files: "^\\.github"
+      args: [--persona=pedantic]
