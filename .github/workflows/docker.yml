@@ -16,33 +16,46 @@ on:
     types: [published]
   workflow_dispatch:
 
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   docker:
     name: Build and publish images
     runs-on: ubuntu-latest
+    permissions:
+      contents: read  # checkout
+      packages: write  # push images to ghcr.io using GITHUB_TOKEN
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
+          persist-credentials: false
       - name: Prepare
         id: prep
+        env:
+          REPO_NAME: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.number }}
+          EVENT_NAME: ${{ github.event_name }}
         run: |
           DOCKER_IMAGE=histfitter/histfitter
           VERSION=latest
           HISTFITTER_VERSION=v1.0.1
-          REPO_NAME=${{github.repository}}
           REPO_NAME_LOWERCASE="${REPO_NAME,,}"
           if [[ $GITHUB_REF == refs/tags/* ]]; then
             VERSION=${GITHUB_REF#refs/tags/}
           elif [[ $GITHUB_REF == refs/pull/* ]]; then
-            VERSION=pr-${{ github.event.number }}
+            VERSION=pr-${PR_NUMBER}
           fi
           TAGS="${DOCKER_IMAGE}:${VERSION}"
           TAGS="$TAGS,${DOCKER_IMAGE}:latest,${DOCKER_IMAGE}:${HISTFITTER_VERSION},${DOCKER_IMAGE}:sha-${GITHUB_SHA::8}"
           # Releases also have GITHUB_REFs that are tags, so reuse VERSION
-          if [ "${{ github.event_name }}" = "release" ]; then
+          if [ "${EVENT_NAME}" = "release" ]; then
             TAGS="$TAGS,${DOCKER_IMAGE}:latest-stable,ghcr.io/${REPO_NAME_LOWERCASE}:latest-stable,ghcr.io/${REPO_NAME_LOWERCASE}:${VERSION}"
           fi
           echo ::set-output name=version::${VERSION}
@@ -52,21 +65,21 @@ jobs:
           echo ::set-output name=histfitter_version::"${HISTFITTER_VERSION}"
 
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v1
+        uses: docker/setup-qemu-action@96fe6ef7f33517b61c61be40b68a1882f3264fb8 # v4.2.0
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
+        uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c # v4.2.0
 
       - name: Login to DockerHub
         if: github.event_name != 'pull_request'
-        uses: docker/login-action@v1
+        uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Login to GitHub Container Registry
         if: github.event_name != 'pull_request'
-        uses: docker/login-action@v1
+        uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
@@ -74,7 +87,7 @@ jobs:
 
       - name: Test build
         id: docker_build_test
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
         with:
           context: .
           file: Dockerfile
@@ -87,7 +100,9 @@ jobs:
           push: false
 
       - name: Image digest
-        run: echo ${{ steps.docker_build_test.outputs.digest }}
+        run: echo ${STEPS_DOCKER_BUILD_TEST_OUTPUTS_DIGEST}
+        env:
+          STEPS_DOCKER_BUILD_TEST_OUTPUTS_DIGEST: ${{ steps.docker_build_test.outputs.digest }}
 
       - name: List built images
         run: docker images
@@ -114,7 +129,7 @@ jobs:
         # every PR will trigger a push event on master, so check the push event is actually coming from master
         if: github.event_name == 'push' && github.ref == 'refs/heads/master' && github.repository == 'histfitter/histfitter'
         id: docker_build_latest
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
         with:
           context: .
           file: Dockerfile
@@ -130,7 +145,7 @@ jobs:
       - name: Build and publish to registry with release tag
         if: github.event_name == 'release' && github.event.action == 'published' && github.repository == 'histfitter/histfitter'
         id: docker_build_release
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
         with:
           context: .
           file: Dockerfile
