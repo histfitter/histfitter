@@ -16,33 +16,46 @@ on:
     types: [published]
   workflow_dispatch:
 
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   docker:
     name: Build and publish images
     runs-on: ubuntu-latest
+    permissions:
+      contents: read  # checkout
+      packages: write  # push images to ghcr.io using GITHUB_TOKEN
 
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
+          persist-credentials: false
       - name: Prepare
         id: prep
+        env:
+          REPO_NAME: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.number }}
+          EVENT_NAME: ${{ github.event_name }}
         run: |
           DOCKER_IMAGE=histfitter/histfitter
           VERSION=latest
           HISTFITTER_VERSION=v1.0.1
-          REPO_NAME=${{github.repository}}
           REPO_NAME_LOWERCASE="${REPO_NAME,,}"
           if [[ $GITHUB_REF == refs/tags/* ]]; then
             VERSION=${GITHUB_REF#refs/tags/}
           elif [[ $GITHUB_REF == refs/pull/* ]]; then
-            VERSION=pr-${{ github.event.number }}
+            VERSION=pr-${PR_NUMBER}
           fi
           TAGS="${DOCKER_IMAGE}:${VERSION}"
           TAGS="$TAGS,${DOCKER_IMAGE}:latest,${DOCKER_IMAGE}:${HISTFITTER_VERSION},${DOCKER_IMAGE}:sha-${GITHUB_SHA::8}"
           # Releases also have GITHUB_REFs that are tags, so reuse VERSION
-          if [ "${{ github.event_name }}" = "release" ]; then
+          if [ "${EVENT_NAME}" = "release" ]; then
             TAGS="$TAGS,${DOCKER_IMAGE}:latest-stable,ghcr.io/${REPO_NAME_LOWERCASE}:latest-stable,ghcr.io/${REPO_NAME_LOWERCASE}:${VERSION}"
           fi
           echo ::set-output name=version::${VERSION}
@@ -87,7 +100,9 @@ jobs:
           push: false
 
       - name: Image digest
-        run: echo ${{ steps.docker_build_test.outputs.digest }}
+        run: echo ${STEPS_DOCKER_BUILD_TEST_OUTPUTS_DIGEST}
+        env:
+          STEPS_DOCKER_BUILD_TEST_OUTPUTS_DIGEST: ${{ steps.docker_build_test.outputs.digest }}
 
       - name: List built images
         run: docker images
