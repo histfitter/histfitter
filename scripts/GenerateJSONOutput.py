@@ -157,6 +157,8 @@ def processFile(file):
 def cleanUpJSON():
 
     for file in glob.glob("./*json"):
+        if os.isdir(file):
+            continue
         print(">>> Making file human readable: %s" % file)
         data = json.load(open(file))
         with open(file, "w") as f:
