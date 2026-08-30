@@ -285,7 +285,7 @@ void hf::Util::GenerateFitAndPlot(TString fcName, TString anaName, Bool_t drawBe
         h.setAnalysisName(anaName);
         h.setPlotRegions(plotChannels);
         h.setPlotComponents(true);
-        h.setPlotSeparateComponents(false);
+        //h.setPlotSeparateComponents(false);
         h.setDoStackPlots(doStackPlots);
         h.setStoreSingleFiles(storeSingleFiles);
         h.setStoreMergedFile(storeMergedFile);
@@ -325,7 +325,7 @@ void hf::Util::GenerateFitAndPlot(TString fcName, TString anaName, Bool_t drawBe
         h.setAnalysisName(anaName);
         h.setPlotRegions(plotChannels);
         h.setPlotComponents(true);
-        h.setPlotSeparateComponents(false);
+        //h.setPlotSeparateComponents(false);
         h.setDoStackPlots(doStackPlots);
         h.setStoreSingleFiles(storeSingleFiles);
         h.setStoreMergedFile(storeMergedFile);
@@ -335,9 +335,9 @@ void hf::Util::GenerateFitAndPlot(TString fcName, TString anaName, Bool_t drawBe
 
         // plot each component of each region separately with propagated
         // error after fit  (interesting for debugging)
-        if(plotSeparateComponents) {
-            h.setPlotSeparateComponents(true);
-        }
+        //if(plotSeparateComponents) {
+        //    h.setPlotSeparateComponents(true);
+        //}
 
         h.Initialize();
         h.PlotRegions();
@@ -1093,7 +1093,7 @@ void hf::Util::PlotPdfWithComponents(RooWorkspace* w, TString fcName, TString an
     h.setOutputPrefix(outputPrefix);
     h.setFitResult(rFit);
     h.setInputData(inputData);
-    h.setPlotSeparateComponents(true); //TODO: hack
+    //h.setPlotSeparateComponents(true); //TODO: hack
 
     h.Initialize();
     h.PlotRegions();
