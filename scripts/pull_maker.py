@@ -99,7 +99,7 @@ def main(argv):
     y = array('d',uncRes[1])
     yep = array('d',uncRes[2])
     yem = array('d',uncRes[3])
-    x = array('d', [ a for a in range( len(uncRes[1]) ) ] )
+    x = array('d', [*range( len(uncRes[1]) ) ] )
     xe = array('d', [ 0 for a in range( len(uncRes[1]) ) ] )
     
     c = ROOT.TCanvas('Pulls_'+outputfile,'',1200,600)
