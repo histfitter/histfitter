@@ -575,8 +575,8 @@ def interpolateSurface(modelDict = {}, interpolationFunction = "linear", useROOT
 
     for whichContour in tmpListOfContours:
         zValues[whichContour] = [ tmpEntry[whichContour] for tmpEntry in modelPointsValues]
-        x[whichContour]       = [ a for a in x0 ];
-        y[whichContour]       = [ a for a in y0 ];
+        x[whichContour]       = [*x0 ];
+        y[whichContour]       = [*y0 ];
 
     # remove inf point in each entry
     for whichContour in tmpListOfContours:
